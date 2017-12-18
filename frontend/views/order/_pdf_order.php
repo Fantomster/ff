@@ -30,17 +30,17 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                Телефон: <?= $order->createdByProfile->phone ? $order->createdByProfile->phone : $order->createdByProfile->phone ?>
+                                Телефон: <?= isset($order->createdByProfile->phone) ? $order->createdByProfile->phone : $order->createdByProfile->phone ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Email: <?= $order->createdBy->email ? $order->createdBy->email : $order->createdBy->email ?>
+                                Email: <?= isset($order->createdBy->email) ? $order->createdBy->email : $order->createdBy->email ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Заказ создал: <?= $order->createdByProfile->full_name ? $order->createdByProfile->full_name : '' ?>
+                                Заказ создал: <?= isset($order->createdByProfile->full_name) ? $order->createdByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>
@@ -61,24 +61,24 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                Телефон: <?= $order->acceptedByProfile->phone ? $order->acceptedByProfile->phone : ''?>
+                                Телефон: <?= isset($order->acceptedByProfile->phone) ? $order->acceptedByProfile->phone : ''?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Email: <?= $order->acceptedBy->email ? $order->acceptedBy->email : '' ?>
+                                Email: <?= isset($order->acceptedBy->email) ? $order->acceptedBy->email : '' ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Заказ создал: <?= $order->acceptedByProfile->full_name ? $order->acceptedByProfile->full_name : '' ?>
+                                Заказ создал: <?= isset($order->acceptedByProfile->full_name) ? $order->acceptedByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Адрес: <?= $order->vendor->locality ? $order->vendor->locality : '' ?>,
-                                <?= $order->vendor->route ? $order->vendor->route  : '' ?>,
-                                <?= $order->vendor->street_number ? $order->vendor->street_number : '' ?>
+                                Адрес: <?= isset($order->vendor->locality) ? $order->vendor->locality : '' ?>,
+                                <?= isset($order->vendor->route) ? $order->vendor->route  : '' ?>,
+                                <?= isset($order->vendor->street_number) ? $order->vendor->street_number : '' ?>
                             </td>
                         </tr>
                     </table>

@@ -490,7 +490,12 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
                             $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
                             $('#profile-full_name,#organization-name').removeAttr('readonly');
-                                    console.log('type = 5');    
+                                    console.log('type = 5'); 
+                            if($('.has-error').length >= 1) {
+                                 $('#addProduct').attr('disabled','disabled');                 
+                            } else {
+                                $('#addProduct').removeAttr('disabled');                      
+                            }
                     }
                         // 
 	                if(response.eventType==6){
@@ -506,13 +511,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
                             $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
 		            console.log('type = 6');    
 	                }
-	                
-	                if($('#profile-phone').val().length < 2) {
-                         $('#addProduct').attr('disabled','disabled');                 
-                    } else {
-                        $('#addProduct').removeAttr('disabled');                      
-                    }
-                    
+                                      
                 }else{
 		    console.log(response.message); 
                 }
@@ -523,7 +522,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
         }); 
 	}	 
 	
-	if($('#profile-phone').val().length <= 0) {
+	if($('.has-error').length >= 1) {
          $('#addProduct').attr('disabled','disabled');                 
     } else {
         $('#addProduct').removeAttr('disabled');                      

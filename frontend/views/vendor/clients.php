@@ -47,7 +47,7 @@ $gridColumnsClients = [
         'format' => 'raw',
         'attribute' => 'last_order_date',
         'value' => function($data) {
-            $date = isset($data->lastOrder) ? Yii::$app->formatter->asDatetime($data->lastOrder->updated_at, "php:j M Y") : 'Никогда';
+            $date = isset($data->lastOrder) ? Yii::$app->formatter->asDatetime($data->lastOrder->updated_at, "php:j M Y") : Yii::t('app', 'Никогда');
             return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
         },
     ],
@@ -200,7 +200,7 @@ $form = ActiveForm::begin([
                 <div class="col-sm-3">
 <?=
         $form->field($searchModel, "cat_id")
-        ->dropDownList($currentOrganization->getCatalogsList(), ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_catalog'])
+        ->dropDownList($currentOrganization->getCatalogsList(), ['prompt' => Yii::t('app', 'Все'), 'class' => 'form-control', 'id' => 'filter_catalog'])
         ->label(Yii::t('message', 'frontend.views.vendor.catalog', ['ru'=>"Каталог"]), ['class' => 'label filter_catalog', 'style' => 'color:#555'])
 ?>
                 </div>
@@ -210,7 +210,7 @@ $form = ActiveForm::begin([
         ->dropDownList([
             '0' => Yii::t('message', 'frontend.views.vendor.not_accepted', ['ru'=>'Не подтвержден']),
             '1' => Yii::t('message', 'frontend.views.vendor.accepted', ['ru'=>'Подтвержден']),
-                ], ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_invite'])
+                ], ['prompt' => Yii::t('app', 'Все'), 'class' => 'form-control', 'id' => 'filter_invite'])
         ->label("Статус", ['class' => 'label filter_invite', 'style' => 'color:#555'])
 ?>
                 </div>

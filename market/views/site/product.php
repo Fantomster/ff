@@ -70,7 +70,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
         ],
         'homeLink' => false,
         'links' => [
-            Html::decode($product->mainCategory->name),
+            Html::decode(Yii::t('app', $product->mainCategory->name)),
             [
                 'label' => Html::decode(Yii::t('app', $product->category->name)),
                 'url' => ['site/category', 'slug' => $product->category->slug],

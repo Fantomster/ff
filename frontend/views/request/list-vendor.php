@@ -118,7 +118,7 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
                                 'class' => 'form-control',
                                 'placeholder'=>Yii::t('message', 'frontend.views.request.search', ['ru'=>'Поиск']),
                                 'id'=>'search'
-                            ]);?> 
+                            ]);?>
                         </div>
               </div>
               <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
@@ -175,16 +175,16 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
     </div>
     <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
       <div class="row">
-        <div class="col-md-12">   
+        <div class="col-md-12">
           <div class="box box-info">
             <div class="box-body" style="padding-bottom:15px !important;padding-top:0 !important;">
-              <?php 
+              <?php
               Pjax::begin([
-                  'id' => 'list', 
-                  'timeout' => 10000, 
+                  'id' => 'list',
+                  'timeout' => 10000,
                   'enablePushState' => false,
                   ]);
-              ?> 
+              ?>
               <?=ListView::widget([
                     'dataProvider' => $dataListRequest,
                     'itemView' => function ($model, $key, $index, $widget) {

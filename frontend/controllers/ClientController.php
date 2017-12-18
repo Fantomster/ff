@@ -234,7 +234,7 @@ class ClientController extends DefaultController {
                     $user->save();
                     $profile->save();
 
-                    $message = 'Пользователь обновлен!';
+                    $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }

@@ -14,16 +14,22 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
     <p>
-        <?= Html::a('Создать трансляцию', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Создать перевод', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 <div class="sms-send-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
         'columns' => [
             [
-                'attribute' => 'message'
+                'attribute' => 'message',
+                'label' => 'Переменная',
+                'format' => 'raw',
+                'value' => 'message',
+                'headerOptions' => ['style' => 'width:40px'],
             ],
             [
                 'header' => 'Шаблон',
@@ -54,6 +60,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     $message .= '</table>';
                     return $message;
                 }
+            ],
+            [
+                'attribute' => 'category',
+                'label' => 'Категория'
             ],
         ],
     ]); ?>

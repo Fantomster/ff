@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use backend\models\TranslationSearch;
 use common\models\Message;
 use common\models\SourceMessage;
 use Yii;
@@ -56,17 +57,12 @@ class TranslationsController extends SmsController
      */
     public function actionMessage()
     {
-        $query = SourceMessage::find()
-            ->joinWith('messages')
-            ->where(['!=', 'category', 'sms_message'])
-            ->orderBy('language ASC')->all();
-
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $query
-        ]);
+        $searchModel = new TranslationSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('messages', [
             'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel
         ]);
     }
 

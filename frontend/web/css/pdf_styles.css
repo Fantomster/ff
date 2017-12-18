@@ -13,3 +13,8 @@
     border-top: 1px solid black;
     vertical-align: bottom;
 }
+
+hr {
+    height: 1px;
+    color: #000000;
+}

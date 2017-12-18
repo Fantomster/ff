@@ -38,20 +38,25 @@ class CronController extends Controller {
                 ->all();
 
         foreach ($base as $catalogBaseGoods) {
-            $product_id = $catalogBaseGoods->id;
-            $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : '';
-            $product_name = $catalogBaseGoods->product;
-            $product_supp_id = $catalogBaseGoods->supp_org_id;
-            $product_supp_name = $catalogBaseGoods->vendor->name;
-            $product_price = $catalogBaseGoods->price;
-            $product_currency = $catalogBaseGoods->catalog->currency->symbol;
-            $product_category_id = $catalogBaseGoods->category->parent;
-            $product_category_name = \common\models\MpCategory::find()->where(['id' => $catalogBaseGoods->category->parent])->one()->name;
-            $product_category_sub_id = $catalogBaseGoods->category->id;
-            $product_category_sub_name = $catalogBaseGoods->category->name;
-            $product_show_price = $catalogBaseGoods->mp_show_price;
-            $product_created_at = $catalogBaseGoods->created_at;
-            $product_partnership = $catalogBaseGoods->vendor->partnership;
+            try {
+                $product_id = $catalogBaseGoods->id;
+                $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : '';
+                $product_name = $catalogBaseGoods->product;
+                $product_supp_id = $catalogBaseGoods->supp_org_id;
+                $product_supp_name = $catalogBaseGoods->vendor->name;
+                $product_price = $catalogBaseGoods->price;
+                $product_currency = $catalogBaseGoods->catalog->currency->symbol;
+                $product_category_id = $catalogBaseGoods->category->parent;
+                $product_category_name = \common\models\MpCategory::find()->where(['id' => $catalogBaseGoods->category->parent])->one()->name;
+                $product_category_sub_id = $catalogBaseGoods->category->id;
+                $product_category_sub_name = $catalogBaseGoods->category->name;
+                $product_show_price = $catalogBaseGoods->mp_show_price;
+                $product_created_at = $catalogBaseGoods->created_at;
+                $product_partnership = $catalogBaseGoods->vendor->partnership;
+            } catch (\Exception $e) {
+                echo "ошибка! cbg_id: $product_id/n";
+                return;
+            }
 
             $product_rating = $catalogBaseGoods->vendor->rating;
             if (!empty($product_image)) {

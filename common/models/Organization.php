@@ -159,34 +159,34 @@ class Organization extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'type_id' => 'Тип бизнеса',
-            'name' => 'Название организации',
-            'city' => 'Город',
-            'address' => 'Адрес',
-            'zip_code' => 'Индекс',
-            'phone' => 'Телефон',
-            'email' => 'Email организации',
-            'website' => 'Веб-сайт',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'legal_entity' => 'Название юридического лица',
-            'contact_name' => 'ФИО контактного лица',
-            'about' => 'Информация об организации',
-            'picture' => 'Аватар',
-            'white_list' => 'Одобрено для f-market',
-            'partnership' => 'Партнерство',
-            'lat' => 'Lat',
-            'lng' => 'Lng',
-            'country' => 'Страна',
-            'administrative_area_level_1' => 'Область',
-            'locality' => 'Город',
-            'route' => 'Улица',
-            'street_number' => 'Дом',
-            'place_id' => 'Place ID',
-            'formatted_address' => 'Formatted Address',
-            'franchisee_sorted' => 'Назначен Франшизы',
-            'manager_id' => 'Менеджер',
-            'is_allowed_for_franchisee' => 'Разрешить франчайзи вход в данный Личный Кабинет'
+            'type_id' => Yii::t('app', 'common.models.business_type', ['ru'=>'Тип бизнеса']),
+            'name' => Yii::t('app', 'common.models.organization_name', ['ru'=>'Название организации']),
+            'city' => Yii::t('app', 'common.models.city_three', ['ru'=>'Город']),
+            'address' => Yii::t('app', 'common.models.address', ['ru'=>'Адрес']),
+            'zip_code' => Yii::t('app', 'common.models.index', ['ru'=>'Индекс']),
+            'phone' => Yii::t('app', 'common.models.phone_three', ['ru'=>'Телефон']),
+            'email' => Yii::t('app', 'common.models.org_email', ['ru'=>'Email организации']),
+            'website' => Yii::t('app', 'common.models.web_site', ['ru'=>'Веб-сайт']),
+            'created_at' => Yii::t('app', 'Created At'),
+            'updated_at' => Yii::t('app', 'Updated At'),
+            'legal_entity' => Yii::t('app', 'common.models.jur_name_three', ['ru'=>'Название юридического лица']),
+            'contact_name' => Yii::t('app', 'common.models.contact_name', ['ru'=>'ФИО контактного лица']),
+            'about' => Yii::t('app', 'common.models.org_info', ['ru'=>'Информация об организации']),
+            'picture' => Yii::t('app', 'common.models.avatar', ['ru'=>'Аватар']),
+            'white_list' => Yii::t('app', 'common.models.accepted_for_f_market', ['ru'=>'Одобрено для f-market']),
+            'partnership' => Yii::t('app', 'common.models.partnership', ['ru'=>'Партнерство']),
+            'lat' => Yii::t('app', 'Lat'),
+            'lng' => Yii::t('app', 'Lng'),
+            'country' => Yii::t('app', 'common.models.country_four', ['ru'=>'Страна']),
+            'administrative_area_level_1' => Yii::t('app', 'common.models.region_three', ['ru'=>'Область']),
+            'locality' => Yii::t('app', 'common.models.city_four', ['ru'=>'Город']),
+            'route' => Yii::t('app', 'common.models.city_five', ['ru'=>'Улица']),
+            'street_number' => Yii::t('app', 'common.models.house', ['ru'=>'Дом']),
+            'place_id' => Yii::t('app', 'Place ID'),
+            'formatted_address' => Yii::t('app', 'Formatted Address'),
+            'franchisee_sorted'=>Yii::t('app', 'common.models.settled_franchisee', ['ru'=>'Назначен Франшизы']),
+            'manager_id'=>Yii::t('app', 'common.models.manager', ['ru'=>'Менеджер']),
+            'is_allowed_for_franchisee'=>Yii::t('app', 'common.models.let_franchisee', ['ru'=>'Разрешить франчайзи вход в данный Личный Кабинет'])
         ];
     }
 
@@ -262,7 +262,7 @@ class Organization extends \yii\db\ActiveRecord
             ->asArray()
             ->all(), 'id', 'name');
         if ($all) {
-            $vendors[''] = 'Все поставщики';
+            $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru'=>'Все поставщики']);
         }
         ksort($vendors);
         return $vendors;
@@ -290,7 +290,7 @@ class Organization extends \yii\db\ActiveRecord
             ->all(), 'id', 'name');
         
         if ($all) {
-            $clients[''] = 'Все рестораны';
+            $clients[''] = Yii::t('app', 'common.models.all_vendors', ['ru'=>'Все поставщики']);
         }
         ksort($clients);
         return $clients;
@@ -885,35 +885,35 @@ class Organization extends \yii\db\ActiveRecord
     {
         return [
             [
-                'label' => 'Номер',
+                'label' => Yii::t('app', 'common.models.number_two', ['ru'=>'Номер']),
                 'value' => 'id',
             ],
             [
-                'label' => 'Название',
+                'label' => Yii::t('app', 'common.models.name', ['ru'=>'Название']),
                 'value' => 'name',
             ],
             [
-                'label' => 'Кол-во поставщиков',
+                'label' => Yii::t('app', 'common.models.amount_vendor', ['ru'=>'Кол-во поставщиков']),
                 'value' => 'vendorCount',
             ],
             [
-                'label' => 'Кол-во заказов',
+                'label' => Yii::t('app', 'common.models.orders_amount', ['ru'=>'Кол-во заказов']),
                 'value' => 'orderCount',
             ],
             [
-                'label' => 'Сумма заказов',
+                'label' => Yii::t('app', 'common.models.order_sum', ['ru'=>'Сумма заказов']),
                 'value' => 'orderSum',
             ],
             [
-                'label' => 'Дата регистрации',
+                'label' => Yii::t('app', 'common.models.reg_date', ['ru'=>'Дата регистрации']),
                 'value' => 'created_at',
             ],
             [
-                'label' => 'Контакт',
+                'label' => Yii::t('app', 'common.models.contact', ['ru'=>'Контакт']),
                 'value' => 'contact_name',
             ],
             [
-                'label' => 'Телефон',
+                'label' => Yii::t('app', 'common.models.phone_four', ['ru'=>'Телефон']),
                 'value' => 'phone',
             ],
         ];
@@ -923,35 +923,35 @@ class Organization extends \yii\db\ActiveRecord
     {
         return [
             [
-                'label' => 'Номер',
+                'label' => Yii::t('app', 'common.models.number_three', ['ru'=>'Номер']),
                 'value' => 'id',
             ],
             [
-                'label' => 'Название',
+                'label' => Yii::t('app', 'common.models.name_four', ['ru'=>'Название']),
                 'value' => 'name',
             ],
             [
-                'label' => 'Кол-во ресторанов',
+                'label' => Yii::t('app', 'common.models.rest_amount', ['ru'=>'Кол-во ресторанов']),
                 'value' => 'clientCount',
             ],
             [
-                'label' => 'Кол-во заказов',
+                'label' => Yii::t('app', 'common.models.orders_amount_two', ['ru'=>'Кол-во заказов']),
                 'value' => 'orderCount',
             ],
             [
-                'label' => 'Сумма заказов',
+                'label' => Yii::t('app', 'common.models.order_sum_two', ['ru'=>'Сумма заказов']),
                 'value' => 'orderSum',
             ],
             [
-                'label' => 'Дата регистрации',
+                'label' => Yii::t('app', 'common.models.register_date', ['ru'=>'Дата регистрации']),
                 'value' => 'created_at',
             ],
             [
-                'label' => 'Контакт',
+                'label' => Yii::t('app', 'common.models.contact_two', ['ru'=>'Контакт']),
                 'value' => 'contact_name',
             ],
             [
-                'label' => 'Телефон',
+                'label' => Yii::t('app', 'common.models.phone_five', ['ru'=>'Телефон']),
                 'value' => 'phone',
             ],
         ];
@@ -1265,7 +1265,7 @@ class Organization extends \yii\db\ActiveRecord
                 $message = Yii::$app->mailer;
                 $message->compose('franchiseeAssociateAdded', ["organization" => $this, "route" => $url.'/'.$this->id])
                     ->setTo($franchise['legal_email'])
-                    ->setSubject(Yii::t('app', 'Самостоятельно зарегистрировавшаяся организация добавлена во франчайзи'))
+                    ->setSubject(Yii::t('app', 'common.models.self_registered', ['ru'=>'Самостоятельно зарегистрировавшаяся организация добавлена во франчайзи']))
                     ->send();
             }
         }

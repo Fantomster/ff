@@ -8,7 +8,7 @@ use yii\widgets\Breadcrumbs;
 ?>
 
 <?php
-$this->title = 'MixCart Продукты поставщика';
+$this->title = Yii::t('message', 'market.views.site.supp_prod.vendors_prods', ['ru'=>'MixCart Продукты поставщика']);
 ?>
 <div class="row">
     <div class="col-md-12 no-padding">
@@ -20,14 +20,14 @@ $this->title = 'MixCart Продукты поставщика';
             'homeLink' => false,
             'links' => [
                 [
-                    'label' => 'Все поставщики',
+                    'label' => Yii::t('message', 'market.views.site.supp_prod.all_vendors', ['ru'=>'Все поставщики']),
                     'url' => ['/site/suppliers'],
                 ],
                 [
                     'label' => $vendor->name,
                     'url' => ['/site/supplier', 'id' => $vendor->id],
                 ],
-                'Каталог',
+                Yii::t('message', 'market.views.site.supp_prod.catalog', ['ru'=>'Каталог']),
             ],
         ])
         ?>
@@ -57,7 +57,7 @@ $this->title = 'MixCart Продукты поставщика';
                                     <a href="<?= Url::to(['/site/product', 'id' => $row->id]); ?>"><h3><?= Html::decode(Html::decode($row->product)) ?></h3></a>
                                 </div>
                                 <div class="product-category">
-                                    <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?= $row->subCategory->name; ?></h5>
+                                    <h5><?= Yii::t('app', \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name); ?>/<?= Yii::t('app', $row->subCategory->name); ?></h5>
                                 </div>
                                 <div class="product-company">
                                     <a href="<?= Url::to(['/site/supplier', 'id' => $row->vendor->id]); ?>">
@@ -68,7 +68,7 @@ $this->title = 'MixCart Продукты поставщика';
                             <div class="col-md-12">
                                 <div class="product-price">
                                     <?php if (empty($row->mp_show_price)) { ?>
-                                        <h4 style="color:#dfdfdf">договорная цена</h4>
+                                        <h4 style="color:#dfdfdf"><?= Yii::t('message', 'market.views.site.supp_prod.price', ['ru'=>'договорная цена']) ?></h4>
                                     <?php } else { ?>
                                         <h4><?= floatval($row->price); ?> <small><?= $row->catalog->currency->symbol; ?></small></h4>
                                     <?php } ?>
@@ -77,7 +77,7 @@ $this->title = 'MixCart Продукты поставщика';
                             </div>
                             <div class="col-md-12">
                                 <div class="product-button">
-                                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> <?= Yii::t('message', 'market.views.site.supp_prod.buy', ['ru'=>'КУПИТЬ']) ?></a>
                                 </div>  
                             </div>
                         </div>
@@ -89,7 +89,7 @@ $this->title = 'MixCart Продукты поставщика';
         </div>
         <div class="row">
             <div class="col-md-12 min-padding">
-                <a href="#" class="btn btn-100 btn-outline-default <?= $productsCount > 12 ? '' : 'disabled' ?>" id="product-more">Показать еще</a>  
+                <a href="#" class="btn btn-100 btn-outline-default <?= $productsCount > 12 ? '' : 'disabled' ?>" id="product-more"><?= Yii::t('message', 'market.views.site.supp_prod.show_more', ['ru'=>'Показать еще']) ?></a>
             </div>   
         </div>
     </div>

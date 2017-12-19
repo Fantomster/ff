@@ -61,12 +61,12 @@ class RkDic extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'dictype_id' => 'Справочник',
-            'dicstatus_id' => 'Состояние',
-            'created_at' => 'Создано',
-            'updated_at' => 'Обновлено',
-            'obj_count' => 'Кол-во объектов',
-            'obj_mapcount' => 'Кол-во сопоставленных',
+            'dictype_id' => Yii::t('app', 'api.common.models.directory', ['ru'=>'Справочник']),
+            'dicstatus_id' => Yii::t('app', 'api.common.models.condition', ['ru'=>'Состояние']),
+            'created_at' => Yii::t('app', 'api.common.models.created', ['ru'=>'Создано']),
+            'updated_at' => Yii::t('app', 'api.common.models.updated_two', ['ru'=>'Обновлено']),
+            'obj_count' => Yii::t('app', 'api.common.models.objects_count', ['ru'=>'Кол-во объектов']),
+            'obj_mapcount' => Yii::t('app', 'api.common.models.count', ['ru'=>'Кол-во сопоставленных']),
           //  'dictype_id' => '',
             
             
@@ -76,8 +76,8 @@ class RkDic extends \yii\db\ActiveRecord
     
     public static function getStatusArray() {
         return [
-        RkAccess::STATUS_UNLOCKED  => 'Активен',
-        RkAccess::STATUS_LOCKED => 'Отключен',    
+        RkAccess::STATUS_UNLOCKED  => Yii::t('app', 'api.common.models.active_three', ['ru'=>'Активен']),
+        RkAccess::STATUS_LOCKED => Yii::t('app', 'api.common.models.off_three', ['ru'=>'Отключен']),
         ];
     }
 

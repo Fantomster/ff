@@ -28,7 +28,7 @@ class NotificationChat {
                 $message = Yii::$app->fcm->createMessage();
                 $message->addRecipient(new Device($row->token));
                 $message->setData(['action' => 'new_message',
-                            'title' => 'Новое сообщение по заказу №'.$message_data->order_id,
+                            'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.new', ['ru'=>'Новое сообщение по заказу №']).$message_data->order_id,
                             'message' => $message_data->message,
                             'data' => Json::encode($message_data->attributes),
                             'activity' => "Work"]);

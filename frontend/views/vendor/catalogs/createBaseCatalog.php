@@ -17,7 +17,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
 /* 
  * 
  */
-$this->title = 'Главный каталог';
+$this->title = Yii::t('message', 'frontend.views.vendor.main_catalog_seven', ['ru'=>'Главный каталог']);
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
@@ -45,8 +45,8 @@ if (false) {
 
     Modal::begin([
         'id' => 'showVideo',
-        'header' => '<h4>Загрузка Главного каталога поставщика</h4>',
-        'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>',
+        'header' => '<h4>' . Yii::t('message', 'frontend.views.vendor.main_cat_down_two', ['ru'=>'Загрузка Главного каталога поставщика']) . ' </h4>',
+        'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> ' . Yii::t('message', 'frontend.views.vendor.close_three', ['ru'=>'Закрыть']) . ' </a>',
     ]);
     ?>
     <div class="modal-body form-inline"> 
@@ -54,7 +54,7 @@ if (false) {
             <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen=""></iframe>
         </div>
         <div style="padding-top: 15px;">
-            Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог.
+            <?= Yii::t('message', 'frontend.views.vendor.create_first', ['ru'=>'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог.']) ?>
         </div>
     </div>
     <?php
@@ -64,7 +64,7 @@ if (false) {
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Создание главного каталога
+        <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.creating_of_main', ['ru'=>'Создание главного каталога']) ?>
         <small></small>
     </h1>
     <?=
@@ -72,8 +72,9 @@ if (false) {
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
-            'Создание главного каталога'
+            Yii::t('message', 'frontend.views.vendor.new_cat_create', ['ru'=>'Создание главного каталога'])
         ],
     ])
     ?>
@@ -83,7 +84,7 @@ if (false) {
 <?php if (Yii::$app->session->hasFlash('success')): ?>
     <div class="alert alert-danger alert-dismissable">
     <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-    <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+    <h4><i class="icon fa fa-check"></i><?= Yii::t('error', 'frontend.views.vendor.error_two', ['ru'=>'Ошибка']) ?></h4>
     <?= Yii::$app->session->getFlash('success') ?>
     </div>
   <?php endif; ?>
@@ -91,11 +92,11 @@ if (false) {
     <div class="box-body">
         <div class="panel-body">
     <?= Html::a(
-        '<i class="icon fa fa-save"></i> Сохранить',
+        '<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.save_six', ['ru'=>'Сохранить']) . ' ',
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
     ) ?>
-    <?= Html::a('<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>', 
+    <?= Html::a('<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('message', 'frontend.views.vendor.downl_cat_two', ['ru'=>'Загрузить каталог (XLS)']) . ' </span>',
             ['/vendor/import-base-catalog-from-xls'], [
                 'data' => [
                 'target' => '#importFromXls',
@@ -108,7 +109,7 @@ if (false) {
             ]);
     ?>
     <?= Html::a(
-        '<i class="fa fa-list-alt"></i> Скачать шаблон',
+        '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.downl_templ_two', ['ru'=>'Скачать шаблон']) . ' ',
         Url::to('@web/upload/template.xlsx'),
         ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px;']]
     ) ?>
@@ -124,7 +125,7 @@ if (false) {
 //                      ]);
     ?>
             <?= 
-                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr_three', ['ru'=>'Изменить валюту:']) . '  </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
                         'class' => 'btn btn-default pull-right',
                         'style' => ['margin'=>'0 5px;'],
                         'id' => 'changeCurrency',
@@ -139,7 +140,7 @@ if (false) {
 </section>
 <?php 
 Modal::begin([
-   'header'=>'<h4 class="modal-title">Загрузка каталога</h4>',
+   'header'=>'<h4 class="modal-title">' . Yii::t('message', 'frontend.views.vendor.cat_down', ['ru'=>'Загрузка каталога']) . ' </h4>',
    'id'=>'instruction',
    'size'=>'modal-lg',
 ]);
@@ -150,9 +151,26 @@ Modal::end();
 
 $mped = \yii\helpers\ArrayHelper::getColumn(common\models\MpEd::find()->all(), 'name');
 array_unshift($mped,"");
+foreach ($mped as &$item){
+    $item = Yii::t('app', $item);
+}
 $mped = json_encode($mped, JSON_UNESCAPED_UNICODE);
 
 $supplierStartCatalogCreateUrl = \yii\helpers\Url::to(['vendor/supplier-start-catalog-create']);
+
+$var1 = Yii::t('message', 'frontend.views.vendor.art_seven', ['ru'=>'Артикул']);
+$var2 = Yii::t('message', 'frontend.views.vendor.product_three', ['ru'=>'Продукт']);
+$var3 = Yii::t('message', 'frontend.views.vendor.multiplicity_four', ['ru'=>'Кратность']);
+$var4 = Yii::t('message', 'frontend.views.vendor.price_six', ['ru'=>'Цена']);
+$var5 = Yii::t('message', 'frontend.views.vendor.measure_four', ['ru'=>'Ед. измерения']);
+$var6 = Yii::t('message', 'frontend.views.vendor.comment_two', ['ru'=>'Комментарий']);
+$var7 = Yii::t('message', 'frontend.views.vendor.work', ['ru'=>'Приступить к работе']);
+$var8 = Yii::t('message', 'frontend.views.vendor.ok', ['ru'=>'Окей!']);
+$var9 = Yii::t('message', 'frontend.views.vendor.change_curr_four', ['ru'=>'Изменение валюты каталога']);
+$var10 = Yii::t('message', 'frontend.views.vendor.choose_curr_two', ['ru'=>'Выберите новую валюту каталога']);
+$var11 = Yii::t('message', 'frontend.views.vendor.choose_curr_from_list', ['ru'=>'Выберите валюту из списка']);
+$var12 = Yii::t('message', 'frontend.views.vendor.curr_in_use', ['ru'=>'Данная валюта уже используется!']);
+$var13 = Yii::t('message', 'frontend.views.vendor.curr_changed_two', ['ru'=>'Валюта каталога изменена!']);
 
 $language = Yii::$app->sourceLanguage;
 
@@ -177,7 +195,7 @@ hot = new Handsontable(container, {
   beforeChange: function () {
       //console.log('beforeChange');
   },
-  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (<span class="currency-symbol">{$firstCurrency}</span>)', 'Ед. измерения', 'Комментарий'],
+  colHeaders : ['$var1', '$var2', '$var3', '$var4 (<span class="currency-symbol">{$firstCurrency}</span>)', '$var5', '$var6'],
   colWidths: [40, 120, 45, 45, 65, 80],
   renderAllRows: true,
   columns: [
@@ -240,7 +258,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Приступить к работе",
+                          label: "$var7",
                           className: "btn-success btn-md",
                           callback: function() {
                             location.reload();    
@@ -255,7 +273,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Окей!",
+                          label: "$var8",
                           className: "btn-success btn-md",
                         },
                     },
@@ -284,23 +302,23 @@ $("#instruction").on('show.bs.modal', function(){
 
     $(document).on("click", "#changeCurrency", function() {
         swal({
-            title: 'Изменение валюты каталога',
+            title: '$var9',
             input: 'select',
             inputOptions: $currencyList,
-            inputPlaceholder: 'Выберите новую валюту каталога',
+            inputPlaceholder: '$var10',
             showCancelButton: true,
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (!value) {
-                        reject('Выберите валюту из списка')
+                        reject('$var11')
                     }
                     if (value != currentCurrency) {
                         currentCurrency = value;
                         $(".currency-symbol").html(currencies[currentCurrency-1]);
                         resolve();
                     } else {
-                        reject('Данная валюта уже используется!')
+                        reject('$var12')
                     }
                 })
             },
@@ -309,7 +327,7 @@ $("#instruction").on('show.bs.modal', function(){
                 swal.close();
             } else {
                 swal({
-                    title: 'Валюта каталога изменена!',
+                    title: '$var13',
                     type: 'success',
                     showCancelButton: false,
                 })

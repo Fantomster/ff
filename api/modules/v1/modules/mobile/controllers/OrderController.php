@@ -330,10 +330,12 @@ class OrderController extends ActiveController {
             
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
-                $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+            if ($profile->phone && $recipient->smsNotification->order_done) {
+                $text = Yii::$app->sms->prepareText('sms.order_done', [
+                    'name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -366,10 +368,12 @@ class OrderController extends ActiveController {
             }
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
-                $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+            if ($profile->phone && $recipient->smsNotification->order_processing) {
+                $text = Yii::$app->sms->prepareText('sms.order_processing', [
+                    'vendor_name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -407,10 +411,11 @@ class OrderController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
             if ($profile->phone && $recipient->smsNotification->order_created) {
-                //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $text = "Новый заказ от " . $senderOrg->name . ' ' . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $target = $profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_new', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $profile->phone);
             }
         }
     }
@@ -445,9 +450,11 @@ class OrderController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ " . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$senderOrg->name . " отменил заказ в системе №" . $order->id;
-                $target = $profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_canceled', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $profile->phone);
             }
         }
     }

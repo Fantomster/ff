@@ -69,8 +69,8 @@ class RkAccess extends \yii\db\ActiveRecord
     
     public static function getStatusArray() {
         return [
-        RkAccess::STATUS_UNLOCKED  => 'Активен',
-        RkAccess::STATUS_LOCKED => 'Отключен',    
+        RkAccess::STATUS_UNLOCKED  => Yii::t('app', 'api.common.models.active', ['ru'=>'Активен']),
+        RkAccess::STATUS_LOCKED => Yii::t('app', 'api.common.models.off', ['ru'=>'Отключен']),
         ];
     }
 

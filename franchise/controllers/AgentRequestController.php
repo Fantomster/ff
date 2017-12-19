@@ -151,7 +151,7 @@ class AgentRequestController extends DefaultController
         if (($model = AgentRequest::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'franchise.controllers.not_found', ['ru'=>'The requested page does not exist.']));
         }
     }
 }

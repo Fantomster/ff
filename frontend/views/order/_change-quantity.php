@@ -15,7 +15,7 @@ echo Html::hiddenInput('product_id', $product_id);
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Изменить количество</h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.order.change_quantity', ['ru'=>'Изменить количество']) ?></h4>
 </div>
 <div class="modal-body form-inline" style="text-align: center;"> 
     <?= Html::label("<b>$product_name</b> ($vendor_name)", '', ['class' => 'padding-right-15']) ?>
@@ -40,8 +40,8 @@ echo Html::hiddenInput('product_id', $product_id);
                         ?>
 </div>
 <div class="modal-footer">
-    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save', 'data' => ['dismiss' => "modal"]]) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
+    <?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.', ['ru'=>'Сохранить']), ['class' => 'btn btn-success save', 'data' => ['dismiss' => "modal"]]) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.order.close_five', ['ru'=>'Закрыть']) ?></a>
 </div>
 <?php
 ActiveForm::end();

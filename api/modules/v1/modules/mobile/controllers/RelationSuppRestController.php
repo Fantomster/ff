@@ -137,9 +137,10 @@ class RelationSuppRestController extends ActiveController {
 
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
-                        $text = $client->organization->name . ' хочет работать с Вами в системе';
-                        $target = $user->profile->phone;
-                        Yii::$app->sms->send($text, $target);
+                        $text = Yii::$app->sms->prepareText('sms.request_add_supplier', [
+                            'client_name' => $client->organization->name
+                        ]);
+                        Yii::$app->sms->send($text, $user->profile->phone);
                     }
                     //$this->sendMail("invite-supplier", $request, $row);
                     if(!empty($user->email)){

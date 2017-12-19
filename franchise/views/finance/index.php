@@ -1,6 +1,6 @@
 <?php
 
-$this->title = Yii::t('app', 'Финансы');
+$this->title = Yii::t('app', 'franchise.views.finance.finance', ['ru'=>'Финансы']);
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -12,8 +12,8 @@ use yii\widgets\Breadcrumbs;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> <?= Yii::t('app', 'Ваши финансы') ?>
-        <small><?= Yii::t('app', 'Узнайте ваши денежные потоки') ?></small>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'franchise.views.finance.your_fin', ['ru'=>'Ваши финансы']) ?>
+        <small><?= Yii::t('app', 'franchise.views.finance.know_fin', ['ru'=>'Узнайте ваши денежные потоки']) ?></small>
     </h1> <?php /*
     <div class="nav-tabs-custom" style="cursor: move; margin-top:15px;">
         <!-- Tabs within a box -->
@@ -58,7 +58,7 @@ use yii\widgets\Breadcrumbs;
                            // 'model' => $searchModel,
                             'name' => 'month',
                             'attribute' => 'month',
-                            'options' => ['placeholder' => Yii::t('app', 'Выберите месяц'), 'id' => 'month', 'style' => 'max-width: 150px;'],
+                            'options' => ['placeholder' => Yii::t('app', 'franchise.views.finance.choose', ['ru'=>'Выберите месяц']), 'id' => 'month', 'style' => 'max-width: 150px;'],
                             'type' => DatePicker::TYPE_INPUT,
                             'pluginOptions' => [
                                 'format' => 'MM yyyy',
@@ -72,7 +72,7 @@ use yii\widgets\Breadcrumbs;
                 </div>
                 <div class="col-md-5 no-padding">
                     <div class="input-group pull-right" style="width: 150px;">
-                        <input type="text" name="table_search" class="form-control" placeholder="<?= Yii::t('app', 'Поиск') ?>">
+                        <input type="text" name="table_search" class="form-control" placeholder="<?= Yii::t('app', 'franchise.views.finance.search', ['ru'=>'Поиск']) ?>">
                             <div class="input-group-btn">
                                 <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
@@ -123,37 +123,37 @@ use yii\widgets\Breadcrumbs;
                                 'format' => 'raw',
                                 'attribute' => 'name',
                                 'value' => 'name',
-                                'label' => Yii::t('app', 'Имя поставщика'),
+                                'label' => Yii::t('app', 'franchise.views.finance.vendors_name', ['ru'=>'Имя поставщика']),
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'turnoverCut',
                                 'value' => 'turnoverCut',
-                                'label' => Yii::t('app', 'Поставщик мне'),
+                                'label' => Yii::t('app', 'franchise.views.finance.vendors_to_me_two', ['ru'=>'Поставщик мне']),
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'fromFkeeper',
                                 'value' => 'fromFkeeper',
-                                'label' => Yii::t('app', 'MixCart мне'),
+                                'label' => Yii::t('app', 'franchise.views.finance.mix_me', ['ru'=>'MixCart мне']),
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'toFkeeper',
                                 'value' => 'toFkeeper',
-                                'label' => Yii::t('app', 'Я MixCart\'у'),
+                                'label' => Yii::t('app', 'franchise.views.finance.me_mix_three', ['ru'=>"Я MixCart\'у"]),
                             ],
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
                                     return $data['turnoverCut'] - $data['toFkeeper'];
                                 },
-                                'label' => Yii::t('app', 'Итого прибыль'),
+                                'label' => Yii::t('app', 'franchise.views.finance.total_income_five', ['ru'=>'Итого прибыль']),
                             ],
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i>'. Yii::t('app', 'Выставить счет') . '</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i>'. Yii::t('app', 'Оплачено') . ' </small></a>';
+                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i>'. Yii::t('app', 'franchise.views.finance.settle_bill', ['ru'=>'Выставить счет']) . '</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i>'. Yii::t('app', 'franchise.views.finance.payd', ['ru'=>'Оплачено']) . ' </small></a>';
                                     return $result;
                                 },
                                         'contentOptions' => ['class' => 'table-btns'],

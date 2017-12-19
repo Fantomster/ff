@@ -18,7 +18,7 @@ yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 use kartik\select2\Select2;
 kartik\select2\Select2Asset::register($this);
 $request = new \common\models\Request();
-$this->title = 'Заявки';
+$this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заявки']);
 ?>
 <style>
     .req-items{
@@ -85,16 +85,17 @@ $this->title = 'Заявки';
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-paper-plane"></i> Список заявок
-        <small>Находите честных партнеров для своего бизнеса</small>
+        <i class="fa fa-paper-plane"></i> <?= Yii::t('message', 'frontend.views.request.req_list', ['ru'=>'Список заявок']) ?>
+        <small><?= Yii::t('message', 'frontend.views.request.partners_list', ['ru'=>'Находите честных партнеров для своего бизнеса']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
-            'Список заявок'
+            Yii::t('message', 'frontend.views.request.req_list_two', ['ru'=>'Список заявок'])
         ],
     ])
     ?>
@@ -115,18 +116,23 @@ $this->title = 'Заявки';
                             <?=Html::input('text', 'search', \Yii::$app->request->get('search')?:'',
                             [
                                 'class' => 'form-control',
-                                'placeholder'=>'Поиск',
+                                'placeholder'=>Yii::t('message', 'frontend.views.request.search', ['ru'=>'Поиск']),
                                 'id'=>'search'
-                            ]);?> 
+                            ]);?>
                         </div>
               </div>
               <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
-                    <?= Html::label('Категория', null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?= Html::label(Yii::t('message', 'frontend.views.request.category', ['ru'=>'Категория']), null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?php
+                    $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name');
+                    foreach ($mpCat as &$item){
+                        $item = Yii::t('app', $item);
+                    }; ?>
                     <?=Select2::widget([
                         'name' => 'category',
                         'value' => '',
-                        'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
-                        'options' => ['id'=>'category','multiple' => false, 'placeholder' => 'Категория товара'],
+                        'data' => $mpCat,
+                        'options' => ['id'=>'category','multiple' => false, 'placeholder' => Yii::t('message', 'frontend.views.request.product_category', ['ru'=>'Категория товара'])],
                         'pluginOptions' => [
                             'allowClear' => true
                         ],
@@ -134,11 +140,11 @@ $this->title = 'Заявки';
                     ?>
               </div>
               <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
-                    <?= Html::label('Все заявки/мои', null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?= Html::label(Yii::t('message', 'frontend.views.request.all_requests', ['ru'=>'Все заявки/мои']), null, ['class' => 'label','style'=>'color:#555']) ?>
                     <?=Select2::widget([
                         'name' => 'my-only',
                         'value' => '',
-                        'data' => [1=>'Все',2=>'Только мои'],
+                        'data' => [1=>Yii::t('message', 'frontend.views.request.all', ['ru'=>'Все']),2=>Yii::t('message', 'frontend.views.request.just_mine', ['ru'=>'Только мои'])],
                         'options' => ['id'=>'my-only','multiple' => false, 'placeholder' => false],
                         'hideSearch' => true,
                         'pluginOptions' => [
@@ -148,11 +154,11 @@ $this->title = 'Заявки';
                     ?>
               </div>
               <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
-                    <?= Html::label('Все заявки/срочные', null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?= Html::label(Yii::t('message', 'frontend.views.request.all_requests_two', ['ru'=>'Все заявки/срочные']), null, ['class' => 'label','style'=>'color:#555']) ?>
                     <?=Select2::widget([
                         'name' => 'rush',
                         'value' => '',
-                        'data' => [1=>'Все',2=>'Срочные'],
+                        'data' => [1=>Yii::t('message', 'frontend.views.request.all_two', ['ru'=>'Все']),2=>Yii::t('message', 'frontend.views.request.common_three', ['ru'=>'Срочные'])],
                         'options' => ['id'=>'rush','multiple' => false, 'placeholder' => false],
                         'hideSearch' => true,
                         'pluginOptions' => [
@@ -169,16 +175,16 @@ $this->title = 'Заявки';
     </div>
     <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
       <div class="row">
-        <div class="col-md-12">   
+        <div class="col-md-12">
           <div class="box box-info">
             <div class="box-body" style="padding-bottom:15px !important;padding-top:0 !important;">
-              <?php 
+              <?php
               Pjax::begin([
-                  'id' => 'list', 
-                  'timeout' => 10000, 
+                  'id' => 'list',
+                  'timeout' => 10000,
                   'enablePushState' => false,
                   ]);
-              ?> 
+              ?>
               <?=ListView::widget([
                     'dataProvider' => $dataListRequest,
                     'itemView' => function ($model, $key, $index, $widget) {
@@ -194,8 +200,8 @@ $this->title = 'Заявки';
                       'class'=>'col-lg-12 list-wrapper inline no-padding'
                     ],
                     'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                    'summary' => 'Показано {count} из {totalCount}',
-                    'emptyText' => '<h5 class="text-center" style="padding-top:17px;">По текущим параметрам поиска, новых заявок нет</h5>',
+                    'summary' => Yii::t('message', 'frontend.views.request.showed_two', ['ru'=>'Показано']) . '  {count} ' . Yii::t('message', 'frontend.views.request.of', ['ru'=>'из']) . '  {totalCount}',
+                    'emptyText' => '<h5 class="text-center" style="padding-top:17px;">' . Yii::t('message', 'frontend.views.request.no_new', ['ru'=>'По текущим параметрам поиска, новых заявок нет']) . ' </h5>',
                 ])?>
               <?php Pjax::end(); ?>
             </div>
@@ -230,9 +236,7 @@ $("body").on("hidden.bs.modal", "#create", function() {
     
 });
 $(document).on("click", ".req-items", function() {
-    var id = $(this).attr("data-id");
-    var url = "' . Url::to(["request/view", 'id' => '']) . '" + id;
-    window.location.href = url;
+    window.location.href = $(this).data("url");
 })  
 
 ');

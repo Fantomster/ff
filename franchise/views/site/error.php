@@ -22,14 +22,14 @@ $this->title = $name;
             </p>
 
             <p>
-                <?= Yii::t('app', 'The above error occurred while the Web server was processing your request.
-                Please contact us if you think this is a server error. Thank you.') ?>
-                <?= Yii::t('app', 'Meanwhile, you may') ?> <a href='<?= Yii::$app->homeUrl ?>'><?= Yii::t('app', 'return to dashboard') ?></a> <?= Yii::t('app', 'or try using the search form.') ?>
+                <?= Yii::t('app', 'franchise.views.site.error', ['ru'=>'The above error occurred while the Web server was processing your request.
+                Please contact us if you think this is a server error. Thank you.']) ?>
+                <?= Yii::t('app', 'franchise.views.site.meanwhile', ['ru'=>'Meanwhile, you may']) ?> <a href='<?= Yii::$app->homeUrl ?>'><?= Yii::t('app', 'franchise.views.site.return', ['ru'=>'return to dashboard']) ?></a> <?= Yii::t('app', 'franchise.views.site.or_try', ['ru'=>'or try using the search form.']) ?>
             </p>
 
             <form class='search-form'>
                 <div class='input-group'>
-                    <input type="text" name="search" class='form-control' placeholder="<?= Yii::t('app', 'Search') ?>"/>
+                    <input type="text" name="search" class='form-control' placeholder="<?= Yii::t('app', 'franchise.views.site.search_two', ['ru'=>'Search']) ?>"/>
 
                     <div class="input-group-btn">
                         <button type="submit" name="submit" class="btn btn-primary"><i class="fa fa-search"></i>

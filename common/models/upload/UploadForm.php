@@ -3,6 +3,7 @@ namespace common\models\upload;
 
 use yii\base\Model;
 use yii\web\UploadedFile;
+use Yii;
 
 class UploadForm extends Model
 {
@@ -22,7 +23,7 @@ class UploadForm extends Model
     }
     public function attributeLabels() {
         return [
-            'importType' => 'Тип импорта',
+            'importType' => Yii::t('app', 'common.models.import_type', ['ru'=>'Тип импорта']),
         ];
     }
     public function upload()

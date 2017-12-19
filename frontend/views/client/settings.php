@@ -9,7 +9,7 @@ use common\assets\CroppieAsset;
 CroppieAsset::register($this);
 \frontend\assets\GoogleMapsAsset::register($this);
 
-$this->title = 'Настройки';
+$this->title = Yii::t('message', 'frontend.views.client.settings.settings', ['ru'=>'Настройки']);
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
@@ -123,24 +123,25 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
         'options' => [
             'class' => 'alert-warning fade in',
         ],
-        'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
-        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+        'body' => Yii::t('message', 'frontend.views.client.settings.fill', ['ru'=>'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы.']) . '  '
+        . '<a class="btn btn-default btn-sm" href="#">' . Yii::t('message', 'frontend.views.client.settings.lets_do_it', ['ru'=>'Сделаем это!']) . ' </a>',
     ]);
 }
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Общие
-        <small>Информация об организации</small>
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.client.settings.common', ['ru'=>'Общие']) ?>
+        <small><?= Yii::t('message', 'frontend.views.client.settings.org', ['ru'=>'Информация об организации']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.client.settings', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
-            'Настройки',
-            'Общие',
+            Yii::t('message', 'frontend.views.client.settings.settings_two', ['ru'=>'Настройки']),
+            Yii::t('message', 'frontend.views.client.settings.common_two', ['ru'=>'Общие']),
         ],
     ])
     ?>
@@ -163,14 +164,14 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
 
                 <div class="col-md-12">
                     <fieldset>
-                        <legend>Данные организации:</legend>
+                        <legend><?= Yii::t('message', 'frontend.views.client.settings.ord_data', ['ru'=>'Данные организации:']) ?></legend>
                         <div class="avatar-option" style="">
 
                             <div class="upload-demo-wrap">
                                 <div id="upload-avatar"></div>
                             </div>
                             <img id="newAvatar" style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px;" class="center-block" src="<?= $organization->pictureUrl ?>">
-                            <label class="btn btn-gray" id="uploadAvatar" style="width:420px; display: block; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px;"> Загрузить аватар
+                            <label class="btn btn-gray" id="uploadAvatar" style="width:420px; display: block; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px;"> <?= Yii::t('message', 'frontend.views.client.settings.avatar', ['ru'=>'Загрузить аватар']) ?>
                                 <?=
                                         $form->field($organization, 'picture', ['template' => '<div class="input-group">{input}</div>{error}'])
                                         ->fileInput(['id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
@@ -190,8 +191,8 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                             $form->field($organization, 'name', [
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
-                                            ->label('Название ресторана <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['placeholder' => 'Введите название ресторана'])
+                                            ->label(Yii::t('message', 'frontend.views.client.settings.common.rest', ['ru'=>'Название ресторана']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
+                                            ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.rest_name', ['ru'=>'Введите название ресторана'])])
                                     ?>
                             </div>
                             <div class="form-group">
@@ -199,8 +200,8 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                             $form->field($organization, 'legal_entity', [
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
-                                            ->label('Название юридического лица <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['placeholder' => 'Введите название юридического лица'])
+                                            ->label(Yii::t('message', 'frontend.views.client.settings.jur_name', ['ru'=>'Название юридического лица']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
+                                            ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.jur_name_fill', ['ru'=>'Введите название юридического лица'])])
                                     ?>
                             </div>
                             <div class="form-group">
@@ -208,21 +209,21 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                         $form->field($organization, 'website', [
                                             'addon' => ['prepend' => ['content' => '<i class="fa fa-globe"></i>']]
                                         ])
-                                        ->label('Веб-сайт')
-                                        ->textInput(['placeholder' => 'Введите адрес вашего веб-сайта'])
+                                        ->label(Yii::t('message', 'frontend.views.client.settings.web_sit', ['ru'=>'Веб-сайт']))
+                                        ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.site', ['ru'=>'Введите адрес вашего веб-сайта'])])
                                 ?>
                             </div>
                             <div class="form-group">
                         <?=
                                 $form->field($organization, 'about')
-                                ->label('Информация об организации')
-                                ->textarea(['placeholder' => "Несколько слов об организации ...", 'rows' => 2])
+                                ->label(Yii::t('message', 'frontend.views.client.settings.org_info', ['ru'=>'Информация об организации']))
+                                ->textarea(['placeholder' => Yii::t('message', 'frontend.views.client.settings.several', ['ru'=>"Несколько слов об организации ..."]), 'rows' => 2])
                         ?>
                             </div>
                             <div class="form-group">
                                 <?=
                                 $form->field($organization, 'is_allowed_for_franchisee')
-                                    ->label(Yii::t('app', 'Разрешить франчайзи вход в данный Личный Кабинет'))
+                                    ->label(Yii::t('message', 'frontend.views.client.settings.franchisee', ['ru'=>'Разрешить франчайзи вход в данный Личный Кабинет']))
                                     ->checkbox()
                                 ?>
                             </div>
@@ -233,8 +234,8 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                         $form->field($organization, 'address', [
                                             'addon' => ['prepend' => ['content' => '<i class="fa fa-compass"></i>']]
                                         ])
-                                        ->label('Адрес')
-                                        ->textInput(['placeholder' => 'Адрес организации'])
+                                        ->label(Yii::t('message', 'frontend.views.client.settings.address', ['ru'=>'Адрес']))
+                                        ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.org_address', ['ru'=>'Адрес организации'])])
                                 ?>                            
                             </div>
         <div id="map" style="width:100%;height:250px;"></div>
@@ -263,7 +264,7 @@ document.onkeypress = stopRKey;
                 </div>
             </div>
             <fieldset>
-                <legend>Контактное лицо:</legend>
+                <legend><?= Yii::t('message', 'frontend.views.client.settings.contact', ['ru'=>'Контактное лицо:']) ?></legend>
                 <div class="row">
 
                     <div class="col-md-4">
@@ -272,8 +273,8 @@ document.onkeypress = stopRKey;
                                     $form->field($organization, 'contact_name', [
                                         'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                     ])
-                                    ->label('ФИО контактного лица')
-                                    ->textInput(['placeholder' => 'Введите ФИО контактного лица'])
+                                    ->label(Yii::t('message', 'frontend.views.client.settings.contact_fio', ['ru'=>'ФИО контактного лица']))
+                                    ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.contact_fio_two', ['ru'=>'Введите ФИО контактного лица'])])
                             ?>                        </div>
                     </div>
                     <div class="col-md-4">
@@ -283,7 +284,7 @@ document.onkeypress = stopRKey;
                                         'addon' => ['prepend' => ['content' => '<i class="fa fa-envelope"></i>']]
                                     ])
                                     ->label('E-mail')
-                                    ->textInput(['placeholder' => "Введите E-mail"])
+                                    ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.email', ['ru'=>"Введите E-mail"])])
                             ?>
                         </div>
                     </div>
@@ -301,7 +302,7 @@ document.onkeypress = stopRKey;
                                     'class' => 'form-control',
                                 ],
                             ])
-                                    ->label('Телефон')
+                                    ->label(Yii::t('message', 'frontend.views.client.settings.phone', ['ru'=>'Телефон']))
                             ?>
                         </div>
                     </div>
@@ -309,8 +310,8 @@ document.onkeypress = stopRKey;
             </fieldset>
         </div>
         <div class="box-footer clearfix">
-            <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
-            <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
+            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.client.settings.save', ['ru'=>'Сохранить изменения']), ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
+            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.client.settings.cancel', ['ru'=>'Отменить изменения']), ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
         </div>
         <?php
         ActiveForm::end();

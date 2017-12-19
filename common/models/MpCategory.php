@@ -59,7 +59,7 @@ class MpCategory extends \yii\db\ActiveRecord {
     {
         return [
             'id' => 'ID',
-            'name' => Yii::t('app', 'Категория') . ' (MP)',
+            'name' => Yii::t('app', 'common.models.category_mp', ['ru'=>'Категория']) . ' (MP)',
             'parent' => 'Parent',
         ];
     }
@@ -69,11 +69,16 @@ class MpCategory extends \yii\db\ActiveRecord {
     }
 
     public static function getCategory($id) {
-        return MpCategory::find()->where(["id" => $id])->one()->name;
+        $cat = Yii::t('app', MpCategory::find()->where(["id" => $id])->one()->name);
+        return $cat;
     }
 
     public static function allCategory() {
-        return ArrayHelper::map(MpCategory::find()->all(), 'id', 'name');
+        $mp_ed = ArrayHelper::map(MpCategory::find()->all(), 'id', 'name');
+        foreach ($mp_ed as &$item){
+            $item = Yii::t('app', $item);
+        }
+        return $mp_ed;
     }
 
 }

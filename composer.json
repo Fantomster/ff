@@ -64,6 +64,8 @@
         "branchonline/yii2-lightbox": "*",
         "npm-asset/readmore.js": "*",
         "insolita/yii2-migration-generator": "~2.3",
+        "codemix/yii2-localeurls": "*",
+        "modernkernel/yii2-flag-icon-css": "*",
         "xj/yii2-user-agent": "^1.0.0",
         "yandex-money/yandex-checkout-sdk-php": "*"
     },

@@ -9,7 +9,7 @@ use yii\bootstrap\Modal;
 ?>
 
 <?php
-$this->title = 'MixCart информация о поставщике';
+$this->title = Yii::t('message', 'market.views.site.rest.info', ['ru'=>'MixCart информация о поставщике']);
 ?>
 <style>
     .mp-supplier-image{
@@ -56,7 +56,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             'homeLink' => false,
             'links' => [
                 [
-                    'label' => 'Все рестораны',
+                    'label' => Yii::t('message', 'market.views.site.rest.all', ['ru'=>'Все рестораны']),
                     'url' => ['/site/restaurants'],
                 ],
                 $restaurant->name,
@@ -71,7 +71,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             <div class="row">
                 <div class="col-md-12">
                     <h3><?= $restaurant->name ?></h3>
-                    <h5><span class="title-param">Контактное лицо:</span> <?= empty($restaurant->contact_name) ? '<span class="noinfo">нет информации</span>':$restaurant->contact_name ?></h5>
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.rest.contact', ['ru'=>'Контактное лицо:']) ?></span> <?= empty($restaurant->contact_name) ? '<span class="noinfo">' . Yii::t('error', 'market.views.site.rest.no_info', ['ru'=>'нет информации']) . ' </span>':$restaurant->contact_name ?></h5>
                     <hr>
                 </div>
                 <?php
@@ -88,10 +88,10 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 
 }else{
-                    
+    $register = Yii::t('error', 'market.views.site.rest.reg', ['ru'=>'Необходимо зарегистрироваться в системе MixCart']);
 $js2 = <<<JS
 $('#supp-phone,#supp-email').click(function(e){
-alert('Необходимо зарегистрироваться в системе MixCart');  
+alert('$register');  
 })
 JS;
 $this->registerJs($js2, \yii\web\View::POS_READY);
@@ -101,7 +101,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                                <?=Html::a('<i class="fa fa-truck" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;предложить услуги', ['send-service',
+                                <?=Html::a('<i class="fa fa-truck" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;' . Yii::t('message', 'market.views.site.service', ['ru'=>'предложить услуги']), ['send-service',
                                     'id' => $restaurant->id], [
                                     'data' => [
                                         'target' => '#sendService',
@@ -112,7 +112,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                                     'style' => 'width:100%',
                                 ]);
                                 ?>
-                                <h5>* <small>Если вы поставщик, предложите ресторану свои услуги</small></h5>
+                                <h5>* <small><?= Yii::t('message', 'market.views.site.rest.if_vendor', ['ru'=>'Если вы поставщик, предложите ресторану свои услуги']) ?></small></h5>
                             </div>
                         </div>
                     </div>
@@ -125,20 +125,20 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6">
-                    <h4>КОРОТКО О РЕСТОРАНЕ</h4>  
+                    <h4><?= Yii::t('message', 'market.views.site.rest.short_info', ['ru'=>'КОРОТКО О РЕСТОРАНЕ']) ?></h4>
                 </div>
                 <div class="col-md-6"> 
-                    <h4>ОПИСАНИЕ</h4>
+                    <h4><?= Yii::t('message', 'market.views.site.rest.descr', ['ru'=>'ОПИСАНИЕ']) ?></h4>
                 </div>
             </div>
         </div>
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6"> 
-                    <h5><span class="title-param">Адрес:</span> <?= empty($restaurant->address) ? '<span class="noinfo">нет информации</span>':$restaurant->address ?></h5>
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.rest.address', ['ru'=>'Адрес:']) ?></span> <?= empty($restaurant->address) ? '<span class="noinfo">' . Yii::t('message', 'market.views.site.rest.no_info', ['ru'=>'нет информации']) . ' </span>':$restaurant->address ?></h5>
                 </div>
                 <div class="col-md-6">
-                    <h5><?= empty($restaurant->about) ? '<span class="noinfo">нет информации</span>':$restaurant->about ?></h5>  
+                    <h5><?= empty($restaurant->about) ? '<span class="noinfo">' . Yii::t('error', 'market.views.site.rest.no_info', ['ru'=>'нет информации']) . ' </span>':$restaurant->about ?></h5>
                 </div>
             </div>
         </div>

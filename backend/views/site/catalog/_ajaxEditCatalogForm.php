@@ -223,9 +223,13 @@ label {
     textInput(['placeholder' => 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ']) ?>
                                     <label class="control-label" for="">Ед измерения</label>
                                     <?php
+                                    $mp_ed = \common\models\MpEd::find()->asArray()->all();
+                                    foreach ($mp_ed as &$item){
+                                        $item['name'] = Yii::t('app', $item['name']);
+                                    }
                                     echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->ed,
-                                        'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(),'name', 'name'),
+                                        'data' => ArrayHelper::map($mp_ed,'name', 'name'),
                                         'options' => ['placeholder' => 'Выберите...'],
                                         'theme' => Select2::THEME_DEFAULT,
                                         'pluginOptions' => [

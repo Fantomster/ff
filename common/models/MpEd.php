@@ -41,4 +41,5 @@ class MpEd extends \yii\db\ActiveRecord
             'name' => 'Name',
         ];
     }
+
 }

@@ -7,7 +7,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\checkbox\CheckboxX;
 
-$this->title = 'Добавить продукты';
+$this->title = Yii::t('message', 'frontend.views.vendor.add_products', ['ru'=>'Добавить продукты']);
 $this->registerCss('
     @media (max-width: 1300px){
        th{
@@ -17,7 +17,7 @@ $this->registerCss('
 ?>
 <section class="content-header">
     <h1 class="margin-right-350">
-        <i class="fa fa-list-alt"></i> Редактирование каталога <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.edit_cat_three', ['ru'=>'Редактирование каталога']) ?> <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
         <small></small>
     </h1>
     <?=
@@ -25,12 +25,13 @@ $this->registerCss('
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
-                'label' => 'Каталоги',
+                'label' => Yii::t('message', 'frontend.views.vendor.catalogs_six', ['ru'=>'Каталоги']),
                 'url' => ['vendor/catalogs'],
             ],
-            'Шаг 2. Редактирование каталога',
+            Yii::t('message', 'frontend.views.vendor.edit_cat_five', ['ru'=>'Шаг 2. Редактирование каталога']),
         ],
     ])
     ?>
@@ -40,14 +41,14 @@ $this->registerCss('
         <div class="box-body">
             <div class="panel-body">
                 <ul class="nav fk-tab nav-tabs pull-left">
-                    <?= '<li>' . Html::a('Название', ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li class="active">' . Html::a('Добавить товары <i class="fa fa-fw fa-hand-o-right"></i>', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li>' . Html::a('Изменить цены', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li>' . Html::a('Назначить ресторану', ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a(Yii::t('message', 'frontend.views.vendor.name_two', ['ru'=>'Название']), ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="active">' . Html::a(Yii::t('message', 'frontend.views.vendor.add_goods_three', ['ru'=>'Добавить товары']) . '  <i class="fa fa-fw fa-hand-o-right"></i>', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a(Yii::t('message', 'frontend.views.vendor.change_prices_three', ['ru'=>'Изменить цены']), ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_four', ['ru'=>'Назначить ресторану']), ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
                 </ul>
                 <ul class="fk-prev-next pull-right">
-                    <?= '<li class="fk-prev">' . Html::a('Назад', ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li class="fk-next">' . Html::a('<i class="fa fa-save"></i> Далее', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru'=>'Назад']), ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="fk-next">' . Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue_two', ['ru'=>'Далее']) . ' ', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
                 </ul>
             </div>
 
@@ -55,13 +56,13 @@ $this->registerCss('
             $gridColumnsBaseCatalog = [
                 [
                     'attribute' => 'article',
-                    'label' => 'Артикул',
+                    'label' => Yii::t('message', 'frontend.views.vendor.art_eight', ['ru'=>'Артикул']),
                     'value' => 'article',
                     'contentOptions' => ['style' => 'vertical-align:middle;'],
                 ],
                 [
                     'attribute' => 'product',
-                    'label' => 'Наименование',
+                    'label' => Yii::t('message', 'frontend.views.vendor.product_name', ['ru'=>'Наименование']),
                     'format' => 'raw',
                     'value' => function($data) {
                         return Html::decode(Html::decode($data['product']));
@@ -70,7 +71,7 @@ $this->registerCss('
                 ],
                 [
                     'attribute' => 'units',
-                    'label' => 'Кратность',
+                    'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_five', ['ru'=>'Кратность']),
                     'value' => function ($data) {
                         return empty($data['units']) ? '' : $data['units'];
                     },
@@ -78,7 +79,7 @@ $this->registerCss('
                 ],
                 [
                     'attribute' => 'price',
-                    'label' => 'Цена',
+                    'label' => Yii::t('message', 'frontend.views.vendor.price_seven', ['ru'=>'Цена']),
                     'value' => function ($data) use ($baseCurrencySymbol) {
                         $price = preg_replace('/[^\d.,]/', '', $data['price']);
                         return $price . " ".$baseCurrencySymbol;
@@ -86,32 +87,32 @@ $this->registerCss('
                 ],
                 [
                     'attribute' => 'ed',
-                    'label' => 'Ед. измерения',
+                    'label' => Yii::t('message', 'frontend.views.vendor.measure_five', ['ru'=>'Ед. измерения']),
                     'value' => function ($data) {
-                        return $data['ed'];
+                        return Yii::t('app', $data['ed']);
                     },
                 ],
                 [
-                    'label' => 'Категория',
+                    'label' => Yii::t('message', 'frontend.views.vendor.category_three', ['ru'=>'Категория']),
                     'value' => function ($data) {
-                        $data['category_id'] == 0 ? $category_name = '' : $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
+                        $data['category_id'] == 0 ? $category_name = '' : $category_name = Yii::t('app', \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name);
                         return $category_name;
                     }
                 ],
                 [
                     'attribute' => 'status',
-                    'label' => 'Наличие',
+                    'label' => Yii::t('message', 'frontend.views.vendor.in_stock_four', ['ru'=>'Наличие']),
                     'format' => 'raw',
                     'contentOptions' => ['style' => ''],
                     'value' => function ($data) {
                         $data['status'] == common\models\CatalogBaseGoods::STATUS_OFF ?
-                                $product_status = '<span class="text-danger">Нет</span>' :
-                                $product_status = '<span class="text-success">Есть</span>';
+                                $product_status = '<span class="text-danger">' . Yii::t('message', 'frontend.views.vendor.nope_three', ['ru'=>'Нет']) . ' </span>' :
+                                $product_status = '<span class="text-success">' . Yii::t('message', 'frontend.views.vendor.yep_three', ['ru'=>'Есть']) . ' </span>';
                         return $product_status;
                     },
                 ],
                 [
-                    'label' => 'Добавить',
+                    'label' => Yii::t('message', 'frontend.views.vendor.add_four', ['ru'=>'Добавить']),
                     'format' => 'raw',
                     'contentOptions' => ['style' => 'width:50px;'],
                     'value' => function ($data) use ($cat_id) {
@@ -167,9 +168,9 @@ $this->registerCss('
             ?>
             <div class="panel-body">
                 <div class="callout callout-fk-info" style="margin-bottom:0">
-                    <h4>ШАГ 2</h4>
+                    <h4><?= Yii::t('message', 'frontend.views.vendor.step_two', ['ru'=>'ШАГ 2']) ?></h4>
 
-                    <p>Отлично. Теперь выберите товары для вашего каталога, просто проставив галочки в колонке <strong>Добавить</strong>. </p>
+                    <p><?= Yii::t('message', 'frontend.views.vendor.excellent', ['ru'=>'Отлично. Теперь выберите товары для вашего каталога, просто проставив галочки в колонке <strong>Добавить</strong>.']) ?> </p>
                 </div>
             </div>
             <div class="panel-body">
@@ -179,7 +180,7 @@ $this->registerCss('
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', null, ['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_four', ['ru'=>'Поиск']), 'id' => 'search']) ?>
                                         <?= ''
 //                    CheckboxX::widget([
 //                                    'name' => 'test',

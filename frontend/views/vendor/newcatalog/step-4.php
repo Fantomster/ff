@@ -11,11 +11,11 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use kartik\checkbox\CheckboxX;
-$this->title = 'Назначить каталог';
+$this->title = Yii::t('message', 'frontend.views.vendor.set_cat', ['ru'=>'Назначить каталог']);
 ?>
 <section class="content-header">
-    <h1 class="margin-right-350">
-        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+    <h1>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.edit_cat_eight', ['ru'=>'Редактирование каталога']) ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
         <small></small>
     </h1>
     <?=
@@ -23,12 +23,13 @@ $this->title = 'Назначить каталог';
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
-            'label' => 'Каталоги',
+            'label' => Yii::t('message', 'frontend.views.vendor.catalogs_seven', ['ru'=>'Каталоги']),
             'url' => ['vendor/catalogs'],
             ],
-            'Шаг 4. Редактирование каталога',
+            Yii::t('message', 'frontend.views.vendor.step_four', ['ru'=>'Шаг 4. Редактирование каталога']),
         ],
     ])
     ?>
@@ -39,14 +40,14 @@ $this->title = 'Назначить каталог';
     <div class="box-body">
         <div class="panel-body">
             <ul class="nav fk-tab nav-tabs pull-left">
-              <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Назначить ресторану <i class="fa fa-fw fa-thumbs-o-up"></i>',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+              <?='<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.name_four', ['ru'=>'Название']),['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.add_goods_six', ['ru'=>'Добавить товары']),['vendor/step-2','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.change_prices_five', ['ru'=>'Изменить цены']),['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_seven', ['ru'=>'Назначить ресторану']) . '  <i class="fa fa-fw fa-thumbs-o-up"></i>',['vendor/step-4','id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
               <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Завершить',['vendor/catalogs']).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.end', ['ru'=>'Завершить']) . ' ',['vendor/catalogs']).'</li>'?>
             </ul>
         </div>
        
@@ -55,14 +56,14 @@ $this->title = 'Назначить каталог';
         <?php 
         $gridColumns = [
 		[
-		'label'=>'Ресторан',
+		'label'=>Yii::t('message', 'frontend.views.vendor.rest_four', ['ru'=>'Ресторан']),
 		'value'=>function ($data) {
                 $organization_name=common\models\Organization::get_value($data->rest_org_id)->name;
                 return $organization_name;
                 }
 		],
 		[
-		'label'=>'Текущий каталог',
+		'label'=>Yii::t('message', 'frontend.views.vendor.current_cat_two', ['ru'=>'Текущий каталог']),
                 'format' => 'raw',
 		'value'=>function ($data) {
                     $catalog = \common\models\Catalog::findOne(['id' => $data->cat_id]);
@@ -71,7 +72,7 @@ $this->title = 'Назначить каталог';
 		}
 		],
               [
-            'label' => 'Назначить',
+            'label' => Yii::t('message', 'frontend.views.vendor.set_three', ['ru'=>'Назначить']),
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {
@@ -97,9 +98,9 @@ $this->title = 'Назначить каталог';
         ?>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4>ШАГ 4</h4>
+                <h4><?= Yii::t('message', 'frontend.views.vendor.step_four_two', ['ru'=>'ШАГ 4']) ?></h4>
 
-                <p>И наконец, укажите рестораны, которым будет доступен ваш каталог.</p>
+                <p><?= Yii::t('message', 'frontend.views.vendor.in_the_end', ['ru'=>'И наконец, укажите рестораны, которым будет доступен ваш каталог.']) ?></p>
             </div>
         <?php Pjax::begin(['id' => 'pjax-container']); ?>
         <?=GridView::widget([

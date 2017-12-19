@@ -10,10 +10,10 @@ use yii\helpers\ArrayHelper;
 <div class="modal-body" style="background:#fff !important">
     <div class="row">
 	<div class="col-md-12 text-center">
-            <h4>Данная услуга доступна для привилегированных поставщиков,
+            <h4><?= Yii::t('message', 'market.views.site.restaurant.service', ['ru'=>'Данная услуга доступна для привилегированных поставщиков,
 если вы хотите узнать подробнее об услуге,
-обратитесь по телефону</h4>            
-            <h3>+7 499-404-1018 доб. 202</h3>
+обратитесь по телефону']) ?></h4>
+            <h3><?= Yii::t('message', 'market.views.site.restaurant.phone', ['ru'=>'+7 499-404-1018 доб. 202']) ?></h3>
         </div>
     </div>
 </div>

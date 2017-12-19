@@ -69,7 +69,9 @@ class Currency extends \yii\db\ActiveRecord {
                 ->select(['id', 'text'])
                 ->asArray()
                 ->all();
-
+        foreach ($models as &$model){
+            $model['text'] = Yii::t('app', $model['text']);
+        }
         return ArrayHelper::map($models, 'id', 'text');
     }
     

@@ -20,11 +20,11 @@ $this->registerCss('.handsontable .htCore .htDimmed {
     cursor: not-allowed;
     color: #696969;
  }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
-$this->title = Yii::t('app', 'Редактировать продукты');
+$this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.edit_products_two', ['ru'=>'Редактировать продукты']);
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Редактирование каталога') ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'franchise.views.catalog.newcatalog.edit_cat_three', ['ru'=>'Редактирование каталога']) ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
         <small></small>
     </h1>
     <?=
@@ -32,12 +32,13 @@ $this->title = Yii::t('app', 'Редактировать продукты');
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
-            'label' => Yii::t('app', 'Каталоги'),
+            'label' => Yii::t('app', 'franchise.views.catalog.newcatalog.catalogs_three', ['ru'=>'Каталоги']),
             'url' => ['catalog/index', 'vendor_id'=>$vendor_id],
             ],
-            Yii::t('app', 'Шаг 3. Редактирование каталога'),
+            Yii::t('app', 'franchise.views.catalog.newcatalog.editing_cat_three', ['ru'=>'Шаг 3. Редактирование каталога']),
         ],
     ])
     ?>
@@ -48,20 +49,20 @@ $this->title = Yii::t('app', 'Редактировать продукты');
     <div class="box-body">
         <div class="panel-body">
             <ul class="nav fk-tab nav-tabs pull-left">
-                <?='<li>'.Html::a(Yii::t('app', 'Название'),['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a(Yii::t('app', 'Добавить товары'),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a(' ' . Yii::t('app', 'Изменить цены') . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a(Yii::t('app', 'Назначить ресторану'),['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.name_two', ['ru'=>'Название']),['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.add_goods_six', ['ru'=>'Добавить товары']),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a(' ' . Yii::t('app', 'franchise.views.catalog.newcatalog.change_prices_four', ['ru'=>'Изменить цены']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.settle_to_rest_four', ['ru'=>'Назначить ресторану']),['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
-              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'Назад'),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'Далее') . ' ',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
+              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.back_two', ['ru'=>'Назад']),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'franchise.views.catalog.newcatalog.farther_three', ['ru'=>'Далее']) . ' ',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
             </ul>
         </div>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4><?= Yii::t('app', 'ШАГ 3') ?></h4>
-                <p><?= Yii::t('app', 'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.') ?></p>
+                <h4><?= Yii::t('app', 'franchise.views.catalog.newcatalog.step_three', ['ru'=>'ШАГ 3']) ?></h4>
+                <p><?= Yii::t('app', 'franchise.views.catalog.newcatalog.perfect_two', ['ru'=>'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.']) ?></p>
             </div> 
             <div class="row">
                 <div class="col-sm-4">
@@ -69,7 +70,7 @@ $this->title = Yii::t('app', 'Редактировать продукты');
                             <span class="input-group-addon">
                               <i class="fa fa-search"></i>
                             </span>
-                    <?=Html::input('text', 'search_field', null, ['class' => 'form-control','placeholder'=>Yii::t('app', 'Поиск'),'id'=>'search_field']) ?>
+                    <?=Html::input('text', 'search_field', null, ['class' => 'form-control','placeholder'=>Yii::t('app', 'franchise.views.catalog.newcatalog.search_two', ['ru'=>'Поиск']),'id'=>'search_field']) ?>
                     </div>
                 </div> 
             </div>
@@ -94,6 +95,18 @@ $arr_count = count($array);
 
 $step3CopyUrl = Url::to(['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]);
 $step4Url = Url::to(['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]);
+
+$arr = [
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var', ['ru'=>'Артикул']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var1', ['ru'=>'Наименование']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var2', ['ru'=>'Базовая цена']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var3', ['ru'=>'Индивидуальная цена']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var4', ['ru'=>'Ед. измерения']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var5', ['ru'=>'Скидка в рублях']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var6', ['ru'=>'Скидка %']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var7', ['ru'=>'Итоговая цена']),
+    Yii::t('app', 'franchise.views.catalog.newcatalog.var8', ['ru'=>'Окей!']),
+];
 
 $customJs = <<< JS
 /** 
@@ -122,7 +135,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
   //clickBeginsEditing : true,
-  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Индивидуальная цена', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
+  colHeaders : ['$arr[0]','id', '$arr[1]', '$arr[2]', '$arr[3]', '$arr[4]','$arr[5]','$arr[6]','$arr[7]'],
   search: true,
   renderAllRows: false,
   maxRows: $arr_count,
@@ -254,7 +267,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Окей!",
+                          label: "$arr[8]",
                           className: "btn-success btn-md",
                         },
                     },

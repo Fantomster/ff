@@ -15,7 +15,7 @@ use delocker\animate\AnimateAssetBundle;
 AnimateAssetBundle::register($this);
 yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 $request = new \common\models\Request();
-$this->title = 'Заявки';
+$this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заявки']);
 ?>
 <style>
     .req-items{
@@ -70,16 +70,17 @@ $this->title = 'Заявки';
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-paper-plane"></i> Список заявок
-        <small>Разместите заявку и ее увидят все поставщики системы MixCart</small>
-    </h1>   
+        <i class="fa fa-paper-plane"></i> <?= Yii::t('message', 'frontend.views.request.req_list_three', ['ru'=>'Список заявок']) ?>
+        <small><?= Yii::t('message', 'frontend.views.request.set_req', ['ru'=>'Разместите заявку и ее увидят все поставщики системы MixCart']) ?></small>
+    </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
-            'Список заявок'
+            Yii::t('message', 'frontend.views.request.req_list_four', ['ru'=>'Список заявок'])
         ],
     ])
     ?>
@@ -99,7 +100,7 @@ $this->title = 'Заявки';
                                     <?=
                                     Html::input('text', 'search', \Yii::$app->request->get('search')? : '', [
                                         'class' => 'form-control',
-                                        'placeholder' => 'Поиск',
+                                        'placeholder' => Yii::t('message', 'frontend.views.request.search_two', ['ru'=>'Поиск']),
                                         'id' => 'search'
                                     ]);
                                     ?>
@@ -111,10 +112,10 @@ $this->title = 'Заявки';
                                     'id' => 'create',
                                     'toggleButton' => [
                                         'id' => 'create-button',
-                                        'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
+                                        'label' => '<i class="fa fa-paper-plane"></i> ' . Yii::t('message', 'frontend.views.request.set_req_three', ['ru'=>'Разместить заявку']) . ' ',
                                         'class' => 'btn btn-sm btn-fk-success',
                                         'disabled' => 'disabled',
-                                        'data-loading-text' => '<i class="fa fa-circle-o-notch fa-spin"></i> Подождите...',
+                                        'data-loading-text' => '<i class="fa fa-circle-o-notch fa-spin"></i> ' . Yii::t('message', 'frontend.views.request.wait', ['ru'=>'Подождите...']),
                                         'style' => 'width:100%'],
                                     'options' => ['class' => 'modal-fs fade modal', 'tabindex' => '-1']
                                 ]);
@@ -122,7 +123,7 @@ $this->title = 'Заявки';
 <?php
 echo $this->render("create", compact('request', 'organization', 'profile'));
 Modal::end();
-?>   
+?>
                             </div>
                         </div>
                     </div>
@@ -141,7 +142,7 @@ Modal::end();
                                     'timeout' => 10000,
                                     'enablePushState' => false,
                                 ]);
-                                ?> 
+                                ?>
 
                                 <?=
                                 ListView::widget([
@@ -159,8 +160,8 @@ Modal::end();
                                                 'class' => 'col-lg-12 list-wrapper inline no-padding'
                                             ],
                                             'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                                            'summary' => 'Показано {count} из {totalCount}',
-                                            'emptyText' => 'Список пуст',
+                                            'summary' => Yii::t('message', 'frontend.views.request.showed_three', ['ru'=>'Показано']) . '  {count} ' . Yii::t('message', 'frontend.views.request.of_two', ['ru'=>'из']) . '  {totalCount}',
+                                            'emptyText' => Yii::t('message', 'frontend.views.request.empty_list', ['ru'=>'Список пуст']),
                                         ])
                                         ?>
         <?php Pjax::end(); ?>
@@ -201,9 +202,7 @@ $("body").on("hidden.bs.modal", "#create", function() {
     
 });
 $(document).on("click", ".req-items", function() {
-    var id = $(this).attr("data-id");
-    var url = "' . Url::to(["request/view", 'id' => '']) . '" + id;
-    window.location.href = url;
+    window.location.href = $(this).data("url");
 })  
 
 var current_fs, next_fs, previous_fs;
@@ -334,4 +333,3 @@ $("#create").on("shown.bs.modal", function () {
 });
 ', yii\web\View::POS_END);
 
-        

@@ -59,12 +59,14 @@ $this->title = 'MixCart';
 <header class="header" style="background-image: url(/images/header-banner.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
-            <h1>Автоматизируйте закупки в сфере HoReCa. <br>Будьте успешнее с MixCart.
-            </h1>
+            <h1><?= Yii::t('message', 'frontend.views.site.online_service', ['ru'=>'Онлайн-сервис']) ?>
+                <?= Yii::t('message', 'frontend.views.site.auto_buy', ['ru'=>'для автоматизации закупок']) ?><br>
+<?= Yii::t('message', 'frontend.views.site.horeca', ['ru'=>'в сфере HoReCa']) ?>
+</h1>
         </div>
         <div class="buttons__block">
-            <?= Html::a('<span>для ресторанов</span>', "https://client.mixcart.ru", ['class' => 'for__restaurants']) ?>
-            <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
+            <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_rest_two', ['ru'=>'для ресторанов']) . ' </span>', "https://client.mixcart.ru", ['class' => 'for__restaurants']) ?>
+<?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_vendors_two', ['ru'=>'для поставщиков']) . ' </span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
             <!--            <div class="watch_video">
                             <a href="#" data-toggle="modal" data-target="#myModal2" >
@@ -73,7 +75,7 @@ $this->title = 'MixCart';
                             </a>
                         </div>-->
             <div class="error__block">
-                <p><a class="callback_form" data-modal="callback" data-lead="Оставить заявку">оставить заявку</a></p>
+                <p><a class="callback_form" data-modal="callback" data-lead="<?= Yii::t('app', 'frontend.views.site.index.set_request', ['ru'=>'Оставить заявку']) ?>"><?= Yii::t('message', 'frontend.views.site.request', ['ru'=>'оставить заявку']) ?></a></p>
             </div>
         </div>
     </div>
@@ -87,19 +89,14 @@ $this->title = 'MixCart';
             <div class="container-fluid">
                 <div class="col-md-5">
                     <div class="how_its_work">
-                        <h3>КАК MIXCART СПОСОБСТВУЕТ УСПЕХУ</h3>
-                        <p>Большинству людей технологии делают жизнь легче. А для бизнеса IT технологии
-                            открывают новые возможности роста. MixCart - это удобный сервис по автоматизации
-                            закупок и улучшению взаимодействия между рестораном и поставщиком. Традиционно
-                            длительный процесс закупок и связанных с ним коммуникаций становится управляемым в
-                            любой момент времени, из любой точки мира. MixCart сокращает время на обработку
-                            заказов в несколько раз и уменьшает количество возвратов и ошибок. </p>
-                        <?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
-                        <div class="callback_form call_back_button2" data-modal="callback" data-lead="Оставить заявку">оставить заявку</div>
+                        <h3><?= Yii::t('message', 'frontend.views.site.how_it_works', ['ru'=>'как это работает']) ?></h3>
+                        <p><?= Yii::t('message', 'frontend.views.site.mixcart', ['ru'=>'MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.']) ?></p>
+<?= Html::a(Yii::t('app', 'frontend.views.site.index.for_rest', ['ru'=>'Для ресторанов']), "https://client.mixcart.ru") ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
+                    <div class="callback_form call_back_button2" data-modal="callback" data-lead="<?= Yii::t('app', 'frontend.views.site.index.set_request_two', ['ru'=>'Оставить заявку']) ?>"><?= Yii::t('message', 'frontend.views.site.set_request', ['ru'=>'оставить заявку']) ?></div>
                     </div>
                 </div>	
                 <div class="col-md-7">
-                    <img class="hows__banner" src="/images/image-1.png" alt=""/>
+                    <img class="hows__banner" src="http://static.f-keeper.ru/images/<?=Yii::$app->language ?>/main_<?=Yii::$app->language ?>.png" alt=""/>
                 </div>	
             </div>
         </div>
@@ -109,13 +106,13 @@ $this->title = 'MixCart';
         <div class="inside__number-block">
             <div class="container-fluid">
                 <div class="col-md-6 col-sm-6">
-                    <span class="number"><?= $counter['rest_count'] ?></span>
-                    <span class="plays__title">Ресторанов</span>	
+                    <span class="number"><?=$counter['rest_count'] ?></span>
+                    <span class="plays__title"><?= Yii::t('message', 'frontend.views.site.rest', ['ru'=>'Ресторанов']) ?></span>
                 </div>
                 <div class="col-md-6 col-sm-6">
                     <div class="alig__right">
-                        <span class="number"><?= $counter['supp_count'] ?></span>
-                        <span class="plays__title">Поставщиков</span>
+                        <span class="number"><?=$counter['supp_count'] ?></span>
+                        <span class="plays__title"><?= Yii::t('message', 'frontend.views.site.vendors', ['ru'=>'Поставщиков']) ?></span>
                     </div>
                 </div>
             </div>
@@ -134,44 +131,44 @@ $this->title = 'MixCart';
                         <div class="item active">
                             <div class="col-md-6">
                                 <div class="rew__inside">
-                                    <img src="/images/rew2.jpg" alt=""/>
-                                    <div class="rew__descript">
-                                        <h3>Павел Кравченко</h3>
-                                        <span>Управляющий: Винотека.</span>
-                                        <p>“Выражаю благодарность MixCart, за то, что упростили нашу работу в несколько раз. Рекомендую.”</p>
-                                    </div>
+                                        <img src="/images/rew2.jpg" alt=""/>
+                                        <div class="rew__descript">
+                                                <h3><?= Yii::t('message', 'frontend.views.site.pavel', ['ru'=>'Павел Кравченко']) ?></h3>
+                                                <span><?= Yii::t('message', 'frontend.views.site.vine', ['ru'=>'Управляющий: Винотека.']) ?></span>
+                                                <p>“<?= Yii::t('message', 'frontend.views.site.thanks', ['ru'=>'Выражаю благодарность MixCart, за то, что упростили нашу работу в несколько раз. Рекомендую.']) ?>”</p>
+                                        </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="rew__inside">
-                                    <img src="/images/rew3.jpg" alt=""/>
-                                    <div class="rew__descript">
-                                        <h3>Христо Дечев</h3>
-                                        <span>Совладелец: Black Smith, Гараж, Шайка Лейка, Азия клуб</span>
-                                        <p>“Я владею несколькими заведениями. Сначала мы внедрили MixCart в гараж, а далее во все заведения. Это работает, мы пользуемся и желаем удачи в развитии компании MixCart.”</p>
-                                    </div>
+                                        <img src="/images/rew3.jpg" alt=""/>
+                                        <div class="rew__descript">
+                                                <h3><?= Yii::t('message', 'frontend.views.site.christo', ['ru'=>'Христо Дечев']) ?></h3>
+                                                <span><?= Yii::t('message', 'frontend.views.site.owner', ['ru'=>'Совладелец: Black Smith, Гараж, Шайка Лейка, Азия клуб']) ?></span>
+                                                <p>“<?= Yii::t('message', 'frontend.views.site.good_luck', ['ru'=>'Я владею несколькими заведениями. Сначала мы внедрили MixCart в гараж, а далее во все заведения. Это работает, мы пользуемся и желаем удачи в развитии компании MixCart.']) ?>”</p>
+                                        </div>
                                 </div>
                             </div>
                         </div>
                         <div class="item">
                             <div class="col-md-6">
                                 <div class="rew__inside">
-                                    <img src="/images/rew4.jpg" alt=""/>
-                                    <div class="rew__descript">
-                                        <h3>Роман Кудрицкий</h3>
-                                        <span>Управляющий: Сорока, МОС.</span>
-                                        <p>“Я управляю двумя крупными ресторанами, нам важен высокий уровень как сервиса, так и оптимизации внутренних процессов. MixCart, решает весь спектр задач, связанных с закупками. Прозрачность и скорость обеспечены.”</p>
-                                    </div>
+                                        <img src="/images/rew4.jpg" alt=""/>
+                                        <div class="rew__descript">
+                                                <h3><?= Yii::t('message', 'frontend.views.site.roman', ['ru'=>'Роман Кудрицкий']) ?></h3>
+                                                <span><?= Yii::t('message', 'frontend.views.site.soroka', ['ru'=>'Управляющий: Сорока, МОС.']) ?></span>
+                                                <p>“<?= Yii::t('message', 'frontend.views.site.big_rest', ['ru'=>'Я управляю двумя крупными ресторанами, нам важен высокий уровень как сервиса, так и оптимизации внутренних процессов. MixCart, решает весь спектр задач, связанных с закупками. Прозрачность и скорость обеспечены.']) ?>”</p>
+                                        </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="rew__inside">
-                                    <img src="/images/rew5.jpg" alt=""/>
-                                    <div class="rew__descript">
-                                        <h3>Роман Куча</h3>
-                                        <span>Основатель: Brookwin.</span>
-                                        <p>“Мой ресторан находится в Анапе, я нахожусь в Москве, сейчас я вижу, что происходит у нас с закупками, кто, что и где покупает. Я за современные инструменты работы, MixCart, решает мои задачи.”</p>
-                                    </div>
+                                        <img src="/images/rew5.jpg" alt=""/>
+                                        <div class="rew__descript">
+                                                <h3><?= Yii::t('message', 'frontend.views.site.kucha', ['ru'=>'Роман Куча']) ?></h3>
+                                                <span><?= Yii::t('message', 'frontend.views.site.brookwin', ['ru'=>'Основатель: Brookwin.']) ?></span>
+                                                <p>“<?= Yii::t('message', 'frontend.views.site.modern', ['ru'=>'Мой ресторан находится в Анапе, я нахожусь в Москве, сейчас я вижу, что происходит у нас с закупками, кто, что и где покупает. Я за современные инструменты работы, MixCart, решает мои задачи.']) ?>”</p>
+                                        </div>
                                 </div>
                             </div>
                         </div>
@@ -186,7 +183,7 @@ $this->title = 'MixCart';
             <div class="container-fluid">
                 <div class="col-md-12">
                     <div class="how_its_work">
-                        <h3>Интеграция с системами</h3>
+                        <h3><?= Yii::t('message', 'frontend.views.site.integration', ['ru'=>'Интеграция с системами']) ?></h3>
                     </div>
                 </div>	
             </div>

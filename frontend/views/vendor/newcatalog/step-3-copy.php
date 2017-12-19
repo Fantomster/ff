@@ -16,14 +16,14 @@ $this->registerCss('.handsontable .htCore .htDimmed {
     cursor: not-allowed;
     color: #696969;
  }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
-$this->title = 'Редактировать продукты';
+$this->title = Yii::t('message', 'frontend.views.vendor.edit_goods', ['ru'=>'Редактировать продукты']);
 
 $currencyList = Json::encode(Currency::getList());
 $currencySymbolList = Json::encode(Currency::getSymbolList());
 ?>
 <section class="content-header">
     <h1 class="margin-right-350">
-        <i class="fa fa-list-alt"></i> Редактирование каталога <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.edit_cat_six', ['ru'=>'Редактирование каталога']) ?> <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
         <small></small>
     </h1>
     <?=
@@ -31,12 +31,13 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
-                'label' => 'Каталоги',
+                'label' => Yii::t('message', 'frontend.views.vendor.catalogs_two', ['ru'=>'Каталоги']),
                 'url' => ['vendor/catalogs'],
             ],
-            'Шаг 3. Редактирование каталога',
+            Yii::t('message', 'frontend.views.vendor.edit_cat_seven', ['ru'=>'Шаг 3. Редактирование каталога']),
         ],
     ])
     ?>
@@ -54,20 +55,20 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
         <div class="box-body">
             <div class="panel-body">
                 <ul class="nav fk-tab nav-tabs pull-left">
-                    <?= '<li>' . Html::a('Название', ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li>' . Html::a('Добавить товары', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li class="active">' . Html::a('Изменить цены <i class="fa fa-fw fa-hand-o-right"></i>', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
-                    <?= '<li>' . Html::a('Назначить ресторану', ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a(Yii::t('message', 'frontend.views.vendor.name_three', ['ru'=>'Название']), ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a(Yii::t('message', 'frontend.views.vendor.add_goods_five', ['ru'=>'Добавить товары']), ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="active">' . Html::a(Yii::t('message', 'frontend.views.vendor.change_prices_four', ['ru'=>'Изменить цены']) . '  <i class="fa fa-fw fa-hand-o-right"></i>', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_six', ['ru'=>'Назначить ресторану']), ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
                 </ul>
                 <ul class="fk-prev-next pull-right">
-                    <?= '<li class="fk-prev">' . Html::a('Назад', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back_two', ['ru'=>'Назад']), ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
                     <?=
-                    '<li class="fk-next">' . Html::button('<span><i class="fa fa-save"></i> Далее</span>', [
+                    '<li class="fk-next">' . Html::button('<span><i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue_three', ['ru'=>'Далее']) . ' </span>', [
                         'id' => 'save',
                         'name' => 'save',
                         'data' => [
                             'url' => Url::to(['vendor/step-4', 'id' => $cat_id]),
-                            'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+                            'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.vendor.saving', ['ru'=>'Сохраняем...']),
                         ],
                     ]) . '</li>'
                     ?>
@@ -75,18 +76,18 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
             </div>
             <div class="panel-body">
                 <div class="callout callout-fk-info">
-                    <h4>ШАГ 3</h4>
-                    <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
-                </div> 
+                    <h4><?= Yii::t('message', 'frontend.views.vendor.step_three', ['ru'=>'ШАГ 3']) ?></h4>
+                    <p><?= Yii::t('message', 'frontend.views.vendor.excellent_two', ['ru'=>'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.']) ?></p>
+                </div>
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search_field']) ?>
+                            <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_six', ['ru'=>'Поиск']), 'id' => 'search_field']) ?>
                         </div>
-                    </div> 
+                    </div>
                     <div class="col-sm-8">
                         <?=
                         Modal::widget([
@@ -94,7 +95,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             'clientOptions' => false,
                             'size' => 'modal-md',
                             'toggleButton' => [
-                                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (.xls)</span>',
+                                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('message', 'frontend.views.vendor.import_six', ['ru'=>'Загрузить каталог (.xls)']) . ' </span>',
                                 'tag' => 'a',
                                 'data-target' => '#importToXls',
                                 'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -104,8 +105,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                         ])
                         ?>
                         <?=
-                        Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>' .
-                                '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
+                        Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr_five', ['ru'=>'Изменить валюту:']) . '  </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                             'class' => 'btn btn-outline-default btn-sm pull-right',
                             'id' => 'changeCurrency',
                             'style' => 'margin-right: 5px;',
@@ -117,8 +117,8 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
             </div>
             <div class="panel-body">
                 <?php Pjax::begin(['id' => 'pjax-container']); ?>
-                <div class="handsontable" id="handsontable"></div> 
-                <?php Pjax::end(); ?>   
+                <div class="handsontable" id="handsontable"></div>
+                <?php Pjax::end(); ?>
             </div>
         </div>
     </div>
@@ -138,6 +138,23 @@ $step4Url = Url::to(['vendor/step-4', 'id' => $cat_id]);
 
 $changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
 $calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
+
+$var1 = Yii::t('message', 'frontend.views.vendor.var1', ['ru'=>'Артикул']);
+$var2 = Yii::t('message', 'frontend.views.vendor.var2', ['ru'=>'Наименование']);
+$var3 = Yii::t('message', 'frontend.views.vendor.var3', ['ru'=>'Базовая цена']);
+$var4 = Yii::t('message', 'frontend.views.vendor.var4', ['ru'=>'Индивидуальная цена']);
+$var5 = Yii::t('message', 'frontend.views.vendor.var5', ['ru'=>'Ед. измерения']);
+$var6 = Yii::t('message', 'frontend.views.vendor.var6', ['ru'=>'Фикс. скидка']);
+$var7 = Yii::t('message', 'frontend.views.vendor.var7', ['ru'=>'Скидка %']);
+$var8 = Yii::t('message', 'frontend.views.vendor.var8', ['ru'=>'Итоговая цена']);
+$var9 = Yii::t('message', 'frontend.views.vendor.var9', ['ru'=>'Окей!']);
+$var10 = Yii::t('message', 'frontend.views.vendor.var10', ['ru'=>'Изменение валюты каталога']);
+$var11 = Yii::t('message', 'frontend.views.vendor.var11', ['ru'=>'Выберите новую валюту каталога']);
+$var12 = Yii::t('message', 'frontend.views.vendor.var12', ['ru'=>'Выберите валюту из списка']);
+$var13 = Yii::t('message', 'frontend.views.vendor.var13', ['ru'=>'Данная валюта уже используется!']);
+$var14 = Yii::t('message', 'frontend.views.vendor.var14', ['ru'=>'Валюта каталога изменена!']);
+$var15 = Yii::t('message', 'frontend.views.vendor.var15', ['ru'=>'Пересчитать цены в каталоге?']);
+$var16 = Yii::t('message', 'frontend.views.vendor.var16', ['ru'=>'Цены успешно изменены!']);
 
 $language = Yii::$app->sourceLanguage;
 
@@ -168,7 +185,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
   //clickBeginsEditing : true,
-  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена $baseCurrencySymbol', 'Индивидуальная цена', 'Ед. измерения','Фикс. скидка','Скидка %','Итоговая цена'],
+  colHeaders : ['$var1','id', '$var2', '$var3', '$var4', '$var5','$var6','$var7','$var8'],
   search: true,
   renderAllRows: false,
   maxRows: $arr_count,
@@ -300,7 +317,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Окей!",
+                          label: "$var9",
                           className: "btn-success btn-md",
                         },
                     },
@@ -334,23 +351,23 @@ return false;
         
     $(document).on("click", "#changeCurrency", function() {
         swal({
-            title: 'Изменение валюты каталога',
+            title: '$var10',
             input: 'select',
             inputOptions: $currencyList,
-            inputPlaceholder: 'Выберите новую валюту каталога',
+            inputPlaceholder: '$var11',
             showCancelButton: true,
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (!value) {
-                        reject('Выберите валюту из списка')
+                        reject('$var12')
                     }
                     if (value != currentCurrency) {
                         newCurrency = value;
                         resolve();
                     } else {
-                        reject('Данная валюта уже используется!')
+                        reject('$var13')
                     }
                 })
             },
@@ -379,45 +396,45 @@ return false;
             if (result.dismiss === "cancel") {
                 swal.close();
             } else {
-                swal({
-                    title: 'Валюта каталога изменена!',
-                    type: 'success',
-                    html: 
-                        '<hr /><div>Пересчитать цены в каталоге?</div>' +
-                        '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
-                        '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
-                    showCancelButton: true,
-                    showLoaderOnConfirm: true,
-                    allowOutsideClick: false,
-                    preConfirm: function () {
-                        return new Promise(function (resolve) {
-                            $.post(
-                                '{$calculatePricesUrl}',
-                                {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
-                            ).done(function (response) {
-                                if (response.result === 'success') {
-                                    $.pjax.reload("#pjax-container", {timeout:30000});
-                                    resolve();
-                                } else {
-                                    swal({
-                                        type: response.result,
-                                        title: response.message
-                                    });
-                                }
-                            });
-                        })
-                    }
-                }).then(function (result) {
-                    if (result.dismiss === "cancel") {
-                        swal.close();
-                    } else {
-                        swal({
-                            type: "success",
-                            title: "Цены успешно изменены!",
-                            allowOutsideClick: true,
-                        });
-                    }
-                })
+	            swal({
+	                title: '$var14',
+	                type: 'success',
+	                html: 
+	                    '<hr /><div>$var15</div>' +
+	                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
+	                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
+	                showCancelButton: true,
+	                showLoaderOnConfirm: true,
+	                allowOutsideClick: false,
+	                preConfirm: function () {
+	                    return new Promise(function (resolve) {
+	                        $.post(
+	                            '{$calculatePricesUrl}',
+	                            {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
+	                        ).done(function (response) {
+	                            if (response.result === 'success') {
+	                                $.pjax.reload("#pjax-container", {timeout:30000});
+	                                resolve();
+	                            } else {
+	                                swal({
+	                                    type: response.result,
+	                                    title: response.message
+	                                });
+	                            }
+	                        });
+	                    })
+	                }
+	            }).then(function (result) {
+	                if (result.dismiss === "cancel") {
+	                    swal.close();
+	                } else {
+		                swal({
+		                    type: "success",
+		                    title: "$var16",
+		                    allowOutsideClick: true,
+		                });
+	                }
+	            })
             }
         })        
     });

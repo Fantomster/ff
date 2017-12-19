@@ -61,7 +61,7 @@ $this->registerJs("
 );
 ?>
 <?php
-$this->title = 'Главный каталог';
+$this->title = Yii::t('message', 'frontend.views.vendor.main_catalog_two', ['ru'=>'Главный каталог']);
 
 $this->registerCss('
 @media (max-width: 1485px){
@@ -85,27 +85,29 @@ Modal::widget([
 $exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
 $exportColumns = [
     [
-        'label' => 'Артикул',
+        'label' => Yii::t('message', 'frontend.views.vendor.art_five', ['ru'=>'Артикул']),
         'value' => 'article',
     ],
     [
-        'label' => 'Наименование',
+        'label' => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru'=>'Наименование']),
         'value' => 'product',
     ],
     [
-        'label' => 'Кратность',
+        'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_three', ['ru'=>'Кратность']),
         'value' => 'units',
     ],
     [
-        'label' => 'Цена',
+        'label' => Yii::t('message', 'frontend.views.vendor.price_four', ['ru'=>'Цена']),
         'value' => 'price',
     ],
     [
-        'label' => 'Единица измерения',
-        'value' => 'ed',
+        'label' => Yii::t('message', 'frontend.views.vendor.measure_two', ['ru'=>'Единица измерения']),
+        'value' => function($data){
+            return Yii::t('app', $data['ed']);
+        },
     ],
     [
-        'label' => 'Комментарий',
+        'label' => Yii::t('message', 'frontend.views.vendor.comment', ['ru'=>'Комментарий']),
         'value' => function ($data) {
             return $data['note'] ? $data['note'] : '';
         },
@@ -114,7 +116,7 @@ $exportColumns = [
 ?>
 <?php
 Modal::begin([
-    'header' => '<h4 class="modal-title">Загрузка каталога</h4>',
+    'header' => '<h4 class="modal-title">' . Yii::t('message', 'frontend.views.vendor.downl_cat', ['ru'=>'Загрузка каталога']) . ' </h4>',
     'id' => 'instruction',
     'size' => 'modal-lg',
 ]);
@@ -131,8 +133,8 @@ Modal::end();
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Главный каталог
-        <small>Это ваш главный каталог</small><label>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.main_catalog_three', ['ru'=>'Главный каталог']) ?>
+        <small><?= Yii::t('message', 'frontend.views.vendor.main_catalog_four', ['ru'=>'Это ваш главный каталог']) ?></small><label>
             <div class="icheckbox_minimal-blue" aria-checked="false" aria-disabled="false" style="position: relative;"><input type="checkbox" class="minimal" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div>
         </label>
     </h1>
@@ -141,12 +143,13 @@ Modal::end();
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
-                'label' => 'Каталоги',
+                'label' => Yii::t('message', 'frontend.views.vendor.catalogs_four', ['ru'=>'Каталоги']),
                 'url' => ['vendor/catalogs'],
             ],
-            'Главный каталог',
+            Yii::t('message', 'frontend.views.vendor.main_catalog_five', ['ru'=>'Главный каталог']),
         ],
     ])
     ?>
@@ -155,14 +158,14 @@ Modal::end();
     <?php if (Yii::$app->session->hasFlash('success')): ?>
         <div class="alert alert-danger alert-dismissable">
             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-            <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+            <h4><i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru'=>'Ошибка']) ?></h4>
             <?= Yii::$app->session->getFlash('success') ?>
         </div>
     <?php endif; ?>
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs" style="background-color: #f1f0ee;">
-            <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title">Редактирование</h5></a></li>
-            <li><a data-toggle="tab" href="#tabClients"><h5 class="box-title">Назначить ресторану</h5></a></li>
+            <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title"><?= Yii::t('message', 'frontend.views.vendor.edit_four', ['ru'=>'Редактирование']) ?></h5></a></li>
+            <li><a data-toggle="tab" href="#tabClients"><h5 class="box-title"><?= Yii::t('message', 'frontend.views.vendor.set_for_rest', ['ru'=>'Назначить ресторану']) ?></h5></a></li>
         </ul>
         <div class="tab-content">
             <div id="tabCatalog" class="tab-pane fade in active">
@@ -172,7 +175,7 @@ Modal::end();
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_five', ['ru'=>'Поиск']), 'id' => 'search']) ?>
                         </div>
                     </div>   
                     <?=
@@ -180,7 +183,7 @@ Modal::end();
                         'id' => 'add-product',
                         'clientOptions' => ['style' => 'margin-top:13.2px;'],
                         'toggleButton' => [
-                            'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                            'label' => '<i class="fa fa-plus-circle"></i> '. Yii::t('message', 'frontend.views.vendor.new_good', ['ru'=>'Новый товар']),
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
@@ -194,7 +197,7 @@ Modal::end();
                             'dataProvider' => $dataProvider,
                             'columns' => $exportColumns,
                             'fontAwesome' => true,
-                            'filename' => 'Главный каталог - ' . date('Y-m-d'),
+                            'filename' => Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru'=>'Главный каталог - ']) . date('Y-m-d'),
                             'encoding' => 'UTF-8',
                             'target' => ExportMenu::TARGET_SELF,
                             'showConfirmAlert' => false,
@@ -202,7 +205,7 @@ Modal::end();
                             'batchSize' => 200,
                             'timeout' => 0,
                             'dropdownOptions' => [
-                                'label' => '<span class="text-label">Скачать каталог (.xls)</span>',
+                                'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.export', ['ru'=>'экспорт']) . ' </span>',
                                 'class' => ['btn btn-outline-default btn-sm pull-right']
                             ],
                             'exportConfig' => [
@@ -250,7 +253,7 @@ Modal::end();
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (.xls)</span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('message', 'frontend.views.vendor.import_five', ['ru'=>'импорт']) . ' </span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -259,13 +262,13 @@ Modal::end();
                         ],
                     ])
                     ?>
-                    <?=
-                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>'.
+                    <?= 
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru'=>'Изменить валюту:']) . '  </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                         '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeCurrency',
-                    ])
+                    ]])
                     ?>
 
                 </div>
@@ -274,13 +277,13 @@ Modal::end();
                     $gridColumnsBaseCatalog = [
                         [
                             'attribute' => 'article',
-                            'label' => 'Артикул',
+                            'label' => Yii::t('message', 'frontend.views.vendor.art_six', ['ru'=>'Артикул']),
                             'value' => 'article',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'product',
-                            'label' => 'Наименование',
+                            'label' => Yii::t('message', 'frontend.views.vendor.name_of_good_two', ['ru'=>'Наименование']),
                             'format' => 'raw',
                             'value' => function($data) {
                                 return Html::decode(Html::decode($data['product']));
@@ -289,7 +292,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'units',
-                            'label' => 'Кратность',
+                            'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_six', ['ru'=>'Кратность']),
                             'value' => function ($data) {
                                 return empty($data['units']) ? '' : $data['units'];
                             },
@@ -297,30 +300,30 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'category_id',
-                            'label' => 'Категория',
+                            'label' => Yii::t('message', 'frontend.views.vendor.category_two', ['ru'=>'Категория']),
                             'value' => function ($data) {
-                                $data['category_id'] == 0 ? $category_name = '' : $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
+                                $data['category_id'] == 0 ? $category_name = '' : $category_name = Yii::t('app', \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name);
                                 return $category_name;
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => 'Цена ('.$currentCatalog->currency->iso_code.')',
+                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru'=>'Цена']) . $currentCatalog->currency->iso_code,
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'ed',
-                            'label' => 'Ед. измерения',
+                            'label' => Yii::t('message', 'frontend.views.vendor.measure_three', ['ru'=>'Ед. измерения']),
                             'value' => function ($data) {
-                                return $data['ed'];
+                                return Yii::t('app', $data['ed']);
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'status',
-                            'label' => 'Наличие',
+                            'label' => Yii::t('message', 'frontend.views.vendor.in_stock_three', ['ru'=>'Наличие']),
                             'format' => 'raw',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             'value' => function ($data) {
@@ -361,7 +364,7 @@ Modal::end();
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
-                                        $link = Html::a('ИЗМЕНИТЬ', ['/vendor/ajax-update-product-market-place',
+                                        $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_two', ['ru'=>'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
                                             'data' => [
                                                 'target' => '#add-product-market-place',
@@ -370,7 +373,7 @@ Modal::end();
                                             ],
                                             'class' => 'btn btn-sm btn-outline-success'
                                         ]) :
-                                        $link = Html::a('ИЗМЕНИТЬ', ['/vendor/ajax-update-product-market-place',
+                                        $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_three', ['ru'=>'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
                                             'data' => [
                                                 'target' => '#add-product-market-place',
@@ -438,14 +441,14 @@ Modal::end();
                 <?php
                 $gridColumnsCatalog = [
                     [
-                        'label' => 'Ресторан',
+                        'label' => Yii::t('message', 'frontend.views.vendor.rest_three', ['ru'=>'Ресторан']),
                         'value' => function ($data) {
                             $organization_name = common\models\Organization::find()->where(['id' => $data->rest_org_id])->one()->name;
                             return $organization_name;
                         }
                     ],
                     [
-                        'label' => 'Текущий каталог',
+                        'label' => Yii::t('message', 'frontend.views.vendor.curr_cat', ['ru'=>'Текущий каталог']),
                         'format' => 'raw',
                         'value' => function ($data) {
                             $catalog_name = $data->cat_id == 0 ? '' :
@@ -454,7 +457,7 @@ Modal::end();
                         }
                     ],
                     [
-                        'attribute' => 'Назначить',
+                        'attribute' => Yii::t('message', 'frontend.views.vendor.set_two', ['ru'=>'Назначить']),
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:50px;'],
                         'value' => function ($data) {
@@ -509,6 +512,20 @@ $baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
+
+$var1 = Yii::t('message', 'frontend.views.vendor.del_good', ['ru'=>'Удалить этот продукт?']);
+$var2 = Yii::t('message', 'frontend.views.vendor.will_remove', ['ru'=>'Продукт будет удален из всех каталогов']);
+$var3 = Yii::t('message', 'frontend.views.vendor.del_four', ['ru'=>'Удалить']);
+$var4 = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru'=>'Отмена']);
+$var5 = Yii::t('message', 'frontend.views.vendor.wrong', ['ru'=>'Что-то пошло не так']);
+$var6 = Yii::t('message', 'frontend.views.vendor.change_curr_two', ['ru'=>'Изменение валюты каталога']);
+$var7 = Yii::t('message', 'frontend.views.vendor.choose_curr', ['ru'=>'Выберите новую валюту каталога']);
+$var8 = Yii::t('message', 'frontend.views.vendor.choose_from_list', ['ru'=>'Выберите валюту из списка']);
+$var9 = Yii::t('message', 'frontend.views.vendor.in_use', ['ru'=>'Данная валюта уже используется!']);
+$var10 = Yii::t('message', 'frontend.views.vendor.curr_changed', ['ru'=>'Валюта каталога изменена!']);
+$var11 = Yii::t('message', 'frontend.views.vendor.set_prices', ['ru'=>'Пересчитать цены в каталоге?']);
+$var12 = Yii::t('message', 'frontend.views.vendor.prices_changed', ['ru'=>'Цены успешно изменены!']);
+$var13 = Yii::t('message', 'frontend.views.vendor.farther', ['ru'=>'Далее']);
 
 $customJs = <<< JS
 var timer;
@@ -619,15 +636,15 @@ $(document).on("click", ".del-product", function(e){
     var id = $(this).attr('data-id');
         
 	bootbox.confirm({
-            title: "Удалить этот продукт?",
-            message: "Продукт будет удален из всех каталогов", 
+            title: "$var1",
+            message: "$var2", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$var3',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$var4',
                     className: 'btn-default'
                 }
             },
@@ -644,7 +661,7 @@ $(document).on("click", ".del-product", function(e){
 		        if(response.success){
 			        $.pjax.reload({container: "#kv-unique-id-1"}); 
 			        }else{
-				    console.log('Что-то пошло не так');    
+				    console.log('$var5');    
 			        }
 		        }	
 		    });
@@ -695,24 +712,24 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
         
     $(document).on("click", "#changeCurrency", function() {
         swal({
-            title: 'Изменение валюты каталога',
+            title: '$var6',
             input: 'select',
             inputOptions: $currencyList,
-            inputPlaceholder: 'Выберите новую валюту каталога',
+            inputPlaceholder: '$var7',
             showCancelButton: true,
             showLoaderOnConfirm: true,
-            confirmButtonText: 'Далее',
+            confirmButtonText: '$var13',
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (!value) {
-                        reject('Выберите валюту из списка')
+                        reject('$var8')
                     }
                     if (value != currentCurrency) {
                         newCurrency = value;
                         resolve();
                     } else {
-                        reject('Данная валюта уже используется!')
+                        reject('$var9')
                     }
                 })
             },
@@ -742,10 +759,10 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                 swal.close();
             } else {
                 swal({
-                    title: 'Валюта каталога изменена!',
+                    title: '$var10',
                     type: 'success',
                     html: 
-                        '<hr /><div>Пересчитать цены в каталоге?</div>' +                    
+                        '<hr /><div>$var11</div>' +
                         '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency] + ' = ' +
                         '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency],
                     showCancelButton: true,
@@ -775,7 +792,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                     } else {
                         swal({
                             type: "success",
-                            title: "Цены успешно изменены!",
+                            title: "$var12",
                             allowOutsideClick: true,
                         });
                     }

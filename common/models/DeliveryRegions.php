@@ -49,13 +49,13 @@ class DeliveryRegions extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'supplier_id' => 'Supplier ID',
-            'country' => 'Страна',
-            'locality' => 'Город',
-            'exception' => 'Исключение',
-            'administrative_area_level_1' => 'Область',
-            'created_at' => 'Создано',
-            'updated_at' => 'Обновлено',
+            'supplier_id' => Yii::t('app', 'Supplier ID'),
+            'country' => Yii::t('app', 'common.models.country', ['ru'=>'Страна']),
+            'locality' => Yii::t('app', 'common.models.city', ['ru'=>'Город']),
+            'exception' => Yii::t('app', 'common.models.exception', ['ru'=>'Исключение']),
+            'administrative_area_level_1' => Yii::t('app', 'common.models.region', ['ru'=>'Область']),
+            'created_at' => Yii::t('app', 'common.models.created_two', ['ru'=>'Создано']),
+            'updated_at' => Yii::t('app', 'common.models.refreshed_two', ['ru'=>'Обновлено']),
         ];
     }
 

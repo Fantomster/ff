@@ -7,7 +7,7 @@ use kartik\form\ActiveForm;
 use kartik\grid\GridView;
 use kartik\widgets\TouchSpin;
 
-$this->title = "Часто заказываемые товары";
+$this->title = Yii::t('message', 'frontend.views.order.freq_goods', ['ru'=>"Часто заказываемые товары"]);
 
 yii\jui\JuiAsset::register($this);
 
@@ -15,13 +15,13 @@ $this->registerJs('
     $(document).on("click", ".add-note", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Комментарий к товару";
+        var title = "' . Yii::t('message', 'frontend.views.order.good_comment_two', ['ru'=>'Комментарий к товару']) . ' ";
         swal({
             title: title,
             input: "textarea",
             showCancelButton: true,
-            cancelButtonText: "Закрыть",
-            confirmButtonText: "Сохранить",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.close_two', ['ru'=>'Закрыть']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.save_two', ['ru'=>'Сохранить']) . ' ",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -55,7 +55,7 @@ $this->registerJs('
             } else if (result.dismiss === "cancel") {
                 swal.close();
             } else {
-                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+                swal({title: "' . Yii::t('error', 'frontend.views.order.error_three', ['ru'=>'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again_three', ['ru'=>'Попробуйте еще раз']) . ' ", type: "error"});
             }
         });
     });
@@ -116,15 +116,15 @@ $this->registerJs('
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
-            <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
+            <li><a href="<?= Url::to(['order/create']) ?>"><?= Yii::t('app', 'frontend.views.order.favorites.all', ['ru'=>'Все продукты']) ?></a></li>
             <li>
                 <a href="<?= Url::to(['order/guides']) ?>">
-                    Шаблоны заказов <small class="label bg-yellow">new</small>
+                    <?= Yii::t('app', 'frontend.views.order.favorites.templates', ['ru'=>'Шаблоны заказов']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li class="active">
                 <a href="#">
-                    Часто заказываемые товары <small class="label bg-yellow">new</small>
+                    <?= Yii::t('app', 'frontend.views.order.favorites.freq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -158,7 +158,7 @@ $this->registerJs('
                 ->textInput([
                     'id' => 'searchString',
                     'class' => 'form-control',
-                    'placeholder' => 'Поиск по названию'])
+                    'placeholder' => Yii::t('app', 'frontend.views.order.favorites.search', ['ru'=>'Поиск по названию'])])
                 ->label(false)
         ?>
         <?php ActiveForm::end(); ?>
@@ -192,7 +192,7 @@ $this->registerJs('
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
+                            return $data["price"] . ' ' . $data["symbol"] . '/' . Yii::t('app', $data["ed"]);
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],
@@ -222,7 +222,7 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function($data) use ($client) {
-                            return Html::button('<i class="fa fa-comment"> <span class="circe_font"> Комментарий</span></i>', [
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font"> ' . Yii::t('message', 'frontend.views.order.favorites.comment', ['ru'=>'Комментарий']) . ' </span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right circe_font',
                                         'data' => [
                                             'id' => $data["cbg_id"],
@@ -238,11 +238,11 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> В корзину</span></i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> ' . Yii::t('message', 'frontend.views.order.favorites.in_basket', ['ru'=>'В корзину']) . '</span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right circe_font',
                                         'data-id' => $data["cbg_id"],
                                         'data-cat' => $data["cat_id"],
-                                        'title' => 'Добавить в корзину',
+                                        'title' => Yii::t('app', 'frontend.views.order.favorites.add_to_basket', ['ru'=>'Добавить в корзину']),
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 5%;'],

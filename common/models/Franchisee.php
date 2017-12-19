@@ -80,25 +80,25 @@ class Franchisee extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'info' => 'Поле для заметок',
-            'created_at' => 'Создано',
-            'updated_at' => 'Обновлено',
-            'signed' => 'Подписант',
-            'legal_entity' => 'Юридическое название',
-            'legal_address' => 'Юридический адрес',
-            'legal_email' => 'Официальный email',
-            'inn' => 'ИНН',
-            'kpp' => 'КПП',
-            'ogrn' => 'ОГРН',
-            'bank_name' => 'Банк',
-            'bik' => 'БИК',
-            'correspondent_account' => 'р/с',
-            'checking_account' => 'к/с',
-            'phone' => 'Телефон',
-            'picture_manager' => 'Аватар менеджера',
-            'fio_manager' => 'фио менеджера',
-            'phone_manager' => 'Телефон менеджера',
-            'additional_number_manager' => 'Добавочный номер менеджера'
+            'info' => Yii::t('app', 'common.models.field_two', ['ru'=>'Поле для заметок']),
+            'created_at' => Yii::t('app', 'common.models.created_thrdd', ['ru'=>'Создано']),
+            'updated_at' => Yii::t('app', 'common.models.refreshed_three', ['ru'=>'Обновлено']),
+            'signed' => Yii::t('app', 'common.models.signer', ['ru'=>'Подписант']),
+            'legal_entity' => Yii::t('app', 'common.models.jur_name_two', ['ru'=>'Юридическое название']),
+            'legal_address' => Yii::t('app', 'common.models.jur_address_two', ['ru'=>'Юридический адрес']),
+            'legal_email' => Yii::t('app', 'common.models.official_email_two', ['ru'=>'Официальный email']),
+            'inn' => Yii::t('app', 'common.models.inn_two', ['ru'=>'ИНН']),
+            'kpp' => Yii::t('app', 'common.models.kpp_two', ['ru'=>'КПП']),
+            'ogrn' => Yii::t('app', 'common.models.ogrn_two', ['ru'=>'ОГРН']),
+            'bank_name' => Yii::t('app', 'common.models.bank_two', ['ru'=>'Банк']),
+            'bik' => Yii::t('app', 'common.models.bik_two', ['ru'=>'БИК']),
+            'correspondent_account' => Yii::t('app', 'common.models.rs_two', ['ru'=>'р/с']),
+            'checking_account' => Yii::t('app', 'common.models.ks_two', ['ru'=>'к/с']),
+            'phone' => Yii::t('app', 'common.models.phone_two', ['ru'=>'Телефон']),
+            'picture_manager' => Yii::t('app', 'common.models.managers_avatar', ['ru'=>'Аватар менеджера']),
+            'fio_manager' => Yii::t('app', 'common.models.managers_fio', ['ru'=>'фио менеджера']),
+            'phone_manager' => Yii::t('app', 'common.models.managers_phone', ['ru'=>'Телефон менеджера']),
+            'additional_number_manager' => Yii::t('app', 'common.models.additional_phone_two', ['ru'=>'Добавочный номер менеджера'])
         ];
     }
 
@@ -195,7 +195,7 @@ class Franchisee extends \yii\db\ActiveRecord {
                 $models = Role::findAll(['organization_type' => Organization::TYPE_FRANCHISEE]);
             foreach ($models as $model) {
                 if ($model->id !== Role::ROLE_FRANCHISEE_AGENT) {
-                    $dropdown[$model->id] = $model->name;
+                    $dropdown[$model->id] = Yii::t('app', $model->name);
                 }
             }
         }

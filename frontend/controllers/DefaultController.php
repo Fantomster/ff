@@ -41,7 +41,7 @@ class DefaultController extends Controller {
             $this->loadCurrentUser();
             $organization = $this->currentUser->organization;
             if(!$organization){
-                throw new \yii\web\HttpException(403, Yii::t('app', 'Доступ запрещен'));
+                throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied', ['ru'=>'Доступ запрещен']));
             }
             if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                 $this->view->params['orders'] = $organization->getCart();
@@ -52,7 +52,7 @@ class DefaultController extends Controller {
                 $this->redirectIfNotHome($organization);
             }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
-                throw new \yii\web\HttpException(403, Yii::t('app', 'Доступ запрещен'));
+                throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied_two', ['ru'=>'Доступ запрещен']));
             }
         } elseif (Yii::$app->request->get("token")) {
             $token = Yii::$app->request->get("token");

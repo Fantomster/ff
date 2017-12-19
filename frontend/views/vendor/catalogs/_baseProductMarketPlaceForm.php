@@ -159,13 +159,13 @@ $form = ActiveForm::begin([
 
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord ? 'ДОБАВЛЕНИЕ ТОВАРА' : 'РЕДАКТИРОВАНИЕ ТОВАРА' ?></h4>
+    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord ? Yii::t('message', 'frontend.views.vendor.add_good', ['ru'=>'ДОБАВЛЕНИЕ ТОВАРА']) : Yii::t('message', 'frontend.views.vendor.edit_good', ['ru'=>'РЕДАКТИРОВАНИЕ ТОВАРА']) ?></h4>
 </div>
 <div class="modal-body" style="background:#fff !important">
     <div class="row">
         <div class="col-md-12 text-center">
-            <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
-                <br><small>Товар будет доступен на площадке MixMarket в течение 2 минут</small><h5>
+            <h5 class="sub-h3-text"><?= Yii::t('message', 'frontend.views.vendor.market', ['ru'=>'Вы можете разместить Ваш товар в Маркете']) ?>
+                <br><small><?= Yii::t('message', 'frontend.views.vendor.good_market', ['ru'=>'Товар будет доступен на площадке MixMarket в течении 2 минут']) ?></small><h5>
                     </div>
                     </div>
                     <div class="row">
@@ -204,11 +204,11 @@ $form = ActiveForm::begin([
                                      'id' => 'deleteAvatar',
                                  ]);
                                  ?>
-                            <label for="upload" class="uploadButton">Загрузить файл</label>
+                            <label for="upload" class="uploadButton"><?= Yii::t('message', 'frontend.views.vendor.file_down', ['ru'=>'Загрузить файл']) ?></label>
                             <!--input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload"-->
                             <?=
                                     $form->field($catalogBaseGoods, 'image', ['template' => '<div class="input-group">{input}</div>{error}'])
-                                    ->fileInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА', 'id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
+                                    ->fileInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.good_name', ['ru'=>'НАИМЕНОВАНИЕ ТОВАРА']), 'id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
                             ?>
                             <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
                         </div>
@@ -216,12 +216,16 @@ $form = ActiveForm::begin([
                     <div class="row">
                         <div class="col-md-12">
                             <div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
-                                <label class="control-label" for="dynamicmodel-sub1">Категория товара</label>
+                                <label class="control-label" for="dynamicmodel-sub1"><?= Yii::t('message', 'frontend.views.vendor.good_category', ['ru'=>'Категория товара']) ?></label>
                                 <?php
+                                $mp_category = \common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all();
+                                foreach ($mp_category as &$item){
+                                    $item['name'] = Yii::t('app', $item['name']);
+                                }
                                 echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
                                     //'model'=>$categorys->sub1,
-                                    'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
-                                    'options' => ['placeholder' => 'Выберите...'],
+                                    'data' => ArrayHelper::map($mp_category, 'id', 'name'),
+                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.vendor.choose', ['ru'=>'Выберите...'])],
                                     'theme' => "default",
                                     //'hideSearch' => true,
                                     'pluginOptions' => [
@@ -247,7 +251,7 @@ $form = ActiveForm::begin([
                                         'depends' => ['catalogbasegoods-sub1'],
                                         'placeholder' => false,
                                         'url' => Url::to(['vendor/get-sub-cat']),
-                                        'loadingText' => 'Загрузка...',
+                                        'loadingText' => Yii::t('message', 'frontend.views.vendor.download', ['ru'=>'Загрузка...']),
                                         'initialize' => true,
                                         //'initDepends'=>['dynamicmodel-sub2'],
                                         'params' => ['catalogBaseGoods_id1', 'input-type-2'],
@@ -264,30 +268,34 @@ $form = ActiveForm::begin([
                                 <div class="col-md-6">
                                     <?=
                                             $form->field($catalogBaseGoods, 'product', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                                            textInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА', 'style' => 'border-radius:3px'])
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.good_name', ['ru'=>'НАИМЕНОВАНИЕ ТОВАРА']), 'style' => 'border-radius:3px'])
                                     ?>
                                     <?=
                                             $form->field($catalogBaseGoods, 'article', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
-    title="Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара">
+    title="' . Yii::t('message', 'frontend.views.vendor.art', ['ru'=>'Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара']) . ' ">
     </span></span></div>{error}'])->
-                                            textInput(['placeholder' => 'АРТИКУЛ'])
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.art_two', ['ru'=>'АРТИКУЛ'])])
                                     ?>
                                     <?=
                                             $form->field($catalogBaseGoods, 'price', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
-    title="Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)">
+    title="' . Yii::t('message', 'frontend.views.vendor.price_for_one', ['ru'=>'Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)']) . ' ">
     </span></span></div>{error}'])->
-                                            textInput(['placeholder' => 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ'])
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.price_two', ['ru'=>'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ'])])
                                     ?>
-                                    <label class="control-label" for="">Ед измерения</label>
+                                    <label class="control-label" for=""><?= Yii::t('message', 'frontend.views.vendor.measure', ['ru'=>'Ед измерения']) ?></label>
                                     <?php
+                                    $mp_ed = \common\models\MpEd::find()->asArray()->all();
+                                    foreach ($mp_ed as &$item){
+                                        $item['name'] = Yii::t('app', $item['name']);
+                                    }
                                     echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
                                         'model' => $catalogBaseGoods->ed,
-                                        'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(), 'name', 'name'),
-                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'data' => ArrayHelper::map($mp_ed, 'name', 'name'),
+                                        'options' => ['placeholder' => Yii::t('message', 'frontend.views.vendor.choose_two', ['ru'=>'Выберите...'])],
                                         'theme' => Select2::THEME_DEFAULT,
                                         'pluginOptions' => [
                                             'allowClear' => true,
@@ -298,17 +306,17 @@ $form = ActiveForm::begin([
                                             $form->field($catalogBaseGoods, 'units', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign"
     data-toggle="tooltip" 
-    title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
-                                            textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ'])
+    title="' . Yii::t('message', 'frontend.views.vendor.min_unit', ['ru'=>'Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)']) . ' "></span></span></div>{error}'])->
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.quan', ['ru'=>'КРАТНОСТЬ ПОСТАВКИ'])])
                                     ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="control-label" for="">Страна производитель</label>
+                                    <label class="control-label" for=""><?= Yii::t('message', 'frontend.views.vendor.country', ['ru'=>'Страна производитель']) ?></label>
                                     <?php
                                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                                         'model' => $catalogBaseGoods->region,
                                         'data' => ArrayHelper::map($countrys, 'id', 'name'),
-                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'options' => ['placeholder' => Yii::t('message', 'frontend.views.vendor.choose_three', ['ru'=>'Выберите...'])],
                                         'theme' => "default",
                                         'pluginOptions' => [
                                             'allowClear' => true,
@@ -319,11 +327,11 @@ $form = ActiveForm::begin([
 
                                     <?=
                                             $form->field($catalogBaseGoods, 'brand', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                                            textInput(['placeholder' => 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ', 'style' => 'border-radius:3px'])
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.vendor_name_two', ['ru'=>'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ']), 'style' => 'border-radius:3px'])
                                     ?>
                                     <?=
                                             $form->field($catalogBaseGoods, 'weight', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                                            textInput(['placeholder' => 'ВЕС УПАКОВКИ', 'style' => 'border-radius:3px'])
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.wrappers_weight', ['ru'=>'ВЕС УПАКОВКИ']), 'style' => 'border-radius:3px'])
                                     ?>
                                     <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
 
@@ -334,7 +342,7 @@ $form = ActiveForm::begin([
 
                     <div class="row">
                         <div class="col-md-12" style="padding: 0 28px;">
-                            <h5>Для того, чтобы разместиться на площадке F_MARKET, свяжитесь с нами</h5>
+                            <h5><?= Yii::t('message', 'frontend.views.vendor.contact_us', ['ru'=>'Для того, чтобы разместиться на площадке F_MARKET, свяжитесь с нами']) ?></h5>
                         </div>
                         <div class="col-md-12" style="padding: 15px 28px 4px 28px;">
                             <div class="pull-left" style="border: 2px dotted #84bf76;padding: 10px 10px 0px 10px;margin-top: 0;border-radius:8px;">
@@ -351,7 +359,7 @@ $form = ActiveForm::begin([
                                         'size' => 'lg',
                                     ],
                                     'labelSettings' => [
-                                        'label' => 'РАЗМЕСТИТЬ В MixMarket',
+                                        'label' => Yii::t('message', 'frontend.views.vendor.place_mix', ['ru'=>'РАЗМЕСТИТЬ В MixMarket']),
                                         'position' => CheckboxX::LABEL_RIGHT,
                                         'options' => ['style' => 'font-weight: 700;']
                                     ]
@@ -373,7 +381,7 @@ $form = ActiveForm::begin([
                                         'size' => 'lg',
                                     ],
                                     'labelSettings' => [
-                                        'label' => 'Показывать цену в MixMarket',
+                                        'label' => Yii::t('message', 'frontend.views.vendor.show_price', ['ru'=>'Показывать цену в MixMarket']),
                                         'position' => CheckboxX::LABEL_RIGHT,
                                         'options' => ['style' => '']
                                     ]
@@ -383,18 +391,18 @@ $form = ActiveForm::begin([
                             <div class="pull-right" style="margin-top: 10px;">
                                 <?=
                                 $catalogBaseGoods->isNewRecord ?
-                                        Html::submitButton('<span><i class="icon fa fa-plus-circle"></i> Создать</span>', [
+                                        Html::submitButton('<span><i class="icon fa fa-plus-circle"></i> ' . Yii::t('message', 'frontend.views.vendor.create_two', ['ru'=>'Создать']) . ' </span>', [
                                             'id' => 'btnSave',
                                             'class' => 'btn btn-success edit',
-                                            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Создаем...",
+                                            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.vendor.creating', ['ru'=>'Создаем...']),
                                         ]) :
-                                        Html::submitButton('<span><i class="icon fa fa-save"></i> Сохранить</span>', [
+                                        Html::submitButton('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.save_two', ['ru'=>'Сохранить']) . ' </span>', [
                                             'id' => 'btnSave',
                                             'class' => 'btn btn-success edit',
-                                            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+                                            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.vendor.save_three', ['ru'=>'Сохраняем...']),
                                         ])
                                 ?>
-                                <a id="btnCancel" href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+                                <a id="btnCancel" href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('message', 'frontend.views.vendor.cancel_five', ['ru'=>'Отмена']) ?></a>
                             </div>	
                         </div>
                     </div>

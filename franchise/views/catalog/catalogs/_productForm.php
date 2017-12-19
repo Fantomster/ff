@@ -15,7 +15,7 @@ $form = ActiveForm::begin([
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= Yii::t('app', 'Редактировать продукт') ?></h4>
+    <h4 class="modal-title"><?= Yii::t('app', 'franchise.views.catalog.catalogs.edit_product', ['ru'=>'Редактировать продукт']) ?></h4>
 </div>
 <div class="modal-body">
     <?= $form->field($catalogGoods, 'price') ?>
@@ -27,8 +27,8 @@ $form = ActiveForm::begin([
     <?= $form->field($catalogGoods, 'discount_fixed') ?>
 </div>
 <div class="modal-footer">
-    <?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ', ['class' => 'btn btn-success edit']) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
+    <?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'franchise.views.catalog.catalogs.save_two', ['ru'=>'Сохранить']) . ' ', ['class' => 'btn btn-success edit']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'franchise.views.catalog.catalogs.cancel_five', ['ru'=>'Отмена']) ?></a>
 </div>
 <?php ActiveForm::end(); ?>
 <?php

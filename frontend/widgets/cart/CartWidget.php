@@ -15,7 +15,7 @@ class CartWidget extends Widget {
 
     public function init() {
         parent::init();
-        $cartUrl = \yii\helpers\Url::to('/order/pjax-cart');
+        $cartUrl = \yii\helpers\Url::to(['order/pjax-cart']);
         $this->view->registerJs('
     $(".basket_a").on("click", function (e) {
         var p = $(".block_right_basket").css("right");

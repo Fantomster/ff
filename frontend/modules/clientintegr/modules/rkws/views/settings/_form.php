@@ -40,8 +40,8 @@ use common\models\User;
                 ]);
             } else {
                 echo $form->field($model, 'value')->dropDownList([
-                    '0' => 'Выключено',
-                    '1' => 'Включено',
+                    '0' => Yii::t('app', 'frontend.modules.form.off', ['ru'=>'Выключено']),
+                    '1' => Yii::t('app', 'frontend.modules.form.on', ['ru'=>'Включено']),
                 ]);
             } ?>
     <?php break;
@@ -53,7 +53,7 @@ use common\models\User;
 
 
     <div class="form-group">
-        <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?php echo Html::submitButton($model->isNewRecord ? Yii::t('app', 'frontend.modules.form.create', ['ru'=>'Создать']) : Yii::t('app', 'frontend.modules.form.save', ['ru'=>'Сохранить']), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
                 <?= Html::a('Вернуться',
             ['index'],
             ['class' => 'btn btn-success btn-export']);

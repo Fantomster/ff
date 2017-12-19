@@ -22,7 +22,7 @@ $form = ActiveForm::begin([
     <?=
             $form->field($organization, 'type_id')
             ->radioList(
-                    [Organization::TYPE_RESTAURANT => 'Я покупаю', Organization::TYPE_SUPPLIER => 'Я продаю'], 
+                    [Organization::TYPE_RESTAURANT => Yii::t('app', 'frontend.views.user.default.i_buy.', ['ru'=>'Я покупаю']), Organization::TYPE_SUPPLIER => Yii::t('app', 'frontend.views.user.default.i_sell', ['ru'=>'Я продаю'])],
                     [
                         'item' => function($index, $label, $name, $checked, $value) use ($organization) {
 
@@ -61,17 +61,17 @@ $form = ActiveForm::begin([
                                 ],
                             ])
             ->label(false)
-            ->textInput(['class' => 'form-control', 'placeholder' => 'Телефон'])
+            ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.phone', ['ru'=>'Телефон'])])
     ?>        <i class="fa fa-phone-square"></i>
     </label>
     <label>
         <?=
             $form->field($user, 'newPassword')
             ->label(false)
-            ->passwordInput(['class' => 'form-control', 'placeholder' => 'Пароль'])
+            ->passwordInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.pass_two', ['ru'=>'Пароль'])])
     ?><i class="fa fa-lock"></i>
     </label>
 </div>
-<button type="submit" class="but but_green" id="btnRegister" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Регистрируемся..."><span>Зарегистрироваться</span><i class="ico"></i></button>
-<div class="auth-sidebar__enter reg"><span>Уже зарегистрированы?</span><a href="#">войти в систему</a></div>
+<button type="submit" class="but but_green" id="btnRegister" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('message', 'frontend.views.user.default.', ['ru'=>'Регистрируемся..']) ?>."><span><?= Yii::t('message', 'frontend.views.user.default.', ['ru'=>'Зарегистрироваться']) ?></span><i class="ico"></i></button>
+<div class="auth-sidebar__enter reg"><span><?= Yii::t('message', 'frontend.views.user.default.registered', ['ru'=>'Уже зарегистрированы?']) ?></span><a href="#"><?= Yii::t('message', 'frontend.views.user.default.enter_system', ['ru'=>'войти в систему']) ?></a></div>
 <?php ActiveForm::end(); ?>

@@ -4,5 +4,5 @@
     <?= $message ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.client.settings.close', ['ru'=>'Закрыть']) ?></a>
 </div>

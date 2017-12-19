@@ -12,9 +12,9 @@ $grid = [
     'format' => 'raw',
     'value'=>function ($data) {
             if($data['type_id']==\common\models\Organization::TYPE_RESTAURANT){
-            return "<span style='color: #cacaca;'>Закупщик</span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer', ['ru'=>'Закупщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
             }        
-        return "<span style='color: #cacaca;'>Поставщик</span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor', ['ru'=>'Поставщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
         },
     ],
     [
@@ -55,19 +55,19 @@ $grid = [
 <div class="modal-body network-modal">
     <div class="row">
         <div class="col-md-12">
-            <h3 class="pull-left">БИЗНЕС <span style="color:#84bf76;margin-top:5px;"><?=$user->organization->name;?></span></h3>
+            <h3 class="pull-left"><?= Yii::t('message', 'frontend.views.user.default.business', ['ru'=>'БИЗНЕС']) ?> <span style="color:#84bf76;margin-top:5px;"><?=$user->organization->name;?></span></h3>
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="padding-bottom: 10px;">×</button>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <p style="color:#BAB9B9">Выберите из имеющихся для доступа в Ваш бизнес-профиль или создайте новый</p>
+            <p style="color:#BAB9B9"><?= Yii::t('message', 'frontend.views.user.default.choose', ['ru'=>'Выберите из имеющихся для доступа в Ваш бизнес-профиль или создайте новый']) ?></p>
             <hr>
         </div>
     </div>
     <div class="row">
         <div class="col-md-8">
-            <h5>Список бизнесов</h5>
+            <h5><?= Yii::t('message', 'frontend.views.user.default.business_list', ['ru'=>'Список бизнесов']) ?></h5>
             <div class="network-list">
             <?php Pjax::begin(['id' => 'pjax-network-list', 'enablePushState' => false,'timeout' => 10000])?>
             <?=GridView::widget([
@@ -89,7 +89,7 @@ $grid = [
             </div>
         </div>
         <div class="col-md-4">
-          <h5>Создать бизнес</h5>
+          <h5><?= Yii::t('message', 'frontend.views.user.default.create', ['ru'=>'Создать бизнес']) ?></h5>
             <?php
             $form = ActiveForm::begin([
                         'id' => 'create-network-form',
@@ -99,7 +99,7 @@ $grid = [
             <?=
                     $form->field($organization, 'type_id')
                     ->radioList(
-                            [\common\models\Organization::TYPE_RESTAURANT => ' Закупщик', \common\models\Organization::TYPE_SUPPLIER => ' Поставщик'], 
+                            [\common\models\Organization::TYPE_RESTAURANT => Yii::t('message', 'frontend.views.user.default.buyer_two', ['ru'=>' Закупщик']), \common\models\Organization::TYPE_SUPPLIER => Yii::t('message', 'frontend.views.user.default.vendor_two', ['ru'=>' Поставщик'])],
                             [
                                 'item' => function($index, $label, $name, $checked, $value) use ($organization) {
 
@@ -118,9 +118,9 @@ $grid = [
             <?=
                     $form->field($organization, 'name')
                     ->label(false)
-                    ->textInput(['class' => 'form-control', 'placeholder' => 'Название организации']);
+                    ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.org_name', ['ru'=>'Название организации'])]);
             ?>
-            <?= Html::submitButton('Создать бизнес', ['class' => 'btn btn-md btn-success new-network']) ?>
+            <?= Html::submitButton(Yii::t('message', 'frontend.views.user.default.create_business', ['ru'=>'Создать бизнес']), ['class' => 'btn btn-md btn-success new-network']) ?>
           <?php ActiveForm::end(); ?>
         </div>
     </div>

@@ -87,7 +87,27 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 ],
                             ],
                         ],
-                        ['label' => 'SERVICEDESK', 'url' => ['/service-desk/index'], 'linkOptions' => ['style' => 'color:#f4c871;font-size:bold']],
+                        ['label' => 'SERVICEDESK',
+                            'items' => [
+                                [
+                                    'label' => 'SERVICEDESK',
+                                    'url' => ['/service-desk/index'],
+                                    'linkOptions' => ['style' => 'color:#f4c871;font-size:bold']
+                                ],
+                                [
+                                    'label' => 'СМС сообщения',
+                                    'url' => ['/sms'],
+                                ],
+                                [
+                                    'label' => 'Переводы СМС',
+                                    'url' => ['/sms/message'],
+                                ],
+                                [
+                                    'label' => 'Все переводы',
+                                    'url' => ['/translations/message'],
+                                ]
+                            ],
+                        ],
                         [
                             'label' => 'Пользователи',
                             'items' => [

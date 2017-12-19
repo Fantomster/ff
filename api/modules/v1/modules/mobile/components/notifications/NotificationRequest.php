@@ -69,9 +69,9 @@ class NotificationRequest {
                 $message = Yii::$app->fcm->createMessage();
                 $message->addRecipient(new Device($row->token));
                 $message->setData(['action' => 'requestSetResponsible',
-                    'title' => "mixcart.ru - заявка №" . $request->id,
-                    'message' => "На Вашу заявку №".$request->id." ".$request->product." назначен исполнитель ".$request->vendor->name."
-Дата назначения: ".date('Y-m-d H:i')]);
+                    'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.mix_req', ['ru'=>"mixcart.ru - заявка №"]) . $request->id,
+                    'message' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.on_your', ['ru'=>"На Вашу заявку №"]).$request->id." ".$request->product.Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.executer_settled', ['ru'=>" назначен исполнитель "]).$request->vendor->name.Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.date', ['ru'=>"
+Дата назначения: "]).date('Y-m-d H:i')]);
 
                 $response = Yii::$app->fcm->send($message);
             }

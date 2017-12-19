@@ -159,11 +159,11 @@ class OrderContentController extends ActiveController {
             if ($quantityChanged) {
                 $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                 if ($position['quantity'] == 0) {
-                    $message .= "<br/> удалил $product->product_name из заказа";
+                    $message .= Yii::t('app', 'api.modules.v1.modules.mobile.controllers.prod', ['ru'=>"<br/> удалил {prod} из заказа", 'prod'=>$product->product_name]);
                 } else {
                     $oldQuantity = $product->quantity + 0;
                     $newQuantity = $position["quantity"] + 0;
-                    $message .= "<br/> изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                    $message .= Yii::t('app', 'api.modules.v1.modules.mobile.controllers.', ['ru'=>"<br/> изменил количество {prod} с {old} {ed} на ", "prod"=>$product->product_name, "old"=>$oldQuantity, "ed"=>$ed]) . $newQuantity . ' ' . $ed;
                 }
                 $product->quantity = $position['quantity'];
             }
@@ -209,13 +209,18 @@ class OrderContentController extends ActiveController {
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+                $text_system = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $order->client->name,
+                    'url' => $order->getUrlForUser($user)
+                ]);
+                $this->sendSystemMessage($user, $order->id, $text_system);
                 foreach ($order->recipientsList as $recipient) {
                     if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                        $text = $subject;
-                        $target = $recipient->profile->phone;
-                        Yii::$app->sms->send($text, $target);
+                        $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                            'name' => $order->client->name,
+                            'url' => $order->getUrlForUser($recipient)
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
                 }
                 $order->calculateTotalPrice();
@@ -226,14 +231,19 @@ class OrderContentController extends ActiveController {
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();
-                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $text_system = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($user)
+                ]);
+                $this->sendSystemMessage($user, $order->id, $text_system);
                 $this->sendOrderChange($order->vendor, $order);
-                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
                     if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                        $text = $subject;
-                        $target = $recipient->profile->phone;
-                        Yii::$app->sms->send($text, $target);
+                        $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                            'name' => $order->vendor->name,
+                            'url' => $order->getUrlForUser($recipient)
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
                 }
             }
@@ -353,9 +363,11 @@ class OrderContentController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
             
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
-                $target = $profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_canceled', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $profile->phone);
             }
         }
     }
@@ -390,9 +402,11 @@ class OrderContentController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
             
             if ($profile->phone && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
-                $target = $profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $profile->phone);
            }
         }
     }

@@ -10,7 +10,7 @@ use kartik\form\ActiveForm;
 use yii\web\View;
 use kartik\checkbox\CheckboxX;
 
-$this->title = 'Мои клиенты';
+$this->title = Yii::t('message', 'frontend.views.vendor.my_clients', ['ru'=>'Мои клиенты']);
 ?>
 <?=
 Modal::widget([
@@ -29,7 +29,7 @@ Modal::widget([
 <?php
 $gridColumnsClients = [
     [
-        'label' => 'Ресторан',
+        'label' => Yii::t('app', 'frontend.views.vendor.clients.rest', ['ru'=>'Ресторан']),
         'format' => 'raw',
         'attribute' => 'client_name',
         'value' => function ($data) {
@@ -43,11 +43,11 @@ $gridColumnsClients = [
         }
     ],
     [
-        'label' => 'Последний заказ',
+                'label' => Yii::t('message', 'frontend.views.vendor.last_order', ['ru'=>'Последний заказ']),
         'format' => 'raw',
         'attribute' => 'last_order_date',
         'value' => function($data) {
-            $date = isset($data->lastOrder) ? Yii::$app->formatter->asDatetime($data->lastOrder->updated_at, "php:j M Y") : 'Никогда';
+            $date = isset($data->lastOrder) ? Yii::$app->formatter->asDatetime($data->lastOrder->updated_at, "php:j M Y") : Yii::t('app', 'Никогда');
             return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
         },
     ],
@@ -68,7 +68,7 @@ $gridColumnsClients = [
       }
       ], */
     [
-        'label' => 'Назначенные менеджеры',
+        'label' => Yii::t('message', 'frontend.views.vendor.managers', ['ru'=>'Назначенные менеджеры']),
         'format' => 'raw',
         'value' => function ($data) {
             $result = '';
@@ -80,7 +80,7 @@ $gridColumnsClients = [
         },
     ],
     [
-        'label' => 'Каталог',
+        'label' => Yii::t('message', 'frontend.views.vendor.my_client', ['ru'=>'Мой клиент']),
         'attribute' => 'invite',
         'format' => 'raw',
         'contentOptions' => ['style' => 'text-align:left'],
@@ -110,7 +110,7 @@ $gridColumnsClients = [
             } elseif (empty($data->invite)) {
                 $result = "";
             } elseif (!empty($data->invite) && empty($data->cat_id)) {
-                $result = Html::a("Каталог не назначен", ['vendor/view-client', 'id' => $data->rest_org_id], [
+                $result = Html::a(Yii::t('message', 'frontend.views.vendor.no_cat', ['ru'=>"Каталог не назначен"]), ['vendor/view-client', 'id' => $data->rest_org_id], [
                             'data' => [
                                 'target' => '#view-client',
                                 'toggle' => 'modal',
@@ -138,7 +138,7 @@ $gridColumnsClients = [
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Мои клиенты
+        <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.my_clients_two', ['ru'=>'Мои клиенты']) ?>
         <small></small>
     </h1>
 <?=
@@ -146,8 +146,9 @@ Breadcrumbs::widget([
     'options' => [
         'class' => 'breadcrumb',
     ],
+    'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
     'links' => [
-        'Мои клиенты'
+      Yii::t('message', 'frontend.views.vendor.my_clients_three', ['ru'=>'Мои клиенты'])
     ],
 ])
 ?>
@@ -160,7 +161,7 @@ Modal::widget([
     'id' => 'add-client',
     'clientOptions' => false,
     'toggleButton' => [
-        'label' => 'Пригласить клиента',
+        'label' => Yii::t('message', 'frontend.views.vendor.invite_client', ['ru'=>'Пригласить клиента']),
         'tag' => 'a',
         'data-target' => '#add-client',
         'class' => 'btn btn-md btn-fk-success',
@@ -192,24 +193,24 @@ $form = ActiveForm::begin([
                                 ],
                             ],
                         ])
-                        ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'search_string'])
-                        ->label('Поиск', ['class' => 'label search_string', 'style' => 'color:#555'])
+                        ->textInput(['prompt' => Yii::t('message', 'frontend.views.vendor.', ['ru'=>'Поиск']), 'class' => 'form-control', 'id' => 'search_string'])
+                        ->label(Yii::t('message', 'frontend.views.vendor.search_two', ['ru'=>'Поиск']), ['class' => 'label search_string', 'style' => 'color:#555'])
                 ?>
                 </div>
                 <div class="col-sm-3">
 <?=
         $form->field($searchModel, "cat_id")
-        ->dropDownList($currentOrganization->getCatalogsList(), ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_catalog'])
-        ->label("Каталог", ['class' => 'label filter_catalog', 'style' => 'color:#555'])
+        ->dropDownList($currentOrganization->getCatalogsList(), ['prompt' => Yii::t('app', 'Все'), 'class' => 'form-control', 'id' => 'filter_catalog'])
+        ->label(Yii::t('message', 'frontend.views.vendor.catalog', ['ru'=>"Каталог"]), ['class' => 'label filter_catalog', 'style' => 'color:#555'])
 ?>
                 </div>
                 <div class="col-sm-3">
 <?=
         $form->field($searchModel, "invite")
         ->dropDownList([
-            '0' => 'Не подтвержден',
-            '1' => 'Подтвержден',
-                ], ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_invite'])
+            '0' => Yii::t('message', 'frontend.views.vendor.not_accepted', ['ru'=>'Не подтвержден']),
+            '1' => Yii::t('message', 'frontend.views.vendor.accepted', ['ru'=>'Подтвержден']),
+                ], ['prompt' => Yii::t('app', 'Все'), 'class' => 'form-control', 'id' => 'filter_invite'])
         ->label("Статус", ['class' => 'label filter_invite', 'style' => 'color:#555'])
 ?>
                 </div>
@@ -235,7 +236,7 @@ $form = ActiveForm::begin([
                     'responsive' => false,
                     'hover' => false,
                 ]);
-                ?> 
+                ?>
                 <?php Pjax::end(); ?> 
             </div>
         </div>
@@ -244,6 +245,11 @@ $form = ActiveForm::begin([
 <?php
 $inviteRestOrgUrl = Url::to(['vendor/ajax-invite-rest-org-id']);
 $removeClientUrl = Url::to(['vendor/remove-client']);
+
+$one = Yii::t('message', 'frontend.views.vendor.del_client', ['ru'=>'Удалить клиента?']);
+$two = Yii::t('message', 'frontend.views.vendor.client_will_delete', ['ru'=>'Клиент будет удален из Вашего списка клиентов']);
+$three = Yii::t('message', 'frontend.views.vendor.del_six', ['ru'=>'Удалить']);
+$four = Yii::t('message', 'frontend.views.vendor.cancel', ['ru'=>'Отмена']);
 
 $customJs = <<< JS
     $(document).on("change keyup paste cut", "#search_string", function() {
@@ -340,15 +346,15 @@ $("#view-client").on("click", ".save-form", function() {
 $(document).on("click",".del", function(e){
     var id = $(this).attr('data-id');
         bootbox.confirm({
-            title: "Удалить клиента?",
-            message: "Клиент будет удален из Вашего списка клиентов", 
+            title: "$one",
+            message: "$two", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$three',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$four',
                     className: 'btn-default'
                 }
             },

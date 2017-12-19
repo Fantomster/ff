@@ -207,7 +207,7 @@ class SiteController extends Controller {
         if ($product) {
             return $this->render('/site/product', compact('product'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out_six', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
     }
     public function actionSendService($id) {
@@ -263,7 +263,7 @@ class SiteController extends Controller {
                             ->orderBy(['product_rating'=>SORT_DESC])->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
     }
 
@@ -378,7 +378,7 @@ class SiteController extends Controller {
                             ->limit(12)->all();
             return $this->render('/site/search-suppliers', compact('count', 'sp', 'search'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
     }
 
@@ -497,18 +497,18 @@ class SiteController extends Controller {
                 'homeLink' => false,
                 'links' => [
                     [
-                        'label' => 'Все поставщики',
+                        'label' => Yii::t('message', 'market.controllers.site.all_vendors', ['ru'=>'Все поставщики']),
                         'url' => ['/site/suppliers'],
                     ],
                     [
                         'label' => $vendor->name,
                         'url' => ['/site/supplier', 'id' => $vendor->id],
                     ],
-                    'Каталог',
+                    Yii::t('message', 'market.controllers.site.catalog', ['ru'=>'Каталог']),
                 ],
             ];
-            $title = 'MixCart Продукты поставщика';
-            $message = 'Поставщик еще не добавил свои товары на торговую площадку MixCart';
+            $title = Yii::t('message', 'market.controllers.site.products', ['ru'=>'MixCart Продукты поставщика']);
+            $message = Yii::t('message', 'market.controllers.site.vendor_empty', ['ru'=>'Поставщик еще не добавил свои товары на торговую площадку MixCart']);
             return $this->render('/site/empty', compact('breadcrumbs','title', 'message'));
         }
     }
@@ -525,7 +525,7 @@ class SiteController extends Controller {
                 ->one();
         
         if (empty($vendor)) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         
         if (\Yii::$app->user->isGuest) {
@@ -558,7 +558,7 @@ class SiteController extends Controller {
         if ($vendor && !$relationSupplier) {
             return $this->render('/site/supplier', compact('vendor', 'currency'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out_three', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
     }
     public function actionRestaurant($id) {
@@ -567,7 +567,7 @@ class SiteController extends Controller {
         if ($restaurant) {
             return $this->render('/site/restaurant', compact('restaurant'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out_four', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
     }
 
@@ -818,8 +818,8 @@ class SiteController extends Controller {
     {
         $category = \common\models\MpCategory::find()->where(['slug' => $slug])->one();
 
-        if (empty($category)) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        if(empty($category)){
+          throw new HttpException(404 ,Yii::t('message', 'market.controllers.site.get_out_five', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
 
         $id = $category->id;
@@ -908,8 +908,8 @@ class SiteController extends Controller {
                     \common\models\MpCategory::getCategory($category->id),
                 ],
             ]);
-            $message = 'В данной категории товаров нет';
-            return $this->render('not-found', compact('breadcrumbs', 'message', 'products', 'category'));
+            $message = Yii::t('message', 'market.controllers.site.no_goods', ['ru'=>'В данной категории товаров нет']);
+            return $this->render('not-found', compact('breadcrumbs','message','products','category'));
         }
     }
 
@@ -1133,14 +1133,14 @@ class SiteController extends Controller {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (Yii::$app->user->isGuest) {
-            return $this->successNotify("Функция доступна зарегистрированным ресторанам!");
+            return $this->successNotify(Yii::t('message', 'market.controllers.site.function', ['ru'=>"Функция доступна зарегистрированным ресторанам!"]));
         }
 
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
 
         if ($client->type_id !== Organization::TYPE_RESTAURANT) {
-            return $this->successNotify("Опомнитесь, вы и есть поставщик!");
+            return $this->successNotify(Yii::t('message', 'market.controllers.site.you_vendor', ['ru'=>"Опомнитесь, вы и есть поставщик!"]));
         }
 
         $orders = $client->getCart();
@@ -1151,14 +1151,14 @@ class SiteController extends Controller {
         if ($post && $post['product_id']) {
             $product = CatalogBaseGoods::findOne(['id' => $post['product_id']]);
             if (empty($product)) {
-                return $this->successNotify("Продукт не найден!");
+                return $this->successNotify(Yii::t('message', 'market.controllers.site.no_product', ['ru'=>"Продукт не найден!"]));
             }
             $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id]);
             if ($relation && ($relation->invite === RelationSuppRest::INVITE_ON)) {
-                return $this->successNotify("Вы уже имеете каталог этого поставщика!");
+                return $this->successNotify(Yii::t('message', 'market.controllers.site.already_have', ['ru'=>"Вы уже имеете каталог этого поставщика!"]));
             }
         } else {
-            return $this->successNotify("Неизвестная ошибка!");
+            return $this->successNotify(Yii::t('error', 'market.controllers.site.undefined_error', ['ru'=>"Неизвестная ошибка!"]));
         }
 
         $isNewOrder = true;
@@ -1204,21 +1204,21 @@ class SiteController extends Controller {
         }
         $this->sendCartChange($client, $cartCount);
 
-        return $this->successNotify("Продукт добавлен в корзину!");
+        return $this->successNotify(Yii::t('message', 'market.controllers.site.product_added', ['ru'=>"Продукт добавлен в корзину!"]));
     }
 
     public function actionAjaxInviteVendor() {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (Yii::$app->user->isGuest) {
-            return $this->successNotify("Функция доступна зарегистрированным ресторанам!");
+            return $this->successNotify(Yii::t('message', 'market.controllers.site.function_two', ['ru'=>"Функция доступна зарегистрированным ресторанам!"]));
         }
 
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
 
         if ($client->type_id !== Organization::TYPE_RESTAURANT) {
-            return $this->successNotify("Опомнитесь, вы и есть поставщик!");
+            return $this->successNotify(Yii::t('message', 'market.controllers.site.you_vendor_two', ['ru'=>"Опомнитесь, вы и есть поставщик!"]));
         }
 
         $post = Yii::$app->request->post();
@@ -1226,26 +1226,27 @@ class SiteController extends Controller {
         if ($post && $post['vendor_id']) {
             $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
             if (empty($vendor)) {
-                return $this->successNotify("Поставщик не найден!");
+                return $this->successNotify(Yii::t('message', 'market.controllers.site.no_such_vendor', ['ru'=>"Поставщик не найден!"]));
             }
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendor->id, 'rest_org_id' => $client->id]);
             if ($relation) {
-                return $this->successNotify("Запрос поставщику уже направлен!");
+                return $this->successNotify(Yii::t('message', 'market.controllers.site.vendor_request', ['ru'=>"Запрос поставщику уже направлен!"]));
             }
         } else {
-            return $this->successNotify("Неизвестная ошибка!");
+            return $this->successNotify(Yii::t('error', 'market.controllers.site.undefined_error_two', ['ru'=>"Неизвестная ошибка!"]));
         }
 
         $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF, true);
         $this->sendInvite($client,$vendor);
-        return $this->successNotify("Запрос поставщику отправлен!");
+        return $this->successNotify(Yii::t('message', 'market.controllers.site.sent', ['ru'=>"Запрос поставщику отправлен!"]));
     }
     private function sendInvite($client, $vendor) {
         foreach($vendor->users as $recipient){
             if($recipient->profile->phone && $recipient->profile->sms_allow){
-                $text = "Ресторан " . $client->name . " добавил Вас через торговую площадку market.mixcart.ru";
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.add_market', [
+                    'client_name' => $client->name
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             } 
         }
     }

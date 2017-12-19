@@ -55,13 +55,13 @@ class AdditionalEmail extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'email' => 'Email',
-            'organization_id' => Yii::t('app', 'Организация'),
-            'order_created' => Yii::t('app', 'Создание'),
-            'order_canceled' => Yii::t('app', 'Отмена'),
-            'order_changed' => Yii::t('app', 'Изменение'),
-            'order_processing' => Yii::t('app', 'В работе'),
-            'order_done' => Yii::t('app', 'Выполнен'),
-            'request_accept' => Yii::t('app', 'Принятие заявки'),
+            'organization_id' => Yii::t('app', 'common.models.additional_email.org', ['ru'=>'Организация']),
+            'order_created' => Yii::t('app', 'common.models.additional_email.creation', ['ru'=>'Создание']),
+            'order_canceled' => Yii::t('app', 'common.models.additional_email.cancel', ['ru'=>'Отмена']),
+            'order_changed' => Yii::t('app', 'common.models.additional_email.changing', ['ru'=>'Изменение']),
+            'order_processing' => Yii::t('app', 'common.models.additional_email.working', ['ru'=>'В работе']),
+            'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru'=>'Выполнен']),
+            'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru'=>'Принятие заявки']),
         ];
     }
 

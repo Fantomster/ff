@@ -12,27 +12,28 @@ use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
 use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
-$catalog->isNewRecord ? $this->title = Yii::t('app', 'Новый каталог') : $this->title = Yii::t('app', 'Редактирование каталога')
+$catalog->isNewRecord ? $this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.new_cat', ['ru'=>'Новый каталог']) : $this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.edit_cat', ['ru'=>'Редактирование каталога'])
 ?>
 <section class="content-header">
         <h1>
             <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
-            Yii::t('app', 'Создание нового каталога') :
-            Yii::t('app', 'Редактирование каталога <small>').common\models\Catalog::get_value($cat_id)->name.'</small>' ?>
+            Yii::t('app', 'franchise.views.catalog.newcatalog.creating_new_cat', ['ru'=>'Создание нового каталога']) :
+            Yii::t('app', 'franchise.views.catalog.newcatalog.edit_cat_two', ['ru'=>'Редактирование каталога <small>']).common\models\Catalog::get_value($cat_id)->name.'</small>' ?>
         </h1>
         <?=
         Breadcrumbs::widget([
             'options' => [
                 'class' => 'breadcrumb',
             ],
+            'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
             'links' => [
                 [
-                'label' => Yii::t('app', 'Каталоги'),
+                'label' => Yii::t('app', 'franchise.views.catalog.newcatalog.catalogs', ['ru'=>'Каталоги']),
                 'url' => ['catalog/index', 'vendor_id'=>$vendor_id],
                 ],
                 $catalog->isNewRecord? 
-            Yii::t('app', 'Шаг 1. Создание нового каталога') :
-            Yii::t('app', 'Шаг 1. Редактирование каталога'),
+            Yii::t('app', 'franchise.views.catalog.newcatalog.step_one', ['ru'=>'Шаг 1. Создание нового каталога']) :
+            Yii::t('app', 'franchise.views.catalog.newcatalog.step_one_two', ['ru'=>'Шаг 1. Редактирование каталога']),
             ],
         ])
         ?>
@@ -43,26 +44,26 @@ $catalog->isNewRecord ? $this->title = Yii::t('app', 'Новый каталог'
             <div class="panel-body">
                 <ul class="nav fk-tab nav-tabs  pull-left">
                     <?=$catalog->isNewRecord?
-                    '<li class="active">'.Html::a(' ' . Yii::t('app', 'Название') . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-1', 'vendor_id'=>$vendor_id],['class'=>'btn btn-default']).'</li>':
-                    '<li class="active">'.Html::a(' ' . Yii::t('app', 'Название') . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-1-update', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
+                    '<li class="active">'.Html::a(' ' . Yii::t('app', 'franchise.views.catalog.newcatalog.title', ['ru'=>'Название']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-1', 'vendor_id'=>$vendor_id],['class'=>'btn btn-default']).'</li>':
+                    '<li class="active">'.Html::a(' ' . Yii::t('app', 'franchise.views.catalog.newcatalog.title_two', ['ru'=>'Название']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-1-update', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
                     ?>
                     <?=$catalog->isNewRecord?
-                    '<li class="disabled">'.Html::a(Yii::t('app', 'Добавить товары')).'</li>':
-                    '<li>'.Html::a(Yii::t('app', 'Добавить товары'),['catalog/step-2', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
+                    '<li class="disabled">'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.add_goods', ['ru'=>'Добавить товары'])).'</li>':
+                    '<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.add_goods_two', ['ru'=>'Добавить товары']),['catalog/step-2', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
                     ?>
                     <?=$catalog->isNewRecord?
-                    '<li class="disabled">'.Html::a(Yii::t('app', 'Изменить цены')).'</li>':
-                    '<li>'.Html::a(Yii::t('app', 'Изменить цены'),['catalog/step-3-copy', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
+                    '<li class="disabled">'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.change_prices', ['ru'=>'Изменить цены'])).'</li>':
+                    '<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.change_prices_two', ['ru'=>'Изменить цены']),['catalog/step-3-copy', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
                     ?>
                     <?=$catalog->isNewRecord?
-                    '<li class="disabled">'.Html::a(Yii::t('app', 'Назначить ресторану')).'</li>':
-                    '<li>'.Html::a(Yii::t('app', 'Назначить ресторану'),['catalog/step-4', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
+                    '<li class="disabled">'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.settle_to_rest', ['ru'=>'Назначить ресторану'])).'</li>':
+                    '<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.settle_to_rest_two', ['ru'=>'Назначить ресторану']),['catalog/step-4', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'
                     ?>
                 </ul>
         
             
                 <ul class="fk-prev-next pull-right">
-                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'Далее') . ' ',['#'],['class' => 'step-2']).'</li>'?>
+                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'franchise.views.catalog.newcatalog.farther', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>  
@@ -72,8 +73,8 @@ $catalog->isNewRecord ? $this->title = Yii::t('app', 'Новый каталог'
         ?>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4><?= Yii::t('app', 'ШАГ 1') ?></h4>
-                <p><?=$catalog->isNewRecord ? Yii::t('app', 'Введите название для нового каталога'):Yii::t('app', 'Изменить название каталога') ?></p>
+                <h4><?= Yii::t('app', 'franchise.views.catalog.newcatalog.step_one_three', ['ru'=>'ШАГ 1']) ?></h4>
+                <p><?=$catalog->isNewRecord ? Yii::t('app', 'franchise.views.catalog.newcatalog.enter_new_cat_name', ['ru'=>'Введите название для нового каталога']):Yii::t('app', 'franchise.views.catalog.newcatalog.change_cat_name', ['ru'=>'Изменить название каталога']) ?></p>
             </div>
             <?= $form->field($catalog, 'name')->textInput(['class' => 'form-control input-md'])->label(false) ?>
         </div>
@@ -113,7 +114,7 @@ $.ajax({
     success: function(response) {
             
             if(response.success){
-                //bootbox.alert("<h3>Сохранено!</h3>");
+                //bootbox.alert("<h3>' . Yii::t('app', 'franchise.views.catalog.newcatalog.saved', ['ru'=>'Сохранено!']) . '</h3>");
                 var url = "' . Url::toRoute(['catalog/step-2', 'vendor_id'=>$vendor_id, 'id' => '']) . '"+response.cat_id;
                 $(location).attr("href",url);
                 //$.pjax({url: url, container: "#pjax-container"});
@@ -125,7 +126,7 @@ $.ajax({
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Окей",
+                          label: "' . Yii::t('app', 'franchise.views.catalog.newcatalog.ok', ['ru'=>'Ok']) . '",
                           className: "btn-success btn-md",
                         },
                     },

@@ -4,8 +4,8 @@ $organization = $client;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> <?= Yii::t('app', 'Изменить информацию о ресторане') ?> <?= $organization->name ?>
-        <small><?= Yii::t('app', 'Редактирование информации о клиенте') ?></small>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'franchise.views.organization.change_rest_info', ['ru'=>'Изменить информацию о ресторане']) ?> <?= $organization->name ?>
+        <small><?= Yii::t('app', 'franchise.views.organization.edit_three', ['ru'=>'Редактирование информации о клиенте']) ?></small>
     </h1>
 </section>
 <section class="content body">

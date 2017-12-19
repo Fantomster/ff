@@ -152,12 +152,12 @@ $form = ActiveForm::begin([
 
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord ? Yii::t('app', 'ДОБАВЛЕНИЕ ТОВАРА') : Yii::t('app', 'РЕДАКТИРОВАНИЕ ТОВАРА') ?></h4>
+    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord ? Yii::t('app', 'franchise.views.catalog.adding_good', ['ru'=>'ДОБАВЛЕНИЕ ТОВАРА']) : Yii::t('app', 'franchise.views.catalog.editing_good', ['ru'=>'РЕДАКТИРОВАНИЕ ТОВАРА']) ?></h4>
 </div>
 <div class="modal-body" style="background:#fff !important">
     <div class="row">
         <div class="col-md-12 text-center">
-            <h5 class="sub-h3-text"><?= Yii::t('app', 'Вы можете разместить Ваш товар в Маркете') ?></h5>
+            <h5 class="sub-h3-text"><?= Yii::t('app', 'franchise.views.catalog.set_good_on_market', ['ru'=>'Вы можете разместить Ваш товар в Маркете']) ?></h5>
         </div>
     </div>
     <div class="row">
@@ -196,11 +196,11 @@ $form = ActiveForm::begin([
                      'id' => 'deleteAvatar',
                  ]);
                  ?>
-            <label for="upload" class="uploadButton"><?= Yii::t('app', 'Загрузить файл') ?></label>
+            <label for="upload" class="uploadButton"><?= Yii::t('app', 'franchise.views.catalog.upload_file', ['ru'=>'Загрузить файл']) ?></label>
             <!--input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload"-->
 <?=
         $form->field($catalogBaseGoods, 'image', ['template' => '<div class="input-group">{input}</div>{error}'])
-        ->fileInput(['placeholder' => Yii::t('app', 'НАИМЕНОВАНИЕ ТОВАРА'), 'id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
+        ->fileInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.good_name', ['ru'=>'НАИМЕНОВАНИЕ ТОВАРА']), 'id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
 ?>
                 <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
         </div>
@@ -208,12 +208,16 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-12">
             <div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
-                <label class="control-label" for="dynamicmodel-sub1"><?= Yii::t('app', 'Категория товара') ?></label>
+                <label class="control-label" for="dynamicmodel-sub1"><?= Yii::t('app', 'franchise.views.catalog.good_category', ['ru'=>'Категория товара']) ?></label>
                 <?php
+                $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name');
+                foreach ($mpCat as &$item){
+                    $item = Yii::t('app', $item);
+                }
                 echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
                     //'model'=>$categorys->sub1,
-                    'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
-                    'options' => ['placeholder' => 'Выберите...'],
+                    'data' => $mpCat,
+                    'options' => ['placeholder' => Yii::t('app', 'franchise.views.catalog.choose', ['ru'=>'Выберите...'])],
                     'theme' => "default",
                     //'hideSearch' => true,
                     'pluginOptions' => [
@@ -239,7 +243,7 @@ $form = ActiveForm::begin([
                         'depends' => ['catalogbasegoods-sub1'],
                         'placeholder' => false,
                         'url' => Url::to(['catalog/get-sub-cat']),
-                        'loadingText' => 'Загрузка...',
+                        'loadingText' => Yii::t('app', 'franchise.views.catalog.uploading', ['ru'=>'Загрузка...']),
                         'initialize' => true,
                         //'initDepends'=>['dynamicmodel-sub2'],
                         'params' => ['catalogBaseGoods_id1', 'input-type-2'],
@@ -256,30 +260,34 @@ $form = ActiveForm::begin([
                 <div class="col-md-6">
                     <?=
                             $form->field($catalogBaseGoods, 'product', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                            textInput(['placeholder' => Yii::t('app', 'НАИМЕНОВАНИЕ ТОВАРА'), 'style' => 'border-radius:3px'])
+                            textInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.good_name_two', ['ru'=>'НАИМЕНОВАНИЕ ТОВАРА']), 'style' => 'border-radius:3px'])
                     ?>
                     <?=
                             $form->field($catalogBaseGoods, 'article', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
-    title="' . Yii::t('app', 'Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара') . ' ">
+    title="' . Yii::t('app', 'franchise.views.catalog.art', ['ru'=>'Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара']) . ' ">
     </span></span></div>{error}'])->
-                            textInput(['placeholder' => Yii::t('app', 'АРТИКУЛ')])
+                            textInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.art_two', ['ru'=>'АРТИКУЛ'])])
                     ?>
                     <?=
                             $form->field($catalogBaseGoods, 'price', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
-    title="' . Yii::t('app', 'Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)') . ' ">
+    title="' . Yii::t('app', 'franchise.views.catalog.price_for_one', ['ru'=>'Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)']) . ' ">
     </span></span></div>{error}'])->
-                            textInput(['placeholder' => Yii::t('app', 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ')])
+                            textInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.price_for_one_two', ['ru'=>'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ'])])
                     ?>
-                    <label class="control-label" for=""><?= Yii::t('app', 'Ед измерения') ?></label>
+                    <label class="control-label" for=""><?= Yii::t('app', 'franchise.views.catalog.measure', ['ru'=>'Ед измерения']) ?></label>
                     <?php
+                    $mp_ed = \common\models\MpEd::find()->asArray()->all();
+                    foreach ($mp_ed as &$item){
+                        $item['name'] = Yii::t('app', $item['name']);
+                    }
                     echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
                         'model' => $catalogBaseGoods->ed,
-                        'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(), 'name', 'name'),
-                        'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
+                        'data' => ArrayHelper::map($mp_ed, 'name', 'name'),
+                        'options' => ['placeholder' => Yii::t('app', 'franchise.views.catalog.choose_two', ['ru'=>'Выберите...'])],
                         'theme' => Select2::THEME_DEFAULT,
                         'pluginOptions' => [
                             'allowClear' => true,
@@ -290,17 +298,17 @@ $form = ActiveForm::begin([
                             $form->field($catalogBaseGoods, 'units', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign"
     data-toggle="tooltip" 
-    title="' . Yii::t('app', 'Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)') . ' "></span></span></div>{error}'])->
-                            textInput(['placeholder' => Yii::t('app', 'КРАТНОСТЬ ПОСТАВКИ')])
+    title="' . Yii::t('app', 'franchise.views.catalog.min_party', ['ru'=>'Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)']) . ' "></span></span></div>{error}'])->
+                            textInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.multiplicity', ['ru'=>'КРАТНОСТЬ ПОСТАВКИ'])])
                     ?>
                 </div>
                 <div class="col-md-6">
-                    <label class="control-label" for=""><?= Yii::t('app', 'Страна производитель') ?></label>
+                    <label class="control-label" for=""><?= Yii::t('app', 'franchise.views.catalog.vendor_country', ['ru'=>'Страна производитель']) ?></label>
                     <?php
                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                         'model' => $catalogBaseGoods->region,
                         'data' => ArrayHelper::map($countrys, 'id', 'name'),
-                        'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
+                        'options' => ['placeholder' => Yii::t('app', 'franchise.views.catalog.choose_three', ['ru'=>'Выберите...'])],
                         'theme' => "default",
                         'pluginOptions' => [
                             'allowClear' => true,
@@ -311,11 +319,11 @@ $form = ActiveForm::begin([
 
 <?=
         $form->field($catalogBaseGoods, 'brand', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-        textInput(['placeholder' => Yii::t('app', 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ'), 'style' => 'border-radius:3px'])
+        textInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.vendors_name', ['ru'=>'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ']), 'style' => 'border-radius:3px'])
 ?>
                 <?=
                         $form->field($catalogBaseGoods, 'weight', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                        textInput(['placeholder' => Yii::t('app', 'ВЕС УПАКОВКИ'), 'style' => 'border-radius:3px'])
+                        textInput(['placeholder' => Yii::t('app', 'franchise.views.catalog.weight', ['ru'=>'ВЕС УПАКОВКИ']), 'style' => 'border-radius:3px'])
                 ?>
                 <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
                 </div>
@@ -338,7 +346,7 @@ $form = ActiveForm::begin([
                         'size' => 'lg',
                     ],
                     'labelSettings' => [
-                        'label' => Yii::t('app', 'РАЗМЕСТИТЬ В F-MARKET'),
+                        'label' => Yii::t('app', 'franchise.views.catalog.settle_on_market', ['ru'=>'РАЗМЕСТИТЬ В F-MARKET']),
                         'position' => CheckboxX::LABEL_RIGHT,
                         'options' => ['style' => 'font-weight: 700;']
                     ]
@@ -360,7 +368,7 @@ $form = ActiveForm::begin([
                         'size' => 'lg',
                     ],
                     'labelSettings' => [
-                        'label' => Yii::t('app', 'Показывать цену в F-MARKET'),
+                        'label' => Yii::t('app', 'franchise.views.catalog.show_price_in_market', ['ru'=>'Показывать цену в F-MARKET']),
                         'position' => CheckboxX::LABEL_RIGHT,
                         'options' => ['style' => '']
                     ]
@@ -371,11 +379,11 @@ $form = ActiveForm::begin([
             <div class="pull-right" style="margin-top: 10px;">
 <?=
 Html::button($catalogBaseGoods->isNewRecord ?
-                '<i class="icon fa fa-plus-circle"></i> ' . Yii::t('app', 'Создать') . ' ' :
-                '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ', ['class' => $catalogBaseGoods->isNewRecord ?
+                '<i class="icon fa fa-plus-circle"></i> ' . Yii::t('app', 'franchise.views.catalog.create', ['ru'=>'Создать']) . ' ' :
+                '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'franchise.views.catalog.save', ['ru'=>'Сохранить']) . ' ', ['class' => $catalogBaseGoods->isNewRecord ?
             'btn btn-success edit' : 'btn btn-success edit'])
 ?>
-                <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
+                <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'franchise.views.catalog.cancel', ['ru'=>'Отмена']) ?></a>
             </div>	
         </div>
     </div>

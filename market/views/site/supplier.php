@@ -9,7 +9,7 @@ $delivery = $vendor->delivery;
 ?>
 
 <?php
-$this->title = 'MixCart информация о поставщике';
+$this->title = Yii::t('message', 'market.views.site.supplier.info', ['ru'=>'MixCart информация о поставщике']);
 ?>
 <style>
     .mp-supplier-image{
@@ -56,7 +56,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             'homeLink' => false,
             'links' => [
                 [
-                    'label' => 'Все поставщики',
+                    'label' => Yii::t('message', 'market.views.site.supplier.all', ['ru'=>'Все поставщики']),
                     'url' => ['/site/suppliers'],
                 ],
                 $vendor->name,
@@ -71,15 +71,15 @@ font-family: "HelveticaBold",Arial,sans-serif;
             <div class="row">
                 <div class="col-md-12">
                     <h3><?= $vendor->name ?></h3>
-                    <h5><span class="title-param">Контактное лицо:</span> <?= empty($vendor->contact_name) ? '<span class="noinfo">нет информации</span>':$vendor->contact_name ?></h5>
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.contact', ['ru'=>'Контактное лицо:']) ?></span> <?= empty($vendor->contact_name) ? '<span class="noinfo">' . Yii::t('error', 'market.views.site.supplier.no_info', ['ru'=>'нет информации']) . ' </span>':$vendor->contact_name ?></h5>
                     <hr>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                   <?=!empty($vendor->phone)? '<a id="supp-phone">Показать телефон</a>':'&nbsp;'?>
+                   <?=!empty($vendor->phone)? '<a id="supp-phone">' . Yii::t('error', 'market.views.site.supplier.show_phone', ['ru'=>'Показать телефон']) . ' </a>':'&nbsp;'?>
                 </div>
                 
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <?=!empty($vendor->email)? '<a id="supp-email">Показать E-mail</a>':'&nbsp;'?>
+                    <?=!empty($vendor->email)? '<a id="supp-email">' . Yii::t('error', 'market.views.site.supplier.show_email', ['ru'=>'Показать E-mail']) . ' </a>':'&nbsp;'?>
                 </div>
                 <?php
 if(!\Yii::$app->user->isGuest){
@@ -95,10 +95,11 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 
 }else{
+    $register = Yii::t('error', 'market.views.site.supplier.register', ['ru'=>'Необходимо зарегистрироваться в системе MixCart']);
                     
 $js2 = <<<JS
 $('#supp-phone,#supp-email').click(function(e){
-alert('Необходимо зарегистрироваться в системе MixCart');  
+alert('$register');  
 })
 JS;
 $this->registerJs($js2, \yii\web\View::POS_READY);
@@ -109,7 +110,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
                               <a href="<?=Url::to(['/site/supplier-products', 'id' => $vendor->id]);?>" class="btn btn-100 btn-success view-catalog" data-product-id="">
-                                  <isc></isc>&nbsp;&nbsp;КАТАЛОГ
+                                  <isc></isc>&nbsp;&nbsp;<?= Yii::t('message', 'market.views.site.supplier.catalog', ['ru'=>'КАТАЛОГ']) ?>
                               </a>
                             </div>
                         </div>
@@ -120,7 +121,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
                               <a href="#" class="btn btn-100 btn-outline-success invite-vendor" data-vendor-id="<?= $vendor->id ?>">
-                                  ДОБАВИТЬ ПОСТАВЩИКА
+                                  <?= Yii::t('message', 'market.views.site.supplier.add_vendor', ['ru'=>'ДОБАВИТЬ ПОСТАВЩИКА']) ?>
                               </a>
                             </div>
                         </div>
@@ -133,40 +134,40 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
         </div>
         <div class="col-md-12" style="padding-top:25px">
            
-                <h5><span class="title-param">Адрес:</span> <?= empty($vendor->address) ? '<span class="noinfo">нет информации</span>':$vendor->address ?></h5> 
+                <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.address', ['ru'=>'Адрес:']) ?></span> <?= empty($vendor->address) ? '<span class="noinfo">' . Yii::t('error', 'market.views.site.supplier.no_info_two', ['ru'=>'нет информации']) . ' </span>':$vendor->address ?></h5>
        
         </div>
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6">
-                    <h4>КОРОТКО О ПОСТАВЩИКЕ</h4>  
+                    <h4><?= Yii::t('message', 'market.views.site.supplier.short_vendor', ['ru'=>'КОРОТКО О ПОСТАВЩИКЕ']) ?></h4>
                 </div>
                 <div class="col-md-6">
-                    <h4>УСЛОВИЯ ДОСТАВКИ</h4>  
+                    <h4><?= Yii::t('message', 'market.views.site.supplier.conditions', ['ru'=>'УСЛОВИЯ ДОСТАВКИ']) ?></h4>
                 </div>
             </div>
         </div>
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6">
-                    <h5><span class="title-param">Категории:</span> 
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.categories', ['ru'=>'Категории:']) ?></span>
                     <?= $vendor->getMarketGoodsCount() ?>
                     </h5> 
                 </div>
                 <div class="col-md-6">
-                    <h5><span class="title-param">Стоимость доставки:</span> 
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.', ['ru'=>'Стоимость доставки:']) ?></span>
                                       <?= $delivery->delivery_charge ?> <?= $currency ?>
                     </h5>    
-                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> <?= $currency ?></h5> 
-                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> <?= $currency ?></h5>   
-                    <h5><span class="title-param">Адрес самовывоза:</span> <span class="noinfo">нет информации</span></h5>   
-                    <h5><span class="title-param">Дни доставки:</span> <?= $delivery->getDaysString() ?></h5>  
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.free_delivery', ['ru'=>'Бесплатная доставка от:']) ?></span> <?= $delivery->min_free_delivery_charge ?><?= Yii::t('message', 'market.views.site.supplier.rouble_two', ['ru'=>' руб.']) ?></h5>
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.min_order', ['ru'=>'Минимальный заказ:']) ?></span> <?= $delivery->min_order_price ?><?= Yii::t('message', 'market.views.site.supplier.rouble_three', ['ru'=>' руб.']) ?></h5>
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.self_address', ['ru'=>'Адрес самовывоза:']) ?></span> <span class="noinfo"><?= Yii::t('message', 'market.views.site.supplier.no_info', ['ru'=>'нет информации']) ?></span></h5>
+                    <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.delivery_days', ['ru'=>'Дни доставки:']) ?></span> <?= $delivery->getDaysString() ?></h5>
                 </div>
                 <div class="col-md-12">
-                    <h4>ОПИСАНИЕ</h4>  
+                    <h4><?= Yii::t('message', 'market.views.site.supplier.description', ['ru'=>'ОПИСАНИЕ']) ?></h4>
                 </div>
                 <div class="col-md-12" style="padding-bottom:10px;">
-                   <?= empty($vendor->about) ? '<span class="noinfo">нет информации</span>':$vendor->about ?> 
+                   <?= empty($vendor->about) ? '<span class="noinfo">' . Yii::t('error', 'market.views.site.supplier.no_info_three', ['ru'=>'нет информации']) . ' </span>':$vendor->about ?>
                 </div>
             </div>
         </div>

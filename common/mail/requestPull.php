@@ -8,7 +8,7 @@ use yii\helpers\Url;
  */
 ?>
 <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family: sans-serif;">
-			Новый отклик на Вашу заявку
+			<?= Yii::t('app', 'common.mail.request_pull.new_response', ['ru'=>'Новый отклик на Вашу заявку']) ?>
 		</div>
 		<!-- Visually Hidden Preheader Text : END -->
 		<!-- Email Header : BEGIN -->
@@ -53,13 +53,13 @@ use yii\helpers\Url;
 
 			<tr>
 				<td style="text-align: center; font-family: 'Open Sans', sans-serif;  mso-height-rule: exactly; color: #555555;">
-					<h1 style="margin-bottom: 0;font-size: 16px;line-height: 27px;font-weight: 500;padding-top: 27px">Уважаемый(ая) <?=$vendor['full_name']?>!</h1>					
+					<h1 style="margin-bottom: 0;font-size: 16px;line-height: 27px;font-weight: 500;padding-top: 27px"><?= Yii::t('app', 'common.mail.request_pull.dear', ['ru'=>'Уважаемый(ая)']) ?> <?=$vendor['full_name']?>!</h1>
 				</td>
 			</tr>
 
 			<tr>
 				<td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-					<b>На <?=date("Y-m-d", strtotime("yesterday"));?> были созданы новые заявки:</b>
+					<b><?= Yii::t('app', 'common.mail.request_pull.yesterday', ['ru'=>'На {yesterday} были созданы новые заявки', 'yesterday'=>date("Y-m-d", strtotime("yesterday"))]) ?>:</b>
 					<br><br>
 					<table cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" width="100%" style="margin: auto;" class="email-container">
 					<?php
@@ -71,7 +71,7 @@ use yii\helpers\Url;
 						<td style="text-align: left; padding: 10px">
 							<b><?=$request->client->name;?>
 							№<?=$request->id?> <?=$request->product?></b><br>
-							<font style="font-family: 'Open Sans', sans-serif;color: #999999; font-size: 14px">Создана: <?=$request->created_at;?>, Дата завершения <?=$request->end;?></font>
+							<font style="font-family: 'Open Sans', sans-serif;color: #999999; font-size: 14px"><?= Yii::t('app', 'common.mail.request_pull.created', ['ru'=>'Создана']) ?>: <?=$request->created_at;?>, <?= Yii::t('app', 'common.mail.request_pull.end_date', ['ru'=>'Дата завершения']) ?> <?=$request->end;?></font>
 						</td>
 					</tr>
                                         <?php
@@ -84,7 +84,7 @@ use yii\helpers\Url;
 			</tr>
 			<tr>
 				<td style="padding: 10px 30px; padding-bottom: 40px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 16px; mso-height-rule: exactly; line-height: 16px; color: #555;">
-					<a href="https://mixcart.ru/request/list" style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;">Просмотреть все заявки</a>
+					<a href="https://mixcart.ru/request/list" style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;"><?= Yii::t('app', 'common.mail.request_pull.see_all', ['ru'=>'Просмотреть все заявки']) ?></a>
 					<br><br>
 					
 				</td>

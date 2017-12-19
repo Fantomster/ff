@@ -1,12 +1,12 @@
 <?php
-$this->title = Yii::t('app', 'Добавить поставщика');
+$this->title = Yii::t('app', 'franchise.views.organization.add_vendor', ['ru'=>'Добавить поставщика']);
 $organizationType = \common\models\Organization::TYPE_SUPPLIER;
 $organization = $vendor;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> <?= Yii::t('app', 'Добавить поставщика') ?>
-        <small><?= Yii::t('app', 'Информация о новом клиенте') ?></small>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'franchise.views.organization.add_vendor_two', ['ru'=>'Добавить поставщика']) ?>
+        <small><?= Yii::t('app', 'franchise.views.organization.new_info_two', ['ru'=>'Информация о новом клиенте']) ?></small>
     </h1>
 </section>
 <section class="content body">

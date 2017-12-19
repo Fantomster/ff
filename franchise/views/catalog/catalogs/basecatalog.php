@@ -58,7 +58,7 @@ $this->registerJs("
 );
 ?>
 <?php
-$this->title = Yii::t('app', 'Главный каталог');
+$this->title = Yii::t('app', 'franchise.views.catalog.catalogs.main_cat', ['ru'=>'Главный каталог']);
 
 $this->registerCss('
 @media (max-width: 1485px){
@@ -82,27 +82,27 @@ Modal::widget([
 $exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
 $exportColumns = [
     [
-        'label' => Yii::t('app', 'Артикул'),
+        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.art_five', ['ru'=>'Артикул']),
         'value' => 'article',
     ],
     [
-        'label' => Yii::t('app', 'Наименование'),
+        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.title', ['ru'=>'Наименование']),
         'value' => 'product',
     ],
     [
-        'label' => Yii::t('app', 'Кратность'),
+        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.multiplicity_four', ['ru'=>'Кратность']),
         'value' => 'units',
     ],
     [
-        'label' => Yii::t('app', 'Цена'),
+        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.price_three', ['ru'=>'Цена']),
         'value' => 'price',
     ],
     [
-        'label' => Yii::t('app', 'Единица измерения'),
+        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.measure_two', ['ru'=>'Единица измерения']),
         'value' => 'ed',
     ],
     [
-        'label' => Yii::t('app', 'Комментарий'),
+        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.comment', ['ru'=>'Комментарий']),
         'value' => function ($data) {
             return $data['note'] ? $data['note'] : '';
         },
@@ -111,7 +111,7 @@ $exportColumns = [
 ?>
 <?php
 Modal::begin([
-    'header' => '<h4 class="modal-title">' . Yii::t('app', 'Загрузка каталога') . ' </h4>',
+    'header' => '<h4 class="modal-title">' . Yii::t('app', 'franchise.views.catalog.catalogs.download_catalog', ['ru'=>'Загрузка каталога']) . ' </h4>',
     'id' => 'instruction',
     'size' => 'modal-lg',
 ]);
@@ -128,8 +128,8 @@ Modal::end();
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Главный каталог') ?>
-        <small><?= Yii::t('app', 'Это ваш главный каталог') ?></small><label>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'franchise.views.catalog.catalogs.main_cat_two', ['ru'=>'Главный каталог']) ?>
+        <small><?= Yii::t('app', 'franchise.views.catalog.catalogs.main_cat_three', ['ru'=>'Это ваш главный каталог']) ?></small><label>
             <div class="icheckbox_minimal-blue" aria-checked="false" aria-disabled="false" style="position: relative;"><input type="checkbox" class="minimal" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div>
         </label>
     </h1>
@@ -138,12 +138,13 @@ Modal::end();
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
-                'label' => Yii::t('app', 'Каталоги'),
+                'label' => Yii::t('app', 'franchise.views.catalog.catalogs.catalogs', ['ru'=>'Каталоги']),
                 'url' => ['vendor/catalogs'],
             ],
-            Yii::t('app', 'Главный каталог'),
+            Yii::t('app', 'franchise.views.catalog.catalogs.main_cat_four', ['ru'=>'Главный каталог']),
         ],
     ])
     ?>
@@ -152,14 +153,14 @@ Modal::end();
     <?php if (Yii::$app->session->hasFlash('success')): ?>
         <div class="alert alert-danger alert-dismissable">
             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-            <h4><i class="icon fa fa-check"></i><?= Yii::t('app', 'Ошибка') ?></h4>
+            <h4><i class="icon fa fa-check"></i><?= Yii::t('app', 'franchise.views.catalog.catalogs.error', ['ru'=>'Ошибка']) ?></h4>
             <?= Yii::$app->session->getFlash('success') ?>
         </div>
     <?php endif; ?>
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs" style="background-color: #f1f0ee;">
-            <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title"><?= Yii::t('app', 'Редактирование') ?></h5></a></li>
-            <li><a data-toggle="tab" href="#tabClients"><h5 class="box-title"><?= Yii::t('app', 'Назначить ресторану') ?></h5></a></li>
+            <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title"><?= Yii::t('app', 'franchise.views.catalog.catalogs.editing', ['ru'=>'Редактирование']) ?></h5></a></li>
+            <li><a data-toggle="tab" href="#tabClients"><h5 class="box-title"><?= Yii::t('app', 'franchise.views.catalog.catalogs.set_to_rest', ['ru'=>'Назначить ресторану']) ?></h5></a></li>
         </ul>
         <div class="tab-content">
             <div id="tabCatalog" class="tab-pane fade in active">
@@ -169,7 +170,7 @@ Modal::end();
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('app', 'franchise.views.catalog.catalogs.search', ['ru'=>'Поиск']), 'id' => 'search']) ?>
                         </div>
                     </div>   
                     <?=
@@ -177,7 +178,7 @@ Modal::end();
                         'id' => 'add-product',
                         'clientOptions' => ['style' => 'margin-top:13.2px;'],
                         'toggleButton' => [
-                            'label' => '<i class="fa fa-plus-circle"></i> ' . Yii::t('app', 'Новый товар') . ' ',
+                            'label' => '<i class="fa fa-plus-circle"></i> ' . Yii::t('app', 'franchise.views.catalog.catalogs.new_good_two', ['ru'=>'Новый товар']) . ' ',
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
@@ -190,7 +191,7 @@ Modal::end();
                         'dataProvider' => $dataProvider,
                         'columns' => $exportColumns,
                         'fontAwesome' => true,
-                        'filename' => Yii::t('app', 'Главный каталог - ') . date('Y-m-d'),
+                        'filename' => Yii::t('app', 'franchise.views.catalog.catalogs.main_cat_five', ['ru'=>'Главный каталог - ']) . date('Y-m-d'),
                         'encoding' => 'UTF-8',
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
@@ -198,7 +199,7 @@ Modal::end();
                         'batchSize' => 200,
                         'timeout' => 0,
                         'dropdownOptions' => [
-                            'label' => '<span class="text-label">' . Yii::t('app', 'Скачать каталог') . ' </span>',
+                            'label' => '<span class="text-label">' . Yii::t('app', 'franchise.views.catalog.catalogs.download_catalog_two', ['ru'=>'Скачать каталог']) . ' </span>',
                             'class' => ['btn btn-outline-default btn-sm pull-right']
                         ],
                         'exportConfig' => [
@@ -256,7 +257,7 @@ Modal::end();
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('app', 'Загрузить каталог (XLS)') . ' </span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('app', 'franchise.views.catalog.catalogs.download_catalog_three', ['ru'=>'Загрузить каталог (XLS)']) . ' </span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -267,7 +268,7 @@ Modal::end();
                     ?>
                     <?=
                     Html::a(
-                            '<i class="fa fa-list-alt"></i> <span class="text-label">' . Yii::t('app', 'Скачать шаблон (XLS)') . ' </span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
+                            '<i class="fa fa-list-alt"></i> <span class="text-label">' . Yii::t('app', 'franchise.views.catalog.catalogs.download_template_three', ['ru'=>'Скачать шаблон (XLS)']) . ' </span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
                     )
                     ?>
                     <?=
@@ -287,19 +288,19 @@ Modal::end();
                     $gridColumnsBaseCatalog = [
                         [
                             'attribute' => 'article',
-                            'label' => Yii::t('app', 'Артикул'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.art_six', ['ru'=>'Артикул']),
                             'value' => 'article',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'product',
-                            'label' => Yii::t('app', 'Наименование'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.title', ['ru'=>'Наименование']),
                             'value' => 'product',
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [
                             'attribute' => 'units',
-                            'label' => Yii::t('app', 'Кратность'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.multiplicity_five', ['ru'=>'Кратность']),
                             'value' => function ($data) {
                                 return empty($data['units']) ? '' : $data['units'];
                             },
@@ -307,7 +308,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'category_id',
-                            'label' => Yii::t('app', 'Категория'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.category_two', ['ru'=>'Категория']),
                             'value' => function ($data) {
                                 $data['category_id'] == 0 ? $category_name = '' : $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
                                 return $category_name;
@@ -316,13 +317,13 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => Yii::t('app', 'Цена'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.price_four', ['ru'=>'Цена']),
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'ed',
-                            'label' => Yii::t('app', 'Ед. измерения'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.measure_three', ['ru'=>'Ед. измерения']),
                             'value' => function ($data) {
                                 return $data['ed'];
                             },
@@ -330,7 +331,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'status',
-                            'label' => Yii::t('app', 'Наличие'),
+                            'label' => Yii::t('app', 'franchise.views.catalog.catalogs.in_stock_two', ['ru'=>'Наличие']),
                             'format' => 'raw',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             'value' => function ($data) {
@@ -435,14 +436,14 @@ Modal::end();
                 <?php
                 $gridColumnsCatalog = [
                     [
-                        'label' => Yii::t('app', 'Ресторан'),
+                        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.rest', ['ru'=>'Ресторан']),
                         'value' => function ($data) {
                             $organization_name = common\models\Organization::find()->where(['id' => $data->rest_org_id])->one()->name;
                             return $organization_name;
                         }
                     ],
                     [
-                        'label' => Yii::t('app', 'Текущий каталог'),
+                        'label' => Yii::t('app', 'franchise.views.catalog.catalogs.current_cat', ['ru'=>'Текущий каталог']),
                         'format' => 'raw',
                         'value' => function ($data) {
                             $catalog_name = $data->cat_id == 0 ? '' :
@@ -451,7 +452,7 @@ Modal::end();
                         }
                     ],
                     [
-                        'attribute' => Yii::t('app', 'Назначить'),
+                        'attribute' => Yii::t('app', 'franchise.views.catalog.catalogs.set', ['ru'=>'Назначить']),
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:50px;'],
                         'value' => function ($data) {
@@ -505,6 +506,14 @@ $baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
+
+$arr = [
+    Yii::t('app', 'franchise.views.catalog.catalogs.var', ['ru'=>'Удалить этот продукт?']),
+    Yii::t('app', 'franchise.views.catalog.catalogs.var1', ['ru'=>'Продукт будет удален из всех каталогов']),
+    Yii::t('app', 'franchise.views.catalog.catalogs.var2', ['ru'=>'Удалить']),
+    Yii::t('app', 'franchise.views.catalog.catalogs.var3', ['ru'=>'Отмена']),
+    Yii::t('app', 'franchise.views.catalog.catalogs.var4', ['ru'=>'Что-то пошло не так']),
+];
 
 $customJs = <<< JS
 var timer;
@@ -615,15 +624,15 @@ $(document).on("click", ".del-product", function(e){
     var id = $(this).attr('data-id');
         
 	bootbox.confirm({
-            title: "Удалить этот продукт?",
-            message: "Продукт будет удален из всех каталогов", 
+            title: "$arr[0]",
+            message: "$arr[1]", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$arr[2]',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$arr[3]',
                     className: 'btn-default'
                 }
             },
@@ -641,7 +650,7 @@ $(document).on("click", ".del-product", function(e){
                         //$.pjax.reload({container: "#clients-list"});
 			        $.pjax.reload({container: "#kv-unique-id-1"}); 
 			        }else{
-				    console.log('Что-то пошло не так');    
+				    console.log('$arr[4]');    
 			        }
 		        }	
 		    });

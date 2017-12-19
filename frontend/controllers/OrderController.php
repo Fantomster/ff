@@ -140,11 +140,11 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(60);
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->setTitle('отчет')
-                    ->setCellValue('A1', 'Артикул')
-                    ->setCellValue('B1', 'Наименование товара')
-                    ->setCellValue('C1', 'Кол-во')
-                    ->setCellValue('D1', 'Ед.изм');
+            $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru'=>'отчет']))
+                    ->setCellValue('A1', Yii::t('message', 'frontend.controllers.order.art', ['ru'=>'Артикул']))
+                    ->setCellValue('B1', Yii::t('message', 'frontend.controllers.order.good', ['ru'=>'Наименование товара']))
+                    ->setCellValue('C1', Yii::t('message', 'frontend.controllers.order.amo', ['ru'=>'Кол-во']))
+                    ->setCellValue('D1', Yii::t('message', 'frontend.controllers.order.mea', ['ru'=>'Ед.изм']));
             $row = 2;
             foreach ($model as $foo) {
                 $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
@@ -685,7 +685,7 @@ class OrderController extends DefaultController {
                 $order->comment = Yii::$app->request->post('comment');
                 $order->save();
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return ["title" => "Комментарий добавлен", "comment" => $order->comment, "type" => "success"]; //$this->successNotify("Комментарий добавлен");
+                return ["title" => Yii::t('message', 'frontend.controllers.order.comment_added', ['ru'=>"Комментарий добавлен"]), "comment" => $order->comment, "type" => "success"]; //$this->successNotify("Комментарий добавлен");
             }
             return false;
         }
@@ -709,7 +709,7 @@ class OrderController extends DefaultController {
                     $order->comment = Yii::$app->request->post("comment");
                 }
                 $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
-                $systemMessage = $initiator->name . ' отменил заказ!';
+                $systemMessage = $initiator->name . Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru'=>' отменил заказ!']);
                 $danger = true;
                 $order->save();
                 if ($initiator->type_id == Organization::TYPE_RESTAURANT) {
@@ -719,7 +719,7 @@ class OrderController extends DefaultController {
                 }
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return ["title" => "Заказ успешно отменен!", "type" => "success"];
+                return ["title" => Yii::t('message', 'frontend.controllers.order.order_cancelled', ['ru'=>"Заказ успешно отменен!"]), "type" => "success"];
             }
             return false;
         }
@@ -739,7 +739,7 @@ class OrderController extends DefaultController {
             $note->note = Yii::$app->request->post("comment");
             $note->save();
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $result = ["title" => "Комментарий к товару добавлен", "comment" => $note->note, "type" => "success"];
+            $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru'=>"Комментарий к товару добавлен"]), "comment" => $note->note, "type" => "success"];
             return $result;
         }
 
@@ -819,22 +819,22 @@ class OrderController extends DefaultController {
                     $order->requested_delivery = $timestamp;
                     $order->save();
                 } else {
-                    $result = ["title" => "Некорректная дата", "type" => "error"];
+                    $result = ["title" => Yii::t('message', 'frontend.controllers.order.uncorrect_date', ['ru'=>"Некорректная дата"]), "type" => "error"];
                     return $result;
                 }
             }
             if ($oldDateSet && !empty($delivery_date)) {
-                $result = ["title" => "Дата доставки изменена", "type" => "success"];
+                $result = ["title" => Yii::t('message', 'frontend.controllers.order.date_changed', ['ru'=>"Дата доставки изменена"]), "type" => "success"];
                 return $result;
             } 
             if (!$oldDateSet && !empty($delivery_date)) {
-                $result = ["title" => "Дата доставки установлена", "type" => "success"];
+                $result = ["title" => Yii::t('message', 'frontend.controllers.order.date_set', ['ru'=>"Дата доставки установлена"]), "type" => "success"];
                 return $result;
             }
             if (empty($delivery_date)) {
                 $order->requested_delivery = null;
                 $order->save();
-                $result = ["title" => "Дата доставки удалена", "type" => "success"];
+                $result = ["title" => Yii::t('message', 'frontend.controllers.order.seted_date', ['ru'=>"Дата доставки удалена"]), "type" => "success"];
                 return $result;
             }
         }
@@ -925,7 +925,7 @@ class OrderController extends DefaultController {
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
@@ -956,16 +956,16 @@ class OrderController extends DefaultController {
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                         if ($position['quantity'] == 0) {
-                            $message .= "<br/>удалил $product->product_name из заказа";
+                            $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru'=>"<br/>удалил {prod} из заказа", 'prod'=>$product->product_name]);
                         } else {
                             $oldQuantity = $product->quantity + 0;
                             $newQuantity = $position["quantity"] + 0;
-                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                            $message .=Yii::t('message', 'frontend.controllers.order.change', ['ru'=>"<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod'=>$product->product_name, 'oldQuan'=>$oldQuantity, 'ed'=>$ed]). " $newQuantity" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru'=>"<br/>изменил цену {prod} с {productPrice} руб на ", 'prod'=>$product->product_name, 'productPrice'=>$product->price]) . $position['price'] . " руб";
                         $product->price = $position['price'];
                     }
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
@@ -987,7 +987,7 @@ class OrderController extends DefaultController {
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
-                $systemMessage = $initiator . ' отменил заказ!';
+                $systemMessage = $initiator . Yii::t('message', 'frontend.controllers.order.cancelled_order_two', ['ru'=>' отменил заказ!']);
                 $this->sendSystemMessage($user, $order->id, $systemMessage, true);
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
                     $this->sendOrderCanceled($order->client, $order);
@@ -1001,31 +1001,31 @@ class OrderController extends DefaultController {
                     $order->discount_type = $discount['discount_type'];
                     $order->discount = $order->discount_type ? abs($discount['discount']) : null;
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
-                        $message = $order->discount . " руб";
+                        $message = $order->discount . Yii::t('message', 'frontend.controllers.order.rouble', ['ru'=>" руб"]);
                     } else {
                         $message = $order->discount . "%";
                     }
-                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
+                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.discount', ['ru'=>' сделал скидку на заказ №']) . $order->id . Yii::t('message', 'frontend.controllers.order.value', ['ru'=>" в размере: "]). $message);
                 }
             } else {
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
-                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.cancel_discount', ['ru'=>' отменил скидку на заказ №']) . $order->id);
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details', ['ru'=>' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
-                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru'=>' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->vendor, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
                 if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                    $systemMessage = $order->client->name . ' получил заказ!';
+                    $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order', ['ru'=>' получил заказ!']);
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
                     $this->sendOrderDone($order->acceptedBy, $order);
@@ -1057,7 +1057,7 @@ class OrderController extends DefaultController {
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
@@ -1089,16 +1089,16 @@ class OrderController extends DefaultController {
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                         if ($position['quantity'] == 0) {
-                            $message .= "<br/> удалил $product->product_name из заказа";
+                            $message .= Yii::t('message', 'frontend.controllers.del_two', ['ru'=>'<br/> удалил {prod} из заказа', 'prod'=>$product->product_name]);
                         } else {
                             $oldQuantity = $product->quantity + 0;
                             $newQuantity = $position["quantity"] + 0;
-                            $message .= "<br/> изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                            $message .= Yii::t('message', 'frontend.controllers.order.change_three', ['ru'=>"<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod'=>$product->product_name, 'oldQuan'=>$oldQuantity, 'ed'=>$ed]). " $newQuantity" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/> изменил цену $product->product_name с $product->price $currencySymbol на $position[price] $currencySymbol";
+                        $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru'=>"<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod'=>$product->product_name, 'productPrice'=>$product->price, 'currencySymbol' => $currencySymbol]) . $position['price'] . $currencySymbol;
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -1129,7 +1129,7 @@ class OrderController extends DefaultController {
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
-                $systemMessage = $initiator . ' отменил заказ!';
+                $systemMessage = $initiator . Yii::t('message', 'frontend.controllers.order.cancelled_order_three', ['ru'=>' отменил заказ!']);
                 $this->sendSystemMessage($user, $order->id, $systemMessage, true);
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
                     $this->sendOrderCanceled($order->client, $order);
@@ -1150,12 +1150,12 @@ class OrderController extends DefaultController {
                         $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
-                    $message .= "<br/> сделал скидку на заказ №$order->id в размере: $discountValue";
+                    $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru'=>"<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id'=>$order->id]) . $position['price'] . $currencySymbol;
                     $orderChanged = 1;
                 }
             } else {
                 if ($order->discount > 0) {
-                    $message .= "<br/> отменил скидку на заказ №$order->id";
+                    $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_four', ['ru'=>"<br/> отменил скидку на заказ № "]) . $order->id;
                     $orderChanged = 1;
                 }
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
@@ -1164,7 +1164,7 @@ class OrderController extends DefaultController {
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_three', ['ru'=>' изменил детали заказа №']) . $order->id . ":$message");
                 $order->calculateTotalPrice();
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
@@ -1173,13 +1173,13 @@ class OrderController extends DefaultController {
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();
-                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru'=>' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->vendor, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
                 if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                    $systemMessage = $order->client->name . ' получил заказ!';
+                    $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_two', ['ru'=>' получил заказ!']);
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
                     $this->sendOrderDone($order->acceptedBy, $order);
@@ -1208,7 +1208,7 @@ class OrderController extends DefaultController {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_three', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
@@ -1254,7 +1254,7 @@ class OrderController extends DefaultController {
             $content = Yii::$app->request->post('OrderContent');
             $this->saveCartChanges($content);
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return ["title" => "Изменения сохранены!", "type" => "success"];
+            return ["title" => Yii::t('message', 'frontend.controllers.order.changes_saved', ['ru'=>"Изменения сохранены!"]), "type" => "success"];
         }
 
         $orders = $client->getCart();
@@ -1274,7 +1274,7 @@ class OrderController extends DefaultController {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_four', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
@@ -1303,7 +1303,7 @@ class OrderController extends DefaultController {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
                     $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
-                    $systemMessage = $initiator . ' отменил заказ!';
+                    $systemMessage = $initiator . Yii::t('message', 'frontend.controllers.order.cancelled_order_five', ['ru'=>' отменил заказ!']);
                     $danger = true;
                     if ($organizationType == Organization::TYPE_RESTAURANT) {
                         $this->sendOrderCanceled($order->client, $order);
@@ -1313,23 +1313,23 @@ class OrderController extends DefaultController {
                     break;
                 case 'confirm':
                     if ($order->isObsolete) {
-                        $systemMessage = $order->client->name . ' получил заказ!';
+                        $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_three', ['ru'=>' получил заказ!']);
                         $order->status = Order::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
                         $this->sendOrderDone($order->createdBy, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
-                        $systemMessage = $order->client->name . ' подтвердил заказ!';
+                        $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.confirm_order', ['ru'=>' подтвердил заказ!']);
                         $this->sendOrderProcessing($order->client, $order);
                         $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
-                        $systemMessage = $order->vendor->name . ' подтвердил заказ!';
+                        $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru'=>' подтвердил заказ!']);
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                         $edit = true;
                         $this->sendOrderProcessing($order->vendor, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                        $systemMessage = $order->client->name . ' получил заказ!';
+                        $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_four', ['ru'=>' получил заказ!']);
                         $order->status = Order::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
                         $this->sendOrderDone($order->createdBy, $order);
@@ -1351,10 +1351,10 @@ class OrderController extends DefaultController {
             $order = Order::findOne(['id' => $id, 'vendor_id' => $currentOrganization->id]);
         }
         if (!isset($order) || !$order->isObsolete) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_five', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
 
-        $systemMessage = $order->client->name . ' получил заказ!';
+        $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru'=>' получил заказ!']);
         $order->status = Order::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
         $this->sendOrderDone($order->createdBy, $order);
@@ -1441,7 +1441,7 @@ class OrderController extends DefaultController {
         $order = Order::findOne(['id' => $id]);
 
         if ($order->client_id !== $this->currentUser->organization_id) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_six', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
 
         $newOrder = new Order([
@@ -1642,7 +1642,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "Измененения в заказе №" . $order->id;
+        $subject = Yii::t('message', 'frontend.controllers.order.change_in_order', ['ru'=>"Измененения в заказе №"]) . $order->id;
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1658,9 +1658,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1677,7 +1679,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "Заказ №" . $order->id . " выполнен!";
+        $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru'=>"Заказ № {order_id} выполнен!", 'order_id'=>$order->id]);
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1693,9 +1695,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
-                $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_done', [
+                    'name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1712,7 +1716,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "Новый заказ №" . $order->id . "!";
+        $subject = Yii::t('message', 'frontend.controllers.order.new_order', ['ru'=>"Новый заказ №"]) . $order->id . "!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1730,9 +1734,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_new', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1748,7 +1754,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "Заказ №" . $order->id . " подтвержден!";
+        $subject = Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru'=>"Заказ № {order_id} подтвержден!", 'order_id'=>$order->id]);
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1764,9 +1770,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
-                $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_processing', [
+                    'vendor_name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1782,7 +1790,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "Заказ №" . $order->id . " отменен!";
+        $subject = Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru'=>"Заказ № {order_id} отменен!", 'order_id'=>$order->id]);
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1798,9 +1806,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_canceled', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }

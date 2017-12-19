@@ -24,7 +24,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
         ?>
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="modal-title"><?= $user->isNewRecord ? Yii::t('app', 'Новый пользователь') : Yii::t('app', 'Редактировать пользователя') ?></h4>
+            <h4 class="modal-title"><?= $user->isNewRecord ? Yii::t('app', 'franchise.views.site.settings.new_user', ['ru'=>'Новый пользователь']) : Yii::t('app', 'franchise.views.site.settings.edit_user', ['ru'=>'Редактировать пользователя']) ?></h4>
         </div>
         <div class="modal-body">
 
@@ -58,18 +58,18 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                     'size' => 'md',
                 ],
                 'labelSettings' => [
-                    'label' => Yii::t('app', 'Разрешить СМС уведомление'),
+                    'label' => Yii::t('app', 'franchise.views.site.settings.allow_sms', ['ru'=>'Разрешить СМС уведомление']),
                     'position' => CheckboxX::LABEL_RIGHT,
                     'options' => ['style' => '']
                 ]
             ])->label(false);
             ?>
 
-            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown())->label(Yii::t('app', 'Роль')) ?>
+            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown())->label(Yii::t('app', 'franchise.views.site.settings.role', ['ru'=>'Роль'])) ?>
 
             <div style="display: <?= (isset($user->role_id) && $user->role_id == Role::ROLE_FRANCHISEE_MANAGER) ? 'block' : 'none' ?>" class="alLeaderChoose">
 
-            <?= $form->field($rel, 'leader_id')->dropDownList($leadersArray, ['prompt'=>Yii::t('app', 'Выберите руководителя для менеджера')])->label(Yii::t('app', 'Руководитель')) ?>
+            <?= $form->field($rel, 'leader_id')->dropDownList($leadersArray, ['prompt'=>Yii::t('app', 'franchise.views.site.settings.choose_boss', ['ru'=>'Выберите руководителя для менеджера'])])->label(Yii::t('app', 'franchise.views.site.settings.boss', ['ru'=>'Руководитель'])) ?>
 
             <?= $form->field($rel, 'manager_id')->hiddenInput(['value'=>$user->id])->label(false) ?>
 
@@ -88,7 +88,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                     'size' => 'md',
                 ],
                 'labelSettings' => [
-                    'label' => Yii::t('app', 'Активен'),
+                    'label' => Yii::t('app', 'franchise.views.site.settings.is_active', ['ru'=>'Активен']),
                     'position' => CheckboxX::LABEL_RIGHT,
                     'options' => ['style' => '']
                 ]
@@ -98,16 +98,16 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
         </div>
         <div class="modal-footer">
-            <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> ' . Yii::t('app', 'Создать') . ' ' : '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ', ['class' => 'btn btn-success edit']) ?>
+            <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> ' . Yii::t('app', 'franchise.views.site.settings.create', ['ru'=>'Создать']) . ' ' : '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'franchise.views.site.settings.save', ['ru'=>'Сохранить']) . ' ', ['class' => 'btn btn-success edit']) ?>
             <?=
-            Html::button('<i class="fa fa-fw fa-trash-o"></i> ' . Yii::t('app', 'Удалить') . ' ', [
+            Html::button('<i class="fa fa-fw fa-trash-o"></i> ' . Yii::t('app', 'franchise.views.site.settings.del', ['ru'=>'Удалить']) . ' ', [
                 'class' => 'btn btn-danger delete',
                 'data' => [
                     'id' => $user->id,
                     'action' => Url::to(["site/ajax-delete-user"]),
         ]])
             ?>
-            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
+            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'franchise.views.site.settings.cancel', ['ru'=>'Отмена']) ?></a>
         </div>
 <?php ActiveForm::end(); ?>
     </div>

@@ -25,7 +25,7 @@ $left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($
 $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is not null')->all();
 ?>
 <style>
-.panel-group {margin-bottom: 0px;overflow: hidden;}  
+.panel-group {margin-bottom: 0px;overflow: hidden;}
 .panel-group .panel{border-radius:0;border:0;border-bottom:1px solid #ddd}
 .panel-body { padding:0px; }
 .panel-body table tr td span{ width:100%;display: block;padding-left: 25px;padding-top:10px;padding-bottom:7px;}
@@ -46,13 +46,13 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
 </style>
 <div class="row">
     <div class="col-md-12">
-        <h3>Каталог <span class="badge pull-right"><?=$count_products_from_mp;?> товаров</span></h3>  
+        <h3><?= Yii::t('message', 'market.views.layouts.left.catalog', ['ru'=>'Каталог']) ?> <span class="badge pull-right"><?=$count_products_from_mp;?> <?= Yii::t('message', 'market.views.layouts.left.goods', ['ru'=>'товаров']) ?></span></h3>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12">
       <div class="panel-group" id="accordion">
-        <?php 
+        <?php
         $i = 0;
         foreach($left_menu_categorys as $row){
         $i++;
@@ -61,7 +61,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
             <div class="panel-heading">
               <a data-toggle="collapse" data-parent="#accordion" href="#coll<?= $i ?>">
                 <h4 class="panel-title">
-                    <?=$row['name']?>
+                    <?=Yii::t('app', $row['name'])?>
                 </h4>
                 <span class="caret pull-right"></span>
               </a>
@@ -75,23 +75,23 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
                     <table class="table">
                         <tr>
                             <td>
-                                <a href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row2->slug ]) ?>" title="<?=$row2->name ?>">
-                                <span><?=$row2->name ?></span>
+                                <a href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row2->slug ]) ?>" title="<?=Yii::t('app', $row2->name) ?>">
+                                <span><?=Yii::t('app', $row2->name) ?></span>
                               </a>
                             </td>
                         </tr>
                     </table>
                 </div>
-                <?php 
+                <?php
                     }
                 }
                 ?>
             </div>
         </div>
         <?php
-        } 
+        }
         ?>
       </div>
-      
+
     </div>
 </div>

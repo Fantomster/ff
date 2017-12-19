@@ -69,7 +69,7 @@ $this->registerJs('
         <div class="modal-content">
             <div class="first-step">
                 <div class="data-modal__logo"><img src="images/tmp_file/logo.png" alt=""></div>
-                <div class="data-modal__sub-txt">Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.</div>
+                <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.client.dashboard.sorry', ['ru'=>'Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.']) ?></div>
                 <?php
                 $form = ActiveForm::begin([
                             'id' => 'complete-form',
@@ -97,7 +97,7 @@ $this->registerJs('
                         <?=
                                 $form->field($profile, 'full_name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => 'ФИО']);
+                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.fio', ['ru'=>'ФИО'])]);
                         ?>
                         <i class="fa fa-user"></i>
                     </label>
@@ -105,7 +105,7 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => 'Название организации']);
+                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.org_name', ['ru'=>'Название организации'])]);
                         ?>
                         <i class="fa fa-bank"></i>
                     </label>
@@ -113,13 +113,13 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'address')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => 'Адрес'])
+                                ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.address', ['ru'=>'Адрес'])])
                         ?>
                         <i class="fa fa-map-marker"></i>
                     </label>
                 </div>
                 <div id="map" class="modal-map"></div>
-                <button type="submit" class="but but_green complete-reg"><span>Продолжить работу</span><i class="ico"></i></button>
+                <button type="submit" class="but but_green complete-reg"><span><?= Yii::t('message', 'frontend.views.client.dashboard.continue', ['ru'=>'Продолжить работу']) ?></span><i class="ico"></i></button>
                 <?php ActiveForm::end(); ?>
             </div>
             <div class="second-step">
@@ -129,10 +129,10 @@ $this->registerJs('
                         <div class="col-md-6 col-xs-6"><i class="ico ico-basket"></i></div>
                     </div>
                 </div>
-                <div class="data-modal__sub-txt">Вы хотите работать со своими поставщиками или найти новых?</div>
+                <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.client.dashboard.wanna_work', ['ru'=>'Вы хотите работать со своими поставщиками или найти новых?']) ?></div>
                 <div class="data-modal__buts-wrp">
-                    <a href="#" class="search-new but but_green wt next"><span>Найти новых</span></a>
-                    <a href="<?= Url::to('/client/add-first-vendor') ?>" class="but but_green wizard-off"><span>Завести своих поставщиков</span></a>
+                    <a href="#" class="search-new but but_green wt next"><span><?= Yii::t('message', 'frontend.views.client.dashboard.find', ['ru'=>'Найти новых']) ?></span></a>
+                    <a href="<?= Url::to('/client/add-first-vendor') ?>" class="but but_green wizard-off"><span><?= Yii::t('message', 'frontend.views.client.dashboard.make_own', ['ru'=>'Завести своих поставщиков']) ?></span></a>
                 </div>
             </div>
             <div class="third-step">
@@ -142,10 +142,10 @@ $this->registerJs('
                         <div class="col-md-6"><i class="ico ico-cart"></i></div>
                     </div>
                 </div>
-                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на MixMarket</div>
+                <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.client.dashboard.can_create', ['ru'=>'Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на MixMarket']) ?></div>
                 <div class="data-modal__buts-wrp">
-                    <a href="<?= Url::to('/request/list') ?>" class="but but_green wt wizard-off"><span>Создать заявку</span></a>
-                    <a href="https://market.mixcart.ru" class="but but_green"><span>Поиск на MixMarket</span></a>
+                    <a href="<?= Url::to('/request/list') ?>" class="but but_green wt wizard-off"><span><?= Yii::t('message', 'frontend.views.client.dashboard.create', ['ru'=>'Создать заявку']) ?></span></a>
+                    <a href="https://market.mixcart.ru" class="but but_green"><span><?= Yii::t('message', 'frontend.views.client.dashboard.search', ['ru'=>'Поиск на MixMarket']) ?></span></a>
                 </div>
             </div>
         </div>

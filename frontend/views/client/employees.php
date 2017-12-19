@@ -9,7 +9,7 @@ use yii\bootstrap\Modal;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\Breadcrumbs;
-$this->title = 'Настройки';
+$this->title = Yii::t('message', 'frontend.views.client.emp.settings', ['ru'=>'Настройки']);
 $user = new User();
 $role = new Role();
 
@@ -56,17 +56,18 @@ $this->registerJs(
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Сотрудники
-        <small>Список сотрудников организации</small>
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.client.emp.employees', ['ru'=>'Сотрудники']) ?>
+        <small><?= Yii::t('message', 'frontend.views.client.emp.list', ['ru'=>'Список сотрудников организации']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
-            'Настройки',
-            'Сотрудники',
+            Yii::t('message', 'frontend.views.client.emp.settings_two', ['ru'=>'Настройки']),
+            Yii::t('message', 'frontend.views.client.emp.employees_two', ['ru'=>'Сотрудники']),
         ],
     ])
     ?>
@@ -91,7 +92,7 @@ $this->registerJs(
         $form->field($searchModel, 'searchString')->textInput([
             'id' => 'searchString',
             'class' => 'form-control',
-            'placeholder' => 'Поиск'])->label(false)
+            'placeholder' => Yii::t('message', 'frontend.views.client.emp.search', ['ru'=>'Поиск'])])->label(false)
         ?>
             </div><div class="col-md-9">
         <?=
@@ -99,7 +100,7 @@ $this->registerJs(
             'id' => 'add-user',
             'clientOptions' => false,
             'toggleButton' => [
-                'label' => '<i class="icon fa fa-user-plus"></i>  Добавить сотрудника',
+                'label' => '<i class="icon fa fa-user-plus"></i>  ' . Yii::t('message', 'frontend.views.client.emp.add', ['ru'=>'Добавить сотрудника']),
                 'tag' => 'a',
                 'data-target' => '#add-user',
                 'class' => 'btn btn-success pull-right',
@@ -140,11 +141,11 @@ $this->registerJs(
                         'profile.phone',
                         [
                           'attribute' => 'role.name',
-                          'label' => \Yii::t('app', 'Роль')
+                          'label' => \Yii::t('app', 'frontend.views.client.emp.role', ['ru'=>'Роль'])
                         ],
                         [
                             'attribute' => 'status',
-                            'label' => Yii::t('user', 'Status'),
+                            'label' => Yii::t('app', 'frontend.views.client.emp.status', ['ru'=>'Статус']),
                             'filter' => $user::statusDropdown(),
                             'value' => function($model, $index, $dataColumn) use ($user) {
                                 $statusDropdown = $user::statusDropdown();

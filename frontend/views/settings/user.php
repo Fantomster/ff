@@ -104,17 +104,18 @@ $this->registerJs("
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Личные
-        <small>Информация обо мне</small>
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.settings.personal', ['ru'=>'Личные']) ?>
+        <small><?= Yii::t('message', 'frontend.views.settings.my_info', ['ru'=>'Информация обо мне']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
-            'Настройки',
-            'Личные',
+            Yii::t('message', 'frontend.views.settings.settings', ['ru'=>'Настройки']),
+            Yii::t('message', 'frontend.views.settings.personal_two', ['ru'=>'Личные']),
         ],
     ])
     ?>
@@ -128,7 +129,7 @@ $this->registerJs("
                 'id' => 'setAvatar',
                 'clientOptions' => false,
                 'toggleButton' => [
-                    'label' => '<i class="icon fa fa-user-plus"></i>  Сменить аватар',
+                    'label' => '<i class="icon fa fa-user-plus"></i>  ' . Yii::t('message', 'frontend.views.settings.avatar', ['ru'=>'Сменить аватар']),
                     'tag' => 'a',
                     'data-target' => '#setAvatar',
                     'class' => 'btn btn-success',
@@ -137,7 +138,7 @@ $this->registerJs("
             ])
             ?>
             <?=
-            Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить аватар', '#', [
+            Html::a('<i class="fa fa-trash m-r-xxs"></i> ' . Yii::t('message', 'frontend.views.settings.del_avatar', ['ru'=>'Удалить аватар']) . ' ', '#', [
                                     'class' => 'btn btn-danger',
                                     'id' => 'deleteAvatar',
                         ]);
@@ -162,8 +163,8 @@ $this->registerJs("
             <?php Pjax::end(); ?>
         </div>
         <div class="box-footer clearfix">
-            <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
-            <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
+            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.settings.save', ['ru'=>'Сохранить изменения']) . ' ', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
+            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.settings.cancel_changes', ['ru'=>'Отменить изменения']) . ' ', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
         </div>
     </div>
 </section>

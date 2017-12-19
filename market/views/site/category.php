@@ -63,8 +63,8 @@ $this->registerMetaTag([
         if($filter == 'rating-down'){$caretRating = "down"; $caretPrice = "up";}
         if($filter == 'price-up'){$caretRating = "up"; $caretPrice = "up";}
         if($filter == 'price-down'){$caretRating = "up"; $caretPrice = "down";}
-        echo "<a href=" . Url::to(['/site/category', 'slug' => $category->slug, 'filter' => 'rating-' . $caretRating]) . " class='filter'>Рейтинг <span class='caret " . $caretRating . "'></span></a>";
-        echo "<a href=" . Url::to(['/site/category', 'slug' => $category->slug, 'filter' => 'price-' . $caretPrice]) . " class='filter'>Цена <span class='caret " . $caretPrice . "'></span></a>";
+        echo "<a href=" . Url::to(['/site/category', 'slug' => $category->slug, 'filter' => 'rating-' . $caretRating]) . " class='filter'>" . Yii::t('message', 'market.views.site.category.rating', ['ru'=>'Рейтинг']) . "  <span class='caret " . $caretRating . "'></span></a>";
+        echo "<a href=" . Url::to(['/site/category', 'slug' => $category->slug, 'filter' => 'price-' . $caretPrice]) . " class='filter'>" . Yii::t('message', 'market.views.site.category.price', ['ru'=>'Цена']) . "  <span class='caret " . $caretPrice . "'></span></a>";
         ?>
     </div>
 </div>
@@ -97,7 +97,7 @@ $this->registerMetaTag([
                       <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>"><h3><?=$row->product; ?></h3></a>
                   </div>
                   <div class="product-category">
-                      <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?=$row->subCategory->name; ?></h5>
+                      <h5><?= Yii::t('app', \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name); ?>/<?=Yii::t('app', $row->subCategory->name); ?></h5>
                   </div>
                   <div class="product-company">
                       <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
@@ -108,7 +108,7 @@ $this->registerMetaTag([
                 <div class="col-md-12">
                   <div class="product-price">
                       <?php if(empty($row->mp_show_price)){ ?>
-                      <h4 style="color:#dfdfdf">договорная цена</h4>
+                      <h4 style="color:#dfdfdf"><?= Yii::t('message', 'market.views.site.category.price_two', ['ru'=>'договорная цена']) ?></h4>
                       <?php } else {?>
                       <h4><?=floatval($row->price); ?> <small><?= $row->catalog->currency->symbol ?></small></h4>
                       <?php } ?>
@@ -116,7 +116,7 @@ $this->registerMetaTag([
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
-                      <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                      <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> <?= Yii::t('message', 'market.views.site.category.buy', ['ru'=>'КУПИТЬ']) ?></a>
                   </div>  
                 </div>
               </div>
@@ -128,7 +128,7 @@ $this->registerMetaTag([
     </div> 
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-100 btn-outline-default <?=$count>12?'':'disabled'?>" id="product-more">Показать еще</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$count>12?'':'disabled'?>" id="product-more"><?= Yii::t('message', 'market.views.site.category.show_more', ['ru'=>'Показать еще']) ?></a>
       </div>   
     </div>
   </div>

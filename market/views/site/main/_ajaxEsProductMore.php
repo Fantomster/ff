@@ -30,7 +30,7 @@ foreach ($pr as $row) {
                         <a href="<?= Url::to(['/site/product', 'id' => $row->product_id]); ?>"><h3><?= Html::decode(Html::decode($row->product_name)) ?></h3></a>
                     </div>
                     <div class="product-category">
-                        <h5><?= $row->product_category_name ?>/<?= $row->product_category_sub_name; ?></h5>
+                        <h5><?= Yii::t('app', $row->product_category_name) ?>/<?= Yii::t('app', $row->product_category_sub_name); ?></h5>
                     </div>
                     <div class="product-company">
                         <a href="<?= Url::to(['/site/supplier', 'id' => $row->product_supp_id]); ?>">
@@ -41,7 +41,7 @@ foreach ($pr as $row) {
                 <div class="col-md-12">
                     <div class="product-price">
                         <?php if (empty($row->product_show_price)) { ?>
-                            <h4 style="color: #dfdfdf">договорная цена</h4>
+                            <h4 style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.main.price', ['ru'=>'договорная цена']) ?></h4>
                         <?php } else { ?>
                             <h4><?= floatval($row->product_price); ?> <small><?= $row->product_currency ?></small></h4>
     <?php } ?>
@@ -50,7 +50,7 @@ foreach ($pr as $row) {
                 </div>
                 <div class="col-md-12">
                     <div class="product-button">
-                        <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->product_id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                        <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->product_id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> <?= Yii::t('message', 'market.views.site.main.buy', ['ru'=>'КУПИТЬ']) ?></a>
                     </div>  
                 </div>
             </div>

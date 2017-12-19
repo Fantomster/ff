@@ -1,6 +1,6 @@
 <?php
 
-$this->title = Yii::t('app', 'Заказы');
+$this->title = Yii::t('app', 'franchise.views.site.orders_two', ['ru'=>'Заказы']);
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -20,8 +20,8 @@ kartik\select2\Select2Asset::register($this);
 ?>
     <section class="content-header">
         <h1>
-            <i class="fa fa-home"></i> <?= Yii::t('app', 'Заказы ваших ресторанов') ?>
-            <small><?= Yii::t('app', 'Список заказов подключенных вами ресторанов и их статус') ?></small>
+            <i class="fa fa-home"></i> <?= Yii::t('app', 'franchise.views.site.rest_orders', ['ru'=>'Заказы ваших ресторанов']) ?>
+            <small><?= Yii::t('app', 'franchise.views.site.rest_orders_list', ['ru'=>'Список заказов подключенных вами ресторанов и их статус']) ?></small>
         </h1>
     </section>
     <section class="content">
@@ -39,31 +39,31 @@ kartik\select2\Select2Asset::register($this);
                 ?>
                 <div class="row">
                     <div class="col-lg-3 col-md-3 col-sm-6">
-                        <?= Html::label('Поиск', null, ['style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('app', 'franchise.views.site.search', ['ru'=>'Поиск']), null, ['style' => 'color:#555']) ?>
                         <div class="input-group  pull-left">
                         <span class="input-group-addon">
                             <i class="fa fa-search"></i>
                         </span>
-                            <?= Html::input('text', 'OrderSearch[search]', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search', 'style' => 'width:300px']) ?>
+                            <?= Html::input('text', 'OrderSearch[search]', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'franchise.views.site.search_three', ['ru'=>'Поиск']), 'id' => 'search', 'style' => 'width:300px']) ?>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?=
                         $form->field($searchModel, 'status')
-                            ->dropDownList(['0' => Yii::t('app', 'Все'), '1' => Yii::t('app', 'Новый'), '2' => Yii::t('app', 'Отменен'), '3' => Yii::t('app', 'Выполняется'), '4' => Yii::t('app', 'Завершен')], ['id' => 'statusFilterID'])
+                            ->dropDownList(['0' => Yii::t('app', 'franchise.views.site.all_two', ['ru'=>'Все']), '1' => Yii::t('app', 'franchise.views.site.new', ['ru'=>'Новый']), '2' => Yii::t('app', 'franchise.views.site.canceled', ['ru'=>'Отменен']), '3' => Yii::t('app', 'franchise.views.site.in_process', ['ru'=>'Выполняется']), '4' => Yii::t('app', 'franchise.views.site.ended', ['ru'=>'Завершен'])], ['id' => 'statusFilterID'])
                             ->label('Статус', ['style' => 'color:#555'])
                         ?>
                     </div>
                     <div class="col-lg-5 col-md-6 col-sm-6">
-                        <?= Html::label(Yii::t('app', 'Начальная дата / Конечная дата'), null, ['style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('app', 'franchise.views.site.date_from_to', ['ru'=>'Начальная дата / Конечная дата']), null, ['style' => 'color:#555']) ?>
                         <div class="form-group" style="width: 300px; height: 44px;">
                             <?=
                             DatePicker::widget([
                                 'model' => $searchModel,
                                 'attribute' => 'date_from',
                                 'attribute2' => 'date_to',
-                                'options' => ['placeholder' => Yii::t('app', 'Дата'), 'id' => 'dateFrom'],
-                                'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
+                                'options' => ['placeholder' => Yii::t('app', 'franchise.views.site.date_from', ['ru'=>'Дата']), 'id' => 'dateFrom'],
+                                'options2' => ['placeholder' => Yii::t('app', 'franchise.views.site.date_to', ['ru'=>'Конечная дата']), 'id' => 'dateTo'],
                                 'separator' => '-',
                                 'type' => DatePicker::TYPE_RANGE,
                                 'pluginOptions' => [
@@ -83,7 +83,7 @@ kartik\select2\Select2Asset::register($this);
                             'dataProvider' => $dataProvider,
                             'columns' => $exportColumns,
                             'fontAwesome' => true,
-                            'filename' => Yii::t('app', 'Заказы - ') . date('Y-m-d'),
+                            'filename' => Yii::t('app', 'franchise.views.site.orders_three', ['ru'=>'Заказы - ']) . date('Y-m-d'),
                             'encoding' => 'UTF-8',
                             'target' => ExportMenu::TARGET_SELF,
                             'showConfirmAlert' => false,
@@ -91,7 +91,7 @@ kartik\select2\Select2Asset::register($this);
                             'batchSize' => 200,
                             'timeout' => 0,
                             'dropdownOptions' => [
-                                'label' => '<span class="text-label">' . Yii::t('app', 'Скачать список') . ' </span>',
+                                'label' => '<span class="text-label">' . Yii::t('app', 'franchise.views.site.download_list', ['ru'=>'Скачать список']) . ' </span>',
                                 'class' => ['btn btn-outline-default btn-sm'],
                                 'style' => 'margin-right:10px;',
                             ],
@@ -169,17 +169,17 @@ kartik\select2\Select2Asset::register($this);
                                 [
                                     'attribute' => 'clientName',
                                     'value' => 'client.name',
-                                    'label' => Yii::t('app', 'Ресторан'),
+                                    'label' => Yii::t('app', 'franchise.views.site.rest_three', ['ru'=>'Ресторан']),
                                 ],
                                 [
                                     'attribute' => 'vendorName',
                                     'value' => 'vendor.name',
-                                    'label' => Yii::t('app', 'Поставщик'),
+                                    'label' => Yii::t('app', 'franchise.views.site.vendor_two', ['ru'=>'Поставщик']),
                                 ],
                                 [
                                     'attribute' => 'clientManager',
                                     'value' => 'createdByProfile.full_name',
-                                    'label' => Yii::t('app', 'Заказ создал'),
+                                    'label' => Yii::t('app', 'franchise.views.site.order_created', ['ru'=>'Заказ создал']),
                                 ],
                                 [
                                     'attribute' => 'acceptedByProfile.full_name',
@@ -203,7 +203,7 @@ kartik\select2\Select2Asset::register($this);
 //                                        }
 //                                        return $string;
 //                                    },
-                                    'label' => Yii::t('app', 'Заказ принял'),
+                                    'label' => Yii::t('app', 'franchise.views.site.order_accepted', ['ru'=>'Заказ принял']),
                                     'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                                 ],
                                 [
@@ -212,7 +212,7 @@ kartik\select2\Select2Asset::register($this);
                                     'value' => function ($data) {
                                         return (float)$data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
                                     },
-                                    'label' => Yii::t('app', 'Сумма'),
+                                    'label' => Yii::t('app', 'franchise.views.site.sum_two', ['ru'=>'Сумма']),
                                     'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
                                 ],
                                 [
@@ -222,11 +222,11 @@ kartik\select2\Select2Asset::register($this);
                                         $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                         return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                     },
-                                    'label' => Yii::t('app', 'Дата создания'),
+                                    'label' => Yii::t('app', 'franchise.views.site.creating_date_two', ['ru'=>'Дата создания']),
                                 ],
                                 [
                                     'attribute' => 'status',
-                                    'label' => Yii::t('app', 'Статус'),
+                                    'label' => Yii::t('app', 'franchise.views.site.status_three', ['ru'=>'Статус']),
                                     'format' => 'raw',
                                     'value' => function ($data) {
                                         $statusClass = "";

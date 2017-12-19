@@ -81,28 +81,36 @@ if (!Yii::$app->user->isGuest) {
             </div>
             <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader" style="cursor:pointer"><?=Yii::$app->request->cookies->get('locality')?></span>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
-                    <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
+                    <li><a href="<?= Url::to(['site/restaurants']) ?>"><?= Yii::t('message', 'market.views.layouts.header.rest', ['ru'=>'РЕСТОРАНЫ']) ?></a></li>
+                    <li><a href="<?= Url::to(['site/suppliers']) ?>"><?= Yii::t('message', 'market.views.layouts.header.vendors', ['ru'=>'ПОСТАВЩИКИ']) ?></a></li>
                     <li class="dropdown">
                         <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/index']); ?>" class="dropdown-toggle">MIXCART <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/about']) ?>">О&nbsp;нас</a></li>
-                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>">Контакты</a></li>
+                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/about']) ?>"><?= Yii::t('message', 'market.views.layouts.header.about', ['ru'=>'О&nbsp;нас']) ?></a></li>
+                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>"><?= Yii::t('message', 'market.views.layouts.header.contacts', ['ru'=>'Контакты']) ?></a></li>
                         </ul>
                       </li>
-                    
+
                     <?php if (Yii::$app->user->isGuest) { ?>
-                        <li><a class="btn-navbar" href="<?= Url::to(['/user/login']) ?>">войти / регистрация</a></li>
+                        <li><a class="btn-navbar"
+                               href="<?= Url::to(['/user/login']) ?>"><?= Yii::t('message', 'market.views.layouts.header.enter', ['ru'=>'войти / регистрация']) ?></a>
+                        </li>
                     <?php } else { ?>
                         <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                             <li>
                                 <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['order/checkout']) ?>">
-                                    КОРЗИНА <sup><span class="badge cartCount"><?= $organization->getCartCount() ?></span></sup>
+                                    <?= Yii::t('message', 'market.views.layouts.header.basket', ['ru'=>'КОРЗИНА']) ?>
+                                    <sup><span class="badge cartCount"><?= $organization->getCartCount() ?></span></sup>
                                 </a>
                             </li>
                         <?php } ?>
-                        <li><a class="btn-navbar" href="<?= Url::to(['/user/logout']) ?>" data-method="post"><?= $user->profile->full_name ?> [выход]</a></li>
-                        <?php } ?>
+                        <li><a class="btn-navbar" href="<?= Url::to(['/user/logout']) ?>"
+                               data-method="post"><?= $user->profile->full_name ?>
+                                [<?= Yii::t('message', 'market.views.layouts.header.exit', ['ru'=>'выход']) ?>]</a>
+                        </li>
+                    <?php } ?>
+
+                    <?=\common\widgets\LangSwitch::widget()?>
                 </ul>
             </div>
             <!--/.nav-collapse -->

@@ -332,19 +332,19 @@ class RequestController extends DefaultController
 
                 //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
-                $sms_text = Yii::t('app', "Вы назначены исполнителем по заявке №%s");
-                $subject = Yii::t('app', "mixcart.ru - заявка №%s");
+                $sms_text = 'sms.request_set_responsible';
+                $subject = Yii::t('app', 'frontend.controllers.request.mix', ['ru'=>"mixcart.ru - заявка №%s"]);
                 $email_template = 'requestSetResponsibleMailToSupp';
                 $client_email_template = 'requestSetResponsible';
                 //Если $reject значит сняли с заявки
                 if ($reject) {
-                    $sms_text = 'Вы сняты с исполнения по заявке №%s';
+                    $sms_text = 'sms.request_unset_responsible';
                     $email_template = 'requestSetResponsibleMailToSuppReject';
                     $client_email_template = 'requestSetResponsibleReject';
                 }
                 //Данные тексты для рассылки
                 $templateMessage = [
-                    'sms_text' => sprintf($sms_text, $request->id),
+                    'sms_text' => Yii::$app->sms->prepareText($sms_text, ['request_id' => $request->id]),
                     'email_template' => $email_template,
                     'email_subject' => sprintf($subject, $request->id),
                     'client_email_template' => $client_email_template
@@ -352,13 +352,10 @@ class RequestController extends DefaultController
                 //Для начала соберем сотрудников постовщика, которым необходимо разослать уведомления
                 //Это руководители, и сотрудник который создал отклик
                 $vendor_users = User::find()->where([
-                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
-                ])->orWhere([
-                    'id' => $request_callback->supp_user_id
-                ])->andWhere([
                     'organization_id' => $request_callback->supp_org_id,
-                    'status' => User::STATUS_ACTIVE
-                ])->all();
+                    'status' => User::STATUS_ACTIVE,
+                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
+                ])->orWhere(['id' => $request_callback->supp_user_id])->all();
 
                 if (!empty($vendor_users)) {
                     //Поехали рассылать
@@ -420,7 +417,7 @@ class RequestController extends DefaultController
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
-            return ['success' => false, 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getCode()];
         }
     }
 
@@ -456,7 +453,7 @@ class RequestController extends DefaultController
                     $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
                     if ($client->email) {
                         $mailer = Yii::$app->mailer;
-                        $subject = "mixcart.ru - заявка №" . $request->id;
+                        $subject = Yii::t('message', 'frontend.controllers.request.request_two', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
                         $mailer->htmlLayout = 'layouts/request';
                         $mailer->compose('requestInviteSupplierMailToRest', compact("request", "client"))
                             ->setTo($client->email)
@@ -467,9 +464,10 @@ class RequestController extends DefaultController
                     if (!empty($vendorUsers)) {
                         foreach ($vendorUsers as $user) {
                             if ($user->profile->phone) {
-                                $text = $client->organization->name . ' хочет работать с Вами в системе';
-                                $target = $user->profile->phone;
-                                Yii::$app->sms->send($text, $target);
+                                $text = Yii::$app->sms->prepareText('sms.request_add_supplier', [
+                                    'client_name' => $client->organization->name
+                                ]);
+                                Yii::$app->sms->send($text, $user->profile->phone);
                             }
                             if (!empty($user->email)) {
                                 $mailer = Yii::$app->mailer;
@@ -537,20 +535,19 @@ class RequestController extends DefaultController
                     $request = Request::findOne($id);
                     #Готовим сообщения
                     //Тема Email
-                    $text = Yii::t('app', 'mixcart.ru - заявка №%s');
+                    $text = Yii::t('app', 'frontend.controllers.request.mix_two', ['ru'=>'mixcart.ru - заявка №%s']);
                     $subject = sprintf($text, $request->id);
                     //Сообщение SMS
-                    $text = Yii::t('app', 'Новый отклик по Вашей заявке №%s от поставщика %s');
-                    $sms_text = sprintf($text, $request->id, $vendor->organization->name);
+                    $sms_text = Yii::$app->sms->prepareText('sms.request_new_callback', [
+                        'request_id' => $request->id,
+                        'vendor_name' => $vendor->organization->name
+                    ]);
                     //Найдем всех сотрудников ресторана, кому должны отправить уведомления
                     $clients = User::find()->where([
-                        'role_id' => Role::ROLE_RESTAURANT_MANAGER
-                    ])->orWhere([
-                        'id' => $request->rest_user_id
-                    ])->andWhere([
-                        'organization_id' => $request->rest_org_id,
-                        'status' => User::STATUS_ACTIVE
-                    ])->all();
+                            'organization_id' => $request->rest_org_id,
+                            'status' => User::STATUS_ACTIVE,
+                            'role_id' => Role::ROLE_RESTAURANT_MANAGER
+                        ])->orWhere(['id' => $request->rest_user_id])->all();
                     //Если есть клиенты, а они должн быть :)
                     if (!empty($clients)) {
                         foreach ($clients as $client) {

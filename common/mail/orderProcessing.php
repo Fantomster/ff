@@ -2,14 +2,14 @@
 use yii\helpers\Url;
 use common\models\Organization;
 
-$orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресторан" : "Поставщик";
+$orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? Yii::t('app', 'common.mail.order_processing.rest', ['ru'=>"Ресторан"]) : Yii::t('app', 'common.mail.order_processing.vendor', ['ru'=>"Поставщик"]);
 ?>
 <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-    <?= $orgType . ' ' . $senderOrg->name . ' подтвердил заказ №' . $order->id ?>.
-    Заказ находится в стадии выполнения.
+    <?= $orgType . ' ' . $senderOrg->name . Yii::t('app', 'common.mail.order_processing.confirm_order', ['ru'=>' подтвердил заказ №']) . $order->id ?>.
+    <?= Yii::t('app', 'common.mail.order_processing.order_in_process', ['ru'=>'Заказ находится в стадии выполнения']) ?>.
 </p>
 <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-    Для просмотра деталей пройдите по ссылке:
+    <?= Yii::t('app', 'common.mail.order_processing.link_for_details', ['ru'=>'Для просмотра деталей пройдите по ссылке']) ?>:
 </p>
 <br style="margin: 0; padding: 0;" />
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
@@ -24,7 +24,7 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;">Заказ №<?= $order->id ?></a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.order_processing.order_no', ['ru'=>'Заказ №']) ?><?= $order->id ?></a>
 </div>
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
     <?= $this->render('_bill', compact('order', 'dataProvider')) ?>

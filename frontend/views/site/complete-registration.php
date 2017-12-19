@@ -9,7 +9,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
-$this->title = "Завершение регистрации";
+$this->title = Yii::t('message', 'frontend.views.site.complete_registration', ['ru'=>"Завершение регистрации"]);
 ?>
 <div class="login__block">
     <div class="login__inside">
@@ -26,7 +26,7 @@ $this->title = "Завершение регистрации";
         <?=
             $form->field($organization, 'address')
             ->label(false)
-            ->textInput(['class' => 'form-control',' onsubmit' => 'return false', 'placeholder' => 'Адрес организации'])
+            ->textInput(['class' => 'form-control',' onsubmit' => 'return false', 'placeholder' => Yii::t('message', 'frontend.views.site.address', ['ru'=>'Адрес организации'])])
         ?>
         <div id="map" style="width:100%;height:250px;"></div>
 <?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
@@ -259,7 +259,7 @@ function changeFields(fields, results){
 ?>
             </div>
             <?=
-            Html::a('Подтвердить', '#', [
+            Html::a(Yii::t('message', 'frontend.views.site.submit', ['ru'=>'Подтвердить']), '#', [
                 'data' => [
                     'method' => 'post',
                 ],

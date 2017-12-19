@@ -19,7 +19,7 @@ use yii\helpers\Url;
             [
                 'class' => 'fa fa-edit pull-right text-warning rename-template',
                 'style' => 'cursor:pointer',
-                'title' => Yii::t('app', 'Переименовать'),
+                'title' => Yii::t('app', 'frontend.views.order.guides.rename_five', ['ru'=>'Переименовать']),
                 'data-id' => $model->id,
                 'data-title' => $model->name
             ]
@@ -27,25 +27,25 @@ use yii\helpers\Url;
     </p>
 </div>
 <div class="guid_block_counts">
-    <p>Кол-во товаров: <span><?= $model->productCount ?></span></p>
+    <p><?= Yii::t('message', 'frontend.views.order.guides.quantity', ['ru'=>'Кол-во товаров:']) ?> <span><?= $model->productCount ?></span></p>
 </div>
 <div class="guid_block_updated">
-    <p>Изменен: <span><?= Yii::$app->formatter->asDatetime($model->updated_at, "php:j M Y") ?></span></p>
+    <p><?= Yii::t('message', 'frontend.views.order.guides.changed', ['ru'=>'Изменен:']) ?> <span><?= Yii::$app->formatter->asDatetime($model->updated_at, "php:j M Y") ?></span></p>
 </div>
 <div class="guid_block_buttons">
     <?=
-    Html::button('<i class="fa fa-trash"></i> Удалить', [
+    Html::button('<i class="fa fa-trash"></i> ' . Yii::t('message', 'frontend.views.order.guides.remove', ['ru'=>'Удалить']), [
         'class' => 'btn btn-sm btn-outline-danger delete-guide',
         'data-url' => Url::to(['/order/ajax-delete-guide', 'id' => $model->id]),
     ])
     ?>
     <?=
-    Html::a('<i class="fa fa-pencil"></i> Редактировать', ['/order/edit-guide', 'id' => $model->id], [
+    Html::a('<i class="fa fa-pencil"></i> ' . Yii::t('message', 'frontend.views.order.guides.edit', ['ru'=>'Редактировать']), ['/order/edit-guide', 'id' => $model->id], [
         'class' => 'btn btn-sm btn-outline-default',
     ])
     ?>
     <?=
-    Html::a('<i class="fa fa-shopping-cart"></i> В корзину', ['order/ajax-show-guide', 'id' => $model->id], [
+    Html::a('<i class="fa fa-shopping-cart"></i> ' . Yii::t('message', 'frontend.views.order.guides.in_basket', ['ru'=>'В корзину']) . ' ', ['order/ajax-show-guide', 'id' => $model->id], [
         'class' => 'btn btn-sm btn-success',
         'data' => [
             'target' => '#guideModal',

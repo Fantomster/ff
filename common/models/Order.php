@@ -104,7 +104,7 @@ class Order extends \yii\db\ActiveRecord {
             'created_by_id' => 'Created By ID',
             'accepted_by_id' => 'Accepted By ID',
             'status' => 'Status',
-            'total_price' => 'Итоговая цена',
+            'total_price' => Yii::t('app', 'common.models.total_price', ['ru'=>'Итоговая цена']),
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -195,21 +195,21 @@ class Order extends \yii\db\ActiveRecord {
     }
 
     public static function statusText($status) {
-        $text = 'Неопределен';
+        $text = Yii::t('app', 'common.models.undefined', ['ru'=>'Неопределен']);
         switch ($status) {
             case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
             case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                $text = 'Новый';
+                $text = Yii::t('app', 'common.models.new', ['ru'=>'Новый']);
                 break;
             case Order::STATUS_PROCESSING:
-                $text = 'Выполняется';
+                $text = Yii::t('app', 'common.models.in_process', ['ru'=>'Выполняется']);
                 break;
             case Order::STATUS_DONE:
-                $text = 'Завершен';
+                $text = Yii::t('app', 'common.models.done', ['ru'=>'Завершен']);
                 break;
             case Order::STATUS_REJECTED:
             case Order::STATUS_CANCELLED:
-                $text = 'Отменен';
+                $text = Yii::t('app', 'common.models.canceled', ['ru'=>'Отменен']);
                 break;
         }
         return $text;
@@ -217,9 +217,9 @@ class Order extends \yii\db\ActiveRecord {
 
     public function discountDropDown() {
         return [
-            '' => 'Без скидки',
-            '1' => 'Скидка ('.$this->currency->symbol.')',
-            '2' => 'Скидка (%)',
+            '' => Yii::t('app', 'common.models.no_discount', ['ru'=>'Без скидки']),
+            '1' => Yii::t('app', 'common.models.discount_rouble_two', ['ru'=>'Скидка ({symbol})', 'symbol' => $this->currency->symbol]),
+            '2' => Yii::t('app', 'common.models.discount_percent_two', ['ru'=>'Скидка (%)']),
         ];
     }
 
@@ -230,13 +230,13 @@ class Order extends \yii\db\ActiveRecord {
 
     public static function getStatusList() {
         return [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => 'Ожидает подтверждения поставщика',
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => 'Ожидает подтверждения клиента',
-            Order::STATUS_PROCESSING => 'Выполняется',
-            Order::STATUS_DONE => 'Завершен',
-            Order::STATUS_REJECTED => 'Отклонен поставщиком',
-            Order::STATUS_CANCELLED => 'Отменен клиентом',
-            Order::STATUS_FORMING => 'Формируется',
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru'=>'Ожидает подтверждения поставщика']),
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru'=>'Ожидает подтверждения клиента']),
+            Order::STATUS_PROCESSING => Yii::t('app', 'common.models.in_process_two', ['ru'=>'Выполняется']),
+            Order::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru'=>'Завершен']),
+            Order::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru'=>'Отклонен поставщиком']),
+            Order::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru'=>'Отменен клиентом']),
+            Order::STATUS_FORMING => Yii::t('app', 'common.models.forming', ['ru'=>'Формируется']),
         ];
     }
 
@@ -317,7 +317,7 @@ class Order extends \yii\db\ActiveRecord {
             case self::DISCOUNT_NO_DISCOUNT:
                 return false;
             case self::DISCOUNT_FIXED:
-                return $this->discount . " " . ($iso_code ? $this->currency->iso_code : $this->currency->symbol);
+                return $this->discount . $this->currency->symbol;
             case self::DISCOUNT_PERCENT:
                 return $this->discount . "%";
         }
@@ -355,35 +355,35 @@ class Order extends \yii\db\ActiveRecord {
     public function getOrdersExportColumns() {
         return [
             [
-                'label' => 'Номер',
+                'label' => Yii::t('app', 'common.models.number', ['ru'=>'Номер']),
                 'value' => 'id',
             ],
             [
-                'label' => 'Ресторан',
+                'label' => Yii::t('app', 'common.models.rest', ['ru'=>'Ресторан']),
                 'value' => 'client.name',
             ],
             [
-                'label' => 'Поставщик',
+                'label' => Yii::t('app', 'common.models.vendor_two', ['ru'=>'Поставщик']),
                 'value' => 'vendor.name',
             ],
             [
-                'label' => 'Заказ создал',
+                'label' => Yii::t('app', 'common.models.order_created', ['ru'=>'Заказ создал']),
                 'value' => 'createdByProfile.full_name',
             ],
             [
-                'label' => 'Заказ принял',
+                'label' => Yii::t('app', 'common.models.order_accepted', ['ru'=>'Заказ принял']),
                 'value' => 'acceptedByProfile.full_name',
             ],
             [
-                'label' => 'Сумма',
+                'label' => Yii::t('app', 'common.models.sum', ['ru'=>'Сумма']),
                 'value' => 'total_price',
             ],
             [
-                'label' => 'Дата создания',
+                'label' => Yii::t('app', 'common.models.creating_date', ['ru'=>'Дата создания']),
                 'value' => 'created_at',
             ],
             [
-                'label' => 'Статус',
+                'label' => Yii::t('app', 'common.models.status_two', ['ru'=>'Статус']),
                 'value' => function($data) {
                     return Order::statusText($data['status']);
                 },

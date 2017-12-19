@@ -1,7 +1,7 @@
 <?php
 use yii\helpers\Url;
 ?>
-<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Пройдите по ссылке для установки нового пароля:</p>
+<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;"><?= Yii::t('app', 'common.mail.change_pass.go_to', ['ru'=>'Пройдите по ссылке для установки нового пароля:']) ?></p>
 <br style="margin: 0; padding: 0;" />
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
     <a href="<?= ($isFranchise) ? Yii::$app->urlManagerFranchise->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]) : Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]); ?>"
@@ -15,5 +15,5 @@ use yii\helpers\Url;
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;">Подтвердить</a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.change_pass.confirm', ['ru'=>'Подтвердить']) ?></a>
 </div>

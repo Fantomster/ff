@@ -3,7 +3,7 @@ $currencySymbol = $order->currency->iso_code;
 ?>
 
 <div>
-    <div class="pdf_header" style="text-align: center;border-bottom: 2px solid black;margin-bottom: 15px;">
+    <div class="pdf_header" style="text-align: center;">
         <span style="font-size: 20px;" >
             <b>Заказ №<?=$order->id?></b>
         </span>
@@ -13,9 +13,12 @@ $currencySymbol = $order->currency->iso_code;
         </small>
         <br>
         <small>
-            <?= $order->requested_delivery ? 'Запрошенная дата доставки: ' . Yii::$app->formatter->asDatetime($order->requested_delivery) : '' ?>
+            <?= $order->requested_delivery ? 'Запрошенная дата доставки: ' . Yii::$app->formatter->asDate($order->requested_delivery, 'php:d/m/Y') : '' ?>
         </small>
     </div>
+
+    <hr>
+
     <div class="pdf_content" style="text-align: center;" >
 
         <table>
@@ -86,7 +89,9 @@ $currencySymbol = $order->currency->iso_code;
             </tr>
         </table>
 
-        <div style="margin-top: 20px;border-top: 2px solid black;padding-top:20px;">
+        <hr>
+
+        <div>
             <?php if (!empty($order->comment)) { ?>
                 <div style="font-size: 12px;width: 100%;height: auto;text-align:left;padding: 5px;margin-bottom: 10px;">
                     <b>Комментарий к заказу:</b>
@@ -98,7 +103,7 @@ $currencySymbol = $order->currency->iso_code;
             <?= $this->render('_view-grid_pdf', compact('dataProvider', 'order')) ?>
         </div>
 
-        <div style="text-align: right;font-size: 12px;">
+        <div style="text-align: right;font-size: 12px;padding-top:30px;padding-right:50px;">
             <?php if ($order->discount) { ?>
                 <p>
                     Скидка: <?= $order->getFormattedDiscount(true) ?>

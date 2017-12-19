@@ -11,7 +11,7 @@ use yii\helpers\Url;
 
 ?>
 
-<p><img src="http://f-keeper.ru/img/invite-to-client.jpg" style="width: 100%;" alt=""/></p>
+<p><img src="https://mixcart.ru/img/invite-to-client.jpg" style="width: 100%;" alt=""/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;">Здравствуйте!</h3>
 <p>Мы, <u><?= $vendor ?></u>, стали использовать очень удобный инструмент для автоматизации работы с вами. 
@@ -20,7 +20,7 @@ use yii\helpers\Url;
 
 <br />
 <div style="width: 100%; text-align: center;">
-    <a href="<?= Url::toRoute(["/user/register"], true) ?>"
+    <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/register"]) ?>"
        style="text-decoration: none;
     color: #FFF;
     background-color: #84bf76;
@@ -37,7 +37,7 @@ use yii\helpers\Url;
 <br /><br />
 
 
-<h5 align="center" style="font-weight: 900;font-size: 17px;">В f-keeper очень широкие возможности для ресторанов, о некоторых из них несколько слов ниже.</h5>
+<h5 align="center" style="font-weight: 900;font-size: 17px;">В MixCart очень широкие возможности для ресторанов, о некоторых из них несколько слов ниже.</h5>
 <br /><br />
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
@@ -52,9 +52,9 @@ use yii\helpers\Url;
         </th>
     </tr>
     <tr align="center">
-        <td><img src="https://f-keeper.ru/img/ico1-1.png" alt="" /></td>
-        <td><img src="https://f-keeper.ru/img/ico2-1.png" alt="" /></td>
-        <td><img src="https://f-keeper.ru/img/ico3-1.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico1-1.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico2-1.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico3-1.png" alt="" /></td>
     </tr>
 
 
@@ -74,9 +74,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="https://f-keeper.ru/img/ico4-1.png" alt="" /></td>
-        <td><img src="https://f-keeper.ru/img/ico5-1.png" alt="" /></td>
-        <td><img src="https://f-keeper.ru/img/ico2.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico4-1.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico5-1.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico2.png" alt="" /></td>
     </tr>
 
 
@@ -96,9 +96,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="https://f-keeper.ru/img/ico4.png" alt="" /></td>
-        <td><img src="https://f-keeper.ru/img/ico8.png" alt="" /></td>
-        <td><img src="https://f-keeper.ru/img/ico9.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico4.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico8.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico9.png" alt="" /></td>
     </tr>
 
 </table>

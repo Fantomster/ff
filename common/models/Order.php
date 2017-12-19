@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "order".
@@ -21,6 +22,7 @@ use Yii;
  * @property string $comment
  * @property string $discount
  * @property integer $discount_type
+ * @property integer $currency_id
  * 
  * @property User $acceptedBy
  * @property User $createdBy
@@ -35,6 +37,7 @@ use Yii;
  * @property bool $isObsolete
  * @property string $rawPrice
  * @property User[] $recipientsList
+ * @property Currency $currency
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -109,7 +112,11 @@ class Order extends \yii\db\ActiveRecord {
 
     public function beforeSave($insert) {
         $result = parent::beforeSave($insert);
-        $this->discount = abs((int) $this->discount);
+        if ($this->discount_type == Order::DISCOUNT_FIXED) {
+            $this->discount = round($this->discount, 2);
+        } else {
+            $this->discount = abs((int) $this->discount);
+        }
         return $result;
     }
 
@@ -140,6 +147,7 @@ class Order extends \yii\db\ActiveRecord {
     public function getCreatedByProfile() {
         return $this->hasOne(Profile::className(), ['user_id' => 'created_by_id']);
     }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -207,10 +215,10 @@ class Order extends \yii\db\ActiveRecord {
         return $text;
     }
 
-    public static function discountDropDown() {
+    public function discountDropDown() {
         return [
             '' => 'Без скидки',
-            '1' => 'Скидка (р)',
+            '1' => 'Скидка ('.$this->currency->symbol.')',
             '2' => 'Скидка (%)',
         ];
     }
@@ -256,12 +264,16 @@ class Order extends \yii\db\ActiveRecord {
             $free_delivery = 0;
         }
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
+            $test = $this->vendor->delivery->delivery_charge;
             return $this->vendor->delivery->delivery_charge;
         }
         return 0;
     }
 
     public function forFreeDelivery() {
+        if ($this->vendor->delivery->min_free_delivery_charge == 0) {
+            return -1;
+        }
         if (isset($this->vendor->delivery)) {
             $diff = $this->vendor->delivery->min_free_delivery_charge - $this->rawPrice;
         } else {
@@ -282,7 +294,7 @@ class Order extends \yii\db\ActiveRecord {
     public function getRawPrice() {
         return OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
     }
-    
+
     public function calculateTotalPrice() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
@@ -300,12 +312,12 @@ class Order extends \yii\db\ActiveRecord {
         return $this->total_price;
     }
 
-    public function getFormattedDiscount() {
+    public function getFormattedDiscount($iso_code = false) {
         switch ($this->discount_type) {
             case self::DISCOUNT_NO_DISCOUNT:
                 return false;
             case self::DISCOUNT_FIXED:
-                return $this->discount . " руб";
+                return $this->discount . " " . ($iso_code ? $this->currency->iso_code : $this->currency->symbol);
             case self::DISCOUNT_PERCENT:
                 return $this->discount . "%";
         }
@@ -319,14 +331,117 @@ class Order extends \yii\db\ActiveRecord {
         if (isset($this->accepted_by_id)) {
             $recipients[] = $this->acceptedBy;
         } else {
-            foreach ($this->vendor->users as $user) {
-                if ($user->role_id === Role::ROLE_SUPPLIER_EMPLOYEE && ManagerAssociate::isAssociated($this->client_id, $user->id)) {
-                    $recipients[] = $user;
-                } elseif ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE) {
-                    $recipients[] = $user;
+            $associatedManagers = $this->client->getAssociatedManagers($this->vendor_id);
+            if (empty($associatedManagers)) {
+                foreach ($this->vendor->users as $user) {
+                    if ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE) {
+                        $recipients[] = $user;
+                    }
                 }
+            } else {
+                $recipients = array_merge($recipients, $associatedManagers);
             }
         }
+
+        //Получаем дополнительные Емайлы для рассылки
+        //Для заказчика
+        $recipients = array_merge($recipients, $this->client->additionalEmail);
+        //Для поставщика
+        $recipients = array_merge($recipients, $this->vendor->additionalEmail);
+
         return $recipients;
+    }
+
+    public function getOrdersExportColumns() {
+        return [
+            [
+                'label' => 'Номер',
+                'value' => 'id',
+            ],
+            [
+                'label' => 'Ресторан',
+                'value' => 'client.name',
+            ],
+            [
+                'label' => 'Поставщик',
+                'value' => 'vendor.name',
+            ],
+            [
+                'label' => 'Заказ создал',
+                'value' => 'createdByProfile.full_name',
+            ],
+            [
+                'label' => 'Заказ принял',
+                'value' => 'acceptedByProfile.full_name',
+            ],
+            [
+                'label' => 'Сумма',
+                'value' => 'total_price',
+            ],
+            [
+                'label' => 'Дата создания',
+                'value' => 'created_at',
+            ],
+            [
+                'label' => 'Статус',
+                'value' => function($data) {
+                    return Order::statusText($data['status']);
+                },
+            ],
+        ];
+    }
+
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
+                \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
+        }
+    }
+
+    /**
+     * @param $user
+     * @return string
+     */
+    public function getUrlForUser($user)
+    {
+        if ($user instanceof User) {
+            if (empty($user) || (!in_array($user->organization_id, [$this->client_id, $this->vendor_id]))) {
+                return '';
+            }
+            switch ($user->status) {
+                case User::STATUS_UNCONFIRMED_EMAIL:
+                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                        "/order/view",
+                        "id" => $this->id,
+                        "token" => $user->access_token
+                    ]);
+                    break;
+                default:
+                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                        "/order/view",
+                        "id" => $this->id
+                    ]);
+            }
+            return $url;
+        }
+
+        //Если пришла модель с дополнительного Емайла
+        if($user instanceof AdditionalEmail){
+            return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                "/order/view",
+                "id" => $this->id
+            ]);
+        }
+    }
+    
+    public function getCurrency() {
+        return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+    }
+    
+    public function formatPrice() {
+        return $this->total_price . " " . $this->currency->symbol;
     }
 }

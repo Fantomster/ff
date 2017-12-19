@@ -171,11 +171,12 @@ var steps = [
   },
 ]
 swal.queue(steps).then(function (result) {
+    console.log(JSON.stringify(result));
     $.ajax({
     url: "' . Url::to(["request/add-callback"]) . '",
     type: "POST",
     dataType: "json",
-    data: "id=" + id +"&price=" + result[0] + "&comment=" + result[1],
+    data: "id=" + id +"&price=" + result.value[0] + "&comment=" + result.value[1],
     cache: false,
     success: function (response) {
         $.pjax.reload({container:"#pjax-callback", async:false});

@@ -8,8 +8,8 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'f-market',
-    'name' => 'f-market',
+    'id' => 'mixmarket',
+    'name' => 'mixmarket',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log',],// 'assetsAutoCompress'
     'controllerNamespace' => 'market\controllers',
@@ -28,17 +28,17 @@ return [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
-                'email' => [
-                    'class' => 'yii\log\EmailTarget',
-                    'except' => ['yii\web\HttpException:404'],
-                    'levels' => ['error'],
-                    'message' => [
-                        'from' => 'noreply@f-keeper.ru', 
-                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com'], 
-                        'subject' => 'Error message',
-                    ],
-                    'mailer' => 'mailer',
-                ],
+//                'email' => [
+//                    'class' => 'yii\log\EmailTarget',
+//                    'except' => ['yii\web\HttpException:404'],
+//                    'levels' => ['error'],
+//                    'message' => [
+//                        'from' => 'noreply@f-keeper.ru', 
+//                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com'], 
+//                        'subject' => 'Error message',
+//                    ],
+//                    'mailer' => 'mailer',
+//                ],
             ],
         ],
 //        'assetsAutoCompress' =>
@@ -54,7 +54,7 @@ return [
         ],
         'urlManagerFrontend' => [
             'class' => 'yii\web\urlManager',
-            'baseUrl' => '//f-keeper.ru',
+            'baseUrl' => '//mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],

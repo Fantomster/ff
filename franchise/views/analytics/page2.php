@@ -1,11 +1,17 @@
 <?php
+
+$this->title = implode(" - ", [
+    Yii::t('app', 'Аналитика'),
+    Yii::t('app', 'Заказы'),
+]);
+
 use yii\bootstrap\Tabs;
 use yii\helpers\Url;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> Аналитика
-        <small>Статистика по заказам</small>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'Аналитика') ?>
+        <small><?= Yii::t('app', 'Статистика по заказам') ?></small>
     </h1>
 </section>
 <section class="content">
@@ -15,11 +21,11 @@ use yii\helpers\Url;
 Tabs::widget([
     'items' => [
         [
-            'label' => 'Регистрации',
+            'label' => Yii::t('app', 'Регистрации'),
             'url' => Url::to(["analytics/index"]),
         ],
         [
-            'label' => 'Заказы',
+            'label' => Yii::t('app', 'Заказы'),
             'content' => $this->render("_orders", compact(
                     'total',
                     'dateFilterFrom', 
@@ -39,7 +45,7 @@ Tabs::widget([
             'active' => true
         ],
         [
-            'label' => 'Оборот',
+            'label' => Yii::t('app', 'Оборот'),
             'url' => Url::to(["analytics/page3"]),
         ],
     ],

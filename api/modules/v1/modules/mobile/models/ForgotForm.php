@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\swiftmailer\Mailer;
 use yii\swiftmailer\Message;
 use amnah\yii2\user\models\forms\ForgotForm as BaseForm;
+use common\models\UserToken;
 
 /**
  * Forgot password form
@@ -32,7 +33,7 @@ class ForgotForm extends BaseForm
             $expireTime = $this->module->resetExpireTime;
             $expireTime = $expireTime ? gmdate("Y-m-d H:i:s", strtotime($expireTime)) : null;
 
-            $userToken = \common\models\UserToken::generate($user->id, $userToken::TYPE_PASSWORD_RESET, null, $expireTime);
+            $userToken = UserToken::generate($user->id, UserToken::TYPE_PASSWORD_RESET, null, $expireTime);
 
             // modify view path to module views
             $mailer = Yii::$app->mailer;
@@ -41,7 +42,8 @@ class ForgotForm extends BaseForm
 
             // send email
             $subject = Yii::$app->id . " - " . Yii::t("user", "Forgot password");
-            $result = $mailer->compose('@common/mail/forgotPassword', compact("subject", "user", "userToken"))
+            $toFrontEnd = true;
+            $result = $mailer->compose('@common/mail/forgotPassword', compact("subject", "user", "userToken", "toFrontEnd"))
                 ->setTo($user->email)
                 ->setSubject($subject)
                 ->send();
@@ -52,5 +54,18 @@ class ForgotForm extends BaseForm
         }
 
         return false;
+    }
+    
+     /**
+     * Get user based on email
+     * @return \amnah\yii2\user\models\User|null
+     */
+    public function getUser()
+    {
+        // get and store user
+        if ($this->user === false) {
+            $this->user = \common\models\User::findOne(["email" => $this->email]);
+        }
+        return $this->user;
     }
 }

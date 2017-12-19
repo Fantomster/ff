@@ -2,7 +2,7 @@
     <div class="box-header with-border">
         <h4 class="box-title">
             <a class="collapse-href" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true">
-                <span class="line-before"></span>Общий доход по поставщику <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
+                <span class="line-before"></span><?= Yii::t('app', 'Общий доход по поставщику') ?> <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
             </a>
         </h4>
     </div>
@@ -11,20 +11,20 @@
             <div class="pay-chek">
                 <table class="pay-table" width="100%">
                     <tbody><tr>
-                            <td style="text-align: left;">F-keeper Мне:</td>
-                            <td style="text-align: right; font-size: 18px;">123000 руб.</td>
+                            <td style="text-align: left;"><?= Yii::t('app', 'MixCart Мне') ?>:</td>
+                            <td style="text-align: right; font-size: 18px;">123000 <?= Yii::t('app', 'руб.') ?></td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">Я F-keeper'у:</td>
-                            <td style="text-align: right; font-size: 18px;">180000 руб.</td>
+                            <td style="text-align: left;"><?= Yii::t('app', 'Я MixCart\'у:') ?></td>
+                            <td style="text-align: right; font-size: 18px;">180000 <?= Yii::t('app', 'руб.') ?></td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">Кол-во месяцев:</td>
-                            <td style="text-align: right; font-size: 18px;">3 месяцев</td>
+                            <td style="text-align: left;"><?= Yii::t('app', 'Кол-во месяцев:') ?></td>
+                            <td style="text-align: right; font-size: 18px;"><?= Yii::t('app', '3 месяцев') ?></td>
                         </tr>
                         <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
-                            <td style="text-align: left; font-weight: bold;">Доход за от поставщика:</td>
-                            <td style="text-align: right; font-size: 22px;">328462389 руб.</td>
+                            <td style="text-align: left; font-weight: bold;"><?= Yii::t('app', 'Доход за от поставщика:') ?></td>
+                            <td style="text-align: right; font-size: 22px;">328462389 <?= Yii::t('app', 'руб.') ?></td>
                         </tr>
                     </tbody></table>
             </div>
@@ -35,7 +35,7 @@
     <div class="box-header with-border">
         <h4 class="box-title">
             <a class="collapse-href collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false">
-                <span class="line-before"></span>Детализация <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
+                <span class="line-before"></span><?= Yii::t('app', 'Детализация') ?> <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
             </a>
         </h4>
     </div>
@@ -44,7 +44,7 @@
             <div class="pay-chek">
                 <table class="pay-table" width="100%">
                     <tbody><tr>
-                            <th>Оборот</th>
+                            <th><?= Yii::t('app', 'Оборот') ?></th>
                         </tr>
                         <tr>
                             <td style="text-align: left;">Оборот поставщика:</td>
@@ -55,7 +55,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper'у:</td>
+                            <td style="text-align: left;">MixCart'у:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -78,7 +78,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper %:</td>
+                            <td style="text-align: left;">MixCart %:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -90,7 +90,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper %:</td>
+                            <td style="text-align: left;">MixCart %:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -102,7 +102,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper %:</td>
+                            <td style="text-align: left;">MixCart %:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>

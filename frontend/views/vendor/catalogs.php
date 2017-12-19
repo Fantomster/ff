@@ -65,12 +65,16 @@ Modal::begin([
               <?php 
                 $arrBaseCatalog = Catalog::GetCatalogs(\common\models\Catalog::BASE_CATALOG);
                 foreach($arrBaseCatalog as $arrBaseCatalogs){
+
+                        $catCurrency = \common\models\Currency::findOne(['id' => $arrBaseCatalogs->currency_id]);
                 ?>
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
                             <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог</h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
-                            <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
+
+                            <p class="small"> Валюта каталога: <?php  echo $catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?><br>Этот каталог содержит все ваши продукты доступные на MixCart</p>
+
                         </div>
                         <div class="col-md-6 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>
@@ -125,13 +129,14 @@ Modal::begin([
                         <?php 
                         }else{
                             foreach($arrCatalog as $arrCatalogs){
+                                $catCurrency = \common\models\Currency::findOne(['id' => $arrCatalogs->currency_id]);
                         ?>
                                 <div class="hpanel" style="margin-bottom:15px;">
                                     <div class="panel-body">
                                         <div class="col-md-4 text-left">
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
                                                 '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['data-pjax'=>'0']) ?>
-                                        <p class="small m-b-none">Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
+                                        <p class="small m-b-none">Валюта каталога:<?php  echo ' '.$catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?> <br>Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
                                         </div>
                                         <div class="col-md-8 text-right">
                                                 <?php echo $link = SwitchBox::widget([
@@ -263,7 +268,7 @@ $(document).on('click', '.del', function (e){
 		}
 	}})
 });
-$('input[type=checkbox]').live('switchChange.bootstrapSwitch', function (event, state) {	
+$(document).on('switchChange.bootstrapSwitch', 'input[type=checkbox]', function (event, state) {	
 var e,id,state
 e = $(this).attr('name')
 id = e.replace('status_','')

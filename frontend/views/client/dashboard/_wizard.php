@@ -26,13 +26,7 @@ $this->registerJs('
             dataType: "json",
             url: "'.Url::to('/site/ajax-wizard-off').'",
             success: function (response) {
-                if (response.result == "moscow") {
-                    yaCounter44637517.reachGoal("regmoscow", function () {
-                        document.location = url;
-                    });
-                }else{
                 document.location = url;
-                }
             },
             async: false
         });
@@ -138,7 +132,7 @@ $this->registerJs('
                 <div class="data-modal__sub-txt">Вы хотите работать со своими поставщиками или найти новых?</div>
                 <div class="data-modal__buts-wrp">
                     <a href="#" class="search-new but but_green wt next"><span>Найти новых</span></a>
-                    <a href="<?= Url::to('client/add-first-vendor') ?>" class="but but_green wizard-off"><span>Завести своих поставщиков</span></a>
+                    <a href="<?= Url::to('/client/add-first-vendor') ?>" class="but but_green wizard-off"><span>Завести своих поставщиков</span></a>
                 </div>
             </div>
             <div class="third-step">
@@ -148,10 +142,10 @@ $this->registerJs('
                         <div class="col-md-6"><i class="ico ico-cart"></i></div>
                     </div>
                 </div>
-                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на f-market</div>
+                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на MixMarket</div>
                 <div class="data-modal__buts-wrp">
-                    <a href="<?= Url::to('request/list') ?>" class="but but_green wt wizard-off"><span>Создать заявку</span></a>
-                    <a href="https://market.f-keeper.ru" class="but but_green"><span>Поиск на f-market</span></a>
+                    <a href="<?= Url::to('/request/list') ?>" class="but but_green wt wizard-off"><span>Создать заявку</span></a>
+                    <a href="https://market.mixcart.ru" class="but but_green"><span>Поиск на MixMarket</span></a>
                 </div>
             </div>
         </div>

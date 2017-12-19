@@ -31,7 +31,7 @@ use kartik\widgets\TouchSpin;
                     <div class="col-md-12">
                         <hr>
                         <h3>
-                        <?= $price ?> <i class="fa fa-fw fa-rub" style="font-size:20px"></i> за 1 <?= $baseProduct->ed ?>
+                        <?= $price ?> <?= $currencySymbol ?> за 1 <?= $baseProduct->ed ?>
                         </h3>
                     </div>
                 </div>

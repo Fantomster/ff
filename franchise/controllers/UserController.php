@@ -60,10 +60,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         if ($model->hasErrors()) {
             $test = $model->errors;
-            $confirmError = "Учетная запись не активирована!";
+            $confirmError = Yii::t('app', "Учетная запись не активирована!");
             if (isset($test['email'][0]) && ($test['email'][0] !== $confirmError)) {
                 $model->clearErrors();
-                $model->addError('password', 'Вы указали неверную почту или пароль');
+                $model->addError('password', Yii::t('app', 'Вы указали неверную почту или пароль'));
             }
         }
 

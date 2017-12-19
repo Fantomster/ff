@@ -4,47 +4,70 @@ use common\models\Order;
 use common\models\Organization;
 use yii\helpers\Html;
 
+$currencySymbol = $order->currency->symbol;
 $statusInfo = '';
 $actionButtons = '';
-$btnCancel = Html::a('<i class="icon fa fa-ban"></i> Отменить', '#', [
+$btnCancel = Html::button('<span><i class="icon fa fa-ban"></i> Отменить</span>', [
             'class' => "btn btn-outline-danger cancel-order",
             'style' => "margin-right: 7px;",
             'data' => [
                 'url' => \yii\helpers\Url::to(['order/ajax-cancel-order', 'order_id' => $order->id]),
+                'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отменяем...",
             ],
             'title' => 'Отменить заказ',
         ]);
+$btnConfirm = Html::button('<span><i class="icon fa fa-check"></i> Подтвердить</span>', [
+    'class' => "btn btn-outline-success btnOrderAction",
+    'data' => [
+        'action' => "confirm",
+        'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Подтверждаем...",
+    ],
+]);
+$btnGetOrder = Html::button('<span><i class="icon fa fa-check"></i> Получить</span>', [
+    'class' => "btn btn-outline-success btnOrderAction",
+    'data' => [
+        'action' => "confirm",
+        'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Получаем...",
+    ],
+]);
+$btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> Завершить</span>', [
+    'class' => "btn btn-outline-success btnOrderAction",
+    'data' => [
+        'action' => "confirm",
+        'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Завершаем...",
+    ],
+]);
 $canEdit = false;
 if ($order->isObsolete) {
     $actionButtons .= $btnCancel;
-    $actionButtons .= '<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm"><i class="icon fa fa-check"></i> Завершить</a>';
+    $actionButtons .= $btnCloseOrder;
     $canEdit = true;
 } else {
     switch ($order->status) {
         case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-            $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+            $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_RESTAURANT) {
-                $statusInfo .= '<a href="#" class="btn btn-warning disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
+                $statusInfo .= '<a href="#" class="btn btn-warning disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
             } else {
-                $actionButtons .= '<a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm"><i class="icon fa fa-thumbs-o-up"></i> Подтвердить</a>';
+                $actionButtons .= $btnConfirm;
             }
             $canEdit = true;
             break;
         case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-            $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+            $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
-                $statusInfo .= '<a href="#" class="btn btn-warning disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
+                $statusInfo .= '<a href="#" class="btn btn-warning disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
             } else {
-                $actionButtons .= '<a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm"><i class="icon fa fa-thumbs-o-up"></i> Подтвердить</a>';
+                $actionButtons .= $btnConfirm;
             }
             $canEdit = true;
             break;
         case Order::STATUS_PROCESSING:
-            $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+            $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
-                $statusInfo .= '<a href="#" class="btn btn-processing disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>';
+                $statusInfo .= '<a href="#" class="btn btn-processing disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>';
             } else {
-                $actionButtons .= '<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm"><i class="icon fa fa-check"></i> Получить</a>';
+                $actionButtons .= $btnGetOrder;
             }
             $canEdit = true;
             break;
@@ -59,7 +82,6 @@ if ($order->isObsolete) {
             break;
     }
 }
-//$actionButtons .= '<a href="#" class="btn btn-outline-default" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>';
 ?>
 <div class="box box-info block_wrapper" style="height:auto;">
     <div class="box-header">
@@ -77,15 +99,19 @@ if ($order->isObsolete) {
                     'style' => 'margin-right: 7px;'
                 ]) : ""
         ?>
-        <?= $edit ? Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right btnSave', 'style' => 'margin-right: 7px;']) : "" ?>
+        <?= $edit ? Html::button('<span><i class="icon fa fa-save"></i> Сохранить</span>', [
+            'class' => 'btn btn-success pull-right btnSave', 
+            'style' => 'margin-right: 7px;',
+            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+            ]) : "" ?>
         <?= $canEdit && !$edit ? Html::a('<i class="icon fa fa-save"></i> Редактировать', ['/order/edit', "id" => $order->id], ['class' => 'btn btn-success pull-right btnSave', 'style' => 'margin-right: 7px;']) : "" ?>
     </div>
     <div class="box-body">
         <p class="ppp">Общая сумма</p>
 
-        <p class="pppp"><?= $order->total_price ?> <i class="fa fa-fw fa-rub" style="font-size: 24px;"></i></p><br>
+        <p class="pppp"><?= $order->total_price ?> <?= $currencySymbol ?></i></p><br>
         <p class="ps">включая доставку</p>
-        <p class="ps"><?= $order->calculateDelivery() ?> <i class="fa fa-fw fa-rub"></i></p>
+        <p class="ps"><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
         <p class="ps">дата создания </p>
         <p class="ps"><?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
         <div class="row">

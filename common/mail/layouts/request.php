@@ -14,7 +14,7 @@ use yii\helpers\Url;
 		<meta charset="utf-8"> <!-- utf-8 works for most cases -->
 		<meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
-		<title>f-keeper</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
+		<title>MixCart</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
 		<?php $this->head() ?>
                 <!-- Web Font / @font-face : BEGIN -->
 		<!-- NOTE: If web fonts are not required, lines 9 - 26 can be safely removed. -->
@@ -149,7 +149,7 @@ use yii\helpers\Url;
 		}
 		</style>
 	</head>
-	<body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; background-image: url('http://f-keeper.ru/img/pattern.png'); margin: 0; padding: 0;">
+	<body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; background-image: url('https://mixcart.ru/img/pattern.png'); margin: 0; padding: 0;">
             <?php $this->beginBody() ?>
             <div style="width: 600px; box-shadow: 0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -webkit-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -moz-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; margin: 40px auto; padding: 15px;border: 1px solid #e4e4e4;background:#ffffff">
 		<!-- Visually Hidden Preheader Text : BEGIN -->

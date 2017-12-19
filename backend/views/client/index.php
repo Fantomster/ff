@@ -10,15 +10,21 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Users';
+$this->title = 'Пользователи';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
-    'id',
+    [
+        'format' => 'raw',
+        'attribute' => 'id',
+        'value' => function ($data) {
+            return Html::a($data['id'], ['client/view', 'id' => $data['id']]);
+        },
+        'label' => 'Id',
+    ],
     [
         'format' => 'raw',
         'attribute' => 'full_name',
-//                'value' => 'profile.full_name',
         'value' => function ($data) {
             return Html::a($data['profile']['full_name'], ['client/view', 'id' => $data['id']]);
         },
@@ -50,6 +56,21 @@ $gridColumns = [
         'value' => 'role.name',
         'label' => 'Роль',
     ],
+    [
+        'attribute' => '',
+        'label' => '',
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'width:40px'],
+        'value' => function ($data) use ($exceptionArray) {
+            if(in_array($data['role_id'], $exceptionArray))return '';
+            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/client/update',
+                'id' => $data['id']], [
+                'class' => 'btn btn-xs btn-default'
+            ]);
+            return $link;
+        },
+    ],
+
 //            'created_at',
 //            'logged_in_at',
 ];
@@ -64,8 +85,21 @@ $gridColumns = [
         'target' => ExportMenu::TARGET_SELF,
         'exportConfig' => [
             ExportMenu::FORMAT_PDF => false,
-            ExportMenu::FORMAT_EXCEL_X => false,
+            ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_EXCEL_X => [
+                'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
+                'icon' => 'floppy-remove',
+                'iconOptions' => ['class' => 'text-success'],
+                'linkOptions' => [],
+                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
+                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'extension' => 'xlsx',
+                'writer' => 'Excel2007'
+            ],
         ],
+        'batchSize' => 200,
+        'timeout' => 0
     ]);
     ?>
     <?php Pjax::begin(['enablePushState' => true, 'id' => 'userList', 'timeout' => 5000]); ?>    
@@ -77,3 +111,4 @@ $gridColumns = [
     ]);
     ?>
     <?php Pjax::end(); ?></div>
+

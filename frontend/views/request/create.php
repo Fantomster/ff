@@ -13,12 +13,12 @@ use kartik\checkbox\CheckboxX;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <style>
-.modal-body {background: none;}
-.modal-content .modal-header {display:none;}
-.modal-fs .modal-body {
+#create .modal-body {background: none;}
+#create .modal-content .modal-header {display:none;}
+#create .modal-fs .modal-body {
     top: 0;
 }
-.modal-content{background: url(/images/request-background.png) no-repeat center center;background-size: cover;}
+#create .modal-content{background: url(/images/request-background.png) no-repeat center center;background-size: cover;}
 #msform {width: 100%;margin: 11px auto;text-align: center;position: relative;}
 #msform fieldset {padding: 20px 30px;min-height: 300px;box-sizing: border-box;border-radius: 4px;background: #fff;border: 5px solid #86be79;position: absolute;}
 @media (min-width: 768px) {#msform fieldset {width: 60%;margin: 0 20%;}}
@@ -32,18 +32,18 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 #progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 35px; z-index: -1;}
 #progressbar li:first-child:after {content: none; }
 #progressbar li.active:before, #progressbar li.active:after{background: #84bf76;color: white;}
-.btn{border-radius:3px;}
-.btn-success{border-color: #84bf76;color: #84bf76}
-.btn-success:hover,.btn-success:active,.btn-success:focus{background: #84bf76;color: #fff;border-color: #84bf76}
-.btn-outline { background-color: transparent; color: inherit; transition: all .5s;}
-.btn-default.btn-outline {background: #fff;color: #c1c1c1;border-color: #ccc}
-.btn-default.btn-outline:hover,.btn-default.btn-outline:active,.btn-default.btn-outline:focus{background: #c1c1c1;color: #fff;border-color: #c1c1c1}
-.btn-primary.btn-outline { color: #428bca;}
-.btn-success.btn-outline { color: #5cb85c;}
-.btn-info.btn-outline { color: #5bc0de;}
-.btn-warning.btn-outline { color: #f0ad4e;}
-.btn-danger.btn-outline { color: #d9534f;}
-.btn-primary.btn-outline:hover,.btn-success.btn-outline:hover,.btn-info.btn-outline:hover,.btn-warning.btn-outline:hover,.btn-danger.btn-outline:hover { color: #fff;}
+#msform .btn{border-radius:3px;}
+#msform .btn-success{border-color: #84bf76;color: #84bf76}
+#msform .btn-success:hover,.btn-success:active,.btn-success:focus{background: #84bf76;color: #fff;border-color: #84bf76}
+#msform .btn-outline { background-color: transparent; color: inherit; transition: all .5s;}
+#msform .btn-default.btn-outline {background: #fff;color: #c1c1c1;border-color: #ccc}
+#msform .btn-default.btn-outline:hover,.btn-default.btn-outline:active,.btn-default.btn-outline:focus{background: #c1c1c1;color: #fff;border-color: #c1c1c1}
+#msform .btn-primary.btn-outline { color: #428bca;}
+#msform .btn-success.btn-outline { color: #5cb85c;}
+#msform .btn-info.btn-outline { color: #5bc0de;}
+#msform .btn-warning.btn-outline { color: #f0ad4e;}
+#msform .btn-danger.btn-outline { color: #d9534f;}
+#msform .btn-primary.btn-outline:hover,.btn-success.btn-outline:hover,.btn-info.btn-outline:hover,.btn-warning.btn-outline:hover,.btn-danger.btn-outline:hover { color: #fff;}
 .overlay-white{width: 100%;height: 100%;top:0;left:0;background: rgba(255,255,255,.5);position: fixed;z-index: -1;}
 .control-group { display: inline-block; vertical-align: top; background: #fff; text-align: left; box-shadow: 0 1px 2px rgba(0,0,0,0.1); padding: 30px; width: 200px; height: 210px; margin: 10px;}
 .control { display: block; position: relative; padding-left: 40px; margin-bottom: 15px;margin-top:20px; padding-top: 6px; cursor: pointer; font-size: 18px;}
@@ -177,7 +177,7 @@ Pjax::begin([
                 <i class="flaticon-cross-out form-close" data-dismiss="modal" style="top: 10px;"></i>
 		<div style="display: inline-block;position: absolute;left:0">
 		<h4 class="f-title">Разместить заявку</h4>
-		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы F-keeper! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
+		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы MixCart! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
 		</div>
 	</div>
 	<!-- progressbar -->
@@ -301,9 +301,9 @@ $(this).next().toggle(Boolean($(this).val()));
     ['template'=>'{input}{error}'])->
     textInput(['placeholder' => '7 дней']) ?>
             
-		<!--h5>Поделиться заявкой в группах f-keeper</h5-->
+		<!--h5>Поделиться заявкой в группах MixCart</h5-->
                 <div style="color:#ccc;font-size:13px;margin-top: 32px;margin-bottom: -32px;">
-                    * Заявка будет существовать в системе f-keeper один месяц, или пока вы ее не закроете
+                    * Заявка будет существовать в системе MixCart один месяц, или пока вы ее не закроете
                 </div>
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
                 <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>

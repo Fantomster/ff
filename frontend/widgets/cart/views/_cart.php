@@ -16,6 +16,7 @@ $count = count($orders);
                 <span class="col_vo"><?= $count ?></span>
                 <img class="hide_basket" src="<?= $baseUrl ?>/img/bask_del1.png" alt="">
             </div>
+            <?= Html::a('Перейти к оформлению', ['order/checkout'], ['class' => 'btn but_zakaz_bask', 'data-pjax' => 0]) ?>
             <?php
             foreach ($orders as $order) {
                 ?>
@@ -28,8 +29,8 @@ $count = count($orders);
                     ?>
                     <div class="block_tovar_check">
 
-                        <p class="name_tovar"><span class="count"><?= $position->quantity + 0 ?></span><?= $position->product_name ?></p>
-                        <p class="name_tovar1"><span class="count"><?= $position->price ?> руб. за 1 <?= $unit ?></span>на общую сумму <span><?= $position->quantity * $position->price ?> руб.</span></p>
+                        <p class="name_tovar"><span class="count"><?= $position->quantity + 0 ?></span><?= Html::decode(Html::decode($position->product_name)) ?></p>
+                        <p class="name_tovar1"><span class="count"><?= $position->price ?> <?= $order->currency->symbol ?> за 1 <?= $unit ?></span>на общую сумму <span><?= $position->quantity * $position->price ?> <?= $order->currency->symbol ?></span></p>
                         <?=
                         Html::a('<img class="delete_tovar" src="' . $baseUrl . '/img/tovar_delete.png" alt="">', "#", [
                             'data-url' => Url::to(['/order/ajax-remove-position', 'vendor_id' => $order->vendor_id, 'product_id' => $position->product_id]),
@@ -40,23 +41,24 @@ $count = count($orders);
                 <?php } 
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
+                    $test = 1;
                 ?>
                 <div class="block_sum">
                     <div class="row">
-                        <div class="col-md-4 name_s">Сумма</div>
-                        <div class="col-md-8 count_s"><?= $order->total_price ?> руб.</div>
+                        <div class="col-md-4 col-xs-4 name_s">Сумма</div>
+                        <div class="col-md-8 col-xs-8 count_s"><?= $order->total_price ?> <?= $order->currency->symbol ?></div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 min_zakaz">
+                        <div class="col-md-6 col-xs-6 min_zakaz">
                         <?php if ($forMinOrderPrice) { ?>
-                        до минимального заказа <br><span><?= $forMinOrderPrice ?> руб</span>
-                        <?php } elseif ($forFreeDelivery) { ?>
-                        до бесплатной доставки <br><span><?= $forFreeDelivery ?> руб</span>
-                        <?php } else { ?>
+                        до минимального заказа <br><span><?= $forMinOrderPrice ?> <?= $order->currency->symbol ?></span>
+                        <?php } elseif ($forFreeDelivery > 0) { ?>
+                        до бесплатной доставки <br><span><?= $forFreeDelivery ?> <?= $order->currency->symbol ?></span>
+                        <?php } elseif ($forFreeDelivery == 0) { ?>
                         бесплатная доставка!<br><span>&nbsp;</span>
                         <?php } ?>
                         </div>
-                        <div class="col-md-6 dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> руб</span></div>
+                        <div class="col-md-6 col-xs-6 dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> <?= $order->currency->symbol ?></span></div>
                     </div>
                 </div>
             <?php } ?>

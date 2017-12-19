@@ -195,7 +195,7 @@ $this->title = 'Заявки';
                     ],
                     'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
                     'summary' => 'Показано {count} из {totalCount}',
-                    'emptyText' => 'Список пуст',
+                    'emptyText' => '<h5 class="text-center" style="padding-top:17px;">По текущим параметрам поиска, новых заявок нет</h5>',
                 ])?>
               <?php Pjax::end(); ?>
             </div>
@@ -204,8 +204,8 @@ $this->title = 'Заявки';
       </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2">
-          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs', 'style'=>'margin-bottom:15px']) ?>
-          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs']) ?>
+          <?php //echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs', 'style'=>'margin-bottom:15px']) ?>
+          <?php //echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs']) ?>
     </div>
   </div>
 </section>

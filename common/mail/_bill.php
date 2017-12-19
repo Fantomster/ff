@@ -1,3 +1,6 @@
+<?php
+    $currencySymbol = $order->currency->symbol;
+?>
 <div style="width:100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); width: 570px; margin-top: 10px;">
     <div style="width:100%;height: 100%;">
         <table style="padding:10px;width:550px;border-collapse: collapse;border: 0;">
@@ -29,7 +32,7 @@
         <?php if (!empty($order->comment)) { ?>
             <div style="width: 100%;height: auto;border: 1px solid #DDDDDD;float: left;margin: 30px 0%; border-radius: 100px;">
                 <div style="border-right: 1px solid #DDDDDD;width: 55px;float: left;height: 50px;">
-                    <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
+                    <img src="https://mixcart.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
                 </div>
                 <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;"><?= $order->comment ?></p>
             </div>
@@ -39,7 +42,7 @@
             ?>
             <div style="width: 100%;height: auto;border: 1px solid #DDDDDD;float: left;margin: 30px 0%; border-radius: 100px;">
                 <div style="border-right: 1px solid #DDDDDD;width: 55px;float: left;height: 50px;">
-                    <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
+                    <img src="https://mixcart.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
                 </div>
                 <div style="padding: 20px 60px 20px 60px;text-align:left;">
                     <?php foreach ($order->orderChat as $message) { ?>
@@ -55,8 +58,8 @@
             <?php if ($order->discount) { ?>
                 <p style="width:300px;color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold;">Скидка: <?= $order->getFormattedDiscount() ?></p>
             <?php } ?>
-            <p style="width:300px;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold;margin-left:auto;margin-right:30px;">Стоимость доставки: <?= $order->calculateDelivery() ?> руб.</p>
-            <p style="width:300px;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold;margin-left:auto;margin-right:30px;">Итого: <?= $order->total_price ?> руб.</p>
+            <p style="width:300px;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold;margin-left:auto;margin-right:30px;">Стоимость доставки: <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
+            <p style="width:300px;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold;margin-left:auto;margin-right:30px;">Итого: <?= $order->total_price ?> <?= $currencySymbol ?></p>
         </div>
         <p style="width:600px;color: #999C9E;margin-top: 150px;display: block;text-align: left;margin-top: 10px;">Подпись: ______________ &nbsp;Дата: _________________</p>
     </div>

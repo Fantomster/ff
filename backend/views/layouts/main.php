@@ -20,6 +20,11 @@ $('#loader-show').css('height',$(window).height());
 $(window).on('resize',function() {
     $('#loader-show').css('height',$(window).height());
 });
+
+$.post('/sms/ajax-balance',function(data){
+    $('#sms-info').html(data);
+});
+
 JS;
 $this->registerJs($customJs, yii\web\View::POS_READY);
 ?>
@@ -39,7 +44,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
         <div class="wrap">
             <?php
             NavBar::begin([
-                'brandLabel' => 'f-keeper',
+                'brandLabel' => 'MixCart',
                 'brandUrl' => Yii::$app->homeUrl,
                 'options' => [
                     'class' => 'navbar-inverse navbar-fixed-top',
@@ -73,7 +78,16 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             } else {
                 if (Yii::$app->user->identity->role_id === \common\models\Role::ROLE_ADMIN) {
                     $menuItems = array_merge($menuItems, [
-                        ['label' => 'SERVICEDESK', 'url' => ['/service-desk/index'],'linkOptions'=>['style'=>'color:#f4c871;font-size:bold']],
+                        [
+                            'label' => 'SEO',
+                            'items' => [
+                                [
+                                    'label' => 'Категории',
+                                    'url' => ['/mp-category/index'],
+                                ],
+                            ],
+                        ],
+                        ['label' => 'SERVICEDESK', 'url' => ['/service-desk/index'], 'linkOptions' => ['style' => 'color:#f4c871;font-size:bold']],
                         [
                             'label' => 'Пользователи',
                             'items' => [
@@ -82,7 +96,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'url' => ['/client/index'],
                                 ],
                                 [
-                                    'label' => 'Менеджеры f-keeper',
+                                    'label' => 'Менеджеры MixCart',
                                     'url' => ['/client/managers'],
                                 ],
                             ],
@@ -95,6 +109,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'url' => ['/organization/index'],
                                 ],
                                 [
+                                    'label' => 'Регионы доставки - поставщик',
+                                    'url' => ['/delivery-regions/index'],
+                                ],
+                                [
                                     'label' => 'Одобренные для f-market',
                                     'url' => ['/buisiness-info/index'],
                                 ],
@@ -102,9 +120,23 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Франшиза',
                                     'url' => ['/franchisee/index'],
                                 ],
+                                [
+                                    'label' => 'Заявки на регистрацию орг-ий',
+                                    'url' => ['/agent-request/index'],
+                                ],
+                                [
+                                    'label' => 'Платежи',
+                                    'url' => ['/payment'],
+                                ],
                             ],
                         ],
-                        ['label' => 'Заказы', 'url' => ['/order/index']],
+                        [
+                            'label' => 'Заказы и заявки',
+                            'items' => [
+                                ['label' => 'Заказы', 'url' => ['/order/index']],
+                                ['label' => 'Заявки', 'url' => ['/request/index']],
+                            ],
+                        ],
                         [
                             'label' => 'Товары',
                             'items' => [
@@ -119,6 +151,25 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             ],
                         ],
                     ]);
+
+                  //  if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435) || (Yii::$app->user->id === 7761)) {
+                      if (in_array(Yii::$app->user->id,Yii::$app->params['integratAdminID'])) {
+                        $menuItems = array_merge($menuItems, [
+                            [
+                                'label' => 'Интеграция',
+                                'items' => [
+                                    [
+                                        'label' => 'R-keeper White Server',
+                                        'url' => ['/rkws/index'],
+                                    ],
+                                //  [
+                                //      'label' => 'Загруженные каталоги',
+                                //      'url' => ['/goods/uploaded-catalogs'],
+                                //  ],
+                                ],
+                            ],
+                        ]);
+                    }
                 }
                 $menuItems[] = '<li>'
                         . Html::beginForm(['/site/logout'], 'post')
@@ -136,6 +187,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             ?>
 
             <div class="container">
+                <span id="sms-info"></span>
                 <?=
                 Breadcrumbs::widget([
                     'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
@@ -143,14 +195,17 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 ?>
                 <?= Alert::widget() ?>
                 <?= $content ?>
+
             </div>
         </div>
 
         <footer class="footer">
             <div class="container">
-                <p class="pull-left">&copy; f-keeper <?= date('Y') ?></p>
+                <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
                 <p class="pull-right">Работает, оно работает!</p>
+
+                
             </div>
         </footer>
         <div id="loader-show"></div>

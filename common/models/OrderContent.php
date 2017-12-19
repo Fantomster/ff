@@ -19,6 +19,7 @@ use Yii;
  * @property CatalogBaseGoods $product
  * @property string $total
  * @property string $note
+ * @property CatalogGoods $productFromCatalog
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
@@ -52,9 +53,10 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             'order_id' => 'Order ID',
             'product_id' => 'Product ID',
-            'quantity' => 'Количество',
-            'initial_quantity' => 'Запрошенное количество',
-            'price' => 'Цена',
+            'quantity' => Yii::t('app','Количество'),
+            'initial_quantity' => Yii::t('app','Запрошенное количество'),
+            'price' => Yii::t('app','Цена'),
+            'total' => Yii::t('app','Сумма'),
         ];
     }
 
@@ -165,5 +167,46 @@ class OrderContent extends \yii\db\ActiveRecord
     
     public function  getNote() {
         return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $this->order->client_id]);
+    }
+    
+    public function formatPrice() {
+        return $this->price . " " . $this->order->currency->symbol;
+    }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        
+        $product = $this->productFromCatalog;
+        if (!empty($product)) {
+            $catalog = $product->catalog;
+        } else {
+            $catalog = $this->product->catalog;
+        }
+        
+        if ($catalog->currency_id !== $this->order->currency_id) {
+            $order = $this->order;
+            $order->currency_id = $catalog->currency_id;
+            $order->save();
+        }
+        
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+            }
+        }
+    }
+
+    public function getCurrency() {
+         return Currency::findOne($this->order->currency_id);
+    }
+
+    public function afterDelete() {
+        parent::afterDelete();
+        
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+            }
+        }
     }
 }

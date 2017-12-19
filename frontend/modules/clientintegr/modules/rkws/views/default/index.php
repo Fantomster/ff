@@ -12,7 +12,14 @@ use kartik\editable\Editable;
 use api\common\models\RkAccess;
 
 
-
+$script = <<< JS
+$("document").ready(function() {
+    setInterval(function() {     
+       $.pjax.reload({container:"#dics_pjax",timeout: 16000});
+    }, 10000); 
+});
+JS;
+$this->registerJs($script);
 ?>
 
 
@@ -49,16 +56,19 @@ use api\common\models\RkAccess;
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
+                              
+                                <p> Состояние лицензии:<?php echo '<strong>Активна</strong> ID: '.$lic->code.' (с '.date("d-m-Y H:i:s",strtotime($lic->fd)).' по '.date("d-m-Y H:i:s",strtotime($lic->td)).') '; ?>
                                     
-                                    <p> Состояние лицензии: <strong>Активна</strong> ID: 199990046 ( 01.06.2017 - 31.10.2017)
-                                </p>    
+                                </p>  
+                                
                             
                           
                                 </div>
                             </div>
             </div>
         </div>    
-  СПРАВОЧНИКИ:                              
+    
+СПРАВОЧНИКИ:                            
 </section>
 <section class="content-header">
     
@@ -68,10 +78,13 @@ use api\common\models\RkAccess;
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
+                                <?php                                Pjax::begin(['id'=>'dics_pjax']); ?>    
                                     <?=
                                     GridView::widget([
                                         'dataProvider' => $dataProvider,
-                                        'pjax' => true, // pjax is set to always true for this demo
+                                        'pjax' => false, // pjax is set to always true for this demo
+                                        'id' => 'dics_grid',                                        
+                                        //
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                         'layout' => '{items}',
@@ -86,7 +99,7 @@ use api\common\models\RkAccess;
                                                 'contentOptions'=>['style'=>'width: 10%;']        
                                             ],
                                      
-                                            'created_at',
+                                           // 'created_at',
                                             'updated_at',
                                             'obj_count',
                                         //    'obj_mapcount',
@@ -110,8 +123,8 @@ use api\common\models\RkAccess;
                                                         return true;     
                                                         },           
                                                         'getws' => function ($model, $key, $index) {
-                                                        // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-                                                        return true;     
+                                                         return ($model->dicstatus_id == 2) ? false : true;
+                                                       //     return true;
                                                         },                   
                                                     //    'map' => function ($model, $key, $index) {
                                                     //    // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
@@ -164,7 +177,8 @@ use api\common\models\RkAccess;
                                             'fontAwesome' => true,
                                         ],
                                     ]);
-                                    ?> 
+                                ?>
+                                <?php Pjax::end(); ?>    
                                 </div>
                             </div>    
                 </div>

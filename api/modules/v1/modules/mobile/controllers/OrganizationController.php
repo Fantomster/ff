@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\models\User;
 use common\models\forms\LoginForm;
 use common\models\RelationSuppRest;
+use yii\helpers\Json;
 
 
 /**
@@ -43,14 +44,6 @@ class OrganizationController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'view' => [
-                'class' => 'yii\rest\ViewAction',
-                'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -76,23 +69,33 @@ class OrganizationController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         
         $query = Organization::find();
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-        $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $user->organization_id])]);
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-             $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('rest_org_id')->where(['supp_org_id' => $user->organization_id])]);
-     
+
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
         ));
         
         $filters = [];
+        
+        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+            $query->andWhere (['in','id', RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $user->organization_id])]);
+
+        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+            $query->andWhere(['in','id', RelationSuppRest::find()->select('rest_org_id')->where(['supp_org_id' => $user->organization_id])]);
+
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+          
+            $dataProvider =  new ActiveDataProvider(array(
+            'query' => $query,
+            ));
+            
             return $dataProvider;
         }
+        
+            if($params->list != null)
+            $query->andWhere ('id IN('.implode(',', Json::decode($params->list)).')');
 
+             
             $filters['id'] = $params->id; 
             $filters['name'] = $params->name; 
             $filters['type_id'] = $params->type_id; 

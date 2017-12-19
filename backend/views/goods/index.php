@@ -17,7 +17,7 @@ use kartik\depdrop\DepDrop;
 CroppieAsset::register($this);
 kartik\select2\Select2Asset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
-$this->title = 'Catalog Base Goods';
+$this->title = Yii::t('app','Товары');
 $this->params['breadcrumbs'][] = $this->title;
 
 $this->registerJs("           

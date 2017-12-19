@@ -161,13 +161,19 @@ swal({
             cache: false,
             success: function (response) {
             $.pjax.reload({container:"#pjax-callback", async:false});
-            initMap();
-            resolve()
+                initMap();
+                resolve(response)
             }
         });
     })
   }
-}).then(function (e){swal("Готово!",eNames["end"],"success")})
+}).then(function (result){
+    if (result.value.success === true) {
+        swal("Готово!",eNames["end"],"success");
+    } else {
+        swal("Ошибка!",result.value.error,"error");
+    }
+});
 });
 $(document).on("click",".r-close", function(e){
 id = $(this).attr("data-id");
@@ -195,7 +201,12 @@ swal({
         });
     })
   }
-}).then(function () {swal("Готово!","Заявка закрыта","success")
+}).then(function (result) {
+    if (result.dismiss === "cancel") {
+        swal.close();
+    } else {
+        swal("Готово!","Заявка закрыта","success")
+    }
 })
 });
 $(document).on("click",".add-supplier", function(e){
@@ -225,7 +236,12 @@ swal({
         });
     })
   }
-}).then(function () {swal("Готово!","Приглашение отправлено!","success")
+}).then(function (result) {
+    if (result.dismiss === "cancel") {
+        swal.close();
+    } else {
+        swal("Готово!","Приглашение отправлено!","success")
+    }
 })
 });
 ');?>

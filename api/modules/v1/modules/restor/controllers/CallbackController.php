@@ -32,6 +32,10 @@ class CallbackController extends Controller {
         (new \frontend\modules\clientintegr\modules\rkws\components\AgentHelper())->callback();
     }
     
+    public function actionEdism() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\EdismHelper())->callback();
+    }
+    
         
     public function actionStore() {
         (new \frontend\modules\clientintegr\modules\rkws\components\StoreHelper())->callback();
@@ -43,6 +47,10 @@ class CallbackController extends Controller {
     
     public function actionWaybill() {
         (new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper())->callback();
+    }
+
+    public function actionProductgroup() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\ProductgroupHelper())->callback();
     }
 
 }

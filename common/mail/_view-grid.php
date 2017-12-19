@@ -6,7 +6,9 @@ use common\models\Order;
 use yii\helpers\Html;
 
 $dataProvider->sort = false;
-$discountTypes = Order::discountDropDown();
+$discountTypes = $order->discountDropDown();
+$currencySymbol = $order->currency->symbol;
+
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterPosition' => false,
@@ -19,7 +21,7 @@ echo GridView::widget([
             'attribute' => 'product.product',
             'value' => function($data) {
                 $note = isset($data->note->note) ? '<p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">Заметка: ' . $data->note->note . '</p>' : ""; 
-                return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . $data->product_name . '</p>
+                return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . Html::decode(Html::decode($data->product_name)) . '</p>
                     <p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>'.$note;
             },
             'label' => 'Товар',
@@ -35,8 +37,8 @@ echo GridView::widget([
         ],
         ['format' => 'raw',
             'attribute' => 'price',
-            'value' => function($data) {
-                return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->price . ' ' . $currencySymbol . '</b>';
             },
             'label' => 'Цена',
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
@@ -45,8 +47,8 @@ echo GridView::widget([
         [
             'format' => 'raw',
             'attribute' => 'total',
-            'value' => function($data) {
-                return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->total . ' ' . $currencySymbol . '</b>';
             },
             'label' => 'Сумма',
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],

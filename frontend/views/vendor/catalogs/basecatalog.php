@@ -2,23 +2,26 @@
 
 use kartik\grid\GridView;
 use yii\widgets\Breadcrumbs;
-use kartik\editable\Editable;
 use yii\helpers\Html;
 use kartik\export\ExportMenu;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
+use yii\helpers\Json;
 use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
-use yii\helpers\ArrayHelper;
 use yii\web\View;
-use common\models\Category;
-use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
 use common\assets\CroppieAsset;
+use common\models\Currency;
 
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
+
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode(Currency::getSymbolList());
+
+$changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
+$calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
 ?>
 <?php
 $this->registerJs("           
@@ -181,71 +184,64 @@ Modal::end();
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
-                            'href' => Url::to(['/vendor/ajax-create-product-market-place', 'id' => Yii::$app->request->get('id')]),
+                            'href' => Url::to(['/vendor/ajax-create-product-market-place', 'id' => $cat_id]),
                         ],
                     ])
-                    ?><div class="btn-group pull-right" placement="left" style="margin-right: 10px">
-                    <?=
-                    ExportMenu::widget([
-                        'dataProvider' => $dataProvider,
-                        'columns' => $exportColumns,
-                        'fontAwesome' => true,
-                        'filename' => 'Главный каталог - ' . date('Y-m-d'),
-                        'encoding' => 'UTF-8',
-                        'target' => ExportMenu::TARGET_SELF,
-                        'showConfirmAlert' => false,
-                        'showColumnSelector' => false,
-                        'dropdownOptions' => [
-                            'label' => '<span class="text-label">Скачать каталог</span>',
-                            'class' => ['btn btn-outline-default btn-sm pull-right']
-                        ],
-                        'exportConfig' => [
-                            ExportMenu::FORMAT_HTML => false,
-                            ExportMenu::FORMAT_TEXT => false,
-                            ExportMenu::FORMAT_EXCEL => false,
-                            ExportMenu::FORMAT_PDF => false,
-                            ExportMenu::FORMAT_CSV => false, /* [
-                              'label' => Yii::t('kvexport', 'CSV'),
-                              'icon' => 'file-code-o',
-                              'iconOptions' => ['class' => 'text-primary'],
-                              'linkOptions' => [],
-                              'options' => ['title' => Yii::t('kvexport', 'Comma Separated Values')],
-                              'alertMsg' => Yii::t('kvexport', 'Вы загружаете CSV файл.'),
-                              'mime' => 'application/csv;charset=UTF-8',
-                              'extension' => 'csv',
-                              'writer' => 'CSV'
-                              ], */
-                            ExportMenu::FORMAT_EXCEL_X => [
-                                'label' => Yii::t('kvexport', 'Excel'),
-                                'icon' => 'file-excel-o',
-                                'iconOptions' => ['class' => 'text-success'],
-                                'linkOptions' => [],
-                                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
-                                'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
-                                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                'extension' => 'xlsx',
-                                'writer' => 'Excel2007',
-                                'styleOptions' => [
-                                    'font' => [
-                                        'bold' => true,
-                                        'color' => [
-                                            'argb' => 'FFFFFFFF',
-                                        ],
-                                    ],
-                                    'fill' => [
-                                        'type' => PHPExcel_Style_Fill::FILL_NONE,
-                                        'startcolor' => [
-                                            'argb' => 'FFFFFFFF',
-                                        ],
-                                        'endcolor' => [
-                                            'argb' => 'FFFFFFFF',
-                                        ],
-                                    ],
-                                ]
-                            ],
-                        ],
-                    ]);
                     ?>
+                    <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
+                        <?=
+                        ExportMenu::widget([
+                            'dataProvider' => $dataProvider,
+                            'columns' => $exportColumns,
+                            'fontAwesome' => true,
+                            'filename' => 'Главный каталог - ' . date('Y-m-d'),
+                            'encoding' => 'UTF-8',
+                            'target' => ExportMenu::TARGET_SELF,
+                            'showConfirmAlert' => false,
+                            'showColumnSelector' => false,
+                            'batchSize' => 200,
+                            'timeout' => 0,
+                            'dropdownOptions' => [
+                                'label' => '<span class="text-label">Скачать каталог (.xls)</span>',
+                                'class' => ['btn btn-outline-default btn-sm pull-right']
+                            ],
+                            'exportConfig' => [
+                                ExportMenu::FORMAT_HTML => false,
+                                ExportMenu::FORMAT_TEXT => false,
+                                ExportMenu::FORMAT_EXCEL => false,
+                                ExportMenu::FORMAT_PDF => false,
+                                ExportMenu::FORMAT_CSV => false,
+                                ExportMenu::FORMAT_EXCEL_X => [
+                                    'label' => Yii::t('kvexport', 'Excel'),
+                                    'icon' => 'file-excel-o',
+                                    'iconOptions' => ['class' => 'text-success'],
+                                    'linkOptions' => [],
+                                    'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                    'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                    'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    'extension' => 'xlsx',
+                                    'writer' => 'Excel2007',
+                                    'styleOptions' => [
+                                        'font' => [
+                                            'bold' => true,
+                                            'color' => [
+                                                'argb' => 'FFFFFFFF',
+                                            ],
+                                        ],
+                                        'fill' => [
+                                            'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                            'startcolor' => [
+                                                'argb' => 'FFFFFFFF',
+                                            ],
+                                            'endcolor' => [
+                                                'argb' => 'FFFFFFFF',
+                                            ],
+                                        ],
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
 
                     <?=
@@ -254,31 +250,24 @@ Modal::end();
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (.xls)</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
-                            'href' => Url::to(['/vendor/import-to-xls', 'id' => Yii::$app->request->get('id')]),
+                            'href' => Url::to(['/vendor/import', 'id' => $cat_id]),
                             'style' => 'margin-right:10px;',
                         ],
                     ])
                     ?>
                     <?=
-                    Html::a(
-                            '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
-                    )
+                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>'.
+                        '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
+                        'class' => 'btn btn-outline-default btn-sm pull-right',
+                        'style' => ['margin-right' => '10px;'],
+                        'id' => 'changeCurrency',
+                    ])
                     ?>
-                    <?=
-                    Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
-                        'class' => 'btn btn-warning btn-sm pull-right',
-                        'style' => 'margin-right:10px;',
-                        'data' => [
-                            'target' => '#instruction',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-                    ]);
-                    ?>
+
                 </div>
                 <div class="panel-body">
                     <?php
@@ -292,7 +281,10 @@ Modal::end();
                         [
                             'attribute' => 'product',
                             'label' => 'Наименование',
-                            'value' => 'product',
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::decode(Html::decode($data['product']));
+                            },
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [
@@ -314,7 +306,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => 'Цена',
+                            'label' => 'Цена ('.$currentCatalog->currency->iso_code.')',
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
@@ -335,9 +327,9 @@ Modal::end();
                                 $link = CheckboxX::widget([
                                             'name' => 'status_' . $data['id'],
                                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                            'value' => $data['status'] == 0 ? 0 : 1,
+                                            'value' => $data['status'],
                                             'autoLabel' => true,
-                                            'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status'],
+                                            'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status', 'value' => $data['status']],
                                             'pluginOptions' => [
                                                 'threeState' => false,
                                                 'theme' => 'krajee-flatblue',
@@ -350,13 +342,26 @@ Modal::end();
                         ],
                         [
                             'attribute' => '',
-                            'label' => 'F-MARKET',
+                            'label' => 'MixMarket',
                             'format' => 'raw',
                             'contentOptions' => ['style' => 'width:70px'],
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
-                                        $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
+                                        $res = '' :
+                                        $res = '<center><i style="font-size: 28px;color:#84bf76;" class="fa fa-check-square-o"></i></center>';
+                                return $res;
+                            },
+                        ],
+                        [
+                            'attribute' => '',
+                            'label' => '',
+                            'format' => 'raw',
+                            'contentOptions' => ['style' => 'width:70px'],
+                            'headerOptions' => ['class' => 'text-center'],
+                            'value' => function ($data) {
+                                $data['market_place'] == 0 ?
+                                        $link = Html::a('ИЗМЕНИТЬ', ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
                                             'data' => [
                                                 'target' => '#add-product-market-place',
@@ -365,7 +370,7 @@ Modal::end();
                                             ],
                                             'class' => 'btn btn-sm btn-outline-success'
                                         ]) :
-                                        $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
+                                        $link = Html::a('ИЗМЕНИТЬ', ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
                                             'data' => [
                                                 'target' => '#add-product-market-place',
@@ -453,12 +458,13 @@ Modal::end();
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:50px;'],
                         'value' => function ($data) {
+                            $value = ($data->cat_id == Yii::$app->request->get('id')) ? 1 : 0;
                             $link = CheckboxX::widget([
                                         'name' => 'setcatalog_' . $data->id,
                                         'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                        'value' => $data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
+                                        'value' => $value,
                                         'autoLabel' => true,
-                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog'],
+                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog', 'value' => $value],
                                         'pluginOptions' => [
                                             'threeState' => false,
                                             'theme' => 'krajee-flatblue',
@@ -499,7 +505,7 @@ Modal::end();
     </div>
 </section>
 <?php
-$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog]);
+$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
@@ -582,7 +588,7 @@ $(document).on('change','input[event-type=set-catalog]', function(e) {
         url: "$changeSetCatalogUrl",
         type: "POST",
         dataType: "json",
-        data: {'id' : id, 'curCat' : $currentCatalog,'state' : state},
+        data: {'id' : id, 'curCat' : $currentCatalog->id,'state' : state},
         cache: false,
         success: function(response) {
                 console.log(response)
@@ -609,7 +615,7 @@ $("#add-product").on("click", ".edit", function() {
         });
         return false;
     });
-$(".del-product").live("click", function(e){
+$(document).on("click", ".del-product", function(e){
     var id = $(this).attr('data-id');
         
 	bootbox.confirm({
@@ -636,7 +642,6 @@ $(".del-product").live("click", function(e){
 	        cache: false,
 	        success: function(response) {
 		        if(response.success){
-                        //$.pjax.reload({container: "#clients-list"});
 			        $.pjax.reload({container: "#kv-unique-id-1"}); 
 			        }else{
 				    console.log('Что-то пошло не так');    
@@ -664,20 +669,121 @@ $("body").on("show.bs.modal", "#add-product-market-place", function() {
 $(document).on("submit", "#marketplace-product-form", function(e) {
         e.preventDefault();
     var form = $("#marketplace-product-form");
-    $('#loader-show').showLoading();
+    $("#btnSave").button("loading");
+    $("#btnCancel").prop("disabled", true);
     $.post(
         form.attr("action"),
             form.serialize()
             )
             .done(function(result) {
-            $('#loader-show').hideLoading();
+            $("#btnSave").button("reset");
+            $("#btnCancel").prop("disabled", false);
             form.replaceWith(result);
         $.pjax.reload({container: "#kv-unique-id-1"});
         });
         return false;
     });
   $('#add-product-market-place').removeAttr('tabindex');
-  
+    
+    // var currencies = $.map($currencySymbolList, function(el) { return el });
+    var currencies = $currencySymbolList;
+    
+    console.log(currencies);
+    var newCurrency = {$currentCatalog->currency->id};
+    var currentCurrency = {$currentCatalog->currency->id};
+    var oldCurrency = {$currentCatalog->currency->id};
+        
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            confirmButtonText: 'Далее',
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != currentCurrency) {
+                        newCurrency = value;
+                        resolve();
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            },
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        "{$changeCurrencyUrl}",
+                        {newCurrencyId: newCurrency}
+                    ).done(function (response) {
+                        if (response.result === 'success') {
+                            $(".currency-symbol").html(response.symbol);
+                            $(".currency-iso").html(response.iso_code);
+                            oldCurrency = currentCurrency;
+                            currentCurrency = newCurrency;
+                            resolve();
+                        } else {
+                            swal({
+                                type: response.result,
+                                title: response.message
+                            });
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    title: 'Валюта каталога изменена!',
+                    type: 'success',
+                    html: 
+                        '<hr /><div>Пересчитать цены в каталоге?</div>' +                    
+                        '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency] + ' = ' +
+                        '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency],
+                    showCancelButton: true,
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                    preConfirm: function () {
+                        return new Promise(function (resolve) {
+                            $.post(
+                                '{$calculatePricesUrl}',
+                                {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
+                            ).done(function (response) {
+                                if (response.result === 'success') {
+                                    $.pjax.reload({container: "#kv-unique-id-1", timeout:30000});
+                                    resolve();
+                                } else {
+                                    swal({
+                                        type: response.result,
+                                        title: response.message
+                                    });
+                                }
+                            });
+                        })
+                    }
+                }).then(function (result) {
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal({
+                            type: "success",
+                            title: "Цены успешно изменены!",
+                            allowOutsideClick: true,
+                        });
+                    }
+                })
+            }
+        })        
+    });
+        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

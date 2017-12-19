@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 $this->title = 'ServiceDesk';
 ?>
 <section class="content-header">
-    <h1>ServiceDesk <small>Заявки от клиентов системы f-keeper</small>
+    <h1>ServiceDesk <small>Заявки от клиентов системы MixCart</small>
     </h1>
 </section>
 <section class="content-body">

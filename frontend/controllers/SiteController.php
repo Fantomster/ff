@@ -52,6 +52,7 @@ class SiteController extends Controller {
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                         'denyCallback' => function($rule, $action) {
                     $user = Yii::$app->user->identity;
@@ -112,6 +113,10 @@ class SiteController extends Controller {
      */
     public function actionAbout() {
         return $this->render('about');
+    }
+
+    public function actionPayment() {
+        return $this->render('payment');
     }
 
     public function actionContacts() {
@@ -176,26 +181,35 @@ class SiteController extends Controller {
         $organization->scenario = "complete";
 
         $post = Yii::$app->request->post();
-        if (Yii::$app->request->isAjax && $profile->load($post) && $organization->load($post)) {
+        if (Yii::$app->request->isAjax && empty($organization->locality) && $profile->load($post) && $organization->load($post)) {
             if ($profile->validate() && $organization->validate()) {
                 $profile->save();
                 $organization->save();
                 $organization->refresh();
-                if($organization->locality == 'Москва' || $organization->administrative_area_level_1 == 'Московская область'){
-                   $this->SendToAmo($organization, $profile, $user);  
-                }
+//                if($organization->locality == 'Москва' || $organization->administrative_area_level_1 == 'Московская область'){
+//                   $this->SendToAmo($organization, $profile, $user);  
+//                }
             }
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
+    
+    
+    /**
+     * 
+     * @param Organization $organizationModel
+     * @param Profile $profileModel
+     * @param User $userModel
+     * @return boolean
+     */
     private function SendToAmo($organizationModel, $profileModel, $userModel) {
             $response = null;
             $lead_name = $organizationModel->name;
             $company_name = $organizationModel->name;
             $responsible_user_id = 1427371;
-            $lead_status_id = 465729;
+            $lead_status_id = ($organizationModel->type_id === Organization::TYPE_RESTAURANT) ? 465729 : 463335;
             $comment = $organizationModel->formatted_address;
             $city = $organizationModel->country . ", " . $organizationModel->locality;
             $contact_name = $profileModel->full_name; //Название добавляемого контакта

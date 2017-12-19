@@ -35,13 +35,15 @@ class OrderCatalogSearch extends \yii\base\Model {
         
         $searchString = "%$this->searchString%";
 
-        $query = "SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.article, cbg.note, cbg.ed FROM "
-                . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
+        $query = "SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.article, cbg.note, cbg.ed, curr.symbol FROM "
+                . "catalog_base_goods AS cbg LEFT JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "LEFT JOIN catalog cat ON cbg.cat_id = cat.id JOIN currency curr ON cat.currency_id = curr.id "
                 . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
                 . "AND (cbg.status = 1) AND (cbg.deleted = 0) "
-                . "UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id, org.name, cbg.article, cbg.note, cbg.ed FROM "
-                . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
-                . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id, org.name, cbg.article, cbg.note, cbg.ed, curr.symbol FROM "
+                . "catalog_goods AS cg JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
+                . "LEFT JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "LEFT JOIN catalog cat ON cg.cat_id = cat.id JOIN currency curr ON cat.currency_id = curr.id "
                 . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
                 . "AND (cbg.status = 1) AND (cbg.deleted = 0))";
 
@@ -64,6 +66,9 @@ class OrderCatalogSearch extends \yii\base\Model {
             'pagination' => [
                 'pageSize' => 20,
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
+                'params' => [
+                    'sort' => isset($params['sort']) ? $params['sort'] : 'product',
+                ]
             ],
             'sort' => [
                 'attributes' => [

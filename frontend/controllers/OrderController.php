@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\helpers\Json;
+use yii\helpers\Html;
 use common\models\search\OrderCatalogSearch;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
@@ -16,6 +17,12 @@ use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use common\models\ManagerAssociate;
 use common\models\OrderChat;
+use common\models\guides\Guide;
+use common\models\search\GuideSearch;
+use common\models\guides\GuideProduct;
+use common\models\search\GuideProductsSearch;
+use common\models\search\BaseProductSearch;
+use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
@@ -48,6 +55,7 @@ class OrderController extends DefaultController {
                             'ajax-refresh-stats',
                             'ajax-set-comment',
                             'pdf',
+                            'export-to-xls'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -58,15 +66,22 @@ class OrderController extends DefaultController {
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                     [
                         'actions' => [
                             'create',
+                            'guides',
+                            'favorites',
+                            'edit-guide',
+                            'reset-guide',
+                            'save-guide',
                             'checkout',
                             'repeat',
                             'refresh-cart',
                             'ajax-add-to-cart',
+                            'ajax-add-guide-to-cart',
                             'ajax-delete-order',
                             'ajax-make-order',
                             'ajax-change-quantity',
@@ -76,6 +91,13 @@ class OrderController extends DefaultController {
                             'ajax-set-note',
                             'ajax-set-delivery',
                             'ajax-show-details',
+                            'ajax-create-guide',
+                            'ajax-rename-guide',
+                            'ajax-add-to-guide',
+                            'ajax-delete-guide',
+                            'ajax-remove-from-guide',
+                            'ajax-show-guide',
+                            'ajax-select-vendor',
                             'complete-obsolete',
                             'pjax-cart',
                         ],
@@ -86,6 +108,7 @@ class OrderController extends DefaultController {
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                 ],
@@ -96,20 +119,66 @@ class OrderController extends DefaultController {
         ];
     }
 
-    public function actionCreate() {
+    public function actionExportToXls() {
+        $selected = Yii::$app->request->get('selected');
+        if (!empty($selected)) {
+            $model = \Yii::$app->db->createCommand("
+                select 
+                    cbg.article,
+                    cbg.product as product, 
+                    sum(quantity) as total_quantity,
+                    cbg.ed
+                from `order_content` oc 
+                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+                where oc.order_id in ($selected)
+                group by cbg.id")->queryAll();
+
+            $objPHPExcel = new \PHPExcel();
+            $sheet = 0;
+            $objPHPExcel->setActiveSheetIndex($sheet);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(60);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->setTitle('отчет')
+                    ->setCellValue('A1', 'Артикул')
+                    ->setCellValue('B1', 'Наименование товара')
+                    ->setCellValue('C1', 'Кол-во')
+                    ->setCellValue('D1', 'Ед.изм');
+            $row = 2;
+            foreach ($model as $foo) {
+                $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
+                $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode(Html::decode(Html::decode($foo['product']))));
+                $objPHPExcel->getActiveSheet()->setCellValue('C' . $row, $foo['total_quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $foo['ed']);
+                $row++;
+            }
+            header('Content-Type: application/vnd.ms-excel');
+            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            header('Content-Disposition: attachment;filename=' . $filename . ' ');
+            header('Cache-Control: max-age=0');
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+        }
+    }
+
+    public function actionCreate()
+    {
+        $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
 
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
 
         $selectedCategory = null;
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int) $params['OrderCatalogSearch']['selectedVendor'] : null;
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
         }
 
         $vendors = $client->getSuppliers($selectedCategory);
@@ -118,6 +187,9 @@ class OrderController extends DefaultController {
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
 
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+        }
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
@@ -125,11 +197,320 @@ class OrderController extends DefaultController {
 
         $orders = $client->getCart();
 
+        //Вывод по 10
+        $dataProvider->pagination->pageSize = 10;
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         } else {
             return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
+    }
+
+    public function actionGuides() {
+        $client = $this->currentUser->organization;
+        $searchModel = new GuideSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['GuideSearch'] = Yii::$app->request->post("GuideSearch");
+
+        $dataProvider = $searchModel->search($params, $client->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('guides', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('guides', compact('dataProvider', 'searchModel'));
+        }
+    }
+
+    public function actionAjaxDeleteGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        if (isset($guide)) {
+            $guide->delete();
+            return true;
+        }
+        return false;
+    }
+
+    public function actionAjaxCreateGuide($name) {
+        $client = $this->currentUser->organization;
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if ($name && $client->type_id === Organization::TYPE_RESTAURANT) {
+            $guide = new Guide();
+            $guide->client_id = $client->id;
+            $guide->name = $name;
+            $guide->type = Guide::TYPE_GUIDE;
+            $guide->save();
+            return ['type' => 'success', 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
+        } else {
+            return ['type' => 'fail'];
+        }
+    }
+
+    public function actionAjaxRenameGuide()
+    {
+        if (Yii::$app->request->isAjax):
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+            $id = Yii::$app->request->post('id');
+            $name = Yii::$app->request->post('name');
+
+            $model = Guide::findOne($id);
+            $model->name = $name;
+
+            if ($model->validate() and $model->save()) {
+                return ['type' => 'success'];
+            } else {
+                return ['type' => 'fail'];
+            }
+        endif;
+    }
+
+    public function actionEditGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+
+        if (empty($guide)) {
+            return $this->redirect(['order/guides']);
+        }
+
+        $session = Yii::$app->session;
+
+        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
+            unset($session['guideProductList']);
+            unset($session['selectedVendor']);
+        }
+        $session['currentGuide'] = $id;
+
+        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
+        $session['guideProductList'] = $guideProductList;
+
+        $test = $session['selectedVendor'];
+        $test2 = $session['guideProductList'];
+
+        $params = Yii::$app->request->getQueryParams();
+
+        $vendorSearchModel = new VendorSearch();
+        if (Yii::$app->request->post("VendorSearch")) {
+            $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
+        }
+        $params['VendorSearch'] = $session['vendorSearchString'];
+        $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
+        $vendorDataProvider->pagination = ['pageSize' => 8];
+
+        $productSearchModel = new OrderCatalogSearch();
+        $vendors = $client->getSuppliers(null, false);
+        $selectedVendor = $session['selectedVendor'];
+        if (empty($selectedVendor)) {
+            $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
+        }
+        //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
+        $productSearchModel->client = $client;
+        $productSearchModel->catalogs = $catalogs;
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearchString'];
+        $productDataProvider = $productSearchModel->search($params);
+        $productDataProvider->pagination = ['pageSize' => 8];
+
+        $guideSearchModel = new BaseProductSearch();
+        if (Yii::$app->request->post("BaseProductSearch")) {
+            $session['baseProductSearchString'] = Yii::$app->request->post("BaseProductSearch");
+        }
+        $params['BaseProductSearch'] = $session['baseProductSearchString'];
+        $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
+        $guideDataProvider->pagination = ['pageSize' => 7];
+
+        $pjax = Yii::$app->request->get("_pjax");
+        if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
+            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
+            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
+            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
+        } else {
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider'));
+        }
+    }
+
+    public function actionSaveGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $session = Yii::$app->session;
+
+        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
+            return $this->redirect(['order/guides']);
+        }
+
+        $guideProductList = isset($session['guideProductList']) ?  $session['guideProductList'] : [];
+
+        foreach ($guide->guideProducts as $guideProduct) {
+            if (!in_array($guideProduct->cbg_id, $guideProductList)) {
+                $guideProduct->delete();
+            } else {
+                $position = array_search($guideProduct->cbg_id, $guideProductList);
+                if ($position !== false) {
+                    unset($guideProductList[$position]);
+                }
+            }
+        }
+
+        foreach ($guideProductList as $newProductId) {
+            $newProduct = new GuideProduct();
+            $newProduct->guide_id = $id;
+            $newProduct->cbg_id = $newProductId;
+            $newProduct->save();
+        }
+
+        unset($session['guideProductList']);
+        unset($session['selectedVendor']);
+        unset($session['currentGuide']);
+
+        return $this->redirect(['order/guides']);
+    }
+
+    public function actionResetGuide() {
+        $session = Yii::$app->session;
+        unset($session['guideProductList']);
+        unset($session['selectedVendor']);
+        unset($session['currentGuide']);
+        return $this->redirect(['order/guides']);
+    }
+
+    public function actionAjaxShowGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+
+        $params = Yii::$app->request->getQueryParams();
+
+        $guideSearchModel = new GuideProductsSearch();
+        $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
+        $guideDataProvider = $guideSearchModel->search($params, $guide->id, $this->currentUser->organization_id);
+        $guideDataProvider->pagination = false;//['pageSize' => 8];
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+        } else {
+            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+        }
+    }
+
+    public function actionAjaxSelectVendor($id) {
+        $session = Yii::$app->session;
+        $session['selectedVendor'] = $id;
+        return true;
+    }
+
+    public function actionAjaxAddToGuide($id) {
+        $client = $this->currentUser->organization;
+        $session = Yii::$app->session;
+
+        $product = $client->getProductIfAvailable($id);
+
+        if ($product) {
+            $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            if (!in_array($product->id, $guideProductList)) {
+                $guideProductList[] = $product->id;
+                $session['guideProductList'] = $guideProductList;
+            }
+        }
+
+        return isset($product);
+    }
+
+    public function actionAjaxRemoveFromGuide($id) {
+        $client = $this->currentUser->organization;
+        $session = Yii::$app->session;
+        $guideProductList = $session['guideProductList'];
+        $positionInGuide = array_search($id, $guideProductList);
+        if ($positionInGuide !== FALSE) {
+            unset($guideProductList[$positionInGuide]);
+            $session['guideProductList'] = $guideProductList;
+            return true;
+        }
+        return false;
+    }
+
+    public function actionAjaxAddGuideToCart($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+
+        $guideProducts = Yii::$app->request->post("GuideProduct");
+        
+        foreach ($guideProducts as $productId => $quantity) {
+
+            if ($quantity <= 0) {
+                continue;
+            }
+            
+            $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
+
+            $orders = $client->getCart();
+
+            $product_id = $guideProduct->cbg_id;
+            $price = $guideProduct->price;
+            $product_name = $guideProduct->baseProduct->product;
+            $vendor = $guideProduct->baseProduct->vendor;
+            $units = $guideProduct->baseProduct->units;
+            $article = $guideProduct->baseProduct->article;
+            //$quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
+            $isNewOrder = true;
+
+            foreach ($orders as $order) {
+                if ($order->vendor_id == $vendor->id) {
+                    $isNewOrder = false;
+                    $alteringOrder = $order;
+                }
+            }
+            if ($isNewOrder) {
+                $newOrder = new Order();
+                $newOrder->client_id = $client->id;
+                $newOrder->vendor_id = $vendor->id;
+                $newOrder->status = Order::STATUS_FORMING;
+                $newOrder->save();
+                $alteringOrder = $newOrder;
+            }
+
+            $isNewPosition = true;
+            foreach ($alteringOrder->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $position->quantity += $quantity;
+                    $position->save();
+                    $isNewPosition = false;
+                }
+            }
+            if ($isNewPosition) {
+                $position = new OrderContent();
+                $position->order_id = $alteringOrder->id;
+                $position->product_id = $product_id;
+                $position->quantity = $quantity;
+                $position->price = $price;
+                $position->product_name = $product_name;
+                $position->units = $units;
+                $position->article = $article;
+                $position->save();
+            }
+            $alteringOrder->calculateTotalPrice();
+        }
+        $cartCount = $client->getCartCount();
+        $this->sendCartChange($client, $cartCount);
+
+        return true; //$this->renderPartial('_orders', compact('orders'));
+    }
+
+    public function actionFavorites() {
+        $client = $this->currentUser->organization;
+
+        $params = Yii::$app->request->getQueryParams();
+        $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
+
+        $searchModel = new \common\models\search\FavoriteSearch();
+        $dataProvider = $searchModel->search($params, $client->id);
+
+        return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
 
     public function actionPjaxCart() {
@@ -143,11 +524,14 @@ class OrderController extends DefaultController {
     }
 
     public function actionAjaxAddToCart() {
-
+        $post = Yii::$app->request->post();
+        $quantity = $post['quantity'];
+        if ($quantity <= 0) {
+            return false;
+        }
         $client = $this->currentUser->organization;
         $orders = $client->getCart();
 
-        $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
 
         if ($product) {
@@ -169,7 +553,6 @@ class OrderController extends DefaultController {
             $units = $product->units;
             $article = $product->article;
         }
-        $quantity = $post['quantity'];
         $isNewOrder = true;
 
         foreach ($orders as $order) {
@@ -183,6 +566,7 @@ class OrderController extends DefaultController {
             $newOrder->client_id = $client->id;
             $newOrder->vendor_id = $vendor->id;
             $newOrder->status = Order::STATUS_FORMING;
+            $newOrder->currency_id = $product->catalog->currency_id;
             $newOrder->save();
             $alteringOrder = $newOrder;
         }
@@ -222,13 +606,16 @@ class OrderController extends DefaultController {
         if ($product) {
             $baseProduct = $product->baseProduct;
             $price = $product->price;
+            $currencySymbol = $product->catalog->currency->symbol;
         } else {
             $baseProduct = CatalogBaseGoods::findOne(['id' => $get['id'], 'cat_id' => $get['cat_id']]);
             $price = $baseProduct->price;
+            $currencySymbol = $baseProduct->catalog->currency->symbol;
         }
         $vendor = $baseProduct->vendor;
+        
 
-        return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId'));
+        return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
 
     public function actionAjaxRemovePosition($vendor_id, $product_id) {
@@ -415,23 +802,39 @@ class OrderController extends DefaultController {
 
     public function actionAjaxSetDelivery() {
         if (Yii::$app->request->post()) {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $client = $this->currentUser->organization;
             $order_id = Yii::$app->request->post('order_id');
             $delivery_date = Yii::$app->request->post('delivery_date');
             $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             $oldDateSet = isset($order->requested_delivery);
-            if ($order) {
+            if ($order && !empty($delivery_date)) {
+                
+                $nowTS = time();
+                $requestedTS = strtotime($delivery_date . ' 19:00:00');
+                
                 $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
-                $order->requested_delivery = $timestamp;
-                $order->save();
+                if ($nowTS < $requestedTS) {
+                    $order->requested_delivery = $timestamp;
+                    $order->save();
+                } else {
+                    $result = ["title" => "Некорректная дата", "type" => "error"];
+                    return $result;
+                }
             }
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            if ($oldDateSet) {
+            if ($oldDateSet && !empty($delivery_date)) {
                 $result = ["title" => "Дата доставки изменена", "type" => "success"];
                 return $result;
-            } else {
+            } 
+            if (!$oldDateSet && !empty($delivery_date)) {
                 $result = ["title" => "Дата доставки установлена", "type" => "success"];
+                return $result;
+            }
+            if (empty($delivery_date)) {
+                $order->requested_delivery = null;
+                $order->save();
+                $result = ["title" => "Дата доставки удалена", "type" => "success"];
                 return $result;
             }
         }
@@ -519,7 +922,6 @@ class OrderController extends DefaultController {
             $order = $this->findOrder([Order::tableName() . '.id' => $id], Yii::$app->user->can('manage'));
         } else {
             $order = Order::findOne(['id' => $id]);
-            ;
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -652,7 +1054,6 @@ class OrderController extends DefaultController {
             $order = $this->findOrder([Order::tableName() . '.id' => $id], Yii::$app->user->can('manage'));
         } else {
             $order = Order::findOne(['id' => $id]);
-            ;
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -668,7 +1069,8 @@ class OrderController extends DefaultController {
         $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
         $message = "";
         $orderChanged = 0;
-
+        $currencySymbol = $order->currency->symbol;
+        
         if (Yii::$app->request->post()) {
             $content = Yii::$app->request->post('OrderContent');
             $discount = Yii::$app->request->post('Order');
@@ -696,7 +1098,7 @@ class OrderController extends DefaultController {
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/> изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $message .= "<br/> изменил цену $product->product_name с $product->price $currencySymbol на $position[price] $currencySymbol";
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -739,11 +1141,13 @@ class OrderController extends DefaultController {
                 $discountChanged = (($order->discount_type != $discount['discount_type']) || ($order->discount != $discount['discount']));
                 if ($discountChanged) {
                     $order->discount_type = $discount['discount_type'];
-                    $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    $order->discount = null;
                     $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
-                        $discountValue = $order->discount . " руб";
+                        $order->discount = round($discount['discount'], 2);
+                        $discountValue = $order->discount . " $currencySymbol";
                     } else {
+                        $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
                     $message .= "<br/> сделал скидку на заказ №$order->id в размере: $discountValue";
@@ -761,15 +1165,6 @@ class OrderController extends DefaultController {
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
-                foreach ($order->recipientsList as $recipient) {
-                    if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                        $text = $subject;
-                        $target = $recipient->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target);
-                    }
-                }
                 $order->calculateTotalPrice();
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
@@ -780,15 +1175,6 @@ class OrderController extends DefaultController {
                 $order->save();
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->vendor, $order);
-                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
-                foreach ($order->client->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                        $text = $subject;
-                        $target = $recipient->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target);
-                    }
-                }
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -837,8 +1223,7 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
-
-        //return $this->renderPartial('_bill', compact('dataProvider', 'order'));
+        //return $this->renderPartial('_pdf_order', compact('dataProvider', 'order'));
         $pdf = new Pdf([
             'mode' => Pdf::MODE_UTF8, // leaner size using standard fonts
             'format' => Pdf::FORMAT_A4,
@@ -846,7 +1231,7 @@ class OrderController extends DefaultController {
             'orientation' => Pdf::ORIENT_PORTRAIT,
             // stream to browser inline
             'destination' => Pdf::DEST_BROWSER,
-            'content' => $this->renderPartial('_bill', compact('dataProvider', 'order')),
+            'content' => $this->renderPartial('_pdf_order', compact('dataProvider', 'order')),
             'options' => [
 //                'title' => 'Privacy Policy - Krajee.com',
 //                'subject' => 'Generating PDF files via yii2-mpdf extension has never been easy'
@@ -854,8 +1239,9 @@ class OrderController extends DefaultController {
             ],
             'methods' => [
 //                'SetHeader' => ['Generated By: Krajee Pdf Component||Generated On: ' . date("r")],
-                'SetFooter' => ['|Page {PAGENO}|'],
-            ]
+                //'SetFooter' => ['|Page {PAGENO}|'],
+            ],
+            'cssFile' => '../web/css/pdf_styles.css'
         ]);
         return $pdf->render();
     }
@@ -1256,7 +1642,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: измененения в заказе №" . $order->id;
+        $subject = "Измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1265,18 +1651,17 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_changed) {
-                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+            if (isset($recipient->emailNotification->order_changed) && $recipient->emailNotification->order_changed) {
+                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-//            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-//                $text = $subject;
-//                $target = $recipient->profile->phone;
-//                $sms = new \common\components\QTSMS();
-//                $sms->post_message($text, $target);
-//            }
+            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
+                $target = $recipient->profile->phone;
+                Yii::$app->sms->send($text, $target);
+            }
         }
     }
 
@@ -1292,7 +1677,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: заказ №" . $order->id . " выполнен!";
+        $subject = "Заказ №" . $order->id . " выполнен!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1302,16 +1687,15 @@ class OrderController extends DefaultController {
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_done) {
-                $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
+                $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
-                $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
+                $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1328,12 +1712,14 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: новый заказ №" . $order->id . "!";
+        $subject = "Новый заказ №" . $order->id . "!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
+
+        $test = $order->recipientsList;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
@@ -1344,10 +1730,9 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
+                $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1363,7 +1748,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " подтвержден!";
+        $subject = "Заказ №" . $order->id . " подтвержден!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1373,16 +1758,15 @@ class OrderController extends DefaultController {
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_processing) {
-                $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
+                $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
-                $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
+                $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1398,7 +1782,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
+        $subject = "Заказ №" . $order->id . " отменен!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1408,16 +1792,15 @@ class OrderController extends DefaultController {
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_canceled) {
-                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
+                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }

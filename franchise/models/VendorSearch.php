@@ -2,6 +2,7 @@
 
 namespace franchise\models;
 
+use common\models\Role;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -43,7 +44,7 @@ class VendorSearch extends Organization {
      *
      * @return SqlDataProvider
      */
-    public function search($params, $franchisee_id) {
+    public function search($params, $franchisee_id, $client_id = null) {
         $this->load($params);
 
         $searchString = "%{$this->searchString}%";
@@ -60,7 +61,7 @@ class VendorSearch extends Organization {
             $t2_f = $to->format('Y-m-d');
         }
 
-        $query = "SELECT self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
+        $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
                 (select count(id) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
@@ -69,8 +70,20 @@ class VendorSearch extends Organization {
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
                 FROM `organization` AS org
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id 
-                WHERE fa.franchisee_id = $franchisee_id and org.type_id=2 and (org.created_at between :dateFrom and :dateTo) 
+                WHERE fa.franchisee_id = $franchisee_id and org.type_id=".parent::TYPE_SUPPLIER." and (org.created_at between :dateFrom and :dateTo) 
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
+
+        if($client_id){
+            $query = parent::getOrganizationQuery($client_id);
+        }
+
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
+            $query.=" and (org.manager_id=".Yii::$app->user->id." or org.manager_id in(select manager_id from relation_manager_leader where leader_id=".Yii::$app->user->id."))";
+        }
+
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER){
+            $query.=" and org.manager_id=".Yii::$app->user->id;
+        }
 
         $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
 
@@ -100,5 +113,4 @@ class VendorSearch extends Organization {
 
         return $dataProvider;
     }
-
 }

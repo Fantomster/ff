@@ -30,16 +30,22 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         
         $searchModel = new RkDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        
+        $lic = $this->checkLic();       
+        
+        $vi = $lic ? 'index' : '/default/_nolic';
                 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index',[
+            return $this->renderPartial($vi,[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'lic' => $lic,    
         ]);
         } else {
-            return $this->render('index',[
+            return $this->render($vi,[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'lic' => $lic,    
         ]);
         }   
         
@@ -112,6 +118,25 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     }  
     
   }
+  
+    protected function checkLic() {
+     
+    $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one(); 
+    $t = strtotime(date('Y-m-d H:i:s',time()));
+    
+    if ($lic) {
+       if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
+       $res = $lic; 
+    } else { 
+       $res = 0; 
+    }
+    } else 
+       $res = 0; 
+    
+    
+    return $res ? $res : null;
+        
+    }
   
     public function security($header) {
     

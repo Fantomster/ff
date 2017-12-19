@@ -76,7 +76,7 @@ if (!empty($success) || !empty($invalidToken)) {
         <div class="auth-sidebar h-fx_center auth">
             <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
             <div class="auth-sidebar__content">
-                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="images/tmp_file/logo.png" alt=""></a></div>
+                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
 
                 <div class="auth-sidebar__annotation">Введите новый пароль</div>
                 <?php
@@ -89,7 +89,7 @@ if (!empty($success) || !empty($invalidToken)) {
                             ],
                             'fieldConfig' => ['template' => '{input}'],
                 ]);
-                ?>    
+                ?>
                 <div class="auth-sidebar__form-brims">
                     <label>
                         <?=
@@ -112,7 +112,7 @@ if (!empty($success) || !empty($invalidToken)) {
     <?php ActiveForm::end(); ?>
                 <div class="auth-sidebar__contacts">
                     <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>
-                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@f-keeper.ru">info@f-keeper.ru</a></div>
+                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@mixcart.ru">info@mixcart.ru</a></div>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@ if (!empty($success) || !empty($invalidToken)) {
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
         <h1>Онлайн-сервис для автоматизации закупок</h1>
         <div class="present__media clearfix">
-            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div>
+            <div class="present__image"><img src="/images/tmp_file/flowers.png" alt=""></div>
 <!--            <a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a>
             <a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->
         </div>

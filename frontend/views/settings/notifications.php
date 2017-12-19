@@ -124,6 +124,34 @@ $this->title = 'Уведомления';
                         ]
                     ])->label(false)
                     ?>
+                    <?php
+                    $label = '';
+                    switch($user->organization->type_id){
+                        case \common\models\Organization::TYPE_RESTAURANT:
+                            $label = Yii::t('app', 'Уведомления по новым откликам на заявку по email');
+                            break;
+                        case \common\models\Organization::TYPE_SUPPLIER:
+                            $label = Yii::t('app', 'Уведомления о назначении исполнителем заявки по email');
+                            break;
+                    };
+
+                    echo $form->field($emailNotification, 'request_accept')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $emailNotification,
+                        'attribute' => 'request_accept',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => $label,
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false);
+                    ?>
                     <?= ''
 //                    $form->field($emailNotification, 'requests')->widget(CheckboxX::classname(), [
 //                        'autoLabel' => true,
@@ -234,6 +262,34 @@ $this->title = 'Уведомления';
                         ]
                     ])->label(false)
                     ?>
+                    <?php
+                    $label = '';
+                    switch($user->organization->type_id){
+                        case \common\models\Organization::TYPE_RESTAURANT:
+                            $label = Yii::t('app', 'Уведомления по новым откликам на заявку по sms');
+                            break;
+                        case \common\models\Organization::TYPE_SUPPLIER:
+                            $label = Yii::t('app', 'Уведомления о назначении исполнителем заявки по sms');
+                            break;
+                    };
+
+                    echo $form->field($smsNotification, 'request_accept')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $smsNotification,
+                        'attribute' => 'request_accept',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => $label,
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false);
+                    ?>
                     <?= ''
 //                    $form->field($smsNotification, 'requests')->widget(CheckboxX::classname(), [
 //                        'autoLabel' => true,
@@ -253,8 +309,16 @@ $this->title = 'Уведомления';
 //                    ])->label(false)
                     ?>
                 </div>
+                <div class="panel-info settings">
+                    <div class="col-md-10" ><i><br><p>Если вы хотите добавить еще один email для получения уведомлений без заведения нового сотрудника, то вы можете сделать это в таблице ниже.<br>
+                            Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления.</p><br></div></i></div>
+                </div>
+                <div class="col-md-6">
+                    <?=$this->render('_additional_email', ['additional_email' => $additional_email, 'user' => $user])?>
+                </div>
             </div>
         </div>
+
         <div class="box-footer clearfix">
         <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success']) ?>
         </div>

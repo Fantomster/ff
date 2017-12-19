@@ -7,9 +7,19 @@ namespace api\modules\v1\modules\mobile\resources;
  */
 class OrderChat extends \common\models\OrderChat
 {
+    public $type; //dialogs or messages
+    public $count;
+    public $page;
+    public $organization_picture;
+    public $organization_name;
+    
+    const TYPE_DIALOGS=1;
+    const TYPE_MESSAGES=2;
+    
     public function fields()
     {
-        return ['id', 'order_id', 'sent_by_id', 'is_system', 'message', 'created_at', 'viewed', 'recipient_id', 'danger'];
+        return ['id', 'order_id', 'sent_by_id', 'is_system', 'message', 'created_at', 'viewed',  
+            'recipient_id', 'danger', 'type', 'count', 'page', 'organization_picture', 'organization_name'];
     }
     
      /**
@@ -18,8 +28,8 @@ class OrderChat extends \common\models\OrderChat
     public function rules()
     {
         return [
-            [['order_id', 'sent_by_id', 'viewed', 'recipient_id'], 'integer'],
-            [['message', 'created_at', 'is_system', 'danger'], 'safe'],
+            [['order_id', 'sent_by_id', 'viewed', 'recipient_id', 'count', 'type', 'page'], 'integer'],
+            [['message', 'created_at', 'is_system', 'danger', 'organization_name', 'organization_picture'], 'safe'],
             [['message'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'on' => 'userSent'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['sent_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['sent_by_id' => 'id']],

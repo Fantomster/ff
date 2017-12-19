@@ -12,6 +12,32 @@
     box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
     position: relative;
 }
+.block_new {
+    width: 50%;
+    float:left;
+}
+.block_new2 {
+    width: 50%;
+    float:left;
+}
+.small_cell_checkbox {
+    max-width: 20px !important;
+    min-width: 20px !important;
+    text-align: center;
+}
+.block_img {
+    width: 40%;
+    float:left;
+}
+.block_logo {
+    margin: 0 auto;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    width: 393;
+    height: 113;
+}
+
 .top-zakaz{
     margin-top: 30px;
 }
@@ -292,17 +318,62 @@
         float: right !important;
     }
     .block_wrapper1{
-        height: 1200px !important; 
+        height: 100% !important; 
+    }
+    .block_new {
+        width: 100%;
+        float:none;
+    }
+    .block_new2 {
+    width: 100%;
+    float:none;
+    }
+    .block_img {
+    width: 40%;
+    float:right;
+    }
+    .block_logo {
+    width: 300px;
+    }
+    .small_cell_id {
+        max-width: 140px;         
     }
 }
 @media (max-width: 600px) {
     .table{
         overflow-x: scroll;
-        display: block;
-
     }
     td{
         min-width: 200px !important;
+    }
+    .small_cell_id {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+        .small_cell_sum {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    
+    .small_cell_date {
+        max-width: 140px;  
+        min-width: 120px !important;
+    }
+    .small_cell_status {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    .small_cell_sozdal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_prinyal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_supp {
+        max-width: 140px;  
+        min-width: 90px !important;
     }
 
 }
@@ -310,6 +381,12 @@
     .pp{
         width: 100%;
         margin: 0 0%;
+    }
+
+}
+@media (max-width: 480px) {
+    .pull-right{
+        float: none !important;
     }
 
 }
@@ -387,7 +464,7 @@
 
     }
     .block_name{
-        width: 100% !important;
+        width: 60% !important;
 
     }
     .name_dashed{
@@ -395,8 +472,8 @@
         width: 100% !important;
     }
     .block_img{
-        width: 100% !important;
-        float: none !important;
+        width: 40% !important;
+        float: right !important;
         text-align: center;
     }
     .img_i{
@@ -410,10 +487,45 @@
         width: 100% !important;
     }
     .block_wrapper1{
-        height: 1320px !important; 
+        height: 100% !important; 
     }
     .pl{
         font-size: 12px !important; 
+    }
+    
+    .block_logo {
+    width: 250px;
+    }
+    .small_cell_id {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   
+    .small_cell_sum {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    
+    .small_cell_date {
+        max-width: 140px;  
+        min-width: 120px !important;
+    }
+    .small_cell_status {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    
+    .small_cell_sozdal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_prinyal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_supp {
+        max-width: 140px;  
+        min-width: 90px !important;
     }
 }
 .box.box-info {

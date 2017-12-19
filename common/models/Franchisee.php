@@ -30,7 +30,8 @@ use common\models\Role;
  * @property string $fio_manager
  * @property string $phone_manager
  * @property integer $additional_number_manager
- *  
+ * @property integer $receiving_organization
+ *
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
  * @property FracnchiseeType type
@@ -65,7 +66,7 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['type_id','additional_number_manager'], 'integer'],
+            [['type_id','additional_number_manager', 'receiving_organization'], 'integer'],
             [['type_id'], 'required'],
             [['info'], 'string'],
             [['created_at', 'updated_at', 'deleted'], 'safe'],
@@ -148,6 +149,7 @@ class Franchisee extends \yii\db\ActiveRecord {
         $firstOrg = Organization::find()
                 ->joinWith('franchiseeAssociate')
                 ->where(['franchisee_associate.franchisee_id' => $this->id])
+                ->andWhere('organization.created_at is not null')
                 ->orderBy(['organization.created_at' => SORT_ASC])
                 ->limit(1)
                 ->one();
@@ -197,6 +199,23 @@ class Franchisee extends \yii\db\ActiveRecord {
                 }
             }
         }
+        return $dropdown;
+    }
+
+    public function getFranchiseeEmployees($is_managers=false){
+        $dropdown = [];
+        $role = ($is_managers) ? Role::ROLE_FRANCHISEE_MANAGER : Role::ROLE_FRANCHISEE_LEADER;
+        $models = User::find()
+            ->joinWith("franchiseeUser")
+            ->joinWith("profile")->select(['user.id', 'profile.full_name'])
+            ->where([
+                'franchisee_user.franchisee_id' => $this->id,
+                'role_id' => $role
+            ])->all();
+        foreach ($models as $model) {
+            $dropdown[$model->id] = $model->profile->full_name;
+        }
+
         return $dropdown;
     }
 }

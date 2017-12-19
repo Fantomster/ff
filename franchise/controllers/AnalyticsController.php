@@ -42,12 +42,13 @@ class AnalyticsController extends DefaultController {
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_LEADER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
                 ],
             /* 'denyCallback' => function($rule, $action) {
-              throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+              throw new HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
               } */
             ],
             'verbs' => [
@@ -247,13 +248,13 @@ class AnalyticsController extends DefaultController {
         unset($ordersStatThisDay["count"]);
 
         $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
-            from (SELECT count(`$orderTable`.id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day 
+            from (SELECT count(`$orderTable`.id) as count,year(`$orderTable`.created_at) as year, month(`$orderTable`.created_at) as month, day(`$orderTable`.created_at) as day 
                 FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id
-                where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+                where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and `$orderTable`.status <> 7 and `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo group by year(`$orderTable`.created_at), month(`$orderTable`.created_at), day(`$orderTable`.created_at)) aa 
             left outer join (
                 select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day 
                 from (select a.* 
-                    from `f-keeper`.order a left join $fraTable on $fraTable.organization_id=a.vendor_id  
+                    from `order` a left join $fraTable on $fraTable.organization_id=a.vendor_id  
                     where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)
                 ) bb
             on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
@@ -299,10 +300,10 @@ class AnalyticsController extends DefaultController {
         $end = $dtEnd->add(new \DateInterval('P1D'));
         $date = $dt->format('Y-m-d');
 
-        $query = "SELECT truncate(sum(total_price),1) as spent,truncate(sum(total_price)/count(`$orderTable`.id),1) as cheque, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+        $query = "SELECT truncate(sum(`$orderTable`.total_price),1) as spent,truncate(sum(`$orderTable`.total_price)/count(`$orderTable`.id),1) as cheque, year(`$orderTable`.created_at) as year, month(`$orderTable`.created_at) as month, day(`$orderTable`.created_at) as day "
                 . "FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id "
-                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") and created_at between :dateFrom and :dateTo "
-                . "group by year(created_at), month(created_at), day(created_at)";
+                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and `$orderTable`.status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") and `$orderTable`.created_at between :dateFrom and :dateTo "
+                . "group by year(`$orderTable`.created_at), month(`$orderTable`.created_at), day(`$orderTable`.created_at)";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
@@ -316,10 +317,10 @@ class AnalyticsController extends DefaultController {
             $dayCheque[] = $order["cheque"];
         }
 
-        $query = "SELECT truncate(sum(total_price),1) as total_month, truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(`$orderTable`.id),1) as cheque, year(created_at) as year, month(created_at) as month "
+        $query = "SELECT truncate(sum(`$orderTable`.total_price),1) as total_month, truncate(sum(`$orderTable`.total_price)/count(distinct `$orderTable`.client_id),1) as spent,truncate(sum(`$orderTable`.total_price)/count(`$orderTable`.id),1) as cheque, year(`$orderTable`.created_at) as year, month(`$orderTable`.created_at) as month "
                 . "FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id "
-                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
-                . "group by year(created_at), month(created_at)";
+                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and `$orderTable`.status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
+                . "group by year(`$orderTable`.created_at), month(`$orderTable`.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $money = $command->queryAll();
         $monthLabels = [];
@@ -497,7 +498,19 @@ class AnalyticsController extends DefaultController {
             $dayTurnover[] = $order["spent"];
         }
         //---turnover by day end
-        
+
+        //---clients count by day
+        $clientsQuery = "SELECT COUNT(*) AS clients_count, YEAR(created_at) AS year, MONTH(created_at) AS month, DAY(created_at) AS day FROM relation_supp_rest WHERE supp_org_id=".$id." AND created_at IS NOT NULL  AND created_at BETWEEN :dateFrom AND :dateTo GROUP BY YEAR(created_at), MONTH(created_at), DAY(created_at)";
+        $clientsCommand = Yii::$app->db->createCommand($clientsQuery, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $clientsByDay = $clientsCommand->queryAll();
+        $clientsDayLabels = [];
+        $clientsDayTurnover = [];
+        foreach ($clientsByDay as $client) {
+            $clientsDayLabels[] = $client["day"] . " " . date('M', strtotime("2000-$client[month]-01")) . " " . $client["year"];
+            $clientsDayTurnover[] = $client["clients_count"];
+        }
+        //---clients count by day end
+
         //---turnover by client start
         $query = "SELECT TRUNCATE(SUM(total_price),1) AS client_turnover, `$orgTable`.name AS name "
                 . "FROM `$orderTable` LEFT JOIN `$orgTable` ON `$orderTable`.client_id=`$orgTable`.id "
@@ -530,11 +543,11 @@ class AnalyticsController extends DefaultController {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('vendor-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor', 'clientsDayLabels', 'clientsDayTurnover'
             ));
         } else {
             return $this->render('vendor-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor', 'clientsDayLabels', 'clientsDayTurnover'
             ));
         }
     }

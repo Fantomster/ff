@@ -2,7 +2,10 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\bootstrap\Modal;
 use common\models\Organization;
+use common\models\Role;
+use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
@@ -18,6 +21,7 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
+    $changeNetworkUrl = Url::to(['/user/change']);
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
 //    });
@@ -127,7 +131,7 @@ if (!Yii::$app->user->isGuest) {
         e.preventDefault();
         form = $("#inviteForm");
         swal({
-            title: "Приглашение на f-keeper",
+            title: "Приглашение на MixCart",
             input: "text",
             showCancelButton: true,
             cancelButtonText: "Отмена",
@@ -165,6 +169,8 @@ if (!Yii::$app->user->isGuest) {
         }).then(function (result) {
             if (result.success) {
                 swal({title: "Приглашение отправлено!", type: "success"});
+            } else if (result.dismiss === "cancel") {
+                swal.close();
             } else {
                 swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
             }
@@ -190,9 +196,102 @@ if (!Yii::$app->user->isGuest) {
                 }
             });
     });
+            
+$("body").on("hidden.bs.modal", "#changeNetOrg", function() {
+    $(this).data("bs.modal", null);
+})
+$(document).on("click",".change-net-org", function(e){
+    e.preventDefault();
+    var id = $(this).attr('data-id'); 
+    $.get(
+        '$changeNetworkUrl',
+        {id : id}
+    ).done(function(result) {
+        if (result) {
+            document.location = "$dashboard";
+        }
+    });
+})
+$(document).on("click", ".new-network", function(e) { 
+    e.preventDefault();        
+    var form = $("#create-network-form");
+    $.ajax({
+        url: form.attr('action'),
+        type: 'post',
+        data: form.serialize(),
+        success: function (response) {  
+          $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "/user/default/change-form"});
+          $("#create-network-form")[0].reset();
+        },
+        error: function(jqXHR, errMsg) { 
+            // handle error
+        }
+    });
+    return false;
+});      
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
+<?php $this->registerCss("
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background-color: #fff;
+    border-left: 1px solid #eee;
+}
+::-webkit-scrollbar-thumb {
+    border-radius:4px;
+    background-color: #84bf76;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #88bd36;
+}
+    .network-modal{
+        padding:20px 30px 20px 30px;
+    }
+    .network-modal h5, .network-modal h4, .network-modal h3, .network-modal h2{
+     font-family: 'Circe-Bold';  
+     letter-spacing: 0.05em;
+    }
+    .network-modal h3, .network-modal h3 span{
+     font-family: 'Circe-Bold';
+     letter-spacing: 0.05em;
+     font-size:28px;
+    }
+    .network-modal a, .network-modal div, .network-modal p, .network-modal span{
+     font-family: 'Circe-Regular';
+     letter-spacing: 0.05em;
+     font-size:14px;
+    }
+    .network-modal .network-list{
+        overflow-y: auto;
+    }
+    .network-modal .new-network{
+        height:40px;
+        border-radius: 50px;
+        font-size: 19px;
+        width:100%;
+        margin-top:20px;
+        
+    }
+    #changeNetOrg .modal-content{
+        background-color:rgba(255, 255, 255, 0);
+    }
+    .network-modal{
+        border-radius:4px;
+    }
+    .btn-business{
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0,0,10px rgba(0,0,0, 0.4);
+    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    width:100%;
+    text-align:center;
+    }
+");
+?>
     <script type="text/javascript">
         var socket;
         var dataEdited = 0;
@@ -203,11 +302,10 @@ JS;
     </script>
 <?php } ?>
 <header class="main-header">
-
-    <?= Html::a('<span class="logo-mini"><b>f</b>k</span><span class="logo-lg"><b>f</b>-keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini"><b>M</b>C</span><span class="logo-lg">MixCart</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
-        <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -305,7 +403,27 @@ JS;
                                     <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>
+                                <?php
+                                if($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
+                                   $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
+                                   $user->role_id == Role::ROLE_ADMIN ||
+                                   $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
+                                    in_array($user->role_id, Role::getFranchiseeEditorRoles()))
+                                {
+                                    echo Html::a("БИЗНЕСЫ", ['user/change-form'], [
+                                        'data' => [
+                                            'target' => '#changeNetOrg',
+                                            'toggle' => 'modal',
+                                            'backdrop' => 'static',
+                                        ],
+                                        'class' => 'btn btn-lg btn-business',
+                                    ]);
+                                }
+                                ?>
                             </li>
+                            <!--li class="user-body" style="padding:0;border:0;">
+                               <span class="btn btn-lg btn-gray" style="border-radius:0;width:100%;text-align:center;">смена бизнеса</span> 
+                            </li-->
                             <!-- Menu Body -->
 
                             <!-- Menu Footer-->
@@ -313,11 +431,7 @@ JS;
                         </ul>
                     </li>
                     <li class="dropdown tasks-menu">
-                        <?=
-                        Html::a(
-                                '<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post']
-                        )
-                        ?>
+                        <?=Html::a('<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post'])?>
                     </li>
 
                 </ul>
@@ -325,3 +439,10 @@ JS;
         <?php } ?>
     </nav>
 </header>
+<?=
+Modal::widget([
+    'id' => 'changeNetOrg',
+    'size' => 'modal-lg',
+    'clientOptions' => false
+])
+?>

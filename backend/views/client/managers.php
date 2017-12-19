@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Менеджеры f-keeper';
+$this->title = 'Менеджеры MixCart';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [

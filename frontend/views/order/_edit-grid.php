@@ -8,6 +8,8 @@ use kartik\widgets\TouchSpin;
 use kartik\form\ActiveForm;
 use common\models\Order;
 
+$currencySymbol = $order->currency->symbol;
+
 $form = ActiveForm::begin([
             'id' => 'editOrder',
             'enableAjaxValidation' => false,
@@ -17,6 +19,7 @@ $form = ActiveForm::begin([
             'method' => 'post',
             'action' => Url::to(['order/edit', 'id' => $order->id]),
         ]);
+
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
@@ -24,16 +27,13 @@ echo GridView::widget([
     'summary' => '',
     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable order-table'],
     'options' => ['class' => 'table-responsive'],
-//    'panel' => false,
-//    'bootstrap' => false,
-//    'resizableColumns' => false,
     'columns' => [
         [
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = isset($data->note->note) ? "<div class='grid-article'>Заметка: " . $data->note->note . "</div>" : ""; 
-                return "<div class='grid-prod'>" . $data->product_name . "</div>"
+                $note = isset($data->note->note) ? "<div class='grid-article'>Заметка: " . $data->note->note . "</div>" : "";
+                return "<div class='grid-prod'>" . Html::decode(Html::decode($data->product_name)) . "</div>"
                         . "<div class='grid-article'>Артикул: <span>"
                         . $data->article . "</span></div>" . $note;
             },
@@ -59,146 +59,149 @@ echo GridView::widget([
                             'options' => ['class' => 'view-data', 'id' => 'qnty' . $data->id],
                         ]) . Html::hiddenInput("OrderContent[$data->id][id]", $data->id);
             },
-                    'contentOptions' => ['class' => 'width150'],
-                ],
-                ($priceEditable) ?
-                        [
-                    'attribute' => 'price',
-                    'content' => function($data) {
-                        return TouchSpin::widget([
-                                    'name' => "OrderContent[$data->id][price]",
-                                    'pluginOptions' => [
-                                        'initval' => $data->price,
-                                        'min' => 0,
-                                        'max' => PHP_INT_MAX,
-                                        'step' => 1,
-                                        'decimals' => 2,
-                                        'forcestepdivisibility' => 'none',
-                                        'buttonup_class' => 'btn btn-default btn-sm',
-                                        'buttondown_class' => 'btn btn-default btn-sm',
-                                        'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                        'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                                    ],
-                                    'options' => ['class' => 'view-data'],
-                        ]);
-                    },
-                            'contentOptions' => ['class' => 'width150'],
-                                ] : [ 'format' => 'raw',
-                            'attribute' => 'price',
-                            'value' => function($data) {
-                                return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
-                            },
-                            'label' => 'Цена',
-                            'contentOptions' => ['class' => 'width150'],
-                                ],
-                        [
-                            'format' => 'raw',
-                            'attribute' => 'total',
-                            'value' => function($data) {
-                                return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
-                            },
-                            'label' => 'Сумма',
-                            'contentOptions' => ['class' => 'width150'],
-                        ],
-                        [
-                            'format' => 'raw',
-                            'value' => function($data) {
-                                return '<a href="#" class="deletePosition btn btn-outline-danger btn-sm" data-target="#qnty' . $data->id . '" title="Удалить позицию"><i class="fa fa-trash m-r-xxs"></i></a>';
-                            },
-                            'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
-                        ],
-                    ],
+            'contentOptions' => ['class' => 'width150'],
+        ],
+        ($priceEditable) ?
+                [
+            'attribute' => 'price',
+            'content' => function($data) {
+                return TouchSpin::widget([
+                            'name' => "OrderContent[$data->id][price]",
+                            'pluginOptions' => [
+                                'initval' => $data->price,
+                                'min' => 0,
+                                'max' => PHP_INT_MAX,
+                                'step' => 1,
+                                'decimals' => 2,
+                                'forcestepdivisibility' => 'none',
+                                'buttonup_class' => 'btn btn-default btn-sm',
+                                'buttondown_class' => 'btn btn-default btn-sm',
+                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
+                            ],
+                            'options' => ['class' => 'view-data'],
                 ]);
-                $discountTypes = Order::discountDropDown();
-                if ($priceEditable) {
-                    //editable discount
-                    ?>
-                    <div class="order-total">
-                        <div class="row">
-                            <div class="col-xs-4"><hr></div>
-                            <div class="col-xs-8"></div>
-                        </div>
-                        <?php if (!empty($order->comment)) { ?>
-                        <div class="row">
-                            <div class="col-xs-4"><span>Комментарий к заказу</span></div>
-                            <div class="col-xs-8"><?= $order->comment ?></div>
-                        </div>
-                        <?php } ?>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
-                            </div>
-                            <div class="col-xs-8">
-                                <?= $form->field($order, 'discount')->label(false) ?>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4"><hr></div>
-                            <div class="col-xs-8"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4 ">
-                                <span>Стоимость доставки:</span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= $order->calculateDelivery() . ' руб' ?></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <span>Итого:</span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= $order->total_price . ' руб' ?></span>
-                            </div>
-                        </div>
-                    </div>
-                    <?php
-                } else {
-                    //show discount
-                    ?>
-                    <div class="order-total">
-                        <div class="row">
-                            <div class="col-xs-4"><hr></div>
-                            <div class="col-xs-8"></div>
-                        </div>
-                        <?php if (!empty($order->comment)) { ?>
-                        <div class="row">
-                            <div class="col-xs-4"><span>Комментарий к заказу</span></div>
-                            <div class="col-xs-8"><?= $order->comment ?></div>
-                        </div>
-                        <?php } ?>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?></span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= ($order->discount) ? $order->discount : '-' ?></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4 ">
-                                <span>Стоимость доставки:</span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= $order->calculateDelivery() . ' руб' ?></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <span>Итого:</span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= $order->total_price . ' руб' ?></span>
-                            </div>
-                        </div>
-                    </div>
-                    <?php
-                }
-                echo Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right btnSave']);
-                echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
-                            'class' => 'btn btn-default pull-right',
-                            'style' => 'margin-right: 7px;'
-                        ]) : "";
-                ActiveForm::end();
-                
+            },
+            'contentOptions' => ['class' => 'width150'],
+                ] : ['format' => 'raw',
+            'attribute' => 'price',
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->price . ' '. $currencySymbol . '</b>';
+            },
+            'label' => 'Цена',
+            'contentOptions' => ['class' => 'width150'],
+                ],
+        [
+            'format' => 'raw',
+            'attribute' => 'total',
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->total . ' '. $currencySymbol . '</b>';
+            },
+            'label' => 'Сумма',
+            'contentOptions' => ['class' => 'width150'],
+        ],
+        [
+            'format' => 'raw',
+            'value' => function($data) {
+                return '<a href="#" class="deletePosition btn btn-outline-danger btn-sm" data-target="#qnty' . $data->id . '" title="Удалить позицию"><i class="fa fa-trash m-r-xxs"></i></a>';
+            },
+            'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
+        ],
+    ],
+]);
+$discountTypes = $order->discountDropDown();
+if ($priceEditable) {
+    //editable discount
+    ?>
+    <div class="order-total">
+        <div class="row">
+            <div class="col-xs-4"><hr></div>
+            <div class="col-xs-8"></div>
+        </div>
+        <?php if (!empty($order->comment)) { ?>
+            <div class="row">
+                <div class="col-xs-4"><span>Комментарий к заказу</span></div>
+                <div class="col-xs-8"><?= $order->comment ?></div>
+            </div>
+        <?php } ?>
+        <div class="row">
+            <div class="col-xs-4">
+                <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
+            </div>
+            <div class="col-xs-8">
+                <?= $form->field($order, 'discount')->label(false) ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4"><hr></div>
+            <div class="col-xs-8"></div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 ">
+                <span>Стоимость доставки:</span>
+            </div>
+            <div class="col-xs-8">
+                <span><?= $order->calculateDelivery() . ' ' . $currencySymbol ?></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+                <span>Итого:</span>
+            </div>
+            <div class="col-xs-8">
+                <span><?= $order->total_price . ' ' . $currencySymbol ?></span>
+            </div>
+        </div>
+    </div>
+    <?php
+} else {
+    //show discount
+    ?>
+    <div class="order-total">
+        <div class="row">
+            <div class="col-xs-4"><hr></div>
+            <div class="col-xs-8"></div>
+        </div>
+        <?php if (!empty($order->comment)) { ?>
+            <div class="row">
+                <div class="col-xs-4"><span>Комментарий к заказу</span></div>
+                <div class="col-xs-8"><?= $order->comment ?></div>
+            </div>
+        <?php } ?>
+        <div class="row">
+            <div class="col-xs-4">
+                <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?></span>
+            </div>
+            <div class="col-xs-8">
+                <span><?= ($order->discount) ? $order->discount : '-' ?></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 ">
+                <span>Стоимость доставки:</span>
+            </div>
+            <div class="col-xs-8">
+                <span><?= $order->calculateDelivery() . ' ' . $currencySymbol ?></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+                <span>Итого:</span>
+            </div>
+            <div class="col-xs-8">
+                <span><?= $order->total_price . ' ' . $currencySymbol ?></span>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+echo Html::button('<span><i class="icon fa fa-save"></i> Сохранить</span>', [
+    'class' => 'btn btn-success pull-right btnSave',
+    'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+]);
+echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
+            'class' => 'btn btn-default pull-right',
+            'style' => 'margin-right: 7px;'
+        ]) : "";
+ActiveForm::end();
+

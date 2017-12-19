@@ -2,10 +2,11 @@
 
 namespace api\common\models;
 
-//use common\models\User;
+use common\models\User;
 
 use Yii;
 use common\models\OrderContent;
+// use common\models\User;
 
 /**
  * This is the model class for table "rk_access".
@@ -31,6 +32,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
+    
+
 
     /**
      * @inheritdoc
@@ -44,10 +47,10 @@ class RkWaybill extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['order_id', 'doc_date', 'corr_rid', 'store_rid', 'note', 'text_code', 'num_code'], 'required'],
+            [['order_id', 'doc_date', 'corr_rid'], 'required'],
             [['corr_rid', 'store_rid', 'status_id'], 'integer'],
                 //     [['comment'], 'string', 'max' => 255],
-                //     [['acc','rid','denom','agent_type','updated_at'],'safe']
+            [['store_rid', 'org','vat_included','text_code','num_code'],'safe']
         ];
     }
 
@@ -85,7 +88,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
     public function getStore() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        return RkStore::find()->andWhere('rid = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => Yii::$app->user->identity->organization_id])->one();
+        return RkStoretree::find()->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => Yii::$app->user->identity->organization_id])->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
@@ -107,10 +110,16 @@ class RkWaybill extends \yii\db\ActiveRecord {
             } else {
             $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd');    
             }
-            
+
+            if (empty($this->text_code))
+                    $this->text_code = 'mixcart';
+
+            if (empty($this->num_code))
+                    $this->num_code = $this->order_id;
+
             return true;
         }
-    }    
+    }
 
     
     public function afterSave($insert, $changedAttributes) {
@@ -133,11 +142,30 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
                     $wdmodel->waybill_id = $this->id;
                     $wdmodel->product_id = $record->product_id;
-                    $wdmodel->quant = $record->quantity;
-                    $wdmodel->sum = $record->price;
+                    $wdmodel->quant = $record->quantity;                    
+                    $wdmodel->sum = round($record->price*$record->quantity,2);
+                    $wdmodel->defquant = $record->quantity;                    
+                    $wdmodel->defsum = round($record->price*$record->quantity,2);
                     $wdmodel->vat = 1800;
                     $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
+                    $wdmodel->org = $this->org;
+                    $wdmodel->koef = 1;
+                    
+                    
+                    // Check previous
+                    
+                    $ch = RkWaybilldata::find()
+                            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
+                            ->andWhere('org = :org',['org' => $wdmodel->org]) 
+                            ->andWhere('product_rid is not null')
+                            ->one();
+                    
+                    if ($ch) {
+                        $wdmodel->product_rid = $ch->product_rid;
+                        $wdmodel->munit_rid = $ch->munit_rid;
+                    }
+                    
+               
                     if (!$wdmodel->save()) {
                         
                         var_dump($wdmodel->getErrors());

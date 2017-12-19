@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\rkws\components;
 use yii;
 use api\common\models\RkSession;
 use api\common\models\RkAccess;
+use api\common\models\RkService;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use common\models\User;
@@ -26,7 +27,9 @@ class AuthHelper extends Object {
         if(isset(User::findOne(Yii::$app->user->id)->organization_id))
         $this->org = User::findOne(Yii::$app->user->id)->organization_id;
         
-        $this->restr = RkAccess::find()->andwhere('id=1')->one();
+        if (isset($this->org))
+        $this->restr = RkService::find()->andwhere('org = :org',[':org' => $this->org])->one();
+                
        
     } 
     
@@ -60,7 +63,7 @@ class AuthHelper extends Object {
         } else {
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="'.$this->restr->salespoint.'"/>
+        <PARAM name="object_id" val="199990046"/>
         </RQ>';  
         
         $res = ApiHelper::sendCurl($xml,$this->restr);
@@ -88,9 +91,11 @@ class AuthHelper extends Object {
  
     public function sendAuth() {
     
-    $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Login";
+    // $url = "http://ws.ucs.ru/WSClient/api/Client/Login";
     
-    $restrModel = RkAccess::find()->andwhere('id = 1')->one();
+    $url = Yii::$app->params['rkeepAuthURL'] ? Yii::$app->params['rkeepAuthURL'] : 'http://ws.ucs.ru/WSClient/api/Client/Login';
+    
+    $restrModel = RkAccess::find()->andwhere('fid = 1')->one();
        
     $licReq = $restrModel->lic;
     $rlogin = $restrModel->login;
@@ -99,7 +104,7 @@ class AuthHelper extends Object {
                   
     $usrReq = base64_encode($rlogin.';'.strtolower(md5($rlogin.$rpass)).';'.strtolower(md5($rtoken)));
     
-    var_dump($usrReq);
+    // var_dump($usrReq);
     // exit;
     
     $xml ='<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="'.$licReq.'" usr="'.$usrReq.'"/>';

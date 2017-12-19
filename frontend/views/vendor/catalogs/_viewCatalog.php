@@ -43,8 +43,8 @@ $gridColumnsCatalog = [
     ],
     [
     'label'=>'Цена каталога',
-    'value'=>function ($data) {
-    return $data->price." руб.";
+    'value'=>function ($data) use ($currencySymbol) {
+    return $data->price." ".$currencySymbol;
     },
     ],
     [

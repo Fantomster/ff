@@ -1,15 +1,18 @@
-<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 600px;">
+<?php 
+$currencySymbol = $order->currency->symbol;
+?>
+<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 320px;">
     <div class="block__wrapp" style="width: 100%;	height: 100%; padding: 20px;">
-        <img  src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" alt="" style="margin: 0 auto;display: block;margin-top: 10px;margin-bottom: 30px;" width="393" height="113">
+        <img  src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" alt="" class="block_logo">
 
         <div style="width: 100%;">
-            <div style="width: 50%;float:left;">
+            <div class="block_new">
                 <div style="width: 100%;">
                     <div class="block_name" style="width: 60%;float:left;">
                         <p class = "z_1" style="font-family: Circe_Bold; text-transform: uppercase;font-size: 16px; text-align: left;">Заказчик</p>
                         <p class= "name_dashed" style="font-family: sans-serif;font-size: 18px;border-bottom: 1px dashed #000; width: 100%;text-align: left;font-weight: 100;" ><?= $order->client->name ?></p>
                     </div>
-                    <div class="block_img" style="width: 40%;float:left;">
+                    <div class="block_img" >
                         <img class = "img_i pull-left" src="<?= $order->client->pictureUrl ?>" alt="" width="93" height="52">
                     </div>
                 </div>
@@ -22,9 +25,9 @@
                     <p style="font-family: Circe_Bold;padding-top: 20px;	text-align: left;color: #999C9E;flex-wrap: bold;">Запрошенная дата доставки: <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?></p>
                 </div>
             </div>
-            <div style="width: 50%;float:left;">
+            <div class="block_new2">
                 <div style="width: 100%;">
-                    <div class="block_img" style="width: 40%;float:left;">
+                    <div class="block_img" >
                         <img  class = "img_i pull-right" src="<?= $order->vendor->pictureUrl ?>" alt="" width="93" height="52">
                     </div>
                     <div class="block_name" style="width: 60%;float:left;">
@@ -45,7 +48,7 @@
         <?php if (!empty($order->comment)) { ?>
             <div style="width: 100%;height: auto;border: 1px solid #DDDDDD;float: left;margin: 30px 0%; border-radius: 100px;">
                 <div style="border-right: 1px solid #DDDDDD;width: 55px;float: left;height: 50px;">
-                    <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
+                    <img src="https://mixcart.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
                 </div>
                 <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;"><?= $order->comment ?></p>
             </div>
@@ -56,8 +59,8 @@
                 <?php if ($order->discount) { ?>
                     <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount() ?></p>
                 <?php } ?>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: <?= $order->calculateDelivery() ?> руб.</p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: <?= $order->total_price ?> руб.</p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px;">Стоимость доставки: <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px;">Итого: <?= $order->total_price ?> <?= $currencySymbol ?></p>
             </div>
         </div>
         <div style="padding-bottom: 20px;width:100%;">

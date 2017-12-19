@@ -48,13 +48,13 @@ if($i > 0){
                     ?>
                       <div class="media media-block animated fadeInUp" >
                         <div class="media-left media-middle">
-                          <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_sub_id']]);?>">
+                          <a href="<?=Url::to(['/site/category', 'slug' => $arr['_source']['category_slug']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
                                  src="<?=Url::to('@web/fmarket/images/image-category/'.$arr['_source']['category_id'].".jpg", true)?>">
                           </a>
                         </div>
                         <div class="media-body">
-                          <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_sub_id']]);?>">
+                          <a href="<?=Url::to(['/site/category', 'slug' => $arr['_source']['category_slug']]);?>">
                           <h5 class="media-heading"><?=$arr['_source']['category_name']?></h5>    
                           </a>
                         </div>
@@ -95,7 +95,7 @@ if($i > 0){
                             <?php if (empty($arr['_source']['product_show_price'])){ ?>
                             <h5 class="media-price" style="color: #dfdfdf">договорная цена</h5>
                             <?php } else {?>
-                            <h5 class="media-price"><?=floatval($arr['_source']['product_price']); ?> <small>руб.</small></h5>
+                            <h5 class="media-price"><?=floatval($arr['_source']['product_price']); ?> <small><?= $arr['_source']['product_currency'] ?></small></h5>
                             <?php } ?>                 
                         </div>
                       </div>

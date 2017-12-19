@@ -30,7 +30,7 @@ use yii\helpers\Url;
                             <table align="center" border="0" cellpadding="0" cellspacing="0" >
                                     <tr>
                                             <td valign="top" style="text-align: center;">
-                                                    <a href=""><img src="http://f-keeper.ru/img/request/logo-mail.png" alt="" /></a>
+                                                    <a href=""><img src="https://mixcart.ru/img/request/logo-mail.png" alt="" /></a>
                                             </td>
                                     </tr>
                             </table>
@@ -67,7 +67,7 @@ use yii\helpers\Url;
         </tr>
         <tr>
                 <td style="padding: 10px 30px; padding-bottom: 40px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 16px; mso-height-rule: exactly; line-height: 16px; color: #555;">
-                        <a href="<?= Url::toRoute(["/request/view", 'id' => $request->id], true) ?>" style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;">Перейти к заявке</a>
+                        <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/request/view", 'id' => $request->id]) ?>" style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;">Перейти к заявке</a>
                         <br><br>
 
                 </td>

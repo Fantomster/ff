@@ -6,7 +6,8 @@ use common\models\Order;
 use yii\helpers\Html;
 
 $dataProvider->sort = false;
-$discountTypes = Order::discountDropDown();
+$discountTypes = $order->discountDropDown();
+$currencySymbol = $order->currency->symbol;
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterPosition' => false,
@@ -18,9 +19,9 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = isset($data->note->note) ? '<p style="line-height: 0.5;font-size: 11px;color: #999C9E;">Заметка: ' . $data->note->note . '</p>' : ""; 
-                return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . $data->product_name . '</p>
-                    <p style="line-height: 0.5;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>'.$note;
+                $note = isset($data->note->note) ? '<p style="line-height: 1;font-size: 11px;color: #999C9E;">Заметка: ' . $data->note->note . '</p>' : ""; 
+                return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . Html::decode(Html::decode($data->product_name)) . '</p>
+                    <p style="line-height: 1;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>'.$note;
             },
             'label' => 'Товар',
             'headerOptions' => ['style' => "padding: 10px;width: 40%;border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
@@ -35,8 +36,8 @@ echo GridView::widget([
         ],
         ['format' => 'raw',
             'attribute' => 'price',
-            'value' => function($data) {
-                return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->price . '</b> ' . $currencySymbol;
             },
             'label' => 'Цена',
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
@@ -45,8 +46,8 @@ echo GridView::widget([
         [
             'format' => 'raw',
             'attribute' => 'total',
-            'value' => function($data) {
-                return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->total . '</b> '.$currencySymbol.'</i>';
             },
             'label' => 'Сумма',
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],

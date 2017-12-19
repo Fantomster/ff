@@ -111,6 +111,7 @@ class OrderSearch extends Order {
                 $query->from(Profile::tableName(). ' createdByProfile');
             },
                 ], true);
+
         $query->joinWith([
             'acceptedByProfile' => function($query) {
                 $query->from(Profile::tableName(). ' acceptedByProfile');
@@ -122,11 +123,6 @@ class OrderSearch extends Order {
             $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
         $query->where(Order::tableName() . '.status != :status', ['status' => Order::STATUS_FORMING]);
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
-        ]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         $addSortAttributes[] = 'createdByProfile.full_name';
@@ -162,6 +158,11 @@ class OrderSearch extends Order {
         $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         $query->andFilterWhere(['client_id' => $this->client_id]);
 
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 20],
+        ]);
         return $dataProvider;
     }  
     

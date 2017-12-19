@@ -4,14 +4,45 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Breadcrumbs;
-?>
 
-<?php
-$this->title = 'F-MARKET фильтр поиска';
+common\assets\ReadMoreAsset::register($this);
 
+$this->title = $category->title;
+$this->registerMetaTag([
+    'name' => 'description',
+    'content' => $category->description,
+]);
+$this->registerMetaTag([
+    'name' => 'keywords',
+    'content' => $category->keywords,
+]);
 ?>
+<style>
+    .filter{
+    margin: 24px 0 12px 0;
+    color:#76aa69;
+    border-bottom: 1px dotted;
+    float: right;
+    margin-left:15px;
+    }  
+    @media (max-width: 767px){
+        .filter{
+        margin: -10px 0 15px 0;
+        float: none;
+        }     
+    }
+    .filter:hover,.filter:focus{text-decoration:none;color:#84bf76;}
+    .caret.down {
+        border-bottom: 4px dashed;
+        border-top:0;
+    }
+    .caret.up {
+        border-top: 4px dashed;
+        border-bottom:0;
+    }
+</style>
 <div class="row">
-    <div class="col-md-12 no-padding">
+      <div class="col-xs-12 col-md-6 col-sm-6 min-padding">
       <?=
         Breadcrumbs::widget([
             'options' => [
@@ -24,6 +55,22 @@ $this->title = 'F-MARKET фильтр поиска';
             ],
         ])
       ?>
+    </div>
+    <div class="col-xs-12 col-md-6 col-sm-6 min-padding">
+        <?php
+        $caretRating = "down"; $caretPrice = "down";
+        if($filter == 'rating-up'){$caretRating = "up"; $caretPrice = "up";}
+        if($filter == 'rating-down'){$caretRating = "down"; $caretPrice = "up";}
+        if($filter == 'price-up'){$caretRating = "up"; $caretPrice = "up";}
+        if($filter == 'price-down'){$caretRating = "up"; $caretPrice = "down";}
+        echo "<a href=" . Url::to(['/site/category', 'slug' => $category->slug, 'filter' => 'rating-' . $caretRating]) . " class='filter'>Рейтинг <span class='caret " . $caretRating . "'></span></a>";
+        echo "<a href=" . Url::to(['/site/category', 'slug' => $category->slug, 'filter' => 'price-' . $caretPrice]) . " class='filter'>Цена <span class='caret " . $caretPrice . "'></span></a>";
+        ?>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="category-text"><?= $category->text ?></div>
     </div>
 </div>
 <div class="row">
@@ -63,7 +110,7 @@ $this->title = 'F-MARKET фильтр поиска';
                       <?php if(empty($row->mp_show_price)){ ?>
                       <h4 style="color:#dfdfdf">договорная цена</h4>
                       <?php } else {?>
-                      <h4><?=floatval($row->price); ?> <small>руб.</small></h4>
+                      <h4><?=floatval($row->price); ?> <small><?= $row->catalog->currency->symbol ?></small></h4>
                       <?php } ?>
                   </div>                 
                 </div>
@@ -98,7 +145,7 @@ if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !
       $.ajax({
         url: "$productCatLoaderUrl",
         type: "GET",
-        data: {"num": num, "category":$id},
+        data: {"num": num, "category":$category->id},
         beforeSend: function() {
         inProgress = true;},
         cache: false,
@@ -124,7 +171,7 @@ $('#product-more').on("click", function (e) {
     $.ajax({
       url: "$productCatLoaderUrl",
       type: "GET",
-      data: {"num": num, "category":$id},
+      data: {"num": num, "category":$category->id},
       cache: false,
       success: function(response){
           if(response == 0){
@@ -138,6 +185,12 @@ $('#product-more').on("click", function (e) {
        }
     });
 });       
+$('.category-text').readmore({
+    speed: 75,
+    lessLink: '<a href="#" class="category-text-read-more">Свернуть</a>',
+    moreLink: '<a href="#" class="category-text-read-more">Читать дальше</a>',
+    collapsedHeight: 60,
+});        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

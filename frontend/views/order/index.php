@@ -9,8 +9,10 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
+use common\models\Role;
 
 $this->title = 'Заказы';
+$urlExport = Url::to(['/order/export-to-xls']);
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
@@ -30,9 +32,15 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
-            if ($(this).find("a").hasClass("reorder") || $(this).find("a").hasClass("complete")) {
+            if($(this).find("input").hasClass("checkbox-export")){
                 return true;
             }
+            if ($(this).find("a").hasClass("reorder") || 
+                $(this).find("a").hasClass("complete")
+            ){
+                return true;
+            }
+            
             var url = $(this).parent("tr").data("url");
             if (url !== undefined) {
                 location.href = url;
@@ -49,17 +57,25 @@ $this->registerJs('
                 confirmButtonText: "Да",
                 cancelButtonText: "Отмена",
                 showLoaderOnConfirm: true,
-            }).then(function() {
-                document.location = clicked.data("url")
+            }).then(function(result) {
+                if (result.dismiss === "cancel") {
+                    swal.close();
+                } else {
+                    document.location = clicked.data("url")
+                }
             });
         });
     });
-        ');
+    $(document).on("click", ".export-to-xls", function(e) {
+        if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
+            window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows");  
+        }
+    });
+');
 $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
 ?>
-
 <section class="content-header">
     <h1>
         <i class="fa fa-history"></i>  Заказы
@@ -144,7 +160,7 @@ $this->registerCss("
                     <?php
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                         echo $form->field($searchModel, 'vendor_id')
-                                ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
+                                ->dropDownList($organization->getSuppliers(), ['id' => 'orgFilter'])
                                 ->label('Поставщики', ['class' => 'label', 'style' => 'color:#555']);
                     } else {
                         echo $form->field($searchModel, 'client_id')
@@ -174,8 +190,14 @@ $this->registerCss("
                         ?>
                     </div>
                 </div>
+                <div class="col-lg-5 col-md-6 col-sm-6">
+                    
+                </div>
             </div>
-<?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
+            <?php if($organization->type_id == Organization::TYPE_SUPPLIER ){ ?>
+            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> отчет xls', ['class' => 'btn btn-success export-to-xls']) ?>
+            <?php }?>
             <div class="row">
                 <div class="col-md-12">
                     <?=
@@ -190,13 +212,24 @@ $this->registerCss("
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                         'columns' => [
                             [
+                                'visible'=> ( $organization->type_id == Organization::TYPE_SUPPLIER ) ? true : false,
+                                'class' => 'yii\grid\CheckboxColumn',
+                                'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
+                                'headerOptions'    =>   ['style' => 'text-align:center;'],
+                                'checkboxOptions' => function($model, $key, $index, $widget){
+                                    return ['value' => $model['id'],'class'=>'checkbox-export'];
+                                }
+                            ],
+                            [
                                 'attribute' => 'id',
                                 'value' => 'id',
                                 'label' => '№',
+                                'contentOptions'   =>   ['class' => 'small_cell_id'],
                             ],
                             $organization->type_id == Organization::TYPE_RESTAURANT ? [
                                 'attribute' => 'vendor.name',
                                 'value' => 'vendor.name',
+                                'contentOptions'   =>   ['class' => 'small_cell_supp'],
                                 'label' => 'Поставщик',
                                     //'headerOptions' => ['class'=>'sorting',],
                                     ] : [
@@ -208,19 +241,41 @@ $this->registerCss("
                                 'attribute' => 'createdByProfile.full_name',
                                 'value' => 'createdByProfile.full_name',
                                 'label' => 'Заказ создал',
+                                'contentOptions'   =>   ['class' => 'small_cell_sozdal'],
                             ],
                             [
                                 'attribute' => 'acceptedByProfile.full_name',
                                 'value' => 'acceptedByProfile.full_name',
+//                                'value' => function($data) {
+//                                    $arr = [];
+//                                    foreach ($data->orderChat as $chat){
+//                                        if(in_array($chat->user->role_id, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_ADMIN])){
+//                                            $arr[$chat->user->profile->full_name]=$chat->user->profile->full_name;
+//                                        }
+//                                    }
+//                                    if(isset($data->acceptedByProfile->full_name)){
+//                                        $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;
+//                                    }
+//                                    $string = '';
+//                                    foreach ($arr as $key => $value){
+//                                        $string.=$value;
+//                                        if($key!=end($arr)){
+//                                            $string.=', ';
+//                                        }
+//                                    }
+//                                    return $string;
+//                                },
                                 'label' => 'Заказ принял',
+                                'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'total_price',
                                 'value' => function($data) {
-                                    return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                                    return "<b>$data->total_price</b> " . $data->currency->symbol;
                                 },
                                 'label' => 'Сумма',
+                                'contentOptions'   =>   ['class' => 'small_cell_sum'],
                             ],
                             [
                                 'format' => 'raw',
@@ -230,6 +285,8 @@ $this->registerCss("
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
                                 'label' => 'Дата создания',
+                                'contentOptions'   =>   ['style' => 'min-width:120px;'],
+                               
                             ],
                             [
                                 'format' => 'raw',
@@ -254,6 +311,7 @@ $this->registerCss("
                                     return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
                                 },
                                 'label' => 'Статус',
+                                'contentOptions'   =>   ['class' => 'small_cell_status'],
                             ],
                             [
                                 'format' => 'raw',

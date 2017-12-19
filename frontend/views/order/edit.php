@@ -7,6 +7,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 
+$this->title = 'Редактирование заказа №' . $order->id;
+
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
@@ -17,7 +19,7 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
                 Order::STATUS_PROCESSING]));
     $priceEditable = (in_array($order->status, [
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT])); //($organizationType == Organization::TYPE_SUPPLIER) && 
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
@@ -28,26 +30,26 @@ $edit = true;
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            var clickedButton = $(this);
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
                 extData = "&orderAction=confirm"; 
-                $("#loader-show").showLoading();
+                clickedButton.button("loading");
                 $.post(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
                     dataEdited = 0;
-                    $("#loader-show").hideLoading();
+                    clickedButton.button("reset");
                 });
             } else if ($(this).data("action") != "cancel") {
-                $("#loader-show").showLoading();
+                clickedButton.button("loading");
                 $.post(
                     "$urlOrderAction",
                         {"action": $(this).data("action"), "order_id": $order->id}
                 ).done(function(result) {
                         $('#actionButtons').html(result);
-                        //$.pjax.reload({container: "#orderContent"});
-                        $("#loader-show").hideLoading();
+                        clickedButton.button("reset");
                 });
             }
         });
@@ -68,8 +70,12 @@ $js = <<<JS
                             showCancelButton: true,
                             confirmButtonText: "Уйти",
                             cancelButtonText: "Остаться",
-                        }).then(function() {
-                            document.location = link;
+                        }).then(function(result) {
+                            if (result.dismiss === "cancel") {
+                               swal.close();
+                            } else {
+                                document.location = link;
+                            }
                         });
                     }
                 }
@@ -91,17 +97,9 @@ $js = <<<JS
         $('.content').on('click', '.btnSave', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
-            $("#loader-show").showLoading();
+            $(".btnSave").button("loading");
             form.submit();
             saving = true;
-//            $.post(
-//                form.attr("action"),
-//                form.serialize()
-//            ).done(function(result) {
-//                document.location = "$urlViewOrder";
-////                dataEdited = 0;
-////                $("#loader-show").hideLoading();
-//            });
         });
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
@@ -131,8 +129,12 @@ $js = <<<JS
                         });
                     })
                 },
-            }).then(function() {
-                swal({title: "Товар удален из заказа!", type: "success"});
+            }).then(function(result) {
+                if (result.dismiss === "cancel") {
+                    swal.close();
+                } else {
+                    swal({title: "Товар удален из заказа!", type: "success"});
+                }
             });        
         });
 
@@ -165,8 +167,10 @@ $js = <<<JS
                     })
                 },
             }).then(function (result) {
-                if (result.type == "success") {
-                    swal(result);
+                if (result.value.type == "success") {
+                    swal(result.value);
+                } else if (result.dismiss == "cancel") {
+                    swal.close();
                 } else {
                     swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                 }

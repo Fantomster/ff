@@ -7,6 +7,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\OrderChat;
 use yii\data\ActiveDataProvider;
+use yii\data\SqlDataProvider;
 
 
 /**
@@ -71,33 +72,138 @@ class OrderChatController extends ActiveController {
     {
         $params = new OrderChat();
         $query = OrderChat::find();
-        
-        $dataProvider =  new ActiveDataProvider(array(
+
+       /* $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         $filters = [];
-        $user = Yii::$app->user->getIdentity();
-        
-        $filters['sent_by_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) ? $user->id : $params->sent_by_id;
-        $filters['recipient_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) ? $user->organization_id : $params->recipient_id;
-          
-        
+       
+        $query->select(
+            'order_chat.*,profile.full_name, '
+            . 'organization.name as organization_name, organization.picture as organization_picture')
+            ->from('order_chat')
+            ->innerJoin('user', 'user.id = order_chat.sent_by_id')
+            //->innerJoin('user as sender', 'sender.id = '.Yii::$app->user->id)
+            ->innerJoin('profile', 'profile.user_id = order_chat.sent_by_id')
+            ->innerJoin('organization', 'organization.id = user.organization_id')
+            ->innerJoin('order', '`order`.id = order_chat.order_id and `order`.client_id = '.Yii::$app->user->identity->organization_id.' OR `order`.vendor_id = '.Yii::$app->user->identity->organization_id)
+            ->orderBy(['created_at' => SORT_DESC]);
+         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            $query->andFilterWhere($filters);
             return $dataProvider;
         }
-  
-       
-            $filters['id'] = $params->id; 
-            $filters['order_id'] = $params->order_id; 
-            $filters['is_system'] = $params->is_system;
-            $filters['message'] = $params->message;
-            $filters['created_at'] = $params->created_at;
-            $filters['viewed'] = $params->viewed;
-            $filters['recipient_id'] = $params->recipient_id;
-            $filters['danger'] = $params->danger;
+        
+        if($params->type == OrderChat::TYPE_DIALOGS)
+            $query->andWhere('order_chat.id in (
+                        SELECT order_chat.id 
+                        FROM order_chat
+                        INNER JOIN (
+                          SELECT order_id, MAX(created_at) AS created_at
+                          FROM order_chat GROUP BY order_id
+                        ) AS max USING (order_id, created_at))');
 
-            $query->andFilterWhere($filters);
+        if(isset($params->count))
+        {
+        $query->limit($params->count);
+            if(isset($params->page))
+            {
+                $offset = ($params->page * $params->count) - $params->count;
+                $query->offset($offset);
+            }
+        }
+        
+        $filters['id'] = $params->id; 
+        $filters['order_id'] = $params->order_id; 
+        $filters['is_system'] = $params->is_system;
+        $filters['message'] = $params->message;
+        $filters['created_at'] = $params->created_at;
+        $filters['viewed'] = $params->viewed;
+        $filters['recipient_id'] = $params->recipient_id;
+        $filters['danger'] = $params->danger;
+
+        $query->andFilterWhere($filters);*/
+        
+        $query = "SELECT 
+                    order_chat.*, profile.full_name, 
+                    organization.name AS organization_name, 
+                    organization.picture AS organization_picture 
+                    FROM order_chat 
+                    INNER JOIN user ON user.id = order_chat.sent_by_id
+                    INNER JOIN profile ON profile.user_id = order_chat.sent_by_id 
+                    INNER JOIN organization ON organization.id = user.organization_id 
+                    INNER JOIN `order` ON `order`.id = order_chat.order_id and (`order`.client_id = ".Yii::$app->user->identity->organization_id." OR `order`.vendor_id = ".Yii::$app->user->identity->organization_id.")";
+        
+         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            return new SqlDataProvider([
+            'sql' => $query." ORDER BY created_at DESC",
+            'pagination' => false,
+        ]);
+        }
+        
+        $filters = [];
+       if($params->type == OrderChat::TYPE_DIALOGS)
+            $filters[] = ' order_chat.id in (
+                        SELECT order_chat.id 
+                        FROM order_chat
+                        INNER JOIN (
+                          SELECT order_id, MAX(created_at) AS created_at
+                          FROM order_chat GROUP BY order_id
+                        ) AS max USING (order_id, created_at))';
+
+        
+       $filter = (isset($params->id)) ? "id = $params->id" : null; 
+       if($filter != null)
+           $filters[] = $filter;
+       
+       $filter = (isset($params->order_id)) ? "order_id = $params->order_id" : null; 
+        if($filter != null)
+           $filters[] = $filter;
+        
+       $filter = (isset($params->is_system)) ? "is_system = $params->is_system" : null;
+        if($filter != null)
+           $filters[] = $filter;
+        
+       $filter = (isset($params->message)) ? "message = $params->message" : null;
+        if($filter != null)
+           $filters[] = $filter;
+        
+       $filter = (isset($params->created_at)) ? "created_at = $params->created_at" : null;
+        if($filter != null)
+           $filters[] = $filter;
+        
+       $filter = (isset($params->viewed)) ? "viewed = $params->viewed" : null;
+        if($filter != null)
+           $filters[] = $filter;
+        
+       $filter = (isset($params->recipient_id)) ? "recipient_id = $params->recipient_id" : null;
+        if($filter != null)
+           $filters[] = $filter;
+        
+       $filter = (isset($params->danger)) ? "danger = $params->danger" : null;
+        if($filter != null)
+           $filters[] = $filter;
+       
+       $filter = implode(" AND ", $filters);
+       
+       if (strlen($filter) > 0)
+           $query .= " WHERE ".$filter;
+       
+       $query .= " ORDER BY created_at DESC";
+        if(isset($params->count))
+        {
+        $query .= " LIMIT ".$params->count;
+            if(isset($params->page))
+            {
+                $offset = ($params->page * $params->count) - $params->count;
+                $query .= " OFFSET ".$offset;
+            }
+        }
+        
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query,
+            'pagination' => false,
+        ]);
   
         return $dataProvider;
     }
@@ -113,7 +219,7 @@ class OrderChatController extends ActiveController {
             throw new \yii\web\BadRequestHttpException(Yii::t('yii', 'Unable to verify your data submission.'));
         }
     }
-    
+
     public function actionViewed() {
         if (Yii::$app->request->post() && Yii::$app->request->post('message_id')) {
             $message = OrderChat::findOne(['id'=>Yii::$app->request->post('message_id')]);

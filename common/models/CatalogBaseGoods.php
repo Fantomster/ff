@@ -42,6 +42,7 @@ use yii\helpers\Url;
  * @property MpCategory $mainCategory
  * @property RatingStars $ratingStars
  * @property RatingPercent $ratingPercent
+ * @property Catalog $catalog
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
@@ -49,7 +50,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const STATUS_OFF = 0;
     const MP_SHOW_PRICE = 1;
     const MP_HIDE_PRICE = 0;
-    const MAX_INSERT_FROM_XLS = 4000;
+    const MAX_INSERT_FROM_XLS = 20000;
+    const MAX_INSERT_FROM_XLS_FOR_CLIENT = 1000;
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
@@ -105,22 +107,22 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             
-            [['cat_id', 'price', 'product', 'ed','article'], 'required'],
+            [['cat_id', 'price', 'product', 'ed'], 'required'],
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
-            [['article'], 'required', 'on' => 'uniqueArticle'],
+            //[['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],
-            [['article'], 'uniqueArticle','when' => function($model) {
-            return !empty($model->cat_id);
-            }],
+//            [['article'], 'uniqueArticle','when' => function($model) {
+//            return !empty($model->cat_id);
+//            }],
             [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
-            [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
+            [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
             [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => 'Размер файла не должен превышать 2 Мб'], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            [['price'], 'number', 'min' => 0.1],
+            [['price'], 'number', 'min' => 0.01],
             [['sub1', 'sub2'], 'required',
                 'when' => function($model) {
             return $model->market_place == self::MARKETPLACE_ON;
@@ -139,16 +141,16 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             ],
         ];
     }
-    public function uniqueArticle($attribute, $params, $validator)
-    {
-        empty($this->id)?$where= "true":$where = "id <> $this->id";
-        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
-                    ->andWhere($where)
-                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
-                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
-        }
-        
-    }
+//    public function uniqueArticle($attribute, $params, $validator)
+//    {
+//        empty($this->id)?$where= "true":$where = "id <> $this->id";
+//        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
+//                    ->andWhere($where)
+//                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
+//                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
+//        }
+//        
+//    }
     /**
      * @inheritdoc
      */
@@ -161,9 +163,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'product' => 'Товар',
             'supp_org_id' => 'id поставщика',
             'units' => 'Кратность',
-            'price' => 'Цена (руб.)',
+            'price' => 'Цена',
             'status' => 'Статус',
-            'market_place' => 'Market_place',
+            'market_place' => 'Размещен на F-MARKET',
             'deleted' => 'Deleted',
             'note' => 'Комментарий',
             'ed' => 'Единица измерения',
@@ -173,7 +175,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'weight' => 'Вес',
             'mp_show_price' => 'Показывать цену в F-MARKET',
             'rating' => 'Рейтинг'
-                //'importCatalog'=>'Files'
         ];
     }
 
@@ -188,7 +189,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     public function search($params, $id) {
         $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price', 'note', 'ed', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
-        //$query->andFilterWhere(['like', 'product', '']);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -216,12 +216,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 ->orFilterWhere(['like', 'product', $this->searchString]);
 
         return $dataProvider;
-    }
-
-    public static function GetCatalog() {
-        $catalog = CatalogBaseGoods::find()
-                        ->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id), 'type' => \common\models\Catalog::BASE_CATALOG])->all();
-        return $catalog;
     }
 
     public static function get_value($id) {
@@ -294,5 +288,18 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     public function getRatingPercent() {
         return number_format(((($this->rating) / (self::MAX_RATING / 5)) / 5 * 100), 1);
+    }
+    
+    public function getClientNote($clientId) {
+        $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->id, 'rest_org_id' => $clientId]);
+        return isset($note) ? $note->note : '';
+    }
+    
+    public function formatPrice() {
+        return $this->price . " " . $this->catalog->currency->symbol;
+    }
+
+    public function getCatalog() {
+        return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
 }

@@ -6,7 +6,7 @@ $this->title = 'Поставщикам';
 <header class="header inner-bg-block" style="background-image: url(/images/restoran-banner-2.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
-            <h1>Автоматизация работы с закупщиками.<br/>Закупщики, заказы и аналитика, в одном месте.</h1>
+            <h1>Автоматизация работы с закупщиками.<br/>Закупщики, заказы и аналитика в одном месте.</h1>
             <h2>Будущее уже сегодня!</h2>
         </div>
     </div>
@@ -19,7 +19,7 @@ $this->title = 'Поставщикам';
 
         <div class="inside__block">
             <div class="container-fluid">
-                <h2>возможности f-keeper</h2>
+                <h2>возможности MixCart</h2>
                 <span class="for__who">Для поставщиков</span>
 
                 <div class="row">

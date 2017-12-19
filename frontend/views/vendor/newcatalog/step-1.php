@@ -10,12 +10,10 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
-use nirvana\showloading\ShowLoadingAsset;
-ShowLoadingAsset::register($this);
 $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога'
 ?>
 <section class="content-header">
-        <h1>
+        <h1 class="margin-right-350">
             <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
             'Создание нового каталога' : 
             'Редактирование каталога <small>'.common\models\Catalog::get_value($cat_id)->name.'</small>' ?>      
@@ -102,7 +100,6 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 }
 $(".step-2").click(function(e){
 e.preventDefault();
-//$("#loader-show").showLoading();
 var urlStap = "'.$router.'";
 $.ajax({
     url: urlStap,
@@ -113,11 +110,8 @@ $.ajax({
     success: function(response) {
             
             if(response.success){
-                //bootbox.alert("<h3>Сохранено!</h3>");
                 var url = "' . Url::toRoute(['vendor/step-2', 'id' => '']) . '"+response.cat_id;
                 $(location).attr("href",url);
-                //$.pjax({url: url, container: "#pjax-container"});
-                //$("#loader-show").hideLoading();
                 }else{
             if(response.type==1){
             bootbox.dialog({
@@ -131,13 +125,11 @@ $.ajax({
                     },
                     className: response.alert.class
                 });
-            //$("#loader-show").hideLoading();
             }
             console.log(response);    
             }
         },
         failure: function(errMsg) {
-        //$("#loader").hideLoading();
         console.log(errMsg);
         }
     });

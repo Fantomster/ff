@@ -90,7 +90,7 @@ class CatalogGoodsController extends ActiveController {
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
-  
+
         $query->andFilterWhere([
             'id' => $params->id, 
             'base_goods_id' => $params->base_goods_id, 

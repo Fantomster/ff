@@ -1,15 +1,18 @@
 <?php
 use yii\widgets\Breadcrumbs;
-use kartik\grid\GridView;
 use yii\helpers\Html;
-use yii\helpers\url;
 use yii\web\View;
-use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
-use kartik\select2\Select2;
-use common\models\Category;
+use yii\helpers\Json;
+use common\models\Currency;
+use yii\helpers\Url;
 
 \frontend\assets\HandsOnTableAsset::register($this);
+
+$currencySymbolListList = Currency::getSymbolList();
+$firstCurrency = $currencySymbolListList[1];
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode($currencySymbolListList);
 
 /* 
  * 
@@ -19,18 +22,6 @@ $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
 ');
-//$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
-//$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
-//$this->registerCssFile('modules/handsontable/dist/chosen.css');
-//$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
-//$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
-//$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
-//$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
-//$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
-//$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-//$this->registerJsFile('modules/handsontable/dist/handsontable.js');
-//$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-//$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <?php
 Modal::begin([
@@ -41,20 +32,7 @@ Modal::begin([
 Modal::end();
 ?>
 <?php
-/*
-if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
-    echo yii\bootstrap\Alert::widget([
-        'options' => [
-            'class' => 'alert-warning fade in',
-        ],
-        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
-        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-    ]);
-} 
- */
-?>
-<?php
-if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
+if (false) {
     $this->registerJs('
         $("document").ready(function(){
             $("#showVideo").modal("show");
@@ -64,14 +42,6 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
             });
         });
             ');
-
-//    echo yii\bootstrap\Alert::widget([
-//        'options' => [
-//            'class' => 'alert-warning fade in',
-//        ],
-//        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
-//        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-//    ]);
 
     Modal::begin([
         'id' => 'showVideo',
@@ -140,17 +110,26 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
     <?= Html::a(
         '<i class="fa fa-list-alt"></i> Скачать шаблон',
         Url::to('@web/upload/template.xlsx'),
-        ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px']]
+        ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px;']]
     ) ?>
-    <?=Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
-                      'class' => 'btn btn-warning btn-sm pull-right',
-                      'style' => 'margin-right:10px;',
-                      'data' => [
-                      'target' => '#instruction',
-                      'toggle' => 'modal',
-                      'backdrop' => 'static',
-                         ],
-                      ]);?>
+    <?= ''
+//            Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
+//                      'class' => 'btn btn-warning btn-sm pull-right',
+//                      'style' => 'margin-right:10px;',
+//                      'data' => [
+//                      'target' => '#instruction',
+//                      'toggle' => 'modal',
+//                      'backdrop' => 'static',
+//                         ],
+//                      ]);
+    ?>
+            <?= 
+                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                        'class' => 'btn btn-default pull-right',
+                        'style' => ['margin'=>'0 5px;'],
+                        'id' => 'changeCurrency',
+                    ])
+                    ?>
         </div>
         <div class="panel-body">
             <div class="handsontable" id="CreateCatalog"></div> 
@@ -175,6 +154,8 @@ $mped = json_encode($mped, JSON_UNESCAPED_UNICODE);
 
 $supplierStartCatalogCreateUrl = \yii\helpers\Url::to(['vendor/supplier-start-catalog-create']);
 
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
 var ed = $mped;
 var arr = [];
@@ -196,7 +177,7 @@ hot = new Handsontable(container, {
   beforeChange: function () {
       //console.log('beforeChange');
   },
-  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (<span class="currency-symbol">{$firstCurrency}</span>)', 'Ед. измерения', 'Комментарий'],
   colWidths: [40, 120, 45, 45, 65, 80],
   renderAllRows: true,
   columns: [
@@ -206,13 +187,13 @@ hot = new Handsontable(container, {
         data: 'units', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {
         data: 'price', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {
         data: 'ed', 
@@ -250,7 +231,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
           url: '$supplierStartCatalogCreateUrl',
           type: 'POST',
           dataType: "json",
-          data: $.param({'catalog':JSON.stringify(data)}),
+          data: $.param({'catalog':JSON.stringify(data), 'currency':currentCurrency}),
           cache: false,
           success: function (response) {
               if(response.success){ 
@@ -292,11 +273,50 @@ e.preventDefault();
 });
 var url = $("#video").attr('src');        
 $("#instruction").on('hide.bs.modal', function(){
-$("#video").attr('src', '');
+    $("#video").attr('src', '');
 });
 $("#instruction").on('show.bs.modal', function(){
-$("#video").attr('src', url);
+    $("#video").attr('src', url);
 });
+
+    var currencies = $.map($currencySymbolList, function(el) { return el });
+    var currentCurrency = 1;
+
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != currentCurrency) {
+                        currentCurrency = value;
+                        $(".currency-symbol").html(currencies[currentCurrency-1]);
+                        resolve();
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            },
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    title: 'Валюта каталога изменена!',
+                    type: 'success',
+                    showCancelButton: false,
+                })
+            }
+        })        
+    });
+        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

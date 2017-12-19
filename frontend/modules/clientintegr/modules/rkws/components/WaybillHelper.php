@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
+use api\common\models\RkDicconst;
 use yii;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
@@ -19,7 +20,7 @@ use api\common\models\RkDic;
 
 class WaybillHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
+    // const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
     
     public function sendWaybill ($id) {
     if (!$this->Authorizer()) {
@@ -31,20 +32,29 @@ class WaybillHelper extends AuthHelper {
     $guid = UUID::uuid4();
     
     $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
-    
+
+    $exportApproved        = RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
+    $exportVAT             = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue();
+    $exportAutoNumber      = RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue();
+
+    $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';
+
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
-    <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
-    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store_rid.'" active="0"'
-            . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">'.PHP_EOL;           
+    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/waybill' . '">
+    <PARAM name="object_id" val="'.$this->restr->code.'" />
+    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store->rid.'" active="'.$exportApproved.'"'
+            . ' duedate="1" note="'.$wmodel->note.'" '.$autoNumber.'>'.PHP_EOL;
     
-   $recs = \api\common\models\RkWaybilldata::find()->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
+   $recs = \api\common\models\RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.rid as prid')->leftJoin('rk_product','rk_product.id = product_rid')
+           ->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
    
    // var_dump($recs);
    
     foreach($recs as $rec) {
        
-       $xml .='<ITEM rid="'.$rec["product_rid"].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*1000).'" vatrate="1800" />'.PHP_EOL;
+       // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
+       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$exportVAT.'" />'.PHP_EOL;
+
     }
    
    // var_dump($recs);
@@ -52,9 +62,7 @@ class WaybillHelper extends AuthHelper {
     $xml .= '</DOC>'.PHP_EOL.
             '</RQ>';
     
-    // var_dump($xml);
-    
-    /*
+      /*
     $xml2 = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
@@ -239,6 +247,7 @@ class WaybillHelper extends AuthHelper {
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
+    if (empty($er2)) $er2='пусто';
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======WAYBILL==EVENT==START================='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   

@@ -14,14 +14,20 @@ use yii\widgets\Pjax;
     <?php Pjax::end(); ?>
 </div>
 <div class="modal-footer">
-    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success','id'=>'save-catalog-supplier']) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
+    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', [
+        'class' => 'btn btn-success',
+        'id'=>'save-catalog-supplier',
+        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+        ]) ?>
+    <button class="btn btn-gray" data-dismiss="modal" id="btnClose"><span><i class="icon fa fa-remove"></i> Закрыть</span></button>
 </div>
 <?php
 $arr= $array;
 $arr_count = count($array);
 
 $editCatalogUrl = Url::to(['client/edit-catalog', 'id' => $id]);
+
+$language = Yii::$app->sourceLanguage;
 
 $customJs = <<< JS
 var data = $arr;
@@ -30,7 +36,7 @@ var save = document.getElementById('save-catalog-supplier'), hot, originalColWid
 hot = new Handsontable(container, {
 removeRowPlugin: true,
 data: JSON.parse(JSON.stringify(data)),
-colHeaders : ['base_goods_id', 'goods_id', 'Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+colHeaders : ['base_goods_id', 'goods_id', 'Артикул', 'Наименование товара', 'Кратность', 'Цена (<span class="currency-symbol">{$catalogCurrency->symbol}</span>)', 'Ед. измерения', 'Комментарий'],
 colWidths: [0, 0, 50, 60, 40, 30, 40, 60],
 columns: [
         
@@ -52,13 +58,13 @@ columns: [
         data: 'units', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {
         data: 'price', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {data: 'ed', allowEmpty: false},
     {data: 'note', wordWrap:true}
@@ -77,7 +83,6 @@ hot.updateSettings({colWidths: colWidths});
 function getRowsFromObjects(queryResult) {
     rows = [];
     for (var i = 0, l = queryResult.length; i < l; i++) {
-      //                        debugger
       rows.push(queryResult[i].row);
 
     }
@@ -100,7 +105,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
             datas.push({dataItem});
         }    
     });
-    $('#loader-show').showLoading();
+    $("#save-catalog-supplier").button("loading");
+    $("#btnClose").prop( "disabled", true );
     $.ajax({
           url: "$editCatalogUrl",
           type: 'POST',
@@ -109,8 +115,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
           cache: false,
           success: function (response) {
               if(response.success){ 
-                $('#loader-show').hideLoading();
-                //
+                $("#save-catalog-supplier").button("reset");
+                $("#btnClose").prop( "disabled", false );
                 bootbox.dialog({
                     message: response.alert.body,
                     title: response.alert.title,
@@ -126,7 +132,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     className: response.alert.class,
                 });
               }else{
-                $('#loader-show').hideLoading();
+                $("#save-catalog-supplier").button("reset");
+                $("#btnClose").prop( "disabled", false );
                 bootbox.dialog({
                     message: response.alert.body,
                     title: response.alert.title,
@@ -144,7 +151,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
               }
           },
           error: function(response) {
-            $('#loader-show').hideLoading();
+                $("#save-catalog-supplier").button("reset");
+                $("#btnClose").prop( "disabled", false );
           console.log(response.message);
           }
     });

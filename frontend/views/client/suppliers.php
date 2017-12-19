@@ -7,12 +7,12 @@ use yii\web\View;
 use kartik\form\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
-use kartik\widgets\FileInput;
+use common\models\Currency;
 use yii\helpers\Url;
+use yii\helpers\Json;
 
 kartik\select2\Select2Asset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
-
 ?>
 <?=
 Modal::widget([
@@ -44,6 +44,11 @@ $this->registerCss('
 .file-input{width: 400px; float: left;}
 
 ');
+
+$currencySymbolListList = Currency::getSymbolList();
+$firstCurrency = $currencySymbolListList[1];
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode($currencySymbolListList);
 ?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -61,8 +66,15 @@ $this->registerCss('
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
-                <button id="invite" type="button" class="btn btn-success">Отправить</button>
+                <?=
+                Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                    'class' => 'btn btn-default pull-left',
+                    'style' => ['margin' => '0 5px;'],
+                    'id' => 'changeCurrency',
+                ])
+                ?>
+                <button id="btnCancel" type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
+                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
             </div>
         </div>
     </div>
@@ -93,14 +105,14 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'contentOptions' => ['class' => 'text-bold', 'style' => 'vertical-align:middle;width:45%;font-size:14px'],
         'value' => function ($data) {
-    return Html::a(Html::encode($data->vendor->name), ['client/view-supplier', 'id' => $data->supp_org_id], [
-                'data' => [
-                    'target' => '#view-supplier',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                ],
-    ]);
-}
+            return Html::a(Html::encode($data->vendor->name), ['client/view-supplier', 'id' => $data->supp_org_id], [
+                        'data' => [
+                            'target' => '#view-supplier',
+                            'toggle' => 'modal',
+                            'backdrop' => 'static',
+                        ],
+            ]);
+        }
     ],
     [
         'attribute' => 'status',
@@ -108,14 +120,14 @@ $gridColumnsCatalog = [
         'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
         'format' => 'raw',
         'value' => function ($data) {
-    if ($data->invite == 0) {
-        return '<span class="text-danger">Приглашение<br>отправлено</span>';
-    } elseif (isset($data->catalog) && $data->catalog->status == 1) {
-        return '<span class="text-success">Партнер</span>';
-    } else {
-        return '<span class="text-yellow">Партнер<br> Каталог не назначен</span>';
-    }
-}
+            if ($data->invite == 0) {
+                return '<span class="text-danger">Приглашение<br>отправлено</span>';
+            } elseif (isset($data->catalog) && $data->catalog->status == 1) {
+                return '<span class="text-success">Партнер</span>';
+            } else {
+                return '<span class="text-yellow">Партнер<br> Каталог не назначен</span>';
+            }
+        }
     ],
     [
         'label' => '',
@@ -123,75 +135,75 @@ $gridColumnsCatalog = [
         'headerOptions' => ['style' => 'text-align:right'],
         'format' => 'raw',
         'value' => function ($data) {
-        $result = "";
-    if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
-        //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
-        $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-                    'class' => 'btn btn-success btn-sm',
-                    'disabled' => 'disabled']);
-        $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                    'class' => 'btn btn-default btn-sm',
-                    'disabled' => 'disabled']);
-        $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                    'class' => 'btn btn-default btn-sm',
-                    'disabled' => 'disabled']);
-    } else {
-        if (!$data->vendor->hasActiveUsers()) {
-            $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
-                        'OrderCatalogSearch[searchString]' => "",
-                        'OrderCatalogSearch[selectedCategory]' => "",
-                        'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                            ], [
-                        'class' => 'btn btn-success btn-sm',
-                        'data-pjax' => 0,
-            ]);
+            $result = "";
+            if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
+                //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
+                $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
+                            'class' => 'btn btn-success btn-sm',
+                            'disabled' => 'disabled']);
+                $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
+                            'class' => 'btn btn-default btn-sm',
+                            'disabled' => 'disabled']);
+                $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
+                            'class' => 'btn btn-default btn-sm',
+                            'disabled' => 'disabled']);
+            } else {
+                if (!$data->vendor->hasActiveUsers()) {
+                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
+                                'OrderCatalogSearch[searchString]' => "",
+                                'OrderCatalogSearch[selectedCategory]' => "",
+                                'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
+                                    ], [
+                                'class' => 'btn btn-success btn-sm',
+                                'data-pjax' => 0,
+                    ]);
 
-            $result .= Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-                        'class' => 'btn btn-default btn-sm',
-                        'style' => 'text-center',
-                        'data-pjax' => 0,
-                        'data' => [
-                            'target' => '#edit-catalog',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',]
-            ]);
+                    $result .= Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
+                                'class' => 'btn btn-default btn-sm',
+                                'style' => 'text-center',
+                                'data-pjax' => 0,
+                                'data' => [
+                                    'target' => '#edit-catalog',
+                                    'toggle' => 'modal',
+                                    'backdrop' => 'static',]
+                    ]);
 
-            $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
-                        'id' => $data["supp_org_id"],
-                            ], [
-                        'class' => 'btn btn-default btn-sm resend-invite',
-                        'data-pjax' => 0,]);
-        } else {
-            $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
-                        'OrderCatalogSearch[searchString]' => "",
-                        'OrderCatalogSearch[selectedCategory]' => "",
-                        'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                            ], [
-                        'class' => 'btn btn-success btn-sm',
-                        'data-pjax' => 0,
+                    $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
+                                'id' => $data["supp_org_id"],
+                                    ], [
+                                'class' => 'btn btn-default btn-sm resend-invite',
+                                'data-pjax' => 0,]);
+                } else {
+                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
+                                'OrderCatalogSearch[searchString]' => "",
+                                'OrderCatalogSearch[selectedCategory]' => "",
+                                'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
+                                    ], [
+                                'class' => 'btn btn-success btn-sm',
+                                'data-pjax' => 0,
+                    ]);
+                    $result .= Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
+                                'class' => 'btn btn-default btn-sm',
+                                'style' => 'text-center',
+                                'data-pjax' => 0,
+                                'data' => [
+                                    'target' => '#view-catalog',
+                                    'toggle' => 'modal',
+                                    'backdrop' => 'static',
+                                ],
+                    ]);
+                    $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
+                                'class' => 'btn btn-default btn-sm',
+                                'disabled' => 'disabled']);
+                }
+            }
+
+            $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                        'class' => 'btn btn-danger btn-sm del',
+                        'data' => ['id' => $data["supp_org_id"]],
             ]);
-            $result .= Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
-                        'class' => 'btn btn-default btn-sm',
-                        'style' => 'text-center',
-                        'data-pjax' => 0,
-                        'data' => [
-                            'target' => '#view-catalog',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-            ]);
-            $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
+            return "<div class='btn-group'>" . $result . "</div>";
         }
-    }
-    
-    $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                'class' => 'btn btn-danger btn-sm del',
-                'data' => ['id' => $data["supp_org_id"]],
-    ]);
-    return "<div class='btn-group'>" . $result . "</div>";
-}
     ]
 ];
 ?>
@@ -228,12 +240,6 @@ $gridColumnsCatalog = [
                                     ->label(false)
                             ?>
                             <?php ActiveForm::end(); ?>
-                            <!--                            <div class="input-group">
-                                                            <span class="input-group-addon">
-                                                                <i class="fa fa-search"></i>
-                                                            </span>
-                            <?= ''//Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search'])  ?>
-                                                        </div>-->
                         </div>
                     </div>
                     <div class="row">
@@ -262,7 +268,7 @@ $gridColumnsCatalog = [
         </div>
         <div class="col-sm-12 col-md-4">
             <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'add-supplier-list']) ?>
-            <?php $form = ActiveForm::begin(['id' => 'SuppliersFormSend']); ?>
+            <?php $form = ActiveForm::begin(['id' => 'SuppliersFormSend', 'enableClientValidation' => true]); ?>
             <div class="box box-info">
                 <div class="box-header with-border">
                     <h3 class="box-title">Добавить поставщика</h3>
@@ -270,7 +276,6 @@ $gridColumnsCatalog = [
                 <!-- /.box-header -->
                 <div class="box-body">
                     <?= $form->field($user, 'email') ?>
-                    <?= $form->field($profile, 'full_name')->label('ФИО') ?>
                     <?=
                             $form->field($profile, 'phone')
                             ->widget(\common\widgets\PhoneInput::className(), [
@@ -286,6 +291,7 @@ $gridColumnsCatalog = [
                             ->label('Телефон')
                             ->textInput()
                     ?>
+                    <?= $form->field($profile, 'full_name')->label('ФИО') ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
                 </div> 
                 <div class="box-footer">
@@ -316,13 +322,19 @@ $gridColumnsCatalog = [
 </section>
 
 <?php
-
 $chkmailUrl = Url::to(['client/chkmail']);
 $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
+
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
+        
+var currencies = $.map($currencySymbolList, function(el) { return el });
+var currentCurrency = 1;
+   
 $(".content").on("change keyup paste cut", "#searchString", function() {
     if (timer) {
         clearTimeout(timer);
@@ -356,7 +368,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (руб)'],
+  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},
@@ -364,7 +376,7 @@ for ( var i = 0; i < 60; i++ ) {
             data: 'price', 
             type: 'numeric',
             format: '0.00',
-            language: 'ru-RU'
+            language: '$language'
         }
     ],
   className : 'Handsontable_table',
@@ -397,7 +409,6 @@ $('#modal_addProduct').on('hidden.bs.modal', function (e) {
 * 6 поставщик авторизован, связи не найдено, invite	
 */
 $('#profile-full_name').attr('readonly','readonly');
-$('#profile-phone').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
 $('#relationcategory-category_id').attr('disabled','disabled');
 $('.select2-search__field').css('width','100%');
@@ -475,12 +486,17 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                }
                         // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
 	                if(response.eventType==5){
-		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
+		                    $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
                             $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
-		            $('#profile-full_name,#profile-phone,#organization-name').removeAttr('readonly');
-                            console.log('type = 5');    
-	                }
+                            $('#profile-full_name,#organization-name').removeAttr('readonly');
+                                    console.log('type = 5'); 
+                            if($('.has-error').length >= 1) {
+                                 $('#addProduct').attr('disabled','disabled');                 
+                            } else {
+                                $('#addProduct').removeAttr('disabled');                      
+                            }
+                    }
                         // 
 	                if(response.eventType==6){
 		        var fio = response.fio;
@@ -495,6 +511,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
                             $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
 		            console.log('type = 6');    
 	                }
+                                      
                 }else{
 		    console.log(response.message); 
                 }
@@ -503,19 +520,30 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		    console.log(response.message); 
             }
         }); 
-	}
+	}	 
+	
+	if($('.has-error').length >= 1) {
+         $('#addProduct').attr('disabled','disabled');                 
+    } else {
+        $('#addProduct').removeAttr('disabled');                      
+    }
 });
 $('#profile-full_name,#organization-name').on('keyup paste put', function(e){
         console.log('ok');
     if($('#profile-full_name').val().length<2 || $('#organization-name').val().length<2){
-        $('#inviteSupplier').attr('disabled','disabled');
-        $('#addProduct').attr('disabled','disabled'); 
-        }else{
+            $('#inviteSupplier').attr('disabled','disabled');
+            $('#addProduct').attr('disabled','disabled'); 
+    }else{
         $('#inviteSupplier').removeAttr('disabled');
         $('#addProduct').removeAttr('disabled');   
-        }
-});
-        
+    }
+    
+    if($('#profile-phone').val().length < 2) {
+         $('#addProduct').attr('disabled','disabled');                 
+    } else {
+        $('#addProduct').removeAttr('disabled');                      
+    }
+});   
 $('#inviteSupplier').click(function(e){
 e.preventDefault();	
     $.ajax({
@@ -534,7 +562,8 @@ e.preventDefault();
                           label: "Завершить",
                           className: "btn-success",
                           callback: function() {
-                              $('#loader-show').hideLoading();
+                                $("#invite").button("reset");
+                                $("#btnCancel").prop( "disabled", false );
                               location.reload();   
                           }
                         },
@@ -546,7 +575,8 @@ e.preventDefault();
     });
 });
 $('#invite').click(function(e){	
-    $('#loader-show').showLoading();
+    $("#invite").button("loading");
+    $("#btnCancel").prop( "disabled", true );
     e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = ['product', 'ed', 'price'];
@@ -571,6 +601,7 @@ $('#invite').click(function(e){
         var form = $("#SuppliersFormSend")[0];
         var formData = new FormData(form);
         formData.append('catalog', catalog);
+        formData.append('currency',currentCurrency);
 	$.ajax({
                     processData: false,
                     contentType: false,
@@ -581,7 +612,8 @@ $('#invite').click(function(e){
 		  cache: false,
 		  success: function (response) {
                         if(response.success){
-                          $('#loader-show').hideLoading();
+                            $("#invite").button("reset");
+                            $("#btnCancel").prop( "disabled", false );
                           $.pjax.reload({container: "#add-supplier-list",timeout:30000});
                           $.pjax.reload({container: "#sp-list",timeout:30000});
 			  $('#modal_addProduct').modal('hide'); 
@@ -599,13 +631,15 @@ $('#invite').click(function(e){
 			  }
 			});
 		  }else{
-                  $('#loader-show').hideLoading();
+                    $("#invite").button("reset");
+                    $("#btnCancel").prop( "disabled", false );
 		  bootboxDialogShow(response.message);
 		  console.log(response.message); 	  
 		  }
 	  },
         error: function(response) {
-            $('#loader-show').hideLoading();
+                    $("#invite").button("reset");
+                    $("#btnCancel").prop( "disabled", false );
             }
         });
 });       
@@ -631,7 +665,7 @@ $(document).on("click", ".resend-invite", function(e) {
     var url = $(this).attr('href');
     console.log(url);
     bootbox.confirm({
-        title:"Приглашение на F-keeper",
+        title:"Приглашение на MixCart",
         message: "Отправить приглашение повторно?",
         buttons: {
             cancel: {
@@ -699,6 +733,41 @@ $("#organization-name").keyup(function() {
     $(".client-manager-name").html("$clientName");
     $(".supplier-org-name").html($("#organization-name").val());
 });
+        
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != currentCurrency) {
+                        currentCurrency = value;
+                        $(".currency-symbol").html(currencies[currentCurrency-1]);
+                        resolve();
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            },
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    title: 'Валюта каталога изменена!',
+                    type: 'success',
+                    showCancelButton: false,
+                })
+            }
+        })        
+    });        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

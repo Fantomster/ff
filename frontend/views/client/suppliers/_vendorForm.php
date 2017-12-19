@@ -6,9 +6,9 @@ use yii\helpers\Url;
 $form = ActiveForm::begin([
             'id' => 'SuppliersFormSend',
             'enableClientValidation' => true,
-            'enableAjaxValidation' => true,
+            'enableAjaxValidation' => false,
             'action' => Url::to(['client/ajax-validate-vendor']),
-            'validateOnSubmit' => true,
+            'validateOnSubmit' => false,
             'fieldConfig' => [
                 'template' => '{input}',
                 'options' => [

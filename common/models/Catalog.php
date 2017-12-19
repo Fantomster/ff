@@ -14,13 +14,16 @@ use Yii;
  * @property integer $type
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $currency_id
+ * 
  * @property Vendor $vendor
+ * @property Currency $currency
  */
 class Catalog extends \yii\db\ActiveRecord
-{    
+{
     const BASE_CATALOG = 1;
     const CATALOG = 2;
-	
+
     const NON_CATALOG = 0;
     const CATALOG_BASE_NAME = 'Главный каталог';
     const STATUS_ON = 1;
@@ -56,7 +59,7 @@ class Catalog extends \yii\db\ActiveRecord
             [['supp_org_id', 'type', 'status'], 'integer'],
             [['created_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
-            ['type', 'uniqueBaseCatalog'],
+            //['type', 'uniqueBaseCatalog'],
         ];
     }
     /**
@@ -73,7 +76,7 @@ class Catalog extends \yii\db\ActiveRecord
             'created_at' => 'Create Datetime',
         ];
     }
-    
+
     public function uniqueBaseCatalog() {
         if ($this->type == 1) {
             $baseCheck = self::find()->where(['supp_org_id' => $this->supp_org_id, 'type' => 1])->all();
@@ -82,10 +85,10 @@ class Catalog extends \yii\db\ActiveRecord
             }
         }
     }
-    
+
     public static function getNameCatalog($id){
 	$catalogName = Catalog::find()
-	->where(['id' => $id])->one();  
+	->where(['id' => $id])->one();
 	return $catalogName;
     }
     public static function get_value($id){
@@ -95,14 +98,19 @@ class Catalog extends \yii\db\ActiveRecord
         }
         return null;
     }
-    public static function GetCatalogs($type)
+    public static function GetCatalogs($type, $vendorId = null)
     {
 		$catalog = Catalog::find()
-		->select(['id','status','name','created_at'])
-		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();   
+		->select(['id','status','name','created_at','currency_id'])
+		->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();
 		return $catalog;
     }
+    
     public function getVendor() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
+    }
+    
+    public function getCurrency() {
+        return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
 }

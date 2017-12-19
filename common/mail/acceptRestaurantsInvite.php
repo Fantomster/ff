@@ -1,7 +1,5 @@
 <?php
 
-use yii\helpers\Url;
-
 /**
  * @var string $subject
  * @var \common\models\User $vendor
@@ -10,17 +8,17 @@ use yii\helpers\Url;
  */
 ?>
 
-<p><img src="http://f-keeper.ru/img/invite-to-vendor.jpg" style="width: 100%;" alt=""/></p>
+<p><img src="https://mixcart.ru/images/invite-to-vendor.jpg" style="width: 100%;" alt=""/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;">Здравствуйте, <small style="font-size: 60%;color: #787878;line-height: 0;text-transform: none;"><?= $vendor->profile->full_name ?>.</small></h3>
 <p>Наш ресторан, <u><?= $restaurant ?></u>, стал использовать очень удобный инструмент для автоматизации работы с вами. 
     <br />
     Я приглашаю Вас, <u><?= $vendor->organization->name ?></u>, присоединиться, и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу.</p>
 
-<p>При отправке этого письма, автоматически был создан аккаунт для вас в <a href="http://f-keeper.ru" style="color: #84bf76;">F-keeper</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения.</p>
+<p>При отправке этого письма, автоматически был создан аккаунт для вас в <a href="https://mixcart.ru" style="color: #84bf76;">MixCart</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения.</p>
 <br />
 <div style="width: 100%; text-align: center;">
-    <a href="<?= Url::toRoute(["/user/reset", "token" => $userToken->token], true); ?>"
+    <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]); ?>"
        style="text-decoration: none;
     color: #FFF;
     background-color: #84bf76;
@@ -37,7 +35,7 @@ use yii\helpers\Url;
 <br /><br />
 
 
-<h5 align="center" style="font-weight: 900;font-size: 17px;">В f-keeper очень широкие возможности для поставщиков, о некоторых из них несколько слов ниже.</h5>
+<h5 align="center" style="font-weight: 900;font-size: 17px;">В MixCart очень широкие возможности для поставщиков, о некоторых из них несколько слов ниже.</h5>
 <br /><br />
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
@@ -52,9 +50,9 @@ use yii\helpers\Url;
         </th>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico1.png" alt="" /></td>
-        <td><img src="http://f-keeper.ru/img/ico2.png" alt="" /></td>
-        <td><img src="http://f-keeper.ru/img/ico3.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico1.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico2.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico3.png" alt="" /></td>
     </tr>
 
 
@@ -74,9 +72,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico4.png" alt="" /></td>
-        <td><img src="http://f-keeper.ru/img/ico5.png" alt="" /></td>
-        <td><img src="http://f-keeper.ru/img/ico6.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico4.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico5.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico6.png" alt="" /></td>
     </tr>
 
 
@@ -96,9 +94,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico7.png" alt="" /></td>
-        <td><img src="http://f-keeper.ru/img/ico8.png" alt="" /></td>
-        <td><img src="http://f-keeper.ru/img/ico9.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico7.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico8.png" alt="" /></td>
+        <td><img src="https://mixcart.ru/img/ico9.png" alt="" /></td>
     </tr>
 
 </table>

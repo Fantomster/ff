@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'format' => 'raw',
-                'attribute' => 'Регионы франшизы (GEO)',
+                'label' => 'Регионы франшизы (GEO)',
                 'value' => function ($data) {
                     if(\common\models\FranchiseeGeo::find()->where(['franchisee_id'=>$data['id']])->exists()){
                     return Html::a('Изменить', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-success']);
@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'signed',         
             [
                 'format' => 'raw',
-                'attribute' => 'Клиентов',
+                'label' => 'Клиентов',
                 'value' => function($data) {
                        $c_all = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
                                'franchisee_id'=>$data->id])->count();

@@ -9,7 +9,7 @@ $delivery = $vendor->delivery;
 ?>
 
 <?php
-$this->title = 'F-MARKET информация о поставщике';
+$this->title = 'MixCart информация о поставщике';
 ?>
 <style>
     .mp-supplier-image{
@@ -98,7 +98,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     
 $js2 = <<<JS
 $('#supp-phone,#supp-email').click(function(e){
-alert('Необходимо зарегистрироваться в системе f-keeper');  
+alert('Необходимо зарегистрироваться в системе MixCart');  
 })
 JS;
 $this->registerJs($js2, \yii\web\View::POS_READY);
@@ -155,10 +155,10 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                 </div>
                 <div class="col-md-6">
                     <h5><span class="title-param">Стоимость доставки:</span> 
-                                      <?= $delivery->delivery_charge ?> руб.
+                                      <?= $delivery->delivery_charge ?> <?= $currency ?>
                     </h5>    
-                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> руб.</h5> 
-                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> руб.</h5>   
+                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> <?= $currency ?></h5> 
+                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> <?= $currency ?></h5>   
                     <h5><span class="title-param">Адрес самовывоза:</span> <span class="noinfo">нет информации</span></h5>   
                     <h5><span class="title-param">Дни доставки:</span> <?= $delivery->getDaysString() ?></h5>  
                 </div>

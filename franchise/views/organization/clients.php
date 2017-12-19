@@ -1,36 +1,43 @@
 <?php
 
+$this->title = Yii::t('app', 'Ваши рестораны');
+
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\grid\GridView;
-use yii\widgets\Pjax;
+use kartik\grid\GridView;
 use kartik\form\ActiveForm;
 use kartik\date\DatePicker;
-use yii\widgets\Breadcrumbs;
+use kartik\export\ExportMenu;
 use yii\bootstrap\Modal;
+use yii\web\View;
+use common\assets\CroppieAsset;
+
+CroppieAsset::register($this);
+kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
+kartik\select2\Select2Asset::register($this);
 
 $this->registerJs('
     $("document").ready(function(){
         $("#clientInfo").data("bs.modal", null);
         var justSubmitted = false;
         var timer;
-        $("body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#searchForm").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-        $("body").on("change keyup paste cut", "#searchString", function() {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    $("#searchForm").submit();
-                }, 700);
-            });
+//        $("body").on("change", "#dateFrom, #dateTo", function() {
+//            if (!justSubmitted) {
+//                $("#searchForm").submit();
+//                justSubmitted = true;
+//                setTimeout(function() {
+//                    justSubmitted = false;
+//                }, 500);
+//            }
+//        });
+//        $("body").on("change keyup paste cut", "#searchString", function() {
+//                if (timer) {
+//                    clearTimeout(timer);
+//                }
+//                timer = setTimeout(function() {
+//                    $("#searchForm").submit();
+//                }, 700);
+//            });
         $("body").on("hidden.bs.modal", "#clientInfo", function() {
                 $(this).data("bs.modal", null);
             });
@@ -40,9 +47,22 @@ $this->registerJs('
                 return false;
             }
             var url = $(this).parent("tr").data("url");
-            if (url !== undefined) {
+            if (url !== undefined && !$(this).find("a").hasClass("f-delete")) {
                 $("#clientInfo").modal({backdrop:"static",toggle:"modal"}).load(url);
             }
+        });
+        $("body").on("click", ".f-delete", function(e){
+            e.preventDefault();
+            if(!confirm("Вы уверены, что хотите удалить ресторан?")){
+                return false;
+            }
+            var url = $(this).attr("url");
+            var obj = $(this);
+            $.ajax({
+              url: url,
+            }).done(function() {
+              obj.parent("td").parent("tr").fadeOut("fast", function() {});
+            });
         });
     });
         ');
@@ -51,21 +71,22 @@ $this->registerCss("
         ");
 ?>
 
+
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i>  Ваши рестораны
-        <small>Подключенные Вами рестораны и информация о них</small>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'Ваши рестораны') ?>
+        <small><?= Yii::t('app', 'Подключенные Вами рестораны и информация о них') ?></small>
     </h1>
     <?=
     ''
-//    Breadcrumbs::widget([
-//        'options' => [
-//            'class' => 'breadcrumb',
-//        ],
-//        'links' => [
-//            'Список ваших ресторанов',
-//        ],
-//    ])
+    //    Breadcrumbs::widget([
+    //        'options' => [
+    //            'class' => 'breadcrumb',
+    //        ],
+    //        'links' => [
+    //            'Список ваших ресторанов',
+    //        ],
+    //    ])
     ?>
 </section>
 <section class="content">
@@ -74,44 +95,34 @@ $this->registerCss("
         <div class="box-body">
             <?php
             $form = ActiveForm::begin([
-                        'options' => [
-                            'id' => 'searchForm',
-                            //'class' => "navbar-form",
-                            'role' => 'search',
-                        ],
+                'options' => [
+                    'id' => 'searchForm',
+                    //'class' => "navbar-form",
+                    'role' => 'search',
+                ],
             ]);
             ?>
             <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6">
-                    <?=
-                            $form->field($searchModel, 'searchString', [
-                                'addon' => [
-                                    'prepend' => [
-                                        'content' => '<i class="fa fa-search"></i>',
-                                    ],
-                                ],
-                                'options' => [
-                                    'class' => "margin-right-15 form-group",
-                                ],
-                            ])
-                            ->textInput([
-                                'id' => 'searchString',
-                                'class' => 'form-control',
-                                'placeholder' => 'Поиск'])
-                            ->label('Поиск', ['style' => 'color:#555'])
-                    ?>
+                <div class="col-lg-3 col-md-3 col-sm-6">
+                    <?= Html::label(Yii::t('app', 'Поиск'), null, ['style' => 'color:#555']) ?>
+                    <div class="input-group  pull-left">
+                        <span class="input-group-addon">
+                            <i class="fa fa-search"></i>
+                        </span>
+                        <?= Html::input('text', 'search', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search', 'style'=>'width:300px']) ?>
+                    </div>
                 </div>
 
-                <div class="col-lg-5 col-md-6 col-sm-6"> 
-                    <?= Html::label('Начальная дата / Конечная дата', null, ['style' => 'color:#555']) ?>
+                <div class="col-lg-5 col-md-6 col-sm-6">
+                    <?= Html::label(Yii::t('app', 'Начальная дата / Конечная дата'), null, ['style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
                         DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'date_from',
                             'attribute2' => 'date_to',
-                            'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                            'options' => ['placeholder' => Yii::t('app', 'Дата'), 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                             'separator' => '-',
                             'type' => DatePicker::TYPE_RANGE,
                             'pluginOptions' => [
@@ -123,23 +134,95 @@ $this->registerCss("
                         ?>
                     </div>
                 </div>
+                <?php
+                ActiveForm::end();
+                ?>
+                <div class="pull-right" style="margin-top: 30px; margin-right: 10px;">
+                    <?= ExportMenu::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => $exportColumns,
+                        'fontAwesome' => true,
+                        'filename' => Yii::t('app', 'Рестораны - ') . date('Y-m-d'),
+                        'encoding' => 'UTF-8',
+                        'target' => ExportMenu::TARGET_SELF,
+                        'showConfirmAlert' => false,
+                        'showColumnSelector' => false,
+                        'batchSize' => 200,
+                        'timeout' => 0,
+                        'dropdownOptions' => [
+                            'label' => '<span class="text-label">' . Yii::t('app', 'Скачать список') . ' </span>',
+                            'class' => ['btn btn-outline-default btn-sm'],
+                            'style' => 'margin-right:10px;',
+                        ],
+                        'exportConfig' => [
+                            ExportMenu::FORMAT_HTML => false,
+                            ExportMenu::FORMAT_TEXT => false,
+                            ExportMenu::FORMAT_EXCEL => false,
+                            ExportMenu::FORMAT_PDF => false,
+                            ExportMenu::FORMAT_CSV => false,
+                            ExportMenu::FORMAT_EXCEL_X => [
+                                'label' => Yii::t('kvexport', 'Excel'),
+                                'icon' => 'file-excel-o',
+                                'iconOptions' => ['class' => 'text-success'],
+                                'linkOptions' => [],
+                                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'extension' => 'xlsx',
+                                'writer' => 'Excel2007',
+                                'styleOptions' => [
+                                    'font' => [
+                                        'bold' => true,
+                                        'color' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                    ],
+                                    'fill' => [
+                                        'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                        'startcolor' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                        'endcolor' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                    ],
+                                ]
+                            ],
+                        ],
+                        'onRenderSheet' => function($sheet, $grid) {
+                            $i=2;
+                            while($sheet->cellExists("B".$i)){
+                                $sheet->setCellValue("B".$i, html_entity_decode($sheet->getCell("B".$i)));
+                                $i++;
+                            }
+                        }
+                    ]);
+                    ?>
+                </div>
             </div>
-            <?php
-            ActiveForm::end();
-            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'client-list', 'timeout' => 5000]);
-            ?>
             <div class="row">
                 <div class="col-md-12">
                     <?=
                     GridView::widget([
                         'id' => 'clientsList',
                         'dataProvider' => $dataProvider,
-                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        'pjax' => true,
+                        'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                         'filterModel' => $searchModel,
                         'filterPosition' => false,
                         'summary' => '',
                         'options' => ['class' => 'table-responsive'],
-                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
+                        'tableOptions' => ['class' => 'table table-bordered', 'role' => 'grid'],
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                        'bordered' => false,
+                        'striped' => false,
+                        'condensed' => false,
+                        'responsive' => false,
+                        'hover' => false,
+                        'resizableColumns' => false,
+                        'export' => [
+                            'fontAwesome' => true,
+                        ],
                         'columns' => [
                             [
                                 'attribute' => 'id',
@@ -149,13 +232,13 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'attribute' => 'name',
-                                'value' => function($data) {
-                                    if($data['self_registered']==\common\models\FranchiseeAssociate::SELF_REGISTERED){
-                                        return "<i title='Клиент самостоятельно зарегистрировался' class='fa fa-bolt text-success' aria-hidden='true'></i>" . $data['name'];
+                                'value' => function ($data) {
+                                    if ($data['self_registered'] == \common\models\FranchiseeAssociate::SELF_REGISTERED) {
+                                        return $data['name'] . " &nbsp; <i title='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "' class='text-success' aria-hidden='true'><img src='/images/new.png' alt='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "'></i>";
                                     }
                                     return $data['name'];
                                 },
-                                'label' => 'Имя ресторана',
+                                'label' => Yii::t('app', 'Имя ресторана'),
                             ],
                             [
                                 'format' => 'raw',
@@ -214,44 +297,102 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'attribute' => 'created_at',
-                                'value' => function($data) {
+                                'value' => function ($data) {
                                     $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
-                                'label' => 'Дата регистрации',
+                                'label' => Yii::t('app', 'Дата регистрации'),
                             ],
                             [
                                 'attribute' => 'contact_name',
                                 'value' => 'contact_name',
-                                'label' => 'Контакт',
+                                'label' => Yii::t('app', 'Контакт'),
                             ],
                             [
                                 'attribute' => 'phone',
                                 'value' => 'phone',
-                                'label' => 'Телефон',
+                                'label' => Yii::t('app', 'Телефон'),
                             ],
                             [
                                 'format' => 'raw',
-                                'value' => function($data) {
+                                'value' => function ($data) {
                                     return Html::a('<i class="fa fa-signal"></i>', ['analytics/client-stats', 'id' => $data["id"]], ['class' => 'stats']);
                                 },
-                                    ],
+                            ],
+                            [
+                                'class' => 'yii\grid\ActionColumn',
+                                'template' => '{delete}',
+                                'buttons' => [
+                                    'delete' => function ($url, $data) {
+                                        return Html::a(
+                                            '<span class="glyphicon glyphicon-trash text-red" title="' . Yii::t('app', 'Удалить') . ' "></span>',
+                                            null, ['data-pjax' => '0', 'class' => 'f-delete', 'url' => Url::to(['organization/delete', 'id' => $data["franchisee_associate_id"]])]);
+                                    },
                                 ],
-                                'rowOptions' => function ($model, $key, $index, $grid) {
+                            ],
+                        ],
+                        'rowOptions' => function ($model, $key, $index, $grid) {
                             return ['data-url' => Url::to(['organization/ajax-show-client', 'id' => $model["id"]])];
                         },
-                            ]);
-                            ?>
-                        </div></div>
-                    <?php Pjax::end() ?>
-                    <!-- /.table-responsive -->
+                    ]);
+                    ?>
                 </div>
-                <!-- /.box-body -->
             </div>
-            <?php
-            Modal::begin([
-                'id' => 'clientInfo',
-            ]);
-            ?>
-            <?php Modal::end(); ?>
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <?php
+    Modal::begin([
+        'id' => 'clientInfo',
+    ]);
+    ?>
+    <?php Modal::end(); ?>
 </section>
+<?php
+$url = Url::to(['organization/clients']);
+$customJs = <<< JS
+var timer;
+$('#search').on("keyup", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateFrom').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateTo').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+JS;
+$this->registerJs($customJs, View::POS_READY);

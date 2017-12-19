@@ -16,7 +16,7 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
 </p>
 <br style="margin: 0; padding: 0;" />
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-    <a href="<?= $recipient->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL ? Url::toRoute(["/order/view", "id" => $order->id, "token" => $recipient->access_token], true) : Url::toRoute(["/order/view", "id" => $order->id], true); ?>" 
+    <a href="<?= $order->getUrlForUser($recipient) ?>"
        style="text-decoration: none;
        color: #FFF;
        background-color: #84bf76;

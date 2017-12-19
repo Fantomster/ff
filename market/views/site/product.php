@@ -7,10 +7,11 @@ use yii\widgets\Breadcrumbs;
 
 $vendor = $product->vendor;
 $delivery = $vendor->delivery;
+$currency = $product->catalog->currency->symbol;
 ?>
 
 <?php
-$this->title = 'F-MARKET информация о товаре';
+$this->title = 'MixCart информация о товаре';
 ?>
 <style>
     .mp-product-image{
@@ -72,7 +73,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             Html::decode($product->mainCategory->name),
             [
                 'label' => Html::decode($product->category->name),
-                'url' => ['site/category', 'id' => $product->category_id],
+                'url' => ['site/category', 'slug' => $product->category->slug],
             ],
             [
             'label' => Html::decode($product->product, ['style'=>'text-overflow: ellipsis']),
@@ -89,7 +90,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
         <div class="col-md-8 col-lg-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><?= $product->product ?> <br>
+                    <h3><?= Html::decode(Html::decode($product->product)) ?> <br>
                         <a class="grey-link" href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
                             <small><?= $vendor->name ?></small>
                         </a>
@@ -97,7 +98,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
               <?php if(empty($product->mp_show_price)){ ?>
               <h2 style="color:#dfdfdf;padding-bottom:15px">договорная цена</h2>
               <?php } else {?>
-              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small>руб.</small></h2>
+              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small><?= $currency ?></small></h2>
               <?php } ?>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
@@ -124,7 +125,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     
 $js2 = <<<JS
 $('#supp-phone,#supp-email').click(function(e){
-alert('Необходимо зарегистрироваться в системе f-keeper');  
+alert('Необходимо зарегистрироваться в системе MixCart');  
 })
 JS;
 $this->registerJs($js2, \yii\web\View::POS_READY);
@@ -179,9 +180,9 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                     <h5><span class="title-param">Кратность поставки:</span> <?= empty($product->units) ? '<span class="noinfo">нет информации</span>':$product->units ?></h5>   
                 </div>
                 <div class="col-md-6">
-                    <h5><span class="title-param">Стоимость доставки:</span> <?= $delivery->delivery_charge ?> руб.</h5>    
-                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> руб.</h5> 
-                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> руб.</h5>   
+                    <h5><span class="title-param">Стоимость доставки:</span> <?= $delivery->delivery_charge ?> <?= $currency ?></h5>    
+                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> <?= $currency ?></h5> 
+                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> <?= $currency ?></h5>   
                     <!--h5><span class="title-param">Адрес самовывоза:</span> </h5-->   
                     <h5><span class="title-param">Дни доставки:</span> <?= $delivery->getDaysString() ?></h5>  
                 </div>

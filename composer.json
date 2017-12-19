@@ -28,7 +28,7 @@
         "phpoffice/phpexcel": "*",
         "2amigos/yii2-switch-widget": "~1.0",
         "kartik-v/yii2-export": "@dev",
-        "kartik-v/yii2-mpdf": "*",
+        "kartik-v/yii2-mpdf": "@dev",
         "kartik-v/yii2-grid": "@dev",
         "kartik-v/yii2-editable": "*",
         "nizsheanez/yii2-asset-converter": "1.*",
@@ -60,7 +60,12 @@
         "yiisoft/yii2-jui": "~2.0.0",
         "understeam/yii2-fcm": "~0.1",
         "ofat/yii2-yashop-ses": "*",
-        "kartik-v/yii2-tree-manager": "@dev"
+        "kartik-v/yii2-tree-manager": "@dev",
+        "branchonline/yii2-lightbox": "*",
+        "npm-asset/readmore.js": "*",
+        "insolita/yii2-migration-generator": "~2.3",
+        "xj/yii2-user-agent": "^1.0.0",
+        "yandex-money/yandex-checkout-sdk-php": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

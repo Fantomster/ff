@@ -3,10 +3,9 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\bootstrap\Modal;
 
-//market\assets\AppAsset::register($this);
-
-$this->title = 'F-MARKET главная';
+$this->title = 'MixCart главная';
 ?>
 <div class="row">
   <div class="col-md-12 min-padding">
@@ -50,7 +49,7 @@ $this->title = 'F-MARKET главная';
                       <?php if(empty($row->mp_show_price)){ ?>
                       <h4 style="color:#dfdfdf">договорная цена</h4>
                       <?php } else {?>
-                      <h4><?=floatval($row->price); ?> <small>руб.</small></h4>
+                      <h4><?=floatval($row->price); ?> <small><?= $row->catalog->currency->symbol; ?></small></h4>
                       <?php } ?>
                   </div>
                 </div>
@@ -125,7 +124,10 @@ $this->title = 'F-MARKET главная';
     </div>
   </div> 
 </div> 
+
+
 <?php 
+        
 $productMoreUrl = Url::to(['site/ajax-product-more']);
 $supplierMore = Url::to(['site/ajax-supplier-more']);
 
@@ -134,7 +136,6 @@ var num = 6;
 $('#product-more').on("click", function (e) {
     e.preventDefault();
     $('#product-more').addClass('disabled');
-    console.log('product click more');
     $.ajax({
       url: "$productMoreUrl",
       type: "GET",
@@ -168,7 +169,7 @@ $('#supplier-more').on("click", function (e) {
           }
        }
     });
-});       
+});      
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

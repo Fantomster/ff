@@ -10,6 +10,10 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
+use kartik\tree\TreeView;
+
+use common\models\User;
+use api\common\models\RkStoretree;
 
 
 ?>
@@ -45,12 +49,12 @@ use api\common\models\RkAccess;
 <section class="content">
     <div class="catalog-index">
 
-    	<div class="box box-info">            
+    <!--	<div class="box box-info">            
             <div class="box-header with-border">
                             <div class="panel-body">
-                                <div class="box-body table-responsive no-padding">
-                                    <?=
-                                    GridView::widget([
+                                <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
+                                  <?php /*
+                                    echo GridView::widget([
                                         'dataProvider' => $dataProvider,
                                         'pjax' => false, // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
@@ -60,9 +64,9 @@ use api\common\models\RkAccess;
                                             'denom',
                                             'updated_at',
                                                                                     ],
-                                        /* 'rowOptions' => function ($data, $key, $index, $grid) {
-                                          return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
-                                          }, */
+                                        // 'rowOptions' => function ($data, $key, $index, $grid) {
+                                        //  return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
+                                        //  },
                                         'options' => ['class' => 'table-responsive'],
                                         'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
@@ -75,17 +79,60 @@ use api\common\models\RkAccess;
                                         'export' => [
                                             'fontAwesome' => true,
                                         ],
-                                    ]);
+                                    ]); */
                                     ?> 
-                                    <?= Html::a('Вернуться',
-            ['/clientintegr/rkws/default'],
-            ['class' => 'btn btn-success btn-export']);
-        ?>
+
                                 </div>
                             </div>    
                 </div>
-            </div>        
+            </div>  
+        -->
+            <div class="box box-info">            
+                <div class="box-header with-border">
+                            <div class="panel-body">
+                                    <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
+                                    <?=
+                                         TreeView::widget([
+                                        // single query fetch to render the tree
+                                        // use the Product model you have in the previous step
+                                        'query' => RkStoretree::find()
+                                                 ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                                                 ->andWhere('active = 1')
+                                                 ->addOrderBy('root, lft'), 
+                                        'headingOptions' => ['label' => 'Склады'],
+                                        'fontAwesome' => false,     // optional
+                                        'isAdmin' => false,         // optional (toggle to enable admin mode)
+                                        'displayValue' => 1,        // initial display value
+                                        'softDelete' => true,       // defaults to true
+                                        'toolbar' => [
+                                                         TreeView::BTN_CREATE => false,
+                                                         TreeView::BTN_CREATE_ROOT => false,
+                                                         TreeView::BTN_REMOVE => false,
+                                                         TreeView::BTN_SEPARATOR => false,
+                                                         TreeView::BTN_MOVE_UP => false,
+                                                         TreeView::BTN_MOVE_DOWN => false,
+                                                         TreeView::BTN_MOVE_LEFT => false,
+                                                         TreeView::BTN_MOVE_RIGHT => false,
+                                                     ],     
+                                        'cacheSettings' => [        
+                                                'enableCache' => false   // defaults to true
+                                        ]
+                                        ]);
+                                     
+                                     ?>
+                <?= Html::a('Вернуться',
+            ['/clientintegr/rkws/default'],
+            ['class' => 'btn btn-success btn-export']);
+        ?>
+                                    </div>
+                             </div>    
+                 </div>
+             </div>    
+                                
     </div>            
 </section>
+
+
+
 
 

@@ -53,8 +53,12 @@ $this->registerJs(
                             });
                         })
                     },
-                }).then(function() {
-                    swal({title: success, type: "success"});
+                }).then(function(result) {
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal({title: success, type: "success"});
+                    }
                 });
             });
 
@@ -97,8 +101,12 @@ $this->registerJs(
                             });
                         })
                     },
-                }).then(function() {
-                    swal({title: success, type: "success"});
+                }).then(function(result) {
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal({title: success, type: "success"});
+                    }
                 });
             });
 
@@ -132,7 +140,11 @@ $this->registerJs(
                         })
                     },
                 }).then(function(result) {
-                    swal(result);
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal(result.value);
+                    }
                 });
             });
             $("#checkout").on("change", ".delivery-date", function(e) {
@@ -141,7 +153,7 @@ $this->registerJs(
                     {"order_id":$(this).data("order_id"), "delivery_date":$(this).val() }
                 ).done(function(result) {
                     if (result) {
-                        swal(result);
+                        swal(result.value);
                     }
                 });
             });
@@ -183,13 +195,15 @@ $this->registerJs(
                         })
                     },
                 }).then(function (result) {
-                    if (result.type == "success") {
+                    if (result.value.type == "success") {
                         clicked.tooltip("hide")
-                            .attr("data-original-title", result.comment)
+                            .attr("data-original-title", result.value.comment)
                             .tooltip("fixTitle")
                             .blur();
-                        clicked.data("original-title", result.comment);
-                        swal(result);
+                        clicked.data("original-title", result.value.comment);
+                        swal(result.value);
+                    } else if (result.dismiss === "cancel") {
+                        swal.close();
                     } else {
                         swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                     }
@@ -218,8 +232,12 @@ $this->registerJs(
                                 showCancelButton: true,
                                 confirmButtonText: "Уйти",
                                 cancelButtonText: "Остаться",
-                            }).then(function() {
-                                document.location = link;
+                            }).then(function(result) {
+                                if (result.dismiss === "cancel") {
+                                    swal.close()
+                                } else {
+                                    document.location = link;
+                                }
                             });
                         }
                     }
@@ -285,15 +303,15 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             ]
                         ]);
                         ?>
-                        <?=
-                        Html::button("&nbsp;<span>$totalCart</span> <i class='fa fa-fw fa-rub'></i>&nbsp;", [
-                            'class' => 'btn btn-success createAll btn-outline total-cart',
-                            'data' => [
-                                'url' => Url::to(['/order/ajax-make-order']),
-                                'all' => true,
-                                'id' => null,
-                            ]
-                        ]);
+                        <?= ''
+//                        Html::button("&nbsp;<span>$totalCart</span> <i class='fa fa-fw fa-rub'></i>&nbsp;", [
+//                            'class' => 'btn btn-success createAll btn-outline total-cart',
+//                            'data' => [
+//                                'url' => Url::to(['/order/ajax-make-order']),
+//                                'all' => true,
+//                                'id' => null,
+//                            ]
+//                        ]);
                         ?>
                     </div>
                 </div>
@@ -324,6 +342,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                 ?>
                 <?php
                 foreach ($orders as $order) {
+                    $currencySymbol = $order->currency->symbol;
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
                     ?>
@@ -380,26 +399,29 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                             'format' => 'dd.mm.yyyy',
                                             'autoclose' => true,
                                             'startDate' => "0d",
+                                            'endDate' => date('d.m.Y',strtotime(date("Y-m-d", mktime()) . " + 365 day")),
                                             'todayHighlight' => true,
                                         ]
                                     ])
                                     ?>
                                 </div>
                             </div>
-    <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
+    <?= $this->render('_checkout-content', ['order' => $order]) ?>
                         </div>
                         <div class="block_right">
                             <div class="block_right_wrap">
-                                <p>Итого: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> р.</p>
+                                <p>Итого: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> <?= $currencySymbol ?></p>
 
                             </div>
                             <div class="block_right_wrap_1">
                                 <?php if ($forMinOrderPrice) { ?>
-                                    <p>до минимального заказа</p><p><?= $forMinOrderPrice ?> руб</p>
-                                <?php } elseif ($forFreeDelivery) { ?>
-                                    <p>до бесплатной доставки </p><p><?= $forFreeDelivery ?> руб</p>
-                                <?php } else { ?>
+                                    <p>до минимального заказа</p><p><?= $forMinOrderPrice ?> <?= $currencySymbol ?></p>
+                                <?php } elseif ($forFreeDelivery > 0) { ?>
+                                    <p>до бесплатной доставки </p><p><?= $forFreeDelivery ?> <?= $currencySymbol ?></p>
+                                <?php } elseif ($forFreeDelivery == 0) { ?>
                                     <p>бесплатная доставка!</p>
+                                <?php } else { ?>
+                                    <p>включая доставку</p><p><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
                                 <?php } ?>
                                 <?=
                                 Html::button('Оформить заказ', [

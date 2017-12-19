@@ -28,27 +28,28 @@ $edit = false;
 
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
+        
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            var clickedButton = $(this);
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
                 extData = "&orderAction=confirm"; 
-                $("#loader-show").showLoading();
+                clickedButton.button("loading");
                 $.post(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
                     dataEdited = 0;
-                    $("#loader-show").hideLoading();
+                    clickedButton.button("reset");
                 });
             } else if ($(this).data("action") != "cancel") {
-                $("#loader-show").showLoading();
+                clickedButton.button("loading");
                 $.post(
                     "$urlOrderAction",
                         {"action": $(this).data("action"), "order_id": $order->id}
                 ).done(function(result) {
                         $('#actionButtons').html(result);
-                        //$.pjax.reload({container: "#orderContent"});
-                        $("#loader-show").hideLoading();
+                        clickedButton.button("reset");
                 });
             }
         });
@@ -70,7 +71,11 @@ $js = <<<JS
                             confirmButtonText: "Уйти",
                             cancelButtonText: "Остаться",
                         }).then(function() {
-                            document.location = link;
+                            if (result.dismiss === "cancel") {
+                                swal.close();
+                            } else {
+                                document.location = link;
+                            }
                         });
                     }
                 }
@@ -92,13 +97,13 @@ $js = <<<JS
         $('.content').on('click', '#btnSave', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
-            $("#loader-show").showLoading();
+            $(".btnSave").button("loading");
             $.post(
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
                 dataEdited = 0;
-                $("#loader-show").hideLoading();
+                $(".btnSave").button("reset");
             });
         });
         $('.content').on('click', '.deletePosition', function(e) {
@@ -130,7 +135,11 @@ $js = <<<JS
                     })
                 },
             }).then(function() {
-                swal({title: "Товар удален из заказа!", type: "success"});
+                if (result.dismiss === "cancel") {
+                    swal.close();
+                } else {
+                    swal({title: "Товар удален из заказа!", type: "success"});
+                }
             });        
         });
 
@@ -147,7 +156,6 @@ $js = <<<JS
                 confirmButtonText: "Да",
                 showLoaderOnConfirm: true,
                 allowOutsideClick: false,
-                showLoaderOnConfirm: true,
                 preConfirm: function (text) {
                     return new Promise(function (resolve, reject) {
                         $.post(
@@ -163,8 +171,10 @@ $js = <<<JS
                     })
                 },
             }).then(function (result) {
-                if (result.type == "success") {
-                    swal(result);
+                if (result.value.type == "success") {
+                    swal(result.value);
+                } else if (result.dismiss === "cancel") {
+                    swal.close();
                 } else {
                     swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                 }

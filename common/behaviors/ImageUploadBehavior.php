@@ -233,4 +233,7 @@ class ImageUploadBehavior extends UploadBehavior {
         }
     }
     
+    public function beforeDelete() {
+        return true;
+    }
 }

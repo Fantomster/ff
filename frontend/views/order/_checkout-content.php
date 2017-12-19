@@ -4,16 +4,18 @@ use kartik\widgets\TouchSpin;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+$currencySymbol = $order->currency->symbol;
+$content = $order->orderContent;
+$vendor_id = $order->vendor_id;
+
 foreach ($content as $position) {
     $note = $position->getNote();
     ?>
     <div class="block_left_bot">
         <div class="block_left_bot_left">
             <?php //<img class= "img_product" src="<?= $position->product->imageUrl ? >" alt=""> ?>
-            <p class = "block_left_bot_left_name"><?= $position->product_name ?></p>
-            <p class = "block_left_bot_left_art">Артикул: <?= $position->product->article ?></p>
-    <!--        <img  class = "izbranoe" src="/img/izb_icon.png" alt="">
-            <a class = "izbranoe_p" href="#">Избранное</a>--><br>
+            <p class = "block_left_bot_left_name"><?= Html::decode(Html::decode($position->product_name)) ?></p>
+            <p class = "block_left_bot_left_art">Артикул: <?= $position->product->article ?></p><br>
             <p class = "kr_p">Кратность: <?= $position->product->units ? $position->product->units : '' ?><?= $position->product->ed ?></p>
             <?=
             Html::button('Комментарий к товару', [
@@ -50,8 +52,8 @@ foreach ($content as $position) {
             ?>
         </div>
         <div class="block_cena">
-            <p class = "block_cena_p"><span id="total<?= $position->id ?>"><?= number_format($position->price * $position->quantity, 2) ?></span> руб.</p>
-            <p class = "block_cena_p1"><?= $position->quantity ?> x <span> <?= $position->price ?> руб.</span></p>
+            <p class = "block_cena_p"><span id="total<?= $position->id ?>"><?= number_format($position->price * $position->quantity, 2) ?></span> <?= $currencySymbol ?></p>
+            <p class = "block_cena_p1"><?= $position->quantity ?> x <span> <?= $position->price ?> <?= $currencySymbol ?></span></p>
             <?=
             Html::a('<img class= "delete_tovar1" src="/img/tovar_delete.png" alt="">', '#', [
                 'class' => 'remove',

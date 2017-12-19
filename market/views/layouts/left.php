@@ -2,7 +2,10 @@
 use yii\helpers\Html;
 use common\models\Organization;
 use common\models\CatalogBaseGoods;
-
+$locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
 $count_products_from_mp = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
@@ -10,10 +13,16 @@ $count_products_from_mp = CatalogBaseGoods::find()
                     'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere($locationWhere)
                 ->andWhere('category_id is not null')
                 ->count();
-$left_menu_categorys = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
-$left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,parent,')->where('parent is not null')->asArray()->all();
+$left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($db) {
+    return \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
+});
+//$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
+//    return \common\models\MpCategory::find()->where('parent is not null')->all();
+//});
+$left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is not null')->all();
 ?>
 <style>
 .panel-group {margin-bottom: 0px;overflow: hidden;}  
@@ -60,14 +69,14 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
             <div id="coll<?= $i ?>" class="panel-collapse collapse">
                 <?php
                 foreach($left_menu_categorys_sub as $row2){
-                    if($row['id'] == $row2['parent']){
+                    if($row['id'] == $row2->parent){
                 ?>
                 <div class="panel-body">
                     <table class="table">
                         <tr>
                             <td>
-                                <a href="<?= \yii\helpers\Url::to(['site/category', 'id' => $row2['id']]) ?>" title="<?=$row2['name']?>">
-                                <span><?=$row2['name']?></span>
+                                <a href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row2->slug ]) ?>" title="<?=$row2->name ?>">
+                                <span><?=$row2->name ?></span>
                               </a>
                             </td>
                         </tr>

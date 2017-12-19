@@ -34,7 +34,7 @@ $menuItems = [
     ],
     ['label' => 'Мои каталоги', 'icon' => 'list-alt', 'url' => ['/vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
-    ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.mixcart.ru', 'options' => ['class' => 'l-fmarket']],
     ['label' => 'Заявки', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
     [
         'label' => 'Мои клиенты',
@@ -43,9 +43,9 @@ $menuItems = [
         'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">' . ($newClientCount ? $newClientCount : '') . '</span></span></a>',
     ],
     ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
-    ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
+    //['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
     //['label' => 'Мои акции', 'icon' => 'ticket', 'url' => ['vendor/events']],
-    ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
+   // ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
         //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
 ];
 if (Yii::$app->user->can('manage')) {
@@ -58,8 +58,9 @@ if (Yii::$app->user->can('manage')) {
             ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
-            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
+            ['label' => 'Платежи', 'icon' => 'circle-o', 'url' => ['/vendor/payments']],
         ]
     ];
 } else {
@@ -69,7 +70,7 @@ if (Yii::$app->user->can('manage')) {
         'url' => '#',
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
-            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
         ]
     ];
 }
@@ -82,7 +83,7 @@ $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options
         <?=
         dmstr\widgets\Menu::widget(
                 [
-                    'options' => ['class' => 'sidebar-menu'],
+                    'options' => ['class' => 'sidebar-menu tree', 'data-widget' => "tree"],
                     'encodeLabels' => false,
                     'items' => $menuItems,
                 ]

@@ -30,9 +30,18 @@ class Module extends \yii\base\Module
         
         Yii::$app->set(
                 'mailer', [
-                    'class' => 'yii\swiftmailer\Mailer',
+                    'class' => 'common\components\Mailer',
                     'viewPath' => '@common/mail',
-                    'htmlLayout' => '@common/mail/layouts/html'
+                    'htmlLayout' => '@common/mail/layouts/html',
+                    'useFileTransport' => false,
+                        'access_key' => 'AKIAIMZCOXBPC5GJY4MA',
+                        'secret_key' => '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',
+                        'host' => 'email.eu-west-1.amazonaws.com',
+                        'messageConfig' => [
+            //                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                            'from' => ['noreply@mixcart.ru' => 'noreply@mixcart.ru'],
+                            'charset' => 'UTF-8',
+                        ],
                     ]);
         
         Yii::$app->set(
@@ -44,9 +53,20 @@ class Module extends \yii\base\Module
                     ]
                 );
         
+        Yii::$app->set(
+                'urlManagerFrontEnd', [
+                        'class' => 'yii\web\urlManager',
+                        'baseUrl' => Yii::$app->params['maindUrl'],
+                        'enablePrettyUrl' => true,
+                        'showScriptName' => false,
+                    ]
+                );
+        
          $this->controllerBehaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
-            'only' => ['index', 'view', 'options', 'auth','complete-registration', 'refresh-fcm-token', 'send', 'create', 'viewed'],
+            'only' => ['index', 'view', 'options', 'auth','complete-registration', 
+                'refresh-fcm-token', 'send', 'create', 
+                'viewed', 'update', 'create', 'delete', 'new-order', 'favorites', 'send', 'cancel-order', 'confirm-order', 'remove-supply'],
             'authMethods' => [
                 [
                     'class' => HttpBasicAuth::className(),

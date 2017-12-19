@@ -1,11 +1,8 @@
 <?php
 
-use yii\widgets\Breadcrumbs;
-use kartik\date\DatePicker;
 use kartik\grid\GridView;
 use common\models\Order;
 use common\models\Organization;
-use common\models\Profile;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
@@ -13,7 +10,6 @@ use yii\widgets\Pjax;
 
 $this->title = 'Рабочий стол';
 
-frontend\assets\AdminltePluginsAsset::register($this);
 frontend\assets\TutorializeAsset::register($this);
 
 $this->registerCss('
@@ -171,10 +167,10 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             <div class="dash-small-box step-f-market" data-target="fmarket">
                                 <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
-                                    <h3>F-Market</h3>
+                                    <h3>MixMarket</h3>
                                     <p>доступно для заказа товаров <b><?= $count_products_from_mp ?></b></p>
                                 </div>
-<?= Html::a('F-Market', 'https://market.f-keeper.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+<?= Html::a('MixMarket', 'https://market.mixcart.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash2.png) no-repeat bottom right;
                                      background-size: 120px;">
@@ -275,7 +271,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             'format' => 'raw',
                             'attribute' => 'total_price',
                             'value' => function($data) {
-                                return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                                return "<b>$data->total_price</b> " . $data->currency->symbol;
                             },
                             'label' => 'Сумма',
                         ],
@@ -392,7 +388,7 @@ $customJs = <<< JS
         if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
         if(targetUrl == 'order'){location.href = '$createUrl';}
         if(targetUrl == 'request'){location.href = '$requestUrl';}
-        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+        if(targetUrl == 'fmarket'){window.open('https://market.mixcart.ru');}
     }) 
             
     $(document).on("click", "td", function (e) {
@@ -415,8 +411,12 @@ $customJs = <<< JS
             confirmButtonText: "Да",
             cancelButtonText: "Отмена",
             showLoaderOnConfirm: true,
-        }).then(function() {
-            document.location = clicked.data("url")
+        }).then(function(result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                document.location = clicked.data("url")
+            }
         });
     });
 JS;
@@ -429,7 +429,7 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
     var targetUrl = $(this).attr('data-target');
         if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
         if(targetUrl == 'order'){location.href = '$createUrl';}
-        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+        if(targetUrl == 'fmarket'){window.open('https://market.mixcart.ru');}
     }); 
 
                     var _slides = [{
@@ -471,7 +471,7 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
                     },
                     {
                             title: '&nbsp;',
-                            content: 'Или найти новых с помощью сервиса F-Market.',
+                            content: 'Или найти новых с помощью сервиса MixMarket.',
                             position: 'bottom-center',
                             overlayMode: 'focus',
                             selector: '.step-f-market',

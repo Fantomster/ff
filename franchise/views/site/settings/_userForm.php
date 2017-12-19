@@ -24,7 +24,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
         ?>
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="modal-title"><?= $user->isNewRecord ? 'Новый пользователь' : 'Редактировать пользователя' ?></h4>
+            <h4 class="modal-title"><?= $user->isNewRecord ? Yii::t('app', 'Новый пользователь') : Yii::t('app', 'Редактировать пользователя') ?></h4>
         </div>
         <div class="modal-body">
 
@@ -58,28 +58,72 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                     'size' => 'md',
                 ],
                 'labelSettings' => [
-                    'label' => 'Разрешить СМС уведомление',
+                    'label' => Yii::t('app', 'Разрешить СМС уведомление'),
                     'position' => CheckboxX::LABEL_RIGHT,
                     'options' => ['style' => '']
                 ]
             ])->label(false);
             ?>
 
-            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown()) ?>
+            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown())->label(Yii::t('app', 'Роль')) ?>
+
+            <div style="display: <?= (isset($user->role_id) && $user->role_id == Role::ROLE_FRANCHISEE_MANAGER) ? 'block' : 'none' ?>" class="alLeaderChoose">
+
+            <?= $form->field($rel, 'leader_id')->dropDownList($leadersArray, ['prompt'=>Yii::t('app', 'Выберите руководителя для менеджера')])->label(Yii::t('app', 'Руководитель')) ?>
+
+            <?= $form->field($rel, 'manager_id')->hiddenInput(['value'=>$user->id])->label(false) ?>
+
+            </div>
+
+            <?=
+            $form->field($user, 'status')->widget(CheckboxX::classname(), [
+                //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                'autoLabel' => true,
+                'model' => $user,
+                'attribute' => 'status',
+                'pluginOptions' => [
+                    'threeState' => false,
+                    'theme' => 'krajee-flatblue',
+                    'enclosedLabel' => false,
+                    'size' => 'md',
+                ],
+                'labelSettings' => [
+                    'label' => Yii::t('app', 'Активен'),
+                    'position' => CheckboxX::LABEL_RIGHT,
+                    'options' => ['style' => '']
+                ]
+            ])->label(false);
+            ?>
+
 
         </div>
         <div class="modal-footer">
-            <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success edit']) ?>
+            <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> ' . Yii::t('app', 'Создать') . ' ' : '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ', ['class' => 'btn btn-success edit']) ?>
             <?=
-            Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', [
+            Html::button('<i class="fa fa-fw fa-trash-o"></i> ' . Yii::t('app', 'Удалить') . ' ', [
                 'class' => 'btn btn-danger delete',
                 'data' => [
                     'id' => $user->id,
                     'action' => Url::to(["site/ajax-delete-user"]),
         ]])
             ?>
-            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
         </div>
 <?php ActiveForm::end(); ?>
     </div>
 </div>
+<?php
+$role_id = Role::ROLE_FRANCHISEE_MANAGER;
+$customJs = <<< JS
+
+$('#user-role_id').on("change", function () {
+    var role_id = '$role_id';
+    if($(this).val()==role_id){
+        $('.alLeaderChoose').css('display', 'block');
+    }else{
+        $('.alLeaderChoose').css('display', 'none');
+    }
+});
+
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_READY);

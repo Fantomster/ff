@@ -21,6 +21,10 @@ namespace common\models;
 class Role extends \amnah\yii2\user\models\Role {
 
     /**
+     * @var int admin role
+     */
+    const ROLE_ADMIN = 1;
+    /**
      * @var int Restaurant manager role
      */
     const ROLE_RESTAURANT_MANAGER = 3;
@@ -60,6 +64,15 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int franchisee agent role
      */
     const ROLE_FRANCHISEE_AGENT = 12;
+    /**
+     * @var int franchisee leader role
+     */
+    const ROLE_FRANCHISEE_LEADER = 13;
+    /**
+     * @var int franchisee manager role
+     */
+    const ROLE_FRANCHISEE_MANAGER = 14;
+
     
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [
@@ -98,6 +111,16 @@ class Role extends \amnah\yii2\user\models\Role {
             }
         }
         return $dropdown;
+    }
+
+
+    public static function getExceptionArray(){
+        return [self::ROLE_ADMIN, self::ROLE_FKEEPER_OBSERVER];
+    }
+
+
+    public static function getFranchiseeEditorRoles(){
+        return [self::ROLE_FRANCHISEE_OWNER, self::ROLE_FRANCHISEE_OPERATOR, self::ROLE_FRANCHISEE_LEADER, self::ROLE_FRANCHISEE_MANAGER];
     }
     
 }

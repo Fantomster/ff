@@ -40,10 +40,21 @@ class RkStoretree extends \kartik\tree\models\Tree
     {
         return 'rk_storetree';
     }
+    
+    
 
+        public function rules()
+    {
+        $rules = parent::rules();
+        $rules[] = [['type', 'fid','acc','version'], 'safe'];
+        return $rules;
+    }
+    
+    /*
     /**
      * @inheritdoc
      */
+    /*
     public function rules()
     {
         return [
@@ -57,6 +68,7 @@ class RkStoretree extends \kartik\tree\models\Tree
             
         ];
     }
+    */
 
     /**
      * @inheritdoc

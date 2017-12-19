@@ -5,14 +5,15 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'f-keeper',
-    'name' => 'f-keeper',
+    'id' => 'mixcart',
+    'name' => 'mixcart',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log',], // 'assetsAutoCompress'
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-fk',
+            'enableCsrfCookie' => true,
         ],
         'session' => [
             // this is the name of the session cookie used for login on the frontend
@@ -25,19 +26,19 @@ return [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
-                'email' => [
-                    'class' => 'yii\log\EmailTarget',
-                    'except' => ['yii\web\HttpException:404','yii\web\HttpException:403'],
-                    'levels' => ['error'],
-                    'message' => [
-                        'from' => 'noreply@f-keeper.ru', 
-                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com','xsupervisor@f-keeper.ru'], 
-                        'subject' => 'Error message',
-                    ],
-                    'mailer' => 'mailer',
-                ],
+//                'email' => [
+//                    'class' => 'yii\log\EmailTarget',
+//                    'except' => ['yii\web\HttpException:404','yii\web\HttpException:403'],
+//                    'levels' => ['error'],
+//                    'message' => [
+//                        'from' => 'noreply@f-keeper.ru', 
+//                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com','xsupervisor@f-keeper.ru'], 
+//                        'subject' => 'Error message',
+//                    ],
+//                    'mailer' => 'mailer',
+//                ],
             ],
-        ],
+        ], 
 //        'assetsAutoCompress' =>
 //        [
 //            'class'         => '\skeeks\yii2\assetsAuto\AssetsAutoCompressComponent',
@@ -51,11 +52,16 @@ return [
         ],
         'urlManagerFranchise' => [
             'class' => 'yii\web\urlManager',
-            'baseUrl' => '//partner.f-keeper.ru',
+            'baseUrl' => '//partner.mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],
     ],
 
     'params' => $params,
+    'modules' => [
+        'billing' => [
+            'class' => 'frontend\modules\billing\Module',
+        ],
+    ],
 ];

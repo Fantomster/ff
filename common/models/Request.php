@@ -1,8 +1,10 @@
 <?php
 
 namespace common\models;
+
 use Yii;
 use yii\db\ActiveRecord;
+
 /**
  * This is the model class for table "request".
  *
@@ -21,7 +23,7 @@ use yii\db\ActiveRecord;
  * @property string $end
  * @property integer $rest_org_id
  * @property integer $active_status
- *
+ * @property integer $rest_user_id
  * @property string $regularName
  * @property Organization $vendor
  * @property Organization $client
@@ -30,61 +32,60 @@ use yii\db\ActiveRecord;
  * @property string $countCallback
  * @property array $requestCallbacks
  */
-class Request extends \yii\db\ActiveRecord
-{
+class Request extends \yii\db\ActiveRecord {
+
     const ACTIVE = 1;
     const INACTIVE = 0;
-    
-    
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'request';
     }
+
     public function beforeSave($insert) {
         if (parent::beforeSave($insert)) {
-            if($this->rush_order){
-            $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 24*3600,'php:Y-m-d H:i:s');
-            }else{
-            $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 30*24*3600,'php:Y-m-d H:i:s');   
+            if ($this->rush_order) {
+                $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 24 * 3600, 'php:Y-m-d H:i:s');
+            } else {
+                $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 30 * 24 * 3600, 'php:Y-m-d H:i:s');
             }
             return true;
         }
         return false;
     }
+
     public function behaviors() {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                        ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
-                 ],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
+                ],
                 'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
+                    return date("Y-m-d H:i:s");
                 },
             ],
         ];
     }
+
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['category', 'product', 'amount', 'rest_org_id'], 'required'],
-            [['category', 'rush_order', 'payment_method', 'responsible_supp_org_id', 'count_views', 'rest_org_id', 'active_status'], 'integer'],
+            [['category', 'rush_order', 'payment_method', 'responsible_supp_org_id', 'count_views', 'rest_org_id', 'active_status', 'rest_user_id'], 'integer'],
             [['created_at', 'end'], 'safe'],
             [['product', 'comment', 'regular', 'amount', 'deferment_payment'], 'string', 'max' => 255],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'category' => 'Категория товара',
@@ -101,92 +102,82 @@ class Request extends \yii\db\ActiveRecord
             'end' => 'End',
             'rest_org_id' => 'Rest Org ID',
             'active_status' => 'Active Status',
+            'rest_user_id' => 'User Id',
         ];
     }
-    
+
     public function getModifyDate()
     {
-          $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at),'php:Y-m-d H:i:s');
-          $m = Yii::$app->formatter->asDatetime($date,'php:n');
-          $ypd = Yii::$app->formatter->asDatetime($date,'php:yy');
-          $mpd = Yii::$app->formatter->asDatetime($date,'php:m.y');
-          $dpd = Yii::$app->formatter->asDatetime($date,'php:j');
-          $tpd = Yii::$app->formatter->asDatetime($date,'php:H:i');
-          $yy =  Yii::$app->formatter->asDatetime('now','php:yy');
-          $md =  Yii::$app->formatter->asDatetime('now','php:m.y');
-          $dd =  Yii::$app->formatter->asDatetime('now','php:j');
-          
-          $today = false;
-          $yesterday = false;
-        
-        if (($mpd == $md) & ($dpd == $dd))
-        {
-            $today = true;
-            $yesterday = false;
-            
-            $dataTime =  Yii::$app->formatter->asTimestamp($date,'php:H:i:s');
-            $curTime =  Yii::$app->formatter->asTimestamp('now','php:H:i:s');
-            
-            $dif = $curTime - $dataTime;
-            
-            $sArray = array("секунду", "секунды", "секунд");   
+        $date_stamp = strtotime($this->created_at);
+        $m = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
+        $ypd = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
+        $mpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
+        $dpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
+        $tpd = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
+        $yy = Yii::$app->formatter->asDatetime('now', 'php:yy');
+        $md = Yii::$app->formatter->asDatetime('now', 'php:m.y');
+        $dd = Yii::$app->formatter->asDatetime('now', 'php:j');
+
+        $today = false;
+        $yesterday = false;
+
+        if (($mpd == $md) & ($dpd == $dd)) {
+
+            $dif = time() - $date_stamp;
+
+            $sArray = array("секунду", "секунды", "секунд");
             $iArray = array("минуту", "минуты", "минут");
             $hArray = array("час", "часа", "часов");
-            
-            if($dif<60 and $dif>=0){
+
+            if ($dif < 60 and $dif >= 0) {
                 $ns = floor($dif);
                 $text = self::getTimeFormatWord($ns, $sArray);
                 return "$ns $text назад";
-            }
-            elseif($dif/60>0 and $dif/60<60){  
-                $ni = floor($dif/60);
+            } elseif ($dif / 60 > 0 and $dif / 60 < 60) {
+                $ni = floor($dif / 60);
                 $text = self::getTimeFormatWord($ni, $iArray);
                 return "$ni $text назад";
-            }
-            elseif($dif/3600>0 and $dif/3600<6){
-                $nh = floor($dif/3600);
+            } elseif ($dif / 3600 > 0 and $dif / 3600 < 6) {
+                $nh = floor($dif / 3600);
                 $text = self::getTimeFormatWord($nh, $hArray);
                 return "$nh $text назад";
-            }else{
-                return 'Сегодня, в '. $tpd;
+            } else {
+                return 'Сегодня, в ' . $tpd;
             }
         }
-        if (($mpd == $md) & ($dpd == $dd-1))
-        {
-            $today = false;
-            $yesterday = true;
-            return  'Вчера, в '. $tpd;
+
+        if (($mpd == $md) & ($dpd == $dd - 1)) {
+            return 'Вчера, в ' . $tpd;
         }
-        $monthes = array(
+
+        $monthes = [
             1 => 'Января', 2 => 'Февраля', 3 => 'Марта', 4 => 'Апреля',
             5 => 'Мая', 6 => 'Июня', 7 => 'Июля', 8 => 'Августа',
             9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'
-        );
-        if  (($today == false) & ($yesterday == false) & ($ypd == $yy))
-        {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ', в HH:mm');
-        }
-        else
-        {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
+        ];
+
+        if (($today == false) & ($yesterday == false) & ($ypd == $yy)) {
+            return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ', в HH:mm');
+        } else {
+            return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
         }
     }
-    static function  getTimeFormatWord($number, $suffix) {
+
+    static function getTimeFormatWord($number, $suffix) {
         $keys = array(2, 0, 1, 1, 1, 2);
         $mod = $number % 100;
-        $suffix_key = ($mod > 7 && $mod < 20) ? 2: $keys[min($mod % 10, 5)];
+        $suffix_key = ($mod > 7 && $mod < 20) ? 2 : $keys[min($mod % 10, 5)];
         return $suffix[$suffix_key];
     }
-      
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCategoryName()
-    {
+    public function getCategoryName() {
         return $this->hasOne(MpCategory::className(), ['id' => 'category']);
     }
-    public function getRegularName()
-    {
+
+    public function getRegularName() {
         switch ($this->regular) {
             case 1:
                 return 'Разово';
@@ -202,8 +193,8 @@ class Request extends \yii\db\ActiveRecord
                 break;
         }
     }
-    public function getPaymentMethodName()
-    {
+
+    public function getPaymentMethodName() {
         switch ($this->payment_method) {
             case 1:
                 return 'Наличный расчет';
@@ -213,36 +204,87 @@ class Request extends \yii\db\ActiveRecord
                 break;
         }
     }
-    public function getManagers($id)
-    {
-        if(User::find()->where(['organization_id' => $id])->exists()){
-           return User::find()->where(['organization_id'=>$id])->all(); 
-        }else{
-           return; 
+
+    public function getManagers($id) {
+        if (User::find()->where(['organization_id' => $id])->exists()) {
+            return User::find()->where(['organization_id' => $id])->all();
+        } else {
+            return;
         }
     }
-    public function getClient()
-    {
+
+    public function getClient() {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
-    
-    public function getVendor()
-    {
+
+    public function getVendor() {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);
     }
-    
-    public function getCounter()
-    {
+
+    public function getCounter() {
         return RequestCounters::find()->where(['request_id' => $this->id])->count();
-        
     }
-    public function getCountCallback()
-    {
+
+    public function getCountCallback() {
         return RequestCallback::find()->where(['request_id' => $this->id])->count();
-        
     }
-    public function getRequestCallbacks()
-    {
+
+    public function getRequestCallbacks() {
         return $this->hasMany(RequestCallback::className(), ['request_id' => 'id']);
     }
+
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        if ($insert) {
+            if (!is_a(Yii::$app, 'yii\console\Application')) {
+                if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                    \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+                }
+            }
+        }
+    }
+
+    public function getFranchiseeAssociate() {
+        return $this->hasOne(FranchiseeAssociate::className(), ['rest_org_id' => 'organization_id']);
+    }
+
+    public function getRequestExportColumns() {
+        return [
+            [
+                'label' => 'Номер',
+                'value' => 'id',
+            ],
+            [
+                'label' => 'Продукт',
+                'value' => 'product',
+            ],
+            [
+                'label' => 'Количество',
+                'value' => 'amount',
+            ],
+            [
+                'label' => 'Комментарий',
+                'value' => 'comment',
+            ],
+            [
+                'label' => 'Категория',
+                'value' => 'categoryName.name',
+            ],
+            [
+                'attribute' => 'client.name',
+                'label' => 'Название ресторана',
+            ],
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+            ],
+            [
+                'value' => function($data) {
+                    return ($data['active_status']) ? 'Открыта' : 'Закрыта';
+                },
+                'label' => 'Статус',
+            ],
+        ];
+    }
+
 }

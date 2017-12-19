@@ -11,7 +11,7 @@ body {
 }
 
 .wrap > .container {
-    padding: 70px 15px 20px;
+    padding: 150px 15px 20px;
 }
 
 .footer {
@@ -100,12 +100,115 @@ a.desc:after {
     padding: 8px;
 }
 
-@media(max-width:768px) {
-	.nav li > form {
-	    padding: 3px;
-	}
+@media (max-width: 768px) {
+    .nav li > form {
+        padding: 3px;
+    }
 }
 
 .nav > li > form > button:hover {
     text-decoration: none;
+}
+
+.text-sm {
+    font-size: 12px;
+}
+
+.email-error {
+    max-width: 300px;
+    margin-top: 10px;
+}
+
+.panel_white_border_green {
+    border-radius: 3px;
+    background-color: #fff;
+    border-top: 3px solid #00a65a;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+}
+
+.panel_white_border_green .name_label {
+    font-family: Circe_Bold;
+    text-transform: uppercase;
+    font-size: 16px;
+    text-align: left;
+}
+
+.panel_white_border_green .name_title {
+    font-family: sans-serif;
+    font-size: 18px;
+    border-bottom: 1px dashed #000;
+    width: 100%;
+    text-align: left;
+    font-weight: 100;
+}
+
+.panel_white_border_green .body {
+    margin-top: 70px;
+    padding-left: 14px;
+    color: grey;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.panel_white_border_green .row_field {
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.panel_white_border_green .title {
+    font-weight: bold;
+}
+
+.order_comment_block {
+    height: auto;
+    border: 1px solid #DDDDDD;
+    float: left;
+    margin: 30px 0%;
+    border-radius: 100px;
+}
+
+.order_comment_block > div {
+    border-right: 1px solid #DDDDDD;
+    width: 55px;
+    float: left;
+    height: 50px;
+}
+
+.order_comment_block > div > img {
+    margin-left: 18px;
+    margin-top: 13px;
+}
+
+.order_comment_block > p {
+    margin-left: 10px;
+    padding-left: 60px;
+    padding-top: 13px;
+}
+
+.message_chat {
+    border: 1px solid grey;
+    padding: 6px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.message_chat .name {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.message_chat .text {
+    margin-left: 13px;
+    font-size: 12px;
+    color: brown;
+}
+
+.message_chat .system {
+    font-size: 14px;
+    color: #ff0000;
+}
+
+.message_chat .type {
+    color: #808080;
 }

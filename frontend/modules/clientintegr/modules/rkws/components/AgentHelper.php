@@ -19,8 +19,8 @@ use api\common\models\RkDic;
 
 class AgentHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/agent";
-    
+    // protected $callbackUrl = Yii::$app->params['rkeepCallBackURL']."/agent";
+        
     public function getAgents () {
     if (!$this->Authorizer()) {
        
@@ -29,10 +29,10 @@ class AgentHelper extends AuthHelper {
     }    
     
     $guid = UUID::uuid4();
-          
+    
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_corrs" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
-    <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
+    <RQ cmd="sh_get_corrs" tasktype="any_call" guid="'.$guid.'" timeout="600" callback="'.Yii::$app->params['rkeepCallBackURL'].'/agent'.'">
+    <PARAM name="object_id" val="'.$this->restr->code.'" />
     </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
@@ -85,6 +85,11 @@ class AgentHelper extends AuthHelper {
     $acc =0;    
         
     $getr = Yii::$app->request->getRawBody();
+    
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'()()()()()('.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'!'.print_r($getr,true).'!'.PHP_EOL,FILE_APPEND);
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'()()()()()('.PHP_EOL,FILE_APPEND); 
+    
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
@@ -118,8 +123,8 @@ class AgentHelper extends AuthHelper {
     }
     */
     
-    $cmdguid = strval($myXML['cmdguid']); 
-    $posid = strval($myXML['posid']); 
+    $cmdguid = strval($myXML['cmdguid']) ? strval($myXML['cmdguid']) : strval($myXML['taskguid']); 
+    $posid = strval($myXML['posid']) ? strval($myXML['posid']) : 1; 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         
@@ -222,8 +227,13 @@ class AgentHelper extends AuthHelper {
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
-        
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
+    
+    if (empty($er)) $er = 'пусто';     
+    if (empty($er3)) $er3 = 'пусто';
+    if (empty($er2)) $er2 = 'пусто';
+
+
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 

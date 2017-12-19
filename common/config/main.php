@@ -2,13 +2,27 @@
 
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
-    'sourceLanguage' => 'ru_ru',
+    'sourceLanguage' => 'ru-RU',
     'language' => 'ru',
     'timeZone' => 'Asia/Baghdad',
     'charset' => 'utf-8',
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
+        ],
+        'sms' => [
+            'class' => 'common\components\sms\Sms',
+            'provider' => 'common\components\sms\providers\Qtelecom',
+            'attributes' => [
+                'user' => '37251.4',
+                'pass' => '27816749',
+                'sender' => 'MixCart',
+                'hostname' => 'service.qtelecom.ru',
+                'on_ssl' => false,
+                'period' => false,
+                'post_id' => 'x1209448',
+                'path' => '/public/http/'
+            ]
         ],
         'user' => [
             'class' => 'amnah\yii2\user\components\User',
@@ -23,8 +37,8 @@ return [
         ],
         'resourceManager' => [
             'class' => 'dosamigos\resourcemanager\AmazonS3ResourceManager',
-            'key' => 'AKIAIQWR4FTPYC2CM6QQ',
-            'secret' => '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',
+            'key' => 'AKIAJZH26ZXTQSLVFT6A',
+            'secret' => '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',
             'bucket' => 'fkeeper',
         ],
         'i18n' => [
@@ -41,11 +55,12 @@ return [
             'viewPath' => '@common/mail',
             'class' => 'common\components\Mailer',
             'useFileTransport' => false,
-            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
-            'secret_key' => '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',
+            'access_key' => 'AKIAIMZCOXBPC5GJY4MA',
+            'secret_key' => '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',
             'host' => 'email.eu-west-1.amazonaws.com',
             'messageConfig' => [
-                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+//                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                'from' => ['noreply@mixcart.ru' => 'noreply@mixcart.ru'],
                 'charset' => 'UTF-8',
             ],
         ],
@@ -56,14 +71,6 @@ return [
             // Use pretty URLs
             'enablePrettyUrl' => true,
             'rules' => [
-                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
-                '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
-                '<controller:\w+>/<id:\d+>' => '<controller>/view',
-                '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
-                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
-            ],
-            //'enableStrictParsing' => true,
-            'rules' => [
                 '/' => 'site/index',
                 'client' => 'client/index',
                 'vendor' => 'vendor/index',
@@ -73,12 +80,62 @@ return [
                 'supplier' => 'site/supplier',
                 'restaurant' => 'site/restaurant',
                 'login' => 'user/login',
+                'business' => 'user/default/business',
+                'logout' => 'user/logout',
+                'register' => 'user/register',
+                'forgot' => 'user/forgot',
+                'resend' => 'user/resend',
+                'reset' => 'user/reset',
+                'payment' => 'site/payment',
+                'orders' => 'order/index',
+                'product/<id:\d+>' => 'site/product',
+                'restaurant/<id:\d+>' => 'site/restaurant',
+                'supplier/<id:\d+>' => 'site/supplier',
+                'category/<slug:[a-z0-9_-]+>' => 'site/category',
+                '<controller:\w+>/<id:\d+>' => '<controller>/view',
+                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>/<id:\d+>' => '<controller>/<action>',
+                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>' => '<controller>/<action>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
+            ],
+        ],
+        'urlManagerFrontend' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//mixcart.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'product/<id:\d+>' => 'site/product',
+                'restaurant/<id:\d+>' => 'site/restaurant',
+                'supplier/<id:\d+>' => 'site/supplier',
+                'category/<slug:[a-z0-9_-]+>' => 'site/category',
+                '<controller:\w+>/<id:\d+>' => '<controller>/view',
+                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>/<id:\d+>' => '<controller>/<action>',
+                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>' => '<controller>/<action>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
+                '/' => 'site/index',
+                'client' => 'client/index',
+                'vendor' => 'vendor/index',
+                'about' => 'site/about',
+                'faq' => 'site/faq',
+                'contacts' => 'site/contacts',
+                'supplier' => 'site/supplier',
+                'restaurant' => 'site/restaurant',
+                'login' => 'user/login',
+                'business' => 'user/default/business',
                 'logout' => 'user/logout',
                 'register' => 'user/register',
                 'forgot' => 'user/forgot',
                 'resend' => 'user/resend',
                 'reset' => 'user/reset',
             ],
+        ],
+        'urlManagerFranchise' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//partner.mixcart.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
         ],
         'assetManager' => [
             'bundles' => [
@@ -93,9 +150,13 @@ return [
         ],
         //Google firebase cloud messaging
         'fcm' => [
-        'class' => 'understeam\fcm\Client',
-        'apiKey' => 'AAAADvq3Ss8:APA91bFB5zGZpz01LtWYpMS5wwMDSjnmlv4bWYLJgJHBmQauzW24bHDG__ECgMGElVZqFV_I2MTPG2aCsV7HXshwq4yjupX1xGbuShGAyxtf7fIiepmHhFkLpxfkA4cKcCEufA3H7_Bb', // Server API Key (you can get it here: https://firebase.google.com/docs/server/setup#prerequisites) 
-    ],
+            'class' => 'understeam\fcm\Client',
+            'apiKey' => 'AAAADvq3Ss8:APA91bFB5zGZpz01LtWYpMS5wwMDSjnmlv4bWYLJgJHBmQauzW24bHDG__ECgMGElVZqFV_I2MTPG2aCsV7HXshwq4yjupX1xGbuShGAyxtf7fIiepmHhFkLpxfkA4cKcCEufA3H7_Bb', // Server API Key (you can get it here: https://firebase.google.com/docs/server/setup#prerequisites)
+        ],
+        'google' => [
+            'class' => 'common\components\GoogleShortUrl',
+            'apiKey' => 'AIzaSyBBFwzatN-rVz6kESUAziVngA-T3_0W6Pk',
+        ],
     ],
     'modules' => [
         'user' => [
@@ -128,10 +189,10 @@ return [
             'layout' => '@frontend/views/layouts/main-vendor.php',
         ],
         'treemanager' =>  [
-        'class' => '\kartik\tree\Module',
-        // enter other module properties if needed
-        // for advanced/personalized configuration
-        // (refer module properties available below)
-    ]
+            'class' => '\kartik\tree\Module',
+            // enter other module properties if needed
+            // for advanced/personalized configuration
+            // (refer module properties available below)
+        ]
     ],
 ];

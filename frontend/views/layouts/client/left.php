@@ -3,8 +3,16 @@
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use api\common\models\RkService;
 
 $user = Yii::$app->user->identity;
+
+$roles = [
+    \common\models\Role::ROLE_RESTAURANT_MANAGER,
+    \common\models\Role::ROLE_FKEEPER_MANAGER,
+    \common\models\Role::ROLE_ADMIN,
+    \common\models\Role::getFranchiseeEditorRoles(),
+];
 
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
 if ($franchiseeManager && $franchiseeManager->phone_manager) {
@@ -22,6 +30,14 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
+
+$resArr = [];
+
+$arrService = RkService::find()->select('org')->asArray()->all();
+foreach ($arrService as $key => $val) {
+    $resArr[] = $val['org'];
+}
+
 ?>
 
 <aside class="main-sidebar">
@@ -30,7 +46,7 @@ $cartCount = $user->organization->getCartCount();
         <?=
         dmstr\widgets\Menu::widget(
                 [
-                    'options' => ['class' => 'sidebar-menu'],
+                    'options' => ['class' => 'sidebar-menu tree', 'data-widget' => "tree"],
                     'encodeLabels' => false,
                     'items' => [
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
@@ -53,22 +69,48 @@ $cartCount = $user->organization->getCartCount();
 //                            'icon' => 'envelope', 
 //                            'url' => ['client/messages'],
 //                            ],
-                        ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'https://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => 'https://market.mixcart.ru', 'options' => ['class' => 'l-fmarket']],
                         ['label' => 'Заявки', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs']],
-                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
+//                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
-                        ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
+                     //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [
                             'label' => 'Настройки',
                             'icon' => 'gears',
                             'url' => '#', //['client/settings'],
-                            'options' => ['class' => "treeview hidden-xs"],
+                            'options' => ['class' => "hidden-xs"],
                             'items' => [
-                                ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
-                                //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']],
-                                ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
-                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+                                [
+                                    'label' => 'Общие',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/client/settings'],
+                                    'visible' => in_array($user->role_id,$roles)
+                                ],
+                                [
+                                    'label' => 'Интеграции',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/clientintegr/default'],
+                                    'visible' => (in_array($user->organization_id,$resArr))
+                                ],
+                                [
+                                    'label' => 'Сотрудники',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/client/employees'],
+                                    'visible' => in_array($user->role_id,$roles)
+                                ],
+                                [
+                                    'label' => 'Уведомления',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/settings/notifications'],
+                                    'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))
+                                ],
+                                [
+                                    'label' => 'Платежи',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/client/payments'],
+                                    'visible' => in_array($user->role_id,$roles)
+                                ],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
@@ -87,6 +129,7 @@ $cartCount = $user->organization->getCartCount();
                 </span>
             </div>
         </form>
+        
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;padding-top:10px">
@@ -96,7 +139,7 @@ $cartCount = $user->organization->getCartCount();
                     </a>
                 </p>
             </div>
-        </ul>
+        </ul>     
     </section>
 </aside>
 <?php

@@ -58,7 +58,7 @@ class DefaultController extends \frontend\controllers\DefaultController {
                     $this->layout = '@frontend/views/layouts/main-client.php';
                     break;
                 case Organization::TYPE_SUPPLIER:
-                    $this->layout = 'main-vendor';
+                    $this->layout = '@frontend/views/layouts/main-vendor.php';
                     break;
             }
     }

@@ -60,7 +60,7 @@ $currencySymbol = $order->currency->iso_code;
                             <td style="font-size: 14px;"><b>Поставщик</b></td>
                         </tr>
                         <tr>
-                            <td><b><?= $order->vendor->name ?> <?= ($order->vendor->legal_entity ? "({$order->vendor->legal_entity})" : '') ?></b></td>
+                            <td><b><?= $order->vendor->name ?> <?= ($order->vendor->legal_entity ? "(" . $order->vendor->legal_entity . ")" : '') ?></b></td>
                         </tr>
                         <tr>
                             <td>

@@ -124,7 +124,7 @@ $this->registerJs('
             </li>
             <li class="active">
                 <a href="#">
-                    <?= Yii::t('app', 'frontend.views.order.favorites.freq', ['ru'=>'Часто заказываемые товар']) ?>ы <small class="label bg-yellow">new</small>
+                    <?= Yii::t('app', 'frontend.views.order.favorites.freq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -192,7 +192,7 @@ $this->registerJs('
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
+                            return $data["price"] . ' ' . $data["symbol"] . '/' . Yii::t('app', $data["ed"]);
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],

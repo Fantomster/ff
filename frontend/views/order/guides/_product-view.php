@@ -8,7 +8,7 @@ use yii\helpers\Url;
         <p><?= $model["product"] ?></p>
     </div>	
     <div class="guid_block_create_counts">
-        <p><?= Yii::t('message', 'frontend.views.order.guides.measure', ['ru'=>'Ед. измерения:']) ?> <span><?= $model["ed"] ?></span></p>
+        <p><?= Yii::t('message', 'frontend.views.order.guides.measure', ['ru'=>'Ед. измерения:']) ?> <span><?= Yii::t('app', $model["ed"]) ?></span></p>
     </div>     
 </td>
 <td>

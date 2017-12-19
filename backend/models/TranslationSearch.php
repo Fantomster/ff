@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use common\models\Message;
 use common\models\SourceMessage;
 use Yii;
 use yii\base\Model;
@@ -18,6 +19,7 @@ class TranslationSearch extends SourceMessage {
 
     public $category;
     public $message;
+    public $translation;
 
 
     /**
@@ -33,7 +35,7 @@ class TranslationSearch extends SourceMessage {
     public function rules() {
         return [
             [['id'], 'integer'],
-            [['message', 'category'], 'safe'],
+            [['message', 'category', 'translation'], 'safe'],
         ];
     }
 
@@ -54,8 +56,10 @@ class TranslationSearch extends SourceMessage {
      */
     public function search($params) {
         $sourceMessageTable = SourceMessage::tableName();
+        $messageTable = Message::tableName();
 
         $query = SourceMessage::find();
+        $query->joinWith(['messages']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -77,10 +81,9 @@ class TranslationSearch extends SourceMessage {
         ];
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'message' => $this->message,
-        ]);
-
+        $query->andFilterWhere(['like', 'message', $this->message])
+            ->andFilterWhere(['like', 'category', $this->category])
+            ->andFilterWhere(['like', "$messageTable.translation", $this->translation]);
 
         return $dataProvider;
     }

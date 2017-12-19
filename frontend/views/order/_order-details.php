@@ -31,7 +31,7 @@ use kartik\widgets\TouchSpin;
                     <div class="col-md-12">
                         <hr>
                         <h3>
-                        <?= $price ?> <?= $currencySymbol ?> <?= Yii::t('message', 'frontend.views.order.for_one', ['ru'=>'за 1']) ?> <?= $baseProduct->ed ?>
+                        <?= $price ?> <?= $currencySymbol ?> <?= Yii::t('message', 'frontend.views.order.for_one', ['ru'=>'за 1']) ?> <?= Yii::t('app', $baseProduct->ed) ?>
                         </h3>
                     </div>
                 </div>
@@ -50,7 +50,7 @@ use kartik\widgets\TouchSpin;
                         </small><br>
                         <small><?= Yii::t('message', 'frontend.views.order.measure', ['ru'=>'Единица измерения:']) ?>
                             <b>
-                            <?= $baseProduct->ed ?>
+                            <?= Yii::t('app', $baseProduct->ed) ?>
                             </b>
                         </small><br>
                         <small><?= Yii::t('message', 'frontend.views.order.weight', ['ru'=>'Вес:']) ?>

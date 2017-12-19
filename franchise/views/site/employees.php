@@ -156,7 +156,7 @@ $this->registerCss("
                             'filter' => $user::statusDropdown(),
                             'value' => function($model, $index, $dataColumn) use ($user) {
                                 $statusDropdown = $user::statusDropdown();
-                                return $statusDropdown[$model->status];
+                                return Yii::t('app', $statusDropdown[$model->status]);
                             },
                         ],
                     ],

@@ -53,18 +53,18 @@ return [
                 'kvexport' => [
                     'class' => 'yii\i18n\PhpMessageSource'
                 ],
-                'user' => [
-                    'class' => 'yii\i18n\PhpMessageSource'
-                ],
-                'backend' => [
-                    'class' => 'yii\i18n\PhpMessageSource'
-                ],
-                'prequest' => [
-                    'class' => 'yii\i18n\PhpMessageSource'
-                ],
-                'yii' => [
-                    'class' => 'yii\i18n\PhpMessageSource'
-                ],
+//                'user' => [
+//                    'class' => 'yii\i18n\PhpMessageSource'
+//                ],
+//                'backend' => [
+//                    'class' => 'yii\i18n\PhpMessageSource'
+//                ],
+//                'prequest' => [
+//                    'class' => 'yii\i18n\PhpMessageSource'
+//                ],
+//                'yii' => [
+//                    'class' => 'yii\i18n\PhpMessageSource'
+//                ],
                 'app' => [
                     'class' => 'yii\i18n\DbMessageSource'
                 ],
@@ -79,10 +79,10 @@ return [
                 ],
             ],
         ],
-        'formatter' => [
-            'class' => 'yii\i18n\Formatter',
-            'nullDisplay' => Yii::t('app', 'common.config.main.empty', ['ru'=>'пусто']),
-        ],
+//        'formatter' => [
+//            'class' => 'yii\i18n\Formatter',
+//            'nullDisplay' => Yii::t('app', 'common.config.main.empty', ['ru'=>'пусто']),
+//        ],
         'mailer' => [
             'viewPath' => '@common/mail',
             'class' => 'common\components\Mailer',

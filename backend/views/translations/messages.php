@@ -12,6 +12,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 \common\assets\SweetAlertAsset::register($this);
 
+$this->registerCss("
+    .grid-view td{white-space: normal;}
+        ");
 ?>
     <p>
         <?= Html::a('Создать перевод', ['create'], ['class' => 'btn btn-success']) ?>
@@ -29,10 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Переменная',
                 'format' => 'raw',
                 'value' => 'message',
-                'headerOptions' => ['style' => 'width:40px'],
+                'headerOptions' => ['style' => 'width:300px'],
             ],
             [
-                'header' => 'Шаблон',
+                'header' => 'Перевод',
+                'attribute' => 'translation',
                 'format' => 'raw',
                 'value' => function($data){
                     $message = '<table class="table table-bordered table-hover" style="margin-bottom: 0px;">';
@@ -63,7 +67,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'category',
-                'label' => 'Категория'
+                'label' => 'Категория',
+                'headerOptions' => ['style' => 'width:100px'],
             ],
         ],
     ]); ?>

@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         $message .= '<td width="36" >';
                         $message .= \common\widgets\LangSwitch::getFlag($m->language);
                         $message .= '</td>';
-                        $message .= '<td class="translation" >';
+                        $message .= '<td class="translation" style="white-space: normal">';
                         $message .= (!empty($m->translation) ? $m->translation : Html::tag('span','Пусто...', ['style' => 'color:grey']));
                         $message .= '</td>';
                         $message .= '<td width="36" >';

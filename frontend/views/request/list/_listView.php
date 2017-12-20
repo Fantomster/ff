@@ -16,7 +16,7 @@ use yii\helpers\Url;
           <span class="btn btn-danger btn-sm" style="font-size: 11px;padding: 0px 4px;margin-right:5px"><?= Yii::t('message', 'frontend.views.request.closed_two', ['ru'=>'Закрыта']) ?></span>
           <?php }?>
           <span class="req-cat"><?= Yii::t('message', 'frontend.views.request.category_three', ['ru'=>'Категория:']) ?></span>
-          <span class="req-cat-name"> <b><?=Yii::t('app', $model->categoryName->name) ?></b></span>
+          <span class="req-cat-name"> <b><?= isset($model->categoryName) ? Yii::t('app', $model->categoryName->name) : '' ?></b></span>
           <span class="req-nal-besnal"><i class="fa fa-money" aria-hidden="true"></i> 
               <b>
               <?=$model->paymentMethodName ?>

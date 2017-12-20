@@ -291,34 +291,27 @@ Handsontable.Dom.addEvent(save, 'click', function() {
         }    
     });
     $('#save').button("loading");
-    $.ajax({
-          url: "$step3CopyUrl",
-          type: 'POST',
-          dataType: "json",
-          data: $.param({'catalog':JSON.stringify(data)}),
-          cache: false,
-          success: function (response) {
-              if(response.success){ 
-                var url = "$step4Url";
-                $(location).attr("href",url);
-              }else{
-                $('#save').button("reset");
-                bootbox.dialog({
-                    message: response.alert.body,
-                    title: response.alert.title,
-                    buttons: {
-                        success: {
-                          label: "$var9",
-                          className: "btn-success btn-md",
-                        },
+    $.post(
+        "$step3CopyUrl",
+        {catalog: JSON.stringify(data)},
+    ).done(function(response) {
+        if(response.success) { 
+            var url = "$step4Url";
+            $(location).attr("href",url);
+        } else {
+            $('#save').button("reset");
+            bootbox.dialog({
+                message: response.alert.body,
+                title: response.alert.title,
+                buttons: {
+                    success: {
+                        label: "$var9",
+                        className: "btn-success btn-md",
                     },
-                    className: response.alert.class
-                });
-              }
-          },
-          error: function(response) {
-          console.log(response.message);
-          }
+                },
+                className: response.alert.class
+            });               
+        }
     });
 });
 $('#save').click(function(e){	

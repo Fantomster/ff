@@ -1150,7 +1150,7 @@ class OrderController extends DefaultController {
                         $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
-                    $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru'=>"<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id'=>$order->id]) . $position['price'] . $currencySymbol;
+                    $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru'=>"<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id'=>$order->id]) . $discountValue;
                     $orderChanged = 1;
                 }
             } else {

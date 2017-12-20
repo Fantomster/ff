@@ -1544,7 +1544,7 @@ class VendorController extends DefaultController {
         if (empty($model)) {
             throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_four', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (Yii::$app->request->isAjax) {
+        if (Yii::$app->request->isPost) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);

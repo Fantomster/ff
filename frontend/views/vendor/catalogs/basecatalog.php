@@ -177,7 +177,7 @@ Modal::end();
                             </span>
                             <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_five', ['ru'=>'Поиск']), 'id' => 'search']) ?>
                         </div>
-                    </div>   
+                    </div>
                     <?=
                     Modal::widget([
                         'id' => 'add-product',
@@ -262,13 +262,13 @@ Modal::end();
                         ],
                     ])
                     ?>
-                    <?= 
-                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru'=>'Изменить валюту:']) . '  </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
+                    <?=
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru'=>'Изменить валюту:']) . ' </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>'.
                         '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeCurrency',
-                    ]])
+                    ])
                     ?>
 
                 </div>
@@ -429,15 +429,15 @@ Modal::end();
                                     'lastPageLabel' => true,
                                 ],
                             ]);
-                            ?> 
+                            ?>
                         </div>
-                    </div>      
+                    </div>
 
 
-                </div>       
+                </div>
 
             </div>
-            <div id="tabClients" class="tab-pane fade"> 	    
+            <div id="tabClients" class="tab-pane fade">
                 <?php
                 $gridColumnsCatalog = [
                     [
@@ -502,7 +502,7 @@ Modal::end();
                         ?>
                         <?php Pjax::end(); ?>
                     </div>
-                </div>              
+                </div>
             </div>
         </div>
     </div>

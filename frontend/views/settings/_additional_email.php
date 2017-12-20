@@ -136,7 +136,7 @@ addEmail= function () {
             $.pjax.reload('#emails-pjax-container');
           })
           .fail(function(xhr, status, error) {
-            reject(error);
+            reject('oops!');
           });
         })
       },

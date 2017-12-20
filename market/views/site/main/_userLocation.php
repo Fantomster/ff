@@ -32,7 +32,7 @@ yii\web\View::POS_READY);
                 <?php
                 $form = ActiveForm::begin([
                             'id' => 'user-location',
-                            'action' => Url::to('/site/location-user'),
+                            'action' => Url::to(['/site/location-user']),
                 ]);
                 ?>
                   <?php if (Yii::$app->session->hasFlash('warning')): ?>

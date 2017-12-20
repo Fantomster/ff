@@ -93,7 +93,7 @@ class SiteController extends Controller {
             $cookies->add(new \yii\web\Cookie(['name' => 'region','value' => $region,]));
             $cookies->add(new \yii\web\Cookie(['name' => 'country','value' => $country,])); 
         }
-        return $this->redirect([$currentUrl]);
+        return $this->redirect($currentUrl);
     }
     public function actionClearSession() {
         var_dump(Yii::$app->request->cookies->get('locality'));

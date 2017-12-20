@@ -110,7 +110,7 @@ if (false) {
     ?>
     <?= Html::a(
         '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.downl_templ_two', ['ru'=>'Скачать шаблон']) . ' ',
-        Url::to(['@web/upload/template.xlsx']),
+        Url::to('@web/upload/template.xlsx'),
         ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px;']]
     ) ?>
     <?= ''

@@ -124,6 +124,9 @@ addEmail= function () {
     swal({
       title: '" . Yii::t('message', 'frontend.views.settings.insert_email', ['ru'=>'Введите email']) . "',
       input: 'email',
+              inputValidator: (value) => {
+            return !value && '" . Yii::t('app', 'Неправильный формат email') . "'
+        },
       showCancelButton: true,
       confirmButtonText: '" . Yii::t('message', 'frontend.views.settings.save_three', ['ru'=>'Сохранить']) . "',
       cancelButtonText: '" . Yii::t('message', 'frontend.views.settings.cancel', ['ru'=>'Отменить']) . "',
@@ -136,7 +139,7 @@ addEmail= function () {
             $.pjax.reload('#emails-pjax-container');
           })
           .fail(function(xhr, status, error) {
-            reject('oops!');
+            reject(error);
           });
         })
       },

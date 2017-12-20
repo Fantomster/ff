@@ -283,7 +283,7 @@ $this->registerCss("
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
+                                    return ($data["orderSum"] ? $data["orderSum"] : 0) .  Yii::t('app',' руб.') . " <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => Yii::t('app', 'franchise.views.organization.orders_sum_three', ['ru'=>'Сумма заказов']),
                             ],

@@ -182,7 +182,7 @@ if (!Yii::$app->user->isGuest) {
         }).then(function (result) {
             if (result.value.success) {
                 swal({title: "$arr[4]", type: "success"});
-            } else if (result.dismiss === "cancel") {
+            } else if (result.value.dismiss === "cancel") {
                 swal.close();
             } else {
                 swal({title: "$arr[5]", text: "$arr[6]", type: "error"});

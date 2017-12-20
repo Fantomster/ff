@@ -175,7 +175,7 @@ class SiteController extends Controller {
     public function actionAjaxCompleteRegistration() {
         $user = Yii::$app->user->identity;
         $profile = new Profile();
-        //$profile = $user->profile;
+        $profile = $user->profile;
         $profile->scenario = "complete";
         $organization = $user->organization;
         $organization->scenario = "complete";

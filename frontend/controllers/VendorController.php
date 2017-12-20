@@ -2158,8 +2158,9 @@ class VendorController extends DefaultController {
             return ['result' => 'error', 'message' => Yii::t('error', 'frontend.controllers.vendor.cat_not_found', ['ru'=>'Каталог не найден!'])];
         }
 
-        $oldCurrencyUnits = Yii::$app->request->post('oldCurrencyUnits') + 0.0;
-        $newCurrencyUnits = Yii::$app->request->post('newCurrencyUnits') + 0.0;
+        
+        $oldCurrencyUnits = floatval(str_replace(',', '.', Yii::$app->request->post('oldCurrencyUnits')));
+        $newCurrencyUnits = floatval(str_replace(',','.', Yii::$app->request->post('newCurrencyUnits')));
         if (($oldCurrencyUnits <= 0) || ($newCurrencyUnits <= 0)) {
             return ['result' => 'error', 'message' => Yii::t('error', 'frontend.controllers.vendor.wrong_curr', ['ru'=>'Некорректный курс!'])];
         }

@@ -378,7 +378,7 @@ class VendorController extends DefaultController {
 
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-            $arrEd = \yii\helpers\ArrayHelper::getColumn(\common\models\MpEd::find()->all(), 'name');
+            $arrEd = \common\models\MpEd::dropdown();
             //$articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -411,11 +411,11 @@ class VendorController extends DefaultController {
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_seven', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_price', ['ru'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_seven', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_price', ['ru'=>'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
                     return $result;
                 }
                 if (!empty($units) && !preg_match($numberPattern, $units)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_eight', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_number', ['ru'=>'Не верный формат <strong>Кратность</strong><br><small>только число</small>'])]];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_eight', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_number', ['ru'=>'Неверный формат <strong>Кратность</strong><br><small>только число</small>'])]];
                     return $result;
                 }
             }

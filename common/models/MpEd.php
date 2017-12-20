@@ -42,4 +42,9 @@ class MpEd extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function dropdown() {
+        $list = \yii\helpers\ArrayHelper::getColumn(self::find()->all(), 'name');
+        $list = array_map(function($item) { return Yii::t('app', $item); }, $list);
+        return $list;
+    }
 }

@@ -14,7 +14,7 @@ $catalog->isNewRecord ? $this->title = Yii::t('message', 'frontend.views.vendor.
 ?>
 <section class="content-header">
         <h1 class="margin-right-350">
-            <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
+            <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord?
             Yii::t('message', 'frontend.views.vendor.create_cat_two', ['ru'=>'Создание нового каталога']) :
             Yii::t('message', 'frontend.views.vendor.edit_cat_two', ['ru'=>'Редактирование каталога']) . '  <small>'.common\models\Catalog::get_value($cat_id)->name.'</small>' ?>
         </h1>
@@ -29,7 +29,7 @@ $catalog->isNewRecord ? $this->title = Yii::t('message', 'frontend.views.vendor.
                 'label' => Yii::t('message', 'frontend.views.vendor.catalogs_five', ['ru'=>'Каталоги']),
                 'url' => ['vendor/catalogs'],
                 ],
-                $catalog->isNewRecord? 
+                $catalog->isNewRecord?
             Yii::t('message', 'frontend.views.vendor.step_one', ['ru'=>'Шаг 1. Создание нового каталога']) :
             Yii::t('message', 'frontend.views.vendor.step_edit', ['ru'=>'Шаг 1. Редактирование каталога']),
             ],
@@ -58,13 +58,13 @@ $catalog->isNewRecord ? $this->title = Yii::t('message', 'frontend.views.vendor.
                     '<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_three', ['ru'=>'Назначить ресторану']),['vendor/step-4','id'=>$cat_id]).'</li>'
                     ?>
                 </ul>
-        
-            
+
+
                 <ul class="fk-prev-next pull-right">
                   <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
         </div>
-        <?php Pjax::begin(['id' => 'pjax-container'])?>  
+        <?php Pjax::begin(['id' => 'pjax-container'])?>
         <?php $form = ActiveForm::begin([
             'id' => 'newCatalogForm'
             ]);
@@ -79,7 +79,7 @@ $catalog->isNewRecord ? $this->title = Yii::t('message', 'frontend.views.vendor.
         <?php $form = ActiveForm::end();?>
         <?php Pjax::end(); ?>
     </div>
-</div> 
+</div>
 </section>
 <?php
 if($catalog->isNewRecord){$router = Url::to(['vendor/step-1']);}else{$router = Url::to(['vendor/step-1-update', 'id' => $cat_id]);}

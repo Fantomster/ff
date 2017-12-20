@@ -120,7 +120,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
         'options' => [
             'class' => 'alert-warning fade in',
         ],
-        'body' => Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '])
+        'body' => Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее'])
         . '<a class="btn btn-default btn-sm" href="#">' . Yii::t('message', 'frontend.views.vendor.do_it', ['ru'=>'Сделаем это!']) . ' </a>',
     ]);
 }

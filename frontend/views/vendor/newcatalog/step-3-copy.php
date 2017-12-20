@@ -43,13 +43,6 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
     ?>
 </section>
 <section class="content">
-    <?php if (Yii::$app->session->hasFlash('success')): ?>
-        <div class="alert alert-danger alert-dismissable">
-            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-            <h4><i class="icon fa fa-check"></i>Ошибка</h4>
-            <?= Yii::$app->session->getFlash('success') ?>
-        </div>
-    <?php endif; ?>
     <div class="box box-info">
         <!-- /.box-header -->
         <div class="box-body">
@@ -156,8 +149,6 @@ $var14 = Yii::t('message', 'frontend.views.vendor.var14', ['ru'=>'Валюта �
 $var15 = Yii::t('message', 'frontend.views.vendor.var15', ['ru'=>'Пересчитать цены в каталоге?']);
 $var16 = Yii::t('message', 'frontend.views.vendor.var16', ['ru'=>'Цены успешно изменены!']);
 
-$language = Yii::$app->sourceLanguage;
-
 $customJs = <<< JS
 /** 
  * Forward port jQuery.live()
@@ -201,24 +192,24 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
         data: 'base_price', 
         type: 'numeric',
         format: '0.00',
-        language: '$language',
+        language: 'ru-RU',
         readOnly: true
     },
     {
         data: 'price', 
         type: 'numeric',
         format: '0.00',
-        language: '$language'
+        language: 'ru-RU'
     },
     {data: 'ed',readOnly: true}, 
     {
         data: 'discount',
         type: 'numeric',
         format: '0.00',
-        language: '$language'
+        language: 'ru-RU'
     },
     {data: 'discount_percent', type: 'numeric',format: '0',},
-    {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: '$language'},
+    {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: 'ru-RU'},
   ],
   className : 'Handsontable_table',
   rowHeaders : true,

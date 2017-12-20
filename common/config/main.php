@@ -2,9 +2,9 @@
 
 //Если домен .ru то язык русский, в остальных случаях en
 if (strstr($_SERVER['HTTP_HOST'], '.ru')) {
-    $lang = ['ru_ru', 'ru'];
+    $lang = ['ru-RU', 'ru'];
 } else {
-    $lang = ['en_en', 'en'];
+    $lang = ['en-US', 'en'];
 }
 
 return [

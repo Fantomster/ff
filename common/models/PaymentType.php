@@ -59,7 +59,7 @@ class PaymentType extends \yii\db\ActiveRecord
         $title = \Yii::t('app', 'app.models.PaymentType.type_payment');
 
         if($title == 'app.models.PaymentType.type_payment'){
-            $title = 'Тип платежа';
+            $title = Yii::t('app', 'Тип платежа');
         }
 
         return [

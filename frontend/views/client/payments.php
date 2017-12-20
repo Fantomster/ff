@@ -9,6 +9,9 @@ $listTitle = Yii::t('app', 'Список платежей');
 $this->params['breadcrumbs'][] = $this->title;
 
 $types = \yii\helpers\ArrayHelper::map(\common\models\PaymentType::find()->asArray()->all(), 'type_id', 'title');
+foreach ($types as &$type){
+    $type = Yii::t('app', $type);
+}
 $types[0] = '---';
 ksort($types);
 ?>

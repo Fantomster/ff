@@ -170,9 +170,9 @@ swal({
   }
 }).then(function (result){
     if (result.value.success === true) {
-        swal("' . Yii::t('message', 'Готово!') . ' ",eNames["end"],"success");
+        swal("' . Yii::t('app', 'Готово!') . ' ",eNames["end"],"success");
     } else {
-        swal("' . Yii::t('message', 'Ошибка!') . ' ",result.value.error,"error");
+        swal("' . Yii::t('app', 'Ошибка!') . ' ",result.value.error,"error");
     }
 });
 });

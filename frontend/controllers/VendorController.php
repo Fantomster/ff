@@ -1124,6 +1124,9 @@ class VendorController extends DefaultController {
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        foreach ($countrys as &$country){
+            $country['name'] = Yii::t('app', $country['name']);
+        }
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -1215,6 +1218,9 @@ class VendorController extends DefaultController {
             andWhere(['parent' => $id])->
             asArray()->
             all();
+            foreach ($list as &$item){
+                $item['name'] = Yii::t('app', $item['name']);
+            }
             $selected = null;
             if ($id != null && count($list) > 0) {
                 $selected = '';

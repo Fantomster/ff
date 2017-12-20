@@ -220,7 +220,7 @@ $(document).ready(
     $(document).on("click", ".delete", function(e){
     e.preventDefault()
     var url = $(this).attr("data-url");
-    var r = confirm("Подтвердите удаление! ");
+    var r = confirm("' . Yii::t('message', 'Подтвердите удаление!') . ' ");
     if (r == true) {
         $.ajax({
                 url: url,

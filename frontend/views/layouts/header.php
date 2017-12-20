@@ -180,7 +180,7 @@ if (!Yii::$app->user->isGuest) {
                 })
             },
         }).then(function (result) {
-            if (result.success) {
+            if (result.value.success) {
                 swal({title: "$arr[4]", type: "success"});
             } else if (result.dismiss === "cancel") {
                 swal.close();

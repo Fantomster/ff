@@ -1006,6 +1006,7 @@ class ClientController extends DefaultController {
                     'class' => 'danger-fk',
                     'title' => 'УПС! Ошибка',
                     'body' => 'Каталог пустой']];
+            Yii::$app->response->format = Response::FORMAT_JSON;
             return $result;
         }
 

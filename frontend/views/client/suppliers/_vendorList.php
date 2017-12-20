@@ -31,7 +31,7 @@ use yii\helpers\Html;
     </div>
     <div class="block_wrap_d">
         <?php
-        if ($model->vendor->hasActiveUsers()) {
+        if ($model->vendor->hasActiveUsers() && ($model->cat_id > 0)) {
             echo Html::a('<img src="/img/redact_icon.png" alt="">' . Yii::t('message', 'frontend.views.client.supp.watch', ['ru'=>'Просмотреть продукты']) , ['client/view-catalog', 'id' => $model->cat_id], [
                 'class' => 'redact',
                 'style' => 'text-center',
@@ -42,7 +42,7 @@ use yii\helpers\Html;
                     'backdrop' => 'static',
                 ],
             ]);
-        } else {
+        } elseif ($model->cat_id > 0) {
             echo Html::a('<img src="/img/redact_icon.png" alt="">' . Yii::t('message', 'frontend.views.client.supp.edit_two', ['ru'=>'Редактировать продукты']), ['client/edit-catalog', 'id' => $model->cat_id], [
                 'class' => 'redact',
                 'style' => 'text-center',
@@ -52,6 +52,8 @@ use yii\helpers\Html;
                     'toggle' => 'modal',
                     'backdrop' => 'static',]
             ]);
+        } else {
+//            echo "<span ";
         }
         ?>
         <?=

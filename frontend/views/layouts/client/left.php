@@ -106,7 +106,7 @@ foreach ($arrService as $key => $val) {
                                     'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))
                                 ],
                                 [
-                                    'label' => 'Платежи',
+                                    'label' => Yii::t('app', 'Платежи'),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/payments'],
                                     'visible' => in_array($user->role_id,$roles)

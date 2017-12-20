@@ -108,7 +108,7 @@ $this->registerJs(
             'id' => 'add-user',
             'clientOptions' => false,
             'toggleButton' => [
-                'label' => '<i class="icon fa fa-user-plus"></i>  ' . Yii::t('message', 'frontend.views.vendor.', ['ru'=>'Добавить сотрудника']) . ' ',
+                'label' => '<i class="icon fa fa-user-plus"></i>  ' . Yii::t('app', 'frontend.views.vendor.add_employee', ['ru'=>'Добавить сотрудника']) . ' ',
                 'tag' => 'a',
                 'data-target' => '#add-user',
                 'class' => 'btn btn-success pull-right',

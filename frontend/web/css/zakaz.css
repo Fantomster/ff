@@ -343,9 +343,6 @@
     .table{
         overflow-x: scroll;
     }
-    td{
-        min-width: 200px !important;
-    }
     .small_cell_id {
         max-width: 140px;  
         min-width: 10px !important;

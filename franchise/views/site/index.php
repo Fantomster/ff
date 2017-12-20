@@ -117,7 +117,7 @@ use dosamigos\chartjs\ChartJs;
                 <div class="box-header with-border">
                     <h3 class="box-title"><?= Yii::t('app', 'franchise.views.site.stat', ['ru'=>'Статистика']) ?></h3>
                     <div class="box-tools pull-right">
-                        <a class="btn btn-success btn-sm" href="<?= Url::to(['client/suppliers']) ?>"><?= Yii::t('app', 'franchise.views.site.fin_anal', ['ru'=>'Финансовая аналитика']) ?></a>          </div>
+                        <a class="btn btn-success btn-sm" href="<?= Url::to(['finance/index']) ?>"><?= Yii::t('app', 'franchise.views.site.fin_anal', ['ru'=>'Финансовая аналитика']) ?></a>          </div>
                 </div>
 
                 <div class="box-body">

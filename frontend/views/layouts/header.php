@@ -13,7 +13,7 @@ if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
     $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
-    $cartUrl = Url::to('/order/pjax-cart');
+    $cartUrl = Url::to(['/order/pjax-cart']);
     $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
     //Yii::$app->urlManager->baseUrl;
     $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
@@ -22,6 +22,7 @@ if (!Yii::$app->user->isGuest) {
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
     $changeNetworkUrl = Url::to(['/user/change']);
+    $changeFormUrl = Url::to(['/user/default/change-form']);
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
 //    });
@@ -179,9 +180,9 @@ if (!Yii::$app->user->isGuest) {
                 })
             },
         }).then(function (result) {
-            if (result.success) {
+            if (result.value.success) {
                 swal({title: "$arr[4]", type: "success"});
-            } else if (result.dismiss === "cancel") {
+            } else if (result.value.dismiss === "cancel") {
                 swal.close();
             } else {
                 swal({title: "$arr[5]", text: "$arr[6]", type: "error"});
@@ -232,7 +233,7 @@ $(document).on("click", ".new-network", function(e) {
         type: 'post',
         data: form.serialize(),
         success: function (response) {  
-          $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "/user/default/change-form"});
+          $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "$changeFormUrl"});
           $("#create-network-form")[0].reset();
         },
         error: function(jqXHR, errMsg) { 

@@ -34,17 +34,17 @@ $form = ActiveForm::begin([
         <div class="col-md-8" style="border-right: 1px solid #ccc;">
     <?= Html::a(
        '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.templ_add_new_positions', ['ru'=>'Шаблон - добавить новые позиции']) . ' ',
-       Url::to('@web/upload/template.xlsx'),
+       Url::to(['@web/upload/template.xlsx']),
        ['class' => 'btn btn-default', 'style'=>'display:block;margin-bottom:5px;text-align:left']) 
     ?>
     <?= Html::a(
        '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.prices_upd', ['ru'=>'Шаблон - обновить цены']) . ' ',
-       Url::to('@web/upload/template_update.xlsx'),
+       Url::to(['@web/upload/template_update.xlsx']),
        ['class' => 'btn btn-default', 'style'=>'display:block;margin-bottom:5px;margin-left:0px;text-align:left']) 
     ?>
     <?= Html::a(
        '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.templ_add_on_mix', ['ru'=>'Шаблон - добавить на MixMarket']) . ' ',
-       Url::to('@web/upload/template_market.xlsx'),
+       Url::to(['@web/upload/template_market.xlsx']),
        ['class' => 'btn btn-default', 'style'=>'display:block;margin-left:0px;text-align:left']) 
     ?>
         </div>

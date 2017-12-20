@@ -206,7 +206,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['$arr[2]', '$arr[3]', '$arr[4]],
+  colHeaders : ['$arr[2]', '$arr[3]', '$arr[4]'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},

@@ -17,7 +17,7 @@ $this->registerJs('
         $.ajax({
             type: "POST",
             dataType: "json",
-            url: "'.Url::to('/site/ajax-wizard-off').'",
+            url: "'.Url::to(['/site/ajax-wizard-off']).'",
             async: false
         });
     });
@@ -66,7 +66,7 @@ $this->registerJs('
                             'enableAjaxValidation' => true,
                             'enableClientValidation' => false,
                             'validateOnSubmit' => true,
-                            'action' => Url::to('/site/ajax-complete-registration'),
+                            'action' => Url::to(['/site/ajax-complete-registration']),
                             'options' => [
                                 'class' => 'auth-sidebar__form form-check data',
                             ],
@@ -120,7 +120,7 @@ $this->registerJs('
                 </div>
                 <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.vendor.create_cat', ['ru'=>'Создайте свой каталог с товарами']) ?></div>
                 <div class="data-modal__buts-wrp">
-                    <a href="<?= Url::to('/vendor/catalogs') ?>" class="but but_green wizard-off"><span><?= Yii::t('message', 'frontend.views.vendor.fill_cat', ['ru'=>'Заполнить свой каталог']) ?></span></a>
+                    <a href="<?= Url::to(['/vendor/catalogs']) ?>" class="but but_green wizard-off"><span><?= Yii::t('message', 'frontend.views.vendor.fill_cat', ['ru'=>'Заполнить свой каталог']) ?></span></a>
                 </div>
             </div>
         </div>

@@ -31,7 +31,7 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
         <div class="col-md-8" style="border-right: 1px solid #ccc;">
     <?= Html::a(
        '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.templ_two', ['ru'=>'Шаблон']) . ' ',
-       Url::to('@web/upload/template_update.xlsx'),
+       Url::to(['@web/upload/template_update.xlsx']),
        ['class' => 'btn btn-default', 'style'=>'display:block;margin-bottom:5px;margin-left:0px;text-align:left']) 
     ?>
         </div>

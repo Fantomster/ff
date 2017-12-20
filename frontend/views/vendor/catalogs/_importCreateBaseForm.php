@@ -21,7 +21,7 @@ use yii\web\View;
 <div class="modal-footer">
     <?= Html::a(
        '<i class="fa fa-list-alt"></i> ' . Yii::t('message', 'frontend.views.vendor.downl_templ', ['ru'=>'Скачать шаблон (XLS)']) . ' ',
-       Url::to('@web/upload/template.xlsx'),
+       Url::to(['@web/upload/template.xlsx']),
        ['class' => 'btn btn-default btn-sm pull-left','style' => ['margin-right'=>'10px;']]
    ) ?> 
     <?= Html::submitButton('<i class="glyphicon glyphicon-import"></i> ' . Yii::t('message', 'frontend.views.vendor.import', ['ru'=>'Импорт']) . ' ',['class' => 'btn btn-success import']) ?>

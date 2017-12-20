@@ -617,11 +617,9 @@ class VendorController extends DefaultController {
             unset($objReader);
 
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
-            $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
-            $newRows = 0;
             $xlsArray = [];
 
-            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+            if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки каталога<br>')
                     . Yii::t('app', '<small>Вы пытаетесь загрузить каталог объемом больше ') . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', ' позиций, обратитесь к нам и мы вам поможем')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');

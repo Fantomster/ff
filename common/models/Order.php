@@ -317,7 +317,7 @@ class Order extends \yii\db\ActiveRecord {
             case self::DISCOUNT_NO_DISCOUNT:
                 return false;
             case self::DISCOUNT_FIXED:
-                return $this->discount . $this->currency->symbol;
+                return $this->discount . ' ' . ($iso_code ? $this->currency->iso_code : $this->currency->symbol);
             case self::DISCOUNT_PERCENT:
                 return $this->discount . "%";
         }

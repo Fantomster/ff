@@ -9,11 +9,11 @@ $currencySymbol = $order->currency->iso_code;
         </span>
         <br>
         <small>
-            от <?=Yii::$app->formatter->asDatetime($order->created_at)?>
+            от <?=Yii::$app->formatter->asDatetime($order->created_at, 'php:d.m.Y, H:i')?>
         </small>
         <br>
         <small>
-            <?= $order->requested_delivery ? 'Запрошенная дата доставки: ' . Yii::$app->formatter->asDate($order->requested_delivery, 'php:d/m/Y') : '' ?>
+            <?= $order->requested_delivery ? 'Запрошенная дата доставки: ' . Yii::$app->formatter->asDate($order->requested_delivery, 'php:d.m.Y') : '' ?>
         </small>
     </div>
 
@@ -79,9 +79,9 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                Адрес: <?= isset($order->vendor->locality) ? $order->vendor->locality : '' ?>,
-                                <?= isset($order->vendor->route) ? $order->vendor->route  : '' ?>,
-                                <?= isset($order->vendor->street_number) ? $order->vendor->street_number : '' ?>
+                                Адрес: <?= isset($order->vendor->locality) ? $order->vendor->locality : '' ?>
+                                <?= isset($order->vendor->route) ? ', '.$order->vendor->route  : '' ?>
+                                <?= (isset($order->vendor->street_number) && $order->vendor->street_number != 'undefined') ? ', '.$order->vendor->street_number : '' ?>
                             </td>
                         </tr>
                     </table>
@@ -94,7 +94,7 @@ $currencySymbol = $order->currency->iso_code;
         <div>
             <?php if (!empty($order->comment)) { ?>
                 <div style="font-size: 12px;width: 100%;height: auto;text-align:left;padding: 5px;margin-bottom: 10px;">
-                    <b>Комментарий к заказу:</b>
+                    <b style="font-size: 14px;" >Комментарий к заказу:</b>
                     <p class = "pl" style="padding-top: 5px;">
                         <?= $order->comment ?>
                     </p>
@@ -103,7 +103,7 @@ $currencySymbol = $order->currency->iso_code;
             <?= $this->render('_view-grid_pdf', compact('dataProvider', 'order')) ?>
         </div>
 
-        <div style="text-align: right;font-size: 12px;padding-top:30px;padding-right:50px;">
+        <div style="text-align: right;font-size: 12px;padding-top:10px;">
             <?php if ($order->discount) { ?>
                 <p>
                     Скидка: <?= $order->getFormattedDiscount(true) ?>

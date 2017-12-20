@@ -15,6 +15,9 @@ echo GridView::widget([
         [
             'attribute' => 'product.product',
             'label' => 'Наименование товара',
+            'value' => function ($data) {
+                return htmlspecialchars_decode(htmlspecialchars_decode($data->product->product, true));
+            },
             'headerOptions' => [
                 'width' => '180'
             ],
@@ -52,7 +55,7 @@ echo GridView::widget([
         [
             'attribute' => 'quantity',
             'value' => function ($data) {
-                return number_format(round($data->quantity, 2), 2, '.', '');
+                return number_format(round($data->quantity, 3), 3, '.', '');
             },
             'label' => 'Кол-во',
             'contentOptions' => [

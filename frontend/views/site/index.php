@@ -65,7 +65,7 @@ $this->title = 'MixCart';
 </h1>
         </div>
         <div class="buttons__block">
-            <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_rest_two', ['ru'=>'для ресторанов']) . ' </span>', "https://client.mixcart.ru", ['class' => 'for__restaurants']) ?>
+            <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_rest_two', ['ru'=>'для ресторанов']) . ' </span>', Yii::$app->params['staticUrl']['client'], ['class' => 'for__restaurants']) ?>
 <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_vendors_two', ['ru'=>'для поставщиков']) . ' </span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
             <!--            <div class="watch_video">
@@ -91,7 +91,7 @@ $this->title = 'MixCart';
                     <div class="how_its_work">
                         <h3><?= Yii::t('message', 'frontend.views.site.how_it_works', ['ru'=>'как это работает']) ?></h3>
                         <p><?= Yii::t('message', 'frontend.views.site.mixcart', ['ru'=>'MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.']) ?></p>
-<?= Html::a(Yii::t('app', 'frontend.views.site.index.for_rest', ['ru'=>'Для ресторанов']), "https://client.mixcart.ru") ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
+<?= Html::a(Yii::t('app', 'frontend.views.site.index.for_rest', ['ru'=>'Для ресторанов']), Yii::$app->params['staticUrl']['client']) ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
                     <div class="callback_form call_back_button2" data-modal="callback" data-lead="<?= Yii::t('app', 'frontend.views.site.index.set_request_two', ['ru'=>'Оставить заявку']) ?>"><?= Yii::t('message', 'frontend.views.site.set_request', ['ru'=>'оставить заявку']) ?></div>
                     </div>
                 </div>	

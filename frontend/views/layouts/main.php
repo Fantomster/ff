@@ -265,8 +265,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 'options' => ['class' => 'nav_menu'],
                                 'items' => [
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.main', ['ru'=>'Главная']), 'url' => ['/site/index']],
-                                    ['label' => 'MIXMARKET', 'url' => 'https://market.mixcart.ru'],
-                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.franchisee', ['ru'=>'Франшиза']), 'url' => 'http://fr.mixcart.ru'],
+                                    ['label' => 'MIXMARKET', 'url' => Yii::$app->params['staticUrl']['market']],
+                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.franchisee', ['ru'=>'Франшиза']), 'url' => Yii::$app->params['staticUrl']['franchise']],
                                    // ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.faq', ['ru'=>'Вопрос / ответ']), 'url' => ['/site/faq']],
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.about', ['ru'=>'О компании']), 'url' => ['/site/about']],
@@ -289,7 +289,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 <span class="title__menu"><?= Yii::t('message', 'frontend.views.layouts.main.sitemap', ['ru'=>'Карта сайта']) ?></span>
                                 <ul class="links">
 <!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
-                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_rest', ['ru'=>'Для ресторанов']), "https://client.mixcart.ru") ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_rest', ['ru'=>'Для ресторанов']), Yii::$app->params['staticUrl']['client']) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_vendors', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.about_two', ['ru'=>'О компании']), ["/site/about"]) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.contacts_two', ['ru'=>'Контакты']), ["/site/contacts"]) ?></li>

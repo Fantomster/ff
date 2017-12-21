@@ -17,4 +17,11 @@ return [
 
     #id франчази к которому крепим организации, для которых не нашли франчей
     'default_franchisee_id' => 1,
+    
+    //static urls
+    'staticUrl' => [
+        'market' => 'https://market.mixcart.ru/',
+        'franchise' => 'http://fr.mixcart.ru/',
+        'client' => 'https://client.mixcart.ru/',
+    ],
 ];

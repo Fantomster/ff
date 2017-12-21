@@ -41,7 +41,7 @@ $menuItems = [
     ],
     ['label' => Yii::t('message', 'frontend.views.layouts.left.catalogs', ['ru' => 'Мои каталоги']), 'icon' => 'list-alt', 'url' => ['/vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
-    ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.mixcart.ru', 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl']['market'], 'options' => ['class' => 'l-fmarket']],
     ['label' => Yii::t('message', 'frontend.views.layouts.left.requests', ['ru' => 'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
     [
         'label' => Yii::t('message', 'frontend.views.layouts.left.my_clients', ['ru' => 'Мои клиенты']),

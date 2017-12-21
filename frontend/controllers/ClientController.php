@@ -909,14 +909,14 @@ class ClientController extends DefaultController {
                     \Yii::$app->db->createCommand($sql)->execute();
                 }
 
-                $message = 'Сохранено';
+                $message = Yii::t('app', 'Сохранено');
                 return $this->renderAjax('suppliers/_success', ['message' => $message]);
             } else {
                 $post = Yii::$app->request->post();
                 if ($post) {
                     $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
                     \Yii::$app->db->createCommand($sql)->execute();
-                    $message = 'Сохранено';
+                    $message = Yii::t('app', 'Сохранено');
                     return $this->renderAjax('suppliers/_success', ['message' => $message]);
                 }
             }

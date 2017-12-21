@@ -1788,10 +1788,10 @@ class VendorController extends DefaultController {
                         }
                         $relation_supp_rest->update();
                         $transaction->commit();
-                        $message = 'Сохранено';
+                        $message = Yii::t('app', 'Сохранено');
                     } catch (Exception $e) {
                         $transaction->rollBack();
-                        $message = 'Ошибка!';
+                        $message = Yii::t('app', 'Ошибка!');
                     }
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }

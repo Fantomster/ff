@@ -57,7 +57,7 @@ use yii\widgets\ListView;
             </div>
             <h6><b><?= Yii::t('message', 'frontend.views.request.buying_value', ['ru'=>'Объем закупки:']) ?></b> <?=$request->amount?></h6>
             <h6><b><?= Yii::t('message', 'frontend.views.request.frequency', ['ru'=>'Периодичность заказа:']) ?></b> <?=$request->regularName?></h6>
-            <h6><b>Способ оплаты:</b> <?=$request->paymentMethodName ?></h6>
+            <h6><b><?= Yii::t('message', 'frontend.views.request.payment_variant', ['ru'=>'Способ оплаты:']) ?></b> <?=$request->paymentMethodName ?></h6>
             <div class="req-respons"><?= Yii::t('message', 'frontend.views.request.executor', ['ru'=>'Исполнитель:']) ?>
                 <?=$request->responsible_supp_org_id ? 
                       '<span style="color:#84bf76;text-decoration:underline">' . $request->vendor->name . '</span>' : 

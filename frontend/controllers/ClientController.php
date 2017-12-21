@@ -343,11 +343,11 @@ class ClientController extends DefaultController {
                     $price = floatval(trim(str_replace(',', '.', $arrCatalogs['dataItem']['price'])));
                     $ed = strip_tags(trim($arrCatalogs['dataItem']['ed']));
                     if (empty($product)) {
-                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_field', ['ru'=>'Ошибка: Пустое поле']) . '  <strong>[Продукт]</strong>!'];
+                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_field', ['ru'=>'Ошибка: Пустое поле'])];
                         return $result;
                     }
                     if (empty($price)) {
-                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_price', ['ru'=>'Ошибка: Пустое поле']) . '  <strong>[Цена]</strong>!'];
+                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_price', ['ru'=>'Ошибка: Пустое поле'])];
                         return $result;
                     }
                     $price = str_replace(',', '.', $price);
@@ -431,7 +431,7 @@ class ClientController extends DefaultController {
                         if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
                             $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                            $newBaseCatalog->name = 'Главный каталог';
+                            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
                             $newBaseCatalog->type = Catalog::BASE_CATALOG;
                             $newBaseCatalog->status = Catalog::STATUS_ON;
                             if (isset($currency)) {

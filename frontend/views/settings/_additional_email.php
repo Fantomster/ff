@@ -152,7 +152,7 @@ addEmail= function () {
         swal({
             type: 'success',
             title: '" . Yii::t('message', 'frontend.views.settings.ready', ['ru'=>'Готово']) . "',
-            html: '" . Yii::t('message', 'frontend.views.settings.new_email', ['ru'=>'Добавлен новый email']) . ": ' + email,
+            html: '" . Yii::t('message', 'frontend.views.settings.new_email', ['ru'=>'Добавлен новый email']) . ": ' + result.value,
             timer: 1500
           }).catch(swal.noop);
       }

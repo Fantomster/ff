@@ -16,7 +16,7 @@ foreach ($content as $position) {
             <?php //<img class= "img_product" src="<?= $position->product->imageUrl ? >" alt=""> ?>
             <p class = "block_left_bot_left_name"><?= Html::decode(Html::decode($position->product_name)) ?></p>
             <p class = "block_left_bot_left_art"><?= Yii::t('message', 'frontend.views.order.art_four', ['ru'=>'Артикул:']) ?> <?= $position->product->article ?></p><br>
-            <p class = "kr_p"><?= Yii::t('message', 'frontend.views.order.frequency_three', ['ru'=>'Кратность:']) ?> <?= $position->product->units ? $position->product->units : '' ?><?= $position->product->ed ?></p>
+            <p class = "kr_p"><?= Yii::t('message', 'frontend.views.order.frequency_three', ['ru'=>'Кратность:']) ?> <?= $position->product->units ? $position->product->units : '' ?><?= Yii::t('app', $position->product->ed) ?></p>
             <?=
             Html::button(Yii::t('message', 'frontend.views.order.good_comment_three', ['ru'=>'Комментарий к товару']), [
                 'class' => 'add-note but_com',

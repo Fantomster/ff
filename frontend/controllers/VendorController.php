@@ -1138,7 +1138,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Товар добавлен!';
+                        $message = Yii::t('app', 'Товар добавлен!');
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
@@ -1146,7 +1146,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->market_place = 0;
                         $catalogBaseGoods->save();
-                        $message = 'Товар добавлен!';
+                        $message = Yii::t('app', 'Товар добавлен!');
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }
@@ -1179,7 +1179,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Товар обновлен!';
+                        $message = Yii::t('app', 'Товар обновлен!');
 
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
@@ -1189,7 +1189,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
 
-                        $message = 'Товар обновлен!';
+                        $message = Yii::t('app', 'Товар обновлен!');
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }

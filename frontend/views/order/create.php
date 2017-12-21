@@ -206,7 +206,7 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'price',
                                     'value' => function ($data) {
-                                        $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
+                                        $unit = empty($data['ed']) ? '' : " / " . Yii::t('app', $data['ed']);
                                         return '<b>' . $data['price'] . '</b> ' . $data['symbol'] . $unit;
                                     },
                                     'label' => Yii::t('message', 'frontend.views.order.price', ['ru'=>'Цена']),

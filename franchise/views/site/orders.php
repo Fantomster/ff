@@ -51,7 +51,7 @@ kartik\select2\Select2Asset::register($this);
                         <?=
                         $form->field($searchModel, 'status')
                             ->dropDownList(['0' => Yii::t('app', 'franchise.views.site.all_two', ['ru'=>'Все']), '1' => Yii::t('app', 'franchise.views.site.new', ['ru'=>'Новый']), '2' => Yii::t('app', 'franchise.views.site.canceled', ['ru'=>'Отменен']), '3' => Yii::t('app', 'franchise.views.site.in_process', ['ru'=>'Выполняется']), '4' => Yii::t('app', 'franchise.views.site.ended', ['ru'=>'Завершен'])], ['id' => 'statusFilterID'])
-                            ->label('Статус', ['style' => 'color:#555'])
+                            ->label(Yii::t('app', 'Статус'), ['style' => 'color:#555'])
                         ?>
                     </div>
                     <div class="col-lg-5 col-md-6 col-sm-6">

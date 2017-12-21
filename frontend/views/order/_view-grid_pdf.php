@@ -14,7 +14,7 @@ echo GridView::widget([
     'columns' => [
         [
             'attribute' => 'product.product',
-            'label' => 'Наименование товара',
+            'label' => Yii::t('app', 'Наименование товара'),
             'value' => function ($data) {
                 return htmlspecialchars_decode(htmlspecialchars_decode($data->product->product, true));
             },
@@ -24,7 +24,7 @@ echo GridView::widget([
         ],
         [
             'attribute' => 'note.note',
-            'header' => 'Комментарий',
+            'header' => Yii::t('app', 'Комментарий'),
             'value' => function ($data) {
                 return (isset($data->note->note) ? $data->note->note : '');
             },
@@ -34,7 +34,7 @@ echo GridView::widget([
         ],
         [
             'attribute' => 'article',
-            'header' => 'Артикул',
+            'header' => Yii::t('app', 'Артикул'),
             'contentOptions' => [
                 'style' => 'text-align:center;',
             ],
@@ -43,7 +43,7 @@ echo GridView::widget([
             ],
         ],
         [
-            'label' => 'Ед. измерения',
+            'label' => Yii::t('app', 'Ед. измерения'),
             'attribute' => 'product.ed',
             'contentOptions' => [
                 'style' => 'text-align:center;',
@@ -57,7 +57,7 @@ echo GridView::widget([
             'value' => function ($data) {
                 return number_format(round($data->quantity, 3), 3, '.', '');
             },
-            'label' => 'Кол-во',
+            'label' => Yii::t('app', 'Кол-во'),
             'contentOptions' => [
                 'style' => 'text-align:right;',
             ],
@@ -70,7 +70,7 @@ echo GridView::widget([
             'value' => function ($data) use ($order) {
                 return number_format(round($data->price, 2), 2, '.', '');
             },
-            'label' => 'Цена за ед.,  ' . $order->currency->iso_code,
+            'label' => Yii::t('app', 'Цена за ед.,  ') . $order->currency->iso_code,
             'contentOptions' => [
                 'style' => 'text-align:right;',
             ],
@@ -83,7 +83,7 @@ echo GridView::widget([
             'value' => function ($data) {
                 return number_format(round($data->total, 2), 2, '.', '');
             },
-            'label' => 'Сумма',
+            'label' => Yii::t('app', 'Сумма'),
             'contentOptions' => [
                 'style' => 'text-align:right;',
             ],

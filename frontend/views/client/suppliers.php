@@ -67,7 +67,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
             </div>
             <div class="modal-footer">
                 <?=
-                Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                Html::button('<span class="text-label">' . Yii::t('app', 'Изменить валюту:') . '  </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
                     'class' => 'btn btn-default pull-left',
                     'style' => ['margin' => '0 5px;'],
                     'id' => 'changeCurrency',
@@ -347,6 +347,11 @@ $arr = [
     Yii::t('message', 'frontend.views.client.suppliers.var14', ['ru'=>'Поставщик будет удален из Вашего списка поставщиков']),
     Yii::t('message', 'frontend.views.client.suppliers.var15', ['ru'=>'Удалить']),
     Yii::t('message', 'frontend.views.client.suppliers.var16', ['ru'=>'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var17', ['ru'=>'Изменение валюты каталога']),
+    Yii::t('app', 'frontend.views.client.suppliers.var18', ['ru'=>'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var19', ['ru'=>'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var20', ['ru'=>'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var21', ['ru'=>'Отмена']),
 ];
 $language = Yii::$app->sourceLanguage;
 
@@ -756,23 +761,23 @@ $("#organization-name").keyup(function() {
         
     $(document).on("click", "#changeCurrency", function() {
         swal({
-            title: 'Изменение валюты каталога',
+            title: '$arr[17]',
             input: 'select',
             inputOptions: $currencyList,
-            inputPlaceholder: 'Выберите новую валюту каталога',
+            inputPlaceholder: '$arr[18]',
             showCancelButton: true,
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (!value) {
-                        reject('Выберите валюту из списка')
+                        reject("$arr[19]")
                     }
                     if (value != currentCurrency) {
                         currentCurrency = value;
                         $(".currency-symbol").html(currencies[currentCurrency-1]);
                         resolve();
                     } else {
-                        reject('Данная валюта уже используется!')
+                        reject("$arr[20]")
                     }
                 })
             },
@@ -781,7 +786,7 @@ $("#organization-name").keyup(function() {
                 swal.close();
             } else {
                 swal({
-                    title: 'Валюта каталога изменена!',
+                    title: '$arr[21]',
                     type: 'success',
                     showCancelButton: false,
                 })

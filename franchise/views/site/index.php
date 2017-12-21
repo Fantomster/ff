@@ -69,7 +69,7 @@ use dosamigos\chartjs\ChartJs;
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
                                 <span class="description-percentage text-green"><?= $franchiseeType->share ?>%</span>
-                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * $franchiseeType->share / 100, 2, '.', ' ') ?> руб.</h5>
+                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * $franchiseeType->share / 100, 2, '.', ' ') ?><?= Yii::t('app', ' руб.') ?></h5>
                                 <span class="description-text"><?= Yii::t('app', 'franchise.views.site.your_income', ['ru'=>'Ваша прибыль']) ?></span>
                             </div>
                             <!-- /.description-block -->

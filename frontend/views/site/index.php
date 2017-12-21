@@ -59,9 +59,10 @@ $this->title = 'MixCart';
 <header class="header" style="background-image: url(/images/header-banner.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
-            <h1><?= Yii::t('message', 'frontend.views.site.online_service', ['ru'=>'Онлайн-сервис']) ?>
-                <?= Yii::t('message', 'frontend.views.site.auto_buy', ['ru'=>'для автоматизации закупок']) ?><br>
-<?= Yii::t('message', 'frontend.views.site.horeca', ['ru'=>'в сфере HoReCa']) ?>
+            <h1><?= Yii::t('message', 'frontend.views.site.online_service', ['ru'=>'Автоматизируйте закупки']) ?>
+                <?= Yii::t('message', 'frontend.views.site.horeca', ['ru'=>'в сфере HoReCa']) ?>.<br>
+                <?= Yii::t('message', 'frontend.views.site.auto_buy', ['ru'=>'Будьте успешнее с MixCart.']) ?>
+
 </h1>
         </div>
         <div class="buttons__block">
@@ -89,9 +90,15 @@ $this->title = 'MixCart';
             <div class="container-fluid">
                 <div class="col-md-5">
                     <div class="how_its_work">
-                        <h3><?= Yii::t('message', 'frontend.views.site.how_it_works', ['ru'=>'как это работает']) ?></h3>
-                        <p><?= Yii::t('message', 'frontend.views.site.mixcart', ['ru'=>'MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.']) ?></p>
-<?= Html::a(Yii::t('app', 'frontend.views.site.index.for_rest', ['ru'=>'Для ресторанов']), Yii::$app->params['staticUrl']['client']) ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
+                        <h3><?= Yii::t('message', 'frontend.views.site.how_it_works', ['ru'=>'КАК MIXCART
+СПОСОБСТВУЕТ УСПЕХУ']) ?></h3>
+                        <p><?= Yii::t('message', 'frontend.views.site.mixcart', ['ru'=>'Большинству людей технологии делают жизнь легче. А для бизнеса IT технологии
+открывают новые возможности роста. MixCart - это удобный сервис по автоматизации
+закупок и улучшению взаимодействия между рестораном и поставщиком. Традиционно
+длительный процесс закупок и связанных с ним коммуникаций становится управляемым в
+любой момент времени, из любой точки мира. MixCart сокращает время на обработку
+заказов в несколько раз и уменьшает количество возвратов и ошибок. ']) ?></p>
+<?= Html::a(Yii::t('app', 'frontend.views.site.index.for_rest', ['ru'=>'Для ресторанов']), "https://client.mixcart.ru") ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
                     <div class="callback_form call_back_button2" data-modal="callback" data-lead="<?= Yii::t('app', 'frontend.views.site.index.set_request_two', ['ru'=>'Оставить заявку']) ?>"><?= Yii::t('message', 'frontend.views.site.set_request', ['ru'=>'оставить заявку']) ?></div>
                     </div>
                 </div>	

@@ -348,7 +348,7 @@ class OrganizationController extends DefaultController {
                         // send email
                         $model = new Organization();
                         $model->sendGenerationPasswordEmail($user);
-                        $catalog->name = \common\models\Catalog::CATALOG_BASE_NAME;
+                        $catalog->name = Yii::t('app', \common\models\Catalog::CATALOG_BASE_NAME);
                         $catalog->status = 1;
                         $catalog->type = \common\models\Catalog::BASE_CATALOG;
                         $catalog->supp_org_id = $vendor->id;

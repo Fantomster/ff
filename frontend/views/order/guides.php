@@ -306,7 +306,7 @@ $this->registerJs('
             if (result.dismiss === "cancel") {
                 swal.close();
             } else if (result.value.type !== "success") {
-               swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+               swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru'=>'Ошибка!']) . '", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru'=>'Попробуйте еще раз']) . '", type: "error"});
             }
         });
     });

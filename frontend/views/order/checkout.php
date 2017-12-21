@@ -411,7 +411,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                         </div>
                         <div class="block_right">
                             <div class="block_right_wrap">
-                                <p>Итого: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> <?= $currencySymbol ?></p>
+                                <p><?= Yii::t('app', 'Итого:') ?> <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> <?= $currencySymbol ?></p>
 
                             </div>
                             <div class="block_right_wrap_1">

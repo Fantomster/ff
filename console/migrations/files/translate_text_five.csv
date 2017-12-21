@@ -6029,12 +6029,12 @@
 "message"|"frontend.views.site.wanna_work"|"en"|"Would you like to work for us?"
 "message"|"frontend.views.site.wanna_work"|"es"|"¿Quieres trabajar con nosotros?"
 "message"|"frontend.views.site.wanna_work"|"ru"|"Хотите работать у нас?"
-"message"|"frontend.views.site.online_service"|"en"|"Online service "
-"message"|"frontend.views.site.online_service"|"es"|"Servicio en línea"
-"message"|"frontend.views.site.online_service"|"ru"|"Онлайн-сервис"
-"message"|"frontend.views.site.auto_buy"|"en"|"for automatic purchase"
-"message"|"frontend.views.site.auto_buy"|"es"|"para automatización de compras"
-"message"|"frontend.views.site.auto_buy"|"ru"|"для автоматизации закупок"
+"message"|"frontend.views.site.online_service"|"en"|"Automate purchases"
+"message"|"frontend.views.site.online_service"|"es"|"Automatice las compras"
+"message"|"frontend.views.site.online_service"|"ru"|"Автоматизируйте закупки"
+"message"|"frontend.views.site.auto_buy"|"en"|"Be successful with MixCart."
+"message"|"frontend.views.site.auto_buy"|"es"|"Sea exitoso con MixCart."
+"message"|"frontend.views.site.auto_buy"|"ru"|"Будьте успешнее с MixCart."
 "message"|"frontend.views.site.horeca"|"en"|"in HoReCa field"
 "message"|"frontend.views.site.horeca"|"es"|"en el campo de HoReCa"
 "message"|"frontend.views.site.horeca"|"ru"|"в сфере HoReCa"
@@ -6049,10 +6049,16 @@
 "message"|"frontend.views.site.request"|"ru"|"оставить заявку"
 "message"|"frontend.views.site.how_it_works"|"en"|"How does it work"
 "message"|"frontend.views.site.how_it_works"|"es"|"cómo funciona"
-"message"|"frontend.views.site.how_it_works"|"ru"|"как это работает"
+"message"|"frontend.views.site.how_it_works"|"ru"|"КАК MIXCART
+СПОСОБСТВУЕТ УСПЕХУ"
 "message"|"frontend.views.site.mixcart"|"en"|"MixCart is a tool for automation of cooperation process between supplier and restaurant. The restaurants create orders making several clicks. The suppliers obtain and process orders. The orders are processed in one place. A human mistake factor is brought down to a minimum. MixCart reduces the time required for order processing in several times. It decreases the number of returns and mistakes."
 "message"|"frontend.views.site.mixcart"|"es"|"MixCart es una herramienta para automatizar el proceso de interacción entre el proveedor y el restaurante. Los restaurantes crean pedidos con un par de clics. Los proveedores reciben y procesan pedidos. Todos los pedidos se procesan en un solo lugar. Se emplea un mínimo del factor humano. MixCart reduce el doble el tiempo de procesamiento de pedidos. Reduce el número de devoluciones y errores."
-"message"|"frontend.views.site.mixcart"|"ru"|"MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок."
+"message"|"frontend.views.site.mixcart"|"ru"|"Большинству людей технологии делают жизнь легче. А для бизнеса IT технологии
+открывают новые возможности роста. MixCart - это удобный сервис по автоматизации
+закупок и улучшению взаимодействия между рестораном и поставщиком. Традиционно
+длительный процесс закупок и связанных с ним коммуникаций становится управляемым в
+любой момент времени, из любой точки мира. MixCart сокращает время на обработку
+заказов в несколько раз и уменьшает количество возвратов и ошибок."
 "message"|"frontend.views.site.set_request"|"en"|"leave a request "
 "message"|"frontend.views.site.set_request"|"es"|"enviar una orden"
 "message"|"frontend.views.site.set_request"|"ru"|"оставить заявку"

@@ -46,7 +46,7 @@ $this->title = Yii::t('message', 'frontend.views.vendor.set_cat', ['ru'=>'Наз
                 <?='<li class="active">'.Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_seven', ['ru'=>'Назначить ресторану']) . '  <i class="fa fa-fw fa-thumbs-o-up"></i>',['vendor/step-4','id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
-              <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'Назад'),['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
               <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.end', ['ru'=>'Завершить']) . ' ',['vendor/catalogs']).'</li>'?>
             </ul>
         </div>

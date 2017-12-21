@@ -453,7 +453,7 @@ Modal::end();
                         'value' => function ($data) {
                             $catalog_name = $data->cat_id == 0 ? '' :
                                     common\models\Catalog::find()->where(['id' => $data->cat_id])->one()->name;
-                            return $catalog_name;
+                            return Yii::t('app', $catalog_name);
                         }
                     ],
                     [

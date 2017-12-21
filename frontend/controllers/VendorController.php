@@ -262,7 +262,7 @@ class VendorController extends DefaultController {
                     $user->setOrganization($this->currentUser->organization)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
-                    $message = 'Пользователь добавлен!';
+                    $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -298,7 +298,7 @@ class VendorController extends DefaultController {
                     $user->save();
                     $profile->save();
 
-                    $message = 'Пользователь обновлен!';
+                    $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 } else {
                     $profile->validate();
@@ -372,7 +372,7 @@ class VendorController extends DefaultController {
 
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             if ($arrCatalog === Array()) {
-                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Нельзя сохранить пустой каталог!']];
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'УПС! Ошибка'), 'body' => Yii::t('app', 'Нельзя сохранить пустой каталог!')]];
                 return $result;
             }
 

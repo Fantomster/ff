@@ -412,7 +412,7 @@ JS;
                                 <img src="<?= $user->profile->avatarUrl ?>" class="img-circle avatar" alt="User Image">
 
                                 <p>
-                                    <?= $user->profile->full_name ?> - <?= $user->role->name ?>
+                                    <?= $user->profile->full_name ?> - <?= Yii::t('app', $user->role->name) ?>
                                     <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>

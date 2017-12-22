@@ -332,12 +332,14 @@ class ClientController extends DefaultController {
                     $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru'=>'Каталог пустой!'])];
                     return $result;
                 }
+                
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
                 if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                     $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.more_position', ['ru'=>'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max'=>CatalogBaseGoods::MAX_INSERT_FROM_XLS])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>'];
                     return $result;
                 }
+                $productNames = [];
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = strip_tags(trim($arrCatalogs['dataItem']['product']));
                     $price = floatval(trim(str_replace(',', '.', $arrCatalogs['dataItem']['price'])));
@@ -367,7 +369,14 @@ class ClientController extends DefaultController {
                         $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.empty', ['ru'=>'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'])];
                         return $result;
                     }
+                    array_push($productNames, mb_strtolower(trim($product)));
                 }
+
+                if (count($productNames) !== count(array_flip($productNames))) {
+                    $result = ['success' => false, 'message' => Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!')];
+                    return $result;
+                }
+                
                 $email = $user->email;
                 $fio = $profile->full_name;
                 $org = $organization->name;

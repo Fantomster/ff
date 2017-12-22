@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
     
     <?= $form->field($sourceMessage, 'category')->textInput(['maxlength' => true, 'value'=>'app'])->label('Категория') ?>
 
-    <?= $form->field($sourceMessage, 'message')->textInput(['maxlength' => true])->label('Сообщение') ?>
+    <?= $form->field($sourceMessage, 'message')->textInput(['maxlength' => true])->label('Переменная') ?>
 
     <?= $form->field($message, 'translation[ru]')->textInput(['maxlength' => true])->label('Перевод[ru]') ?>
 

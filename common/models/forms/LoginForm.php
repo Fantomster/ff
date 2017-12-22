@@ -25,6 +25,7 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
             }
             $this->addError("email", Yii::t("app", "{attr} not found", ['attr'=>$attribute]));
             // do we need to check $user->userAuths ???
+
         }
 
         // check if user is banned

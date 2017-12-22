@@ -91,7 +91,7 @@ $this->registerCss("
                     <div class="row">
                         <div class="col-md-4" style="text-align: center;">
                             <img style="max-width: 100%;" src="<?= $organization->pictureUrl ?>">
-                            <?php if ($showButton): ?>
+                            <?php if (false && $showButton): ?>
                                 <div class="btn-edite">
                                     <?= isset($catalog->id) ? Html::a(Yii::t('app', 'franchise.views.organization.price_lists', ['ru'=>'Прайс-листы поставщика']), ['catalog/index', 'vendor_id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
                                 </div>
@@ -140,7 +140,7 @@ $this->registerCss("
                                 </div>
                                 <?php endif; ?>
                                 <div>
-                                    <?= Html::a(Yii::t('app', 'franchise.views.organization.go_to_two', ['ru'=>'Перейти в ЛК организации под своей учеткой']), ['organization/update-users-organization', 'organization_id' => $organization->id], ['class' => 'btn btn-default', 'target' => '_blank']) ?>
+                                    <?= Html::a(Yii::t('app', 'franchise.views.organization.go_to_two', ['ru'=>'Перейти в ЛК организации под своей учеткой']), ['organization/update-users-organization', 'organization_id' => $organization->id], ['class' => 'btn btn-default', 'target' => '_blank', 'disabled' => !$organization->is_allowed_for_franchisee]) ?>
                                 </div>
                             </div>
                         </div>

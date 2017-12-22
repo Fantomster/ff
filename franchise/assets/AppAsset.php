@@ -24,5 +24,6 @@ class AppAsset extends AssetBundle
         'frontend\assets\BootboxAsset',
         '\rmrevin\yii\fontawesome\AssetBundle',
         'yii\bootstrap\BootstrapAsset',
+        'common\assets\SweetAlertAsset',
     ];
 }

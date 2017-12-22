@@ -16,9 +16,16 @@ $this->registerCss("
     .grid-view td{white-space: normal;}
         ");
 ?>
-    <p>
-        <?= Html::a('Создать перевод', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+<div class="row">
+    <div class="col-md-2">
+        <p>
+            <?= Html::a('Создать перевод', ['create'], ['class' => 'btn btn-success']) ?>
+        </p>
+    </div>
+    <div class="col-md-10">
+        <p>Инструкция: 1.) Переменные для переводов создаются по принципу - папка.подпапка.имя_файла.переменная 2.) Категории, используемые для перевода: app - общая, error - ошибка, message - сообщение 3.) Поиск работает как по переменным, так и по самим переводам на любом языке</p>
+    </div>
+</div>
 <div class="sms-send-index">
 
     <h1><?= Html::encode($this->title) ?></h1>

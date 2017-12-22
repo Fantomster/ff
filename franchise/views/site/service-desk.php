@@ -32,18 +32,18 @@ $this->title = Yii::t('app', 'franchise.views.site.tech_two', ['ru'=>'Техни
                         '4'=>Yii::t('app', 'franchise.views.site.more_mid', ['ru'=>'Выше среднего (Не работает не критичный бизнес процесс)']),
                         '5'=>Yii::t('app', 'franchise.views.site.high', ['ru'=>'Высокий (Система не работает)']),
                         ]);?>
-                    <?= $form->field($model, 'body')->textInput() ?> 
+                    <?= $form->field($model, 'body')->textInput() ?>
                     <div class="form-group">
                         <?= Html::submitButton(Yii::t('app', 'franchise.views.site.send', ['ru'=>'Отправить']), ['id'=>'send','class'=>'btn btn-success']) ?>
                     </div>
                 </div>
             </div>
         </div>
-      
-      <?php 
-      ActiveForm::end(); 
+
+      <?php
+      ActiveForm::end();
       Pjax::end();
-      ?>  
+      ?>
     </div>
   </div>
 </section>
@@ -61,6 +61,7 @@ $this->registerJs(
             type: "post",
             data: form.serialize(),
             success: function(data) {
+                swal("' . Yii::t('message', 'frontend.views.request.ready_two', ['ru'=>'Готово!']) . ' ","' . Yii::t('app', 'Запрос отправлен') . ' ","success")
                 $("#send").prop("disabled", false);
             }
         });

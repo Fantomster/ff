@@ -56,9 +56,9 @@ return [
 //                'user' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
-//                'backend' => [
-//                    'class' => 'yii\i18n\PhpMessageSource'
-//                ],
+                'backend' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
 //                'prequest' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
@@ -66,16 +66,20 @@ return [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
                 'app' => [
-                    'class' => 'yii\i18n\DbMessageSource'
+                    'class' => 'yii\i18n\DbMessageSource',
+                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'message' => [
-                    'class' => 'yii\i18n\DbMessageSource'
+                    'class' => 'yii\i18n\DbMessageSource',
+                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'sms_message' => [
-                    'class' => 'yii\i18n\DbMessageSource'
+                    'class' => 'yii\i18n\DbMessageSource',
+                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'error' => [
-                    'class' => 'yii\i18n\DbMessageSource'
+                    'class' => 'yii\i18n\DbMessageSource',
+                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
             ],
         ],

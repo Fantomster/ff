@@ -146,7 +146,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 ],
                                 [
                                     'label' => 'Платежи',
-                                    'url' => ['/payment'],
+                                    'url' => ['/payment/index'],
                                 ],
                             ],
                         ],

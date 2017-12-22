@@ -66,7 +66,7 @@ $this->title = 'MixCart';
 </h1>
         </div>
         <div class="buttons__block">
-            <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_rest_two', ['ru'=>'для ресторанов']) . ' </span>', "https://client.mixcart.ru", ['class' => 'for__restaurants']) ?>
+            <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_rest_two', ['ru'=>'для ресторанов']) . ' </span>', Yii::$app->params['staticUrl']['client'], ['class' => 'for__restaurants']) ?>
 <?= Html::a('<span>' . Yii::t('message', 'frontend.views.site.for_vendors_two', ['ru'=>'для поставщиков']) . ' </span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
             <!--            <div class="watch_video">

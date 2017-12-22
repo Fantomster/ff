@@ -189,11 +189,11 @@ class OrderContent extends \yii\db\ActiveRecord
             $order->save();
         }
         
-        if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
-                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
-            }
-        }
+//        if (!is_a(Yii::$app, 'yii\console\Application')) {
+//            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+//                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+//            }
+//        }
     }
 
     public function getCurrency() {
@@ -203,10 +203,10 @@ class OrderContent extends \yii\db\ActiveRecord
     public function afterDelete() {
         parent::afterDelete();
         
-        if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
-                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
-            }
-        }
+//        if (!is_a(Yii::$app, 'yii\console\Application')) {
+//            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+//                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+//            }
+//        }
     }
 }

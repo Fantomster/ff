@@ -79,23 +79,18 @@ return [
                 ],
             ],
         ],
-//        'formatter' => [
-//            'class' => 'yii\i18n\Formatter',
-//            'nullDisplay' => Yii::t('app', 'common.config.main.empty', ['ru'=>'пусто']),
+//        'mailer' => [
+//            'viewPath' => '@common/mail',
+//            'class' => 'common\components\Mailer',
+//            'useFileTransport' => false,
+//            'access_key' => '',
+//            'secret_key' => '',
+//            'host' => 'email.eu-west-1.amazonaws.com',
+//            'messageConfig' => [
+//                'from' => ['noreply@mixcart.ru' => 'noreply@mixcart.ru'],
+//                'charset' => 'UTF-8',
+//            ],
 //        ],
-        'mailer' => [
-            'viewPath' => '@common/mail',
-            'class' => 'common\components\Mailer',
-            'useFileTransport' => false,
-            'access_key' => 'AKIAIMZCOXBPC5GJY4MA',
-            'secret_key' => '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',
-            'host' => 'email.eu-west-1.amazonaws.com',
-            'messageConfig' => [
-//                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
-                'from' => ['noreply@mixcart.ru' => 'noreply@mixcart.ru'],
-                'charset' => 'UTF-8',
-            ],
-        ],
         'urlManager' => [
             'class' => 'codemix\localeurls\UrlManager',
             //Список языков, какая тут очередность, так и будет выводиться в виджите

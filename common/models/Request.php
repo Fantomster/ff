@@ -245,11 +245,11 @@ class Request extends \yii\db\ActiveRecord {
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
         if ($insert) {
-            if (!is_a(Yii::$app, 'yii\console\Application')) {
-                if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
-                    \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
-                }
-            }
+//            if (!is_a(Yii::$app, 'yii\console\Application')) {
+//                if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+//                    \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+//                }
+//            }
         }
     }
 

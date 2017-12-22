@@ -56,9 +56,9 @@ return [
 //                'user' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
-//                'backend' => [
-//                    'class' => 'yii\i18n\PhpMessageSource'
-//                ],
+                'backend' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
 //                'prequest' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],

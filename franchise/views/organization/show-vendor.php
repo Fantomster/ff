@@ -96,6 +96,11 @@ $this->registerCss("
                                     <?= isset($catalog->id) ? Html::a(Yii::t('app', 'franchise.views.organization.price_lists', ['ru'=>'Прайс-листы поставщика']), ['catalog/index', 'vendor_id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
                                 </div>
                             <?php endif; ?>
+                            <br>
+                            <br>
+                            <div class="col-md-12" style="text-align: left; color: red;"><?= Yii::t('app', 'franchise.views.organization.under_text', ['ru'=>'Прайс-листы поставщика вы можете посмотреть и отредактировать, зайдя в личный кабинет клиента по кнопке "Перейти в ЛК организации под своей учеткой".<br><br> 
+После ее нажатия откроется новая вкладка и вам надо будет ввести свой логин и пароль. 
+<br><br>Далее откроется личный кабинет клиента. Если кнопка неактивна, значит клиент запретил доступ для франчайзи.']) ?></div>
                         </div>
                         <div class="col-md-8">
                             <div class="edite-place">

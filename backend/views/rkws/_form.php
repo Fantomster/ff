@@ -29,7 +29,7 @@ use yii\web\JsExpression;
 
     <?php echo $form->field($model, 'org')->widget(Select2::classname(), [
             'data' => $data,
-            'options' => ['placeholder' => Yii::t('prequest', 'Выберите организацию по ID или Наименованию'),            
+            'options' => ['placeholder' => 'Выберите организацию по ID или Наименованию',
                 ],
              'pluginOptions' => [
                     'minimumInputLength' => 2,

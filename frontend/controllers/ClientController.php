@@ -408,6 +408,7 @@ class ClientController extends DefaultController {
                             $profile->setUser($user->id);
                             $profile->sms_allow = Profile::SMS_ALLOW;
                             $profile->save();
+                            $organization->is_invited = 1;
                             $organization->save();
                             $user->setOrganization($organization)->save();
                             $get_supp_org_id = $organization->id;

@@ -417,11 +417,11 @@ JS;
                                     <small><?= $organization->name ?></small>
                                 </p>
                                 <?php
-                                if($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
+                                if(!$organization->is_invited && ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
                                    $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                                    $user->role_id == Role::ROLE_ADMIN ||
                                    $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
-                                    in_array($user->role_id, Role::getFranchiseeEditorRoles()))
+                                    in_array($user->role_id, Role::getFranchiseeEditorRoles())))
                                 {
                                     echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru'=>"БИЗНЕСЫ"]), ['user/change-form'], [
                                         'data' => [

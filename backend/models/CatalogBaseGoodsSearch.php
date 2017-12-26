@@ -42,7 +42,7 @@ class CatalogBaseGoodsSearch extends CatalogBaseGoods
      *
      * @return ActiveDataProvider
      */
-    public function search($params = null)
+    public function search($params = null, $id = null)
     {
         $goodsTable = CatalogBaseGoods::tableName();
         $vendorTable = \common\models\Organization::tableName();

@@ -1,5 +1,9 @@
 <?php
 $currencySymbol = $order->currency->iso_code;
+
+/**
+ * @var $order \common\models\Order
+ */
 ?>
 
 <div>
@@ -14,7 +18,7 @@ $currencySymbol = $order->currency->iso_code;
         </small>
         <br>
         <small>
-            <?= $order->requested_delivery ? Yii::t('message', 'frontend.views.order.delivery_date_two', ['ru'=>'Запрошенная дата доставки:']) . Yii::$app->formatter->asDate($order->requested_delivery, 'php:d.m.Y') : '' ?>
+            <?= $order->requested_delivery ? Yii::t('message', 'frontend.views.order.delivery_date_two', ['ru'=>'Запрошенная дата доставки:']) .' '. Yii::$app->formatter->asDate($order->requested_delivery, 'php:d.m.Y') : '' ?>
         </small>
     </div>
 
@@ -38,7 +42,7 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('message', 'frontend.views.order.phone', ['ru'=>'Телефон']) ?>:
+                                <?= Yii::t('message', 'frontend.views.order.phone', ['ru'=>'Телефон']) ?>
                                 <?= isset($order->createdByProfile->phone) ? $order->createdByProfile->phone : $order->createdByProfile->phone ?>
                             </td>
                         </tr>
@@ -55,7 +59,7 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('message', 'frontend.views.order.address', ['ru'=>'Адрес']) ?>:
+                                <?= Yii::t('message', 'frontend.views.order.address', ['ru'=>'Адрес']) ?>
                                 <?= $order->client->locality ?>, <?= $order->client->route ?>, <?= $order->client->street_number ?>
                             </td>
                         </tr>
@@ -72,7 +76,7 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('message', 'frontend.views.order.phone_two') ?>:
+                                <?= Yii::t('message', 'frontend.views.order.phone_two') ?>
                                 <?= isset($order->acceptedByProfile->phone) ? $order->acceptedByProfile->phone : ''?>
                             </td>
                         </tr>
@@ -89,7 +93,7 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('message', 'frontend.views.order.address_two') ?>:
+                                <?= Yii::t('message', 'frontend.views.order.address_two') ?>
                                 <?= isset($order->vendor->locality) ? $order->vendor->locality : '' ?>
                                 <?= isset($order->vendor->route) ? ', '.$order->vendor->route  : '' ?>
                                 <?= (isset($order->vendor->street_number) && $order->vendor->street_number != 'undefined') ? ', '.$order->vendor->street_number : '' ?>
@@ -124,15 +128,23 @@ $currencySymbol = $order->currency->iso_code;
                 </p>
             <?php } ?>
             <p>
-                <?= Yii::t('message', 'frontend.views.order.delivery_price') ?> <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
-            <p style="font-size: 14px; font-weight: bold;" >
-                <?= mb_strtoupper(Yii::t('message', 'frontend.views.order.total_price')) ?> <?= $order->total_price ?> <?= $currencySymbol ?>
+                <?= Yii::t('message', 'frontend.views.order.delivery_price') ?> <?= $order->calculateDelivery() ?> <?= $currencySymbol ?>
+            </p>
+            <p style="font-size: 12px;" >
+                <?= Yii::t('message', 'frontend.views.order.total_price') ?> <?= $order->getTotalPriceWithOutDiscount() ?> <?= $currencySymbol ?>
+            </p>
+            <p style="font-size: 12px;font-weight: bold;" >
+                <?= mb_strtoupper(Yii::t('message', 'frontend.views.order.total_price_all')) ?> <?= $order->total_price ?> <?= $currencySymbol ?>
             </p>
         </div>
 
-        <div style="text-align:right; padding-top: 10px; width:100%;">
+        <div style="text-align:right; padding-top: 20px; width:100%;">
             <div class = "but_p_1" style="display: block;float: left;font-size: 12px;">
                 <?= Yii::t('message', 'frontend.views.order.signature') ?>: ______________
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
                 &nbsp;
                 <?= Yii::t('message', 'frontend.views.order.current_date') ?>: _________________
             </div>

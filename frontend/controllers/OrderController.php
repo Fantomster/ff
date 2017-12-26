@@ -180,7 +180,6 @@ class OrderController extends DefaultController {
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
         }
-
         $vendors = $client->getSuppliers($selectedCategory);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
@@ -201,9 +200,9 @@ class OrderController extends DefaultController {
         $dataProvider->pagination->pageSize = 10;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
+            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors', 'selectedVendor'));
         } else {
-            return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
+            return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors', 'selectedVendor'));
         }
     }
 

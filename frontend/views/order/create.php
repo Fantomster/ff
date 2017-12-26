@@ -150,7 +150,7 @@ $this->registerJs(
                         ?>
                         <?=
                         $form->field($searchModel, 'selectedVendor')
-                            ->dropDownList($vendors, ['id' => 'selectedVendor'])
+                            ->dropDownList($vendors, ['id' => 'selectedVendor', 'options'=>[$selectedVendor=>['selected'=>true]]])
                             ->label(false)
                         ?>
                         <?php ActiveForm::end(); ?>

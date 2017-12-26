@@ -312,12 +312,21 @@ class Order extends \yii\db\ActiveRecord {
         return $this->total_price;
     }
 
+    public function getTotalPriceWithOutDiscount() {
+        $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
+        if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
+            $total_price += floatval($this->vendor->delivery->delivery_charge);
+        }
+        return number_format(round($total_price, 2), 2, '.', '');
+    }
+
     public function getFormattedDiscount($iso_code = false) {
         switch ($this->discount_type) {
             case self::DISCOUNT_NO_DISCOUNT:
                 return false;
             case self::DISCOUNT_FIXED:
-                return $this->discount . ' ' . ($iso_code ? $this->currency->iso_code : $this->currency->symbol);
+                return number_format(round($this->discount, 2), 2, '.', '') . ' ' . ($iso_code ? $this->currency->iso_code : $this->currency->symbol);
             case self::DISCOUNT_PERCENT:
                 return $this->discount . "%";
         }

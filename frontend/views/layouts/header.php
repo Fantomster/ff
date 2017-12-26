@@ -417,7 +417,7 @@ JS;
                                     <small><?= $organization->name ?></small>
                                 </p>
                                 <?php
-                                if(!$user->status==\common\models\User::STATUS_UNCONFIRMED_EMAIL && ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
+                                if($user->status==\common\models\User::STATUS_ACTIVE && ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
                                    $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                                    $user->role_id == Role::ROLE_ADMIN ||
                                    $user->role_id == Role::ROLE_FKEEPER_MANAGER ||

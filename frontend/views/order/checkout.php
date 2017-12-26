@@ -418,7 +418,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             </div>
                             <div class="block_right_wrap_1">
                                 <?php if ($forMinOrderPrice) { ?>
-                                    <p><?= Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) ?></p><p> <?= $currencySymbol ?></p>
+                                    <p><?= Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) ?></p><p><?= $forMinOrderPrice ?> <?= $currencySymbol ?></p>
                                 <?php } elseif ($forFreeDelivery > 0) { ?>
                                     <p><?= Yii::t('message', 'frontend.views.order.until_free', ['ru'=>'до бесплатной доставки']) ?> </p><p> <?= $currencySymbol ?></p>
                                 <?php } elseif ($forFreeDelivery == 0) { ?>

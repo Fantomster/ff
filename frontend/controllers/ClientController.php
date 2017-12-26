@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\PaymentSearch;
+use common\models\UserToken;
 use Yii;
 use yii\web\UploadedFile;
 use common\models\User;
@@ -261,8 +262,23 @@ class ClientController extends DefaultController {
                 }
                 if ($user && ($usersCount > 1)) {
 //                    $user->role_id = Role::ROLE_USER;
-                    $user->organization_id = null;
-                    if ($user->save()) {
+                    $email_notification = $user->emailNotification;
+                    $sms_notification = $user->smsNotification;
+                    $user_token = UserToken::findOne(['user_id'=>$user->id]);
+                    $profile = $user->profile;
+                    if($profile){
+                        $profile->delete();
+                    }
+                    if($email_notification){
+                        $email_notification->delete();
+                    }
+                    if($sms_notification) {
+                        $sms_notification->delete();
+                    }
+                    if($user_token){
+                        $user_token->delete();
+                    }
+                    if ($user->delete()) {
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru'=>'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
@@ -408,7 +424,6 @@ class ClientController extends DefaultController {
                             $profile->setUser($user->id);
                             $profile->sms_allow = Profile::SMS_ALLOW;
                             $profile->save();
-                            $organization->is_invited = 1;
                             $organization->save();
                             $user->setOrganization($organization)->save();
                             $get_supp_org_id = $organization->id;

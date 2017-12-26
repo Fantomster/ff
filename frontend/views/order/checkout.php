@@ -373,7 +373,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                             'id' => $order->id,
                                             'all' => false,
                                         ]
-                                    ]) :  ('<div class="pull-right" style="padding: 5px;"><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . '</p><p>' . $forMinOrderPrice . Yii::t('message', 'frontend.views.order.rouble', ['ru'=>'руб']) . '</p></div>');
+                                    ]) :  ('<div class="pull-right" style="padding: 5px;"><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . '</p><p>' . $forMinOrderPrice . ' ' . Yii::t('message', 'frontend.views.order.rouble', ['ru'=>'руб']) . '</p></div>');
                                     ?>
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru'=>'Комментарий к заказу']), [

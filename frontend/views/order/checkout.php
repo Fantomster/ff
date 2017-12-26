@@ -373,7 +373,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                             'id' => $order->id,
                                             'all' => false,
                                         ]
-                                    ]) :  ('<div class="pull-right" style="padding: 5px;"><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . '</p><p>' . $forMinOrderPrice . ' ' . Yii::t('message', 'frontend.views.order.rouble', ['ru'=>'руб']) . '</p></div>');
+                                    ]) :  ('<div class="pull-right" style="padding: 5px;"><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . '</p><p>' . $forMinOrderPrice . ' ' . $currencySymbol . '</p></div>');
                                     ?>
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru'=>'Комментарий к заказу']), [
@@ -418,9 +418,9 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             </div>
                             <div class="block_right_wrap_1">
                                 <?php if ($forMinOrderPrice) { ?>
-                                    <p><?= Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) ?></p><p><?= $forMinOrderPrice ?> <?= Yii::t('message', 'frontend.views.order.rouble', ['ru'=>'руб']) ?></p>
+                                    <p><?= Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) ?></p><p> <?= $currencySymbol ?></p>
                                 <?php } elseif ($forFreeDelivery > 0) { ?>
-                                    <p><?= Yii::t('message', 'frontend.views.order.until_free', ['ru'=>'до бесплатной доставки']) ?> </p><p><?= $forFreeDelivery ?> <?= Yii::t('message', 'frontend.views.order.rouble_two', ['ru'=>'руб']) ?></p>
+                                    <p><?= Yii::t('message', 'frontend.views.order.until_free', ['ru'=>'до бесплатной доставки']) ?> </p><p> <?= $currencySymbol ?></p>
                                 <?php } elseif ($forFreeDelivery == 0) { ?>
                                     <p><?= Yii::t('message', 'frontend.views.order.free_delivery', ['ru'=>'бесплатная доставка!']) ?></p>
                                 <?php } else { ?>

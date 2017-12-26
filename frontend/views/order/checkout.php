@@ -346,7 +346,9 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     $currencySymbol = $order->currency->symbol;
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
-                    ?>
+                    if($forMinOrderPrice):
+                        ?><style>#createAll{display: none;}</style>
+                        <?php endif;?>
                     <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
                         <div class="block_left">
                             <div class="block_left_top">
@@ -364,14 +366,14 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                 </div>
                                 <div class="checkout_buttons">
                                     <?=
-                                    Html::button(Yii::t('message', 'frontend.views.order.make_order', ['ru'=>'Оформить заказ']), [
+                                    (!$forMinOrderPrice) ? Html::button(Yii::t('message', 'frontend.views.order.make_order', ['ru'=>'Оформить заказ']), [
                                         'class' => 'but_go_zakaz create pull-right',
                                         'data' => [
                                             'url' => Url::to(['/order/ajax-make-order']),
                                             'id' => $order->id,
                                             'all' => false,
                                         ]
-                                    ]);
+                                    ]) :  ('<div class="pull-right" style="padding: 5px;"><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . '</p><p>' . $forMinOrderPrice . Yii::t('message', 'frontend.views.order.rouble', ['ru'=>'руб']) . '</p></div>');
                                     ?>
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru'=>'Комментарий к заказу']), [
@@ -425,14 +427,14 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     <p><?= Yii::t('app', 'включая доставку') ?></p><p><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
                                 <?php } ?>
                                 <?=
-                                Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru'=>'Оформить заказ']), [
+                                (!$forMinOrderPrice) ? Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru'=>'Оформить заказ']), [
                                     'class' => 'create',
                                     'data' => [
                                         'url' => Url::to(['/order/ajax-make-order']),
                                         'id' => $order->id,
-                                        'all' => false,
-                                    ]
-                                ]);
+                                        'all' => false
+                                    ],
+                                ]) : '';
                                 ?>
                             </div>
 

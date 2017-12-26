@@ -594,7 +594,7 @@ class OrderController extends DefaultController {
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
 
-        return true; //$this->renderPartial('_orders', compact('orders'));
+        return $post['id']; //$this->renderPartial('_orders', compact('orders'));
     }
 
     public function actionAjaxShowDetails() {
@@ -638,7 +638,7 @@ class OrderController extends DefaultController {
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
 
-        return true;
+        return $product_id;
     }
 
     public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {

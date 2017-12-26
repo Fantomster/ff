@@ -73,6 +73,7 @@ $this->registerJs(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
+                   $(\'a[data-id="\'+result+\'"]\').parent().parent().addClass("success");
                 });
             });
             
@@ -176,6 +177,15 @@ $this->registerJs(
                             'summary' => '',
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
+                            'rowOptions'=>function($model) use ($orders){
+                                foreach ($orders as $order){
+                                    foreach($order->orderContent as $product){
+                                        if($model['id'] == $product->product_id){
+                                            return ['class' => 'success'];
+                                        }
+                                    }
+                                }
+                            },
                             'pager' => [
                                 'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
                             ],

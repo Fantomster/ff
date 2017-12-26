@@ -42,6 +42,7 @@ class CartWidget extends Widget {
             clicked.data("url")
         )
         .done(function (result) {
+            $(\'a[data-id="\'+result+\'"]\').parent().parent().removeClass("success");
             $.pjax.reload("#side-cart", {url:"'.$cartUrl.'", replace: false,timeout:30000});
         });
         return false;

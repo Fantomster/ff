@@ -5,15 +5,16 @@ $currencySymbol = $order->currency->iso_code;
 <div>
     <div class="pdf_header" style="text-align: center;">
         <span style="font-size: 20px;" >
-            <b><?= Yii::t('app', 'Заказ №') ?><?=$order->id?></b>
+            <b><?= Yii::t('message', 'frontend.views.order.order_no', ['ru'=>'Заказ №']) ?><?=$order->id?></b>
         </span>
         <br>
         <small>
-            <?= Yii::t('app', 'от') ?> <?=Yii::$app->formatter->asDatetime($order->created_at, 'php:d.m.Y, H:i')?>
+            <?= Yii::t('message', 'frontend.views.order.pdf_ot', ['ru'=>'от']) ?>
+            <?=Yii::$app->formatter->asDatetime($order->created_at, 'php:d.m.Y, H:i')?>
         </small>
         <br>
         <small>
-            <?= $order->requested_delivery ? Yii::t('app', 'Запрошенная дата доставки: ') . Yii::$app->formatter->asDate($order->requested_delivery, 'php:d.m.Y') : '' ?>
+            <?= $order->requested_delivery ? Yii::t('message', 'frontend.views.order.delivery_date_two', ['ru'=>'Запрошенная дата доставки:']) . Yii::$app->formatter->asDate($order->requested_delivery, 'php:d.m.Y') : '' ?>
         </small>
     </div>
 
@@ -26,14 +27,19 @@ $currencySymbol = $order->currency->iso_code;
                 <td>
                     <table style="font-size: 12px;">
                         <tr>
-                            <td style="font-size: 14px;"><b><?= Yii::t('app', 'Заказчик') ?></b></td>
+                            <td style="font-size: 14px;">
+                                <b>
+                                    <?= Yii::t('message', 'frontend.views.order.orderer', ['ru'=>'Заказчик:']) ?>
+                                </b>
+                            </td>
                         </tr>
                         <tr>
                             <td><b><?= $order->client->name ?> <?= ($order->client->legal_entity ? "(" .$order->client->legal_entity. ")" : '') ?></b></td>
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('app', 'Телефон:') ?> <?= isset($order->createdByProfile->phone) ? $order->createdByProfile->phone : $order->createdByProfile->phone ?>
+                                <?= Yii::t('message', 'frontend.views.order.phone', ['ru'=>'Телефон']) ?>:
+                                <?= isset($order->createdByProfile->phone) ? $order->createdByProfile->phone : $order->createdByProfile->phone ?>
                             </td>
                         </tr>
                         <tr>
@@ -43,12 +49,14 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('app', 'Заказ создал:') ?> <?= isset($order->createdByProfile->full_name) ? $order->createdByProfile->full_name : '' ?>
+                                <?= Yii::t('message', 'frontend.views.order.user_order_create', ['ru'=>'Заказ создал']) ?>:
+                                <?= isset($order->createdByProfile->full_name) ? $order->createdByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('app', 'Адрес:') ?> <?= $order->client->locality ?>, <?= $order->client->route ?>, <?= $order->client->street_number ?>
+                                <?= Yii::t('message', 'frontend.views.order.address', ['ru'=>'Адрес']) ?>:
+                                <?= $order->client->locality ?>, <?= $order->client->route ?>, <?= $order->client->street_number ?>
                             </td>
                         </tr>
                     </table>
@@ -64,7 +72,8 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('app', 'Телефон:') ?> <?= isset($order->acceptedByProfile->phone) ? $order->acceptedByProfile->phone : ''?>
+                                <?= Yii::t('message', 'frontend.views.order.phone_two') ?>:
+                                <?= isset($order->acceptedByProfile->phone) ? $order->acceptedByProfile->phone : ''?>
                             </td>
                         </tr>
                         <tr>
@@ -74,12 +83,14 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('app', 'Заказ принял:') ?> <?= isset($order->acceptedByProfile->full_name) ? $order->acceptedByProfile->full_name : '' ?>
+                                <?= Yii::t('message', 'frontend.views.order.order_accept') ?>:
+                                <?= isset($order->acceptedByProfile->full_name) ? $order->acceptedByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <?= Yii::t('app', 'Адрес:') ?> <?= isset($order->vendor->locality) ? $order->vendor->locality : '' ?>
+                                <?= Yii::t('message', 'frontend.views.order.address_two') ?>:
+                                <?= isset($order->vendor->locality) ? $order->vendor->locality : '' ?>
                                 <?= isset($order->vendor->route) ? ', '.$order->vendor->route  : '' ?>
                                 <?= (isset($order->vendor->street_number) && $order->vendor->street_number != 'undefined') ? ', '.$order->vendor->street_number : '' ?>
                             </td>
@@ -94,7 +105,9 @@ $currencySymbol = $order->currency->iso_code;
         <div>
             <?php if (!empty($order->comment)) { ?>
                 <div style="font-size: 12px;width: 100%;height: auto;text-align:left;padding: 5px;margin-bottom: 10px;">
-                    <b style="font-size: 14px;" ><?= Yii::t('app', 'Комментарий к заказу:') ?></b>
+                    <b style="font-size: 14px;" >
+                        <?= Yii::t('message', 'frontend.views.order.order_comment') ?>
+                    </b>
                     <p class = "pl" style="padding-top: 5px;">
                         <?= $order->comment ?>
                     </p>
@@ -106,18 +119,22 @@ $currencySymbol = $order->currency->iso_code;
         <div style="text-align: right;font-size: 12px;padding-top:10px;">
             <?php if ($order->discount) { ?>
                 <p>
-                    <?= Yii::t('app', 'Скидка:') ?> <?= $order->getFormattedDiscount(true) ?>
+                    <?= Yii::t('message', 'frontend.views.order.discount') ?>:
+                    <?= $order->getFormattedDiscount(true) ?>
                 </p>
             <?php } ?>
-            <p><?= Yii::t('app', 'Стоимость доставки:') ?> <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
+            <p>
+                <?= Yii::t('message', 'frontend.views.order.delivery_price') ?> <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
             <p style="font-size: 14px; font-weight: bold;" >
-                <?= Yii::t('app', 'ИТОГО:') ?> <?= $order->total_price ?> <?= $currencySymbol ?>
+                <?= mb_strtoupper(Yii::t('message', 'frontend.views.order.total_price')) ?> <?= $order->total_price ?> <?= $currencySymbol ?>
             </p>
         </div>
 
-        <div style="display:none;text-align:right; padding-top: 50px;width:100%;">
-            <div class = "but_p_1" style="color: #999C9E;display: block;float: left">
-                <?= Yii::t('app', 'Подпись:') ?> ______________ &nbsp;&nbsp;<?= Yii::t('app', 'Дата:') ?> _________________
+        <div style="text-align:right; padding-top: 10px; width:100%;">
+            <div class = "but_p_1" style="display: block;float: left;font-size: 12px;">
+                <?= Yii::t('message', 'frontend.views.order.signature') ?>: ______________
+                &nbsp;
+                <?= Yii::t('message', 'frontend.views.order.current_date') ?>: _________________
             </div>
         </div>
     </div>

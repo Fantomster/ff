@@ -137,17 +137,5 @@ $currencySymbol = $order->currency->iso_code;
                 <?= mb_strtoupper(Yii::t('message', 'frontend.views.order.total_price_all')) ?> <?= $order->total_price ?> <?= $currencySymbol ?>
             </p>
         </div>
-
-        <div style="text-align:right; padding-top: 20px; width:100%;">
-            <div class = "but_p_1" style="display: block;float: left;font-size: 12px;">
-                <?= Yii::t('message', 'frontend.views.order.signature') ?>: ______________
-                &nbsp;
-                &nbsp;
-                &nbsp;
-                &nbsp;
-                &nbsp;
-                <?= Yii::t('message', 'frontend.views.order.current_date') ?>: _________________
-            </div>
-        </div>
     </div>
 </div>

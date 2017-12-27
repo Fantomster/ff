@@ -373,7 +373,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                             'id' => $order->id,
                                             'all' => false,
                                         ]
-                                    ]) :  ('<div class="pull-right" style="padding: 5px;"><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . '</p><p>' . $forMinOrderPrice . ' ' . $currencySymbol . '</p></div>');
+                                    ]) :  ('<div class="but_go_zakaz create pull-right" style="padding: 5px; background: none; color: black; border: 0; width: 230px;">' . Yii::t('message', 'frontend.views.order.until_min', ['ru'=>'до минимального заказа']) . ' ' . $forMinOrderPrice . ' ' . $currencySymbol . '<button type="button" class="btn btn-default" disabled="disabled">'.Yii::t('message', 'frontend.views.order.make_order_two', ['ru'=>'Оформить заказ']).'</button></div>');
                                     ?>
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru'=>'Комментарий к заказу']), [
@@ -434,7 +434,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         'id' => $order->id,
                                         'all' => false
                                     ],
-                                ]) : '';
+                                ]) : '<button type="button" class="btn btn-default" disabled="disabled" style="background-color: #f4f4f4; color: #444; border-color: #ddd;">'.Yii::t('message', 'frontend.views.order.make_order_two', ['ru'=>'Оформить заказ']).'</button>';
                                 ?>
                             </div>
 

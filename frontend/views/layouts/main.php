@@ -94,6 +94,13 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-P3M99V4');</script>
+        <!-- End Google Tag Manager -->
         <![endif]-->
         <style>	
             .fixed{
@@ -227,7 +234,12 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 }
         </style>
     </head>
-    <body>	
+    <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P3M99V4" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
         <?php $this->beginBody() ?>
         <div id="loader-show"></div>
 
@@ -291,6 +303,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 <!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_rest', ['ru'=>'Для ресторанов']), Yii::$app->params['staticUrl']['client']) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_vendors', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.rates', ['ru'=>'Тарифы']), ["/payment"]) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.about_two', ['ru'=>'О компании']), ["/site/about"]) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.contacts_two', ['ru'=>'Контакты']), ["/site/contacts"]) ?></li>
                                 </ul>

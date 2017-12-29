@@ -9,11 +9,12 @@ class Order extends \common\models\Order
 {
     public $count;
     public $page;
+    public $symbol;
     
     public function fields()
     {
         return ['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 
-            'created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'discount', 'discount_type','currency_id'];
+            'created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'discount', 'discount_type','currency_id', 'symbol'];
     }
     
      /**

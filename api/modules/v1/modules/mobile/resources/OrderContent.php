@@ -9,10 +9,11 @@ class OrderContent extends \common\models\OrderContent
 {
     public $list;
     public $ed;
+    public $symbol;
     
     public function fields()
     {
-        return ['id', 'order_id', 'product_id', 'quantity', 'price', 'initial_quantity', 'product_name', 'units', 'article', 'ed'];
+        return ['id', 'order_id', 'product_id', 'quantity', 'price', 'initial_quantity', 'product_name', 'units', 'article', 'ed', 'symbol'];
     }
     
      /**

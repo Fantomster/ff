@@ -42,12 +42,22 @@ use api\common\models\RkAccess;
             </div>
             <!-- /.box-header -->
             <div class="box-body">
-
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
                             <?= Html::a('<h4 class="m-b-xs text-info">R-Keeper</h4>', ['rkws/default']) ?>
                             <p class="small">Интеграция с R-keeper STORE HOUSE через White Server (облачная версия)</p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="hpanel">
+                    <div class="panel-body">
+                        <div class="col-md-6 text-left">
+                            <?= Html::a('<h4 class="m-b-xs text-info">iiko Office</h4>', ['iiko/default']) ?>
+                            <p class="small">Интеграция с iiko Office</p>
                         </div>
                         <div class="col-md-6 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>

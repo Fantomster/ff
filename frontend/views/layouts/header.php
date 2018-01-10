@@ -21,7 +21,7 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
-    $changeNetworkUrl = Url::to(['/user/change']);
+    $changeNetworkUrl = Yii::$app->urlManager->createAbsoluteUrl(['/user/change']);
     $changeFormUrl = Url::to(['/user/default/change-form']);
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
@@ -423,7 +423,7 @@ JS;
                                    $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
                                     in_array($user->role_id, Role::getFranchiseeEditorRoles())))
                                 {
-                                    echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru'=>"БИЗНЕСЫ"]), ['user/change-form'], [
+                                    echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru'=>"БИЗНЕСЫ"]), ['/user/change-form'], [
                                         'data' => [
                                             'target' => '#changeNetOrg',
                                             'toggle' => 'modal',

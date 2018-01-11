@@ -1,5 +1,5 @@
 <?php
-    $this->title = 'Усправление лицензиями';
+    $this->title = 'Управление лицензиями';
     $this->params['breadcrumbs'][] = $this->title;
 ?>
 

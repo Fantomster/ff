@@ -46,7 +46,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     return '';
                 },
             ],
-            'changeCoefficient' => [
+            'change-coefficient' => [
                 'class' => EditableColumnAction::className(),
                 'modelClass' => iikoWaybillData::className(),
                 'outputValue' => function ($model, $attribute) {

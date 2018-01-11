@@ -51,9 +51,22 @@ class iikoWaybillData extends \yii\db\ActiveRecord
         return [
             [['waybill_id'], 'required'],
             [['waybill_id', 'product_id', 'product_rid', 'org', 'vat', 'vat_included'], 'integer'],
-            [['sum', 'quant', 'defsum', 'defquant', 'koef'], 'number'],
-            [['created_at', 'updated_at', 'pdenom'], 'safe'],
+            [['sum', 'quant', 'defsum', 'defquant', 'koef', 'created_at', 'updated_at', 'pdenom'], 'safe'],
             [['munit'], 'string', 'max' => 10],
+            [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
+            ['koef', 'filter', 'filter' => function ($value) {
+                $newValue = 0 + str_replace(',', '.', $value);
+                return $newValue;
+            }],
+            ['sum', 'filter', 'filter' => function ($value) {
+                $newValue = 0 + str_replace(',', '.', $value);
+                return $newValue;
+            }],
+            ['quant', 'filter', 'filter' => function ($value) {
+                $newValue = 0 + str_replace(',', '.', $value);
+                return $newValue;
+            }],
+            [['koef', 'sum', 'quant'], 'number', 'min' => 0.0001],
         ];
     }
 

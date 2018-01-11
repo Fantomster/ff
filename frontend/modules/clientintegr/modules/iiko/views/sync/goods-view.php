@@ -46,6 +46,19 @@ $this->title = 'Интеграция с iiko Office';
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
+                            'columns' => [
+                                'id',
+                                'denom',
+                                'org_id',
+                                'num',
+                                'code',
+                                'product_type',
+                                'cooking_place_type',
+                                'unit',
+                                'is_active',
+                                'created_at',
+                                'updated_at'
+                            ],
                             'pjax' => false,
                             'filterPosition' => false,
                             'options' => ['class' => 'table-responsive'],

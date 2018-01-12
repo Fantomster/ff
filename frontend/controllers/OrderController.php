@@ -724,7 +724,7 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetNote($product_id) {
+    /*public function actionAjaxSetNote($product_id) {
 
         $client = $this->currentUser->organization;
 
@@ -740,6 +740,29 @@ class OrderController extends DefaultController {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru'=>"Комментарий к товару добавлен"]), "comment" => $note->note, "type" => "success"];
             return $result;
+        }
+
+        return false;
+    }*/
+
+    public function actionAjaxSetNote($order_content_id) {
+
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $orderContent = OrderContent::find()->where(['id' => $order_content_id])->one();
+            if ($orderContent) {
+                $order = $orderContent->order;
+
+                if ($order && $order->client_id == $client->id && $order->status == Order::STATUS_FORMING) {
+                    $orderContent->comment = Yii::$app->request->post('comment');
+                    $orderContent->save();
+                    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                    $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru' => "Комментарий к товару добавлен"]), "comment" => $orderContent->comment, "type" => "success"];
+                    return $result;
+                }
+            }
+             return false;
         }
 
         return false;

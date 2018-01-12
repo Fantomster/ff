@@ -9,7 +9,7 @@ $content = $order->orderContent;
 $vendor_id = $order->vendor_id;
 
 foreach ($content as $position) {
-    $note = $position->getNote();
+    $note = $position->comment;
     ?>
     <div class="block_left_bot">
         <div class="block_left_bot_left">
@@ -22,10 +22,10 @@ foreach ($content as $position) {
                 'class' => 'add-note but_com',
                 'data' => [
                     'id' => $position->product_id,
-                    'url' => Url::to(['order/ajax-set-note', 'product_id' => $position->product_id]),
+                    'url' => Url::to(['order/ajax-set-note', 'order_content_id' => $position->id]),
                     'toggle' => "tooltip",
                     'placement' => "bottom",
-                    'original-title' => isset($note) ? $note->note : '',
+                    'original-title' => isset($position->comment) ? $position->comment : '',
                 ],
             ])
             ?>

@@ -14,6 +14,7 @@ use Yii;
  * @property string $price
  * @property string $product_name
  * @property integer $units
+ * @property string $comment
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
@@ -40,6 +41,8 @@ class OrderContent extends \yii\db\ActiveRecord
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
             [['order_id', 'product_id'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units'], 'number'],
+            [['comment'], 'safe'],
+            [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
         ];
@@ -57,6 +60,7 @@ class OrderContent extends \yii\db\ActiveRecord
             'initial_quantity' => Yii::t('app','common.models.asked_amount', ['ru'=>'Запрошенное количество']),
             'price' => Yii::t('app','common.models.price_three', ['ru'=>'Цена']),
             'total' => Yii::t('app','common.models.sum', ['ru'=>'Сумма']),
+            'comment' => 'Comment',
         ];
     }
 

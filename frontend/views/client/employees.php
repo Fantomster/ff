@@ -128,7 +128,7 @@ $this->registerJs(
                     'format' => 'raw',
                     'value' => function ($data) {
 
-                        if ($data === null) {
+                        if ($data->profile === null) {
                             return '';
                         }
 

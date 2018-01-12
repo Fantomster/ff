@@ -130,6 +130,7 @@ $this->registerJs(
 
                         if (!isset($data)) {
                             return '';
+                            exit();
                         }
 
                         $link = Html::a($data->profile->full_name, ['client/ajax-update-user', 'id' => $data->id], [

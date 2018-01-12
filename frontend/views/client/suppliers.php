@@ -137,6 +137,12 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'value' => function ($data) {
             $result = "";
+
+            if (!isset($data)) {
+                return "<div class='btn-group'>" . $result . "</div>";
+                exit();
+            }
+
             if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru'=>'Заказ']), [

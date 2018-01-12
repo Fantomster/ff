@@ -127,6 +127,11 @@ $this->registerJs(
                     'attribute' => 'profile.full_name',
                     'format' => 'raw',
                     'value' => function ($data) {
+
+                        if (!isset($data)) {
+                            return '';
+                        }
+
                         $link = Html::a($data->profile->full_name, ['client/ajax-update-user', 'id' => $data->id], [
                                     'data' => [
                                         'target' => '#add-user',

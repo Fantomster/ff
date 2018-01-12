@@ -138,9 +138,8 @@ $gridColumnsCatalog = [
         'value' => function ($data) {
             $result = "";
 
-            if (!isset($data)) {
+            if ($data === null) {
                 return "<div class='btn-group'>" . $result . "</div>";
-                exit();
             }
 
             if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {

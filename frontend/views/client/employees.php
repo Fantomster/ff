@@ -128,9 +128,8 @@ $this->registerJs(
                     'format' => 'raw',
                     'value' => function ($data) {
 
-                        if (!isset($data)) {
+                        if ($data === null) {
                             return '';
-                            exit();
                         }
 
                         $link = Html::a($data->profile->full_name, ['client/ajax-update-user', 'id' => $data->id], [

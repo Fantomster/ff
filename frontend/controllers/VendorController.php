@@ -388,10 +388,6 @@ class VendorController extends DefaultController {
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
                 //array_push($articleArray, (string) $article);
-                if (empty($article)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_two', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_art', ['ru'=>'Не указан <strong>Артикул</strong>'])]];
-                    return $result;
-                }
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_name', ['ru'=>'Не указано <strong>Наименование</strong>'])]];
                     return $result;

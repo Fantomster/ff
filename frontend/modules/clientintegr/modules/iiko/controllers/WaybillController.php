@@ -311,6 +311,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db_api->beginTransaction();
+
+        /**
+            header ("Content-Type:text/xml");
+            $id = Yii::$app->request->get('id');
+            $model = $this->findModel($id);
+            echo $model->getXmlDocument();
+            exit;
+        */
+
         $api = iikoApi::getInstance();
         try {
             if (!Yii::$app->request->isAjax) {

@@ -209,9 +209,9 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('amountUnit', $row->munit);
             $item->addChild('vatPercent', $vatPercent);
             $item->addChild('amount', $row->quant);
-            $item->addChild('price', $row->defsum/$row->quant);
+            $item->addChild('price', round($row->sum/$row->quant, 2));
             $item->addChild('discountSum', $discount);
-            $item->addChild('sum', $row->defsum);
+            $item->addChild('sum', $row->sum);
         }
 
         return $xml->asXML();

@@ -274,8 +274,7 @@ Modal::end();
                     ])
                     ?>
                     <?=
-                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru' => 'Изменить валюту:']) . ' </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>' .
-                        '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru' => 'Изменить валюту:']) . ' </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeCurrency',
@@ -320,7 +319,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . $currentCatalog->currency->iso_code,
+                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . ' ' .  $currentCatalog->currency->iso_code,
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],

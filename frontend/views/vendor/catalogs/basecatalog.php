@@ -785,7 +785,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                                 {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
                             ).done(function (response) {
                                 if (response.result === 'success') {
-                                    $.pjax.reload({container: "#kv-unique-id-1", timeout:30000});
+                                    $.pjax.reload({container: "body", timeout:1000000});
                                     resolve();
                                 } else {
                                     swal({

@@ -63,7 +63,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
                 </div>
             </div>
             <div class="modal-body">
-                <div class="handsontable" id="CreateCatalog"></div>   
+                <div class="handsontable" id="CreateCatalog"></div>
             </div>
             <div class="modal-footer">
                 <?=
@@ -266,8 +266,8 @@ $gridColumnsCatalog = [
                                     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                                     'resizableColumns' => false,
                                 ]);
-                                ?>  
-                                <?php Pjax::end(); ?> 
+                                ?>
+                                <?php Pjax::end(); ?>
                             </div>
                         </div>
                     </div>
@@ -301,7 +301,7 @@ $gridColumnsCatalog = [
                             ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label(Yii::t('message', 'frontend.views.client.suppliers.org', ['ru'=>'Организация'])) ?>
-                </div> 
+                </div>
                 <div class="box-footer">
                     <div class="form-group">
                         <?=
@@ -320,7 +320,7 @@ $gridColumnsCatalog = [
                     </div>
                     <div class="form-group">
                         <?= Html::submitButton(Yii::t('message', 'frontend.views.client.suppliers.invite', ['ru'=>'Пригласить']), ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
-                    </div>	    
+                    </div>
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
@@ -361,10 +361,9 @@ $arr = [
     Yii::t('app', 'frontend.views.client.suppliers.var21', ['ru'=>'Отмена']),
 ];
 $language = Yii::$app->sourceLanguage;
-
 $customJs = <<< JS
         
-var currencies = $.map($currencySymbolList, function(el) { return el });
+var currencies = $currencySymbolList;
 var currentCurrency = 1;
    
 $(".content").on("change keyup paste cut", "#searchString", function() {
@@ -781,7 +780,7 @@ $("#organization-name").keyup(function() {
                     }
                     if (value != currentCurrency) {
                         currentCurrency = value;
-                        $(".currency-symbol").html(currencies[currentCurrency-1]);
+                        $(".currency-symbol").html(currencies[currentCurrency]);
                         resolve();
                     } else {
                         reject("$arr[20]")

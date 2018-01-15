@@ -168,6 +168,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Загруженные каталоги',
                                     'url' => ['/goods/uploaded-catalogs'],
                                 ],
+                                [
+                                    'label' => 'Валюты',
+                                    'url' => ['/currency/index'],
+                                ],
                             ],
                         ],
                     ]);

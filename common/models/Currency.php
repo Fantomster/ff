@@ -30,7 +30,8 @@ class Currency extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['text', 'symbol'], 'required'],
-            [['text', 'symbol'], 'string', 'max' => 255],
+            [['text', 'symbol', 'num_code', 'iso_code'], 'string', 'max' => 255],
+            [['is_active'], 'boolean']
         ];
     }
 
@@ -42,6 +43,7 @@ class Currency extends \yii\db\ActiveRecord {
             'id' => Yii::t('app', 'ID'),
             'text' => Yii::t('app', 'Text'),
             'symbol' => Yii::t('app', 'Symbol'),
+            'is_active' => Yii::t('app', 'Активна?'),
         ];
     }
 
@@ -67,6 +69,7 @@ class Currency extends \yii\db\ActiveRecord {
     public static function getList() {
         $models = Currency::find()
                 ->select(['id', 'text'])
+                ->where(['is_active'=>true])
                 ->asArray()
                 ->all();
         foreach ($models as &$model){
@@ -83,6 +86,7 @@ class Currency extends \yii\db\ActiveRecord {
     public static function getSymbolList() {
         $models = Currency::find()
                 ->select(['id', 'symbol'])
+                ->where(['is_active'=>true])
                 ->asArray()
                 ->all();
 

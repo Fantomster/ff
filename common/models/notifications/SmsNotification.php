@@ -19,6 +19,7 @@ use common\models\User;
  * @property integer $order_changed
  * @property integer $order_processing
  * @property integer $order_done
+ * @property integer $request_accept
  *
  * @property User $user
  */

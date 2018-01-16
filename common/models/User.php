@@ -77,8 +77,12 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         if ($insert) {
+            /**
+             * Уведомления по Email
+             */
             $emailNotification = new notifications\EmailNotification();
             $emailNotification->user_id = $this->id;
             $emailNotification->orders = true;
@@ -86,12 +90,20 @@ class User extends \amnah\yii2\user\models\User {
             $emailNotification->changes = true;
             $emailNotification->invites = true;
             $emailNotification->save();
-            $smsNotification = new notifications\SmsNotification();
+
+            /**
+             * Уведомления по СМС
+             */
+            $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id]);
+            if(empty($smsNotification)) {
+                $smsNotification = new notifications\SmsNotification();
+            }
             $smsNotification->user_id = $this->id;
             $smsNotification->orders = true;
             $smsNotification->requests = true;
             $smsNotification->changes = true;
             $smsNotification->invites = true;
+
             $smsNotification->save();
         }
         parent::afterSave($insert, $changedAttributes);
@@ -99,20 +111,38 @@ class User extends \amnah\yii2\user\models\User {
 
     /**
      * Set organization id
-     * @param int $orgId
-     * @return static
+     * @param $organization Organization
+     * @param bool $first
+     * @return $this
      */
-    public function setOrganization($organization, $first = false) {
+    public function setOrganization($organization, $first = false)
+    {
         $this->organization_id = $organization->id;
 
-//        if (isset($this->email)) {
-//            $organization->email = $this->email;
-//        }
         if ($first && isset($this->profile->phone)) {
             $organization->phone = $this->profile->phone;
         }
         $organization->save();
         $this->save();
+
+        if ($first) {
+            $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id]);
+            if ($smsNotification) {
+                //Отключаем уведомления по умолчанию для ресторанов
+                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                    $smsNotification->setAttribute('order_created', 0);
+                    $smsNotification->setAttribute('order_done', 0);
+                }
+                //Отключаем уведомления по умолчанию для поставщиков
+                if ($organization->type_id == Organization::TYPE_SUPPLIER) {
+                    $smsNotification->setAttribute('order_processing', 0);
+                    $smsNotification->setAttribute('order_done', 0);
+                    $smsNotification->setAttribute('request_accept', 0);
+                }
+                $smsNotification->save();
+            }
+        }
+
         return $this;
     }
 

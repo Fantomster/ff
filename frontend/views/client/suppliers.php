@@ -460,95 +460,94 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
             console.log(response)
                 if(response.success){
                         // Поставщик уже есть в списке контактов (лочим все кнопки)
-	                if(response.eventType==1){ 
-		        var fio = response.fio;
+	                if(response.eventType==1) { 
+                        var fio = response.fio;
                         var phone = response.phone;
-	                var organization = response.organization;
-	                $('#profile-full_name').val(fio);
+                        var organization = response.organization;
+                        $('#profile-full_name').val(fio);
                         $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization); 
-	                $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
+                        $('#organization-name').val(organization); 
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
                         $('#addProduct').attr('disabled','disabled');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').attr('disabled','disabled');
-		            bootboxDialogShow(response.message);
-		            console.log(organization);    
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id').attr('disabled','disabled');
+                        bootboxDialogShow(response.message);
+                        console.log(organization);    
 	                }
 	                // Вы уже отправили приглашение этому поставщику, ожидается отклик поставщика (лочим кнопки)
-	                if(response.eventType==2){
-		        var fio = response.fio;
+	                if(response.eventType==2) {
+                        var fio = response.fio;
                         var phone = response.phone;
-	                var organization = response.organization;
-	                $('#profile-full_name').val(fio);
+                        var organization = response.organization;
+                        $('#profile-full_name').val(fio);
                         $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization); 
-	                $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
+                        $('#organization-name').val(organization); 
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
                         $('#addProduct').attr('disabled','disabled');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').attr('disabled','disabled');
-		            bootboxDialogShow(response.message);
-		            console.log('type = 2');    
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id').attr('disabled','disabled');
+                        bootboxDialogShow(response.message);
+                        console.log('type = 2');    
 	                }
 	                // Связи не найдено - просто invite (#inviteSupplier)
-	                if(response.eventType==3){
-		        var fio = response.fio;
-                        var phone = response.phone; 
-	                var organization = response.organization;
-	                $('#profile-full_name').val(fio);
-                        $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization);  
-		            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
-                            console.log('type = 3');     
-	                }
-	                // Данный email не может быть использован (лочим все кнопки)
-	                if(response.eventType==4){
-		            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide');
-                            $('#addProduct').attr('disabled','disabled'); 
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').attr('disabled','disabled');
-		            bootboxDialogShow(response.message);
-		            console.log('type = 4');  
-	                }
-                        // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
-	                if(response.eventType==5){
-		                    $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
-                            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
-                            $('#profile-full_name,#organization-name').removeAttr('readonly');
-                                    console.log('type = 5'); 
-                            if($('.has-error').length >= 1) {
-                                 $('#addProduct').attr('disabled','disabled');                 
-                            } else {
-                                $('#addProduct').removeAttr('disabled');                      
-                            }
-                    }
-                        // 
-	                if(response.eventType==6){
-		        var fio = response.fio;
+	                if(response.eventType==3) {
+		                var fio = response.fio;
                         var phone = response.phone; 
                         var organization = response.organization;
-	                $('#profile-full_name').val(fio);
+                        $('#profile-full_name').val(fio);
                         $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization); 
-	                $('#addProduct').addClass('hide');
-	                $('#inviteSupplier').removeClass('hide');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-                            $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
-		            console.log('type = 6');    
+                        $('#organization-name').val(organization);  
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
+                        console.log('type = 3');     
 	                }
-                                      
-                }else{
-		    console.log(response.message); 
+	                // Данный email не может быть использован (лочим все кнопки)
+	                if(response.eventType==4) {
+		                $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
+                        $('#addProduct').attr('disabled','disabled'); 
+		                $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+		                $('#relationcategory-category_id').attr('disabled','disabled');
+		                bootboxDialogShow(response.message);
+		                console.log('type = 4');  
+	                }
+                    // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
+	                if(response.eventType==5){
+                        $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
+                        $('#profile-full_name,#organization-name,#profile-phone').removeAttr('readonly');
+                        console.log('type = 5'); 
+                        if($('.has-error').length >= 1) {
+                             $('#addProduct').attr('disabled','disabled');                 
+                        } else {
+                            $('#addProduct').removeAttr('disabled');                      
+                        }
+                    }
+                    // 
+	                if(response.eventType==6){
+		                var fio = response.fio;
+                        var phone = response.phone; 
+                        var organization = response.organization;
+	                    $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
+                        $('#organization-name').val(organization); 
+                        $('#addProduct').addClass('hide');
+                        $('#inviteSupplier').removeClass('hide');
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
+		                console.log('type = 6');    
+	                }               
+                } else {
+		            console.log(response.message); 
                 }
             },
             error: function(response) {
-		    console.log(response.message); 
+		        console.log(response.message); 
             }
         }); 
 	}	 

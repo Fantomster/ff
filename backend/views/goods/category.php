@@ -40,6 +40,12 @@ $customJs = <<< JS
         });
 
         $(document).on("click", "#clear-multi", function() {
+            if($("#tb-left").yiiGridView("getSelectedRows").length == 0) 
+                  {
+                    alert('Не выбраны товары!');
+                    return;
+                }
+            
             $("#loader-show").showLoading();
             $.post(
                        "$clearUrlMulti",
@@ -57,7 +63,7 @@ $customJs = <<< JS
         });
         
         $(document).on("click", ".set-category", function() {
-            if($(this).data("category") == null)
+            if(!$("#subcat").val())
                 {
                     alert('Не выбрана категория или подкатегория!');
                     return;
@@ -78,11 +84,19 @@ $customJs = <<< JS
         });
         
         $(document).on("click", "#set-multi", function() {
-             if($(this).data("category") == null)
+          
+             if(!$("#subcat").val())
                 {
                     alert('Не выбрана категория или подкатегория!');
                     return;
                 }
+
+             if($("#tb-right").yiiGridView("getSelectedRows").length == 0) 
+                  {
+                    alert('Не выбраны товары!');
+                    return;
+                }
+                
             $("#loader-show").showLoading();
             $.post(
                         "$setUrlMulti",

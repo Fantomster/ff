@@ -43,7 +43,7 @@ class GoodsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market-place', 'import-catalog'],
+                        'actions' => ['ajax-clear-category', 'ajax-set-category', 'ajax-clear-category-multi', 'ajax-set-category-multi', 'ajax-update-product-market-place', 'import-catalog'],
                         'allow' => true,
                         'roles' => [Role::ROLE_ADMIN],
                     ],
@@ -185,7 +185,7 @@ class GoodsController extends Controller {
         echo Json::encode(['output' => '', 'selected' => '']);
     }
 
-    public function actionCategory($vendor_id, $id) {
+    public function actionCategory($vendor_id, $id=0) {
         $vendor = \common\models\Organization::findOne(['id' => $vendor_id]);
 
         $searchModel = new CatalogBaseGoodsSearch();
@@ -208,6 +208,32 @@ class GoodsController extends Controller {
             $product = CatalogBaseGoods::findOne(['id' => $post['id']]);
             $product->category_id = null;
             return $product->save(false);
+        }
+        return false;
+    }
+
+    public function actionAjaxSetCategoryMulti() {
+        $post = Yii::$app->request->post();
+        if ($post) {
+            $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
+            foreach ($products as $product) {
+                $product->category_id = $post['category_id'];
+                $product->save(false);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function actionAjaxClearCategoryMulti() {
+        $post = Yii::$app->request->post();
+        if ($post) {
+            $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
+            foreach ($products as $product) {
+                $product->category_id = null;
+                $product->save(false);
+            }
+            return true;
         }
         return false;
     }

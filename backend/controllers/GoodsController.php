@@ -201,7 +201,9 @@ class GoodsController extends Controller {
         $subCategory = MpCategory::findOne(['id' => $id]);
         if($subCategory === null)
             $subCategory = new MpCategory();
-        $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
+        $category = MpCategory::findOne(['id' => $subCategory->parent]);
+        if($category === null)
+            $category = new MpCategory();
 
         return $this->render('category', compact('id', 'dataProviderCategory', 'dataProviderEmpty', 'vendor', 'subCategory', 'category', 'searchModel', 'searchSetModel'));
     }

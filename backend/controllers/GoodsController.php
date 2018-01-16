@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\models\MpCategory;
 use Yii;
 use common\models\CatalogBaseGoods;
 use common\models\Role;
@@ -197,7 +198,9 @@ class GoodsController extends Controller {
         $dataProviderEmpty->query->andWhere(['supp_org_id' => $vendor_id]);
         $dataProviderEmpty->query->andWhere('(category_id is null) OR (category_id = 0)');
 
-        $subCategory = \common\models\MpCategory::findOne(['id' => $id]);
+        $subCategory = MpCategory::findOne(['id' => $id]);
+        if($subCategory === null)
+            $subCategory = new MpCategory();
         $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
 
         return $this->render('category', compact('id', 'dataProviderCategory', 'dataProviderEmpty', 'vendor', 'subCategory', 'category', 'searchModel', 'searchSetModel'));

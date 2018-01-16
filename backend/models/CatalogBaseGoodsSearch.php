@@ -95,7 +95,7 @@ class CatalogBaseGoodsSearch extends CatalogBaseGoods
             ->andFilterWhere(['like', "$vendorTable.name", $this->vendor_name]);
         
         $query->andFilterWhere(['deleted' => CatalogBaseGoods::DELETED_OFF]);
-        
+
         return $dataProvider;
     }
 }

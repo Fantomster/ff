@@ -126,7 +126,7 @@ Modal::end();
             ])
             ?>
         <?php endif; ?>
-        <?= Html::a("<i class=\"fa fa-fw fa-share\"></i> Перейти к товарам категории", ['category', 'vendor_id' => $id], ['class' => 'btn btn-outline-default btn-sm pull-right']) ?>
+        <?= Html::a("<i class=\"fa fa-fw fa-share\"></i> Распределить товары по категориям", ['category', 'vendor_id' => $id], ['class' => 'btn btn-outline-default btn-sm pull-right']) ?>
     </div>
 
     <?php Pjax::begin(); ?>    <?=

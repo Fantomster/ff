@@ -9,7 +9,7 @@ use common\models\RelationSuppRest;
 use common\models\Catalog;
 use common\models\CatalogGoods;
 use backend\models\CatalogBaseGoodsSearch;
-use yii\helpers\VarDumper;
+use backend\models\CatalogBaseGoodsSetSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -83,7 +83,6 @@ class GoodsController extends Controller {
         $isEditable = true;
         return $this->render('vendor', compact('id', 'searchModel', 'dataProvider', 'isEditable'));
     }
-
 
     public function actionAjaxUpdateProductMarketPlace($id, $supp_org_id = null) {
         if($id){
@@ -188,18 +187,20 @@ class GoodsController extends Controller {
     public function actionCategory($vendor_id, $id=0) {
         $vendor = \common\models\Organization::findOne(['id' => $vendor_id]);
 
-        $searchModel = new CatalogBaseGoodsSearch();
+        $searchSetModel = new CatalogBaseGoodsSetSearch();
 
-        $dataProviderCategory = $searchModel->search();
+        $dataProviderCategory = $searchSetModel->search(Yii::$app->request->queryParams);
         $dataProviderCategory->query->andWhere(['category_id' => $id, 'supp_org_id' => $vendor_id]);
 
-        $dataProviderEmpty = $searchModel->search();
+        $searchModel = new CatalogBaseGoodsSearch();
+        $dataProviderEmpty = $searchModel->search(Yii::$app->request->queryParams);
         $dataProviderEmpty->query->andWhere(['supp_org_id' => $vendor_id]);
         $dataProviderEmpty->query->andWhere('(category_id is null) OR (category_id = 0)');
+
         $subCategory = \common\models\MpCategory::findOne(['id' => $id]);
         $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
 
-        return $this->render('category', compact('id', 'dataProviderCategory', 'dataProviderEmpty', 'vendor', 'subCategory', 'category'));
+        return $this->render('category', compact('id', 'dataProviderCategory', 'dataProviderEmpty', 'vendor', 'subCategory', 'category', 'searchModel', 'searchSetModel'));
     }
 
     public function actionAjaxClearCategory() {
@@ -215,11 +216,14 @@ class GoodsController extends Controller {
     public function actionAjaxSetCategoryMulti() {
         $post = Yii::$app->request->post();
         if ($post) {
-            $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
+            Yii::$app->db->createCommand()
+                ->update(CatalogBaseGoods::tableName(), ['category_id' => $post['category_id']], ['in', 'id', $post['pk']])
+                ->execute();
+           /* $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
             foreach ($products as $product) {
                 $product->category_id = $post['category_id'];
                 $product->save(false);
-            }
+            }*/
             return true;
         }
         return false;
@@ -228,11 +232,14 @@ class GoodsController extends Controller {
     public function actionAjaxClearCategoryMulti() {
         $post = Yii::$app->request->post();
         if ($post) {
-            $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
+            Yii::$app->db->createCommand()
+                ->update(CatalogBaseGoods::tableName(), ['category_id' => null], ['in', 'id', $post['pk']])
+                ->execute();
+            /*$products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
             foreach ($products as $product) {
                 $product->category_id = null;
                 $product->save(false);
-            }
+            }*/
             return true;
         }
         return false;

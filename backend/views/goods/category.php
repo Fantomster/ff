@@ -33,7 +33,10 @@ $customJs = <<< JS
                     $.pjax.reload({container: "#categories"});
                 }
                 $("#loader-show").hideLoading();
-            });
+            })
+            .fail(function() {
+                        $("#loader-show").hideLoading();
+                   });
         });
 
         $(document).on("click", "#clear-multi", function() {
@@ -54,6 +57,11 @@ $customJs = <<< JS
         });
         
         $(document).on("click", ".set-category", function() {
+            if($(this).data("category") == null)
+                {
+                    alert('Не выбрана категория или подкатегория!');
+                    return;
+                }
             $("#loader-show").showLoading();
             $.post(
                 "$setUrl",
@@ -64,9 +72,17 @@ $customJs = <<< JS
                 }
                 $("#loader-show").hideLoading();
             })
+            .fail(function() {
+                        $("#loader-show").hideLoading();
+                   });
         });
         
         $(document).on("click", "#set-multi", function() {
+             if($(this).data("category") == null)
+                {
+                    alert('Не выбрана категория или подкатегория!');
+                    return;
+                }
             $("#loader-show").showLoading();
             $.post(
                         "$setUrlMulti",
@@ -97,8 +113,12 @@ $customJs = <<< JS
           }).
           done(function(){
                 $("#loader-show").hideLoading();
-            });
+            })
+          .fail(function() {
+                        $("#loader-show").hideLoading();
+                   });
         });
+        
         $(document).on('pjax:send', function() {
           $("#loader-show").showLoading();
         });

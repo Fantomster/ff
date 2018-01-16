@@ -522,7 +522,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
                         $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
                         $('#profile-full_name,#organization-name,#profile-phone').removeAttr('readonly');
                         console.log('type = 5'); 
-                        if($('.has-error').length >= 1) {
+                        if($('.has-error').length >= 1 || !$('#profile-phone').intlTelInput("isValidNumber")) {
                              $('#addProduct').attr('disabled','disabled');                 
                         } else {
                             $('#addProduct').removeAttr('disabled');                      
@@ -552,7 +552,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
         }); 
 	}	 
 	
-	if($('.has-error').length >= 1) {
+	if($('.has-error').length >= 1 || !$('#profile-phone').intlTelInput("isValidNumber")) {
          $('#addProduct').attr('disabled','disabled');                 
     } else {
         $('#addProduct').removeAttr('disabled');                      

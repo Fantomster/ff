@@ -89,7 +89,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
                                     'icon' => 'circle-o',
                                     'url' => ['/clientintegr/default'],
-                                    'visible' => (in_array($user->organization_id,$resArr))
+                                    'visible' => (in_array($user->organization_id,$resArr) && in_array($user->role_id,$roles))
                                 ],
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.employees', ['ru'=>'Сотрудники']),

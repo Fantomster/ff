@@ -7,15 +7,12 @@ use yii\web\View;
 use yii\bootstrap\Modal;
 use common\assets\CroppieAsset;
 use yii\helpers\Url;
-use yii\helpers\ArrayHelper;
-use kartik\depdrop\DepDrop;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\CatalogBaseGoodsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 CroppieAsset::register($this);
-kartik\select2\Select2Asset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 $this->title = 'Catalog Base Goods';
 $this->params['breadcrumbs'][] = $this->title;
@@ -61,8 +58,6 @@ $this->registerJs("
         "
 );
 
-$categoryUrl = Url::to(['category', 'vendor_id' => $id, 'id' => '']);
-
 $customJs = <<< JS
 $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
     $(this).data("bs.modal", null);
@@ -85,13 +80,6 @@ $("#add-product-market-place").on("click", ".edit", function() {
         return false;
     });
   $('#add-product-market-place').removeAttr('tabindex');
-  $('#goToCategory').on('click', function(e) {
-        e.preventDefault();
-        subcat = $("#subcat").val();
-        if (subcat) { 
-            document.location = "$categoryUrl" + $("#subcat").val();
-        }
-  });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
@@ -138,52 +126,8 @@ Modal::end();
             ])
             ?>
         <?php endif; ?>
+        <?= Html::a("<i class=\"fa fa-fw fa-share\"></i> Распределить товары по категориям", ['category', 'vendor_id' => $id], ['class' => 'btn btn-outline-default btn-sm pull-right']) ?>
     </div>
-    <div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
-        <label class="control-label" for="parentCategory">Категория товара</label>
-        <?php
-        echo kartik\select2\Select2::widget([
-            //'model'=>$categorys->sub1,
-            'name' => 'sub1',
-            'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
-            'options' => ['placeholder' => 'Выберите...', 'id' =>'parentCategory'],
-            'theme' => "default",
-            //'hideSearch' => true,
-            'pluginOptions' => [
-                'allowClear' => true
-            ],
-        ]);
-        echo Html::hiddenInput('parent', null, ['id' => 'parent_id']);
-        echo Html::hiddenInput('child', null, ['id' => 'child_id']);
-        ?>
-        <?php
-        echo kartik\widgets\DepDrop::widget([
-            'options' => [],
-            'name'=>'sub2',
-            'id'=>'subcat',
-                               'type' => DepDrop::TYPE_SELECT2,
-                               'select2Options'=>[
-                                    'theme' => "default",
-                                    //'hideSearch' => true,
-                                    'pluginOptions' => [
-                                        'allowClear' => true
-                                        ],
-                                    ],
-                                'pluginOptions'=>[
-                                    'depends'=>['parentCategory'],
-                                    
-                                    'placeholder' => false,
-                                    'url' => Url::to(['get-sub-cat']),
-                                    'loadingText' => 'Загрузка...',
-                                    'initialize' => true,
-                                    //'initDepends'=>['dynamicmodel-sub2'],
-                                    'params'=>['parent_id','child_id'],
-                                ],
-          
-        ]);
-        echo Html::a('Перейти к товарам категории', '#', ['id' => 'goToCategory'])
-        ?>
-    </div>    
 
     <?php Pjax::begin(); ?>    <?=
     GridView::widget([

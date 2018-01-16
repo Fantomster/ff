@@ -155,7 +155,7 @@ class OrderSearch extends Order {
             $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $t2_f]);
         }
 
-//        $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
+        $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         $query->andFilterWhere(['client_id' => $this->client_id]);
 
         $dataProvider = new ActiveDataProvider([

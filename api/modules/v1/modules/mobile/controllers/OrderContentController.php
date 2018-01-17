@@ -395,7 +395,7 @@ class OrderContentController extends ActiveController {
             
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
             
-            if ($profile->phone && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
+            if ($profile->phone && $profile->phone && $recipient->smsNotification->order_changed) {
                 $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);

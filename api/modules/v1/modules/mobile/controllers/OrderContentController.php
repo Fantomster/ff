@@ -216,9 +216,10 @@ class OrderContentController extends ActiveController {
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->recipientsList as $recipient) {
-                    if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                    $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                    if (($recipient->organization_id == $order->vendor_id) && $profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
-                        $target = $recipient->profile->phone;
+                        $target = $profile->phone;
                         Yii::$app->sms->send($text, $target);
                     }
                 }
@@ -234,9 +235,10 @@ class OrderContentController extends ActiveController {
                 $this->sendOrderChange($order->vendor, $order);
                 $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                    $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                    if ($profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
-                        $target = $recipient->profile->phone;
+                        $target = $profile->phone;
                         Yii::$app->sms->send($text, $target);
                     }
                 }

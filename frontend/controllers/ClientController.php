@@ -199,7 +199,7 @@ class ClientController extends DefaultController {
 
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $user->setOrganization($this->currentUser->organization)->save();
+                    $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru'=>'Пользователь добавлен!']);

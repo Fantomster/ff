@@ -113,9 +113,10 @@ class User extends \amnah\yii2\user\models\User {
      * Set organization id
      * @param $organization Organization
      * @param bool $first
+     * @param bool $notification
      * @return $this
      */
-    public function setOrganization($organization, $first = false)
+    public function setOrganization($organization, $first = false, $notification = false)
     {
         $this->organization_id = $organization->id;
 
@@ -125,7 +126,7 @@ class User extends \amnah\yii2\user\models\User {
         $organization->save();
         $this->save();
 
-        if ($first) {
+        if ($first || $notification) {
             $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id]);
             if ($smsNotification) {
                 //Отключаем уведомления по умолчанию для ресторанов

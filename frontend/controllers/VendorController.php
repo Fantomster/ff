@@ -259,7 +259,7 @@ class VendorController extends DefaultController {
 
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $user->setOrganization($this->currentUser->organization)->save();
+                    $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
                     $message = Yii::t('app', 'Пользователь добавлен!');

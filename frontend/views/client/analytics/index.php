@@ -28,6 +28,21 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .info-box-text {
     color: #555;
 }
+.alUl{
+    list-style: none;
+    margin-left: 10px;
+}
+.alColor{
+    display: block;
+    float: left;
+    width: 30px;
+    margin-top: 5px;
+    height: 12px;
+}
+.alLabel{
+    display: block;
+    margin-left: 40px;
+}
 ');
 ?>
 <section class="content-header">
@@ -233,10 +248,21 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div style="position:relative;height:282px;width:282px;min-height: 286px;margin: auto;">
+                    <div class="col-md-6">
+                        <ul class="alUl">
+                        <?php foreach ($vendors_colors as $id=>$color): ?>
+                            <li><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $vendors_labels[$id] ?></span></li>
+                        <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                    <div style="position:relative;height:400px;width:282px;min-height: 286px;margin: auto;">
                         <?=
                         ChartJs::widget([
                             'type' => 'pie',
+                            'clientOptions' => [
+                                'legend' => false
+                            ],
                             'options' => [
                                 'height' => 282,
                                 'width' => 282,
@@ -253,6 +279,7 @@ HTML;
                             ],
                         ]);
                         ?>
+                    </div>
                     </div>
                 </div>
                 <!-- /.box-body -->

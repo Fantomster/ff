@@ -68,7 +68,7 @@ class OrderCatalogSearch extends \yii\base\Model {
 
         $query->union($union_sql, true);
 
-        $sort = $params['sort'];
+        $sort = isset($params['sort']) ? $params['sort'] : '';
 
         if($sort == 'product') {
             $query->orderBy('`alf_cyr` DESC, `product` ASC');

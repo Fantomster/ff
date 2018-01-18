@@ -179,8 +179,8 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 'label' => 'Интеграция',
                                 'items' => [
                                     [
-                                        'label' => 'R-keeper White Server',
-                                        'url' => ['/rkws/index'],
+                                        'label' => 'Лицензии MixCart',
+                                        'url' => ['/integration/index'],
                                     ],
                                 //  [
                                 //      'label' => 'Загруженные каталоги',

@@ -33,11 +33,9 @@ $cartCount = $user->organization->getCartCount();
 
 $resArr = [];
 
-$arrService = RkService::find()->select('org')->asArray()->all();
-foreach ($arrService as $key => $val) {
-    $resArr[] = $val['org'];
-}
-
+$arrService = RkService::find()->select('org')->asArray()->column();
+$arrServiceiiko = \api\common\models\iiko\iikoService::find()->select('org')->asArray()->column();
+$resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
 ?>
 
 <aside class="main-sidebar">

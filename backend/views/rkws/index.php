@@ -13,6 +13,12 @@ use yii\helpers\ArrayHelper;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Доступы R-keeper White Server';
+
+$this->params['breadcrumbs'][] = [
+    'label' => 'Управление лицензиями',
+    'url' => '/integration'
+];
+
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [

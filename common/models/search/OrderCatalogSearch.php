@@ -2,8 +2,11 @@
 
 namespace common\models\search;
 
+use common\models\CatalogBaseGoods;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
+use yii\db\Query;
 
 /**
  *  Model for order catalog search form
@@ -32,52 +35,70 @@ class OrderCatalogSearch extends \yii\base\Model {
      */
     public function search($params) {
         $this->load($params);
-        
-        $searchString = "%$this->searchString%";
 
-        $query = "SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.article, cbg.note, cbg.ed, curr.symbol FROM "
-                . "catalog_base_goods AS cbg LEFT JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "LEFT JOIN catalog cat ON cbg.cat_id = cat.id JOIN currency curr ON cat.currency_id = curr.id "
-                . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0) "
-                . "UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id, org.name, cbg.article, cbg.note, cbg.ed, curr.symbol FROM "
-                . "catalog_goods AS cg JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
-                . "LEFT JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "LEFT JOIN catalog cat ON cg.cat_id = cat.id JOIN currency curr ON cat.currency_id = curr.id "
-                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0))";
+        $fields = [
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id',
+            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
+            "(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ];
 
-        $query1 = "SELECT COUNT(cbg.id) FROM "
-                . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
-        $count1 = Yii::$app->db->createCommand($query1, [':searchString' => $searchString])->queryScalar();
-        $query2 = "SELECT COUNT(cbg.id) FROM "
-                . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
-                . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)"
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
-        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $searchString])->queryScalar();
+        $union_sql = (new Query())->select($fields)
+            ->from('catalog_goods AS cg')
+            ->leftJoin('catalog_base_goods AS cbg', 'cg.base_goods_id = cbg.id')
+            ->leftJoin('organization AS org', 'cbg.supp_org_id = org.id')
+            ->leftJoin('catalog AS cat', 'cg.cat_id = cat.id')
+            ->leftJoin('currency AS curr', 'cat.currency_id = curr.id')
+            ->where("cg.cat_id IN ($this->catalogs)")
+            ->andWhere('(cbg.status = 1) AND (cbg.deleted = 0)');
 
-        $dataProvider = new SqlDataProvider([
-            'sql' => $query,
-            'params' => [':searchString' => $searchString],
-            'totalCount' => $count1 + $count2,
+        $query = (new Query())->select($fields)
+            ->from('catalog_base_goods AS cbg')
+            ->leftJoin('organization AS org', 'cbg.supp_org_id = org.id')
+            ->leftJoin('catalog AS cat', 'cbg.cat_id = cat.id')
+            ->leftJoin('currency AS curr', 'cat.currency_id = curr.id')
+            ->where("cat_id IN ($this->catalogs)")
+            ->andWhere('(cbg.status = 1) AND (cbg.deleted = 0)');
+
+        if(!empty($this->searchString)) {
+            $union_sql->andWhere('cbg.product LIKE :searchString OR cbg.article LIKE :searchString', [':searchString' => "%$this->searchString%"]);
+            $query->andWhere('cbg.product LIKE :searchString OR cbg.article LIKE :searchString', [':searchString' => "%$this->searchString%"]);
+        }
+
+        $query->union($union_sql, true);
+
+        $sort = $params['sort'];
+
+        if($sort == 'product') {
+            $query->orderBy('`alf_cyr` DESC, `product` ASC');
+        }
+        if($sort == '-product') {
+            $query->orderBy('`alf_cyr` DESC, `product` DESC');
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
             'pagination' => [
                 'pageSize' => 20,
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
                 'params' => [
-                    'sort' => isset($params['sort']) ? $params['sort'] : 'product',
+                    'sort' => isset($params['sort']) ? $params['sort'] : '',
                 ]
             ],
             'sort' => [
                 'attributes' => [
                     'product',
                     'price',
+                    'c_article_1',
+                    'c_article',
+                    'i'
                 ],
                 'defaultOrder' => [
-                    'product' => SORT_ASC
-                    ]
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
+                ]
             ],
         ]);
         return $dataProvider;

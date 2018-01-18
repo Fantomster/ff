@@ -335,7 +335,7 @@ Modal::end();
                             'attribute' => 'status',
                             'label' => Yii::t('message', 'frontend.views.vendor.in_stock_three', ['ru' => 'Наличие']),
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;width:80px'],
                             'value' => function ($data) {
                                 $link = CheckboxX::widget([
                                     'name' => 'status_' . $data['id'],
@@ -354,10 +354,10 @@ Modal::end();
                             },
                         ],
                         [
-                            'attribute' => '',
+                            'attribute' => 'market_place',
                             'label' => 'MixMarket',
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'width:70px'],
+                            'contentOptions' => ['style' => 'width:80px'],
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
@@ -370,7 +370,7 @@ Modal::end();
                             'attribute' => '',
                             'label' => '',
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'width:70px'],
+                            'contentOptions' => ['style' => 'width:80px'],
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?

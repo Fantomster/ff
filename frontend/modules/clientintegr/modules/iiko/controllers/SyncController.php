@@ -61,7 +61,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionGoodsView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoProduct::find()
+            'query' => iikoProduct::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('goods-view', [
@@ -75,7 +75,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionCategoryView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoCategory::find()
+            'query' => iikoCategory::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('category-view', [
@@ -89,7 +89,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionStoreView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoStore::find()
+            'query' => iikoStore::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('store-view', [
@@ -103,7 +103,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionAgentView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoAgent::find()
+            'query' => iikoAgent::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('agent-view', [
@@ -134,7 +134,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($items['products'])) {
                     foreach ($items['products'] as $uuid => $item) {
-                        $model = iikoProduct::findOne(['uuid' => $uuid]);
+                        $model = iikoProduct::findOne(['uuid' => $uuid, 'org_id' => $this->organisation_id]);
                         //Если нет категории у нас, создаем
                         if (empty($model)) {
                             $model = new iikoProduct(['uuid' => $uuid]);
@@ -205,7 +205,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($items['categories'])) {
                     foreach ($items['categories'] as $uuid => $category) {
-                        $model = iikoCategory::findOne(['uuid' => $uuid]);
+                        $model = iikoCategory::findOne(['uuid' => $uuid, 'org_id' => $this->organisation_id]);
                         //Если нет категории у нас, создаем
                         if (empty($model)) {
                             $model = new iikoCategory(['uuid' => $uuid]);
@@ -265,7 +265,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($stores['corporateItemDto'])) {
                     foreach ($stores['corporateItemDto'] as $store) {
-                        $model = iikoStore::findOne(['uuid' => $store['id']]);
+                        $model = iikoStore::findOne(['uuid' => $store['id'], 'org_id' => $this->organisation_id]);
                         //Если нет категории у нас, создаем
                         if (empty($model)) {
                             $model = new iikoStore(['uuid' => $store['id']]);
@@ -321,7 +321,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($agents['employee'])) {
                     foreach ($agents['employee'] as $agent) {
-                        $model = iikoAgent::findOne(['uuid' => $agent['id']]);
+                        $model = iikoAgent::findOne(['uuid' => $agent['id'], 'org_id' => $this->organisation_id]);
                         //Если нет у нас, создаем
                         if (empty($model)) {
                             $model = new iikoAgent(['uuid' => $agent['id']]);

@@ -213,7 +213,7 @@ HTML;
                         </div>
                     </div>
                     <div class="box-body" style="display: block;">
-                            <div style="position:relative;width:282px;min-height: 286px; margin: auto;">
+                            <div style="position:relative;width:482px;min-height: 286px; margin: auto;">
                                 <?=
                                 ChartJs::widget([
                                     'type' => 'pie',

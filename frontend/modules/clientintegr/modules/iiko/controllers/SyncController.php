@@ -272,9 +272,19 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                             $model->org_id = $this->organisation_id;
                         }
                         $model->is_active = 1;
-                        $model->denom = $store['name'];
-                        $model->store_code = $store['code'];
-                        $model->store_type = $store['type'];
+
+                        if(!empty($store['name'])){
+                            $model->denom = $store['name'];
+                        }
+
+                        if(!empty($store['code'])){
+                            $model->store_code = $store['code'];
+                        }
+                        
+                        if(!empty($store['type'])){
+                            $model->store_type = $store['type'];
+                        }
+
                         //Валидируем сохраняем
                         if (!$model->validate() || !$model->save()) {
                             throw new \Exception(print_r($model->getFirstErrors(), 1));

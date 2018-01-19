@@ -1174,14 +1174,17 @@ class OrderController extends DefaultController {
                     }
                     $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru'=>"<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id'=>$order->id]) . $discountValue;
                     $orderChanged = 1;
+                }else{
+                    $message .= Yii::t('app', 'frontend.controllers.order.not_changed', ['ru'=>"<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id;
                 }
             } else {
                 if ($order->discount > 0) {
-                    $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_four', ['ru'=>"<br/> отменил скидку на заказ № "]) . $order->id;
+                    //$message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_four', ['ru'=>"<br/> отменил скидку на заказ № "]) . $order->id;
+                    $message .= Yii::t('app', 'frontend.controllers.order.not_changed', ['ru'=>"<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id;
                     $orderChanged = 1;
                 }
-                $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
-                $order->discount = null;
+                //$order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
+                //$order->discount = null;
                 $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {

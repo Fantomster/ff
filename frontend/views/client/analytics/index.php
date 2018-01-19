@@ -43,6 +43,12 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
     display: block;
     margin-left: 40px;
 }
+.alLi{
+    cursor: pointer;
+}
+.alStrikethrough .alLabel{
+    text-decoration: line-through;
+}
 ');
 ?>
 <section class="content-header">
@@ -248,20 +254,14 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div class="col-md-6">
-                        <ul class="alUl">
-                        <?php foreach ($vendors_colors as $id=>$color): ?>
-                            <li><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $vendors_labels[$id] ?></span></li>
-                        <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                    <div style="position:relative;height:400px;width:282px;min-height: 286px;margin: auto;">
+                    <div style="position:relative;width:482px;min-height: 286px; margin: auto;">
                         <?=
                         ChartJs::widget([
                             'type' => 'pie',
                             'clientOptions' => [
-                                'legend' => false
+                                'legend' => [
+                                    'position' => 'left'
+                                ]
                             ],
                             'options' => [
                                 'height' => 282,
@@ -279,7 +279,6 @@ HTML;
                             ],
                         ]);
                         ?>
-                    </div>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -464,6 +463,7 @@ $filter_clear_to_date = date("d-m-Y");
 $analyticsUrl = Url::to(['client/analytics']);
 
 $customJs = <<< JS
+
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").on("change", function () {
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").attr('disabled','disabled')      
 var filter_status = $("#filter_status").val();

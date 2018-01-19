@@ -213,21 +213,14 @@ HTML;
                         </div>
                     </div>
                     <div class="box-body" style="display: block;">
-                        <div class="col-md-6">
-                            <ul class="alUl">
-                                <?php foreach ($arr_clients_colors as $id => $color): ?>
-                                    <li><span class="alColor" style="background-color: <?= $color ?>"></span><span
-                                                class="alLabel"><?= $arr_clients_labels[$id] ?></span></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <div style="position:relative;height:282px;width:282px;min-height: 286px;margin: auto;">
+                            <div style="position:relative;width:282px;min-height: 286px; margin: auto;">
                                 <?=
                                 ChartJs::widget([
                                     'type' => 'pie',
                                     'clientOptions' => [
-                                        'legend' => false
+                                        'legend' => [
+                                            'position' => 'bottom'
+                                        ]
                                     ],
                                     'options' => [
                                         'height' => 282,
@@ -246,7 +239,6 @@ HTML;
                                 ]);
                                 ?>
                             </div>
-                        </div>
                     </div>
                     <!-- /.box-body -->
                 </div>

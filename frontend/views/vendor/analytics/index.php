@@ -219,7 +219,7 @@ HTML;
                                     'type' => 'pie',
                                     'clientOptions' => [
                                         'legend' => [
-                                            'position' => 'bottom'
+                                            'position' => 'left'
                                         ]
                                     ],
                                     'options' => [

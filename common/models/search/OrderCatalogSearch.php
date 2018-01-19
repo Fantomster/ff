@@ -51,23 +51,6 @@ class OrderCatalogSearch extends \yii\base\Model {
             $where = 'AND cbg.product LIKE :searchString OR cbg.article LIKE :searchString';
         }
 
-        $order_by = 'ORDER BY ';
-        if(!empty($sort)){
-            if($sort == 'product') {
-                $order_by .= '`alf_cyr` DESC, `product` ASC';
-            } elseif ($sort == '-product') {
-                $order_by .= '`alf_cyr` DESC, `product` DESC';
-            } else {
-                if(strstr($sort, '-') === false) {
-                    $order_by .= $sort;
-                } else {
-                    $order_by .= substr_replace('-', '', $sort) . ' DESC';
-                }
-            }
-        } else {
-            $order_by .= 'i DESC, c_article_1 ASC, c_article ASC';
-        }
-
         $sql = "
         SELECT * FROM (
            SELECT 
@@ -107,7 +90,11 @@ class OrderCatalogSearch extends \yii\base\Model {
             ],
             'sort' => [
                 'attributes' => [
-                    'product',
+                    'product' => [
+                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_DESC],
+                        'default' => SORT_ASC
+                    ],
                     'price',
                     'units',
                     'c_article_1',

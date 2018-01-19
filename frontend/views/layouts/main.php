@@ -280,8 +280,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.main', ['ru'=>'Главная']), 'url' => ['/site/index']],
                                     ['label' => 'MIXMARKET', 'url' => Yii::$app->params['staticUrl']['market']],
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.franchisee', ['ru'=>'Франшиза']), 'url' => Yii::$app->params['staticUrl']['franchise']],
-                                   // ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.faq', ['ru'=>'Вопрос / ответ']), 'url' => ['/site/faq']],
+                                    ['label' => Yii::t('message', 'frontend.views.layout.main.blog', ['ru'=>'Блог']), 'url' => 'https://blog.mixcart.ru'],
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.about', ['ru'=>'О компании']), 'url' => ['/site/about']],
                                     ['label' => Yii::t('message', 'frontend.views.layouts.main.contacts', ['ru'=>'Контакты']), 'url' => ['/site/contacts']],
                                 ]

@@ -112,7 +112,7 @@ class OrderController extends ActiveController {
             }
         }
 
-        $filters['id'] = $params->id;
+        $filters['order.id'] = $params->id;
         $filters['created_by_id'] = $params->created_by_id;
         $filters['accepted_by_id'] = $params->accepted_by_id;
         $filters['status'] = $params->status;

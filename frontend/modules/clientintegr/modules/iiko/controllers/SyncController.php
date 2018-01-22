@@ -145,17 +145,27 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                             $model->parent_uuid = $item['parentId'];
                         }
                         $model->is_active = 1;
-                        $model->denom = $item['name'];
-                        $model->product_type = $item['productType'];
-                        $model->unit = $item['mainUnit'];
-                        $model->num = $item['num'];
-                        $model->code = $item['code'];
+                        if (isset($item['name'])) {
+                            $model->denom = $item['name'];
+                        }
+                        if (isset($item['productType'])) {
+                            $model->product_type = $item['productType'];
+                        }
+                        if (isset($item['mainUnit'])) {
+                            $model->unit = $item['mainUnit'];
+                        }
+                        if (isset($item['num'])) {
+                            $model->num = $item['num'];
+                        }
+                        if (isset($item['code'])) {
+                            $model->code = $item['code'];
+                        }
 
-                        if(isset($item['cookingPlaceType'])) {
+                        if (isset($item['cookingPlaceType'])) {
                             $model->cooking_place_type = $item['cookingPlaceType'];
                         }
 
-                        if(isset($item['containers'])) {
+                        if (isset($item['containers'])) {
                             $model->containers = \GuzzleHttp\json_encode($item['containers']);
                         }
                         //Валидируем сохраняем
@@ -215,9 +225,14 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                         if (isset($category['parentId'])) {
                             $model->parent_uuid = $category['parentId'];
                         }
+
                         $model->is_active = 1;
-                        $model->denom = $category['name'];
-                        $model->group_type = $category['productGroupType'];
+                        if (isset($category['name'])) {
+                            $model->denom = $category['name'];
+                        }
+                        if (isset($category['productGroupType'])) {
+                            $model->group_type = $category['productGroupType'];
+                        }
 
                         if (!$model->validate() || !$model->save()) {
                             throw new \Exception(print_r($model->getFirstErrors(), 1));

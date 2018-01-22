@@ -156,9 +156,27 @@ class iikoApi
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
 
+        /**
+         * Logger
+         */
+        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
+            $org_id  = \Yii::$app->user->identity->organization_id;
+            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
+                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
+                $message = [
+                    'DATE: ' . date('d.m.Y H:i:s'),
+                    'URL: ' . $url,
+                    'HTTP_CODE: ' . $info['http_code'],
+                    'HTTP_URL: ' . $info['url'],
+                    'RESPONSE: ' . $response,
+                    str_pad('', 200, '-') . PHP_EOL
+                ];
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+            }
+        }
+
         if($info['http_code'] != 200) {
-            \Yii::info('error: ' . print_r($info, 1), 'iiko_api');
-            return false;
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
         }
 
         return $response;

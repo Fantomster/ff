@@ -44,52 +44,59 @@ class OrderCatalogSearch extends \yii\base\Model {
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
         ];
 
-        $union_sql = (new Query())->select($fields)
-            ->from('catalog_goods AS cg')
-            ->leftJoin('catalog_base_goods AS cbg', 'cg.base_goods_id = cbg.id')
-            ->leftJoin('organization AS org', 'cbg.supp_org_id = org.id')
-            ->leftJoin('catalog AS cat', 'cg.cat_id = cat.id')
-            ->leftJoin('currency AS curr', 'cat.currency_id = curr.id')
-            ->where("cg.cat_id IN ($this->catalogs)")
-            ->andWhere('(cbg.status = 1) AND (cbg.deleted = 0)');
+        $sort = isset($params['sort']) ? $params['sort'] : null;
 
-        $query = (new Query())->select($fields)
-            ->from('catalog_base_goods AS cbg')
-            ->leftJoin('organization AS org', 'cbg.supp_org_id = org.id')
-            ->leftJoin('catalog AS cat', 'cbg.cat_id = cat.id')
-            ->leftJoin('currency AS curr', 'cat.currency_id = curr.id')
-            ->where("cat_id IN ($this->catalogs)")
-            ->andWhere('(cbg.status = 1) AND (cbg.deleted = 0)');
-
+        $where = '';
         if(!empty($this->searchString)) {
-            $union_sql->andWhere('cbg.product LIKE :searchString OR cbg.article LIKE :searchString', [':searchString' => "%$this->searchString%"]);
-            $query->andWhere('cbg.product LIKE :searchString OR cbg.article LIKE :searchString', [':searchString' => "%$this->searchString%"]);
+            $where = 'AND cbg.product LIKE :searchString OR cbg.article LIKE :searchString';
         }
 
-        $query->union($union_sql, true);
+        $sql = "
+        SELECT * FROM (
+           SELECT 
+              " . implode(',', $fields) . "
+           FROM `catalog_base_goods` `cbg`
+             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
+             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           WHERE
+           cat_id IN (" . $this->catalogs . ")
+           ".$where."
+           AND (cbg.status = 1 AND cbg.deleted = 0)
+        UNION ALL
+          SELECT 
+          " . implode(',', $fields) . "
+          FROM `catalog_goods` `cg`
+           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
+           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
+           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+          WHERE 
+          cg.cat_id IN (" . $this->catalogs . ")
+          ".$where."
+          AND (cbg.status = 1 AND cbg.deleted = 0)
+        ) as c ";
 
-        $sort = isset($params['sort']) ? $params['sort'] : '';
+        $query = Yii::$app->db->createCommand($sql);
 
-        if($sort == 'product') {
-            $query->orderBy('`alf_cyr` DESC, `product` ASC');
-        }
-        if($sort == '-product') {
-            $query->orderBy('`alf_cyr` DESC, `product` DESC');
-        }
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query->sql,
+            'params' => [':searchString' => "%" . $this->searchString . "%"],
             'pagination' => [
-                'pageSize' => 20,
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
                 'params' => [
-                    'sort' => isset($params['sort']) ? $params['sort'] : '',
+                    'sort' => isset($params['sort']) ? $params['sort'] : 'product',
                 ]
             ],
             'sort' => [
                 'attributes' => [
-                    'product',
+                    'product' => [
+                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_DESC],
+                        'default' => SORT_ASC
+                    ],
                     'price',
+                    'units',
                     'c_article_1',
                     'c_article',
                     'i'

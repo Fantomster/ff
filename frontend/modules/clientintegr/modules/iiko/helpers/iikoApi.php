@@ -167,7 +167,8 @@ class iikoApi
                     'DATE: ' . date('d.m.Y H:i:s'),
                     'URL: ' . $url,
                     'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['content_length_download'],
+                    'LENGTH: '. $info['download_content_length'],
+                    'SIZE_DOWNLOAD: '. $info['size_download'].
                     'HTTP_URL: ' . $info['url'],
                     'RESPONSE: ' . $response,
                     'RESP_SIZE:' . sizeof($response),

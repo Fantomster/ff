@@ -12,6 +12,7 @@ class iikoApi
     private $login;
     private $pass;
     private $token;
+    private $response;
 
     protected static $_instance;
 
@@ -153,7 +154,16 @@ class iikoApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
-        $response = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $str) {
+
+            $this->response .= $str;
+            return strlen($str);
+        });
+        curl_exec($ch);
+
+        // $response = curl_exec($ch);
+        // $this->response = curl_exec($ch);
+        $response = $this->response;
         $info = curl_getinfo($ch);
 
         /**

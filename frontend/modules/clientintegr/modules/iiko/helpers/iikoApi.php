@@ -175,7 +175,7 @@ class iikoApi
                     str_pad('', 200, '-') . PHP_EOL
                 ];
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
 
             }
         }

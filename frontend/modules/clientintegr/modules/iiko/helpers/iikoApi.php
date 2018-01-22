@@ -167,8 +167,10 @@ class iikoApi
                     'DATE: ' . date('d.m.Y H:i:s'),
                     'URL: ' . $url,
                     'HTTP_CODE: ' . $info['http_code'],
+                    'LENGTH: '. $info['content_length_download'],
                     'HTTP_URL: ' . $info['url'],
                     'RESPONSE: ' . $response,
+                    'RESP_SIZE:' . sizeof($response),
                     str_pad('', 200, '-') . PHP_EOL
                 ];
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);

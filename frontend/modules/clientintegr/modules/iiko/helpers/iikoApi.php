@@ -168,13 +168,15 @@ class iikoApi
                     'URL: ' . $url,
                     'HTTP_CODE: ' . $info['http_code'],
                     'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'].
+                    'SIZE_DOWNLOAD: '. $info['size_download'],
                     'HTTP_URL: ' . $info['url'],
                     'RESPONSE: ' . $response,
                     'RESP_SIZE:' . sizeof($response),
                     str_pad('', 200, '-') . PHP_EOL
                 ];
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+
             }
         }
 

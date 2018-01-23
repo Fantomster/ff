@@ -254,6 +254,7 @@ class iikoApi
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
         }
 
+        unset($info);
         curl_close($ch);
 
         // Start real request with BODY onboard
@@ -271,10 +272,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
         if ($chunked) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $str) use ($response){
-                $response .= $str;
-                return strlen($str);
-            });
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
             curl_exec($ch);
         } else {
             $response = curl_exec($ch);
@@ -319,6 +317,20 @@ class iikoApi
         //return $response;
 
         return '';
+    }
+
+    /**
+     * @param $ch
+     * @param $str
+     * @return int
+     */
+
+    function Callback($ch, $str){
+        // ссылки свойств
+        $response = &$this -> response;
+        // логика метода
+        $response .= $str;
+        return strlen($str);
     }
 
     /**

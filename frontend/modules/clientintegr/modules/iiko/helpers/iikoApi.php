@@ -258,7 +258,11 @@ class iikoApi
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
         }
 
-        return $response;
+
+
+        //return $response;
+
+        return '';
     }
 
     /**

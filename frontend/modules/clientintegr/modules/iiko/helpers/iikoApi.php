@@ -185,6 +185,7 @@ class iikoApi
                     'HTTP_URL: ' . $info['url'],
                     'RESPONSE: ' . $this->response,
                     'RESP_SIZE:' . sizeof($this->response),
+                    'KEY: ' . $this->token,
                     str_pad('', 200, '-') . PHP_EOL
                 ];
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
@@ -194,7 +195,7 @@ class iikoApi
             }
         }
 
-        $this->logout();
+        // $this->logout();
 
         /**
          * Logger

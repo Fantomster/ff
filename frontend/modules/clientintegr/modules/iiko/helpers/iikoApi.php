@@ -258,6 +258,7 @@ class iikoApi
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
         }
 
+        unset($response);
         unset($info);
         curl_close($ch);
 

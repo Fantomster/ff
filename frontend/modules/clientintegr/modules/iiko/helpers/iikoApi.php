@@ -13,6 +13,8 @@ class iikoApi
     private $pass;
     private $token;
 
+    private $response;
+
     protected static $_instance;
 
     public static function getInstance()
@@ -272,8 +274,9 @@ class iikoApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
         if ($chunked) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array(self, 'Callback'));
             curl_exec($ch);
+            $response = $this->response;
         } else {
             $response = curl_exec($ch);
         }
@@ -327,7 +330,7 @@ class iikoApi
 
     function Callback($ch, $str){
         // ссылки свойств
-        $response = &$this -> response;
+       $response = &$this -> response;
         // логика метода
         $response .= $str;
         return strlen($str);

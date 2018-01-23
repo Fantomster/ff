@@ -144,31 +144,61 @@ class iikoApi
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
-        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_NOBODY, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $str) {
+        // curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $str) {
 
-            $this->response .= $str;
-            return strlen($str);
-        });
-        curl_exec($ch);
+        //    $this->response .= $str;
+        //    return strlen($str);
+        // });
+        // curl_exec($ch);
 
-        // $response = curl_exec($ch);
-        // $this->response = curl_exec($ch);
-        $response = $this->response;
+        $this->response = curl_exec($ch);
         $info = curl_getinfo($ch);
+
+        // $this->response = curl_exec($ch);
+        // $response = $this->response;
+
+        /**
+         * header logger
+         */
+
+        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
+            $org_id  = \Yii::$app->user->identity->organization_id;
+            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
+                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_header'. $org_id .'.log';
+                $message = [
+                    'DATE: ' . date('d.m.Y H:i:s'),
+                    'URL: ' . $url,
+                    'HTTP_CODE: ' . $info['http_code'],
+                    'LENGTH: '. $info['download_content_length'],
+                    'SIZE_DOWNLOAD: '. $info['size_download'],
+                    'HTTP_URL: ' . $info['url'],
+                    'RESPONSE: ' . $this->response,
+                    'RESP_SIZE:' . sizeof($this->response),
+                    str_pad('', 200, '-') . PHP_EOL
+                ];
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+                file_put_contents($file, print_r($this->response,true).PHP_EOL, FILE_APPEND);
+                file_put_contents($file, print_r($info,true).PHP_EOL, FILE_APPEND);
+
+            }
+        }
 
         /**
          * Logger
          */
+
+        /*
         if(isset(\Yii::$app->params['iikoLogOrganization'])) {
             $org_id  = \Yii::$app->user->identity->organization_id;
             if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
@@ -191,11 +221,13 @@ class iikoApi
             }
         }
 
+        */
+
         if($info['http_code'] != 200) {
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
         }
 
-        return $response;
+        return $this->response;
     }
 
     /**

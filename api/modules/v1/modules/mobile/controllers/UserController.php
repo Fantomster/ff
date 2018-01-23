@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use Google\Spreadsheet\Exception\BadRequestException;
 use Yii;
 use api\modules\v1\modules\mobile\models\User;
 use api\modules\v1\modules\mobile\resources\User as UserResource;
@@ -12,6 +13,7 @@ use common\models\Organization;
 use common\models\Role;
 use common\models\UserToken;
 use common\models\UserFcmToken;
+use yii\data\SqlDataProvider;
 
 
 /**
@@ -236,5 +238,87 @@ class UserController extends ActiveController {
         $fcm->token = $token;
 
         return ($fcm->save()) ? "success" : print_r($fcm->getErrors());
+    }
+
+    public function actionBuisinessList(){
+        $user = Yii::$app->user->getIdentity();
+        //$organization = new Organization();
+        $sql = "
+        select distinct id as `id`,`name`,`type_id` from (
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select `parent_id`,
+        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+        from `organization` o where id = " . $user->organization_id . "
+        )tb where id is not null";
+        $sql2 = "
+        select count(*) from (
+        select distinct id as `id`,`name`,`type_id` from (
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select `parent_id`,
+        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+        from `organization` o where id = " . $user->organization_id . "
+        )tb where id is not null)tb2";
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => \Yii::$app->db->createCommand($sql)->sql,
+            'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),
+            'pagination' => [
+                'pageSize' => 4,
+            ],
+        ]);
+        return $dataProvider;
+    }
+
+    public function actionChangeBuisiness($id){
+        $user = Yii::$app->user->getIdentity();
+        $organization = Organization::findOne(['id'=>$id]);
+
+        $sql = "
+        select distinct id as `id`,`name` from (
+        select id,`name` from organization where parent_id = (select id from organization where id = " . $user->organization_id . ")
+        union all
+        select id,`name` from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
+        union all
+        select id,`name` from organization where id = " . $user->organization_id . "
+        union all
+        select parent_id,(select `name` from organization where id = o.parent_id) as name from organization o where id = " . $user->organization_id . "
+        )tb where id = " . $id;
+        if(\Yii::$app->db->createCommand($sql)->queryScalar() &&
+            ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
+                $user->role_id == Role::ROLE_SUPPLIER_MANAGER ||
+                $user->role_id == Role::ROLE_ADMIN ||
+                $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
+            if($organization->type_id == Organization::TYPE_RESTAURANT &&
+                ($user->role_id != Role::ROLE_ADMIN &&
+                    $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
+
+                $user->role_id = Role::ROLE_RESTAURANT_MANAGER;
+            }
+            if($organization->type_id == Organization::TYPE_SUPPLIER &&
+                ($user->role_id != Role::ROLE_ADMIN &&
+                    $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
+                $user->role_id = Role::ROLE_SUPPLIER_MANAGER;
+            }
+            $user->organization_id = $id;
+            $user->save();
+            return compact('organization');
+        }
+        if(in_array($user->role_id, Role::getFranchiseeEditorRoles())){
+            $user->organization_id = $id;
+            $user->save();
+            return compact('organization');
+        }
+        throw new BadRequestException;
     }
 }

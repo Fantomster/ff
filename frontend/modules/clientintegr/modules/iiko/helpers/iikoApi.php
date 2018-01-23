@@ -13,7 +13,7 @@ class iikoApi
     private $pass;
     private $token;
 
-    private $response;
+    var $response = '';
 
     protected static $_instance;
 
@@ -207,6 +207,7 @@ class iikoApi
         $header = ArrayHelper::merge($header, $headers);
 
         $chunked = false; // Признак разбиения BODY на chunked куски
+        $response = &$this -> response;
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
@@ -274,14 +275,15 @@ class iikoApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
         if ($chunked) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array(self, 'Callback'));
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
             curl_exec($ch);
-            $response = $this->response;
         } else {
             $response = curl_exec($ch);
         }
 
         $info = curl_getinfo($ch);
+
+        curl_close($ch);
 
         /**
          * Logger
@@ -329,10 +331,9 @@ class iikoApi
      */
 
     function Callback($ch, $str){
-        // ссылки свойств
        $response = &$this -> response;
-        // логика метода
-        $response .= $str;
+       $response .= $str;
+
         return strlen($str);
     }
 

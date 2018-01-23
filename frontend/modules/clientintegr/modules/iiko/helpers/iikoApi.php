@@ -237,6 +237,7 @@ class iikoApi
             if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
                 $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
                 $message = [
+                    '(Chunked mode detection...)',
                     'DATE: ' . date('d.m.Y H:i:s'),
                     'URL: ' . $url,
                     'HTTP_CODE: ' . $info['http_code'],
@@ -294,20 +295,18 @@ class iikoApi
             if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
                 $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
                 $message = [
+                    '(Normal request)',
                     'DATE: ' . date('d.m.Y H:i:s'),
                     'URL: ' . $url,
                     'HTTP_CODE: ' . $info['http_code'],
                     'LENGTH: '. $info['download_content_length'],
                     'SIZE_DOWNLOAD: '. $info['size_download'],
                     'HTTP_URL: ' . $info['url'],
-                    'RESPONSE: ' . $response,
                     'RESP_SIZE:' . sizeof($response),
                     'KEY: ' . $this->token,
                     str_pad('', 200, '-') . PHP_EOL
                 ];
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
-                file_put_contents($file, print_r($info,true).PHP_EOL, FILE_APPEND);
 
             }
         }
@@ -319,9 +318,7 @@ class iikoApi
 
 
 
-        //return $response;
-
-        return '';
+        return $response;
     }
 
     /**

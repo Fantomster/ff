@@ -194,6 +194,8 @@ class iikoApi
             }
         }
 
+        $this->logout();
+
         /**
          * Logger
          */

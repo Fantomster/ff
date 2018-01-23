@@ -204,6 +204,8 @@ class iikoApi
         $header = ['Content-Type: application/x-www-form-urlencoded'];
         $header = ArrayHelper::merge($header, $headers);
 
+        $chunked = false; // Признак разбиения BODY на chunked куски
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -227,6 +229,7 @@ class iikoApi
 
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
+        $headerArray = self::getHeadersCurl($response);
 
         /**
          * Logger
@@ -248,7 +251,7 @@ class iikoApi
                     str_pad('', 200, '-') . PHP_EOL
                 ];
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
+                file_put_contents($file, print_r($headerArray,true).PHP_EOL, FILE_APPEND);
                 file_put_contents($file, print_r($info,true).PHP_EOL, FILE_APPEND);
 
             }
@@ -316,5 +319,24 @@ class iikoApi
     public static function xmlToArray($xml)
     {
         return json_decode(json_encode(simplexml_load_string($xml)), true);
+    }
+
+    /**
+     * @param $response
+     * @return array
+     */
+
+    public static function getHeadersCurl($response){
+        $headers = array();
+        $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
+        foreach (explode("\r\n", $header_text) as $i => $line){
+            if ($i === 0)
+                $headers['http_code'] = $line;
+            else{
+                list ($key, $value) = explode(': ', $line);
+                $headers[$key] = $value;
+            }
+        }
+        return $headers;
     }
 }

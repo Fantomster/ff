@@ -231,9 +231,39 @@ class iikoApi
         $info = curl_getinfo($ch);
         $headerArray = self::getHeadersCurl($response);
 
+        if ($headerArray['Transfer-Encoding'] == 'chunked')
+            $chunked = true;
+
+        /**
+         * Chunked Logger
+         */
+        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
+            $org_id  = \Yii::$app->user->identity->organization_id;
+            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
+                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
+                $message = [
+                    'DATE: ' . date('d.m.Y H:i:s'),
+                    'URL: ' . $url,
+                    'HTTP_CODE: ' . $info['http_code'],
+                    'LENGTH: '. $info['download_content_length'],
+                    'SIZE_DOWNLOAD: '. $info['size_download'],
+                    'HTTP_URL: ' . $info['url'],
+                    'RESPONSE: ' . $response,
+                    'RESP_SIZE:' . sizeof($response),
+                    'KEY: ' . $this->token,
+                    'CHUNKED MODE DETECTED :' . $chunked,
+                    str_pad('', 200, '-') . PHP_EOL
+                ];
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+            }
+        }
+
+
+
         /**
          * Logger
          */
+        /*
         if(isset(\Yii::$app->params['iikoLogOrganization'])) {
             $org_id  = \Yii::$app->user->identity->organization_id;
             if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
@@ -256,6 +286,7 @@ class iikoApi
 
             }
         }
+        */
 
         if($info['http_code'] != 200) {
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');

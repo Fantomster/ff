@@ -188,7 +188,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
         } catch (\Exception $e) {
             $transaction->rollBack();
             iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getMessage(), 'line' => $e->getLine()];
         }
     }
 
@@ -254,7 +254,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
         } catch (\Exception $e) {
             $transaction->rollBack();
             iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getMessage(),'line' => $e->getLine()];
         }
     }
 

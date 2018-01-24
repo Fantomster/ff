@@ -226,8 +226,10 @@ class iikoApi
         $info = curl_getinfo($ch);
         $headerArray = self::getHeadersCurl($response);
 
-        if ($headerArray['Transfer-Encoding'] == 'chunked')
-            $chunked = true;
+        if (array_key_exists('Transfer-Encoding',$headerArray)) {
+            if ($headerArray['Transfer-Encoding'] == 'chunked')
+                $chunked = true;
+        }
 
         /**
          * Chunked Logger

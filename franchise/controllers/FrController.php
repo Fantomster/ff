@@ -2,6 +2,7 @@
 
 namespace franchise\controllers;
 
+use common\models\AmoFields;
 use Yii;
 use yii\helpers\Html;
 use yii\web\Response;
@@ -127,6 +128,13 @@ class FrController extends \yii\rest\Controller {
             $lead_status_id = 465729;
             $responsible_user_id = 1427371;
         }
+
+        $amoFields = AmoFields::findOne(['amo_field'=>$sitepage]);
+        if($amoFields){
+            $lead_status_id = $amoFields->pipeline_id;
+            $responsible_user_id = $amoFields->responsible_user_id;
+        }
+
         $contact_name = $cname; //Название добавляемого контакта
         $contact_phone = $cphone; //Телефон контакта
         $contact_email = $cemail; //Емейл контакта

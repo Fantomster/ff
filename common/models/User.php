@@ -105,6 +105,21 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->invites = true;
 
             $smsNotification->save();
+            if($this->role_id == Role::ROLE_SUPPLIER_MANAGER){
+                $userId = $this->id;
+                $organizationId = $this->organization_id;
+                $clients = \common\models\RelationSuppRest::findAll(['supp_org_id' => $organizationId]);
+                    if ($clients){
+                        foreach ($clients as $client){
+                            $clientId = $client->rest_org_id;
+                            $managerAssociate = new ManagerAssociate();
+                            $managerAssociate->manager_id = $userId;
+                            $managerAssociate->organization_id = $clientId;
+                            $managerAssociate->save();
+                        }
+                    }
+
+            }
         }
         parent::afterSave($insert, $changedAttributes);
     }

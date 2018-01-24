@@ -43,6 +43,12 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
     display: block;
     margin-left: 40px;
 }
+.alLi{
+    cursor: pointer;
+}
+.alStrikethrough .alLabel{
+    text-decoration: line-through;
+}
 ');
 ?>
     <section class="content-header">
@@ -174,14 +180,14 @@ HTML;
                         </div>
                     </div>
                     <div class="box-body" style="display: block;">
-                        <div class="chart" style="position:relative;height:100%;width:100%;min-height: 286px;">
+                        <div class="chart" style="position:relative;height:100%;width:100%;min-height: 586px;">
                             <?=
                             ChartJs::widget([
                                 'type' => 'line',
                                 'options' => [
                                     'maintainAspectRatio' => false,
                                     'responsive' => true,
-                                    'height' => '282px',
+                                    'height' => '582px',
                                 ],
                                 'data' => [
                                     'labels' => $arr_create_at,
@@ -213,14 +219,30 @@ HTML;
                         </div>
                     </div>
                     <div class="box-body" style="display: block;">
-                            <div style="position:relative;width:482px;min-height: 286px; margin: auto;">
+                        <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
+                            <?php
+                            $json_clients_labels = json_encode($arr_clients_labels);
+                            $json_clients_total_price = json_encode($arr_clients_price);
+                            $json_clients_colors = json_encode($arr_clients_colors);
+                            ?>
+                            <script>
+                                var json_clients_labels_source = <?= $json_clients_labels ?>;
+                                var json_clients_total_price_source = <?= $json_clients_total_price ?>;
+                                var json_clients_colors_source = <?= $json_clients_colors ?>;
+                            </script>
+                            <ul class="alUl">
+                                <?php foreach ($arr_clients_colors as $id=>$color): ?>
+                                    <li class="alLi" color-id="<?= $id ?>"><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $arr_clients_labels[$id] ?></span></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <div style="position:relative;width:282px; min-height: 286px; margin: 1px;">
                                 <?=
                                 ChartJs::widget([
                                     'type' => 'pie',
                                     'clientOptions' => [
-                                        'legend' => [
-                                            'position' => 'left'
-                                        ]
+                                        'legend' => false,
                                     ],
                                     'options' => [
                                         'height' => 282,
@@ -239,6 +261,7 @@ HTML;
                                 ]);
                                 ?>
                             </div>
+                        </div>
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -317,6 +340,52 @@ $filter_clear_to_date = date("d-m-Y");
 $analyticsUrl = Url::to(['vendor/analytics']);
 
 $customJs = <<< JS
+
+$(document).on("click", ".alLi", function() {
+      console.clear();
+      var pieChart = $('#w1');
+      var id = $(this).attr("color-id");
+      var json_clients_colors = $.extend([], json_clients_colors_source);
+      var json_clients_total_price = $.extend([], json_clients_total_price_source);
+      var json_clients_labels = json_clients_labels_source;
+      $(".alLi").each(function() {
+          var color_id = $(this).attr("color-id");
+          if($(this).hasClass("alStrikethrough")){
+              if(color_id == id){
+                  $(this).removeClass("alStrikethrough");
+              }else{
+                json_clients_colors[color_id] = null;
+                 json_clients_total_price[color_id] = 0;
+              }
+          }else{
+              if(color_id == id){
+                  $(this).addClass("alStrikethrough");
+                  json_clients_colors[color_id] = null;
+                 json_clients_total_price[color_id] = 0;
+              }
+          }
+      });
+      var newChart = new Chart(pieChart, {
+        type: 'pie',
+        data: {
+                  labels : json_clients_labels,
+                  datasets : [
+                                {
+                                  data : json_clients_total_price,
+                                  backgroundColor : json_clients_colors,
+                                  hoverBackgroundColor : json_clients_colors,
+                                },
+                      ]      
+              },           
+        options: {
+            legend : false,
+            height : 382,
+            width : 382,
+
+        },
+    });
+});
+
 $("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client").on("change", function () {
 $("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();

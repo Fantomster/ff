@@ -8,6 +8,7 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\resources\Guide;
+use yii\web\ServerErrorHttpException;
 
 
 /**
@@ -41,11 +42,15 @@ class GuideController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            /*'view' => [
-                'class' => 'yii\rest\ViewAction',
-                'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
-            ],*/
+            'create' => [
+                'class' => 'yii\rest\CreateAction',
+                'modelClass' => 'common\models\guides\Guide',
+            ],
+            'update' => [
+                'class' => 'yii\rest\UpdateAction',
+                'modelClass' => 'common\models\guides\Guide',
+                'checkAccess' => [$this, 'checkAccess'],
+            ],
         ];
     }
 
@@ -108,5 +113,36 @@ class GuideController extends ActiveController {
             $query->andFilterWhere($filters);
   
         return $dataProvider;
+    }
+
+    public function actionDelete ($id)
+    {
+        $guide = Guide::findOne(['id' => $id]);
+        $this->checkAccess('delete',$guide);
+        $guide->delete();
+        Yii::$app->getResponse()->setStatusCode(204);
+    }
+
+    /**
+     * Checks the privilege of the current user.
+     *
+     * This method should be overridden to check whether the current user has the privilege
+     * to run the specified action against the specified data model.
+     * If the user does not have access, a [[ForbiddenHttpException]] should be thrown.
+     *
+     * @param string $action the ID of the action to be executed
+     * @param \yii\base\Model $model the model to be accessed. If `null`, it means no specific model is being accessed.
+     * @param array $params additional parameters
+     * @throws ForbiddenHttpException if the user does not have access
+     */
+    public function checkAccess($action, $model = null, $params = []) {
+        // check if the user can access $action and $model
+        // throw ForbiddenHttpException if access should be denied
+        if ($action === 'update' || $action === 'delete') {
+            $user = Yii::$app->user->identity;
+
+            if ($model->client_id !== $user->organization_id)
+                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
+        }
     }
 }

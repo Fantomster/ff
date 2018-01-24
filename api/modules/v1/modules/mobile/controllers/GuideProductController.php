@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\guides\Guide;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
@@ -41,6 +42,21 @@ class GuideProductController extends ActiveController {
                 'class' => 'yii\rest\IndexAction',
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
+            ],
+            'create' => [
+                'class' => 'yii\rest\CreateAction',
+                'modelClass' => 'common\models\guides\GuideProduct',
+                'checkAccess' => [$this, 'checkAccess'],
+            ],
+            'update' => [
+                'class' => 'yii\rest\UpdateAction',
+                'modelClass' => 'common\models\guides\GuideProduct',
+                'checkAccess' => [$this, 'checkAccess'],
+            ],
+            'delete' => [
+                'class' => 'yii\rest\DeleteAction',
+                'modelClass' => 'common\models\guides\GuideProduct',
+                'checkAccess' => [$this, 'checkAccess'],
             ],
         ];
     }
@@ -92,4 +108,33 @@ class GuideProductController extends ActiveController {
   
         return $dataProvider;
     }
+
+    /**
+     * Checks the privilege of the current user.
+     *
+     * This method should be overridden to check whether the current user has the privilege
+     * to run the specified action against the specified data model.
+     * If the user does not have access, a [[ForbiddenHttpException]] should be thrown.
+     *
+     * @param string $action the ID of the action to be executed
+     * @param \yii\base\Model $model the model to be accessed. If `null`, it means no specific model is being accessed.
+     * @param array $params additional parameters
+     * @throws ForbiddenHttpException if the user does not have access
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        // check if the user can access $action and $model
+        // throw ForbiddenHttpException if access should be denied
+        if ($action === 'create') {
+            $model = new \common\models\guides\GuideProduct();
+            $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+        }
+
+        if ($action === 'create' || $action === 'update' || $action === 'delete') {
+            $user = Yii::$app->user->identity;
+            if ($model->guide->client_id !== $user->organization_id)
+                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s order content that you\'ve created.', $action));
+        }
+    }
+
 }

@@ -98,7 +98,7 @@ class CatalogBaseGoodsController extends ActiveController {
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
-        
+
         if($params->list != null)
         {
             $query->andWhere ('id IN('.implode(',', Json::decode($params->list)).')');
@@ -126,14 +126,4 @@ class CatalogBaseGoodsController extends ActiveController {
            ]);
         return $dataProvider;
     }
-    
-    public function actionTest()
-    {
-        $val = "1,2,3";
-        var_dump($val);
-        $val = explode(",", $val);
-        var_dump($val);
-    }
-
-    
 }

@@ -153,6 +153,26 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         ]
                     ])->label(false);
                     ?>
+
+                    <?=
+                    $form->field($emailNotification, 'receive_employee_email')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $emailNotification,
+                        'attribute' => 'order_done',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => Yii::t('app', 'frontend.views.settings.notify_receive_email', ['ru'=>'Получать email, если запрос на сотрудничество направлен на почту не мне, а моему работнику']),
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+
                     <?= ''
 //                    $form->field($emailNotification, 'requests')->widget(CheckboxX::classname(), [
 //                        'autoLabel' => true,
@@ -291,6 +311,26 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         ]
                     ])->label(false);
                     ?>
+
+                    <?=
+                    $form->field($smsNotification, 'receive_employee_sms')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $smsNotification,
+                        'attribute' => 'order_done',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => Yii::t('app', 'frontend.views.settings.receive_employee_sms', ['ru'=>'Получать SMS, если запрос на сотрудничество направлен на почту не мне, а моему работнику']),
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+
                     <?= ''
 //                    $form->field($smsNotification, 'requests')->widget(CheckboxX::classname(), [
 //                        'autoLabel' => true,

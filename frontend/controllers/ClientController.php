@@ -865,17 +865,19 @@ class ClientController extends DefaultController {
                     $mailer = Yii::$app->mailer;
 
                     foreach ($rows as $row) {
-                        if ($row->profile->phone && $row->profile->sms_allow) {
+                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $row->profile->phone);
                         }
-                        $email = $row->email;
-                        $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru'=>"Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru'=>" приглашает вас в систему"]);
-                        $mailer->htmlLayout = 'layouts/html';
-                        $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
-                                ->setTo($email)->setSubject($subject)->send();
+                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->emailNotification->receive_employee_email){
+                            $email = $row->email;
+                            $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru'=>"Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru'=>" приглашает вас в систему"]);
+                            $mailer->htmlLayout = 'layouts/html';
+                            $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
+                                    ->setTo($email)->setSubject($subject)->send();
+                        }
                     }
 
 

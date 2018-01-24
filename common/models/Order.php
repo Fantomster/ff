@@ -343,7 +343,7 @@ class Order extends \yii\db\ActiveRecord {
             $associatedManagers = $this->client->getAssociatedManagers($this->vendor_id);
             if (empty($associatedManagers)) {
                 foreach ($this->vendor->users as $user) {
-                    if ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE) {
+                    if ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE && $user->role_id !== Role::ROLE_SUPPLIER_MANAGER) {
                         $recipients[] = $user;
                     }
                 }

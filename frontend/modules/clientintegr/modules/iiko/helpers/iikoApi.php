@@ -287,7 +287,7 @@ class iikoApi
 
         $info = curl_getinfo($ch);
 
-        curl_close($ch);
+
 
         /**
          * Logger
@@ -312,10 +312,12 @@ class iikoApi
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
                 file_put_contents($file, '************!', FILE_APPEND);
                 file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
+                file_put_contents($file, '!************'.PHP_EOL.curl_error($ch).'!', FILE_APPEND);
 
             }
         }
 
+        curl_close($ch);
 
         if($info['http_code'] != 200) {
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');

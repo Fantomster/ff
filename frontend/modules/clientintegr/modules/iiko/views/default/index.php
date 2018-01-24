@@ -157,7 +157,7 @@ $js = <<< JS
                                     swal.close();
                                     swal('Готово', '', 'success')
                                 } else {
-                                    console.log(data.error);
+                                    console.log(data);
                                     swal(
                                         'Ошибка',
                                         'Обратитесь в службу поддержки.',

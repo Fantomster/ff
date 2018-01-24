@@ -273,7 +273,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
         curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
@@ -312,7 +312,7 @@ class iikoApi
                 file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
                 file_put_contents($file, '************!', FILE_APPEND);
                 file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
-                file_put_contents($file, '!************'.PHP_EOL.curl_error($ch).'!', FILE_APPEND);
+                file_put_contents($file, '!************'.PHP_EOL.curl_error($ch).'!'.PHP_EOL, FILE_APPEND);
 
             }
         }

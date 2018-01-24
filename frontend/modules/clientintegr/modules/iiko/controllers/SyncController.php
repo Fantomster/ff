@@ -170,14 +170,14 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                         }
                         //Валидируем сохраняем
                         if (!$model->validate() || !$model->save()) {
-                            throw new \Exception(print_r($model->getFirstErrors(), 1));
+                            throw new \Exception(print_r($model->getErrors(), 1));
                         }
                     }
                 }
                 //Обновляем колличество полученных объектов
                 $count = iikoProduct::find()->where(['is_active' => 1, 'org_id' => $dicModel->org_id])->count();
                 if (!$dicModel->updateSuccessSync($count)) {
-                    throw new \Exception(print_r($dicModel->getFirstErrors(), 1));
+                    throw new \Exception(print_r($dicModel->getErrors(), 1));
                 }
                 //Сохраняем изменения
                 $transaction->commit();

@@ -169,9 +169,18 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                             $model->containers = \GuzzleHttp\json_encode($item['containers']);
                         }
                         //Валидируем сохраняем
+                        if ($model->validate()) {
+                            if(!$model->save()) {
+                                throw new \Exception('ERROR SAVE:' . print_r($model->getErrors(), 1));
+                            }
+                        } else {
+                            throw new \Exception('ERROR VALIDATE:' . print_r($model->getErrors(), 1));
+                        }
+
+                        /*
                         if (!$model->validate() || !$model->save()) {
                             throw new \Exception(print_r($model->getErrors(), 1));
-                        }
+                        } */
                     }
                 }
                 //Обновляем колличество полученных объектов

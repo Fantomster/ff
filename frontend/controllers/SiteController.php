@@ -116,7 +116,8 @@ class SiteController extends Controller {
     }
 
     public function actionPayment() {
-        return $this->render('payment');
+        throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        //return $this->render('payment');
     }
 
     public function actionContacts() {

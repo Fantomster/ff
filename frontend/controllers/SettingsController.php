@@ -78,7 +78,6 @@ class SettingsController extends DefaultController {
     }
 
     public function actionNotifications() {
-        //dd($this->currentUser->id);
         $emailNotification = $this->currentUser->emailNotification;
         $smsNotification = $this->currentUser->smsNotification;
         if($emailNotification && $smsNotification){

@@ -67,6 +67,26 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         ],
     ])
     ?>
+    <?php
+    if(count($vendors_labels)>18){
+        $col = 6;
+        $clientOptions = [
+            'legend' => false,
+        ];
+        $width = 350;
+    }else{
+        $col = 12;
+        $clientOptions = [
+            'legend' => [
+                    'position' => 'left'
+            ]
+        ];
+        $width = 500;
+    }
+    $json_vendors_labels = json_encode($vendors_labels);
+    $json_vendors_total_price = json_encode($vendors_total_price);
+    $json_vendors_colors = json_encode($vendors_colors);
+    ?>
 </section>
 <section class="content">
     <div class="box box-info">
@@ -254,31 +274,26 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
+                    <script>
+                        var json_vendors_labels_source = <?= $json_vendors_labels ?>;
+                        var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
+                        var json_vendors_colors_source = <?= $json_vendors_colors ?>;
+                    </script>
+                    <?php if(count($vendors_labels)>18): ?>
                     <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
-                        <?php
-                        $json_vendors_labels = json_encode($vendors_labels);
-                        $json_vendors_total_price = json_encode($vendors_total_price);
-                        $json_vendors_colors = json_encode($vendors_colors);
-                        ?>
-                        <script>
-                            var json_vendors_labels_source = <?= $json_vendors_labels ?>;
-                            var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
-                            var json_vendors_colors_source = <?= $json_vendors_colors ?>;
-                        </script>
                         <ul class="alUl">
                         <?php foreach ($vendors_colors as $id=>$color): ?>
                             <li class="alLi" color-id="<?= $id ?>"><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $vendors_labels[$id] ?></span></li>
                         <?php endforeach; ?>
                         </ul>
                     </div>
-                    <div class="col-md-6">
-                    <div style="position:relative;height:400px;width:282px;min-height: 286px;margin: auto;">
+                    <?php endif; ?>
+                    <div class="col-md-<?= $col ?>">
+                    <div style="position:relative;height:400px;width:<?= $width ?>px;min-height: 286px;margin: auto;">
                         <?=
                         ChartJs::widget([
                             'type' => 'pie',
-                            'clientOptions' => [
-                                'legend' => false,
-                            ],
+                            'clientOptions' => $clientOptions,
                             'options' => [
                                 'height' => 282,
                                 'width' => 282,
@@ -290,7 +305,6 @@ HTML;
                                         'data' => $vendors_total_price,
                                         'backgroundColor' => $vendors_colors,
                                         'hoverBackgroundColor' => $vendors_colors,
-                                        'fill' => true,
                                     ]
                                 ],
                             ],

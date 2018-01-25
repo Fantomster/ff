@@ -435,15 +435,15 @@ $("form.callbackwidget-call-form").on("submit", function (h) {
                 modalClose();
                 $('button[type="submit"]').button("reset");
                 if (response.result == "success") {
-                    if($("#formtype").val() == 1){
-                      yaCounter38868410.reachGoal('franch');  
-                    }
-                    if($("#formtype").val() == 2){
-                      yaCounter38868410.reachGoal('resto');   
-                    }
-                    if($("#formtype").val() == 3){
-                      yaCounter38868410.reachGoal('postav');  
-                    }
+//                    if($("#formtype").val() == 1){
+//                      yaCounter38868410.reachGoal('franch');  
+//                    }
+//                    if($("#formtype").val() == 2){
+//                      yaCounter38868410.reachGoal('resto');   
+//                    }
+//                    if($("#formtype").val() == 3){
+//                      yaCounter38868410.reachGoal('postav');  
+//                    }
                     (swal("$arr[0]", "$arr[1]", "success"), form.trigger( 'reset' ));
                 }
                 if (response.result == "error") {
@@ -498,7 +498,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             ?>
         </div><!-- .wrapper -->
         <?php
-        echo $this->render('_yandex');
+        if (Yii::$app->params['enableYandexMetrics']) {
+            echo $this->render('_yandex');
+        }
         $this->endBody()
         ?>
         <!-- BEGIN JIVOSITE CODE {literal} -->

@@ -24,4 +24,6 @@ return [
         'franchise' => 'http://fr.mixcart.ru/',
         'client' => 'https://client.mixcart.ru/',
     ],
+
+    'enableYandexMetrics' => 1,
 ];

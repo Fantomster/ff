@@ -44,7 +44,9 @@ use yii\helpers\Url;
     </div>
 <?php
 //echo $this->render('_yandex');
-echo $this->render('_yandex_vendor');
+if (Yii::$app->params['enableYandexMetrics']) {
+    echo $this->render('_yandex_vendor');
+}
 
 $sidebarUrl = Url::to(['vendor/sidebar']);
 

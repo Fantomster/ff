@@ -145,6 +145,8 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                             $model->parent_uuid = $item['parentId'];
                         }
                         $model->is_active = 1;
+
+
                         if (isset($item['name'])) {
                             $model->denom = $item['name'];
                         }
@@ -157,10 +159,11 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                         if (isset($item['num'])) {
                             $model->num = $item['num'];
                         }
+                        /*
                         if (isset($item['code'])) {
                             $model->code = $item['code'];
                         }
-
+                        */
                         if (isset($item['cookingPlaceType'])) {
                             $model->cooking_place_type = $item['cookingPlaceType'];
                         }
@@ -168,19 +171,17 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                         if (isset($item['containers'])) {
                             $model->containers = \GuzzleHttp\json_encode($item['containers']);
                         }
-                        //Валидируем сохраняем
-                        if ($model->validate()) {
-                            if(!$model->save()) {
-                                throw new \Exception('ERROR SAVE:' . print_r($model, 1));
-                            }
-                        } else {
-                            throw new \Exception('ERROR VALIDATE:' . print_r($model->getErrors(), 1));
-                        }
 
-                        /*
+
+                        //    var_dump($model->code);
+
+                        //Валидируем сохраняем
+
                         if (!$model->validate() || !$model->save()) {
                             throw new \Exception(print_r($model->getErrors(), 1));
-                        } */
+                        }
+
+
                     }
                 }
                 //Обновляем колличество полученных объектов

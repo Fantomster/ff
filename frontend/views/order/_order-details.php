@@ -78,7 +78,7 @@ use kartik\widgets\TouchSpin;
                 <div class="col-md-12">
                     <h5><?= Yii::t('message', 'frontend.views.order.comment', ['ru'=>'КОММЕНТАРИЙ']) ?></h5>
                     <small>
-                    <?= $baseProduct->comment ?>
+                    <?= $baseProduct->note ?>
                     </small>
                 </div>
             </div>

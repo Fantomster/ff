@@ -1404,7 +1404,7 @@ class ClientController extends DefaultController {
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
                         $where .
                         " and client_id = " . $currentUser->organization_id .
-                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id")->queryAll();
+                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id order by total_price DESC")->queryAll();
         $vendors_total_price = [];
         $vendors_labels = [];
         $vendors_colors = [];

@@ -68,21 +68,6 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
     ])
     ?>
     <?php
-    if(count($vendors_labels)>18){
-        $col = 6;
-        $clientOptions = [
-            'legend' => false,
-        ];
-        $width = 350;
-    }else{
-        $col = 12;
-        $clientOptions = [
-            'legend' => [
-                    'position' => 'left'
-            ]
-        ];
-        $width = 500;
-    }
     $json_vendors_labels = json_encode($vendors_labels);
     $json_vendors_total_price = json_encode($vendors_total_price);
     $json_vendors_colors = json_encode($vendors_colors);
@@ -279,7 +264,6 @@ HTML;
                         var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
                         var json_vendors_colors_source = <?= $json_vendors_colors ?>;
                     </script>
-                    <?php if(count($vendors_labels)>18): ?>
                     <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
                         <ul class="alUl">
                         <?php foreach ($vendors_colors as $id=>$color): ?>
@@ -287,13 +271,15 @@ HTML;
                         <?php endforeach; ?>
                         </ul>
                     </div>
-                    <?php endif; ?>
-                    <div class="col-md-<?= $col ?>">
-                    <div style="position:relative;height:400px;width:<?= $width ?>px;min-height: 286px;margin: auto;">
+
+                    <div class="col-md-6">
+                    <div id="alWrapper" style="position:relative;height:400px;width:350px;min-height: 286px;margin: auto;">
                         <?=
                         ChartJs::widget([
                             'type' => 'pie',
-                            'clientOptions' => $clientOptions,
+                            'clientOptions' => [
+                                'legend' => false
+                            ],
                             'options' => [
                                 'height' => 282,
                                 'width' => 282,
@@ -498,6 +484,8 @@ $analyticsUrl = Url::to(['client/analytics']);
 $customJs = <<< JS
 
 $(document).on("click", ".alLi", function() {
+      $('#w2').remove();
+      $('#alWrapper').append('<canvas id="w2" width="350" height="350" style="display: block; width: 350px; height: 350px;" class="chartjs-render-monitor"></canvas>');
       var pieChart = $('#w2');
       var id = $(this).attr("color-id");
       var json_vendors_colors = $.extend([], json_vendors_colors_source);
@@ -509,17 +497,18 @@ $(document).on("click", ".alLi", function() {
               if(color_id == id){
                   $(this).removeClass("alStrikethrough");
               }else{
-                json_vendors_colors[color_id] = null;
-                 json_vendors_total_price[color_id] = 0;
+                delete json_vendors_colors[color_id];
+                 delete json_vendors_total_price[color_id]
               }
           }else{
               if(color_id == id){
                   $(this).addClass("alStrikethrough");
-                  json_vendors_colors[color_id] = null;
-                 json_vendors_total_price[color_id] = 0;
+                  delete json_vendors_colors[color_id];
+                 delete json_vendors_total_price[color_id];
               }
           }
       });
+
       var newChart = new Chart(pieChart, {
         type: 'pie',
         data: {
@@ -535,8 +524,7 @@ $(document).on("click", ".alLi", function() {
         options: {
             legend : false,
             height : 382,
-            width : 382,
-
+            width : 382
         },
     });
 });

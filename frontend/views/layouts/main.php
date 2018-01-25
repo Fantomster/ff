@@ -303,7 +303,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 <!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_rest', ['ru'=>'Для ресторанов']), Yii::$app->params['staticUrl']['client']) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_vendors', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?></li>
-                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.rates', ['ru'=>'Тарифы']), ["/payment"]) ?></li>
+                                    <?php //<li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.rates', ['ru'=>'Тарифы']), ["/payment"]) ?></li> ?>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.about_two', ['ru'=>'О компании']), ["/site/about"]) ?></li>
                                     <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.contacts_two', ['ru'=>'Контакты']), ["/site/contacts"]) ?></li>
                                 </ul>

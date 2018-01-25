@@ -47,7 +47,9 @@ $directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed201
         </div>
         <?php
 //echo $this->render('_yandex');
-        echo $this->render('_yandex_client');
+        if (Yii::$app->params['enableYandexMetrics']) {
+            echo $this->render('_yandex_client');
+        }
 
         $sidebarUrl = Url::to(['client/sidebar']);
 

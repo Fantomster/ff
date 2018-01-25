@@ -49,7 +49,7 @@ $referrer = Yii::$app->request->get('utm_referrer');
                 <?= $content ?>
             </main>
         </div>
-        <?php if (!empty($referrer)) { ?>
+        <?php if (!empty($referrer) && Yii::$app->params['enableYandexMetrics']) { ?>
             <!-- Yandex.Metrika counter -->
             <script type="text/javascript">
                 (function (d, w, c) {

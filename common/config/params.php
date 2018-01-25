@@ -25,6 +25,7 @@ return [
         'client' => 'https://client.mixcart.ru/',
     ],
 
+    'enableYandexMetrics' => 1,
     /**
      * Массив ID организаций, у которых включено логирование ответов на запросы
      * Запись идет в файлы

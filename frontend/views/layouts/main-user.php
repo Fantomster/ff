@@ -55,7 +55,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         </div><!-- .wrapper -->
 
         <?php
-        echo $this->render('_yandex');
+        if (Yii::$app->params['enableYandexMetrics']) {
+            echo $this->render('_yandex');
+        }
         $this->endBody()
         ?>
     </body>

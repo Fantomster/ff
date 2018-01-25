@@ -57,21 +57,6 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             <small><?= Yii::t('message', 'frontend.views.vendor.all_anal', ['ru' => 'Вся аналитика в одном месте']) ?></small>
         </h1>
         <?php
-        if (count($arr_clients_labels) > 18) {
-            $col = 6;
-            $clientOptions = [
-                'legend' => false,
-            ];
-            $width = 350;
-        } else {
-            $col = 12;
-            $clientOptions = [
-                'legend' => [
-                    'position' => 'left'
-                ]
-            ];
-            $width = 500;
-        }
         $json_clients_labels = json_encode($arr_clients_labels);
         $json_clients_total_price = json_encode($arr_clients_price);
         $json_clients_colors = json_encode($arr_clients_colors);
@@ -239,28 +224,28 @@ HTML;
                         </div>
                     </div>
                     <div class="box-body" style="display: block;">
-                        <?php if (count($arr_clients_labels) > 18): ?>
-                            <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
-                                <script>
-                                    var json_clients_labels_source = <?= $json_clients_labels ?>;
-                                    var json_clients_total_price_source = <?= $json_clients_total_price ?>;
-                                    var json_clients_colors_source = <?= $json_clients_colors ?>;
-                                </script>
-                                <ul class="alUl">
-                                    <?php foreach ($arr_clients_colors as $id => $color): ?>
-                                        <li class="alLi" color-id="<?= $id ?>"><span class="alColor"
-                                                                                     style="background-color: <?= $color ?>"></span><span
-                                                    class="alLabel"><?= $arr_clients_labels[$id] ?></span></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
-                        <div class="col-md-<?= $col ?>">
-                            <div style="position:relative;width:<?= $width ?>px; min-height: 286px; margin: 1px;">
+                        <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
+                            <script>
+                                var json_clients_labels_source = <?= $json_clients_labels ?>;
+                                var json_clients_total_price_source = <?= $json_clients_total_price ?>;
+                                var json_clients_colors_source = <?= $json_clients_colors ?>;
+                            </script>
+                            <ul class="alUl">
+                                <?php foreach ($arr_clients_colors as $id => $color): ?>
+                                    <li class="alLi" color-id="<?= $id ?>"><span class="alColor"
+                                                                                 style="background-color: <?= $color ?>"></span><span
+                                                class="alLabel"><?= $arr_clients_labels[$id] ?></span></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="alWrapper" style="position:relative;width:350px; min-height: 286px; margin: 1px;">
                                 <?=
                                 ChartJs::widget([
                                     'type' => 'pie',
-                                    'clientOptions' => $clientOptions,
+                                    'clientOptions' => [
+                                        'legend' => false,
+                                    ],
                                     'options' => [
                                         'height' => 282,
                                         'width' => 282,
@@ -359,7 +344,8 @@ $analyticsUrl = Url::to(['vendor/analytics']);
 $customJs = <<< JS
 
 $(document).on("click", ".alLi", function() {
-      console.clear();
+      $('#w1').remove();
+      $('#alWrapper').append('<canvas id="w1" width="350" height="350" style="display: block; width: 350px; height: 350px;" class="chartjs-render-monitor"></canvas>');
       var pieChart = $('#w1');
       var id = $(this).attr("color-id");
       var json_clients_colors = $.extend([], json_clients_colors_source);

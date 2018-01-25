@@ -2010,7 +2010,7 @@ class VendorController extends DefaultController {
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
             $where .
             " and vendor_id = " . $currentUser->organization_id .
-            " and status<>" . Order::STATUS_FORMING . " group by client_id")->queryAll();
+            " and status<>" . Order::STATUS_FORMING . " group by client_id order by total_price DESC")->queryAll();
         $arr_clients_price = [];
         $arr_clients_labels = [];
         $arr_clients_colors = [];

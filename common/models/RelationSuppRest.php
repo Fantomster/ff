@@ -200,7 +200,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
                 if(!$managerAssociate){
                     $managerAssociate = new ManagerAssociate();
                     $managerAssociate->manager_id = $row->id;
-                    $managerAssociate->organization_id = $this->supp_org_id;
+                    $managerAssociate->organization_id = $this->rest_org_id;
                     $managerAssociate->save();
                 }
         }

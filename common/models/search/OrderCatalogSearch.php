@@ -44,11 +44,16 @@ class OrderCatalogSearch extends \yii\base\Model {
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
         ];
 
-        $sort = isset($params['sort']) ? $params['sort'] : null;
-
         $where = '';
+        $params_sql = [];
         if(!empty($this->searchString)) {
-            $where = 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
+            $where .= 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
+            $params_sql[':searchString'] = "%" . $this->searchString . "%";
+        }
+
+        if(!empty($this->selectedVendor)) {
+            $where .= ' AND `org`.id = :searchVendor ';
+            $params_sql[':searchVendor'] = $this->selectedVendor;
         }
 
         $sql = "
@@ -81,7 +86,7 @@ class OrderCatalogSearch extends \yii\base\Model {
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->sql,
-            'params' => [':searchString' => "%" . $this->searchString . "%"],
+            'params' => $params_sql,
             'pagination' => [
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
                 'params' => [

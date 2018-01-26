@@ -11,12 +11,16 @@ class CatalogBaseGoods extends \common\models\CatalogBaseGoods
     public $organization_name;
     public $comment;
     public $symbol;
+    public $vendor_id;
+    public $rest_org_id;
+    public $count;
+    public $page;
     
     public function fields()
     {
         return ['id', 'cat_id', 'article', 'product', 'status', 'units', 'market_place', 'deleted', 'created_at', 'supp_org_id', 
                 'updated_at', 'category_id', 'note', 'ed', 'image', 'brand', 'region', 'weight', 'es_status', 'mp_show_price', 'rating', 'price', 
-            'organization_name' , 'comment', 'symbol'];
+            'organization_name' , 'comment', 'symbol', 'vendor_id', 'rest_org_id', 'count', 'page'];
     }
     
      /**
@@ -24,7 +28,7 @@ class CatalogBaseGoods extends \common\models\CatalogBaseGoods
      */
     public function rules() {
         return [
-            [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating', 'units'], 'integer'],
+            [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating', 'units', 'vendor_id'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],

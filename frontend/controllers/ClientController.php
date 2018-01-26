@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ManagerAssociate;
 use common\models\PaymentSearch;
 use common\models\UserToken;
 use Yii;
@@ -864,6 +865,11 @@ class ClientController extends DefaultController {
 
                     $mailer = Yii::$app->mailer;
 
+                    $managerAssociate = new ManagerAssociate();
+                    $managerAssociate->manager_id = $user->id;
+                    $managerAssociate->organization_id = $currentUser->organization_id;
+                    $managerAssociate->save();
+
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
@@ -877,6 +883,15 @@ class ClientController extends DefaultController {
                             $mailer->htmlLayout = 'layouts/html';
                             $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
                                     ->setTo($email)->setSubject($subject)->send();
+                        }
+                        if($row->role_id == Role::ROLE_SUPPLIER_MANAGER){
+                            $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$currentUser->organization_id]);
+                            if(!$managerAssociate){
+                                $managerAssociate = new ManagerAssociate();
+                                $managerAssociate->manager_id = $row->id;
+                                $managerAssociate->organization_id = $currentUser->organization_id;
+                                $managerAssociate->save();
+                            }
                         }
                     }
 
@@ -1404,7 +1419,7 @@ class ClientController extends DefaultController {
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
                         $where .
                         " and client_id = " . $currentUser->organization_id .
-                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id order by total_price DESC")->queryAll();
+                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id   ")->queryAll();
         $vendors_total_price = [];
         $vendors_labels = [];
         $vendors_colors = [];

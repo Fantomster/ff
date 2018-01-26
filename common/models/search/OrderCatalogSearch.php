@@ -48,7 +48,7 @@ class OrderCatalogSearch extends \yii\base\Model {
 
         $where = '';
         if(!empty($this->searchString)) {
-            $where = 'AND cbg.product LIKE :searchString OR cbg.article LIKE :searchString';
+            $where = 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
         }
 
         $sql = "

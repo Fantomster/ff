@@ -547,7 +547,7 @@ class VendorController extends DefaultController {
         if($sort == 'product') {
             $q->orderBy('`alf_cyr` DESC, `product` ASC');
         } else if($sort == '-product') {
-            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+            $q->orderBy('`alf_cyr` DESC, `product` DESC');
         }
 
         if($sort == 'article') {
@@ -1493,6 +1493,8 @@ class VendorController extends DefaultController {
 
     public function actionStep2($id)
     {
+        $sort = \Yii::$app->request->get('sort');
+
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if (Yii::$app->request->isAjax) {
@@ -1512,21 +1514,65 @@ class VendorController extends DefaultController {
         }
         $baseCurrencySymbol = $baseCatalog->currency->symbol;
 
-        $q = CatalogBaseGoods::find()->where(['deleted' => 0]);
-        $q->andWhere(['cat_id' => $baseCatalog->id]);
+        $q = CatalogBaseGoods::find()->where('deleted = 0');
+        $q->andWhere('cat_id = '.$baseCatalog->id);
+
+        $q->select([
+           '*',
+            "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
+            "(`article` + 0) AS c_article_1",
+            "`article` AS c_article",
+            "`article` REGEXP '^-?[0-9]+$' AS i",
+            "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ]);
+
+
+
 
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = trim(\Yii::$app->request->get('searchString'));
+            $searchString =  trim(\Yii::$app->request->get('searchString')) ;
             $q->andWhere('product LIKE :p OR article LIKE :a');
-            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" . $searchString . "%"]);
+            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" .$searchString . "%"]);
         }
 
-        $q->orderBy('`article` REGEXP \'^-?[0-9]+$\' DESC, (article + 0), article');
+        if($sort == 'product') {
+            $q->orderBy('`alf_cyr` DESC, `product` ASC');
+        } else if($sort == '-product') {
+            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+        }
+
+        if($sort == 'article') {
+            $q->orderBy('len DESC, i DESC, (article + 0), article');
+        } else if($sort == '-article') {
+            $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
+        }
 
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $q,
             'pagination' => [
                 'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product',
+                    'price',
+                    'article',
+                    'units',
+                    'status',
+                    'category_id',
+                    'ed',
+                    'market_place',
+                    'c_article_1',
+                    'c_article',
+                    'i',
+                    'len'
+                ],
+                'defaultOrder' => [
+                    'len' => SORT_DESC,
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
+                ]
             ],
         ]);
 
@@ -1598,6 +1644,9 @@ class VendorController extends DefaultController {
             $sql = "SELECT "
                 . "catalog.id as id,"
                 . "article,"
+                . "case when LENGTH(article) != 0 then 1 ELSE 0 end as len,"
+                . "(`article` + 0) AS c_article_1,"
+                . "`article` REGEXP '^-?[0-9]+$' AS i,"
                 . "catalog_base_goods.product as product,"
                 . "catalog_base_goods.id as base_goods_id,"
                 . "catalog_goods.id as goods_id,"
@@ -1609,7 +1658,10 @@ class VendorController extends DefaultController {
                 . " FROM `catalog` "
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
+                . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 "
+                . "ORDER BY len DESC, i DESC, c_article_1 ASC, article ASC ";
+
+
             $arr = \Yii::$app->db->createCommand($sql)->queryAll();
 
             $array = [];

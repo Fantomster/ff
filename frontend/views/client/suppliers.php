@@ -568,7 +568,7 @@ $('#profile-full_name,#organization-name').on('keyup paste put', function(e){
         $('#addProduct').removeAttr('disabled');   
     }
     
-    if($('#profile-phone').val().length < 2) {
+    if(!$('#profile-phone').intlTelInput("isValidNumber")) {
          $('#addProduct').attr('disabled','disabled');                 
     } else {
         $('#addProduct').removeAttr('disabled');                      

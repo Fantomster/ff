@@ -92,7 +92,7 @@ class OrderCatalogSearch extends \yii\base\Model {
                 'attributes' => [
                     'product' => [
                         'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
-                        'desc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_DESC],
+                        'desc' => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
                     'price',

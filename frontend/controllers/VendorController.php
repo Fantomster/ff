@@ -547,7 +547,7 @@ class VendorController extends DefaultController {
         if($sort == 'product') {
             $q->orderBy('`alf_cyr` DESC, `product` ASC');
         } else if($sort == '-product') {
-            $q->orderBy('`alf_cyr` DESC, `product` DESC');
+            $q->orderBy('`alf_cyr` ASC, `product` DESC');
         }
 
         if($sort == 'article') {

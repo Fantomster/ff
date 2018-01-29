@@ -196,7 +196,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
         $rows = User::find()->where(['organization_id' => $this->supp_org_id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
         foreach ($rows as $row) {
-                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->supp_org_id]);
+                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->rest_org_id]);
                 if(!$managerAssociate){
                     $managerAssociate = new ManagerAssociate();
                     $managerAssociate->manager_id = $row->id;

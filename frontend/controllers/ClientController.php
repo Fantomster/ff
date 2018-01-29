@@ -1403,7 +1403,6 @@ class ClientController extends DefaultController {
             array_push($arr_create_at, 0);
             array_push($arr_price, 0);
         }
-
         foreach ($area_chart as $area_charts) {
             array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));
             array_push($arr_price, $area_charts['total_price']);

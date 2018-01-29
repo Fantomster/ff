@@ -63,7 +63,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
                 </div>
             </div>
             <div class="modal-body">
-                <div class="handsontable" id="CreateCatalog"></div>   
+                <div class="handsontable" id="CreateCatalog"></div>
             </div>
             <div class="modal-footer">
                 <?=
@@ -137,7 +137,14 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'value' => function ($data) {
             $result = "";
-            if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
+
+            if ($data === null || $data->catalog === null) {
+                return "<div class='btn-group'>" . $result . "</div>";
+            }
+
+            if ($data->invite == 0 ||
+                $data->cat_id == 0 ||
+                $data->catalog->status == 0) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru'=>'Заказ']), [
                             'class' => 'btn btn-success btn-sm',
@@ -259,8 +266,8 @@ $gridColumnsCatalog = [
                                     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                                     'resizableColumns' => false,
                                 ]);
-                                ?>  
-                                <?php Pjax::end(); ?> 
+                                ?>
+                                <?php Pjax::end(); ?>
                             </div>
                         </div>
                     </div>
@@ -294,7 +301,7 @@ $gridColumnsCatalog = [
                             ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label(Yii::t('message', 'frontend.views.client.suppliers.org', ['ru'=>'Организация'])) ?>
-                </div> 
+                </div>
                 <div class="box-footer">
                     <div class="form-group">
                         <?=
@@ -313,7 +320,7 @@ $gridColumnsCatalog = [
                     </div>
                     <div class="form-group">
                         <?= Html::submitButton(Yii::t('message', 'frontend.views.client.suppliers.invite', ['ru'=>'Пригласить']), ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
-                    </div>	    
+                    </div>
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
@@ -354,10 +361,9 @@ $arr = [
     Yii::t('app', 'frontend.views.client.suppliers.var21', ['ru'=>'Отмена']),
 ];
 $language = Yii::$app->sourceLanguage;
-
 $customJs = <<< JS
         
-var currencies = $.map($currencySymbolList, function(el) { return el });
+var currencies = $currencySymbolList;
 var currentCurrency = 1;
    
 $(".content").on("change keyup paste cut", "#searchString", function() {
@@ -454,100 +460,99 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
             console.log(response)
                 if(response.success){
                         // Поставщик уже есть в списке контактов (лочим все кнопки)
-	                if(response.eventType==1){ 
-		        var fio = response.fio;
+	                if(response.eventType==1) { 
+                        var fio = response.fio;
                         var phone = response.phone;
-	                var organization = response.organization;
-	                $('#profile-full_name').val(fio);
+                        var organization = response.organization;
+                        $('#profile-full_name').val(fio);
                         $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization); 
-	                $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
+                        $('#organization-name').val(organization); 
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
                         $('#addProduct').attr('disabled','disabled');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').attr('disabled','disabled');
-		            bootboxDialogShow(response.message);
-		            console.log(organization);    
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id').attr('disabled','disabled');
+                        bootboxDialogShow(response.message);
+                        console.log(organization);    
 	                }
 	                // Вы уже отправили приглашение этому поставщику, ожидается отклик поставщика (лочим кнопки)
-	                if(response.eventType==2){
-		        var fio = response.fio;
+	                if(response.eventType==2) {
+                        var fio = response.fio;
                         var phone = response.phone;
-	                var organization = response.organization;
-	                $('#profile-full_name').val(fio);
+                        var organization = response.organization;
+                        $('#profile-full_name').val(fio);
                         $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization); 
-	                $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
+                        $('#organization-name').val(organization); 
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
                         $('#addProduct').attr('disabled','disabled');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').attr('disabled','disabled');
-		            bootboxDialogShow(response.message);
-		            console.log('type = 2');    
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id').attr('disabled','disabled');
+                        bootboxDialogShow(response.message);
+                        console.log('type = 2');    
 	                }
 	                // Связи не найдено - просто invite (#inviteSupplier)
-	                if(response.eventType==3){
-		        var fio = response.fio;
-                        var phone = response.phone; 
-	                var organization = response.organization;
-	                $('#profile-full_name').val(fio);
-                        $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization);  
-		            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
-                            console.log('type = 3');     
-	                }
-	                // Данный email не может быть использован (лочим все кнопки)
-	                if(response.eventType==4){
-		            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide');
-                            $('#addProduct').attr('disabled','disabled'); 
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').attr('disabled','disabled');
-		            bootboxDialogShow(response.message);
-		            console.log('type = 4');  
-	                }
-                        // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
-	                if(response.eventType==5){
-		                    $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
-                            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
-                            $('#profile-full_name,#organization-name').removeAttr('readonly');
-                                    console.log('type = 5'); 
-                            if($('.has-error').length >= 1) {
-                                 $('#addProduct').attr('disabled','disabled');                 
-                            } else {
-                                $('#addProduct').removeAttr('disabled');                      
-                            }
-                    }
-                        // 
-	                if(response.eventType==6){
-		        var fio = response.fio;
+	                if(response.eventType==3) {
+		                var fio = response.fio;
                         var phone = response.phone; 
                         var organization = response.organization;
-	                $('#profile-full_name').val(fio);
+                        $('#profile-full_name').val(fio);
                         $('#profile-phone').val(phone);
-	                $('#organization-name').val(organization); 
-	                $('#addProduct').addClass('hide');
-	                $('#inviteSupplier').removeClass('hide');
-		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
-                            $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
-		            console.log('type = 6');    
+                        $('#organization-name').val(organization);  
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
+                        console.log('type = 3');     
 	                }
-                                      
-                }else{
-		    console.log(response.message); 
+	                // Данный email не может быть использован (лочим все кнопки)
+	                if(response.eventType==4) {
+		                $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide');
+                        $('#addProduct').attr('disabled','disabled'); 
+		                $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+		                $('#relationcategory-category_id').attr('disabled','disabled');
+		                bootboxDialogShow(response.message);
+		                console.log('type = 4');  
+	                }
+                    // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
+	                if(response.eventType==5){
+                        $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
+                        $('#addProduct').removeClass('hide');
+                        $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
+                        $('#profile-full_name,#organization-name,#profile-phone').removeAttr('readonly');
+                        console.log('type = 5'); 
+                        if($('.has-error').length >= 1 || !$('#profile-phone').intlTelInput("isValidNumber")) {
+                             $('#addProduct').attr('disabled','disabled');                 
+                        } else {
+                            $('#addProduct').removeAttr('disabled');                      
+                        }
+                    }
+                    // 
+	                if(response.eventType==6){
+		                var fio = response.fio;
+                        var phone = response.phone; 
+                        var organization = response.organization;
+	                    $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
+                        $('#organization-name').val(organization); 
+                        $('#addProduct').addClass('hide');
+                        $('#inviteSupplier').removeClass('hide');
+                        $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
+                        $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
+		                console.log('type = 6');    
+	                }               
+                } else {
+		            console.log(response.message); 
                 }
             },
             error: function(response) {
-		    console.log(response.message); 
+		        console.log(response.message); 
             }
         }); 
 	}	 
 	
-	if($('.has-error').length >= 1) {
+	if($('.has-error').length >= 1 || !$('#profile-phone').intlTelInput("isValidNumber")) {
          $('#addProduct').attr('disabled','disabled');                 
     } else {
         $('#addProduct').removeAttr('disabled');                      
@@ -563,7 +568,7 @@ $('#profile-full_name,#organization-name').on('keyup paste put', function(e){
         $('#addProduct').removeAttr('disabled');   
     }
     
-    if($('#profile-phone').val().length < 2) {
+    if(!$('#profile-phone').intlTelInput("isValidNumber")) {
          $('#addProduct').attr('disabled','disabled');                 
     } else {
         $('#addProduct').removeAttr('disabled');                      
@@ -774,7 +779,7 @@ $("#organization-name").keyup(function() {
                     }
                     if (value != currentCurrency) {
                         currentCurrency = value;
-                        $(".currency-symbol").html(currencies[currentCurrency-1]);
+                        $(".currency-symbol").html(currencies[currentCurrency]);
                         resolve();
                     } else {
                         reject("$arr[20]")

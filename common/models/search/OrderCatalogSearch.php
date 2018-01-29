@@ -2,8 +2,11 @@
 
 namespace common\models\search;
 
+use common\models\CatalogBaseGoods;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
+use yii\db\Query;
 
 /**
  *  Model for order catalog search form
@@ -32,39 +35,59 @@ class OrderCatalogSearch extends \yii\base\Model {
      */
     public function search($params) {
         $this->load($params);
-        
-        $searchString = "%$this->searchString%";
 
-        $query = "SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.article, cbg.note, cbg.ed, curr.symbol FROM "
-                . "catalog_base_goods AS cbg LEFT JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "LEFT JOIN catalog cat ON cbg.cat_id = cat.id JOIN currency curr ON cat.currency_id = curr.id "
-                . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0) "
-                . "UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id, org.name, cbg.article, cbg.note, cbg.ed, curr.symbol FROM "
-                . "catalog_goods AS cg JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
-                . "LEFT JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "LEFT JOIN catalog cat ON cg.cat_id = cat.id JOIN currency curr ON cat.currency_id = curr.id "
-                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0))";
+        $fields = [
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id',
+            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
+            "(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ];
 
-        $query1 = "SELECT COUNT(cbg.id) FROM "
-                . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
-        $count1 = Yii::$app->db->createCommand($query1, [':searchString' => $searchString])->queryScalar();
-        $query2 = "SELECT COUNT(cbg.id) FROM "
-                . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
-                . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)"
-                . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
-        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $searchString])->queryScalar();
+        $where = '';
+        $params_sql = [];
+        if(!empty($this->searchString)) {
+            $where .= 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
+            $params_sql[':searchString'] = "%" . $this->searchString . "%";
+        }
+
+        if(!empty($this->selectedVendor)) {
+            $where .= ' AND `org`.id = :searchVendor ';
+            $params_sql[':searchVendor'] = $this->selectedVendor;
+        }
+
+        $sql = "
+        SELECT * FROM (
+           SELECT 
+              " . implode(',', $fields) . "
+           FROM `catalog_base_goods` `cbg`
+             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
+             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           WHERE
+           cat_id IN (" . $this->catalogs . ")
+           ".$where."
+           AND (cbg.status = 1 AND cbg.deleted = 0)
+        UNION ALL
+          SELECT 
+          " . implode(',', $fields) . "
+          FROM `catalog_goods` `cg`
+           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
+           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
+           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+          WHERE 
+          cg.cat_id IN (" . $this->catalogs . ")
+          ".$where."
+          AND (cbg.status = 1 AND cbg.deleted = 0)
+        ) as c ";
+
+        $query = Yii::$app->db->createCommand($sql);
 
         $dataProvider = new SqlDataProvider([
-            'sql' => $query,
-            'params' => [':searchString' => $searchString],
-            'totalCount' => $count1 + $count2,
+            'sql' => $query->sql,
+            'params' => $params_sql,
             'pagination' => [
-                'pageSize' => 20,
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
                 'params' => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',
@@ -72,12 +95,22 @@ class OrderCatalogSearch extends \yii\base\Model {
             ],
             'sort' => [
                 'attributes' => [
-                    'product',
+                    'product' => [
+                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc' => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
+                        'default' => SORT_ASC
+                    ],
                     'price',
+                    'units',
+                    'c_article_1',
+                    'c_article',
+                    'i'
                 ],
                 'defaultOrder' => [
-                    'product' => SORT_ASC
-                    ]
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
+                ]
             ],
         ]);
         return $dataProvider;

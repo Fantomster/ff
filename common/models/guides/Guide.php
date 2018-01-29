@@ -15,6 +15,7 @@ use common\models\Organization;
  * @property integer $deleted
  * @property string $created_at
  * @property string $updated_at
+* @property string $color
  *
  * @property Organization $client
  * @property GuideProduct[] $guideProducts
@@ -41,7 +42,7 @@ class Guide extends \yii\db\ActiveRecord {
             [['client_id', 'type', 'name'], 'required'],
             [['client_id', 'type', 'deleted'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['name'], 'string', 'max' => 255],
+            [['name','color'], 'string', 'max' => 255],
             [['name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
         ];

@@ -28,6 +28,27 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .info-box-text {
     color: #555;
 }
+.alUl{
+    list-style: none;
+    margin-left: 10px;
+}
+.alColor{
+    display: block;
+    float: left;
+    width: 30px;
+    margin-top: 5px;
+    height: 12px;
+}
+.alLabel{
+    display: block;
+    margin-left: 40px;
+}
+.alLi{
+    cursor: pointer;
+}
+.alStrikethrough .alLabel{
+    text-decoration: line-through;
+}
 ');
 ?>
 <section class="content-header">
@@ -45,6 +66,11 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             Yii::t('message', 'frontend.views.client.anal.anal_four', ['ru'=>'Аналитика'])
         ],
     ])
+    ?>
+    <?php
+    $json_vendors_labels = json_encode($vendors_labels);
+    $json_vendors_total_price = json_encode($vendors_total_price);
+    $json_vendors_colors = json_encode($vendors_colors);
     ?>
 </section>
 <section class="content">
@@ -233,10 +259,27 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div style="position:relative;height:282px;width:282px;min-height: 286px;margin: auto;">
+                    <script>
+                        var json_vendors_labels_source = <?= $json_vendors_labels ?>;
+                        var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
+                        var json_vendors_colors_source = <?= $json_vendors_colors ?>;
+                    </script>
+                    <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
+                        <ul class="alUl">
+                        <?php foreach ($vendors_colors as $id=>$color): ?>
+                            <li class="alLi" color-id="<?= $id ?>"><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $vendors_labels[$id] ?></span></li>
+                        <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                    <div id="alWrapper" style="position:relative;height:400px;width:350px;min-height: 286px;margin: auto;">
                         <?=
                         ChartJs::widget([
                             'type' => 'pie',
+                            'clientOptions' => [
+                                'legend' => false
+                            ],
                             'options' => [
                                 'height' => 282,
                                 'width' => 282,
@@ -253,6 +296,7 @@ HTML;
                             ],
                         ]);
                         ?>
+                    </div>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -333,6 +377,7 @@ HTML;
 
     <?php
     $customJs = <<< JS
+    
     
 // Get context with jQuery - using jQuery's .get() method.
 var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
@@ -437,6 +482,54 @@ $filter_clear_to_date = date("d-m-Y");
 $analyticsUrl = Url::to(['client/analytics']);
 
 $customJs = <<< JS
+
+$(document).on("click", ".alLi", function() {
+      $('#w2').remove();
+      $('#alWrapper').append('<canvas id="w2" width="350" height="350" style="display: block; width: 350px; height: 350px;" class="chartjs-render-monitor"></canvas>');
+      var pieChart = $('#w2');
+      var id = $(this).attr("color-id");
+      var json_vendors_colors = $.extend([], json_vendors_colors_source);
+      var json_vendors_total_price = $.extend([], json_vendors_total_price_source);
+      var json_vendors_labels = json_vendors_labels_source;
+      $(".alLi").each(function() {
+          var color_id = $(this).attr("color-id");
+          if($(this).hasClass("alStrikethrough")){
+              if(color_id == id){
+                  $(this).removeClass("alStrikethrough");
+              }else{
+                delete json_vendors_colors[color_id];
+                 delete json_vendors_total_price[color_id]
+              }
+          }else{
+              if(color_id == id){
+                  $(this).addClass("alStrikethrough");
+                  delete json_vendors_colors[color_id];
+                 delete json_vendors_total_price[color_id];
+              }
+          }
+      });
+
+      var newChart = new Chart(pieChart, {
+        type: 'pie',
+        data: {
+                  labels : json_vendors_labels,
+                  datasets : [
+                                {
+                                  data : json_vendors_total_price,
+                                  backgroundColor : json_vendors_colors,
+                                  hoverBackgroundColor : json_vendors_colors,
+                                },
+                      ]      
+              },           
+        options: {
+            legend : false,
+            height : 382,
+            width : 382
+        },
+    });
+});
+    
+
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").on("change", function () {
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").attr('disabled','disabled')      
 var filter_status = $("#filter_status").val();

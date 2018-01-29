@@ -23,10 +23,10 @@ echo GridView::widget([
             ],
         ],
         [
-            'attribute' => 'note.note',
+            'attribute' => 'comment',
             'header' => Yii::t('message', 'frontend.views.order.grid_comment', ['ru'=>'Комментарий']),
             'value' => function ($data) {
-                return (isset($data->note->note) ? $data->note->note : '');
+                return (isset($data->comment) ? $data->comment : '');
             },
             'headerOptions' => [
                 'width' => '120'

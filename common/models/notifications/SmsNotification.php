@@ -19,6 +19,7 @@ use common\models\User;
  * @property integer $order_changed
  * @property integer $order_processing
  * @property integer $order_done
+ * @property integer $request_accept
  *
  * @property User $user
  */
@@ -37,7 +38,7 @@ class SmsNotification extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['user_id'], 'required'],
-            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept'], 'integer'],
+            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'receive_employee_sms'], 'integer'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }

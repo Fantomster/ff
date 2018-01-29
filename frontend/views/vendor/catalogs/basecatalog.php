@@ -274,8 +274,7 @@ Modal::end();
                     ])
                     ?>
                     <?=
-                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru' => 'Изменить валюту:']) . ' </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>' .
-                        '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru' => 'Изменить валюту:']) . ' </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeCurrency',
@@ -320,7 +319,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . $currentCatalog->currency->iso_code,
+                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . ' ' .  $currentCatalog->currency->iso_code,
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
@@ -336,7 +335,7 @@ Modal::end();
                             'attribute' => 'status',
                             'label' => Yii::t('message', 'frontend.views.vendor.in_stock_three', ['ru' => 'Наличие']),
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;width:80px'],
                             'value' => function ($data) {
                                 $link = CheckboxX::widget([
                                     'name' => 'status_' . $data['id'],
@@ -355,10 +354,10 @@ Modal::end();
                             },
                         ],
                         [
-                            'attribute' => '',
+                            'attribute' => 'market_place',
                             'label' => 'MixMarket',
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'width:70px'],
+                            'contentOptions' => ['style' => 'width:80px'],
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
@@ -371,7 +370,7 @@ Modal::end();
                             'attribute' => '',
                             'label' => '',
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'width:70px'],
+                            'contentOptions' => ['style' => 'width:80px'],
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
@@ -786,7 +785,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                                 {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
                             ).done(function (response) {
                                 if (response.result === 'success') {
-                                    $.pjax.reload({container: "#kv-unique-id-1", timeout:30000});
+                                    $.pjax.reload({container: "body", timeout:1000000});
                                     resolve();
                                 } else {
                                     swal({

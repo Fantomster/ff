@@ -88,6 +88,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
+        <link rel="shortcut icon" href="/images/favicon/favicon.ico" type="image/x-icon">
         <link href="<?= yii\helpers\Url::base() ?>/css/style.css" rel="stylesheet">
         <link rel="manifest" href="/images/favicon/manifest.json">
         <?php $this->head() ?>

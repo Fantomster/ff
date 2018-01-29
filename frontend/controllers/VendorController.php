@@ -259,7 +259,7 @@ class VendorController extends DefaultController {
 
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $user->setOrganization($this->currentUser->organization)->save();
+                    $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
@@ -388,10 +388,6 @@ class VendorController extends DefaultController {
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
                 //array_push($articleArray, (string) $article);
-                if (empty($article)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_two', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_art', ['ru'=>'Не указан <strong>Артикул</strong>'])]];
-                    return $result;
-                }
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_name', ['ru'=>'Не указано <strong>Наименование</strong>'])]];
                     return $result;
@@ -517,53 +513,78 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionBasecatalog() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
+    public function actionBasecatalog()
+    {
+        $sort = \Yii::$app->request->get('sort');
 
+        $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($baseCatalog)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
         $currentCatalog = $baseCatalog;
+
+        $q = CatalogBaseGoods::find()
+            ->select([
+                '*',
+                "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
+                "`article` REGEXP '^-?[0-9]+$' as i",
+                "(`article` + 0) AS c_article_1",
+                "`article` AS c_article",
+                "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            ])
+            ->where(['deleted' => 0]);
+
+        $q->andWhere(['cat_id' => $baseCatalog->id]);
+
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
-        } else {
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0", [':article' => $searchString, ':product' => $searchString])->queryScalar();
+            $searchString =  trim(\Yii::$app->request->get('searchString')) ;
+            $q->andWhere('product LIKE :p OR article LIKE :a');
+            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" .$searchString . "%"]);
         }
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'params' => [':article' => $searchString, ':product' => $searchString],
+
+        if($sort == 'product') {
+            $q->orderBy('`alf_cyr` DESC, `product` ASC');
+        } else if($sort == '-product') {
+            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+        }
+
+        if($sort == 'article') {
+            $q->orderBy('len DESC, i DESC, (article + 0), article');
+        } else if($sort == '-article') {
+            $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
+        }
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $q,
             'pagination' => [
                 'pageSize' => 20,
             ],
             'sort' => [
                 'attributes' => [
-                    'article',
                     'product',
-                    'units',
-                    'category_id',
                     'price',
-                    'ed',
-                    'note',
+                    'article',
+                    'units',
                     'status',
+                    'category_id',
+                    'ed',
+                    'market_place',
+                    'c_article_1',
+                    'c_article',
+                    'i',
+                    'len'
                 ],
+                'defaultOrder' => [
+                    'len' => SORT_DESC,
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
+                ]
             ],
         ]);
+
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         $cat_id = $baseCatalog->id;
@@ -1470,7 +1491,10 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionStep2($id) {
+    public function actionStep2($id)
+    {
+        $sort = \Yii::$app->request->get('sort');
+
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if (Yii::$app->request->isAjax) {
@@ -1479,59 +1503,80 @@ class VendorController extends DefaultController {
                 if (CatalogGoods::find()->where(['cat_id' => $cat_id])->exists()) {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
-                    return (['success' => false, 'type' => 1, 'message' => Yii::t('error', 'frontend.controllers.vendor.empty_cat', ['ru'=>'Пустой каталог'])]);
+                    return (['success' => false, 'type' => 1, 'message' => Yii::t('error', 'frontend.controllers.vendor.empty_cat', ['ru' => 'Пустой каталог'])]);
                 }
             }
         }
 
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($baseCatalog)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_three', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_three', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
         $baseCurrencySymbol = $baseCatalog->currency->symbol;
-        $searchString = "";
+
+        $q = CatalogBaseGoods::find()->where('deleted = 0');
+        $q->andWhere('cat_id = '.$baseCatalog->id);
+
+        $q->select([
+           '*',
+            "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
+            "(`article` + 0) AS c_article_1",
+            "`article` AS c_article",
+            "`article` REGEXP '^-?[0-9]+$' AS i",
+            "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ]);
+
+
+
+
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            $sql = "SELECT id,article,product,units,category_id,price,ed,status FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
-        } else {
-            $sql = "SELECT id,article,product,units,category_id,price,ed,status FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0")->queryScalar();
+            $searchString =  trim(\Yii::$app->request->get('searchString')) ;
+            $q->andWhere('product LIKE :p OR article LIKE :a');
+            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" .$searchString . "%"]);
         }
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'params' => [':article' => $searchString, ':product' => $searchString],
-            'totalCount' => $totalCount,
+
+        if($sort == 'product') {
+            $q->orderBy('`alf_cyr` DESC, `product` ASC');
+        } else if($sort == '-product') {
+            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+        }
+
+        if($sort == 'article') {
+            $q->orderBy('len DESC, i DESC, (article + 0), article');
+        } else if($sort == '-article') {
+            $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
+        }
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $q,
             'pagination' => [
                 'pageSize' => 20,
             ],
             'sort' => [
                 'attributes' => [
-                    'id',
-                    'article',
                     'product',
-                    'units',
-                    'category_id',
                     'price',
-                    'ed',
+                    'article',
+                    'units',
                     'status',
+                    'category_id',
+                    'ed',
+                    'market_place',
+                    'c_article_1',
+                    'c_article',
+                    'i',
+                    'len'
                 ],
                 'defaultOrder' => [
-                    'product' => SORT_ASC
+                    'len' => SORT_DESC,
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
                 ]
             ],
         ]);
-        return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id', 'baseCurrencySymbol'));
+
+        return $this->render('newcatalog/step-2', compact('dataProvider', 'cat_id', 'baseCurrencySymbol'));
     }
 
     public function actionStep3Copy($id) {
@@ -1599,6 +1644,9 @@ class VendorController extends DefaultController {
             $sql = "SELECT "
                 . "catalog.id as id,"
                 . "article,"
+                . "case when LENGTH(article) != 0 then 1 ELSE 0 end as len,"
+                . "(`article` + 0) AS c_article_1,"
+                . "`article` REGEXP '^-?[0-9]+$' AS i,"
                 . "catalog_base_goods.product as product,"
                 . "catalog_base_goods.id as base_goods_id,"
                 . "catalog_goods.id as goods_id,"
@@ -1610,7 +1658,10 @@ class VendorController extends DefaultController {
                 . " FROM `catalog` "
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
+                . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 "
+                . "ORDER BY len DESC, i DESC, c_article_1 ASC, article ASC ";
+
+
             $arr = \Yii::$app->db->createCommand($sql)->queryAll();
 
             $array = [];
@@ -2011,7 +2062,7 @@ class VendorController extends DefaultController {
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
             $where .
             " and vendor_id = " . $currentUser->organization_id .
-            " and status<>" . Order::STATUS_FORMING . " group by client_id")->queryAll();
+            " and status<>" . Order::STATUS_FORMING . " group by client_id order by total_price DESC")->queryAll();
         $arr_clients_price = [];
         $arr_clients_labels = [];
         $arr_clients_colors = [];

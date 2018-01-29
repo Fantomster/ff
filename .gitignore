@@ -52,3 +52,9 @@ phpunit.phar
 /frontend/web/runtime/
 /.htaccess
 /.gitignore
+/common/config/main-local.php
+/database.sql
+!/script.php
+!/script2.php
+/script.php
+/script2.php

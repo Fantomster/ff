@@ -724,7 +724,7 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetNote($product_id) {
+    /*public function actionAjaxSetNote($product_id) {
 
         $client = $this->currentUser->organization;
 
@@ -740,6 +740,29 @@ class OrderController extends DefaultController {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru'=>"Комментарий к товару добавлен"]), "comment" => $note->note, "type" => "success"];
             return $result;
+        }
+
+        return false;
+    }*/
+
+    public function actionAjaxSetNote($order_content_id) {
+
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $orderContent = OrderContent::find()->where(['id' => $order_content_id])->one();
+            if ($orderContent) {
+                $order = $orderContent->order;
+
+                if ($order && $order->client_id == $client->id && $order->status == Order::STATUS_FORMING) {
+                    $orderContent->comment = Yii::$app->request->post('comment');
+                    $orderContent->save();
+                    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                    $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru' => "Комментарий к товару добавлен"]), "comment" => $orderContent->comment, "type" => "success"];
+                    return $result;
+                }
+            }
+             return false;
         }
 
         return false;
@@ -1151,14 +1174,17 @@ class OrderController extends DefaultController {
                     }
                     $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru'=>"<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id'=>$order->id]) . $discountValue;
                     $orderChanged = 1;
+                }else{
+                    $message .= Yii::t('app', 'frontend.controllers.order.not_changed', ['ru'=>"<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id;
                 }
             } else {
                 if ($order->discount > 0) {
-                    $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_four', ['ru'=>"<br/> отменил скидку на заказ № "]) . $order->id;
+                    //$message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_four', ['ru'=>"<br/> отменил скидку на заказ № "]) . $order->id;
+                    $message .= Yii::t('app', 'frontend.controllers.order.not_changed', ['ru'=>"<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id;
                     $orderChanged = 1;
                 }
-                $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
-                $order->discount = null;
+                //$order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
+                //$order->discount = null;
                 $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {

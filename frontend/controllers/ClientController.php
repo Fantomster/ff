@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ManagerAssociate;
 use common\models\PaymentSearch;
 use common\models\UserToken;
 use Yii;
@@ -199,7 +200,7 @@ class ClientController extends DefaultController {
 
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $user->setOrganization($this->currentUser->organization)->save();
+                    $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru'=>'Пользователь добавлен!']);
@@ -864,18 +865,34 @@ class ClientController extends DefaultController {
 
                     $mailer = Yii::$app->mailer;
 
+                    $managerAssociate = new ManagerAssociate();
+                    $managerAssociate->manager_id = $user->id;
+                    $managerAssociate->organization_id = $currentUser->organization_id;
+                    $managerAssociate->save();
+
                     foreach ($rows as $row) {
-                        if ($row->profile->phone && $row->profile->sms_allow) {
+                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $row->profile->phone);
                         }
-                        $email = $row->email;
-                        $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru'=>"Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru'=>" приглашает вас в систему"]);
-                        $mailer->htmlLayout = 'layouts/html';
-                        $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
-                                ->setTo($email)->setSubject($subject)->send();
+                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->emailNotification->receive_employee_email){
+                            $email = $row->email;
+                            $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru'=>"Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru'=>" приглашает вас в систему"]);
+                            $mailer->htmlLayout = 'layouts/html';
+                            $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
+                                    ->setTo($email)->setSubject($subject)->send();
+                        }
+                        if($row->role_id == Role::ROLE_SUPPLIER_MANAGER){
+                            $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$currentUser->organization_id]);
+                            if(!$managerAssociate){
+                                $managerAssociate = new ManagerAssociate();
+                                $managerAssociate->manager_id = $row->id;
+                                $managerAssociate->organization_id = $currentUser->organization_id;
+                                $managerAssociate->save();
+                            }
+                        }
                     }
 
 
@@ -1402,7 +1419,7 @@ class ClientController extends DefaultController {
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
                         $where .
                         " and client_id = " . $currentUser->organization_id .
-                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id")->queryAll();
+                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id   ")->queryAll();
         $vendors_total_price = [];
         $vendors_labels = [];
         $vendors_colors = [];
@@ -1583,7 +1600,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
         $profile = new Profile();
-        $profile->scenario = 'supplier';
+        $profile->scenario = 'invite';
         //$relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();

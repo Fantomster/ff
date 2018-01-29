@@ -32,7 +32,7 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = isset($data->note->note) ? "<div class='grid-article'>" . Yii::t('message', 'frontend.views.order.article', ['ru'=>'Заметка:']) . $data->note->note . "</div>" : "";
+                $note = isset($data->comment) ? "<div class='grid-article'>" . Yii::t('message', 'frontend.views.order.article', ['ru'=>'Заметка:']) .' '. $data->comment . "</div>" : "";
                 return "<div class='grid-prod'>" . Html::decode(Html::decode($data->product_name)) . "</div>"
                         . "<div class='grid-article'>" . Yii::t('message', 'frontend.views.order.', ['ru'=>'Артикул:']) . "  <span>"
                         . $data->article . "</span></div>" . $note;

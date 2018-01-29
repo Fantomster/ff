@@ -1242,7 +1242,7 @@ class SiteController extends Controller {
     }
     private function sendInvite($client, $vendor) {
         foreach($vendor->users as $recipient){
-            if($recipient->profile->phone && $recipient->profile->sms_allow){
+            if(!empty($recipient->profile->phone)) {
                 $text = Yii::$app->sms->prepareText('sms.add_market', [
                     'client_name' => $client->name
                 ]);

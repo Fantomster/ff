@@ -194,16 +194,16 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
-        $rows = User::find()->where(['organization_id' => $this->supp_org_id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
-        foreach ($rows as $row) {
-                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->rest_org_id]);
-                if(!$managerAssociate){
-                    $managerAssociate = new ManagerAssociate();
-                    $managerAssociate->manager_id = $row->id;
-                    $managerAssociate->organization_id = $this->rest_org_id;
-                    $managerAssociate->save();
-                }
-        }
+//        $rows = User::find()->where(['organization_id' => $this->supp_org_id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
+//        foreach ($rows as $row) {
+//                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->rest_org_id]);
+//                if(!$managerAssociate){
+//                    $managerAssociate = new ManagerAssociate();
+//                    $managerAssociate->manager_id = $row->id;
+//                    $managerAssociate->organization_id = $this->rest_org_id;
+//                    $managerAssociate->save();
+//                }
+//        }
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
 //            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);

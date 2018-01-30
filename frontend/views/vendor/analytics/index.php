@@ -224,7 +224,7 @@ HTML;
                         </div>
                     </div>
                     <div class="box-body" style="display: block;">
-                        <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
+                        <div class="col-lg-6 col-md-12 col-sm-12" style="max-height: 352px; overflow-y: scroll">
                             <script>
                                 var json_clients_labels_source = <?= $json_clients_labels ?>;
                                 var json_clients_total_price_source = <?= $json_clients_total_price ?>;
@@ -238,8 +238,8 @@ HTML;
                                 <?php endforeach; ?>
                             </ul>
                         </div>
-                        <div class="col-md-6">
-                            <div id="alWrapper" style="position:relative;width:350px; min-height: 286px; margin: 1px;">
+                        <div class="col-lg-6 col-md-12 col-sm-12">
+                            <div id="alWrapper" style="position:relative; width:80%; min-height: 286px; margin: 1px;">
                                 <?=
                                 ChartJs::widget([
                                     'type' => 'pie',

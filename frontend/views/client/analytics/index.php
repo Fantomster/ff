@@ -264,7 +264,7 @@ HTML;
                         var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
                         var json_vendors_colors_source = <?= $json_vendors_colors ?>;
                     </script>
-                    <div class="col-md-6" style="max-height: 352px; overflow-y: scroll">
+                    <div class="col-lg-6 col-md-12 col-sm-12" style="max-height: 352px; overflow-y: scroll">
                         <ul class="alUl">
                         <?php foreach ($vendors_colors as $id=>$color): ?>
                             <li class="alLi" color-id="<?= $id ?>"><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $vendors_labels[$id] ?></span></li>
@@ -272,8 +272,8 @@ HTML;
                         </ul>
                     </div>
 
-                    <div class="col-md-6">
-                    <div id="alWrapper" style="position:relative;height:400px;width:350px;min-height: 286px;margin: auto;">
+                    <div class="col-lg-6 col-md-12 col-sm-12">
+                    <div id="alWrapper" style="position:relative;width:80%;min-height: 286px;margin: auto;">
                         <?=
                         ChartJs::widget([
                             'type' => 'pie',

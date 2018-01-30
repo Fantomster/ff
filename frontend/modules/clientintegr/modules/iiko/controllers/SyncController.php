@@ -61,7 +61,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionGoodsView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoProduct::find()
+            'query' => iikoProduct::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('goods-view', [
@@ -75,7 +75,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionCategoryView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoCategory::find()
+            'query' => iikoCategory::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('category-view', [
@@ -89,7 +89,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionStoreView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoStore::find()
+            'query' => iikoStore::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('store-view', [
@@ -103,7 +103,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     public function actionAgentView()
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => iikoAgent::find()
+            'query' => iikoAgent::find()->where(['org_id' => $this->organisation_id])
         ]);
 
         return $this->render('agent-view', [
@@ -134,7 +134,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($items['products'])) {
                     foreach ($items['products'] as $uuid => $item) {
-                        $model = iikoProduct::findOne(['uuid' => $uuid]);
+                        $model = iikoProduct::findOne(['uuid' => $uuid, 'org_id' => $this->organisation_id]);
                         //Если нет категории у нас, создаем
                         if (empty($model)) {
                             $model = new iikoProduct(['uuid' => $uuid]);
@@ -145,29 +145,49 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                             $model->parent_uuid = $item['parentId'];
                         }
                         $model->is_active = 1;
-                        $model->denom = $item['name'];
-                        $model->product_type = $item['productType'];
-                        $model->unit = $item['mainUnit'];
-                        $model->num = $item['num'];
-                        $model->code = $item['code'];
 
-                        if(isset($item['cookingPlaceType'])) {
+
+                        if (isset($item['name'])) {
+                            $model->denom = $item['name'];
+                        }
+                        if (isset($item['productType'])) {
+                            $model->product_type = $item['productType'];
+                        }
+                        if (isset($item['mainUnit'])) {
+                            $model->unit = $item['mainUnit'];
+                        }
+                        if (isset($item['num'])) {
+                            $model->num = $item['num'];
+                        }
+                        /*
+                        if (isset($item['code'])) {
+                            $model->code = $item['code'];
+                        }
+                        */
+                        if (isset($item['cookingPlaceType'])) {
                             $model->cooking_place_type = $item['cookingPlaceType'];
                         }
 
-                        if(isset($item['containers'])) {
+                        if (isset($item['containers'])) {
                             $model->containers = \GuzzleHttp\json_encode($item['containers']);
                         }
+
+
+                        //    var_dump($model->code);
+
                         //Валидируем сохраняем
+
                         if (!$model->validate() || !$model->save()) {
-                            throw new \Exception(print_r($model->getFirstErrors(), 1));
+                            throw new \Exception(print_r($model->getErrors(), 1));
                         }
+
+
                     }
                 }
                 //Обновляем колличество полученных объектов
                 $count = iikoProduct::find()->where(['is_active' => 1, 'org_id' => $dicModel->org_id])->count();
                 if (!$dicModel->updateSuccessSync($count)) {
-                    throw new \Exception(print_r($dicModel->getFirstErrors(), 1));
+                    throw new \Exception(print_r($dicModel->getErrors(), 1));
                 }
                 //Сохраняем изменения
                 $transaction->commit();
@@ -178,8 +198,8 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
         } catch (\Exception $e) {
             $transaction->rollBack();
             iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage()];
-        }
+            return ['success' => false, 'error' => $e->getMessage(), 'line' => $e->getLine(), 'file' => $e->getFile(), 'trace' => $e->getTraceAsString()];
+            }
     }
 
     /**
@@ -205,7 +225,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($items['categories'])) {
                     foreach ($items['categories'] as $uuid => $category) {
-                        $model = iikoCategory::findOne(['uuid' => $uuid]);
+                        $model = iikoCategory::findOne(['uuid' => $uuid, 'org_id' => $this->organisation_id]);
                         //Если нет категории у нас, создаем
                         if (empty($model)) {
                             $model = new iikoCategory(['uuid' => $uuid]);
@@ -215,9 +235,14 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                         if (isset($category['parentId'])) {
                             $model->parent_uuid = $category['parentId'];
                         }
+
                         $model->is_active = 1;
-                        $model->denom = $category['name'];
-                        $model->group_type = $category['productGroupType'];
+                        if (isset($category['name'])) {
+                            $model->denom = $category['name'];
+                        }
+                        if (isset($category['productGroupType'])) {
+                            $model->group_type = $category['productGroupType'];
+                        }
 
                         if (!$model->validate() || !$model->save()) {
                             throw new \Exception(print_r($model->getFirstErrors(), 1));
@@ -239,7 +264,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
         } catch (\Exception $e) {
             $transaction->rollBack();
             iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getMessage(),'line' => $e->getLine()];
         }
     }
 
@@ -265,16 +290,26 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($stores['corporateItemDto'])) {
                     foreach ($stores['corporateItemDto'] as $store) {
-                        $model = iikoStore::findOne(['uuid' => $store['id']]);
+                        $model = iikoStore::findOne(['uuid' => $store['id'], 'org_id' => $this->organisation_id]);
                         //Если нет категории у нас, создаем
                         if (empty($model)) {
                             $model = new iikoStore(['uuid' => $store['id']]);
                             $model->org_id = $this->organisation_id;
                         }
                         $model->is_active = 1;
-                        $model->denom = $store['name'];
-                        $model->store_code = $store['code'];
-                        $model->store_type = $store['type'];
+
+                        if(!empty($store['name'])){
+                            $model->denom = $store['name'];
+                        }
+
+                        if(!empty($store['code'])){
+                            $model->store_code = $store['code'];
+                        }
+                        
+                        if(!empty($store['type'])){
+                            $model->store_type = $store['type'];
+                        }
+
                         //Валидируем сохраняем
                         if (!$model->validate() || !$model->save()) {
                             throw new \Exception(print_r($model->getFirstErrors(), 1));
@@ -321,7 +356,7 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
                 //Если пришли категории, обновляем их
                 if (!empty($agents['employee'])) {
                     foreach ($agents['employee'] as $agent) {
-                        $model = iikoAgent::findOne(['uuid' => $agent['id']]);
+                        $model = iikoAgent::findOne(['uuid' => $agent['id'], 'org_id' => $this->organisation_id]);
                         //Если нет у нас, создаем
                         if (empty($model)) {
                             $model = new iikoAgent(['uuid' => $agent['id']]);

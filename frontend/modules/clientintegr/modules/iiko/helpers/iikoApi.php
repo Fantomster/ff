@@ -13,6 +13,8 @@ class iikoApi
     private $pass;
     private $token;
 
+    var $response = '';
+
     protected static $_instance;
 
     public static function getInstance()
@@ -55,7 +57,7 @@ class iikoApi
             'pass' => hash('sha1', $password)
         ];
 
-        if($this->token = $this->send('/auth', $params)) {
+        if($this->token = $this->sendAuth('/auth', $params)) {
             return true;
         } else {
             return false;
@@ -69,7 +71,7 @@ class iikoApi
     public function logout()
     {
         if (!empty($this->token)) {
-            $this->send('/logout');
+            $this->sendAuth('/logout');
         }
     }
 
@@ -130,13 +132,15 @@ class iikoApi
     }
 
     /**
+     * Обычный SEND без чанков. Копия обычной SEND() для авторизации,
+     * так как авторизация не поддерживает запрос только с HEADERS для определения чанков
      * @param $url
      * @param array $params
      * @param string $method
      * @param array $headers
      * @return mixed
      */
-    private function send($url, $params = [], $method = 'GET', $headers = [])
+    private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
     {
         $header = ['Content-Type: application/x-www-form-urlencoded'];
         $header = ArrayHelper::merge($header, $headers);
@@ -156,12 +160,184 @@ class iikoApi
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
 
+        /**
+         * Logger
+         */
+        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
+            $org_id  = \Yii::$app->user->identity->organization_id;
+            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
+                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
+                $message = [
+                    '(AUTH PROCEDURE!)',
+                    'DATE: ' . date('d.m.Y H:i:s'),
+                    'URL: ' . $url,
+                    'HTTP_CODE: ' . $info['http_code'],
+                    'LENGTH: '. $info['download_content_length'],
+                    'SIZE_DOWNLOAD: '. $info['size_download'],
+                    'HTTP_URL: ' . $info['url'],
+                    'RESPONSE: ' . $response,
+                    'RESP_SIZE:' . sizeof($response),
+                    'KEY: ' . $this->token,
+                    str_pad('', 200, '-') . PHP_EOL
+                ];
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
+                file_put_contents($file, print_r($info,true).PHP_EOL, FILE_APPEND);
+
+            }
+        }
+
         if($info['http_code'] != 200) {
-            \Yii::info('error: ' . print_r($info, 1), 'iiko_api');
-            return false;
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
         }
 
         return $response;
+    }
+
+    /**
+     * @param $url
+     * @param array $params
+     * @param string $method
+     * @param array $headers
+     * @return mixed
+     */
+    private function send($url, $params = [], $method = 'GET', $headers = [])
+    {
+        $header = ['Content-Type: application/x-www-form-urlencoded'];
+        $header = ArrayHelper::merge($header, $headers);
+
+        $chunked = false; // Признак разбиения BODY на chunked куски
+        $response = &$this -> response;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_NOBODY, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        $headerArray = self::getHeadersCurl($response);
+
+        if (array_key_exists('Transfer-Encoding',$headerArray)) {
+            if ($headerArray['Transfer-Encoding'] == 'chunked')
+                $chunked = true;
+        }
+
+        /**
+         * Chunked Logger
+         */
+        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
+            $org_id  = \Yii::$app->user->identity->organization_id;
+            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
+                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
+                $message = [
+                    '(Chunked mode detection...)',
+                    'DATE: ' . date('d.m.Y H:i:s'),
+                    'URL: ' . $url,
+                    'HTTP_CODE: ' . $info['http_code'],
+                    'LENGTH: '. $info['download_content_length'],
+                    'SIZE_DOWNLOAD: '. $info['size_download'],
+                    'HTTP_URL: ' . $info['url'],
+                    'RESPONSE: ' . $response,
+                    'RESP_SIZE:' . sizeof($response),
+                    'KEY: ' . $this->token,
+                    'CHUNKED MODE DETECTED :' . $chunked,
+                    str_pad('', 200, '-') . PHP_EOL
+                ];
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+            }
+        }
+
+        if($info['http_code'] != 200) {
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
+        }
+
+        $response ='';
+        unset($info);
+        curl_close($ch);
+
+        // Start real request with BODY onboard
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+
+        if ($chunked) {
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
+            curl_exec($ch);
+        } else {
+            $response = curl_exec($ch);
+        }
+
+        $info = curl_getinfo($ch);
+
+
+
+        /**
+         * Logger
+         */
+
+        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
+            $org_id  = \Yii::$app->user->identity->organization_id;
+            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
+                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
+                $message = [
+                    '(Normal request)',
+                    'DATE: ' . date('d.m.Y H:i:s'),
+                    'URL: ' . $url,
+                    'HTTP_CODE: ' . $info['http_code'],
+                    'LENGTH: '. $info['download_content_length'],
+                    'SIZE_DOWNLOAD: '. $info['size_download'],
+                    'HTTP_URL: ' . $info['url'],
+                    'RESP_SIZE:' . sizeof($response),
+                    'KEY: ' . $this->token,
+                    str_pad('', 200, '-') . PHP_EOL
+                ];
+                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
+                file_put_contents($file, '************!', FILE_APPEND);
+                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
+                file_put_contents($file, '!************'.PHP_EOL.curl_error($ch).'!'.PHP_EOL, FILE_APPEND);
+
+            }
+        }
+
+        curl_close($ch);
+
+        if($info['http_code'] != 200) {
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
+        }
+
+
+        return $response;
+    }
+
+    /**
+     * @param $ch
+     * @param $str
+     * @return int
+     */
+
+    function Callback($ch, $str){
+       $response = &$this -> response;
+       $response .= $str;
+
+        return strlen($str);
     }
 
     /**
@@ -215,5 +391,24 @@ class iikoApi
     public static function xmlToArray($xml)
     {
         return json_decode(json_encode(simplexml_load_string($xml)), true);
+    }
+
+    /**
+     * @param $response
+     * @return array
+     */
+
+    public static function getHeadersCurl($response){
+        $headers = array();
+        $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
+        foreach (explode("\r\n", $header_text) as $i => $line){
+            if ($i === 0)
+                $headers['http_code'] = $line;
+            else{
+                list ($key, $value) = explode(': ', $line);
+                $headers[$key] = $value;
+            }
+        }
+        return $headers;
     }
 }

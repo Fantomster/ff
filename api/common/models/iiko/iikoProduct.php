@@ -50,7 +50,7 @@ class iikoProduct extends \yii\db\ActiveRecord
             [['uuid', 'org_id'], 'required'],
             [['org_id', 'is_active'], 'integer'],
             [['containers'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at','code'], 'safe'],
             [['uuid', 'parent_uuid'], 'string', 'max' => 36],
             [['denom'], 'string', 'max' => 255],
             [['num', 'code', 'product_type', 'cooking_place_type', 'unit'], 'string', 'max' => 50],

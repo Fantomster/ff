@@ -123,8 +123,8 @@ $this->registerJs($script);
                                                         return true;     
                                                         },           
                                                         'getws' => function ($model, $key, $index) {
-                                                         return ($model->dicstatus_id == 2) ? false : true;
-                                                       //     return true;
+                                                        // return ($model->dicstatus_id == 2) ? false : true;
+                                                            return true;
                                                         },                   
                                                     //    'map' => function ($model, $key, $index) {
                                                     //    // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;

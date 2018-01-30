@@ -71,7 +71,7 @@ use yii\web\JsExpression;
 
     ?>
 
-    <?php echo $form->field($model, 'store_id')->dropDownList(ArrayHelper::map(\api\common\models\iiko\iikoStore::find()->all(), 'id', 'denom')) ?>
+    <?php echo $form->field($model, 'store_id')->dropDownList(ArrayHelper::map(\api\common\models\iiko\iikoStore::find()->where(['org_id' => $org])->all(), 'id', 'denom')) ?>
     <?php
 
     if (!$model->doc_date) {
@@ -82,13 +82,13 @@ use yii\web\JsExpression;
     }
     ?>
     <?= $form->field($model, 'doc_date')->label('Дата Документа')->
-    widget(\kartik\widgets\DateTimePicker::classname(), [
-        'type' => \kartik\widgets\DateTimePicker::TYPE_COMPONENT_APPEND,
+    widget(DatePicker::classname(), [
+        'type' => DatePicker::TYPE_COMPONENT_APPEND,
         'convertFormat' => true,
         'layout' => '{picker}{input}',
         'pluginOptions' => [
             'autoclose' => true,
-            'format' => 'dd.MM.yyyy H:i',
+            'format' => 'dd.MM.yyyy',
             'todayHighlight' => false,
         ],
     ]);

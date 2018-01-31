@@ -59,3 +59,21 @@ Vagrantfile
 !/script2.php
 /script.php
 /script2.php
+
+/vagrant/nginx/app.conf
+/vagrant/nginx/log/
+/vagrant/config/vagrant-local.yml
+/vagrant/supervisor/log/
+
+# VPN
+/*.vpn
+/*.ovpn
+
+# some logs
+/backend/web/runtime/
+/backend/runtime/
+/api/web/runtime/
+/api/runtime/
+/frontend/web/runtime/
+/frontend/runtime/
+

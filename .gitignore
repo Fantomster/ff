@@ -33,6 +33,7 @@ phpunit.phar
 /phpunit.xml
 
 # vagrant runtime
+Vagrantfile
 /.vagrant
 /instant/node_modules/
 /composer.lock

@@ -61,6 +61,12 @@ apt-get install -y oracle-java8-installer
 info "Install Supervisor"
 apt-get install -y supervisor
 
+# LESSC
+info "Install Less compiler"
+apt-get install -y npm
+npm install -g less
+ln -s /usr/bin/nodejs /usr/bin/node
+
 # info "Configure MySQL"
 # sed -i "s/.*bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
 # mysql -uroot <<< "CREATE USER 'root'@'%' IDENTIFIED BY ''"

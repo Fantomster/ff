@@ -141,7 +141,7 @@ class CatalogBaseGoodsController extends ActiveController {
         }*/
 
         if($params->category_id != null)
-            $andWhere .= "AND cbg.cat_id = $params->category_id";
+            $andWhere .= "AND cbg.category_id = $params->category_id";
 
 
         $query1 .= $andWhere;

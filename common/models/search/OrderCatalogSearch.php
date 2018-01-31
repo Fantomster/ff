@@ -36,8 +36,15 @@ class OrderCatalogSearch extends \yii\base\Model {
     public function search($params) {
         $this->load($params);
 
-        $fields = [
+        $fieldsCBG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id',
+            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
+            "(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ];
+        $fieldsCG = [
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cbg.cat_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
@@ -59,7 +66,7 @@ class OrderCatalogSearch extends \yii\base\Model {
         $sql = "
         SELECT * FROM (
            SELECT 
-              " . implode(',', $fields) . "
+              " . implode(',', $fieldsCBG) . "
            FROM `catalog_base_goods` `cbg`
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
@@ -70,7 +77,7 @@ class OrderCatalogSearch extends \yii\base\Model {
            AND (cbg.status = 1 AND cbg.deleted = 0)
         UNION ALL
           SELECT 
-          " . implode(',', $fields) . "
+          " . implode(',', $fieldsCG) . "
           FROM `catalog_goods` `cg`
            LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id

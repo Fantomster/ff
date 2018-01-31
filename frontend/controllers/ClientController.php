@@ -871,7 +871,7 @@ class ClientController extends DefaultController {
                     $managerAssociate->save();
 
                     foreach ($rows as $row) {
-                        if ($row->profile->phone && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
+                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
@@ -1403,6 +1403,7 @@ class ClientController extends DefaultController {
             array_push($arr_create_at, 0);
             array_push($arr_price, 0);
         }
+
         foreach ($area_chart as $area_charts) {
             array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));
             array_push($arr_price, $area_charts['total_price']);

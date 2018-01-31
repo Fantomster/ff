@@ -44,7 +44,7 @@ class OrderCatalogSearch extends \yii\base\Model {
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
         ];
         $fieldsCG = [
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cbg.cat_id',
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",

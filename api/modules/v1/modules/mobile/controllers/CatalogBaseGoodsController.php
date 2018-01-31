@@ -131,9 +131,7 @@ class CatalogBaseGoodsController extends ActiveController {
         }
 
         if($params->vendor_id != null) {
-            $andWhere .= 'AND id IN ('.implode(',',  CatalogGoods::find()->select('base_goods_id')->where(['in', 'cat_id',
-                    RelationSuppRest::find()->select('cat_id')->where(['supp_org_id' => $params->vendor_id])])
-            ).')) ';
+            $andWhere .= 'AND (cbg.id IN (select base_goods_id from catalog_goods where cat_id in (select cat_id from relation_supp_rest where supp_org_id = '.$params->vendor_id.'))) ';
         }
 
         /*if($params->rest_org_id != null) {

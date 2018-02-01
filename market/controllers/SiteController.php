@@ -1240,6 +1240,8 @@ class SiteController extends Controller {
         $this->sendInvite($client,$vendor);
         return $this->successNotify(Yii::t('message', 'market.controllers.site.sent', ['ru'=>"Запрос поставщику отправлен!"]));
     }
+
+
     private function sendInvite($client, $vendor) {
         foreach($vendor->users as $recipient){
             if(!empty($recipient->profile->phone)) {

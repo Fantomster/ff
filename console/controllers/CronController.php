@@ -38,7 +38,7 @@ class CronController extends Controller {
                 ->all();
 
         foreach ($base as $catalogBaseGoods) {
-            //try {
+            try {
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : '';
                 $product_name = $catalogBaseGoods->product;
@@ -53,10 +53,12 @@ class CronController extends Controller {
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
                 $product_partnership = $catalogBaseGoods->vendor->partnership;
-//            } catch (\Exception $e) {
-//                echo "\nошибка! cbg_id: $product_id\n";
-//                return;
-//            }
+            } catch (\Exception $e) {
+                if (\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {
+                    $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                    $es_product->delete();
+                }
+            }
 
             $product_rating = $catalogBaseGoods->vendor->rating;
             if (!empty($product_image)) {
@@ -72,7 +74,7 @@ class CronController extends Controller {
                 ($catalogBaseGoods->vendor->white_list == 1) &&
                 ($catalogBaseGoods->status == 1)) {
 
-                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0) {
+                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
 
                     $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                     $es_product->attributes = [
@@ -115,7 +117,7 @@ class CronController extends Controller {
                     $es_product->save();
                 }
             } else {
-                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0) {
+                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
                     $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                     $es_product->delete();
                 }

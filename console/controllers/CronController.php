@@ -115,8 +115,6 @@ class CronController extends Controller {
                         $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                         $es_product->delete();
                     }
-                    $catalogBaseGoods->es_status = 0;
-                    $catalogBaseGoods->save();
                 }
             } catch (\Exception $e) {
                 if (\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {

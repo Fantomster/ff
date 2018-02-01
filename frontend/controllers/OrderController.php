@@ -1106,7 +1106,7 @@ class OrderController extends DefaultController {
                 ];
                 $quantityChanged = ($position['quantity'] != $product->quantity);
                 $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
-                if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+                if (($organizationType == Organization::TYPE_RESTAURANT || in_array($order->status, $allowedStatuses)) && ($quantityChanged || $priceChanged)) {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
@@ -1188,7 +1188,9 @@ class OrderController extends DefaultController {
                 $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                if($order->status != Order::STATUS_DONE){
+                    $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                }
                 $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_three', ['ru'=>' изменил детали заказа №']) . $order->id . ":$message");
                 $order->calculateTotalPrice();
                 $order->save();

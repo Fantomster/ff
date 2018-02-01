@@ -62,8 +62,8 @@ class StoreHelper extends AuthHelper {
         $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 2')->one();
     
         if (!$rmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
 
         } else {
             
@@ -86,6 +86,7 @@ class StoreHelper extends AuthHelper {
     {       
     
     $getr = Yii::$app->request->getRawBody();
+    $file = Yii::$app->basePath . '/runtime/logs/rk_callback_store_'. $org_id .'.log'; // Log file
     
     
     $myXML   = simplexml_load_string($getr);
@@ -102,18 +103,19 @@ class StoreHelper extends AuthHelper {
              $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
         
         if (!$tmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
-        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+            $message = [
+                '(Store event registered...)',
+                'DATE: ' . date('d.m.Y H:i:s'),
+                'CMDGUID: '. $cmdguid,
+                'POSID: '. $posid,
+                str_pad('', 200, '-') . PHP_EOL
+            ];
+        file_put_contents($file,print_r($getr,true) , FILE_APPEND);
+        file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents($file,print_r($array,true) , FILE_APPEND);    
+        file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
+        file_put_contents($file,PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
         exit;
         }
         
@@ -276,12 +278,12 @@ class StoreHelper extends AuthHelper {
             
             $sval = $value['parent'];
            
-            file_put_contents('runtime/logs/callback.log',$key.':'.$sval.PHP_EOL, FILE_APPEND); 
+            file_put_contents($file,$key.':'.$sval.PHP_EOL, FILE_APPEND); 
             
             // $value['parent']=$ridarray[$sval];
             $arr[$key]['parent'] = $ridarray[$sval];
             
-            file_put_contents('runtime/logs/callback.log',':'.print_r($arr[$key]['parent'],true).PHP_EOL, FILE_APPEND); 
+            file_put_contents($file,':'.print_r($arr[$key]['parent'],true).PHP_EOL, FILE_APPEND); 
             
            
         }
@@ -289,13 +291,13 @@ class StoreHelper extends AuthHelper {
     }
     */
     
-    //file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log','++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log',print_r($arr,true).PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log',print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
+    //file_put_contents($file,print_r($arr2,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,print_r($arr,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
     //exit;
     
     
@@ -329,8 +331,8 @@ class StoreHelper extends AuthHelper {
 
         
         if (!$rmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
 
         } else {
             
@@ -338,7 +340,7 @@ class StoreHelper extends AuthHelper {
             $rmodel->dicstatus_id= 6;
             $rmodel->obj_count = $icount;
             
-        //    file_put_contents('runtime/logs/callback.log',PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
+        //    file_put_contents($file,PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
             
         //    exit;
     
@@ -367,20 +369,20 @@ class StoreHelper extends AuthHelper {
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
         
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
-    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
+    file_put_contents($file,PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
+    file_put_contents($file, PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents($file,PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents($file,print_r($getr,true) , FILE_APPEND);    
+    file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents($file,print_r($arr,true) , FILE_APPEND);    
+    file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents($file,print_r($er,true) , FILE_APPEND);    
+    file_put_contents($file,print_r($er,true) , FILE_APPEND); 
+    file_put_contents($file,print_r($er,true) , FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
       */        
     }
 

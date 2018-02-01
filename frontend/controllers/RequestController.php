@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\AdditionalEmail;
+use common\models\ManagerAssociate;
 use common\models\User;
 use Yii;
 use common\components\AccessRule;
@@ -449,6 +450,16 @@ class RequestController extends DefaultController
                 $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
 
                 if ($relationSuppRest->save()) {
+                    $rows = User::find()->where(['organization_id' => $vendor->id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
+                    foreach ($rows as $row) {
+                        $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$client->organization_id]);
+                        if(!$managerAssociate){
+                            $managerAssociate = new ManagerAssociate();
+                            $managerAssociate->manager_id = $row->id;
+                            $managerAssociate->organization_id = $client->organization_id;
+                            $managerAssociate->save();
+                        }
+                    }
                     $request = Request::findOne(['id' => $request_id]);
                     $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
                     if ($client->email) {

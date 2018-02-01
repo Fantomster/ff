@@ -702,6 +702,17 @@ class Organization extends \yii\db\ActiveRecord
         if ($includeBaseCatalog && $baseCatalog) {
             $relation->cat_id = $baseCatalog;
         }
+
+        $rows = User::find()->where(['organization_id' => $vendor->id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
+        foreach ($rows as $row) {
+                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->id]);
+                if(!$managerAssociate){
+                    $managerAssociate = new ManagerAssociate();
+                    $managerAssociate->manager_id = $row->id;
+                    $managerAssociate->organization_id = $this->id;
+                    $managerAssociate->save();
+                }
+        }
         return $relation->save();
     }
 

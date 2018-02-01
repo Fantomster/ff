@@ -34,7 +34,6 @@ class CronController extends Controller {
         $base = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
                 ->andWhere(['in', 'es_status', [1, 2]])
-                ->andWhere(['deleted' => false])
                 ->limit(500)
                 ->all();
 
@@ -67,7 +66,11 @@ class CronController extends Controller {
                 $product_rating = $product_rating + 5;
             }
 
-            if ($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted == 0 && $catalogBaseGoods->vendor->white_list == 1) {
+            if ($catalogBaseGoods->es_status == 1 && 
+                $catalogBaseGoods->market_place == 1 && 
+                $catalogBaseGoods->deleted == 0 && 
+                $catalogBaseGoods->vendor->white_list == 1 &&
+                $catalogBaseGoods->status = 1) {
 
                 if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0) {
 

@@ -53,71 +53,71 @@ class CronController extends Controller {
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
                 $product_partnership = $catalogBaseGoods->vendor->partnership;
+                $product_rating = $catalogBaseGoods->vendor->rating;
+                
+                if (!empty($product_image)) {
+                    $product_rating = $product_rating + 5;
+                }
+                if (!empty($product_show_price)) {
+                    $product_rating = $product_rating + 5;
+                }
+
+                if (($catalogBaseGoods->es_status == 1) &&
+                        ($catalogBaseGoods->market_place == 1) &&
+                        ($catalogBaseGoods->deleted == 0) &&
+                        ($catalogBaseGoods->vendor->white_list == 1) &&
+                        ($catalogBaseGoods->status == 1)) {
+
+                    if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
+
+                        $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                        $es_product->attributes = [
+                            "product_id" => $product_id,
+                            "product_image" => $product_image,
+                            "product_name" => $product_name,
+                            "product_supp_id" => $product_supp_id,
+                            "product_supp_name" => $product_supp_name,
+                            "product_price" => $product_price,
+                            "product_currency" => $product_currency,
+                            "product_category_id" => $product_category_id,
+                            "product_category_name" => $product_category_name,
+                            "product_category_sub_id" => $product_category_sub_id,
+                            "product_category_sub_name" => $product_category_sub_name,
+                            "product_show_price" => $product_show_price,
+                            "product_created_at" => $product_created_at,
+                            "product_rating" => $product_rating,
+                            "product_partnership" => $product_partnership
+                        ];
+                        $es_product->save();
+                    } else {
+                        $es_product = new \common\models\ES\Product();
+                        $es_product->attributes = [
+                            "product_id" => $product_id,
+                            "product_image" => $product_image,
+                            "product_name" => $product_name,
+                            "product_supp_id" => $product_supp_id,
+                            "product_supp_name" => $product_supp_name,
+                            "product_price" => $product_price,
+                            "product_currency" => $product_currency,
+                            "product_category_id" => $product_category_id,
+                            "product_category_name" => $product_category_name,
+                            "product_category_sub_id" => $product_category_sub_id,
+                            "product_category_sub_name" => $product_category_sub_name,
+                            "product_show_price" => $product_show_price,
+                            "product_created_at" => $product_created_at,
+                            "product_rating" => $product_rating,
+                            "product_partnership" => $product_partnership
+                        ];
+                        $es_product->save();
+                    }
+                } else {
+                    if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
+                        $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                        $es_product->delete();
+                    }
+                }
             } catch (\Exception $e) {
                 if (\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {
-                    $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
-                    $es_product->delete();
-                }
-            }
-
-            $product_rating = $catalogBaseGoods->vendor->rating;
-            if (!empty($product_image)) {
-                $product_rating = $product_rating + 5;
-            }
-            if (!empty($product_show_price)) {
-                $product_rating = $product_rating + 5;
-            }
-
-            if (($catalogBaseGoods->es_status == 1) && 
-                ($catalogBaseGoods->market_place == 1) && 
-                ($catalogBaseGoods->deleted == 0) && 
-                ($catalogBaseGoods->vendor->white_list == 1) &&
-                ($catalogBaseGoods->status == 1)) {
-
-                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
-
-                    $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
-                    $es_product->attributes = [
-                        "product_id" => $product_id,
-                        "product_image" => $product_image,
-                        "product_name" => $product_name,
-                        "product_supp_id" => $product_supp_id,
-                        "product_supp_name" => $product_supp_name,
-                        "product_price" => $product_price,
-                        "product_currency" => $product_currency,
-                        "product_category_id" => $product_category_id,
-                        "product_category_name" => $product_category_name,
-                        "product_category_sub_id" => $product_category_sub_id,
-                        "product_category_sub_name" => $product_category_sub_name,
-                        "product_show_price" => $product_show_price,
-                        "product_created_at" => $product_created_at,
-                        "product_rating" => $product_rating,
-                        "product_partnership" => $product_partnership
-                    ];
-                    $es_product->save();
-                } else {
-                    $es_product = new \common\models\ES\Product();
-                    $es_product->attributes = [
-                        "product_id" => $product_id,
-                        "product_image" => $product_image,
-                        "product_name" => $product_name,
-                        "product_supp_id" => $product_supp_id,
-                        "product_supp_name" => $product_supp_name,
-                        "product_price" => $product_price,
-                        "product_currency" => $product_currency,
-                        "product_category_id" => $product_category_id,
-                        "product_category_name" => $product_category_name,
-                        "product_category_sub_id" => $product_category_sub_id,
-                        "product_category_sub_name" => $product_category_sub_name,
-                        "product_show_price" => $product_show_price,
-                        "product_created_at" => $product_created_at,
-                        "product_rating" => $product_rating,
-                        "product_partnership" => $product_partnership
-                    ];
-                    $es_product->save();
-                }
-            } else {
-                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
                     $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                     $es_product->delete();
                 }

@@ -82,6 +82,9 @@ if ($order->isObsolete) {
             break;
     }
 }
+if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Organization::TYPE_FRANCHISEE){
+    $canEdit = true;
+}
 ?>
 <div class="box box-info block_wrapper" style="height:auto;">
     <div class="box-header">

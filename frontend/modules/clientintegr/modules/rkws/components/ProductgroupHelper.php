@@ -167,7 +167,7 @@ class ProductgroupHelper extends AuthHelper {
 
         $gcount =0;
 
-        $rress = Yii::$app->db_api->createCommand('UPDATE rk_storetree SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
+        $rress = Yii::$app->db_api->createCommand('UPDATE rk_category SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
 
         foreach ($myXML->ITEM as $item) {
 

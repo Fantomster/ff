@@ -178,7 +178,6 @@ class ProductgroupHelper extends AuthHelper {
                 if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]);
                 if ($c == 'parent')  $arr[$gcount]['parent'] = strval($d[0]);
             }
-//--
 
             if ($arr[$gcount]['parent'] === '') { // Корень дерева
                 $rtree = new RkCategory(['name'=>$arr[$gcount]['name']]);
@@ -202,16 +201,12 @@ class ProductgroupHelper extends AuthHelper {
                 } else { // Дети некорня
 
                  ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
-              //  ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
                 }
 
-               //  $icount++;
-            }
-//--
-          //  $gcount++;
-        }
 
-        die();
+            }
+
+        }
 
 
 /*
@@ -286,17 +281,18 @@ class ProductgroupHelper extends AuthHelper {
             $isLog->logAppendString('SUCCESS:: Task after XML successfully saved!');
         }
 
-        $isLog->logAppendString('SUCCESS:: Stories saved');
+        $isLog->logAppendString('SUCCESS:: Categories saved');
 
-        $tmodel->rcount = $icount;
+        $tmodel->rcount = $gcount;
         $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
+
 
         // Обновление словаря RkDic
 
-        $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 2')->one();
+        $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 5')->one();
 
         if (!$rmodel) {
-            $isLog->logAppendString('ERROR:: Dictionary to update stories is not found.');
+            $isLog->logAppendString('ERROR:: Dictionary to update categories is not found.');
             exit;
         }
 

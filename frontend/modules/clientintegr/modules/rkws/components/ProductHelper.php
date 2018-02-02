@@ -44,6 +44,9 @@ class ProductHelper extends AuthHelper
     </RQ>';
 
         $res = ApiHelper::sendCurl($xml, $this->restr);
+        $isLog = new DebugHelper();
+
+        $isLog->setLogFile('../runtime/logs/rk_request_prodgroup_' . date("Y-m-d_H-i-s").'.log');
 
 
         $tmodel = new RkTasks();
@@ -68,9 +71,7 @@ class ProductHelper extends AuthHelper
         $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $this->org])->andWhere('dictype_id = 3')->one();
 
         if (!$rmodel) {
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'RKDIC TMODEL NOT FOUND.' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
-
+            $isLog->logAppendString('RKDIC TMODEL NOT FOUND. Nothing has been saved.');
         } else {
 
             $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
@@ -79,7 +80,10 @@ class ProductHelper extends AuthHelper
 
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
-            } else $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
+            } else  { $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
+                    $isLog->logAppendString('Данные справочника успешно сохранены.');
+            }
+
         }
 
         // var_dump($res);
@@ -107,7 +111,7 @@ class ProductHelper extends AuthHelper
 
         $isLog = new DebugHelper();
 
-        $isLog->setLogFile('../runtime/logs/callback_prod_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
+        $isLog->setLogFile('../runtime/logs/rk_callback_prod_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
 
         $isLog->logAppendString('=========================================');
         $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Product callback received ');

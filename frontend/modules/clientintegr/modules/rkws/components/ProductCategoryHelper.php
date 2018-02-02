@@ -9,7 +9,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
-use api\common\models\RkStoretree;
+use api\common\models\RkCategory;
 use creocoder\nestedsets\NestedSetsBehavior;
 use api\common\models\RkDic;
 
@@ -19,30 +19,35 @@ use api\common\models\RkDic;
  * and open the template in the editor.
  */
 
-class StoreHelper extends AuthHelper {
+class ProductCategoryHelper extends AuthHelper {
     
   //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/store";
     
-    public function getStore () {
+    public function getCategory () {
     if (!$this->Authorizer()) {
        
       echo "Can't perform authorization";
       return;
-    }    
-    
+    }
+
     $guid = UUID::uuid4();
-          
+
+    $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
+
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_stores" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/store'.'">
-    <PARAM name="object_id" val="'.$this->restr->code.'" />
-    </RQ>'; 
-       
-     $res = ApiHelper::sendCurl($xml,$this->restr);
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
+    <PARAM name="object_id" val="' . $this->restr->code . '" />
+    <PARAM name="goodgroup_rid" val="' . $defGoodGroup . '" />
+    <PARAM name="include_goods" val="1" />
+    </RQ>';
+
+    $res = ApiHelper::sendCurl($xml, $this->restr);
+
      
      
      $tmodel = new RkTasks();
      
-     $tmodel->tasktype_id = 25;
+     $tmodel->tasktype_id = 11;
      $tmodel->acc = $this->org;
      $tmodel->fid = 1;
      $tmodel->guid = $res['respcode']['taskguid'];
@@ -59,7 +64,7 @@ class StoreHelper extends AuthHelper {
      
           // Обновление словаря RkDic
     
-        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 2')->one();
+        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere("contr = 'productgroup'")->one();
     
         if (!$rmodel) {
         file_put_contents($file,PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 

@@ -4,8 +4,7 @@ namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use Yii;
 use yii\web\Controller;
-use api\common\models\RkAgent;
-use api\common\models\RkAgentSearch;
+use api\common\models\RkCategory;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use yii\data\ActiveDataProvider;
 // use yii\mongosoft\soapserver\Action;
@@ -16,12 +15,12 @@ use yii\data\ActiveDataProvider;
  * Author: R.Smirnov
  */
 
-class ProductgroupController extends \frontend\modules\clientintegr\controllers\DefaultController {
+class ProductcategoryController extends \frontend\modules\clientintegr\controllers\DefaultController {
     
         
     public function actionIndex() {
         
-        $searchModel = new RkAgentSearch();
+        $searchModel = new RkCategory();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
                 
         if (Yii::$app->request->isPjax) {
@@ -49,8 +48,8 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
         
    //  $resres = ApiHelper::getAgents();     
         
-        $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductgroupHelper();
-        $res->getProductgroup();
+        $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductCategoryHelper();
+        $res->getCategory();
         
             $this->redirect('\clientintegr\rkws\default');
             

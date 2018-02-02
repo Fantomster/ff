@@ -24,6 +24,10 @@ class AuthHelper extends Object {
     public $restr;
     
     public function init() {
+
+        if (Yii::$app->user->isGuest)
+            return;
+
         if(isset(User::findOne(Yii::$app->user->id)->organization_id))
         $this->org = User::findOne(Yii::$app->user->id)->organization_id;
         

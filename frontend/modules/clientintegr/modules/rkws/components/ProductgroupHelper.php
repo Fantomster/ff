@@ -117,8 +117,6 @@ class ProductgroupHelper extends AuthHelper {
         // $isLog->logAppendString(substr($getr, 0, 600));
         $isLog->logAppendString(print_r($getr,1));
 
-        die();
-
         // Checking if the Task is active
 
         $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
@@ -167,14 +165,56 @@ class ProductgroupHelper extends AuthHelper {
 
         // We got no errors. Try to parse XML with no external errors
 
-        $icount =0;
         $gcount =0;
 
         $rress = Yii::$app->db_api->createCommand('UPDATE rk_storetree SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
 
-        foreach ($myXML->STOREGROUP as $storegroup) {
+        foreach ($myXML->ITEM as $item) {
+
             $gcount++;
 
+            foreach($item->attributes() as $c => $d) {
+                if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);
+                if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]);
+                if ($c == 'parent')  $arr[$gcount]['parent'] = strval($d[0]);
+            }
+//--
+
+            if ($arr[$gcount]['parent'] === '') { // Корень дерева
+                $rtree = new RkCategory(['name'=>$arr[$gcount]['name']]);
+                $rtree->disabled =1;
+                $rtree->rid = $arr[$gcount]['rid'];
+                $rtree->acc = $acc;
+
+                $rtree->makeRoot();
+
+            } else {
+
+                ${'rid'.$arr[$gcount]['rid']} = new RkCategory(['name'=>$arr[$gcount]['name']]);
+                ${'rid'.$arr[$gcount]['rid']}->type = 1;
+                ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
+                ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+                ${'rid'.$arr[$gcount]['rid']}->acc = $acc;
+
+                if ($arr[$gcount]['parent'] === '0' || !isset(${'rid'.$arr[$gcount]['parent']})) { // Цепляем к корню
+                    ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
+                } else { // Дети некорня
+
+                 ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
+              //  ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
+                }
+
+               //  $icount++;
+            }
+//--
+          //  $gcount++;
+        }
+
+        die();
+
+
+/*
             foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);
                 if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]);
@@ -236,7 +276,7 @@ class ProductgroupHelper extends AuthHelper {
 
             }
         }
-
+*/
         // Update task after XML
 
         if (!$tmodel->setCallbackXML()) {

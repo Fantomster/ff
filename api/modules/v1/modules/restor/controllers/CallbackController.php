@@ -52,6 +52,7 @@ class CallbackController extends Controller {
 
     public function actionProductgroup() {
         (new \frontend\modules\clientintegr\modules\rkws\components\ProductgroupHelper())->callback();
+
     }
 
 }

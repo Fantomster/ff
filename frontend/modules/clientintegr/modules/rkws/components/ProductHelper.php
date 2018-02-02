@@ -46,7 +46,7 @@ class ProductHelper extends AuthHelper
         $res = ApiHelper::sendCurl($xml, $this->restr);
         $isLog = new DebugHelper();
 
-        $isLog->setLogFile('../runtime/logs/rk_request_prodgroup_' . date("Y-m-d_H-i-s").'.log');
+        $isLog->setLogFile('../runtime/logs/rk_request_prod_' . date("Y-m-d_H-i-s").'.log');
 
 
         $tmodel = new RkTasks();
@@ -81,7 +81,7 @@ class ProductHelper extends AuthHelper
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
             } else  { $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
-                    $isLog->logAppendString('Данные справочника успешно сохранены.');
+                    $isLog->logAppendString('Данные справочника DIC успешно сохранены.');
             }
 
         }

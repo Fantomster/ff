@@ -19,7 +19,7 @@ use api\common\models\RkDic;
  * and open the template in the editor.
  */
 
-class ProductCategoryHelper extends AuthHelper {
+class ProductgroupHelper extends AuthHelper {
     
   //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/store";
     
@@ -32,18 +32,17 @@ class ProductCategoryHelper extends AuthHelper {
 
     $guid = UUID::uuid4();
 
-    $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
-
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
-    <PARAM name="object_id" val="' . $this->restr->code . '" />
-    <PARAM name="goodgroup_rid" val="' . $defGoodGroup . '" />
-    <PARAM name="include_goods" val="1" />
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/productgroup' . '" timeout="3600">
+    <PARAM name="object_id" val="' . $this->restr->code . '" />    
+    <PARAM name="include_goods" val="0" />
     </RQ>';
 
     $res = ApiHelper::sendCurl($xml, $this->restr);
 
-     
+    $isLog = new DebugHelper();
+
+    $isLog->setLogFile('../runtime/logs/rk_request_prodgroup_' . date("Y-m-d_H-i-s").'.log');
      
      $tmodel = new RkTasks();
      
@@ -64,11 +63,10 @@ class ProductCategoryHelper extends AuthHelper {
      
           // Обновление словаря RkDic
     
-        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere("contr = 'productgroup'")->one();
+        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 5')->one();
     
         if (!$rmodel) {
-        file_put_contents($file,PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+            $isLog->logAppendString('RKDIC TMODEL NOT FOUND. Nothing has been saved.');
 
         } else {
             
@@ -78,7 +76,10 @@ class ProductCategoryHelper extends AuthHelper {
     
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
-            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+            } else {
+                $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+                $isLog->logAppendString('Данные справочника DIC успешно сохранены.');
+            }
         }
      
     // var_dump($res);
@@ -107,13 +108,16 @@ class ProductCategoryHelper extends AuthHelper {
 
         $isLog = new DebugHelper();
 
-        $isLog->setLogFile('../runtime/logs/rk_callback_store_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
+        $isLog->setLogFile('../runtime/logs/rk_callback_pgroup_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
 
         $isLog->logAppendString('=========================================');
         $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Store callback received... ');
         $isLog->logAppendString('CMDGUID: ' . $cmdguid . ' || POSID: ' . $posid);
         $isLog->logAppendString('=========================================');
-        $isLog->logAppendString(substr($getr, 0, 600));
+        // $isLog->logAppendString(substr($getr, 0, 600));
+        $isLog->logAppendString(print_r($getr,1));
+
+        die();
 
         // Checking if the Task is active
 

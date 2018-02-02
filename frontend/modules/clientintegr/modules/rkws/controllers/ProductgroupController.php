@@ -15,7 +15,7 @@ use yii\data\ActiveDataProvider;
  * Author: R.Smirnov
  */
 
-class ProductcategoryController extends \frontend\modules\clientintegr\controllers\DefaultController {
+class ProductgroupController extends \frontend\modules\clientintegr\controllers\DefaultController {
     
         
     public function actionIndex() {
@@ -48,7 +48,7 @@ class ProductcategoryController extends \frontend\modules\clientintegr\controlle
         
    //  $resres = ApiHelper::getAgents();     
         
-        $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductCategoryHelper();
+        $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductgroupHelper();
         $res->getCategory();
         
             $this->redirect('\clientintegr\rkws\default');

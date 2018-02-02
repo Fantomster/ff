@@ -17,6 +17,10 @@ use common\models\Role;
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
+
+$this->registerCss("
+    a:hover{cursor: pointer;}
+        ");
 ?>
     <section class="content-header">
         <h1>
@@ -167,13 +171,23 @@ kartik\select2\Select2Asset::register($this);
                                     'label' => '№',
                                 ],
                                 [
+                                    'format' => 'raw',
                                     'attribute' => 'clientName',
-                                    'value' => 'client.name',
-                                    'label' => Yii::t('app', 'franchise.views.site.rest_three', ['ru'=>'Ресторан']),
+                                    'value' => function ($data) {
+                                        return Html::a(
+                                            $data['client']['name'],
+                                            null, ['data-pjax' => '1', 'class' => 'alClientName', 'data-url' => Url::to(['organization/ajax-show-client', 'id' =>                                                       $data['client']["id"]])]);
+                                    },
+                                    'label' => Yii::t('app', 'franchise.views.site.rest_three', ['ru' => 'Ресторан']),
                                 ],
                                 [
+                                    'format' => 'raw',
                                     'attribute' => 'vendorName',
-                                    'value' => 'vendor.name',
+                                    'value' => function ($data) {
+                                        return Html::a(
+                                            $data['vendor']['name'],
+                                            null, ['data-pjax' => '1', 'class' => 'alClientName', 'data-url' => Url::to(['organization/ajax-show-vendor', 'id' =>                                                       $data['vendor']["id"]])]);
+                                    },
                                     'label' => Yii::t('app', 'franchise.views.site.vendor_two', ['ru'=>'Поставщик']),
                                 ],
                                 [
@@ -263,6 +277,12 @@ kartik\select2\Select2Asset::register($this);
         ]);
         ?>
         <?php Modal::end(); ?>
+        <?php
+        Modal::begin([
+            'id' => 'clientInfo',
+        ]);
+        ?>
+        <?php Modal::end(); ?>
     </section>
 <?php
 $url = Url::to(['site/orders']);
@@ -323,6 +343,15 @@ data: {status: $('#statusFilterID').val(), searchString: $('#search').val(), dat
 })
 }, 700);
 });
+
+        $("body").on("click", ".alClientName", function (e) {
+            var url = $(this).attr("data-url");
+            console.log(url);
+            
+            if (url !== undefined) {
+                $("#clientInfo").modal({backdrop:"static",toggle:"modal"}).load(url);
+            }
+        });
 
 JS;
 $this->registerJs($customJs, View::POS_READY);

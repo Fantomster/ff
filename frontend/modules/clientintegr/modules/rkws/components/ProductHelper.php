@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
+use api\common\models\RkCategory;
 use api\common\models\RkDicconst;
 use yii;
 use api\common\models\RkAccess;
@@ -35,18 +36,28 @@ class ProductHelper extends AuthHelper
         $guid = UUID::uuid4();
 
         $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
+        $dGroups = '';
+
+        foreach (explode(',', $defGoodGroup) as $group) {
+
+            $smodel = RkCategory::find()->andWhere('id = :group',['group' => $group])->one();
+
+            $dGroups .= '<PARAM name="goodgroup_rid" val="' . $smodel->rid . '" />';
+        }
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
-    <PARAM name="object_id" val="' . $this->restr->code . '" />
-    <PARAM name="goodgroup_rid" val="' . $defGoodGroup . '" />
-    <PARAM name="include_goods" val="1" />
+    <PARAM name="object_id" val="' . $this->restr->code . '" />' .
+    $dGroups . '<PARAM name="include_goods" val="1" />
     </RQ>';
+
 
         $res = ApiHelper::sendCurl($xml, $this->restr);
         $isLog = new DebugHelper();
 
         $isLog->setLogFile('../runtime/logs/rk_request_prod_' . date("Y-m-d_H-i-s").'.log');
+        $isLog->logAppendString(print_r($xml,true));
+        $isLog->logAppendString(print_r($res,true));
 
 
         $tmodel = new RkTasks();

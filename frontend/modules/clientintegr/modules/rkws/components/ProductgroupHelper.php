@@ -181,7 +181,7 @@ class ProductgroupHelper extends AuthHelper {
 
             if ($arr[$gcount]['parent'] === '') { // Корень дерева
                 $rtree = new RkCategory(['name'=>$arr[$gcount]['name']]);
-                $rtree->disabled =1;
+                $rtree->disabled =0;
                 $rtree->rid = $arr[$gcount]['rid'];
                 $rtree->acc = $acc;
 
@@ -193,7 +193,7 @@ class ProductgroupHelper extends AuthHelper {
                 ${'rid'.$arr[$gcount]['rid']}->type = 1;
                 ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                 ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
-                ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+               ${'rid'.$arr[$gcount]['rid']}->disabled = 0;
                 ${'rid'.$arr[$gcount]['rid']}->acc = $acc;
 
                 if ($arr[$gcount]['parent'] === '0' || !isset(${'rid'.$arr[$gcount]['parent']})) { // Цепляем к корню

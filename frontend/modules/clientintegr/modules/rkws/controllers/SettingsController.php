@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use api\common\models\RkCategory;
 use api\common\models\RkPconst;
 use Yii;
 use yii\web\Controller;
@@ -72,6 +73,16 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 var_dump($pConst->getErrors());
                 exit;
             }
+
+           if (Yii::$app->request->post('isTree')) // Update tree
+
+            Yii::$app->db_api->createCommand()
+                   ->update('rk_category', ['selected' => 0], ['acc' => $pConst->org])
+                   ->execute();
+
+            Yii::$app->db_api->createCommand()
+                ->update('rk_category', ['selected' => 1], 'id in ('.$pConst->value.')')
+                ->execute();
 
             return $this->redirect(['index']);
         } else {

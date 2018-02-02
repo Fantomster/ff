@@ -59,7 +59,7 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
     {
         if (($dmodel = \api\common\models\RkDic::findOne($id)) !== null) {
             
-            $model = RkAgent::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
+            $model = RkCategory::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
             
             $dataProvider = new ActiveDataProvider([
                                         'query' => $model,

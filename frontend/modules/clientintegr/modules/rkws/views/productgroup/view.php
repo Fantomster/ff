@@ -95,11 +95,11 @@ use api\common\models\RkStoretree;
                                          TreeView::widget([
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
-                                        'query' => RkStoretree::find()
+                                        'query' => \api\common\models\RkCategory::find()
                                                  ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
                                                  ->andWhere('active = 1')
                                                  ->addOrderBy('root, lft'), 
-                                        'headingOptions' => ['label' => 'Склады'],
+                                        'headingOptions' => ['label' => 'Товарные группы'],
                                         'fontAwesome' => false,     // optional
                                         'isAdmin' => false,         // optional (toggle to enable admin mode)
                                         'displayValue' => 1,        // initial display value

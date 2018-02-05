@@ -7,6 +7,7 @@ use kartik\grid\GridView;
 use kartik\export\ExportMenu;
 use kartik\grid\ActionColumn;
 use yii\helpers\ArrayHelper;
+use api\common\models\RkServicedata;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\OrganizationSearch */
@@ -27,26 +28,48 @@ $gridColumns = [
     'name',
     'fd',
     'td',
-                                                    [
-                                                    'attribute' => 'org',
-                                                    'label' => 'Организация MixCart',    
-                                                    'value'=>function ($model) {
-                                                              if (isset($model)) 
-                                                                  return $model->organization ? $model->organization->name : null;
+   /* [
+        'attribute' => 'org',
+        'label' => 'Организация MixCart',
+        'value' => function ($model) {
+            if (isset($model))
+                return $model->organization ? $model->organization->name : null;
 
-                                                                 },
-                                                                    
-                                                ], 
-                [
-              'attribute' => 'status_id',
-              'value'=>function ($model) {
-                    if($model) return ($model->status_id == 1) ? 'Неактивно' : 'Активно';
+        },
 
-                },
-              
-                
-            ],     
+    ], */
+    [
+        'attribute' => 'status_id',
+        'value' => function ($model) {
+            if ($model) return ($model->status_id == 1) ? 'Неактивно' : 'Активно';
+
+        },
+
+
+    ],
+    [
+        'class'=>'kartik\grid\ExpandRowColumn',
+        'width'=>'50px',
+        'value'=>function ($model, $key, $index, $column) {
+            return GridView::ROW_COLLAPSED;
+        },
+        'detail'=>function ($model, $key, $index, $column) {
+          $wmodel = RkServicedata::find()->andWhere('service_id = :service_id',[':service_id'=> $model->id])->one();
+
+          if ($wmodel) {
+                $wmodel = RkServicedata::find()->andWhere('service_id = :service_id',[':service_id'=> $model->id]);
+          } else {
+                $wmodel = null;
+          }
+             $service_id = $model->id;
+
+            return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'service_id'=>$service_id]);
+        },
+        'headerOptions'=>['class'=>'kartik-sheet-style'],
+        'expandOneOnly'=>true,
+    ],
    // 'org',
+    /*
     [
         'class' => 'yii\grid\ActionColumn',
         'template' => '{update}',
@@ -64,6 +87,7 @@ $gridColumns = [
             },
         ]
     ]
+    */
 ];
 
 /*

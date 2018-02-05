@@ -333,7 +333,7 @@ class ProductHelper extends AuthHelper
     // Обновление словаря RkDic
     
 
-        if ($tmodel->isAllPartsReady($tmodel->req_uid){ // If all parts are processed
+        if ($tmodel->isAllPartsReady($tmodel->req_uid)) { // If all parts are processed
 
         $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
 

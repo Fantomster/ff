@@ -46,14 +46,14 @@ class ProductHelper extends AuthHelper
 
             $smodel = RkCategory::find()->andWhere('id = :group', ['group' => $group])->one();
 
-            $dGroups .= '<PARAM name="goodgroup_rid" val="' . $smodel->rid . '" />';
+            $dGroups = '<PARAM name="goodgroup_rid" val="' . $smodel->rid . '" />';
 
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
+    <RQ cmd="sh_get_goods" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
     <PARAM name="object_id" val="' . $this->restr->code . '" />' .
-            $dGroups . '<PARAM name="include_goods" val="1" />
-    </RQ>';
+            $dGroups .
+    '</RQ>';
 
 
         $res = ApiHelper::sendCurl($xml, $this->restr);

@@ -130,5 +130,11 @@ class RkTasks extends \yii\db\ActiveRecord
        return \Yii::$app->db_api;
     }
 
+    public function isAllPartsReady($uid) {
+
+        $parts = RkTasks::find()->andWhere('req_uid = :uid',[':uid' => $uid])->andWhere('fcode = 0')->all();
+
+        return ($parts) ? true : false;
+    }
 
 }

@@ -322,11 +322,21 @@ class ProductHelper extends AuthHelper
         $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
         $tmodel->fcode = 1;
 
+        if (!$tmodel->save()) {
+            $isLog->logAppendString('ERROR:: Task status THE END cannot be saved!!');
+            exit;
+        } else {
+            $isLog->logAppendString('SUCCESS:: FCODE status is looking good');
+        }
+
 
     // Обновление словаря RkDic
     
+
+        if ($tmodel->isAllPartsReady($tmodel->req_uid){ // If all parts are processed
+
         $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
-    
+
         if (!$rmodel) {
             $isLog->logAppendString('ERROR:: Dictionary to update products is not found.');
             exit;
@@ -337,13 +347,14 @@ class ProductHelper extends AuthHelper
         $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $rmodel->dicstatus_id = 6;
         $rmodel->obj_count = isset($fcount) ? $fcount : 0;
-    
-            if (!$rmodel->save()) {
-                $er3 = $rmodel->getErrors();
-                $isLog->logAppendString('ERROR:: Dictionary ' . $rmodel->id . 'cannot be saved - ' . $er3);
-                exit;
-            } else $isLog->logAppendString('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
 
+        if (!$rmodel->save()) {
+            $er3 = $rmodel->getErrors();
+            $isLog->logAppendString('ERROR:: Dictionary ' . $rmodel->id . 'cannot be saved - ' . $er3);
+            exit;
+        } else $isLog->logAppendString('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
+
+        }
 
         $tmodel->intstatus_id = RkTasks::INTSTATUS_FULLOK;
 

@@ -95,6 +95,11 @@ use yii\web\JsExpression;
             $model->td = $rdate;
             }
   ?>
+    <?php if (!empty($service_id)) {
+        echo $form->field($model, 'service_id')->hiddenInput(['value'=>$service_id])->label(false);
+    }
+    ?>
+
        <?php   echo $form->field($model, 'td')->label('Актуально по')->
         widget(DatePicker::classname(), [
                 'type' => DatePicker::TYPE_COMPONENT_APPEND,

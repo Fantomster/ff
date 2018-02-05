@@ -33,6 +33,7 @@
             'columns' => [
                 'id',
                 'service_id',
+                'org',
                 [
                     'attribute' => 'org',
                     'label' => 'Организация MixCart',
@@ -56,7 +57,7 @@
                 ],
                 [
                     'class' => 'yii\grid\ActionColumn',
-                    'template' => '{update}{delete}',
+                    'template' => '{update}',
                     //   'visibleButtons' => [
                     //       'update' => function ($model, $key, $index) {
                     //           // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
@@ -69,11 +70,11 @@
                             $customurl = Yii::$app->getUrlManager()->createUrl(['rkws/update', 'id' => $model->id]);
                             return \yii\helpers\Html::a('Изменить', $customurl, ['title' => 'Изменить', 'data-pjax' => "0"]);
                         },
-                        'delete' => function ($url, $model) {
+                      /*  'delete' => function ($url, $model) {
                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                             $customurl = Yii::$app->getUrlManager()->createUrl(['rkws/delete', 'id' => $model->id]);
                             return \yii\helpers\Html::a('&nbsp; Удалить', $customurl, ['title' => 'Удалить', 'data-pjax' => "0"]);
-                        },
+                        }, */
                     ]
                 ]
                 /*

@@ -43,7 +43,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
         return [
             //    [['org','fd','td','object_id','status_id'], 'required'],
             //    [['id','fid','org','ver'], 'integer'],
-            [['id','service_if','org', 'fd', 'td'], 'safe'],
+            [['id','service_id','org', 'fd', 'td','status_id'], 'safe'],
         ];
     }
 
@@ -58,7 +58,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
             'fd' => 'Активно с',
             'td' => 'Активно по',
             'status_id' => 'Статус',
-            'org' => 'Организация R-keeper',
+            'org' => 'MixCart ORG ID',
             'service_id' => 'Код сервиса',
         ];
     }

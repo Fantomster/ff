@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use api\common\models\RkServicedata;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
@@ -39,7 +40,7 @@ class RkwsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'getws','autocomplete'],
+                        'actions' => ['index', 'view', 'getws','autocomplete','create'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -127,6 +128,21 @@ class RkwsController extends Controller {
         } else {
             return $this->render('update', [
                         'model' => $model,
+            ]);
+        }
+    }
+
+    public function actionCreate($service_id) {
+
+        $model = new RkServicedata();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            //   return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['index']);
+        } else {
+            return $this->render('create', [
+                'model' => $model,
+                'service_id' => $service_id,
             ]);
         }
     }

@@ -55,7 +55,7 @@ class RkTasks extends \yii\db\ActiveRecord
             [['fid','acc','guid'], 'required'],
             [['id','fid','acc'], 'integer'],
             [['guid','acc','created_at','updated_at', 'callback_at', 'intstatus_id', 'wsstatus_id', 
-                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive','callback_xml','callback_end','rcount','total_parts','current_part' ], 'safe'],
+                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive','callback_xml','callback_end','rcount','total_parts','current_part', 'req_uid' ], 'safe'],
         ];
     }
 

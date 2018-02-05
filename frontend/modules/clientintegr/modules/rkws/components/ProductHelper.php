@@ -75,8 +75,8 @@ class ProductHelper extends AuthHelper
         $tmodel->isactive = 1;
         $tmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $tmodel->intstatus_id = 1;
-        $tmodel->total_counts = $groupCount;
-        $tmodel->current_count = $currGroup;
+        $tmodel->total_parts = $groupCount;
+        $tmodel->current_part = $currGroup;
 
 
         if (!$tmodel->save()) {
@@ -93,16 +93,19 @@ class ProductHelper extends AuthHelper
             $isLog->logAppendString('RKDIC TMODEL NOT FOUND. Nothing has been saved.');
         } else {
 
+            if ($tmodel->total_parts === $tmodel->current_part)
+            {
             $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $rmodel->dicstatus_id = 2;
             $rmodel->obj_count = 0;
 
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
-            } else  { $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
-                    $isLog->logAppendString('Данные справочника DIC успешно сохранены.');
+            } else {
+                $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
+                $isLog->logAppendString('Данные справочника DIC успешно сохранены.');
             }
-
+            }
         }
 
         // var_dump($res);

@@ -38,7 +38,7 @@ class ProductHelper extends AuthHelper
         $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
         $dGroups = '';
         $currGroup = 0;
-        $groupArray = explode(',', $defGoodGroup);
+        $groupArray = $defGoodGroup ? explode(',', $defGoodGroup) : 0;
         $groupCount = sizeof($groupArray);
 
         foreach ($groupArray as $group) { // Start cycle for groups
@@ -46,8 +46,10 @@ class ProductHelper extends AuthHelper
 
             $smodel = RkCategory::find()->andWhere('id = :group', ['group' => $group])->one();
 
+            if (isset($smodel))
             $dGroups = '<PARAM name="goodgroup_rid" val="' . $smodel->rid . '" />';
-
+            else
+            $dGroups = '<PARAM name="goodgroup_rid" val="0" />';
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goods" tasktype="any_call" guid="' . $rguid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
@@ -331,7 +333,7 @@ class ProductHelper extends AuthHelper
 
 
     // Обновление словаря RkDic
-    
+        $isLog->logAppendString(print_r($tmodel->isAllPartsReady($tmodel->req_uid),1));
 
         if ($tmodel->isAllPartsReady($tmodel->req_uid)) { // If all parts are processed
 

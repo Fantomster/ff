@@ -33,7 +33,7 @@ class ProductHelper extends AuthHelper
             return;
         }
 
-        $guid = UUID::uuid4();
+        $rguid = UUID::uuid4();
 
         $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
         $dGroups = '';
@@ -50,7 +50,7 @@ class ProductHelper extends AuthHelper
 
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goods" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
+    <RQ cmd="sh_get_goods" tasktype="any_call" guid="' . $rguid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
     <PARAM name="object_id" val="' . $this->restr->code . '" />' .
             $dGroups .
     '</RQ>';
@@ -77,6 +77,7 @@ class ProductHelper extends AuthHelper
         $tmodel->intstatus_id = 1;
         $tmodel->total_parts = $groupCount;
         $tmodel->current_part = $currGroup;
+        $tmodel->req_uid = $rguid;
 
 
         if (!$tmodel->save()) {
@@ -319,6 +320,7 @@ class ProductHelper extends AuthHelper
 
         $tmodel->rcount = $icount;
         $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
+        $tmodel->fcode = 1;
 
 
     // Обновление словаря RkDic

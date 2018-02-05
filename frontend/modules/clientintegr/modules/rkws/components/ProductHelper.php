@@ -187,6 +187,43 @@ class ProductHelper extends AuthHelper
 
         $gcount = 0;
 
+        foreach ($myXML->ITEM as $item) {
+
+            foreach ($item->attributes() as $c => $d) {
+                if ($c == 'rid') $prid = strval($d[0]);
+                if ($c == 'name') $pname = strval($d[0]);
+            }
+
+            foreach ($item->MUNITS as $munit) {
+
+                foreach ($munit->MUNIT as $unit ) {
+
+                    foreach ($unit->attributes() as $c => $d) {
+                        if ($c == 'rid') $urid = strval($d[0]);
+                        if ($c == 'name') $uname = strval($d[0]);
+                    }
+
+                    $gcount++;
+
+                    $array[$gcount]['group_rid'] = 1;
+                    $array[$gcount]['group_name'] = 'пока нет';
+                    // $array[$gcount]['group_parent'] = $grparent;
+
+                    $array[$gcount]['product_rid'] = $prid;
+                    $array[$gcount]['product_name'] = $pname;
+                    $array[$gcount]['unit_rid'] = $urid;
+                    $array[$gcount]['unit_name'] = $uname;
+                }
+            }
+
+        }
+
+/* Old version
+
+        // We got no errors. Try to parse XML with no external errors
+
+        $gcount = 0;
+
         foreach ($myXML->ITEM as $goodsgroup) {
 
             foreach ($goodsgroup->attributes() as $c => $d) {
@@ -228,7 +265,7 @@ class ProductHelper extends AuthHelper
 
 
         }
-
+*/
     // Update task after XML
 
         if (!$tmodel->setCallbackXML()) {

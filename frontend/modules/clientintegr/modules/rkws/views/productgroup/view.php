@@ -91,6 +91,22 @@ use api\common\models\RkStoretree;
                 <div class="box-header with-border">
                             <div class="panel-body">
                                     <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
+                                     <?php   echo TreeView::widget(TreeViewInput::classname(),
+                                        [
+                                        'name' => 'category_list',
+                                        'value' => 'true', // preselected values
+                                        'query' => \api\common\models\RkCategory::find()
+                                        ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                                        ->andWhere('active = 1')
+                                        ->addOrderBy('root, lft'),
+                                        'headingOptions' => ['label' => 'Группы номенклатуры'],
+                                        'rootOptions' => ['label'=>''],
+                                        'fontAwesome' => true,
+                                        'asDropdown' => false,
+                                        'multiple' => true,
+                                        'options' => ['disabled' => false]
+                                        ]); /*
+                                     ?>
                                     <?=
                                          TreeView::widget([
                                         // single query fetch to render the tree
@@ -118,7 +134,7 @@ use api\common\models\RkStoretree;
                                                 'enableCache' => false   // defaults to true
                                         ]
                                         ]);
-                                     
+                                     */
                                      ?>
                 <?= Html::a('Вернуться',
             ['/clientintegr/rkws/default'],

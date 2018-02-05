@@ -331,11 +331,12 @@ class ProductHelper extends AuthHelper
             $isLog->logAppendString('SUCCESS:: FCODE status is looking good');
         }
 
+        // Обновление словаря RkDic
 
-    // Обновление словаря RkDic
-        $isLog->logAppendString(print_r($tmodel->isAllPartsReady($tmodel->req_uid),1));
 
         if ($tmodel->isAllPartsReady($tmodel->req_uid)) { // If all parts are processed
+
+            $isLog->logAppendString('All the parts are received...');
 
         $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
 

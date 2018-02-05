@@ -17,7 +17,7 @@ class m180205_145848_add_fields_to extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%rk_service_data}}', 'status_id', $this->integer()->defaultValue(0));
+        $this->addColumn('{{%rk_service_data}}', 'status_id', $this->integer()->defaultValue(1));
     }
 
     public function safeDown()

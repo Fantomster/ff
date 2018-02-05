@@ -19,7 +19,7 @@ class m180202_130714_add_rk_category_table_prkey extends Migration
     public function safeUp()
     {
 
-        $this->execute('ALTER TABLE `api`.`rk_category` CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT;');
+        $this->execute('ALTER TABLE `rk_category` CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT;');
     }
 
     /**

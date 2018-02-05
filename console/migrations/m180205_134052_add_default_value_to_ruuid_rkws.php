@@ -18,7 +18,7 @@ class m180205_134052_add_default_value_to_ruuid_rkws extends Migration
      */
     public function safeUp()
     {
-        $this->execute('ALTER TABLE `api`.`rk_tasks` CHANGE COLUMN `req_uid` `req_uid` VARCHAR(45) NOT NULL DEFAULT 0');
+        $this->execute('ALTER TABLE `rk_tasks` CHANGE COLUMN `req_uid` `req_uid` VARCHAR(45) NOT NULL DEFAULT 0');
     }
 
     /**
@@ -26,6 +26,6 @@ class m180205_134052_add_default_value_to_ruuid_rkws extends Migration
      */
     public function safeDown()
     {
-        $this->execute('ALTER TABLE `api`.`rk_tasks` CHANGE COLUMN `req_uid` `req_uid` VARCHAR(45) NOT NULL');
+        $this->execute('ALTER TABLE `rk_tasks` CHANGE COLUMN `req_uid` `req_uid` VARCHAR(45) NOT NULL');
     }
 }

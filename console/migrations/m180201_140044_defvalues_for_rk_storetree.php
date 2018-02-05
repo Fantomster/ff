@@ -19,7 +19,7 @@ class m180201_140044_defvalues_for_rk_storetree extends Migration
      */
     public function safeUp()
     {
-        $this->execute('ALTER TABLE `api`.`rk_storetree` CHANGE COLUMN `rid` `rid` INT(11) NOT NULL DEFAULT 0');
+        $this->execute('ALTER TABLE `rk_storetree` CHANGE COLUMN `rid` `rid` INT(11) NOT NULL DEFAULT 0');
     }
 
     /**
@@ -27,7 +27,7 @@ class m180201_140044_defvalues_for_rk_storetree extends Migration
      */
     public function safeDown()
     {
-        $this->execute('ALTER TABLE `api`.`rk_storetree` CHANGE COLUMN `rid` `rid` INT(11) NOT NULL');
+        $this->execute('ALTER TABLE `rk_storetree` CHANGE COLUMN `rid` `rid` INT(11) NOT NULL');
     }
 
 }

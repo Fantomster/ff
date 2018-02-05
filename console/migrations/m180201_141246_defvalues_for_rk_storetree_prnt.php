@@ -18,7 +18,7 @@ class m180201_141246_defvalues_for_rk_storetree_prnt extends Migration
      */
     public function safeUp()
     {
-        $this->execute('ALTER TABLE `api`.`rk_storetree` CHANGE COLUMN `prnt` `prnt` INT(11) NOT NULL DEFAULT 0');
+        $this->execute('ALTER TABLE `rk_storetree` CHANGE COLUMN `prnt` `prnt` INT(11) NOT NULL DEFAULT 0');
     }
 
     /**
@@ -26,7 +26,7 @@ class m180201_141246_defvalues_for_rk_storetree_prnt extends Migration
      */
     public function safeDown()
     {
-        $this->execute('ALTER TABLE `api`.`rk_storetree` CHANGE COLUMN `prnt` `prnt` INT(11) NOT NULL');
+        $this->execute('ALTER TABLE `rk_storetree` CHANGE COLUMN `prnt` `prnt` INT(11) NOT NULL');
     }
 
     /*

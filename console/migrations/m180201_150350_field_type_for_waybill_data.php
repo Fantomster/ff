@@ -18,8 +18,8 @@ class m180201_150350_field_type_for_waybill_data extends Migration
      */
     public function safeUp()
     {
-        $this->execute('ALTER TABLE `api`.`rk_waybill_data` CHANGE COLUMN `quant` `quant` DOUBLE(12,3) DEFAULT NULL');
-        $this->execute('ALTER TABLE `api`.`rk_waybill_data` CHANGE COLUMN `defquant` `defquant` DOUBLE(12,3) DEFAULT NULL');
+        $this->execute('ALTER TABLE `rk_waybill_data` CHANGE COLUMN `quant` `quant` DOUBLE(12,3) DEFAULT NULL');
+        $this->execute('ALTER TABLE `rk_waybill_data` CHANGE COLUMN `defquant` `defquant` DOUBLE(12,3) DEFAULT NULL');
 
     }
 

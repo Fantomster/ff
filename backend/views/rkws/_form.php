@@ -19,13 +19,14 @@ use yii\web\JsExpression;
     <?php
     $orga = $model->organization;
     $data = ($orga != null)?([$orga->id=>$orga->name]):([]);
+    // $smodel = $model->service;
     ?>
     <?php $form = ActiveForm::begin(); ?>
 
     <?php echo $form->errorSummary($model); ?>
     
-    <?php echo $form->field($model, 'code')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
-    <?php echo $form->field($model, 'name')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
+    <?php // echo $form->field($model, 'code')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
+    <?php // echo $form->field($model, 'name')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
 
     <?php echo $form->field($model, 'org')->widget(Select2::classname(), [
             'data' => $data,

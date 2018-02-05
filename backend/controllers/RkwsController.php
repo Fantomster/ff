@@ -119,7 +119,7 @@ class RkwsController extends Controller {
      * @return mixed
      */
     public function actionUpdate($id) {
-        $model = $this->findModel($id);
+        $model = $this->findDataModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
          //   return $this->redirect(['view', 'id' => $model->id]);
@@ -175,6 +175,14 @@ class RkwsController extends Controller {
      */
     protected function findModel($id) {
         if (($model = \api\common\models\RkService::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    protected function findDataModel($id) {
+        if (($model = \api\common\models\RkServicedata::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

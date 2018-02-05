@@ -43,6 +43,17 @@
                     },
 
                 ],
+                'fd',
+                'td',
+                [
+                    'attribute' => 'status_id',
+                    'value' => function ($model) {
+                        if ($model) return ($model->status_id == 1) ? 'Неактивно' : 'Активно';
+
+                    },
+
+
+                ],
                 [
                     'class' => 'yii\grid\ActionColumn',
                     'template' => '{update}{delete}',

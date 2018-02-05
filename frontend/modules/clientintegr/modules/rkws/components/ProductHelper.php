@@ -37,27 +37,31 @@ class ProductHelper extends AuthHelper
 
         $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
         $dGroups = '';
+        $currGroup = 0;
+        $groupArray = explode(',', $defGoodGroup);
+        $groupCount = sizeof($groupArray);
 
-        foreach (explode(',', $defGoodGroup) as $group) {
+        foreach ($groupArray as $group) { // Start cycle for groups
+            $currGroup++;
 
-            $smodel = RkCategory::find()->andWhere('id = :group',['group' => $group])->one();
+            $smodel = RkCategory::find()->andWhere('id = :group', ['group' => $group])->one();
 
             $dGroups .= '<PARAM name="goodgroup_rid" val="' . $smodel->rid . '" />';
-        }
+
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
     <PARAM name="object_id" val="' . $this->restr->code . '" />' .
-    $dGroups . '<PARAM name="include_goods" val="1" />
+            $dGroups . '<PARAM name="include_goods" val="1" />
     </RQ>';
 
 
         $res = ApiHelper::sendCurl($xml, $this->restr);
         $isLog = new DebugHelper();
 
-        $isLog->setLogFile('../runtime/logs/rk_request_prod_' . date("Y-m-d_H-i-s").'.log');
-        $isLog->logAppendString(print_r($xml,true));
-        $isLog->logAppendString(print_r($res,true));
+        $isLog->setLogFile('../runtime/logs/rk_request_prod_' . date("Y-m-d_H-i-s") . '.log');
+        $isLog->logAppendString(print_r($xml, true));
+        $isLog->logAppendString(print_r($res, true));
 
 
         $tmodel = new RkTasks();
@@ -71,11 +75,15 @@ class ProductHelper extends AuthHelper
         $tmodel->isactive = 1;
         $tmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $tmodel->intstatus_id = 1;
+        $tmodel->total_counts = $groupCount;
+        $tmodel->current_count = $currGroup;
+
 
         if (!$tmodel->save()) {
             echo "Ошибка валидации<br>";
             var_dump($tmodel->getErrors());
         }
+    }
 
         // Обновление словаря RkDic
 
@@ -128,7 +136,8 @@ class ProductHelper extends AuthHelper
         $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Product callback received ');
         $isLog->logAppendString('CMDGUID: ' . $cmdguid . ' || POSID: ' . $posid);
         $isLog->logAppendString('=========================================');
-        $isLog->logAppendString(substr($getr, 0, 300));
+        //$isLog->logAppendString(substr($getr, 0, 300));
+        $isLog->logAppendString(print_r($getr,1));
 
     // Checking if the Task is active
 

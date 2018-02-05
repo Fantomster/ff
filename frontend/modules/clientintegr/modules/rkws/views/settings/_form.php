@@ -46,6 +46,11 @@ use common\models\User;
             } ?>
     <?php break;
         case \api\common\models\RkDicconst::PC_TYPE_TREE :
+
+            yii::$app->db_api->
+            createCommand()->
+            update('rk_category', ['disabled' => '0'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1')->execute();
+
             echo $form->field($model, 'value')->widget(TreeViewInput::classname(),
                 [
                     'name' => 'category_list',

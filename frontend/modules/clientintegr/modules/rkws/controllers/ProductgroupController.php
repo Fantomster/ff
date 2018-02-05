@@ -39,6 +39,10 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
     
     public function actionView($id)
     {
+        yii::$app->db_api->
+        createCommand()->
+        update('rk_category', ['disabled' => '1'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1')->execute();
+
         return $this->render('view', [
             'dataProvider' => $this->findModel($id),
         ]);

@@ -10,7 +10,7 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
-use kartik\tree\TreeView;
+use kartik\tree\TreeViewInput;
 
 use common\models\User;
 use api\common\models\RkStoretree;
@@ -87,11 +87,29 @@ use api\common\models\RkStoretree;
                 </div>
             </div>  
         -->
-            <div class="box box-info">            
-                <div class="box-header with-border">
-                            <div class="panel-body">
-                                    <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
-                                    <?=
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <div class="panel-body">
+                    <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
+                        <?php echo TreeViewInput::widget(
+                            [
+                                'name' => 'category_list',
+                                'value' => 'true', // preselected values
+                                'query' => \api\common\models\RkStoretree::find()
+                                    ->andWhere('acc = :acc', [':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                                    ->andWhere('active = 1')
+                                    ->addOrderBy('root, lft'),
+                                'headingOptions' => ['label' => 'Склады'],
+                                'rootOptions' => ['label' => 'Справочник складов'],
+                                'fontAwesome' => true,
+                                'asDropdown' => false,
+                                'multiple' => false,
+                                'options' => ['disabled' => true]
+                            ]);
+
+                        ?>
+
+                                    <?php /* echo
                                          TreeView::widget([
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
@@ -118,7 +136,7 @@ use api\common\models\RkStoretree;
                                                 'enableCache' => false   // defaults to true
                                         ]
                                         ]);
-                                     
+                                     */
                                      ?>
                 <?= Html::a('Вернуться',
             ['/clientintegr/rkws/default'],

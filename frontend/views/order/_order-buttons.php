@@ -108,6 +108,16 @@ if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Or
             'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_two', ['ru'=>'Сохраняем...']),
             ]) : "" ?>
         <?= $canEdit && !$edit ? Html::a('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.edit', ['ru'=>'Редактировать']), ['/order/edit', "id" => $order->id], ['class' => 'btn btn-success pull-right btnSave', 'style' => 'margin-right: 7px;']) : "" ?>
+<div style="clear: both; height: 5px;"></div>
+        <?=
+        Html::a('<i class="icon fa fa-file-excel-o"></i> ' . Yii::t('app', 'frontend.views.order.index.report', ['ru'=>'отчет xls']) . ' ', ['order/order-to-xls', 'id' => $order->id], [
+            'class' => 'btn btn-outline-success pull-right',
+            'target' => '',
+            'data-toggle' => 'tooltip',
+            'title' => Yii::t('app', 'frontend.views.order.index.report', ['ru'=>'отчет xls'])
+        ])
+        ?>
+
     </div>
     <div class="box-body">
         <p class="ppp"><?= Yii::t('message', 'frontend.views.order.full_sum', ['ru'=>'Общая сумма']) ?></p>

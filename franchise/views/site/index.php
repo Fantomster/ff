@@ -221,7 +221,7 @@ use dosamigos\chartjs\ChartJs;
                                 'format' => 'raw',
                                 'attribute' => 'total_price',
                                 'value' => function($data) {
-                                    return (float) $data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
+                                    return (float) $data['total_price'] . ' ' . $data->currency->symbol;
                                 },
                                 'label' => Yii::t('app', 'franchise.views.site.sum', ['ru'=>'Сумма']),
                                 'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],

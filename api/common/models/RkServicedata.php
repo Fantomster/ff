@@ -118,7 +118,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
             if (!$oldic = RkDic::find()->andWhere('org_id = :org', [':org' => $this->org])->all()) {
 
                 echo( 'I am in AfterSave');
-                die()
+                die();
 
                 $dics = RkDictype::find()->all();
 

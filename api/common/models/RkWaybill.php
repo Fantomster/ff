@@ -48,7 +48,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['order_id', 'doc_date', 'corr_rid'], 'required'],
-            [['corr_rid', 'store_rid', 'status_id'], 'integer'],
+            [['corr_rid', 'store_rid', 'status_id','num_code'], 'integer'],
                 //     [['comment'], 'string', 'max' => 255],
             [['store_rid', 'org','vat_included','text_code','num_code','note'],'safe']
         ];

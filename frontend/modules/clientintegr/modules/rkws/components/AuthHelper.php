@@ -1,6 +1,7 @@
 <?php
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
+use api\common\models\RkServicedata;
 use yii;
 use api\common\models\RkSession;
 use api\common\models\RkAccess;
@@ -32,7 +33,7 @@ class AuthHelper extends Object {
         $this->org = User::findOne(Yii::$app->user->id)->organization_id;
         
         if (isset($this->org))
-        $this->restr = RkService::find()->andwhere('org = :org',[':org' => $this->org])->one();
+        $this->restr = RkServicedata::find()->andwhere('org = :org',[':org' => $this->org])->one();
                 
        
     } 

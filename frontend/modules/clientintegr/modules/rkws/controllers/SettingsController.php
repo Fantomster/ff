@@ -95,8 +95,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
 
     protected function checkLic() {
-     
-    $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one(); 
+
+        $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
     if ($lic) {

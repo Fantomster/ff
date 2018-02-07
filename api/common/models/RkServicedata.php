@@ -112,12 +112,13 @@ class RkServicedata extends \yii\db\ActiveRecord {
         // if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
         // if ($this->attributes['org'] != $changedAttributes['org']) {
 
-        var_dump($insert);
+        // var_dump($insert);
 
 
             if (!$oldic = RkDic::find()->andWhere('org_id = :org', [':org' => $this->org])->all()) {
 
-                var_dump($oldic ? $oldic : 'none');
+                echo( 'I am in AfterSave');
+                die()
 
                 $dics = RkDictype::find()->all();
 

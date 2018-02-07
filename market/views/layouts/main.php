@@ -48,11 +48,13 @@ $js = <<<JS
         });
         $('#accordion').on('hidden.bs.collapse', function (e) {
             Cookies.remove('left-menu');
-        })
+        });
         $('#accordion').on('shown.bs.collapse', function (e) {
             Cookies.set('left-menu', e.target.id);
-        })
-        
+        });
+        $('#accordion').on('click', '.parent-category', function(e) {
+            document.location = $(this).data('url');
+        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>

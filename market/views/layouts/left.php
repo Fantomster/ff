@@ -59,9 +59,9 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
         ?>
         <div class="panel panel-default">
             <div class="panel-heading">
-              <a data-toggle="collapse" data-parent="#accordion" data-target="#coll<?= $i ?>" href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row["slug"] ]) ?>" title="<?=Yii::t('app', $row["name"]) ?>">
+              <a data-toggle="collapse" data-parent="#accordion" href="#coll<?= $i ?>" title="<?=Yii::t('app', $row["name"]) ?>">
                   <h4 class="panel-title">
-                    <?=Yii::t('app', $row['name'])?>
+                      <span class="parent-category" data-url="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row["slug"] ]) ?>"><?=Yii::t('app', $row['name'])?></span>
                 </h4>
                 <span class="caret pull-right"></span>
               </a>

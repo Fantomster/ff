@@ -83,7 +83,7 @@ use yii\web\JsExpression;
     <?php
     yii::$app->db_api->
     createCommand()->
-    update('rk_storetree', ['disabled' => '0', 'collapsed' => '1'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1')->execute();
+    update('rk_storetree', ['disabled' => '0', 'collapsed' => '1'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1 and type = 2')->execute();
     ?>
 
     <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">

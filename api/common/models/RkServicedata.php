@@ -75,7 +75,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
     }
 
     public function getCode() {
-        return $this->hasOne(RkService::className(), ['id' => 'service_id'])->code;
+        return $this->hasOne(RkService::className(), ['id' => 'service_id'])->one()->code;
     }
 
     public function getService() {

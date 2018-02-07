@@ -252,7 +252,7 @@ class StoreHelper extends AuthHelper {
         }
 
         $fcount = RkStoretree::find()->andWhere('acc= :org_id', [':org_id' => $acc])->
-                    andWhere('active = 1')->count('*');
+                    andWhere('active = 1 and type = 2')->count('*');
 
         $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $rmodel->dicstatus_id = 6;

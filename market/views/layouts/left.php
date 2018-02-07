@@ -17,7 +17,7 @@ $count_products_from_mp = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
                 ->count();
 $left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($db) {
-    return \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
+    return \common\models\MpCategory::find()->select('id,name,parent,slug')->where(['parent'=>NULL])->asArray()->all();
 });
 //$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
 //    return \common\models\MpCategory::find()->where('parent is not null')->all();
@@ -59,8 +59,8 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
         ?>
         <div class="panel panel-default">
             <div class="panel-heading">
-              <a data-toggle="collapse" data-parent="#accordion" href="#coll<?= $i ?>">
-                <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" data-target="#coll<?= $i ?>" href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row["slug"] ]) ?>" title="<?=Yii::t('app', $row["name"]) ?>">
+                  <h4 class="panel-title">
                     <?=Yii::t('app', $row['name'])?>
                 </h4>
                 <span class="caret pull-right"></span>

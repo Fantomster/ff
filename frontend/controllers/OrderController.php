@@ -183,15 +183,15 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
             ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
         $objPHPExcel->getActiveSheet()->getStyle('A1:G1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        $objPHPExcel->getActiveSheet()->getStyle('A1:G1')->applyFromArray(['font' => ['bold' => true]]);
-        $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(18);
+        $objPHPExcel->getActiveSheet()->getStyle('A1:G1')->applyFromArray(['font' => ['bold' => true, 'size' => 17]]);
+        $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
 
         $objPHPExcel->getActiveSheet()->mergeCells('A2:G2');
         $objPHPExcel->getActiveSheet()->setCellValue('A2', Yii::t('app', 'от') . " " . Yii::$app->formatter->asDate($order->created_at, "dd.MM.yyyy, HH:mm"));
         $objPHPExcel->getActiveSheet()->getStyle('A2:G2')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);;
         $objPHPExcel->getActiveSheet()->getRowDimension(2)->setRowHeight(16);
 
-        $requestedDelivery = isset($order->requested_delivery) ? " " . Yii::$app->formatter->asDate($order->requested_delivery, 'd.MM.yyyy') . " " . Yii::t('app', 'frontend.excel.year') : "";
+        $requestedDelivery = isset($order->requested_delivery) ? " " . Yii::$app->formatter->asDate($order->requested_delivery, 'dd.MM.yyyy') . " " . Yii::t('app', 'frontend.excel.year') : "";
         $objPHPExcel->getActiveSheet()->mergeCells('A3:G3');
         $objPHPExcel->getActiveSheet()->setCellValue('A3', Yii::t('app', 'common.mail.bill.delivery_date') . $requestedDelivery);
         $objPHPExcel->getActiveSheet()->getStyle('A3:G3')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -225,6 +225,8 @@ class OrderController extends DefaultController {
         $this->fillCellData($objPHPExcel, 9, 'E-mail: ' . $order->client->email, 'E-mail: ' . $order->vendor->email);
         $this->fillCellData($objPHPExcel, 10, Yii::t('app', 'Заказ создал:') . " " . $order->createdBy->profile->full_name, Yii::t('app', 'Заказ принял:') . " " . $acceptedName);
         $this->fillCellData($objPHPExcel, 11, Yii::t('message', 'market.views.site.supplier.address') . " " . $order->client->locality . " " . $order->client->address, Yii::t('message', 'market.views.site.supplier.address') . " " . $order->vendor->locality . " " . $order->vendor->address);
+        $objPHPExcel->getActiveSheet()->getStyle('A11')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getStyle('D11')->getAlignment()->setWrapText(true);
 
         $objPHPExcel->getActiveSheet()->getStyle('A13:G13')->getBorders()
             ->getTop()
@@ -234,12 +236,8 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getStyle('A14')->applyFromArray(['font' => ['bold' => true]]);
         $objPHPExcel->getActiveSheet()->mergeCells('B14:G14');
         $objPHPExcel->getActiveSheet()->setCellValue('B14', $order->comment);
+        $objPHPExcel->getActiveSheet()->getStyle('B14')->getAlignment()->setWrapText(true);
         $objPHPExcel->getActiveSheet()->getRowDimension(14)->setRowHeight(18);
-
-//        $objPHPExcel->getActiveSheet()->mergeCells('A15:G15');
-//        $objPHPExcel->getActiveSheet()->setCellValue('A15', Yii::t('app', 'frontend.excel.please'));
-//        $objPHPExcel->getActiveSheet()->getRowDimension(15)->setRowHeight(20);
-
 
         $this->fillCellHeaderData($objPHPExcel, 'A', 'Наименование товара');
         $this->fillCellHeaderData($objPHPExcel, 'B', 'Комментарий');
@@ -274,9 +272,9 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $good->product->ed);
             $objPHPExcel->getActiveSheet()->getStyle("D$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            $objPHPExcel->getActiveSheet()->setCellValue('E' . $row, $good->quantity);
+            $objPHPExcel->getActiveSheet()->setCellValue('E' . $row, number_format($good->quantity, 2, '.', ''));
             $objPHPExcel->getActiveSheet()->getStyle("E$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-            $objPHPExcel->getActiveSheet()->setCellValueExplicit('F' . $row, $good->price, \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('F' . $row, number_format($good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
             $objPHPExcel->getActiveSheet()->getStyle("F$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
             $objPHPExcel->getActiveSheet()->setCellValueExplicit('G' . $row, number_format($good->quantity * $good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
             $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);

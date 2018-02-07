@@ -110,7 +110,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
 
 
         // if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
-        if ($this->attributes['org'] != $changedAttributes['org']) {
+        // if ($this->attributes['org'] != $changedAttributes['org']) {
 
             if (!$oldic = RkDic::find()->andWhere('org_id = :org', [':org' => $this->org])->all()) {
 
@@ -130,7 +130,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
                     }
                 }
             }
-        }
+      //  }
 
         parent::afterSave($insert, $changedAttributes);
     }

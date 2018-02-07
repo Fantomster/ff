@@ -138,7 +138,7 @@ class RkwsController extends Controller {
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //   return $this->redirect(['view', 'id' => $model->id]);
-            return $this->redirect(['index']);
+          //  return $this->redirect(['index']);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -207,7 +207,7 @@ class RkwsController extends Controller {
     
     protected function checkIntegrRK () {
         
-        $arr = RkService::find()->select('org')->asArray->all();
+        $arr = RkServicedata::find()->select('org')->asArray->all();
                 
         if (in_array(User::findOne([Yii::$app->user->id])->organization_id,$arr)) {
             return true; // Ресторан есть в доступах к лицензии (даже если она неактивна

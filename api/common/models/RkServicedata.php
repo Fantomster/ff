@@ -112,7 +112,12 @@ class RkServicedata extends \yii\db\ActiveRecord {
         // if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
         // if ($this->attributes['org'] != $changedAttributes['org']) {
 
+        var_dump($insert);
+
+
             if (!$oldic = RkDic::find()->andWhere('org_id = :org', [':org' => $this->org])->all()) {
+
+                var_dump($oldic ? $oldic : 'none');
 
                 $dics = RkDictype::find()->all();
 
@@ -123,6 +128,8 @@ class RkServicedata extends \yii\db\ActiveRecord {
                     $model->obj_count = 0;
                     $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                     $model->org_id = $this->org;
+
+                    var_dump($model);
 
                     if (!$model->save()) {
                         print_r($model->getErrors());

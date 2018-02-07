@@ -318,15 +318,15 @@ class OrderController extends DefaultController {
 
     private function fillCellBottomData($objPHPExcel, $row, $leftData, $rightData, $bold = false):int
     {
-        $objPHPExcel->getActiveSheet()->mergeCells("D$row:E$row");
+        $objPHPExcel->getActiveSheet()->mergeCells("D$row:F$row");
         $objPHPExcel->getActiveSheet()->setCellValue("D$row", $leftData);
         $objPHPExcel->getActiveSheet()->getStyle("D$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-        $objPHPExcel->getActiveSheet()->setCellValue("F$row"," " . $rightData);
-        $objPHPExcel->getActiveSheet()->getStyle("F$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+        $objPHPExcel->getActiveSheet()->setCellValue("G$row"," " . $rightData);
+        $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(25);
         if($bold){
             $objPHPExcel->getActiveSheet()->getStyle("D$row")->applyFromArray(['font' => ['bold' => true]]);
-            $objPHPExcel->getActiveSheet()->getStyle("F$row")->applyFromArray(['font' => ['bold' => true]]);
+            $objPHPExcel->getActiveSheet()->getStyle("G$row")->applyFromArray(['font' => ['bold' => true]]);
         }
         $row++;
         return $row;

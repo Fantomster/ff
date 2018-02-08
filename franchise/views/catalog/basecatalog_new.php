@@ -133,7 +133,7 @@ $exportColumns = [
                         'dataProvider' => $dataProvider,
                         'columns' => $exportColumns,
                         'fontAwesome' => true,
-                        'filename' => Yii::t('app', 'franchise.views.catalog.main_catalog_four', ['ru'=>'Главный каталог - ']) . date('Y-m-d'),
+                        'filename' => Yii::t('message', 'market.views.site.supplier.catalog', ['ru'=>'КАТАЛОГ']) . " " . $catalog->name . " - " . date('Y-m-d'),
                         'encoding' => 'UTF-8',
                         'batchSize' => 200,
                         'timeout' => 0,
@@ -159,7 +159,7 @@ $exportColumns = [
                                 'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
                                 'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                                 'extension' => 'xlsx',
-                                'writer' => 'Excel2007',
+                                //'writer' => 'Excel2007',
                                 'styleOptions' => [
                                     'font' => [
                                         'bold' => true,

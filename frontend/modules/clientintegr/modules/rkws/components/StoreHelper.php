@@ -62,8 +62,8 @@ class StoreHelper extends AuthHelper {
         $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 2')->one();
     
         if (!$rmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
 
         } else {
             
@@ -83,11 +83,203 @@ class StoreHelper extends AuthHelper {
     }
     
     public function callback()
-    {       
-    
+    {
+
+        $array = [];
+
+        ini_set('MAX_EXECUTION_TIME', -1);
+
+        $getr = Yii::$app->request->getRawBody();
+        $acc=3243;
+
+        $myXML = simplexml_load_string($getr);
+
+        $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid']; // Try to find guid in cmdguid or taskguid
+        $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
+
+        if (!$cmdguid)
+                $cmdguid = 'noGUID';
+
+        $isLog = new DebugHelper();
+
+        $isLog->setLogFile('../runtime/logs/rk_callback_store_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
+
+        $isLog->logAppendString('=========================================');
+        $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Store callback received... ');
+        $isLog->logAppendString('CMDGUID: ' . $cmdguid . ' || POSID: ' . $posid);
+        $isLog->logAppendString('=========================================');
+        $isLog->logAppendString(substr($getr, 0, 600));
+
+        // Checking if the Task is active
+
+        $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
+
+        if (!$tmodel) {
+            $isLog->logAppendString('ERROR:: Task with guid ' . $cmdguid . 'has not been found!!');
+            echo "Не найдена задача с id: (" . $cmdguid . ")";
+            exit;
+        } else {
+            $isLog->logAppendString('-- Task with guid ' . $cmdguid . ' has been found.');
+        }
+
+        $acc = $tmodel->acc;
+        $tmodel->isactive = 0;
+        $tmodel->setCallbackStart();
+
+        // Parsing XML for errors
+
+        foreach ($myXML->ERROR as $err) {
+
+            foreach ($err->attributes() as $e => $h) {
+                if ($e == 'code') $array['code'] = strval($h[0]);
+                if ($e == 'text') $array['text'] = strval($h[0]);
+            }
+
+        }
+
+        if (isset($array['code'])) {  // We got external error
+
+            $tmodel->intstatus_id = RkTasks::INTSTATUS_EXTERROR;
+            $tmodel->wsstatus_id = $array['code'];
+            $tmodel->retry = $tmodel->retry + 1;
+            $tmodel->rcount = 0;
+
+            if (!$tmodel->setCallbackEnd()) {
+                $isLog->logAppendString('ERROR:: Task with external ERROR with guid ' . $cmdguid . 'cannot be saved!!');
+                echo "Cannot save task (" . $cmdguid . ") with error: (" . $array['code'] . ")";
+                exit;
+            } else {
+                $isLog->logAppendString('Task with external ERROR with guid ' . $cmdguid . 'successfully saved!');
+                echo "Task with guid (" . $cmdguid . ") with error: (" . $array['code'] . ") successfully saved.";
+                exit;
+            }
+
+        }
+
+        // We got no errors. Try to parse XML with no external errors
+
+        $icount =0;
+        $gcount =0;
+
+        $rress = Yii::$app->db_api->createCommand('UPDATE rk_storetree SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
+
+        foreach ($myXML->STOREGROUP as $storegroup) {
+            $gcount++;
+
+            foreach($storegroup->attributes() as $c => $d) {
+                if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);
+                if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]);
+                if ($c == 'parent')  $arr[$gcount]['parent'] = strval($d[0]);
+            }
+
+            $arr[$gcount]['type'] = 1;
+            $iparent = $gcount;
+            $ridarray[$arr[$gcount]['rid']] = $gcount;
+            $spar = $arr[$gcount]['rid'];
+
+            if ($arr[$gcount]['parent'] === '') { // Корень дерева
+                $rtree = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                $rtree->disabled =1;
+                $rtree->acc = $acc;
+                $rtree->makeRoot();
+            } else {
+                ${'rid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                ${'rid'.$arr[$gcount]['rid']}->type = 1;
+                ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
+                ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+                ${'rid'.$arr[$gcount]['rid']}->acc = $acc;
+
+
+
+                if ($arr[$gcount]['parent'] === '0') { // Цепляем к корню
+                    ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
+                } else { // Дети некорня
+                    ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
+                }
+
+                $icount++;
+            }
+
+            foreach ($storegroup->STORE as $store) {
+                $gcount++;
+
+                foreach($store->attributes() as $a => $b) {
+                    $arr[$gcount][$a] = strval($b[0]);
+                }
+                $arr[$gcount]['type'] = 2;
+                $arr[$gcount]['parent'] = $iparent;
+
+                ${'srid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                ${'srid'.$arr[$gcount]['rid']}->type = 2;
+                ${'srid'.$arr[$gcount]['rid']}->prnt = $spar;
+                ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
+                ${'srid'.$arr[$gcount]['rid']}->acc = $acc;
+
+                if ($spar === '0' || $spar === '') {
+                    ${'srid'.$arr[$gcount]['rid']}->appendTo($rtree);
+                } else {
+                    ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
+                }
+
+                $icount++;
+
+            }
+        }
+
+        // Update task after XML
+
+        if (!$tmodel->setCallbackXML()) {
+            $isLog->logAppendString('ERROR:: Task after XML parsing cannot be saved!!');
+            exit;
+        } else {
+            $isLog->logAppendString('SUCCESS:: Task after XML successfully saved!');
+        }
+
+        $isLog->logAppendString('SUCCESS:: Stories saved');
+
+        $tmodel->rcount = $icount;
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
+
+        // Обновление словаря RkDic
+
+        $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 2')->one();
+
+        if (!$rmodel) {
+            $isLog->logAppendString('ERROR:: Dictionary to update stories is not found.');
+            exit;
+        }
+
+        $fcount = RkStoretree::find()->andWhere('acc= :org_id', [':org_id' => $acc])->
+                    andWhere('active = 1 and type = 2')->count('*');
+
+        $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $rmodel->dicstatus_id = 6;
+        $rmodel->obj_count = isset($fcount) ? $fcount : 0;
+
+        if (!$rmodel->save()) {
+            $er3 = $rmodel->getErrors();
+            $isLog->logAppendString('ERROR:: Dictionary ' . $rmodel->id . 'cannot be saved - ' . $er3);
+            exit;
+        } else $isLog->logAppendString('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
+
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_FULLOK;
+
+        if (!$tmodel->setCallbackEnd()) {
+            $isLog->logAppendString('ERROR:: Task status THE END cannot be saved!!');
+            exit;
+        } else {
+            $isLog->logAppendString('SUCCESS:: All operations status is looking good');
+            echo 'SUCCESS:: All operations status is looking good';
+            exit;
+        }
+
+/*
+
     $getr = Yii::$app->request->getRawBody();
-    
-    
+    $file = Yii::$app->basePath . '/runtime/logs/rk_callback_store.log'; // Log file
+
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     $acc = 3243;
@@ -97,23 +289,25 @@ class StoreHelper extends AuthHelper {
     $posid = $myXML['posid']; 
     
     if (!empty($cmdguid) && !empty($posid))  {
-        
+  */
+/*
      // Заполнение tasks
              $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
         
         if (!$tmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
-        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+            $message = [
+                '(Store event registered...)',
+                'DATE: ' . date('d.m.Y H:i:s'),
+                'CMDGUID: '. $cmdguid,
+                'POSID: '. $posid,
+                str_pad('', 200, '-') . PHP_EOL
+            ];
+        file_put_contents($file,print_r($getr,true) , FILE_APPEND);
+        file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents($file,print_r($array,true) , FILE_APPEND);    
+        file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
+        file_put_contents($file,PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
         exit;
         }
         
@@ -128,7 +322,7 @@ class StoreHelper extends AuthHelper {
                 $er2 = $tmodel->getErrors();
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
             
-        $icount =0;  
+        $icount =0;
         
       //  $sql = 'update rk_storetree set active = 0 where acc='.User::findOne([Yii::$app->user->id])->organization_id;
         
@@ -197,9 +391,10 @@ class StoreHelper extends AuthHelper {
             $icount++;
          
         }
-       */
+
     }
-    
+*/
+/*
     foreach ($myXML->STOREGROUP as $storegroup) {
             $gcount++;
                                                
@@ -264,7 +459,7 @@ class StoreHelper extends AuthHelper {
                     
                 }
     }
-  
+  */
         
     // $arr2=$arr;
     
@@ -276,12 +471,12 @@ class StoreHelper extends AuthHelper {
             
             $sval = $value['parent'];
            
-            file_put_contents('runtime/logs/callback.log',$key.':'.$sval.PHP_EOL, FILE_APPEND); 
+            file_put_contents($file,$key.':'.$sval.PHP_EOL, FILE_APPEND); 
             
             // $value['parent']=$ridarray[$sval];
             $arr[$key]['parent'] = $ridarray[$sval];
             
-            file_put_contents('runtime/logs/callback.log',':'.print_r($arr[$key]['parent'],true).PHP_EOL, FILE_APPEND); 
+            file_put_contents($file,':'.print_r($arr[$key]['parent'],true).PHP_EOL, FILE_APPEND); 
             
            
         }
@@ -289,13 +484,13 @@ class StoreHelper extends AuthHelper {
     }
     */
     
-    //file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log','++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log',print_r($arr,true).PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log',print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
-    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
+    //file_put_contents($file,print_r($arr2,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,print_r($arr,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents($file,'++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
     //exit;
     
     
@@ -320,7 +515,7 @@ class StoreHelper extends AuthHelper {
     }
     */
     
-    
+    /*
     
      // Обновление словаря RkDic
     
@@ -329,8 +524,8 @@ class StoreHelper extends AuthHelper {
 
         
         if (!$rmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents($file,PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
 
         } else {
             
@@ -338,7 +533,7 @@ class StoreHelper extends AuthHelper {
             $rmodel->dicstatus_id= 6;
             $rmodel->obj_count = $icount;
             
-        //    file_put_contents('runtime/logs/callback.log',PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
+        //    file_put_contents($file,PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
             
         //    exit;
     
@@ -346,6 +541,7 @@ class StoreHelper extends AuthHelper {
                 $er3 = $rmodel->getErrors();
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
+    */
    
   //  $array = ApiHelper::xml2array($myXML);
   //  
@@ -367,20 +563,20 @@ class StoreHelper extends AuthHelper {
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
         
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
-    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
+    file_put_contents($file,PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
+    file_put_contents($file, PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents($file,PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents($file,print_r($getr,true) , FILE_APPEND);    
+    file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents($file,print_r($arr,true) , FILE_APPEND);    
+    file_put_contents($file,PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents($file,print_r($er,true) , FILE_APPEND);    
+    file_put_contents($file,print_r($er,true) , FILE_APPEND); 
+    file_put_contents($file,print_r($er,true) , FILE_APPEND); 
+    file_put_contents($file,PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
       */        
     }
 

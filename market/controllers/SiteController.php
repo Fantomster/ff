@@ -822,7 +822,11 @@ class SiteController extends Controller {
           throw new HttpException(404 ,Yii::t('message', 'market.controllers.site.get_out_five', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
 
-        $id = $category->id;
+        if (empty($category->parent)) {
+            $id = \yii\helpers\ArrayHelper::getColumn(\common\models\MpCategory::find()->where(['parent' => $category->id])->select('id')->asArray()->all(), 'id');
+        } else {
+            $id = $category->id;
+        }
         $relationSuppliers = [];
         $cbgWhere = [];
         $filter = "rating-up";
@@ -887,7 +891,6 @@ class SiteController extends Controller {
                 'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                 'status' => CatalogBaseGoods::STATUS_ON,
                 'deleted' => CatalogBaseGoods::DELETED_OFF])
-            ->andWhere(['category_id' => $id])
             ->andWhere($cbgWhere)
             ->orderBy($filterWhere)
             ->limit(12);
@@ -896,14 +899,16 @@ class SiteController extends Controller {
         $count = $models->count();
 
         if ($count > 0) {
-            return $this->render('category', compact('products', 'id', 'count', 'category', 'filter'));
+            return $this->render('category', compact('products', 'count', 'category', 'filter'));
         } else {
             $breadcrumbs = \yii\widgets\Breadcrumbs::widget([
                 'options' => [
                     'class' => 'breadcrumb',
                 ],
                 'homeLink' => false,
-                'links' => [
+                'links' => empty($category->parent) ? [
+                    \common\models\MpCategory::getCategory($category->id),
+                ] : [
                     \common\models\MpCategory::getCategory($category->parent),
                     \common\models\MpCategory::getCategory($category->id),
                 ],

@@ -20,6 +20,7 @@ class RkDicconst extends \yii\db\ActiveRecord
 
     const PC_TYPE_DROP = 1;
     const PC_TYPE_STRING = 2;
+    const PC_TYPE_TREE = 7;
 
     /**
      * @inheritdoc

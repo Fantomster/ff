@@ -29,9 +29,9 @@ use common\models\User;
 
     <?php switch ($pConst->type) {
 
-        case \api\common\models\RkDicconst::PC_TYPE_DROP : ?>
+        case \api\common\models\RkDicconst::PC_TYPE_DROP :
 
-            <?php if ($pConst->denom === 'taxVat') {
+             if ($pConst->denom === 'taxVat') {
 
                 echo $form->field($model, 'value')->dropDownList([
                     '0' => '0',
@@ -45,6 +45,33 @@ use common\models\User;
                 ]);
             } ?>
     <?php break;
+        case \api\common\models\RkDicconst::PC_TYPE_TREE :
+
+            yii::$app->db_api->
+            createCommand()->
+            update('rk_category', ['disabled' => '0'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1')->execute();
+
+            echo $form->field($model, 'value')->widget(TreeViewInput::classname(),
+                [
+                    'name' => 'category_list',
+                    'value' => 'true', // preselected values
+                    'query' => \api\common\models\RkCategory::find()
+                        ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                        ->andWhere('active = 1')
+                        ->addOrderBy('root, lft'),
+                    'headingOptions' => ['label' => 'Группы номенклатуры'],
+                    'rootOptions' => ['label'=>''],
+                    'fontAwesome' => true,
+                    'asDropdown' => false,
+                    'multiple' => true,
+                    'options' => ['disabled' => false]
+                ]);
+
+            echo Html::hiddenInput('isTree', 1);
+            echo Html::hiddenInput('treeName', $pConst->denom);
+
+            break;
+
         default: ?>
 
         <?php echo $form->field($model, 'value')->textInput(['maxlength' => true]) ?>

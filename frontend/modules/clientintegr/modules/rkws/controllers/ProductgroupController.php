@@ -4,8 +4,7 @@ namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use Yii;
 use yii\web\Controller;
-use api\common\models\RkAgent;
-use api\common\models\RkAgentSearch;
+use api\common\models\RkCategory;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use yii\data\ActiveDataProvider;
 // use yii\mongosoft\soapserver\Action;
@@ -21,7 +20,7 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
         
     public function actionIndex() {
         
-        $searchModel = new RkAgentSearch();
+        $searchModel = new RkCategory();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
                 
         if (Yii::$app->request->isPjax) {
@@ -40,6 +39,10 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
     
     public function actionView($id)
     {
+        yii::$app->db_api->
+        createCommand()->
+        update('rk_category', ['disabled' => '1'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1')->execute();
+
         return $this->render('view', [
             'dataProvider' => $this->findModel($id),
         ]);
@@ -50,7 +53,7 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
    //  $resres = ApiHelper::getAgents();     
         
         $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductgroupHelper();
-        $res->getProductgroup();
+        $res->getCategory();
         
             $this->redirect('\clientintegr\rkws\default');
             
@@ -60,7 +63,7 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
     {
         if (($dmodel = \api\common\models\RkDic::findOne($id)) !== null) {
             
-            $model = RkAgent::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
+            $model = RkCategory::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
             
             $dataProvider = new ActiveDataProvider([
                                         'query' => $model,

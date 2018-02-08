@@ -2,6 +2,7 @@
 
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
+use kartik\tree\TreeViewInput;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
@@ -10,7 +11,7 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
-use kartik\tree\TreeViewInput;
+use kartik\tree\TreeView;
 
 use common\models\User;
 use api\common\models\RkStoretree;
@@ -43,7 +44,7 @@ use api\common\models\RkStoretree;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    СКЛАДЫ
+    Номенклатура
   
 </section>
 <section class="content">
@@ -87,37 +88,35 @@ use api\common\models\RkStoretree;
                 </div>
             </div>  
         -->
-        <div class="box box-info">
-            <div class="box-header with-border">
-                <div class="panel-body">
-                    <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
-                        <?php echo TreeViewInput::widget(
-                            [
-                                'name' => 'category_list',
-                                'value' => 'true', // preselected values
-                                'query' => \api\common\models\RkStoretree::find()
-                                    ->andWhere('acc = :acc', [':acc' => User::findOne([Yii::$app->user->id])->organization_id])
-                                    ->andWhere('active = 1')
-                                    ->addOrderBy('root, lft'),
-                                'headingOptions' => ['label' => 'Склады'],
-                                'rootOptions' => ['label' => 'Справочник складов'],
-                                'fontAwesome' => true,
-                                'asDropdown' => false,
-                                'multiple' => false,
-                                'options' => ['disabled' => true]
-                            ]);
-
-                        ?>
-
-                                    <?php /* echo
+            <div class="box box-info">
+                <div class="box-header with-border">
+                            <div class="panel-body">
+                                    <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
+                                     <?php   echo TreeViewInput::widget(
+                                        [
+                                        'name' => 'category_list',
+                                        'value' => 'true', // preselected values
+                                        'query' => \api\common\models\RkCategory::find()
+                                        ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                                        ->andWhere('active = 1')
+                                        ->addOrderBy('root, lft'),
+                                        'headingOptions' => ['label' => 'Группы номенклатуры'],
+                                        'rootOptions' => ['label'=>'Справочник групп'],
+                                        'fontAwesome' => true,
+                                        'asDropdown' => false,
+                                        'multiple' => false,
+                                        'options' => ['disabled' => true]
+                                        ]); /*
+                                     ?>
+                                    <?=
                                          TreeView::widget([
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
-                                        'query' => RkStoretree::find()
+                                        'query' => \api\common\models\RkCategory::find()
                                                  ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
                                                  ->andWhere('active = 1')
                                                  ->addOrderBy('root, lft'), 
-                                        'headingOptions' => ['label' => 'Склады'],
+                                        'headingOptions' => ['label' => 'Товарные группы'],
                                         'fontAwesome' => false,     // optional
                                         'isAdmin' => false,         // optional (toggle to enable admin mode)
                                         'displayValue' => 1,        // initial display value

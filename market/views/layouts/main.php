@@ -97,7 +97,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 </section>
 <a id='backTop'>Back To Top</a>
 <?php
-echo $this->render('_yandex');
+if (Yii::$app->params['enableYandexMetrics']) {
+    echo $this->render('_yandex');
+}
 $this->endBody()
 ?>
 </body>

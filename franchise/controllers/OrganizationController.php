@@ -333,15 +333,15 @@ class OrganizationController extends DefaultController {
             $user = User::findOne(['organization_id'=>$id]);
 
             if(!$vendor->contact_name){
-                $vendor->contact_name = $user->profile->full_name;
+                $vendor->contact_name = $user->profile->full_name ?? '';
             }
 
             if(!$vendor->phone){
-                $vendor->phone = $user->profile->phone;
+                $vendor->phone = $user->profile->phone ?? '';
             }
 
             if(!$vendor->email){
-                $vendor->email = $user->email;
+                $vendor->email = $user->email ?? '';
             }
         }
 

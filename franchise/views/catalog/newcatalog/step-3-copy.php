@@ -90,7 +90,7 @@ $this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.edit_products_t
 ?>
 <?php
 //dd($array);
-$arr= json_encode($array, JSON_UNESCAPED_UNICODE);
+$arr0= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
 
 $step3CopyUrl = Url::to(['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]);
@@ -124,7 +124,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }      
-var data = $arr;
+var data = $arr0;
 var container = document.getElementById('handsontable');
 var searchFiled = document.getElementById('search_field');        
 height = $('.content-wrapper').height() - $("#handsontable").offset().top;

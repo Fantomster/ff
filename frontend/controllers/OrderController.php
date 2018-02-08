@@ -264,6 +264,7 @@ class OrderController extends DefaultController {
         $row = 18;
         $goods = $order->orderContent;
         foreach ($goods as $good) {
+            $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
             $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, Html::decode($good->product_name));
             $objPHPExcel->getActiveSheet()->getStyle('A' . $row)->getAlignment()->setWrapText(true);
             $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode($good->comment));
@@ -278,7 +279,6 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getStyle("F$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
             $objPHPExcel->getActiveSheet()->setCellValueExplicit('G' . $row, number_format($good->quantity * $good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
             $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-            //$objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(30);
             $objPHPExcel->getActiveSheet()->getStyle("A$row:G$row")->applyFromArray($styleArray);
             $row++;
         }

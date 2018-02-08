@@ -34,18 +34,19 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = $this->checkLic();       
         
         $vi = $lic ? 'index' : '/default/_nolic';
+        $li = $lic ? $lic->service : null;
                 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi,[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $lic,    
+            'lic' => $li,
         ]);
         } else {
             return $this->render($vi,[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $lic,    
+            'lic' => $li,
         ]);
         }   
         
@@ -121,7 +122,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
   
     protected function checkLic() {
      
-    $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one(); 
+    // $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
+    $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
     if ($lic) {

@@ -79,6 +79,7 @@ Modal::begin([
                             } else {
                                 ?>
                                 <select class="form-control" onchange="window.location.href=this.options[this.selectedIndex].value">
+                                    <option disabled><?= Yii::t('app', 'franchise.views.catalog.base_new.choose')?></option>
                                     <?php
                                     foreach ($arrCatalog as $arrCatalogs) {
                                         ?>
@@ -120,18 +121,7 @@ $create = Yii::t('app', 'franchise.views.catalog.create_two', ['ru' => 'Созд
 
 $customJs = <<< JS
 var timer;
-$('#search').on("keyup put paste change", function () {
-window.clearTimeout(timer);
-   timer = setTimeout(function () {
-       $.pjax({
-        type: 'POST',
-        push: false,
-        url: '$catalogsUrl',
-        container: '#catalog-list',
-        data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }
-      })
-   }, 700);
-});
+
 $("#restaurant").on("change", function() {
     $.pjax({
         type: 'POST',

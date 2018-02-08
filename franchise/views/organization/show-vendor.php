@@ -91,7 +91,7 @@ $this->registerCss("
                     <div class="row">
                         <div class="col-md-4" style="text-align: center;">
                             <img style="max-width: 100%;" src="<?= $organization->pictureUrl ?>">
-                            <?php if (false && $showButton): ?>
+                            <?php if ($showButton): ?>
                                 <div class="btn-edite">
                                     <?= isset($catalog->id) ? Html::a(Yii::t('app', 'franchise.views.organization.price_lists', ['ru'=>'Прайс-листы поставщика']), ['catalog/index', 'vendor_id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
                                 </div>

@@ -61,11 +61,11 @@ class CatalogController extends DefaultController
                         'allow' => true,
                         // Allow suppliers managers
                         'roles' => [
-//                            Role::ROLE_FRANCHISEE_OWNER,
-//                            Role::ROLE_FRANCHISEE_OPERATOR,
-//                            Role::ROLE_FRANCHISEE_ACCOUNTANT,
-//                            Role::ROLE_FRANCHISEE_MANAGER,
-//                            Role::ROLE_FRANCHISEE_LEADER,
+                            Role::ROLE_FRANCHISEE_OWNER,
+                            Role::ROLE_FRANCHISEE_OPERATOR,
+                            Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_MANAGER,
+                            Role::ROLE_FRANCHISEE_LEADER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -125,11 +125,79 @@ class CatalogController extends DefaultController
         //dd($currentUser);
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
-        return $this->render('basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'vendor_id'));
+        return $this->renderPartial('basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'vendor_id'));
     }
 
 
-    public function actionIndex($vendor_id) {
+    private function getCatalogData($vendor_id, $cat_id = null)
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $currentUser->organization_id = $vendor_id;
+
+        $searchString = "";
+        $catalog = ($cat_id) ? Catalog::findOne(['supp_org_id' => $vendor_id, 'id' => $cat_id]) : Catalog::findOne(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG]);
+        $catalogId = $catalog->id;
+        if ($cat_id != null) {
+            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+            $sql = "SELECT "
+                . "catalog.id as id,"
+                . "article,"
+                . "catalog_base_goods.product as product,"
+                . "catalog_base_goods.id as base_goods_id,"
+                . "catalog_goods.id as goods_id,"
+                . "units,"
+                . "ed,"
+                . "catalog_base_goods.price as base_price,"
+                . "catalog_goods.price as price,"
+                . "catalog_base_goods.status"
+                . " FROM `catalog` "
+                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+                . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
+            $query = \Yii::$app->db->createCommand($sql);
+            $sql2 = "SELECT count(*)"
+                . " FROM `catalog` "
+                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+                . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
+            $totalCount = Yii::$app->db->createCommand($sql2)->queryScalar();
+        } else {
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                . "WHERE cat_id = $catalogId AND "
+                . "deleted=0";
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                . "WHERE cat_id = $catalogId AND "
+                . "deleted=0", [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        }
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'params' => [':article' => $searchString, ':product' => $searchString],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'ed',
+                    'note',
+                    'status',
+                ],
+            ],
+        ]);
+        $currentUser->setAttribute('organization_id', $vendor_id);
+        $searchModel2 = new RelationSuppRest;
+        $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
+        return $this->renderPartial('basecatalog_new', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'catalog', 'vendor_id'));
+    }
+
+
+    public function actionIndex($vendor_id, $cat_id = null) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = Organization::findOne($vendor_id);
         if($currentOrganization->franchisee->id!=$currentUser->franchiseeUser->franchisee_id){
@@ -183,7 +251,12 @@ class CatalogController extends DefaultController
                     andFilterWhere(['LIKE', 'name', $searchString])->all();
                 }
             }
-            return $this->render("index", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog', 'currentOrganization', 'arrBaseCatalog'));
+            $arrCatalog = array_merge($arrBaseCatalog, $arrCatalog);
+            if(!$cat_id){
+                $cat_id = $arrCatalog[0]->id;
+            }
+            $table = $this->getCatalogData($vendor_id, $cat_id);
+            return $this->render("index_new", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog', 'currentOrganization', 'table', 'cat_id'));
         }
     }
 
@@ -442,7 +515,7 @@ class CatalogController extends DefaultController
             return $result;
             exit;
         }
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'vendor_id'));
+        return $this->renderPartial('newcatalog/step-3-copy', compact('array', 'cat_id', 'vendor_id'));
     }
 
     public function actionStep3($id) {

@@ -33,7 +33,7 @@ $cartCount = $user->organization->getCartCount();
 
 $resArr = [];
 
-$arrService = RkService::find()->select('org')->asArray()->column();
+$arrService = \api\common\models\RkServicedata::find()->select('org')->asArray()->column();
 $arrServiceiiko = \api\common\models\iiko\iikoService::find()->select('org')->asArray()->column();
 $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
 ?>

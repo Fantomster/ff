@@ -19,13 +19,14 @@ use yii\web\JsExpression;
     <?php
     $orga = $model->organization;
     $data = ($orga != null)?([$orga->id=>$orga->name]):([]);
+    // $smodel = $model->service;
     ?>
     <?php $form = ActiveForm::begin(); ?>
 
     <?php echo $form->errorSummary($model); ?>
     
-    <?php echo $form->field($model, 'code')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
-    <?php echo $form->field($model, 'name')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
+    <?php // echo $form->field($model, 'code')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
+    <?php // echo $form->field($model, 'name')->textInput(['maxlength' => true,'disabled'=>'disabled']) ?>
 
     <?php echo $form->field($model, 'org')->widget(Select2::classname(), [
             'data' => $data,
@@ -94,6 +95,11 @@ use yii\web\JsExpression;
             $model->td = $rdate;
             }
   ?>
+    <?php if (!empty($service_id)) {
+        echo $form->field($model, 'service_id')->hiddenInput(['value'=>$service_id])->label(false);
+    }
+    ?>
+
        <?php   echo $form->field($model, 'td')->label('Актуально по')->
         widget(DatePicker::classname(), [
                 'type' => DatePicker::TYPE_COMPONENT_APPEND,

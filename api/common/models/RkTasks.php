@@ -55,7 +55,7 @@ class RkTasks extends \yii\db\ActiveRecord
             [['fid','acc','guid'], 'required'],
             [['id','fid','acc'], 'integer'],
             [['guid','acc','created_at','updated_at', 'callback_at', 'intstatus_id', 'wsstatus_id', 
-                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive','callback_xml','callback_end','rcount' ], 'safe'],
+                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive','callback_xml','callback_end','rcount','total_parts','current_part', 'req_uid' ], 'safe'],
         ];
     }
 
@@ -125,10 +125,18 @@ class RkTasks extends \yii\db\ActiveRecord
             return true;
     }
 
+    public function isAllPartsReady($uid) {
+
+        $parts = RkTasks::find()->andWhere('req_uid = :uid',[':uid' => $uid])->andWhere('fcode = 0')->all();
+
+        return ($parts) ? false : true;
+    }
+
     public static function getDb()
     {
        return \Yii::$app->db_api;
     }
+
 
 
 }

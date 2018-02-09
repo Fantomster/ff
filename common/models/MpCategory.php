@@ -16,6 +16,8 @@ use common\behaviors\SluggableBehavior;
  * @property string $description
  * @property string $keywords
  * @property integer $parent
+ * 
+ * @property MpCategory $parentCategory
  */
 class MpCategory extends \yii\db\ActiveRecord {
 
@@ -72,7 +74,7 @@ class MpCategory extends \yii\db\ActiveRecord {
         $cat = Yii::t('app', MpCategory::find()->where(["id" => $id])->one()->name);
         return $cat;
     }
-
+    
     public static function allCategory() {
         $mp_ed = ArrayHelper::map(MpCategory::find()->all(), 'id', 'name');
         foreach ($mp_ed as &$item){
@@ -81,4 +83,7 @@ class MpCategory extends \yii\db\ActiveRecord {
         return $mp_ed;
     }
 
+    public function getParentCategory() {
+        return MpCategory::find()->where(["id" => $this->parent])->one();
+    }
 }

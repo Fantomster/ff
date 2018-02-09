@@ -430,7 +430,7 @@ class SiteController extends Controller {
         $user = Yii::$app->user->identity;
         $organization = $user->organization;
         if (Yii::$app->request->isAjax) {
-            $organization->step = Organization::STEP_TUTORIAL;
+            $organization->step = Organization::STEP_OK;
             $organization->save();
             $user->sendWelcome();
             $result = true;
@@ -461,6 +461,13 @@ class SiteController extends Controller {
             return $organization->save();
         }
         return false;
+    }
+    
+    public function actionAjaxSetInfo() {
+        $user = Yii::$app->user->identity;
+        $profile = $user->profile;
+        $organization = $user->organization;
+        return $this->renderAjax("/client/dashboard/_wizard", compact("profile", "organization"));
     }
 
     private function isRegistrationComplete($organization) {

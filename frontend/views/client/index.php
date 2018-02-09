@@ -95,11 +95,13 @@ $this->registerCss('
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 
-if ($organization->step == Organization::STEP_SET_INFO) {
-    \frontend\assets\AuthAsset::register($this);
-    \frontend\assets\GoogleMapsAsset::register($this);
-    echo $this->render("dashboard/_wizard", compact("profile", "organization"));
-}
+$infoUrl = Url::to(['/site/ajax-set-info']);
+
+//if ($organization->step == Organization::STEP_SET_INFO) {
+//    \frontend\assets\AuthAsset::register($this);
+//    \frontend\assets\GoogleMapsAsset::register($this);
+//    echo $this->render("dashboard/_wizard", compact("profile", "organization"));
+//}
 ?>
 <section class="content-header">
     <h1>
@@ -437,7 +439,7 @@ $customJs = <<< JS
 JS;
 $this->registerJs($customJs, View::POS_READY);
 
-if ($organization->step == Organization::STEP_TUTORIAL) {
+if (($organization->step == Organization::STEP_TUTORIAL) || ($organization->step == Organization::STEP_SET_INFO)) {
     $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
     $customJs2 = <<< JS
     $(document).on('click','.dash-small-box', function(){
@@ -518,12 +520,15 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
                             labelNext: '$arr[9]',
                             labelPrevious: '$arr[10]',
                             labelStart: '$arr[11]',
-                            arrowPath: './arrows/arrow-green.png',
+                            arrowPath: '/arrows/arrow-green.png',
                             fontSize: '14px',
                             onStop: function(currentSlideIndex, slideData, slideDom){
                                     $.get(
                                         '{$turnoffTutorial}'
                                     );
+                                    $('#organizationInfo').load('{$infoUrl}',function(result){
+                                        $('#data-modal-wizard').modal({show:true});
+                                    });
                                 },
                     });
 

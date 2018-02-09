@@ -61,7 +61,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                             'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
                         ],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor']],
 //                        [
 //                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']),
 //                            'icon' => 'envelope',

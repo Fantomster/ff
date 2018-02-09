@@ -203,7 +203,7 @@ class ClientController extends DefaultController {
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
-                    $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru'=>'Пользователь добавлен!']);
+                    $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -258,35 +258,35 @@ class ClientController extends DefaultController {
                 $user = User::findOne(['id' => $post['id']]);
                 $usersCount = count($user->organization->users);
                 if ($user->id == $this->currentUser->id) {
-                    $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru'=>'Может воздержимся от удаления себя?']);
+                    $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
 //                    $user->role_id = Role::ROLE_USER;
                     $email_notification = $user->emailNotification;
                     $sms_notification = $user->smsNotification;
-                    $user_token = UserToken::findOne(['user_id'=>$user->id]);
+                    $user_token = UserToken::findOne(['user_id' => $user->id]);
                     $profile = $user->profile;
-                    if($profile){
+                    if ($profile) {
                         $profile->delete();
                     }
-                    if($email_notification){
+                    if ($email_notification) {
                         $email_notification->delete();
                     }
-                    if($sms_notification) {
+                    if ($sms_notification) {
                         $sms_notification->delete();
                     }
-                    if($user_token){
+                    if ($user_token) {
                         $user_token->delete();
                     }
                     if ($user->delete()) {
-                        $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru'=>'Пользователь удален!']);
+                        $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
             }
         }
-        $message = Yii::t('message', 'frontend.controllers.client.cant_del', ['ru'=>'Не удалось удалить пользователя!']);
+        $message = Yii::t('message', 'frontend.controllers.client.cant_del', ['ru' => 'Не удалось удалить пользователя!']);
         return $this->renderAjax('settings/_success', ['message' => $message]);
     }
 
@@ -346,13 +346,13 @@ class ClientController extends DefaultController {
             if ($user->validate() && $profile->validate() && $organization->validate()) {
 
                 if ($arrCatalog === Array()) {
-                    $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru'=>'Каталог пустой!'])];
+                    $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!'])];
                     return $result;
                 }
-                
+
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
                 if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                    $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.more_position', ['ru'=>'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max'=>CatalogBaseGoods::MAX_INSERT_FROM_XLS])
+                    $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.more_position', ['ru' => 'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max' => CatalogBaseGoods::MAX_INSERT_FROM_XLS])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>'];
                     return $result;
                 }
@@ -362,16 +362,16 @@ class ClientController extends DefaultController {
                     $price = floatval(trim(str_replace(',', '.', $arrCatalogs['dataItem']['price'])));
                     $ed = strip_tags(trim($arrCatalogs['dataItem']['ed']));
                     if (empty($product)) {
-                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_field', ['ru'=>'Ошибка: Пустое поле'])];
+                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_field', ['ru' => 'Ошибка: Пустое поле'])];
                         return $result;
                     }
                     if (empty($price)) {
-                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_price', ['ru'=>'Ошибка: Пустое поле'])];
+                        $result = ['success' => false, 'message' => Yii::t('error', 'frontend.controllers.client.empty_price', ['ru' => 'Ошибка: Пустое поле'])];
                         return $result;
                     }
                     $price = str_replace(',', '.', $price);
                     if (!preg_match($numberPattern, $price)) {
-                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.wrong_price', ['ru'=>'Ошибка: <strong>[Цена]</strong> в неверном формате!'])];
+                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.wrong_price', ['ru' => 'Ошибка: <strong>[Цена]</strong> в неверном формате!'])];
                         return $result;
                     }
                     if (empty($units) || $units < 0) {
@@ -379,11 +379,11 @@ class ClientController extends DefaultController {
                     }
                     $units = str_replace(',', '.', $units);
                     if (!empty($units) && !preg_match($numberPattern, $units)) {
-                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.wrong_measure', ['ru'=>'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'])];
+                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.wrong_measure', ['ru' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'])];
                         return $result;
                     }
                     if (empty($ed)) {
-                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.empty', ['ru'=>'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'])];
+                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.empty', ['ru' => 'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'])];
                         return $result;
                     }
                     array_push($productNames, mb_strtolower(trim($product)));
@@ -393,7 +393,7 @@ class ClientController extends DefaultController {
                     $result = ['success' => false, 'message' => Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!')];
                     return $result;
                 }
-                
+
                 $email = $user->email;
                 $fio = $profile->full_name;
                 $org = $organization->name;
@@ -475,7 +475,7 @@ class ClientController extends DefaultController {
                             } else {
                                 $newBaseCatalog = new Catalog();
                                 $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru'=>'Главный каталог']);
+                                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
                                 $newBaseCatalog->type = Catalog::BASE_CATALOG;
                                 $newBaseCatalog->status = Catalog::STATUS_ON;
                                 if (isset($currency)) {
@@ -599,12 +599,12 @@ class ClientController extends DefaultController {
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.vendor', ['ru'=>'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru'=>' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
                             return $result;
                         } else {
-                            $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru'=>'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
+                            $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
                             return $result;
                         }
                     } catch (Exception $e) {
                         $transaction->rollback();
-                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.no_save', ['ru'=>'сбой сохранения, попробуйте повторить действие еще раз'])];
+                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз'])];
                         return $result;
                     }
                 }
@@ -655,7 +655,7 @@ class ClientController extends DefaultController {
                         if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
                             $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                            $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat_two', ['ru'=>'Главный каталог']);
+                            $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat_two', ['ru' => 'Главный каталог']);
                             $newBaseCatalog->type = Catalog::BASE_CATALOG;
                             $newBaseCatalog->status = Catalog::STATUS_ON;
                             if (isset($currency)) {
@@ -673,7 +673,7 @@ class ClientController extends DefaultController {
                             } else {
                                 $newBaseCatalog = new Catalog();
                                 $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat_three', ['ru'=>'Главный каталог']);
+                                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat_three', ['ru' => 'Главный каталог']);
                                 $newBaseCatalog->type = Catalog::BASE_CATALOG;
                                 $newBaseCatalog->status = Catalog::STATUS_ON;
                                 if (isset($currency)) {
@@ -800,24 +800,24 @@ class ClientController extends DefaultController {
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.vendor_two', ['ru'=>'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog_two', ['ru'=>' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
                             return $result;
                         } else {
-                            $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.sended', ['ru'=>'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
+                            $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.sended', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
                             return $result;
                         }
                     } catch (Exception $e) {
                         $transaction->rollback();
-                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.saving_error', ['ru'=>'сбой сохранения, попробуйте повторить действие еще раз'])];
+                        $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.saving_error', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз'])];
                         return $result;
                     }
                 } else {
-                    $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.already', ['ru'=>'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'])];
+                    $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.already', ['ru' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'])];
                     return $result;
                 }
             } else {
-                $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.no_validation', ['ru'=>'Валидация не пройдена!!!'])];
+                $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.no_validation', ['ru' => 'Валидация не пройдена!!!'])];
                 return $result;
             }
         } else {
-            $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.none_ajax', ['ru'=>'err: форма передана не ajax-ом!'])];
+            $result = ['success' => false, 'message' => Yii::t('message', 'frontend.controllers.client.none_ajax', ['ru' => 'err: форма передана не ajax-ом!'])];
             return $result;
         }
     }
@@ -874,7 +874,7 @@ class ClientController extends DefaultController {
                     $relationSuppRest->supp_org_id = $get_supp_org_id;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
                     $relationSuppRest->save();
-                    $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.invite_sent', ['ru'=>'Приглашение отправлено!'])];
+                    $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.invite_sent', ['ru' => 'Приглашение отправлено!'])];
                     $currentOrganization = $currentUser->organization;
 
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
@@ -893,16 +893,16 @@ class ClientController extends DefaultController {
                             ]);
                             Yii::$app->sms->send($text, $row->profile->phone);
                         }
-                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->emailNotification->receive_employee_email){
+                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->emailNotification->receive_employee_email) {
                             $email = $row->email;
-                            $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru'=>"Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru'=>" приглашает вас в систему"]);
+                            $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
                             $mailer->htmlLayout = 'layouts/html';
                             $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
                                     ->setTo($email)->setSubject($subject)->send();
                         }
-                        if($row->role_id == Role::ROLE_SUPPLIER_MANAGER){
-                            $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$currentUser->organization_id]);
-                            if(!$managerAssociate){
+                        if ($row->role_id == Role::ROLE_SUPPLIER_MANAGER) {
+                            $managerAssociate = ManagerAssociate::findOne(['manager_id' => $row->id, 'organization_id' => $currentUser->organization_id]);
+                            if (!$managerAssociate) {
                                 $managerAssociate = new ManagerAssociate();
                                 $managerAssociate->manager_id = $row->id;
                                 $managerAssociate->organization_id = $currentUser->organization_id;
@@ -919,7 +919,7 @@ class ClientController extends DefaultController {
                     return $result;
                 }
             } else {
-                $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.valid', ['ru'=>'Валидация не пройдена!'])];
+                $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.valid', ['ru' => 'Валидация не пройдена!'])];
                 return $result;
             }
         }
@@ -1094,7 +1094,7 @@ class ClientController extends DefaultController {
                 $result = ['success' => false, 'alert' => [
                         'class' => 'danger-fk',
                         'title' => 'Уведомление',
-                        'body' => Yii::t('message', 'frontend.controllers.client.contact_us', ['ru'=>'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '])
+                        'body' => Yii::t('message', 'frontend.controllers.client.contact_us', ['ru' => 'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>']];
                 return $result;
             }
@@ -1115,8 +1115,8 @@ class ClientController extends DefaultController {
                 ) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.ai', ['ru'=>'Ай ай ай как не хорошо!'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.ai', ['ru' => 'Ай ай ай как не хорошо!'])]];
                     return $result;
                 }
                 if (
@@ -1125,37 +1125,37 @@ class ClientController extends DefaultController {
                 ) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_two', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.ai_two', ['ru'=>'Ай ай ай как не хорошо!'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_two', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.ai_two', ['ru' => 'Ай ай ай как не хорошо!'])]];
                     return $result;
                 }
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_three', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.no_art', ['ru'=>'<strong>[Артикул]</strong> не указан'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_three', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.no_art', ['ru' => '<strong>[Артикул]</strong> не указан'])]];
                     return $result;
                 }
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_four', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.empty_name', ['ru'=>'Пустое поле <strong>[Наименование]</strong>!'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_four', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.empty_name', ['ru' => 'Пустое поле <strong>[Наименование]</strong>!'])]];
                     return $result;
                 }
                 if (empty($price)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_five', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.empty_price', ['ru'=>'Пустое поле <strong>[Цена]</strong>!'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_five', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.empty_price', ['ru' => 'Пустое поле <strong>[Цена]</strong>!'])]];
                     return $result;
                 }
                 $price = str_replace(',', '.', $price);
                 if (!preg_match($numberPattern, $price)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_six', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.wrong_price_two', ['ru'=>'<strong>[Цена]</strong> в неверном формате!'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_six', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.wrong_price_two', ['ru' => '<strong>[Цена]</strong> в неверном формате!'])]];
                     return $result;
                 }
                 if (empty($units) || $units < 0) {
@@ -1165,20 +1165,20 @@ class ClientController extends DefaultController {
                 if (!empty($units) && !preg_match($numberPattern, $units)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_seven', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.wrong_measure_two', ['ru'=>'<strong>[Кратность]</strong> товара в неверном формате'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_seven', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.wrong_measure_two', ['ru' => '<strong>[Кратность]</strong> товара в неверном формате'])]];
                     return $result;
                 }
                 if (empty($ed)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
-                            'title' => Yii::t('message', 'frontend.controllers.client.oops_eight', ['ru'=>'УПС! Ошибка']),
-                            'body' => Yii::t('message', 'frontend.controllers.client.empty_ed', ['ru'=>'Пустое поле <strong>[Единица измерения]</strong>!'])]];
+                            'title' => Yii::t('message', 'frontend.controllers.client.oops_eight', ['ru' => 'УПС! Ошибка']),
+                            'body' => Yii::t('message', 'frontend.controllers.client.empty_ed', ['ru' => 'Пустое поле <strong>[Единица измерения]</strong>!'])]];
                     return $result;
                 }
             }
             if (max(array_count_values($articleArray)) > 1) {
-                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('message', 'frontend.controllers.client.oops_nine', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('message', 'frontend.controllers.client.many_positions', ['ru'=>'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!'])]];
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('message', 'frontend.controllers.client.oops_nine', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('message', 'frontend.controllers.client.many_positions', ['ru' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!'])]];
                 return $result;
             }
             $transaction = Yii::$app->db->beginTransaction();
@@ -1285,15 +1285,15 @@ class ClientController extends DefaultController {
                 $transaction->commit();
                 $result = ['success' => false, 'alert' => [
                         'class' => 'success-fk',
-                        'title' => Yii::t('message', 'frontend.controllers.client.cat_updated', ['ru'=>'Каталог обновлен']),
-                        'body' => Yii::t('message', 'frontend.controllers.client.cat_updated_two', ['ru'=>'Каталог был успешно обновлен'])]];
+                        'title' => Yii::t('message', 'frontend.controllers.client.cat_updated', ['ru' => 'Каталог обновлен']),
+                        'body' => Yii::t('message', 'frontend.controllers.client.cat_updated_two', ['ru' => 'Каталог был успешно обновлен'])]];
                 return $result;
             } catch (Exception $e) {
                 $transaction->rollback();
                 $result = ['success' => false, 'alert' => [
                         'class' => 'danger-fk',
-                        'title' => Yii::t('message', 'frontend.controllers.client.saving_error_two', ['ru'=>'Ошибка сохранения']),
-                        'body' => Yii::t('message', 'frontend.controllers.client.please', ['ru'=>'Пожалуйста, повторите попытку сохранения'])]];
+                        'title' => Yii::t('message', 'frontend.controllers.client.saving_error_two', ['ru' => 'Ошибка сохранения']),
+                        'body' => Yii::t('message', 'frontend.controllers.client.please', ['ru' => 'Пожалуйста, повторите попытку сохранения'])]];
                 return $result;
             }
             //$message =  'Успех';   
@@ -1600,16 +1600,16 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
         $organization = $currentUser->organization;
-        if ($organization->step == Organization::STEP_SET_INFO) {
-            $profile = $currentUser->profile;
-            return $this->render('index', compact(
-                                    'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp', 'profile', 'organization'
-            ));
-        } else {
-            return $this->render('index', compact(
-                                    'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp'
-            ));
-        }
+//        if ($organization->step == Organization::STEP_SET_INFO) {
+        $profile = $currentUser->profile;
+        return $this->render('index', compact(
+                                'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp', 'profile', 'organization'
+        ));
+//        } else {
+//            return $this->render('index', compact(
+//                                    'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp'
+//            ));
+//        }
     }
 
     public function actionSuppliers() {
@@ -1722,8 +1722,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                         Yii::$app->session->set('sidebar-collapse', true);
     }
 
-    public function actionPayments()
-    {
+    public function actionPayments() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchModel = new PaymentSearch();
 

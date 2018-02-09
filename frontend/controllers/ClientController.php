@@ -1630,9 +1630,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
         } else {
-            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
         }
     }
 

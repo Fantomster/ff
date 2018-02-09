@@ -590,6 +590,12 @@ class ClientController extends DefaultController {
                         }
                         $transaction->commit();
                         if ($check['eventType'] == 5) {
+                            if ($user && $currentUser) {
+                                $managerAssociate = new ManagerAssociate();
+                                $managerAssociate->manager_id = $user->id;
+                                $managerAssociate->organization_id = $currentUser->organization_id;
+                                $managerAssociate->save();
+                            }
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.vendor', ['ru'=>'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru'=>' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
                             return $result;
                         } else {
@@ -763,6 +769,7 @@ class ClientController extends DefaultController {
                             $relationSuppRest->uploaded_processed = 0;
                         }
                         $relationSuppRest->save();
+
                         /**
                          *
                          * Отправка почты
@@ -781,6 +788,15 @@ class ClientController extends DefaultController {
                         }
                         $transaction->commit();
                         if ($check['eventType'] == 5) {
+                            /**
+                             *
+                             *  Менеджер по умолчанию
+                             *
+                             * */
+                            $managerAssociate = new ManagerAssociate();
+                            $managerAssociate->manager_id = $user->id;
+                            $managerAssociate->organization_id = $currentUser->organization_id;
+                            $managerAssociate->save();
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.vendor_two', ['ru'=>'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog_two', ['ru'=>' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
                             return $result;
                         } else {

@@ -272,6 +272,7 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, Html::decode($good->product_name));
             $objPHPExcel->getActiveSheet()->getStyle('A' . $row)->getAlignment()->setWrapText(true);
             $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode($good->comment));
+            $objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setWrapText(true);
             $objPHPExcel->getActiveSheet()->getStyle("B$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
             $objPHPExcel->getActiveSheet()->setCellValueExplicit('C' . $row, $good->article, \PHPExcel_Cell_DataType::TYPE_STRING);
             $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);

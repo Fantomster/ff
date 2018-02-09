@@ -242,7 +242,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getActiveSheet()->setCellValue('A14', Yii::t('app', 'Комментарий к заказу:'));
         $objPHPExcel->getActiveSheet()->getStyle('A14')->applyFromArray(['font' => ['bold' => true]]);
-        $objPHPExcel->getActiveSheet()->mergeCells('A15:G15');
+        $objPHPExcel->getActiveSheet()->mergeCells('A15:C15');
         $objPHPExcel->getActiveSheet()->setCellValue('A15', $order->comment);
         $objPHPExcel->getActiveSheet()->getStyle('A15')->getAlignment()->setWrapText(true);
         $objPHPExcel->getActiveSheet()->getRowDimension(14)->setRowHeight(20);
@@ -307,7 +307,7 @@ class OrderController extends DefaultController {
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(1);
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
         //$objPHPExcel->getActiveSheet()->freezePane("H$row");

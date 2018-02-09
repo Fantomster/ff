@@ -910,7 +910,7 @@ class SiteController extends Controller {
                         'links' => empty($category->parent) ? [
                     \common\models\MpCategory::getCategory($category->id),
                         ] : [
-                    ['label' => \common\models\MpCategory::getCategory($category->parent), 'url' => \yii\helpers\Url::to(['site/category', 'slug' => $category->parentCategory->slug ])],
+                    ['label' => \common\models\MpCategory::getCategory($category->parent), 'url' => \yii\helpers\Url::to(['site/category', 'slug' => $category->parentCategory->slug])],
                     \common\models\MpCategory::getCategory($category->id),
                         ],
             ]);

@@ -306,10 +306,10 @@ class OrderController extends DefaultController {
 
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
-        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
-        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(1);
-        $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
+        $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(50);
         //$objPHPExcel->getActiveSheet()->freezePane("H$row");
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(700);
 

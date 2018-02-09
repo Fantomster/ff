@@ -4,6 +4,9 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+\frontend\assets\AuthAsset::register($this);
+\frontend\assets\GoogleMapsAsset::register($this);
+
 $this->registerJs('
     function stopRKey(evt) { 
         var evt = (evt) ? evt : ((event) ? event : null); 
@@ -39,7 +42,8 @@ $this->registerJs('
             form.serialize()
         ).done(function(result) {
             if (result.length == 0) {
-                $(".data-modal .modal-content").slick("slickNext");
+                document.location.reload();
+                //$(".data-modal .modal-content").slick("slickNext");
             }
         });
         return false;
@@ -57,18 +61,21 @@ $this->registerJs('
     });
 
 
-    $("#data-modal").on("shown.bs.modal",function(){
+    $("#data-modal-wizard").on("shown.bs.modal",function(){
         $(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})
     });
-    $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
+    $("body").on("hidden.bs.modal", "#data-modal-wizard", function() {
+        document.location.reload();
+    })
+//    $("#data-modal-wizard").length>0&&$("#data-modal-wizard").modal({backdrop: "static", keyboard: false});
 ',yii\web\View::POS_READY);
 ?>
-<div id="data-modal" class="modal fade data-modal">
+<div id="data-modal-wizard" class="modal fade data-modal">
     <div class="modal-dialog">
         <button type="button" data-dismiss="modal" class="close hidden"></button>
         <div class="modal-content">
             <div class="first-step">
-                <div class="data-modal__logo"><img src="images/tmp_file/logo.png" alt=""></div>
+                <div class="data-modal__logo"><img src="/images/tmp_file/logo.png" alt=""></div>
                 <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.client.dashboard.sorry', ['ru'=>'Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.']) ?></div>
                 <?php
                 $form = ActiveForm::begin([
@@ -119,10 +126,11 @@ $this->registerJs('
                     </label>
                 </div>
                 <div id="map" class="modal-map"></div>
-                <button type="submit" class="but but_green complete-reg"><span><?= Yii::t('message', 'frontend.views.client.dashboard.continue', ['ru'=>'Продолжить работу']) ?></span><i class="ico"></i></button>
+                <button type="submit" class="but but_grey" data-dismiss="modal"><span><?= Yii::t('message', 'frontend.views.client.settings.cancel_two', ['ru'=>'Отмена']) ?></span><i class="ico"></i></button>
+                <button type="submit" class="but but_green complete-reg"><span><?= Yii::t('message', 'frontend.views.client.settings.save_two', ['ru'=>'Сохранить']) ?></span><i class="ico"></i></button>
                 <?php ActiveForm::end(); ?>
             </div>
-            <div class="second-step">
+<!--            <div class="second-step">
                 <div class="data-modal__icons-wrp">
                     <div class="row">
                         <div class="col-md-6 col-xs-6"><i class="ico ico-delivery"></i></div>
@@ -147,7 +155,7 @@ $this->registerJs('
                     <a href="<?= Url::to(['/request/list']) ?>" class="but but_green wt wizard-off"><span><?= Yii::t('message', 'frontend.views.client.dashboard.create', ['ru'=>'Создать заявку']) ?></span></a>
                     <a href="https://market.mixcart.ru" class="but but_green"><span><?= Yii::t('message', 'frontend.views.client.dashboard.search', ['ru'=>'Поиск на MixMarket']) ?></span></a>
                 </div>
-            </div>
+            </div>-->
         </div>
     </div>
 </div>

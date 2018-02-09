@@ -1144,6 +1144,10 @@ class SiteController extends Controller {
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
 
+        if ($client->isEmpty()) {
+            return $this->successNotify(Yii::t('message', 'market.controllers.site.please_set_info', ['ru'=>"Пожалуйста, сначала заполните информацию о себе на mixcart.ru"]));
+        }
+        
         if ($client->type_id !== Organization::TYPE_RESTAURANT) {
             return $this->successNotify(Yii::t('message', 'market.controllers.site.you_vendor', ['ru'=>"Опомнитесь, вы и есть поставщик!"]));
         }
@@ -1218,9 +1222,13 @@ class SiteController extends Controller {
         if (Yii::$app->user->isGuest) {
             return $this->successNotify(Yii::t('message', 'market.controllers.site.function_two', ['ru'=>"Функция доступна зарегистрированным ресторанам!"]));
         }
-
+        
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
+        
+        if ($client->isEmpty()) {
+            return $this->successNotify(Yii::t('message', 'market.controllers.site.please_set_info', ['ru'=>"Пожалуйста, сначала заполните информацию о себе на mixcart.ru"]));
+        }
 
         if ($client->type_id !== Organization::TYPE_RESTAURANT) {
             return $this->successNotify(Yii::t('message', 'market.controllers.site.you_vendor_two', ['ru'=>"Опомнитесь, вы и есть поставщик!"]));

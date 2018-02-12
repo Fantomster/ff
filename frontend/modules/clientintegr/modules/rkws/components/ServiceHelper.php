@@ -75,7 +75,7 @@ class ServiceHelper extends AuthHelper {
         } else {
 
         // $currDate = new DateTime();
-        $statLic = isset($obj['license_active']) ? new DateTime($obj['license_active']) : new DateTime('2001-01-01');
+        $statLic = isset($obj['license_active']) ? $obj['license_active'] : '0';
         $modDate = isset($obj['license_agent_expired_date']) ? new DateTime($obj['license_agent_expired_date']) : new DateTime('2001-01-01');
         $lastDate = isset($obj['agent_active_date']) ? new DateTime($obj['agent_active_date']) : new DateTime('2001-01-01');
 

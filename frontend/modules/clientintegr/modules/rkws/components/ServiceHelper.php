@@ -71,15 +71,17 @@ class ServiceHelper extends AuthHelper {
             exit;
         }
                 
-     } else {
+        } else {
 
         $currDate = new DateTime();
         $modDate = isset($obj['license_agent_expired_date']) ? new DateTime($obj['license_agent_expired_date']) : new DateTime('2001-01-01');
 
-        var_dump($currDate->format('Y-m-d H:i:s').'!-!'.$modDate->format('Y-m-d H:i:s'));
-    //     var_dump($obj['license_agent_expired_date']);
+        //    var_dump($currDate->format('Y-m-d H:i:s').'!-!'.$modDate->format('Y-m-d H:i:s'));
+        //     var_dump($obj['license_agent_expired_date']);
 
         $rcount->is_deleted = 0;
+        $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
+
         // if
 
 

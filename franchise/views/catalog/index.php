@@ -107,22 +107,22 @@ Modal::begin([
                     <div class="col-md-4">
                         <?= Html::label(Yii::t('app', 'franchise.views.catalog.rest_two', ['ru'=>'Ресторан']), null, ['class' => 'label','style'=>'color:#555']) ?>
                         <?= Html::dropDownList('restaurant', null,
-                            $relation,['prompt' => 'Все','class' => 'form-control','id'=>'restaurant']) ?>                        
+                            $relation,['prompt' => 'Все','class' => 'form-control','id'=>'restaurant']) ?>
                     </div>
                 </div>
             </div>
             <div class="box-body">
                 <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'catalog-list',]); ?>
-                    <?php  
-                    if(empty($arrCatalog)){ ?>   
+                    <?php
+                    if(empty($arrCatalog)){ ?>
                         <div class="empty"><?= Yii::t('app', 'franchise.views.catalog.nothing_found', ['ru'=>'Ничего не найдено']) ?>.</div>
-                    <?php 
+                    <?php
                     }else{
                         if($type==1){ ?>
                             <div class="panel-body">
                                 <h4 class="text-info"><?= Yii::t('app', 'franchise.views.catalog.to_main', ['ru'=>'Ресторан подключен к <strong>Главному каталогу</strong>']) ?></h4>
                             </div>
-                        <?php 
+                        <?php
                         }else{
                             foreach($arrCatalog as $arrCatalogs){
                         ?>
@@ -155,7 +155,7 @@ Modal::begin([
                                     </div>
                                 </div>
                             <?php
-                            } 
+                            }
                         }
                     }
                     ?>

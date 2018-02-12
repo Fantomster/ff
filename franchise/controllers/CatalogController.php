@@ -247,7 +247,8 @@ class CatalogController extends DefaultController
     }
 
 
-    public function actionIndex($vendor_id, $cat_id = null) {
+    public function actionIndex($id, $cat_id = null) {
+        $vendor_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = Organization::findOne($vendor_id);
         if($currentOrganization->franchisee->id!=$currentUser->franchiseeUser->franchisee_id){

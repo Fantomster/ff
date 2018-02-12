@@ -83,7 +83,7 @@ Modal::begin([
                                     <?php
                                     foreach ($arrCatalog as $arrCatalogs) {
                                         ?>
-                                        <option value="<?= Url::toRoute(['catalog/index', 'vendor_id' => $currentOrganization->id, 'cat_id' => $arrCatalogs->id]) ?>" <?php if($arrCatalogs->id == $cat_id) echo 'selected' ?>>
+                                        <option value="<?= Url::toRoute(['catalog/index', 'id' => $currentOrganization->id, 'cat_id' => $arrCatalogs->id]) ?>" <?php if($arrCatalogs->id == $cat_id) echo 'selected' ?>>
                                             <?= $arrCatalogs->name ?>
                                         </option>
 

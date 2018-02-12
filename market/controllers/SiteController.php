@@ -13,6 +13,7 @@ use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use common\models\Catalog;
 use yii\helpers\Json;
+use yii\web\Response;
 
 //ini_set('xdebug.max_nesting_level', 200);
 /**
@@ -1258,6 +1259,26 @@ class SiteController extends Controller {
         return $this->successNotify(Yii::t('message', 'market.controllers.site.sent', ['ru' => "Запрос поставщику отправлен!"]));
     }
 
+    public function actionAjaxCompleteRegistration() {
+        $user = Yii::$app->user->identity;
+        $profile = $user->profile;
+        $profile->scenario = "complete";
+        $organization = $user->organization;
+        $organization->scenario = "complete";
+
+        $post = Yii::$app->request->post();
+        if (Yii::$app->request->isAjax && empty($organization->locality) && $profile->load($post) && $organization->load($post)) {
+            if ($profile->validate() && $organization->validate()) {
+                $profile->save();
+                $organization->save();
+                $organization->refresh();
+            }
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return \yii\widgets\ActiveForm::validate($profile, $organization);
+    }
+    
     private function sendInvite($client, $vendor) {
         foreach ($vendor->users as $recipient) {
             if (!empty($recipient->profile->phone)) {

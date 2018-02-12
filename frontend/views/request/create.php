@@ -10,7 +10,7 @@ kartik\select2\Select2Asset::register($this);
 use kartik\checkbox\CheckboxX;
 
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
-\frontend\assets\GoogleMapsAsset::register($this);
+\common\assets\GoogleMapsAsset::register($this);
 ?>
 <style>
 #create .modal-body {background: none;}

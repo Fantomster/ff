@@ -304,12 +304,6 @@ JS;
     width:100%;
     text-align:center;
     }
-    .auth-sidebar__form .but {
-        display: inline !important;
-        width: 200px !important;
-    }
-
-
 ");
     ?>
     <script type="text/javascript">
@@ -419,7 +413,7 @@ JS;
                                 <img src="<?= $user->profile->avatarUrl ?>" class="img-circle avatar" alt="User Image">
 
                                 <p>
-                                    <?= $user->profile->full_name ?> - <?= Yii::t('app', $user->role->name) ?>
+                                    <?= empty($user->profile->full_name) ? '&nbsp;' : $user->profile->full_name ?> - <?= Yii::t('app', $user->role->name) ?>
                                     <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>
@@ -465,12 +459,4 @@ Modal::widget([
     'size' => 'modal-lg',
     'clientOptions' => false
 ])
-?>
-<?php
-if (($organization->type_id === Organization::TYPE_RESTAURANT) && $organization->isEmpty()) {
-   // \frontend\assets\AuthAsset::register($this);
-   // \frontend\assets\GoogleMapsAsset::register($this);
-    echo "<div id='organizationInfo'></div>";
-   // echo $this->render("/client/dashboard/_wizard", compact("profile", "organization"));
-}
 ?>

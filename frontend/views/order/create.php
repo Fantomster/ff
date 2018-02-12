@@ -39,7 +39,9 @@ $customJs = <<< JS
                             labelEnd: '$endMessage'
                     });
 
-                    $.tutorialize.start();
+                    if ($(window).width() > 767) {
+                        $.tutorialize.start();
+                    }
 
 JS;
     $this->registerJs($customJs, View::POS_READY);

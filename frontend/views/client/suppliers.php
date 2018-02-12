@@ -810,11 +810,16 @@ if ($currentOrganization->isEmpty()) {
     $infoUrl = Url::to(['/site/ajax-set-info']);
     $customJs = <<< JS2
             $("#SuppliersFormSend").on("click", "input, .setInfo", function(e) {
-                $('#organizationInfo').load('{$infoUrl}',function(result){
-                    $('#data-modal-wizard').modal({show:true});
-                });
+                $('#data-modal-wizard').trigger("invoke");
             })
 JS2;
     $this->registerJs($customJs, View::POS_READY);
+    echo common\widgets\setinfo\SetInfoWidget::widget([
+                'action' => Url::to(['/site/ajax-complete-registration']),
+                'organization' => $organization,
+                'profile' => $profile,
+                'events' => 'invoke',
+                'selector' => '#data-modal-wizard',
+            ]);
 }
 ?>

@@ -41,7 +41,7 @@ class ServiceHelper extends AuthHelper {
 
      yii::$app->db_api-> // Set all records to deleted
      createCommand()->
-     update('rk_service', ['is_deleted' => '1'])
+     update('rk_service', ['is_deleted' => '1', 'status_id' => '1'])
      ->execute();
        
                // Обновление списка доступных объектов
@@ -73,6 +73,7 @@ class ServiceHelper extends AuthHelper {
      } else {
 
         $rcount->is_deleted = 0;
+
 
         if (!$rcount->save()) {
             echo "Can't save the service model";

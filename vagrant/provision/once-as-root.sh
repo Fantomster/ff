@@ -40,6 +40,11 @@ info "Update OS software"
 apt-get update
 apt-get upgrade -y
 
+#locales
+info "Configure locales"
+apt-get install -y locales
+localedef ru_RU.UTF-8 -i ru_RU -f UTF-8
+
 info "Install additional software"
 #==  apt-get install -y php7.1-curl php7.1-cli php7.1-intl php7.1-mysqlnd php7.1-gd php7.1-fpm php7.1-mbstring php7.1-xml php7.1-zip unzip nginx mysql-server-5.7
 apt-get install -y php7.1-curl php7.1-cli php7.1-intl php7.1-mysqlnd php7.1-gd php7.1-fpm php7.1-mbstring php7.1-xml php7.1-zip unzip nginx
@@ -60,6 +65,12 @@ apt-get install -y oracle-java8-installer
 
 info "Install Supervisor"
 apt-get install -y supervisor
+
+# LESSC
+info "Install Less compiler"
+apt-get install -y npm
+npm install -g less
+ln -s /usr/bin/nodejs /usr/bin/node
 
 # info "Configure MySQL"
 # sed -i "s/.*bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf

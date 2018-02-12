@@ -91,9 +91,9 @@ $this->registerCss("
                     <div class="row">
                         <div class="col-md-4" style="text-align: center;">
                             <img style="max-width: 100%;" src="<?= $organization->pictureUrl ?>">
-                            <?php if (false && $showButton): ?>
+                            <?php if ($showButton): ?>
                                 <div class="btn-edite">
-                                    <?= isset($catalog->id) ? Html::a(Yii::t('app', 'franchise.views.organization.price_lists', ['ru'=>'Прайс-листы поставщика']), ['catalog/index', 'vendor_id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
+                                    <?= isset($catalog->id) ? Html::a(Yii::t('app', 'franchise.views.organization.price_lists', ['ru'=>'Прайс-листы поставщика']), ['catalog/index', 'id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
                                 </div>
                             <?php endif; ?>
                             <br>
@@ -272,7 +272,7 @@ $this->registerCss("
                                             } elseif ($progress > 0) {
                                                 $class = " text-orange";
                                             }
-                                            return ($data["orderSum"] ? $data["orderSum"] : 0) . Yii::t('app', ' руб.') . " <span class='description-percentage $class'>$divider $progress%";
+                                            return ($data["orderSum"] ? $data["orderSum"] : 0) . " RUB <span class='description-percentage $class'>$divider $progress%";
                                         },
                                         'label' => Yii::t('app', 'franchise.views.organization.sum_two', ['ru'=>'Сумма заказов']),
                                     ],

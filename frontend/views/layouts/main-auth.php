@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-frontend\assets\AuthAsset::register($this);
+common\assets\AuthAsset::register($this);
 $this->registerCss(
         '
 .glyphicon.spinning {

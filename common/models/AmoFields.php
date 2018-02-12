@@ -47,7 +47,7 @@ class AmoFields extends \yii\db\ActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'amo_field' => 'Значение поля из таблицы(напр. franch)',
+            'amo_field' => 'Значение поля FIELDS[sitepage] из формы на лендинге(напр. franch)',
             'responsible_user_id' => 'ID ответственного менеджера(responsible_user_id)',
             'pipeline_id' => 'ID воронки(pipeline_id)',
         ];

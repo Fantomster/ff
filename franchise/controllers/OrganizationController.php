@@ -118,11 +118,30 @@ class OrganizationController extends DefaultController {
                 ->one();
             $showEditButton = false;
         }
+
         if (empty($client->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($client);
             $client->refresh();
         }
+
+        if(!$client->phone || !$client->email || !$client->contact_name){
+            $user = User::findOne(['organization_id' => $id]);
+            if ($user) {
+                if (!$client->contact_name) {
+                    $client->contact_name = $user->profile->full_name;
+                }
+
+                if (!$client->phone) {
+                    $client->phone = $user->profile->phone;
+                }
+
+                if (!$client->email) {
+                    $client->email = $user->email;
+                }
+            }
+        }
+
         return $this->renderAjax("_ajax-show-client", compact('client', 'showEditButton'));
     }
 
@@ -303,11 +322,29 @@ class OrganizationController extends DefaultController {
                 ->one();
             $showEditButton = false;
         }
+
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($vendor);
             $vendor->refresh();
         }
+
+        if(!$vendor->phone || !$vendor->email || !$vendor->contact_name){
+            $user = User::findOne(['organization_id'=>$id]);
+
+            if(!$vendor->contact_name){
+                $vendor->contact_name = $user->profile->full_name ?? '';
+            }
+
+            if(!$vendor->phone){
+                $vendor->phone = $user->profile->phone ?? '';
+            }
+
+            if(!$vendor->email){
+                $vendor->email = $user->email ?? '';
+            }
+        }
+
         return $this->renderAjax("_ajax-show-vendor", compact('vendor', 'showEditButton'));
     }
 

@@ -1,5 +1,5 @@
 <?php
-namespace frontend\assets;
+namespace common\assets;
 
 use yii\web\AssetBundle;
 
@@ -9,12 +9,11 @@ use yii\web\AssetBundle;
  * @author sharaf
  */
 class AuthAsset extends AssetBundle {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+    public $sourcePath = '@common/assets/auth';
     public $css = [
         'css/auth.css', 
     ];
     public $depends = [
-        'frontend\assets\HelpersAsset',
+        'common\assets\HelpersAsset',
     ];
 }

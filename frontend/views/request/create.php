@@ -1,16 +1,16 @@
 <?php
  
 use yii\helpers\Html;
-use yii\helpers\BaseHtml;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
-use yii\web\View;
 use yii\helpers\ArrayHelper;
 use yii\widgets\Pjax;
 use kartik\select2\Select2;
 kartik\select2\Select2Asset::register($this);
 use kartik\checkbox\CheckboxX;
+
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
+\common\assets\GoogleMapsAsset::register($this);
 ?>
 <style>
 #create .modal-body {background: none;}
@@ -205,13 +205,13 @@ Pjax::begin([
 <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
 <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
 <?php
-$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
-        'libraries' => 'places',
-        'key'=>Yii::$app->params['google-api']['key-id'],
-        'language'=>Yii::$app->params['google-api']['language'],
-        'callback'=>'initMap'
-    ));
-$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+//$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+//        'libraries' => 'places',
+//        'key'=>Yii::$app->params['google-api']['key-id'],
+//        'language'=>Yii::$app->params['google-api']['language'],
+//        'callback'=>'initMap'
+//    ));
+//$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 $this->registerJs("
 $(document).on('keyup change', '#organization-address', function(){
 $(this).next().toggle(Boolean($(this).val()));

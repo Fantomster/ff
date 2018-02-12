@@ -55,7 +55,7 @@ $menuItems = [
         // ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
         //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
 ];
-if (Yii::$app->user->can('manage')) {
+if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) || Yii::$app->user->can('manage')) {
     $menuItems[] = [
         'label' => Yii::t('message', 'frontend.views.layouts.left.settings', ['ru' => 'Настройки']),
         'icon' => 'gears',
@@ -65,7 +65,7 @@ if (Yii::$app->user->can('manage')) {
             ['label' => Yii::t('message', 'frontend.views.layouts.left.custom', ['ru' => 'Общие']), 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.employees', ['ru' => 'Сотрудники']), 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
-            ['label' => Yii::t('message', 'frontend.views.layouts.left.notifications', ['ru' => 'Уведомления']), 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
+            ['label' => Yii::t('message', 'frontend.views.layouts.left.notifications', ['ru' => 'Уведомления']), 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.delivery', ['ru' => 'Доставка']), 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
             [
                 'label' => Yii::t('app', 'Платежи'),
@@ -82,7 +82,7 @@ if (Yii::$app->user->can('manage')) {
         'url' => '#',
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
-            ['label' => Yii::t('message', 'frontend.views.layouts.left.notifications_two', ['ru' => 'Уведомления']), 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
+            ['label' => Yii::t('message', 'frontend.views.layouts.left.notifications_two', ['ru' => 'Уведомления']), 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
         ]
     ];
 }

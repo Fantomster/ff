@@ -1,5 +1,5 @@
 <?php
-namespace frontend\assets;
+namespace common\assets;
 
 use yii\web\AssetBundle;
 
@@ -9,19 +9,17 @@ use yii\web\AssetBundle;
  * @author sharaf
  */
 class HelpersAsset extends AssetBundle {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+    public $sourcePath = '@common/assets/helpers';
     public $css = [
         'https://fonts.googleapis.com/css?family=Shadows+Into+Light',
     ];
     public $js = [
-        'js/lib/modernizr-custom.js',
-        'js/plugins/bs/modal.js',
-        'js/separate/global.js',
-        'js/helpers/resizer.js',
-        'js/helpers/object-fit.js',
-        'js/helpers/bs_modal_fix.js',
-        //'js/components/data-modal.js',
+        'js/modernizr-custom.js',
+        'js/modal.js',
+        'js/global.js',
+        'js/resizer.js',
+        'js/object-fit.js',
+        'js/bs_modal_fix.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

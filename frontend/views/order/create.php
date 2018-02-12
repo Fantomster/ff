@@ -8,10 +8,49 @@ use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
+use yii\web\View;
 
 $this->title = Yii::t('message', 'frontend.views.order.set_order', ['ru'=>'Разместить заказ']);
 
 yii\jui\JuiAsset::register($this);
+
+if ($client->isEmpty()) {
+    $endMessage = "<a href='#'>" . Yii::t('message', 'frontend.views.request.continue_four', ['ru'=>'Продолжить']) . "</a>";
+    $content = Yii::t('message', 'frontend.views.order.hint', ['ru'=>'Чтобы делать заказы, добавьте поставщика!']);
+    $suppliersUrl = Url::to(['client/suppliers']);
+    frontend\assets\TutorializeAsset::register($this);
+$customJs = <<< JS
+                    var _slides = [{
+                            title: '&nbsp;',
+                            content: '$content',
+                            position: 'right-center',
+                            overlayMode: 'focus',
+                            selector: '.step-vendor',
+                    },
+                        ];
+
+                    $.tutorialize({
+                            slides: _slides,
+                            bgColor: '#fff',
+                            buttonBgColor: '#84bf76',
+                            buttonFontColor: '#fff',
+                            fontColor: '#3f3e3e',
+                            showClose: true,
+                            arrowPath: '/arrows/arrow-green.png',
+                            fontSize: '14px',
+                            labelEnd: "$endMessage",
+                            onStop: function(currentSlideIndex, slideData, slideDom){
+                                document.location = '$suppliersUrl';
+                            },
+                    });
+
+                    if ($(window).width() > 767) {
+                        $.tutorialize.start();
+                    }
+
+JS;
+    $this->registerJs($customJs, View::POS_READY);
+}
 
 $this->registerJs(
     '$(document).ready(function(){

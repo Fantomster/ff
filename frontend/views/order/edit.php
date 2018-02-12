@@ -21,6 +21,10 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
                 Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
+if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Organization::TYPE_FRANCHISEE){
+    $quantityEditable = true;
+    $priceEditable = true;
+}
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);

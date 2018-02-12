@@ -208,7 +208,7 @@ a{
   margin-left: 15px;
 }
 .navbar-nav>li>.dropdown-menu {
-	z-index: 9999;
+	z-index: 999;
 }
 .btn-navbar{
 border: 1px solid #b0b0b0;
@@ -878,7 +878,7 @@ text-decoration: none;
     padding: 12px 10px 5px 10px !important;
 }
 .navbar{
-    z-index:9999;
+    z-index:999;
 }
 #sendService{margin-top:5%}
 .pro-partner {

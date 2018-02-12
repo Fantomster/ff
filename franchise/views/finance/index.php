@@ -146,7 +146,7 @@ use yii\widgets\Breadcrumbs;
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return $data['turnoverCut'] - $data['toFkeeper'];
+                                    return ($data['turnoverCut'] - $data['toFkeeper']) . " RUB";
                                 },
                                 'label' => Yii::t('app', 'franchise.views.finance.total_income_five', ['ru'=>'Итого прибыль']),
                             ],

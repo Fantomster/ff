@@ -34,6 +34,7 @@ class ServiceHelper extends AuthHelper {
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="get_objects" guid="'.$guid.'">
+    <PARAM name="onlyactive" val="0" />
      </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
@@ -73,18 +74,19 @@ class ServiceHelper extends AuthHelper {
                 
         } else {
 
-        $currDate = new DateTime();
+        // $currDate = new DateTime();
+        $statLic = isset($obj['license_active']) ? new DateTime($obj['license_active']) : new DateTime('2001-01-01');
         $modDate = isset($obj['license_agent_expired_date']) ? new DateTime($obj['license_agent_expired_date']) : new DateTime('2001-01-01');
+        $lastDate = isset($obj['agent_active_date']) ? new DateTime($obj['agent_active_date']) : new DateTime('2001-01-01');
+
 
         //    var_dump($currDate->format('Y-m-d H:i:s').'!-!'.$modDate->format('Y-m-d H:i:s'));
         //     var_dump($obj['license_agent_expired_date']);
 
         $rcount->is_deleted = 0;
         $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
-        $rcount->status_id = 2;
-
-        // if
-
+        $rcount->last_active = Yii::$app->formatter->asDate($lastDate, 'yyyy-MM-dd HH:mm:ss');
+        $rcount->status_id = $statLic+1;
 
         if (!$rcount->save()) {
             echo "Can't save the service model";

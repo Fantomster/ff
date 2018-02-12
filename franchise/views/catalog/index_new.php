@@ -107,7 +107,7 @@ Modal::begin([
 </section>
 <?php
 
-$catalogsUrl = Url::to(['catalog/index', 'vendor_id' => $currentOrganization->id]);
+$catalogsUrl = Url::to(['catalog/index', 'id' => $currentOrganization->id]);
 $myCatalogDelCatalogUrl = Url::to(['catalog/mycatalogdelcatalog']);
 $changeCatalogStatusUrl = Url::to(['catalog/changecatalogstatus']);
 $delCat = Yii::t('app', 'franchise.views.catalog.delete', ['ru' => 'Удалить каталог?']);

@@ -8,7 +8,7 @@ use yii\helpers\Url;
 <div id="<?= $id ?>" class="modal fade data-modal">
     <div class="modal-dialog">
         <button type="button" data-dismiss="modal" class="close hidden"></button>
-        <div class="modal-content">
+        <div class="modal-content modal-content-info data-modal-info">
             <div class="first-step">
                 <div class="data-modal__logo"><img src="<?= $baseUrl ?>/images/logo.png" alt=""></div>
                 <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.client.dashboard.sorry', ['ru'=>'Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.']) ?></div>

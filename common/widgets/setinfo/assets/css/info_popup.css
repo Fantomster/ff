@@ -5569,20 +5569,13 @@ label.error {
     -o-transform: rotate(-45deg);
     transform: rotate(-45deg);
 }
-.data-modal .modal-content {
+.modal-content-info {
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     border-radius: 2px;
     text-align: center;
     padding-top: 40px;
     padding-bottom: 38px;
-}
-.data-modal .modal-content:not(.slick-initialized) {
-    opacity: 0;
-    -webkit-transition: all 0.3s ease;
-    -o-transition: all 0.3s ease;
-    -moz-transition: all 0.3s ease;
-    transition: all 0.3s ease;
 }
 @media (max-width: 500px) {
     .data-modal [class*="col-"] {
@@ -5592,7 +5585,7 @@ label.error {
         margin-bottom: 30px;
     }
 }
-.data-modal .modal-dialog {
+.data-modal-info {
     width: 634px;
 }
 .data-modal .modal-dialog .close {

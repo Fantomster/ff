@@ -32,7 +32,7 @@ class SetInfoWidget extends Widget {
 
             $(document).on("click", ".next", function(e) {
                 e.preventDefault();
-                $(".data-modal .modal-content").slick("slickNext");
+              //  $("' . $this->id . ' .modal-content").slick("slickNext");
             });
 
             $(document).on("submit", "#complete-form", function() {
@@ -60,17 +60,17 @@ class SetInfoWidget extends Widget {
             });
 
             $("#' . $this->id . '").on("shown.bs.modal",function(){
-                $(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})
+                //$("' . $this->id . ' .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})
                 initMap();
             });
             $("body").on("hidden.bs.modal", "#' . $this->id . '", function() {
                 document.location.reload();
             })
-            $(document).on("'.$this->events.'", "'.$this->selector.'", function(e) {
+            $(document).on("' . $this->events . '", "' . $this->selector . '", function(e) {
                 if ($(this).attr("href") === "#") {
                     e.preventDefault();
                 }
-                $("#'.$this->id.'").modal({show:true});
+                $("#' . $this->id . '").modal({show:true});
             })
         ', \yii\web\View::POS_READY);
     }

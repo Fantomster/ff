@@ -122,17 +122,17 @@ if (!Yii::$app->user->isGuest) {
 //\frontend\assets\GoogleMapsAsset::register($this);
 if (!(Yii::$app->request->cookies->get('locality') || Yii::$app->request->cookies->get('country'))) {
 $this->registerJs("
-  $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
+  $(\"#location-modal\").length>0&&$(\"#location-modal\").modal({backdrop: \"static\", keyboard: false});
 ",yii\web\View::POS_END);    
 }
 ?>
 <?php
-\market\assets\GoogleMapsAsset::register($this);
+\common\assets\GoogleMapsAsset::register($this);
 echo $this->render("../site/main/_userLocation");
 $userLocation = Url::to(['/site/location-user']);
 $customJs = <<< JS
-$(document).on("click","#locHeader", function () { 
-    $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
+$(document).on("click","#locHeader", function () {
+    $("#location-modal").length>0&&$("#location-modal").modal({backdrop: "static", keyboard: false});
 });       
 JS;
 $this->registerJs($customJs, View::POS_READY);

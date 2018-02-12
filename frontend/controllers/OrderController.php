@@ -287,7 +287,7 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
             $objPHPExcel->getActiveSheet()->getStyle("A$row:G$row")->applyFromArray($styleArray);
 
-            $height = 14;
+            $height = 18;
             $product_name_length = mb_strlen($good->product_name);
             $comment_length = mb_strlen($good->comment);
             if($product_name_length > $width || $comment_length > $width){

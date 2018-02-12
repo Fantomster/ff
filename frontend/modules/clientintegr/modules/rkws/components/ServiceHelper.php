@@ -72,6 +72,12 @@ class ServiceHelper extends AuthHelper {
                 
      } else {
 
+        $rcount->is_deleted = 0;
+
+        if (!$rcount->save()) {
+            echo "Can't save the service model";
+            exit;
+        }
 
     }
                     

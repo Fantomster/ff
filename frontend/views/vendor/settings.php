@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 use common\assets\CroppieAsset;
 
 CroppieAsset::register($this);
-\frontend\assets\GoogleMapsAsset::register($this);
+\common\assets\GoogleMapsAsset::register($this);
 
 $this->title = Yii::t('message', 'frontend.views.vendor.settings', ['ru'=>'Настройки']);
 $this->registerJs(

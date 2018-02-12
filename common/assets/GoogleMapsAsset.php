@@ -1,16 +1,15 @@
 <?php
 
-namespace frontend\assets;
+namespace common\assets;
 
 use Yii;
 use Yii\web\AssetBundle;
 
 class GoogleMapsAsset extends AssetBundle {
 
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+    public $sourcePath = '@common/assets/googlemaps';
     public $js = [
-        'js/helpers/googleMap.js',
+        'js/googleMap.js',
     ];
 
     public static function register($view) {

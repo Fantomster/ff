@@ -463,13 +463,6 @@ class SiteController extends Controller {
         return false;
     }
     
-    public function actionAjaxSetInfo() {
-        $user = Yii::$app->user->identity;
-        $profile = $user->profile;
-        $organization = $user->organization;
-        return $this->renderAjax("/client/dashboard/_wizard", compact("profile", "organization"));
-    }
-
     private function isRegistrationComplete($organization) {
         return ($organization->step != Organization::STEP_SET_INFO);
     }

@@ -1,0 +1,1 @@
+var objectfit=function(){$(".h-object-fit").each(function(){var i=$(this),t=i.find("img").prop("src");t&&i.css("background-image","url("+t+")").addClass("is-fited")})};Modernizr.objectfit||objectfit();

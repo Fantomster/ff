@@ -526,9 +526,7 @@ if (($organization->step == Organization::STEP_TUTORIAL) || ($organization->step
                                     $.get(
                                         '{$turnoffTutorial}'
                                     );
-                                    $('#organizationInfo').load('{$infoUrl}',function(result){
-                                        $('#data-modal-wizard').modal({show:true});
-                                    });
+                                    $('#data-modal-wizard').trigger('invoke');
                                 },
                     });
 
@@ -537,4 +535,11 @@ if (($organization->step == Organization::STEP_TUTORIAL) || ($organization->step
 JS;
     $this->registerJs($customJs2, View::POS_READY);
 }
+echo common\widgets\setinfo\SetInfoWidget::widget([
+                'action' => Url::to(['/site/ajax-complete-registration']),
+                'organization' => $organization,
+                'profile' => $profile,
+                'events' => 'invoke',
+                'selector' => '#data-modal-wizard',
+            ]);
 ?>

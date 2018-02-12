@@ -186,7 +186,6 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(10);
         $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
         $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(200);
 
         $objPHPExcel->getActiveSheet()->mergeCells('A1:G1');
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
@@ -243,7 +242,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getActiveSheet()->setCellValue('A14', Yii::t('app', 'Комментарий к заказу:'));
         $objPHPExcel->getActiveSheet()->getStyle('A14')->applyFromArray(['font' => ['bold' => true]]);
-        $objPHPExcel->getActiveSheet()->mergeCells('A15:C15');
+        $objPHPExcel->getActiveSheet()->mergeCells('A15:G15');
         $objPHPExcel->getActiveSheet()->setCellValue('A15', $order->comment);
         $objPHPExcel->getActiveSheet()->getStyle('A15')->getAlignment()->setWrapText(true);
         $objPHPExcel->getActiveSheet()->getRowDimension(14)->setRowHeight(20);
@@ -324,7 +323,6 @@ class OrderController extends DefaultController {
         //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(1);
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
         //$objPHPExcel->getActiveSheet()->freezePane("H$row");
-        $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(700);
 
         header('Content-Type: application/vnd.ms-excel');
         $filename = "otchet_zakaz_" . date("d-m-Y-His") . ".xls";

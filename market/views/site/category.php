@@ -53,7 +53,7 @@ $this->registerMetaTag([
             'links' => empty($category->parent) ? [
                 \common\models\MpCategory::getCategory($category->id),
                     ] : [
-                \common\models\MpCategory::getCategory($category->parent),
+                    ['label' => \common\models\MpCategory::getCategory($category->parent), 'url' => \yii\helpers\Url::to(['site/category', 'slug' => $category->parentCategory->slug ])],
                 \common\models\MpCategory::getCategory($category->id),
                     ],
         ])

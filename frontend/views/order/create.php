@@ -15,12 +15,14 @@ $this->title = Yii::t('message', 'frontend.views.order.set_order', ['ru'=>'Ра�
 yii\jui\JuiAsset::register($this);
 
 if ($client->isEmpty()) {
-    $endMessage = Yii::t('message', 'frontend.views.client.index.var8', ['ru'=>'Завершить']);
+    $endMessage = "<a href='#'>" . Yii::t('message', 'frontend.views.request.continue_four', ['ru'=>'Продолжить']) . "</a>";
+    $content = Yii::t('message', 'frontend.views.order.hint', ['ru'=>'Чтобы делать заказы, добавьте поставщика!']);
+    $suppliersUrl = Url::to(['client/suppliers']);
     frontend\assets\TutorializeAsset::register($this);
 $customJs = <<< JS
                     var _slides = [{
                             title: '&nbsp;',
-                            content: 'Чтобы делать заказы, добавьте поставщика!',
+                            content: '$content',
                             position: 'right-center',
                             overlayMode: 'focus',
                             selector: '.step-vendor',
@@ -36,10 +38,15 @@ $customJs = <<< JS
                             showClose: true,
                             arrowPath: '/arrows/arrow-green.png',
                             fontSize: '14px',
-                            labelEnd: '$endMessage'
+                            labelEnd: "$endMessage",
+                            onStop: function(currentSlideIndex, slideData, slideDom){
+                                document.location = '$suppliersUrl';
+                            },
                     });
 
-                    $.tutorialize.start();
+                    if ($(window).width() > 767) {
+                        $.tutorialize.start();
+                    }
 
 JS;
     $this->registerJs($customJs, View::POS_READY);

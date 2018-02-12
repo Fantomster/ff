@@ -16,7 +16,6 @@ if (!Yii::$app->user->isGuest) {
     $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
     $cartUrl = Url::to(['/order/pjax-cart']);
     $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
-    //Yii::$app->urlManager->baseUrl;
     $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
     $tutorialOn = Url::to(['/site/ajax-tutorial-on']);
     $dashboard = Url::to(['/site/index']);
@@ -24,9 +23,6 @@ if (!Yii::$app->user->isGuest) {
     $unreadNotifications = $organization->unreadNotifications;
     $changeNetworkUrl = Yii::$app->urlManager->createAbsoluteUrl(['/user/change']);
     $changeFormUrl = Url::to(['/user/default/change-form']);
-//    $("#checkout").on("pjax:complete", function() {
-//        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
-//    });
 
     $arr = [
         Yii::t('message', 'frontend.views.layouts.header.var1', ['ru' => 'Приглашение на MixCart']),
@@ -156,8 +152,6 @@ if (!Yii::$app->user->isGuest) {
             inputValue: $("#email").val(),
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
-                    //var emailRegex = /^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/;
-                    //if (emailRegex.test(email)) {
                     if (email) {
                         resolve();
                     } else {
@@ -214,6 +208,12 @@ if (!Yii::$app->user->isGuest) {
 $("body").on("hidden.bs.modal", "#changeNetOrg", function() {
     $(this).data("bs.modal", null);
 })
+$(document).on("click", "#change_business", function(e) {
+    e.preventDefault();
+    $("#changeNetOrg").load("$changeFormUrl", function(result) {
+        $('#changeBusinessModal').modal({show:true, top: "20%"});
+    });
+});
 $(document).on("click",".change-net-org", function(e){
     e.preventDefault();
     var id = $(this).attr('data-id'); 
@@ -261,6 +261,10 @@ JS;
 ::-webkit-scrollbar-thumb:hover {
   background-color: #88bd36;
 }
+
+    #changeBusinessModal .modal-content {
+        margin-top: 20%;
+    }
     .network-modal{
         padding:20px 30px 20px 30px;
     }
@@ -304,26 +308,6 @@ JS;
     width:100%;
     text-align:center;
     }
-    .but_grey {
-    height: 48px;
-    line-height: 48px;
-    background: #3f3e3e;
-    color: #fff !important;
-    font-size: 16px;
-    -webkit-border-radius: 28px;
-    -moz-border-radius: 28px;
-    border-radius: 28px;
-}
-.but_grey:hover,
-.but_grey:focus {
-    background-color: #595757;
-    color: #fff;
-}
-.auth-sidebar__form .but {
-    display: inline !important;
-    width: 200px !important;
-}
-
 ");
     ?>
     <script type="text/javascript">
@@ -433,7 +417,7 @@ JS;
                                 <img src="<?= $user->profile->avatarUrl ?>" class="img-circle avatar" alt="User Image">
 
                                 <p>
-                                    <?= $user->profile->full_name ?> - <?= Yii::t('app', $user->role->name) ?>
+                                    <?= empty($user->profile->full_name) ? '&nbsp;' : $user->profile->full_name ?> - <?= Yii::t('app', $user->role->name) ?>
                                     <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>
@@ -443,12 +427,8 @@ JS;
                                         $user->role_id == Role::ROLE_ADMIN ||
                                         $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
                                         in_array($user->role_id, Role::getFranchiseeEditorRoles()))) {
-                                    echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru' => "БИЗНЕСЫ"]), ['/user/change-form'], [
-                                        'data' => [
-                                            'target' => '#changeNetOrg',
-                                            'toggle' => 'modal',
-                                            'backdrop' => 'static',
-                                        ],
+                                    echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru' => "БИЗНЕСЫ"]), "#", [
+                                        'id' => 'change_business',
                                         'class' => 'btn btn-lg btn-business',
                                     ]);
                                 }
@@ -473,18 +453,11 @@ JS;
         <?php } ?>
     </nav>
 </header>
-<?=
-Modal::widget([
-    'id' => 'changeNetOrg',
-    'size' => 'modal-lg',
-    'clientOptions' => false
-])
-?>
-<?php
-if (($organization->type_id === Organization::TYPE_RESTAURANT) && $organization->isEmpty()) {
-   // \frontend\assets\AuthAsset::register($this);
-   // \frontend\assets\GoogleMapsAsset::register($this);
-    echo "<div id='organizationInfo'></div>";
-   // echo $this->render("/client/dashboard/_wizard", compact("profile", "organization"));
-}
+    <div id="changeNetOrg"></div>
+<?= ''
+//Modal::widget([
+//    'id' => 'changeNetOrg',
+//    'size' => 'modal-lg',
+//    'clientOptions' => false
+//])
 ?>

@@ -1300,7 +1300,7 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
     public function isEmpty() {
-        return (empty($this->name) || empty($this->address));
+        return (empty($this->name) || empty($this->place_id));
     }
 
 }

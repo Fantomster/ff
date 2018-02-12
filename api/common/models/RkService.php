@@ -96,7 +96,7 @@ class RkService extends \yii\db\ActiveRecord {
             return true;
         }
     }
-
+/*
     public function afterSave($insert, $changedAttributes) {
 
 
@@ -124,7 +124,7 @@ class RkService extends \yii\db\ActiveRecord {
 
         parent::afterSave($insert, $changedAttributes);
     }
-
+*/
     public static function getDb() {
         return \Yii::$app->db_api;
     }

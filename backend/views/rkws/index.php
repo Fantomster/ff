@@ -45,7 +45,7 @@ $gridColumns = [
     [
         'attribute' => 'status_id',
         'value' => function ($model) {
-            if ($model) return ($model->status_id == 2) ? '<font color="green"> Активно</font>' : '<font color="red">Неактивно</font>';
+            if ($model) return ($model->status_id == 2) ? '<span style="color:green;"> Активно</span>' : '<span style="color:red;">Неактивно</span>';
 
         },
     ],

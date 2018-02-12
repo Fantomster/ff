@@ -45,9 +45,12 @@ $gridColumns = [
     [
         'attribute' => 'status_id',
         'value' => function ($model) {
-            if ($model) return ($model->status_id == 2) ? '<span style="color:green;"> Активно</span>' : '<span style="color:red;">Неактивно</span>';
+            if ($model) return ($model->status_id == 2) ? 'Активно' : 'Неактивно';
 
         },
+        'options' => function($model) {
+        return $model->status_id === 2 ? ['style' =>'color: green;'] : ['style' =>'color: red;'];
+        }
     ],
     [
         'class'=>'kartik\grid\ExpandRowColumn',

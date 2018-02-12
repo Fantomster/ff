@@ -74,9 +74,10 @@ class ServiceHelper extends AuthHelper {
      } else {
 
         $currDate = new DateTime();
-        $modDate = new DateTime($res['resp']['license_agent_expired_date']);
+    // $modDate = isset $res['resp']['license_agent_expired_date'] ? new DateTime($res['resp']['license_agent_expired_date']) : new DateTime('2001-01-01');
 
-        var_dump($currDate .'!-!'.$modDate);
+    //    var_dump($currDate .'!-!'.$modDate);
+          var_dump($res);
 
         $rcount->is_deleted = 0;
         // if

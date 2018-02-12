@@ -38,11 +38,17 @@ class ServiceHelper extends AuthHelper {
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
     // var_dump($res);
+
+     yii::$app->db_api-> // Set all records to deleted
+     createCommand()->
+     update('rk_service', ['is_deleted' => '1'])
+     ->execute();
        
                // Обновление списка доступных объектов
     foreach($res['resp'] as $obj) {
-                
-        $rcount = RkService::findone(['code' => $obj['code']]);
+
+     $rcount = RkService::findone(['code' => $obj['code']]);
+
         
     if (!$rcount) {
         
@@ -52,8 +58,11 @@ class ServiceHelper extends AuthHelper {
         $nmodel->name = $obj['name'] ? $obj['name'] : 'Не задано';  
         $nmodel->address = isset($obj['address']) ? $obj['address'] : 'Не задано';
         $nmodel->phone  = isset($obj['phone']) ? $obj['phone'] : 'Не задано';
-        $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+        $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $nmodel->is_deleted = 0;
+
         $nmodel->status_id=1;
+
         
         
         if (!$nmodel->save()) {
@@ -61,7 +70,10 @@ class ServiceHelper extends AuthHelper {
             exit;
         }
                 
-     }
+     } else {
+
+
+    }
                     
         
         

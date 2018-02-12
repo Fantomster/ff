@@ -43,7 +43,7 @@ class RkService extends \yii\db\ActiveRecord {
         return [
             //    [['org','fd','td','object_id','status_id'], 'required'],
             //    [['id','fid','org','ver'], 'integer'],
-            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone'], 'safe'],
+            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone','last_active'], 'safe'],
         ];
     }
 
@@ -96,7 +96,7 @@ class RkService extends \yii\db\ActiveRecord {
             return true;
         }
     }
-
+/*
     public function afterSave($insert, $changedAttributes) {
 
 
@@ -124,7 +124,7 @@ class RkService extends \yii\db\ActiveRecord {
 
         parent::afterSave($insert, $changedAttributes);
     }
-
+*/
     public static function getDb() {
         return \Yii::$app->db_api;
     }

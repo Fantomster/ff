@@ -39,13 +39,15 @@ $gridColumns = [
 
     ], */
     [
+        'attribute' => 'last_active',
+        'label' => 'Посл. Активность',
+    ],
+    [
         'attribute' => 'status_id',
         'value' => function ($model) {
-            if ($model) return ($model->status_id == 1) ? 'Неактивно' : 'Активно';
+            if ($model) return ($model->status_id == 2) ? 'Активно' : 'Неактивно';
 
         },
-
-
     ],
     [
         'class'=>'kartik\grid\ExpandRowColumn',

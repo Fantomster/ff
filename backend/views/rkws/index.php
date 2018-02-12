@@ -68,13 +68,6 @@ $gridColumns = [
             return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'service_id'=>$service_id]);
         },
         'headerOptions'=>['class'=>'kartik-sheet-style'],
-        'rowOptions' => function ($model, $key, $index, $grid) {
-            if ($model->status_id === 2) {
-                return ['style' => 'background-color:green;'];
-            } else {
-                return ['style' => 'background-color:red;'];
-            }
-        },
         'expandOneOnly'=>true,
     ],
    // 'org',

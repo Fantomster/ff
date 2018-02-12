@@ -48,9 +48,6 @@ $gridColumns = [
             if ($model) return ($model->status_id == 2) ? 'Активно' : 'Неактивно';
 
         },
-        'options' => function($model) {
-        return $model->status_id === 2 ? ['style' =>'color: green;'] : ['style' =>'color: red;'];
-        }
     ],
     [
         'class'=>'kartik\grid\ExpandRowColumn',
@@ -71,6 +68,13 @@ $gridColumns = [
             return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'service_id'=>$service_id]);
         },
         'headerOptions'=>['class'=>'kartik-sheet-style'],
+        'rowOptions' => function ($model, $key, $index, $grid) {
+            if ($model->status_id === 2) {
+                return ['style' => 'background-color:green;'];
+            } else {
+                return ['style' => 'background-color:red;'];
+            }
+        },
         'expandOneOnly'=>true,
     ],
    // 'org',

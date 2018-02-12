@@ -1342,6 +1342,24 @@ class ClientController extends DefaultController {
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
+        //Список валют из заказов
+        $currency_list = Order::find()->distinct()->select([
+            'c.id',
+            'c.iso_code',
+            'COUNT(order.id) as count'
+        ])->joinWith('currency as c')
+            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->andWhere('client_id = :cid', [':cid' => $currentUser->organization_id])
+            ->groupBy('iso_code')
+            ->asArray()->all();
+
+        $currencyList = ['1' => 'RUB'];
+
+        foreach($currency_list as $c) {
+            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+        }
+
+
         $header_info_zakaz = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id])->count();
         empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
@@ -1397,6 +1415,9 @@ class ClientController extends DefaultController {
             empty($filter_supplier) ? "" : $where .= " and vendor_id='" . $filter_supplier . "'";
             empty($filter_employee) ? "" : $where .= " and created_by_id='" . $filter_employee . "'";
         }
+
+        $filter_currency = trim(\Yii::$app->request->get('filter_currency', 1));
+        empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
 
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM `order` 
@@ -1464,13 +1485,22 @@ class ClientController extends DefaultController {
          * 
          */
         $query = Yii::$app->db->createCommand("
-            SELECT sum(price*quantity) as price,sum(quantity) as quantity, product_id FROM order_content WHERE order_id in (
-                SELECT id from `order` where 
-                (DATE(created_at) between '" .
-                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                "and status<>" . Order::STATUS_FORMING . " and client_id = " . $currentUser->organization_id .
-                $where .
-                ") group by product_id order by sum(price*quantity) desc");
+            SELECT 
+              sum(price*quantity) as price,
+              sum(quantity) as quantity,
+              product_id,
+              c.iso_code
+            FROM order_content oc 
+            LEFT JOIN `order` o ON o.id = oc.order_id
+            LEFT JOIN currency c ON c.id = o.currency_id
+            WHERE order_id in (
+                  SELECT id from `order` where 
+                  (DATE(created_at) between '" . date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
+            " and status<>" . Order::STATUS_FORMING .
+            " and client_id = " . $currentUser->organization_id . $where .
+            ") 
+            group by product_id order by sum(price*quantity) desc
+            ");
         $countQuery = "SELECT count(*) from (" . $query->sql . ") as a";
         $count = Yii::$app->db->createCommand($countQuery)->queryScalar();
         $page = Yii::$app->request->get("page");
@@ -1510,11 +1540,11 @@ class ClientController extends DefaultController {
          */
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('analytics/index', compact(
-                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
             ));
         } else {
             return $this->render('analytics/index', compact(
-                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
             ));
         }
     }

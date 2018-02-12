@@ -129,7 +129,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
                         'options' => [\Yii::$app->request->get('filter_status') => ["Selected" => true]]])
                     ?>
                 </div>
-                <div class="col-lg-5 col-md-5 col-sm-6">
+                <div class="col-lg-4 col-md-4 col-sm-6">
                     <?php
                     $layout = <<< HTML
     {input1}
@@ -160,9 +160,16 @@ HTML;
                     ]);
                     ?>
                 </div>
-                <div class="col-lg-2 col-md-3 col-sm-6">
+
+                <div class="col-lg-2 col-md-2 col-sm-6">
                     <?= Html::label(Yii::t('message', 'frontend.views.vendor.client', ['ru' => 'Клиент']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <?= Html::dropDownList('filter_client', null, $filter_restaurant, ['prompt' => Yii::t('message', 'frontend.views.vendor.all_five', ['ru' => 'Все']), 'class' => 'form-control', 'id' => 'filter_client', 'options' => [\Yii::$app->request->get('filter_client') => ["Selected" => true]]])
+                    ?>
+                </div>
+                <div class="col-lg-1 col-md-1 col-sm-6">
+                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <?=
+                    Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
                     ?>
                 </div>
                 <div class="col-lg-1 col-md-1 col-sm-2">
@@ -297,11 +304,12 @@ HTML;
                                     //'attribute' => 'price',
                                     'format' => 'raw',
                                     'label' => Yii::t('message', 'frontend.views.vendor.total_two', ['ru' => 'Итого']),
-                                    'value' => function ($data) {
-                                        return (float)round($data['price'], 2) . "<i class=\"fa fa-fw fa-rub\"></i>";
+                                    'value' => function ($data) use (&$total_price) {
+                                        $total_price = $total_price . $data['iso_code'];
+                                        return (float)round($data['price'], 2) . ' ' . $data['iso_code'];
                                     },
                                     'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
-                                    'footer' => $total_price . "<i class=\"fa fa-fw fa-rub\"></i>",
+                                    'footer' => $total_price
                                 ]
                             ];
                             ?>
@@ -389,13 +397,14 @@ $(document).on("click", ".alLi", function() {
     });
 });
 
-$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client").on("change", function () {
-$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
+$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency").on("change", function () {
+$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
 var filter_client =  $("#filter_client").val();
 var filter_employee =  $("#filter_employee").val();
+var filter_currency =  $("#filter_currency").val();
 
     $.pjax({
      type: 'GET',
@@ -409,15 +418,19 @@ var filter_employee =  $("#filter_employee").val();
          filter_to_date: filter_to_date,
          filter_client: filter_client,
          filter_employee: filter_employee,
+         filter_currency: filter_currency,
            }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee").removeAttr('disabled') });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee,#filter_currency").removeAttr('disabled') });
 });
+
 $("#reset").on("click", function () {
     $("#filter_status").val('');
     $("#filter-date").val('$filter_clear_from_date');
     $("#filter-date-2").val('$filter_clear_to_date');
     $("#filter_client").val('');     
     $("#filter_employee").val('');        
+    $("#filter_currency").val('1');   
+    
     $.pjax({
      type: 'GET',
      push: false,
@@ -429,25 +442,13 @@ $("#reset").on("click", function () {
          filter_from_date: '$filter_clear_from_date',
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
-         filter_supplier: filter_supplier,
-         filter_employee: filter_employee,
-           }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee").removeAttr('disabled') });
-})
-$.pjax({
-     type: 'GET',
-     push: false,
-     timeout: 10000,
-     url: "$analyticsUrl",
-     container: "#product-analytic-list",
-     data: {
-         filter_status: '',
-         filter_from_date: '$filter_clear_from_date',
-         filter_to_date: '$filter_clear_to_date',
-         filter_client: '',
          filter_employee: '',
-           }
-   })
+         filter_currency: 1,
+     }
+   }).done(function() { 
+       $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee,#filter_currency").removeAttr('disabled'); 
+   });
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 

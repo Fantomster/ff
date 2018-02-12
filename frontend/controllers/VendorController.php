@@ -1894,6 +1894,7 @@ class VendorController extends DefaultController {
 
         //Список валют из заказов
         $currency_list = Order::find()->select([
+            'order.currency_id',
             'c.id',
             'c.iso_code',
             'COUNT(order.id) as count'

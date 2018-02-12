@@ -81,6 +81,7 @@ class ServiceHelper extends AuthHelper {
 
         $rcount->is_deleted = 0;
         $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
+        $rcount->status_id = 2;
 
         // if
 

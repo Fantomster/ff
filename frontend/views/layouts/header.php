@@ -304,25 +304,11 @@ JS;
     width:100%;
     text-align:center;
     }
-    .but_grey {
-    height: 48px;
-    line-height: 48px;
-    background: #3f3e3e;
-    color: #fff !important;
-    font-size: 16px;
-    -webkit-border-radius: 28px;
-    -moz-border-radius: 28px;
-    border-radius: 28px;
-}
-.but_grey:hover,
-.but_grey:focus {
-    background-color: #595757;
-    color: #fff;
-}
-.auth-sidebar__form .but {
-    display: inline !important;
-    width: 200px !important;
-}
+    .auth-sidebar__form .but {
+        display: inline !important;
+        width: 200px !important;
+    }
+
 
 ");
     ?>

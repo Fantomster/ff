@@ -4,7 +4,7 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-\frontend\assets\AuthAsset::register($this);
+\frontend\assets\InfoPopupAsset::register($this);
 \frontend\assets\GoogleMapsAsset::register($this);
 
 $this->registerJs('
@@ -104,7 +104,7 @@ $this->registerJs('
                         <?=
                                 $form->field($profile, 'full_name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.fio', ['ru'=>'ФИО'])]);
+                                ->textInput(['class' => 'form-control-ip', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.fio', ['ru'=>'ФИО'])]);
                         ?>
                         <i class="fa fa-user"></i>
                     </label>
@@ -112,7 +112,7 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.org_name', ['ru'=>'Название организации'])]);
+                                ->textInput(['class' => 'form-control-ip', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.org_name', ['ru'=>'Название организации'])]);
                         ?>
                         <i class="fa fa-bank"></i>
                     </label>
@@ -120,7 +120,7 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'address')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.address', ['ru'=>'Адрес'])])
+                                ->textInput(['class' => 'form-control-ip', ' onsubmit' => 'return false', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.address', ['ru'=>'Адрес'])])
                         ?>
                         <i class="fa fa-map-marker"></i>
                     </label>

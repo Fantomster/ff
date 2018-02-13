@@ -521,6 +521,7 @@ class OrganizationController extends DefaultController {
         $user = User::findOne($user_id);
         $user->organization_id = $organization_id;
         $user->save();
+
         $restaurants = RelationSuppRest::findAll(['supp_org_id' => $organization_id]);
         foreach ($restaurants as $restaurant){
             $rest_id = $restaurant->rest_org_id;

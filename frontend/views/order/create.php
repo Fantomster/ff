@@ -15,7 +15,7 @@ $this->title = Yii::t('message', 'frontend.views.order.set_order', ['ru'=>'Ра�
 yii\jui\JuiAsset::register($this);
 
 if ($client->isEmpty()) {
-    $endMessage = "<a href='#'>" . Yii::t('message', 'frontend.views.request.continue_four', ['ru'=>'Продолжить']) . "</a>";
+    $endMessage = Yii::t('message', 'frontend.views.request.continue_four', ['ru'=>'Продолжить']);
     $content = Yii::t('message', 'frontend.views.order.hint', ['ru'=>'Чтобы делать заказы, добавьте поставщика!']);
     $suppliersUrl = Url::to(['client/suppliers']);
     frontend\assets\TutorializeAsset::register($this);

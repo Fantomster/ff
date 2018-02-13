@@ -1,0 +1,4 @@
+function initGoogleMaps() {
+   initAutocomplete();
+   initMap();
+}

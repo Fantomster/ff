@@ -1,57 +1,33 @@
 function initMap() {
-    var fields = {
-        sField: document.getElementById('organization-address'),
-        hLat: document.getElementById('organization-lat'),
-        hLng: document.getElementById('organization-lng'),
-        hCountry: document.getElementById('organization-country'),
-        hLocality: document.getElementById('organization-locality'),
-        hAdministrativeAreaLevel1: document.getElementById('organization-administrative_area_level_1'),
-        hPlaceId: document.getElementById('organization-place_id'),
-        hRoute: document.getElementById('organization-route'),
-        hStreetNumber: document.getElementById('organization-street_number'),
-        hFormattedAddress: document.getElementById('organization-formatted_address')
-    };
+    try {
 
-    //инит карты
-    var map = new google.maps.Map(document.getElementById('map'), {
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-    });
-    // Create the search box and link it to the UI element.
-    var input = document.getElementById('organization-address');
-    var searchBox = new google.maps.places.SearchBox(input);
+        var fields = {
+            sField: document.getElementById('organization-address'),
+            hLat: document.getElementById('organization-lat'),
+            hLng: document.getElementById('organization-lng'),
+            hCountry: document.getElementById('organization-country'),
+            hLocality: document.getElementById('organization-locality'),
+            hAdministrativeAreaLevel1: document.getElementById('organization-administrative_area_level_1'),
+            hPlaceId: document.getElementById('organization-place_id'),
+            hRoute: document.getElementById('organization-route'),
+            hStreetNumber: document.getElementById('organization-street_number'),
+            hFormattedAddress: document.getElementById('organization-formatted_address')
+        };
 
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    autocomplete.bindTo('bounds', map);
+        //инит карты
+        var map = new google.maps.Map(document.getElementById('map'), {
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('organization-address');
+        var searchBox = new google.maps.places.SearchBox(input);
 
-    autocomplete.addListener('place_changed', function () {
-        var place = autocomplete.getPlace();
-        var bounds = new google.maps.LatLngBounds();
-        if (!place.geometry) {
-            console.log('Returned place contains no geometry');
-            return;
-        }
-        if (place.geometry.viewport) {
-            bounds.union(place.geometry.viewport);
-        } else {
-            bounds.extend(place.geometry.location);
-        }
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo('bounds', map);
 
-        marker.setPosition(place.geometry.location);
-        changeFields(fields, [place]);
-        map.fitBounds(bounds);
-        map.setZoom(17);
-        map.panTo(place.geometry.location);
-    });
-
-    searchBox.addListener('places_changed', function () {
-        var places = searchBox.getPlaces();
-
-        if (places.length == 0) {
-            return;
-        }
-        // For each place, get the icon, name and location.
-        var bounds = new google.maps.LatLngBounds();
-        places.forEach(function (place) {
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            var bounds = new google.maps.LatLngBounds();
             if (!place.geometry) {
                 console.log('Returned place contains no geometry');
                 return;
@@ -62,65 +38,93 @@ function initMap() {
                 bounds.extend(place.geometry.location);
             }
 
-        })
-        if (places[0].address_components) {
-            marker.setPosition(places[0].geometry.location);
-            changeFields(fields, places)
-        }
-        map.fitBounds(bounds);
-        map.setZoom(17);
-    })
-
-
-
-    //инит маркера
-    var marker = new google.maps.Marker({
-        map: map,
-        draggable: true
-    });
-    var geocoder = new google.maps.Geocoder;
-
-    if (typeof fields.hPlaceId.value == 'undefined' || fields.hPlaceId.value == '') {
-        geolocation(map, marker, fields)
-    } else {
-        geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value), fields)
-    }
-
-    //событие на перемещение маркера
-    marker.addListener('dragend', function (e) {
-        geocoder.geocode({'latLng': e.latLng}, function (results, status) {
-            if (status == 'OK') {
-                if (results[0]) {
-                    map.panTo(results[0].geometry.location);
-                    marker.setPosition(results[0].geometry.location);
-                    changeFields(fields, results)
-                }
-            } else {
-                console.log('[dragger] Geocoder failed due to: ' + status);
-            }
+            marker.setPosition(place.geometry.location);
+            changeFields(fields, [place]);
+            map.fitBounds(bounds);
+            map.setZoom(17);
+            map.panTo(place.geometry.location);
         });
-    })
 
-    //Событие на клик по карте
-    map.addListener('click', function (e) {
-        geocoder.geocode({'latLng': e.latLng}, function (results, status) {
-            if (status == 'OK') {
-                if (results[0]) {
-                    map.panTo(e.latLng);
-                    marker.setPosition(e.latLng);
-                    changeFields(fields, results)
-                }
-            } else {
-                console.log('[click] Geocoder failed due to: ' + status);
+        searchBox.addListener('places_changed', function () {
+            var places = searchBox.getPlaces();
+
+            if (places.length == 0) {
+                return;
             }
+            // For each place, get the icon, name and location.
+            var bounds = new google.maps.LatLngBounds();
+            places.forEach(function (place) {
+                if (!place.geometry) {
+                    console.log('Returned place contains no geometry');
+                    return;
+                }
+                if (place.geometry.viewport) {
+                    bounds.union(place.geometry.viewport);
+                } else {
+                    bounds.extend(place.geometry.location);
+                }
+
+            })
+            if (places[0].address_components) {
+                marker.setPosition(places[0].geometry.location);
+                changeFields(fields, places)
+            }
+            map.fitBounds(bounds);
+            map.setZoom(17);
         })
-    });
 
-    google.maps.event.addListener(map, 'idle', function ()
-    {
-        google.maps.event.trigger(map, 'resize');
-    });
 
+
+        //инит маркера
+        var marker = new google.maps.Marker({
+            map: map,
+            draggable: true
+        });
+        var geocoder = new google.maps.Geocoder;
+
+        if (typeof fields.hPlaceId.value == 'undefined' || fields.hPlaceId.value == '') {
+            geolocation(map, marker, fields)
+        } else {
+            geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value), fields)
+        }
+
+        //событие на перемещение маркера
+        marker.addListener('dragend', function (e) {
+            geocoder.geocode({'latLng': e.latLng}, function (results, status) {
+                if (status == 'OK') {
+                    if (results[0]) {
+                        map.panTo(results[0].geometry.location);
+                        marker.setPosition(results[0].geometry.location);
+                        changeFields(fields, results)
+                    }
+                } else {
+                    console.log('[dragger] Geocoder failed due to: ' + status);
+                }
+            });
+        })
+
+        //Событие на клик по карте
+        map.addListener('click', function (e) {
+            geocoder.geocode({'latLng': e.latLng}, function (results, status) {
+                if (status == 'OK') {
+                    if (results[0]) {
+                        map.panTo(e.latLng);
+                        marker.setPosition(e.latLng);
+                        changeFields(fields, results)
+                    }
+                } else {
+                    console.log('[click] Geocoder failed due to: ' + status);
+                }
+            })
+        });
+
+        google.maps.event.addListener(map, 'idle', function ()
+        {
+            google.maps.event.trigger(map, 'resize');
+        });
+    } catch (e) {
+        //
+    }
 }
 //Если нам известин placeId тогда выводим все данные
 function geocodePlaceId(geocoder, map, marker, placeId, fields) {

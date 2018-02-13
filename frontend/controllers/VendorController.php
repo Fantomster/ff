@@ -1892,6 +1892,24 @@ class VendorController extends DefaultController {
         $currentUser = $this->currentUser;
         $vendor = $currentUser->organization;
 
+        //Список валют из заказов
+        $currency_list = Order::find()->select([
+            'order.currency_id',
+            'c.id',
+            'c.iso_code',
+            'COUNT(order.id) as count'
+        ])->joinWith('currency as c')
+            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->andWhere('vendor_id = :cid', [':cid' => $currentUser->organization_id])
+            ->groupBy('iso_code')
+            ->asArray()->all();
+
+        $currencyList = ['1' => 'RUB'];
+
+        foreach($currency_list as $c) {
+            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+        }
+
         $orderTable = Order::tableName();
         $maTable = ManagerAssociate::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
@@ -1971,6 +1989,10 @@ class VendorController extends DefaultController {
             empty($filter_client) ? "" : $where .= " and client_id='" . $filter_client . "'";
             empty($filter_employee) ? "" : $where .= " and accepted_by_id='" . $filter_employee . "'";
         }
+
+        $filter_currency = trim(\Yii::$app->request->get('filter_currency', 1));
+        empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
+
         // Объем продаж чарт
         if (Yii::$app->user->can('manage')) {
             $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
@@ -2017,7 +2039,14 @@ class VendorController extends DefaultController {
         }
 
         $query = Yii::$app->db->createCommand("
-            SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
+            SELECT 
+              sum(price*quantity) as price, 
+              product_id,
+              c.iso_code
+            FROM order_content oc 
+            LEFT JOIN `order` o ON o.id = oc.order_id
+            LEFT JOIN currency c ON c.id = o.currency_id
+            WHERE order_id in (
                 SELECT id from `order` where 
                 (DATE(created_at) between '" .
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
@@ -2079,7 +2108,7 @@ class VendorController extends DefaultController {
         }
         //$arr_clients_price = json_encode($arr_clients_price);
 
-        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee'
+        return $this->render('analytics/index', compact('currencyList', 'filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee'
         ));
     }
 

@@ -88,8 +88,13 @@ use api\common\models\RkWaybill;
 
                                         $res = $model->getPconstValue();
 
+                                        $ret = ($model->denom == 'taxVat') ? $res/100 : (($res == 1) ? "Включено" : "Выключено");
+
+                                        if ($model->denom == 'defGoodGroup') $ret = 'Список';
+
+
                                         // VAT храним в единицах * 100, нужно облагородить перед выводом. 0/1 конвертим в слова
-                                        return ($model->denom == 'taxVat') ? $res/100 : (($res == 1) ? "Включено" : "Выключено");
+                                        return $ret;
 
                                     },
                                     'label' => 'Текущее значение',

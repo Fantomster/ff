@@ -430,7 +430,7 @@ class SiteController extends Controller {
         $user = Yii::$app->user->identity;
         $organization = $user->organization;
         if (Yii::$app->request->isAjax) {
-            $organization->step = Organization::STEP_TUTORIAL;
+            $organization->step = Organization::STEP_OK;
             $organization->save();
             $user->sendWelcome();
             $result = true;
@@ -462,7 +462,7 @@ class SiteController extends Controller {
         }
         return false;
     }
-
+    
     private function isRegistrationComplete($organization) {
         return ($organization->step != Organization::STEP_SET_INFO);
     }

@@ -10,20 +10,20 @@ use yii\web\AssetBundle;
  * @author fenris
  */
 class CartWidgetAsset extends AssetBundle {
+
     public $sourcePath = '@frontend/widgets/cart/assets';
-    
     public $css = [
         'css/font-awesome.min.css',
         'css/cartwidget.css',
     ];
-
     public $depends = [
         'yii\web\JqueryAsset',
         'yii\bootstrap\BootstrapAsset',
     ];
 
-    public function init()
-    {
+    public function init() {
         $this->sourcePath = __DIR__ . "/assets";
         parent::init();
-    }}
+    }
+
+}

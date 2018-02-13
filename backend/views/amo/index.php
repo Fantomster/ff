@@ -103,9 +103,20 @@ $this->registerJs($customJs, View::POS_READY);
         <?= Html::a('Создать поле для amoCRM', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <p>
-        Инструкция: 1.) В админ-панели SERVICEDESK > Поля для amoCRM  жмем кнопку Создать поле для amoCRM 2.) В поле "Значение поля из таблицы(напр. franch)" вносим значение поля формы FIELDS[sitepage] на лендингах (если лендинга еще нет, то придумываем любое слово и сообщаем верстальщику, что value поля FIELDS[sitepage] должно быть этим словом) 3.) Заполняем поля ID ответственного менеджера(responsible_user_id) и ID воронки(pipeline_id) - значения берутся из amoCRM
+        Инструкция:
+    <ul>
+        <li>В админ-панели SERVICEDESK > Поля для amoCRM жмем кнопку Создать поле для amoCRM</li>
+        <li>В поле "Значение поля FIELDS[sitepage] из формы на лендинге(напр. franch)" вносим значение поля формы FIELDS[sitepage] на лендингах
+            (если лендинга еще нет, то придумываем любое слово и сообщаем верстальщику, что value поля FIELDS[sitepage]
+            должно быть этим словом)
+        </li>
+        <li>Заполняем поля ID ответственного менеджера(responsible_user_id) и ID воронки(pipeline_id) - значения берутся
+            из amoCRM
+        </li>
+    </ul>
     </p>
     <br>
+
     <?php // echo $this->render('_search', ['model' => $searchModel]);   ?>
 
     <?php Pjax::begin(); ?>    <?=

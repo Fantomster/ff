@@ -80,6 +80,12 @@ use yii\web\JsExpression;
 
     <?php // echo $form->field($model, 'store_rid')->dropDownList(ArrayHelper::map(api\common\models\RkStore::find()->all(), 'rid', 'denom')) ?>
 
+    <?php
+    yii::$app->db_api->
+    createCommand()->
+    update('rk_storetree', ['disabled' => '0', 'collapsed' => '1'], 'acc='.Yii::$app->user->identity->organization_id.' and active = 1 and type = 2')->execute();
+    ?>
+
     <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
         <?php
         echo $form->field($model, 'store_rid')->widget(TreeViewInput::classname(),
@@ -88,9 +94,10 @@ use yii\web\JsExpression;
                 'value' => 'true', // preselected values
                 'query' => api\common\models\RkStoretree::find()->andWhere('acc = :acc', [':acc' => $org])->addOrderBy('root, lft'),
                 //  'headingOptions' => ['label' => 'Склады'],
-                'rootOptions' => ['label' => 'Корень'],
+                'rootOptions' => ['label' => 'Справочник складов'],
                 'fontAwesome' => true,
-                'asDropdown' => true,
+                'asDropdown' => false,
+                // 'dropdownConfig' => [],
                 'multiple' => false,
                 'options' => ['disabled' => false]
             ]);

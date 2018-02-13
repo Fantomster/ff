@@ -1,16 +1,17 @@
 <?php
 
-namespace frontend\assets;
+namespace common\assets;
 
 use Yii;
 use Yii\web\AssetBundle;
 
 class GoogleMapsAsset extends AssetBundle {
 
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+    public $sourcePath = '@common/assets/googlemaps';
     public $js = [
-        'js/helpers/googleMap.js',
+        'js/googleMap.js',
+        'js/googleApiLocation.js?v=1',
+        'js/main.js',
     ];
 
     public static function register($view) {
@@ -19,7 +20,7 @@ class GoogleMapsAsset extends AssetBundle {
                     'libraries' => 'places',
                     'key' => Yii::$app->params['google-api']['key-id'],
                     'language' => Yii::$app->params['google-api']['language'],
-                    'callback' => 'initMap'
+                    'callback' => 'initGoogleMaps'
         ));
         Yii::$app->view->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()], 'async' => true, 'defer' => true, 'position' => \yii\web\View::POS_END]);
     }

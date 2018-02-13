@@ -2,6 +2,8 @@
 
 namespace franchise\controllers;
 
+use common\models\ManagerAssociate;
+use common\models\RelationSuppRest;
 use common\models\UserToken;
 use Yii;
 use yii\helpers\VarDumper;
@@ -118,11 +120,30 @@ class OrganizationController extends DefaultController {
                 ->one();
             $showEditButton = false;
         }
+
         if (empty($client->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($client);
             $client->refresh();
         }
+
+        if(!$client->phone || !$client->email || !$client->contact_name){
+            $user = User::findOne(['organization_id' => $id]);
+            if ($user) {
+                if (!$client->contact_name) {
+                    $client->contact_name = $user->profile->full_name;
+                }
+
+                if (!$client->phone) {
+                    $client->phone = $user->profile->phone;
+                }
+
+                if (!$client->email) {
+                    $client->email = $user->email;
+                }
+            }
+        }
+
         return $this->renderAjax("_ajax-show-client", compact('client', 'showEditButton'));
     }
 
@@ -303,11 +324,29 @@ class OrganizationController extends DefaultController {
                 ->one();
             $showEditButton = false;
         }
+
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($vendor);
             $vendor->refresh();
         }
+
+        if(!$vendor->phone || !$vendor->email || !$vendor->contact_name){
+            $user = User::findOne(['organization_id'=>$id]);
+
+            if(!$vendor->contact_name){
+                $vendor->contact_name = $user->profile->full_name ?? '';
+            }
+
+            if(!$vendor->phone){
+                $vendor->phone = $user->profile->phone ?? '';
+            }
+
+            if(!$vendor->email){
+                $vendor->email = $user->email ?? '';
+            }
+        }
+
         return $this->renderAjax("_ajax-show-vendor", compact('vendor', 'showEditButton'));
     }
 
@@ -482,6 +521,15 @@ class OrganizationController extends DefaultController {
         $user = User::findOne($user_id);
         $user->organization_id = $organization_id;
         $user->save();
+
+        $restaurants = RelationSuppRest::findAll(['supp_org_id' => $organization_id]);
+        foreach ($restaurants as $restaurant){
+            $rest_id = $restaurant->rest_org_id;
+            $ma = new ManagerAssociate();
+            $ma->manager_id = $this->currentUser->id;
+            $ma->organization_id = $rest_id;
+            $ma->save();
+        }
         return $this->redirect(Yii::$app->params['protocol'] . ':' . Yii::$app->urlManagerFrontend->baseUrl . "/user/login");
     }
 }

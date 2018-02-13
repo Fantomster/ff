@@ -48,9 +48,9 @@ class DefaultController extends Controller {
             }
             $this->setLayout($organization->type_id);
             $isAdmin = in_array($this->currentUser->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER]);
-            if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE) && !$isAdmin) {
-                $this->redirectIfNotHome($organization);
-            }
+//            if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE) && !$isAdmin) {
+//                $this->redirectIfNotHome($organization);
+//            }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
                 throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied_two', ['ru'=>'Доступ запрещен']));
             }

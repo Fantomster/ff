@@ -57,7 +57,7 @@ if (!empty($success) || !empty($invalidToken)) {
 }
 ?>">
 <?php if (!empty($success)): ?>
-        <div class="success-message"><a href="<?= Yii::$app->homeUrl; ?>" class="success-message__ico"></a>
+        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="success-message__ico"></a>
             <div class="success-message__text">
                 <p><?= Yii::t("user", "Password has been reset") ?></p>
                 <p><?= Html::a(Yii::t("user", "Log in here"), ["/user/login"]) ?></p>

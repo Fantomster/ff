@@ -13,6 +13,7 @@ function info {
 info "Provision-script user: `whoami`"
 
 info "Restart web-stack"
+localedef ru_RU.UTF-8 -i ru_RU -f UTF-8
 service php7.1-fpm restart
 service nginx restart
 # service mysql restart

@@ -52,6 +52,10 @@ use kartik\grid\GridView;
                                         $model = \api\common\models\iiko\iikoDicconst::findOne(['id' => $data->id]);
                                         $res = $model->getPconstValue();
 
+                                        if($model->type == \api\common\models\iiko\iikoDicconst::TYPE_PASSWORD) {
+                                            return str_pad('', strlen($res), '*');
+                                        }
+
                                         // VAT храним в единицах * 100, нужно облагородить перед выводом.
                                         if($model->denom == 'taxVat') {
                                             return $res / 100;
@@ -61,9 +65,7 @@ use kartik\grid\GridView;
                                             return (($res == 1) ? "Включено" : "Выключено");
                                         }
 
-                                        if($model->type == \api\common\models\iiko\iikoDicconst::TYPE_PASSWORD) {
-                                            return str_pad('', strlen($res), '*');
-                                        }
+
 
                                         return $res;
                                     },

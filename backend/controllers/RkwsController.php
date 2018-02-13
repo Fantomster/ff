@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use api\common\models\RkServicedata;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
@@ -39,7 +40,7 @@ class RkwsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'getws','autocomplete'],
+                        'actions' => ['index', 'view', 'getws','autocomplete','create'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -119,7 +120,7 @@ class RkwsController extends Controller {
      * @return mixed
      */
     public function actionUpdate($id) {
-        $model = $this->findModel($id);
+        $model = $this->findDataModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
          //   return $this->redirect(['view', 'id' => $model->id]);
@@ -127,6 +128,21 @@ class RkwsController extends Controller {
         } else {
             return $this->render('update', [
                         'model' => $model,
+            ]);
+        }
+    }
+
+    public function actionCreate($service_id) {
+
+        $model = new RkServicedata();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            //   return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['index']);
+        } else {
+            return $this->render('create', [
+                'model' => $model,
+                'service_id' => $service_id,
             ]);
         }
     }
@@ -180,10 +196,18 @@ class RkwsController extends Controller {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+    protected function findDataModel($id) {
+        if (($model = \api\common\models\RkServicedata::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
     
     protected function checkIntegrRK () {
         
-        $arr = RkService::find()->select('org')->asArray->all();
+        $arr = RkServicedata::find()->select('org')->asArray->all();
                 
         if (in_array(User::findOne([Yii::$app->user->id])->organization_id,$arr)) {
             return true; // Ресторан есть в доступах к лицензии (даже если она неактивна

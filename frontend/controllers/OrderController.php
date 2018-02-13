@@ -55,7 +55,8 @@ class OrderController extends DefaultController {
                             'ajax-refresh-stats',
                             'ajax-set-comment',
                             'pdf',
-                            'export-to-xls'
+                            'export-to-xls',
+                            'order-to-xls'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -141,10 +142,10 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
             $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru'=>'отчет']))
-                    ->setCellValue('A1', Yii::t('message', 'frontend.controllers.order.art', ['ru'=>'Артикул']))
-                    ->setCellValue('B1', Yii::t('message', 'frontend.controllers.order.good', ['ru'=>'Наименование товара']))
-                    ->setCellValue('C1', Yii::t('message', 'frontend.controllers.order.amo', ['ru'=>'Кол-во']))
-                    ->setCellValue('D1', Yii::t('message', 'frontend.controllers.order.mea', ['ru'=>'Ед.изм']));
+                ->setCellValue('A1', Yii::t('message', 'frontend.controllers.order.art', ['ru'=>'Артикул']))
+                ->setCellValue('B1', Yii::t('message', 'frontend.controllers.order.good', ['ru'=>'Наименование товара']))
+                ->setCellValue('C1', Yii::t('message', 'frontend.controllers.order.amo', ['ru'=>'Кол-во']))
+                ->setCellValue('D1', Yii::t('message', 'frontend.controllers.order.mea', ['ru'=>'Ед.изм']));
             $row = 2;
             foreach ($model as $foo) {
                 $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
@@ -161,6 +162,212 @@ class OrderController extends DefaultController {
             $objWriter->save('php://output');
         }
     }
+
+
+    public function actionOrderToXls($id)
+    {
+        $order = Order::findOne($id);
+        $styleArray = [
+            'borders' => [
+                'allborders' => [
+                    'style' => \PHPExcel_Style_Border::BORDER_THIN
+                ]
+            ]
+        ];
+
+        $width = 30;
+        $objPHPExcel = new \PHPExcel();
+        $sheet = 0;
+        $objPHPExcel->setActiveSheetIndex($sheet);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth($width);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth($width);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A1:G1');
+        $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
+            ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
+        $objPHPExcel->getActiveSheet()->getStyle('A1:G1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A2:G2');
+        $objPHPExcel->getActiveSheet()->setCellValue('A2', Yii::t('app', 'от') . " " . Yii::$app->formatter->asDate($order->created_at, "dd.MM.yyyy, HH:mm"));
+        $objPHPExcel->getActiveSheet()->getStyle('A2:G2')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);;
+        $objPHPExcel->getActiveSheet()->getRowDimension(2)->setRowHeight(18);
+
+        $requestedDelivery = isset($order->requested_delivery) ? " " . Yii::$app->formatter->asDate($order->requested_delivery, 'dd.MM.yyyy') . " " . Yii::t('app', 'frontend.excel.year') : "";
+        $objPHPExcel->getActiveSheet()->mergeCells('A3:G3');
+        $objPHPExcel->getActiveSheet()->setCellValue('A3', Yii::t('app', 'common.mail.bill.delivery_date') . $requestedDelivery);
+        $objPHPExcel->getActiveSheet()->getStyle('A3:G3')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getRowDimension(3)->setRowHeight(18);
+
+        $objPHPExcel->getActiveSheet()->getRowDimension(4)->setRowHeight(5);
+        $objPHPExcel->getActiveSheet()->getStyle('A5:G5')->getBorders()
+            ->getTop()
+            ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A6:C6');
+        $objPHPExcel->getActiveSheet()->setCellValue('A6', Yii::t('message', 'frontend.views.order.customer'));
+        $objPHPExcel->getActiveSheet()->getStyle('A6:C6')->applyFromArray(['font' => ['bold' => true]]);
+        $objPHPExcel->getActiveSheet()->mergeCells('D6:G6');
+        $objPHPExcel->getActiveSheet()->setCellValue('D6', Yii::t('app', 'Поставщик'));
+        $objPHPExcel->getActiveSheet()->getStyle('D6:G6')->applyFromArray(['font' => ['bold' => true]]);
+        $objPHPExcel->getActiveSheet()->getRowDimension(6)->setRowHeight(22);
+
+        $clientName = (!empty($order->client->legal_entity)) ? $order->client->name . " (" . $order->client->legal_entity . ")" : $order->client->name;
+        $vendorName = (!empty($order->vendor->legal_entity)) ? $order->vendor->name . " (" . $order->vendor->legal_entity . ")" : $order->vendor->name;
+        $objPHPExcel->getActiveSheet()->mergeCells('A7:C7');
+        $objPHPExcel->getActiveSheet()->setCellValue('A7', $clientName);
+        $objPHPExcel->getActiveSheet()->getStyle('A7:C7')->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
+        $objPHPExcel->getActiveSheet()->mergeCells('D7:G7');
+        $objPHPExcel->getActiveSheet()->setCellValue('D7', $vendorName);
+        $objPHPExcel->getActiveSheet()->getStyle('D7:G7')->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
+        $objPHPExcel->getActiveSheet()->getRowDimension(7)->setRowHeight(25);
+
+        $acceptedName = isset($order->acceptedBy->profile->full_name) ? $order->acceptedBy->profile->full_name : '';
+        $this->fillCellData($objPHPExcel, 8, Yii::t('message', 'frontend.views.order.phone_four') . " " . $order->client->phone, Yii::t('message', 'frontend.views.order.phone_four') . " " . $order->vendor->phone);
+        $this->fillCellData($objPHPExcel, 9, 'E-mail: ' . $order->client->email, 'E-mail: ' . $order->vendor->email);
+        $this->fillCellData($objPHPExcel, 10, Yii::t('app', 'Заказ создал:') . " " . $order->createdBy->profile->full_name, Yii::t('app', 'Заказ принял:') . " " . $acceptedName);
+        $this->fillCellData($objPHPExcel, 11, Yii::t('message', 'market.views.site.supplier.address') . " " . $order->client->locality . " " . $order->client->address, Yii::t('message', 'market.views.site.supplier.address') . " " . $order->vendor->locality . " " . $order->vendor->address);
+        $objPHPExcel->getActiveSheet()->getStyle('A11')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getStyle('D11')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getRowDimension(11)->setRowHeight(50);
+
+        $objPHPExcel->getActiveSheet()->getStyle('A13:G13')->getBorders()
+            ->getTop()
+            ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+        $objPHPExcel->getActiveSheet()->setCellValue('A14', Yii::t('app', 'Комментарий к заказу:'));
+        $objPHPExcel->getActiveSheet()->getStyle('A14')->applyFromArray(['font' => ['bold' => true]]);
+        $objPHPExcel->getActiveSheet()->mergeCells('A15:G15');
+        $objPHPExcel->getActiveSheet()->setCellValue('A15', $order->comment);
+        $objPHPExcel->getActiveSheet()->getStyle('A15')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getRowDimension(14)->setRowHeight(20);
+        $objPHPExcel->getActiveSheet()->getRowDimension(15)->setRowHeight(30);
+
+        $this->fillCellHeaderData($objPHPExcel, 'A', 'Наименование товара');
+        $this->fillCellHeaderData($objPHPExcel, 'B', 'Комментарий');
+        $this->fillCellHeaderData($objPHPExcel, 'C', 'Артикул');
+        $this->fillCellHeaderData($objPHPExcel, 'D', 'Ед. измерения');
+        $this->fillCellHeaderData($objPHPExcel, 'E', 'Кол-во');
+
+        $objPHPExcel->getActiveSheet()->getStyle('A17:G17')->applyFromArray($styleArray);
+
+        $objPHPExcel->getActiveSheet()->setCellValue("F17", Yii::t('message', 'frontend.views.order.grid_price') . " " . $order->currency->iso_code);
+        $objPHPExcel->getActiveSheet()->getStyle("F17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getStyle("F17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);;
+
+        $this->fillCellHeaderData($objPHPExcel, 'G', 'frontend.widgets.cart.views.sum_two');
+
+        $objPHPExcel->getActiveSheet()->getRowDimension(17)->setRowHeight(25);
+
+        $row = 18;
+        $goods = $order->orderContent;
+        foreach ($goods as $good) {
+            //dd($good->quantity);
+            $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
+            $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, Html::decode($good->product_name));
+            $objPHPExcel->getActiveSheet()->getStyle('A' . $row)->getAlignment()->setWrapText(true);
+            $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode($good->comment));
+            $objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setWrapText(true);
+            $objPHPExcel->getActiveSheet()->getStyle("B$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('C' . $row, $good->article, \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $good->product->ed);
+            $objPHPExcel->getActiveSheet()->getStyle("D$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('E' . $row, number_format($good->quantity, 3, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("E$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('F' . $row, number_format($good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("F$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('G' . $row, number_format($good->quantity * $good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            $objPHPExcel->getActiveSheet()->getStyle("A$row:G$row")->applyFromArray($styleArray);
+
+            $height = 19;
+            $product_name_length = mb_strlen($good->product_name);
+            $comment_length = mb_strlen($good->comment);
+            if($product_name_length > $width || $comment_length > $width){
+                if($product_name_length > $comment_length){
+                    $i = ceil((float)$product_name_length/$width);
+                }else{
+                    $i = ceil((float)$comment_length/$width);
+                }
+                $height*=$i;
+            }
+            $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight($height);
+            $row++;
+        }
+
+        $objPHPExcel->getActiveSheet()->getStyle("A1:G$row")->applyFromArray(['font' => ['size' => 11]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A1:G1')->applyFromArray(['font' => ['bold' => true, 'size' => 18]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A2:G3')->applyFromArray(['font' => ['size' => 14]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A6:G6')->applyFromArray(['font' => ['size' => 16]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A7:G11')->applyFromArray(['font' => ['size' => 14]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A14:G14')->applyFromArray(['font' => ['size' => 16]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->applyFromArray(['font' => ['size' => 12]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A2:G3')->applyFromArray(['font' => ['size' => 14]]);
+
+        $row+=2;
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Скидка:'), " " . $order->getFormattedDiscount());
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Стоимость доставки:'), " " . $order->calculateDelivery() . " " . $order->currency->iso_code);
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Итого:'), " " . $order->getTotalPriceWithOutDiscount() . " " . $order->currency->iso_code);
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
+
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(1);
+        $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
+        //$objPHPExcel->getActiveSheet()->freezePane("H$row");
+
+        header('Content-Type: application/vnd.ms-excel');
+        $filename = "otchet_zakaz_" . date("d-m-Y-His") . ".xls";
+        header('Content-Disposition: attachment;filename=' . $filename . ' ');
+        header('Cache-Control: max-age=0');
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+    }
+
+
+    private function fillCellData($objPHPExcel, $row, $client_string, $vendor_string):void
+    {
+        $objPHPExcel->getActiveSheet()->mergeCells("A$row:C$row");
+        $objPHPExcel->getActiveSheet()->setCellValue("A$row", $client_string);
+        $objPHPExcel->getActiveSheet()->mergeCells("D$row:G$row");
+        $objPHPExcel->getActiveSheet()->setCellValue("D$row", $vendor_string);
+        $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(20);
+    }
+
+
+    private function fillCellHeaderData($objPHPExcel, $column, $data):void
+    {
+        $objPHPExcel->getActiveSheet()->setCellValue($column."17", Yii::t('app', $data));
+        $objPHPExcel->getActiveSheet()->getStyle($column."17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getStyle($column."17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    }
+
+
+    private function fillCellBottomData($objPHPExcel, $row, $leftData, $rightData, $bold = false):int
+    {
+        $objPHPExcel->getActiveSheet()->mergeCells("D$row:F$row");
+        $objPHPExcel->getActiveSheet()->setCellValue("D$row", $leftData);
+        $objPHPExcel->getActiveSheet()->getStyle("D$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+        $objPHPExcel->getActiveSheet()->setCellValue("G$row"," " . $rightData);
+        $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+        $objPHPExcel->getActiveSheet()->getStyle("D$row:G$row")->applyFromArray(['font' => ['size' => 16]]);
+        $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(25);
+        if($bold){
+            $objPHPExcel->getActiveSheet()->getStyle("D$row")->applyFromArray(['font' => ['bold' => true]]);
+            $objPHPExcel->getActiveSheet()->getStyle("G$row")->applyFromArray(['font' => ['bold' => true]]);
+        }
+        $row++;
+        return $row;
+    }
+
 
     public function actionCreate()
     {
@@ -438,13 +645,13 @@ class OrderController extends DefaultController {
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
         $guideProducts = Yii::$app->request->post("GuideProduct");
-        
+
         foreach ($guideProducts as $productId => $quantity) {
 
             if ($quantity <= 0) {
                 continue;
             }
-            
+
             $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
 
             $orders = $client->getCart();
@@ -612,7 +819,7 @@ class OrderController extends DefaultController {
             $currencySymbol = $baseProduct->catalog->currency->symbol;
         }
         $vendor = $baseProduct->vendor;
-        
+
 
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
@@ -762,7 +969,7 @@ class OrderController extends DefaultController {
                     return $result;
                 }
             }
-             return false;
+            return false;
         }
 
         return false;
@@ -831,10 +1038,10 @@ class OrderController extends DefaultController {
             $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             $oldDateSet = isset($order->requested_delivery);
             if ($order && !empty($delivery_date)) {
-                
+
                 $nowTS = time();
                 $requestedTS = strtotime($delivery_date . ' 19:00:00');
-                
+
                 $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
                 if ($nowTS < $requestedTS) {
@@ -848,7 +1055,7 @@ class OrderController extends DefaultController {
             if ($oldDateSet && !empty($delivery_date)) {
                 $result = ["title" => Yii::t('message', 'frontend.controllers.order.date_changed', ['ru'=>"Дата доставки изменена"]), "type" => "success"];
                 return $result;
-            } 
+            }
             if (!$oldDateSet && !empty($delivery_date)) {
                 $result = ["title" => Yii::t('message', 'frontend.controllers.order.date_set', ['ru'=>"Дата доставки установлена"]), "type" => "success"];
                 return $result;
@@ -898,33 +1105,33 @@ class OrderController extends DefaultController {
                 $orderTable = Order::tableName();
                 $maTable = ManagerAssociate::tableName();
                 $newCount = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'vendor_id' => $organization->id,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
-                        ->count();
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'vendor_id' => $organization->id,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                    ->count();
                 $processingCount = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'vendor_id' => $organization->id,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'status' => Order::STATUS_PROCESSING])
-                        ->count();
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'vendor_id' => $organization->id,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'status' => Order::STATUS_PROCESSING])
+                    ->count();
                 $fulfilledCount = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'vendor_id' => $organization->id,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'status' => Order::STATUS_DONE])
-                        ->count();
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'vendor_id' => $organization->id,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'status' => Order::STATUS_DONE])
+                    ->count();
                 $totalPrice = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'status' => Order::STATUS_DONE,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'vendor_id' => $organization->id])
-                        ->sum("total_price");
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'status' => Order::STATUS_DONE,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'vendor_id' => $organization->id])
+                    ->sum("total_price");
             }
         }
         $dataProvider = $searchModel->search($params);
@@ -1092,7 +1299,7 @@ class OrderController extends DefaultController {
         $message = "";
         $orderChanged = 0;
         $currencySymbol = $order->currency->symbol;
-        
+
         if (Yii::$app->request->post()) {
             $content = Yii::$app->request->post('OrderContent');
             $discount = Yii::$app->request->post('Order');
@@ -1106,7 +1313,7 @@ class OrderController extends DefaultController {
                 ];
                 $quantityChanged = ($position['quantity'] != $product->quantity);
                 $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
-                if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+                if (($organizationType == Organization::TYPE_RESTAURANT || in_array($order->status, $allowedStatuses)) && ($quantityChanged || $priceChanged)) {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
@@ -1188,7 +1395,9 @@ class OrderController extends DefaultController {
                 $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                if($order->status != Order::STATUS_DONE){
+                    $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                }
                 $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_three', ['ru'=>' изменил детали заказа №']) . $order->id . ":$message");
                 $order->calculateTotalPrice();
                 $order->save();
@@ -1487,10 +1696,10 @@ class OrderController extends DefaultController {
         }
         if ($newContent) {
             $currentOrder = Order::findOne([
-                        'client_id' => $order->client_id,
-                        'vendor_id' => $order->vendor_id,
-                        'created_by_id' => $order->created_by_id,
-                        'status' => Order::STATUS_FORMING,
+                'client_id' => $order->client_id,
+                'vendor_id' => $order->vendor_id,
+                'created_by_id' => $order->created_by_id,
+                'status' => Order::STATUS_FORMING,
             ]);
             if (!$currentOrder) {
                 $currentOrder = $newOrder;
@@ -1498,8 +1707,8 @@ class OrderController extends DefaultController {
             }
             foreach ($newContent as $position) {
                 $samePosition = OrderContent::findOne([
-                            'order_id' => $currentOrder->id,
-                            'product_id' => $position->product_id,
+                    'order_id' => $currentOrder->id,
+                    'product_id' => $position->product_id,
                 ]);
                 if ($samePosition) {
                     $samePosition->quantity += $position->quantity;
@@ -1681,9 +1890,9 @@ class OrderController extends DefaultController {
             $email = $recipient->email;
             if (isset($recipient->emailNotification->order_changed) && $recipient->emailNotification->order_changed) {
                 $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                 $text = Yii::$app->sms->prepareText('sms.order_changed', [
@@ -1697,7 +1906,7 @@ class OrderController extends DefaultController {
 
     /**
      * Sends mail informing both sides that order is delivered and accepted
-     * 
+     *
      * @param User $sender
      * @param Order $order
      */
@@ -1718,9 +1927,9 @@ class OrderController extends DefaultController {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_done) {
                 $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
                 $text = Yii::$app->sms->prepareText('sms.order_done', [
@@ -1734,7 +1943,7 @@ class OrderController extends DefaultController {
 
     /**
      * Sends mail informing both sides about new order
-     * 
+     *
      * @param Organization $sender
      * @param Order $order
      */
@@ -1757,9 +1966,9 @@ class OrderController extends DefaultController {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_created) {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
                 $text = Yii::$app->sms->prepareText('sms.order_new', [
@@ -1773,7 +1982,7 @@ class OrderController extends DefaultController {
 
     /**
      * Sends mail informing both sides that vendor confirmed order
-     * 
+     *
      * @param Organization $senderOrg
      * @param Order $order
      */
@@ -1793,9 +2002,9 @@ class OrderController extends DefaultController {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_processing) {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
                 $text = Yii::$app->sms->prepareText('sms.order_processing', [
@@ -1809,7 +2018,7 @@ class OrderController extends DefaultController {
 
     /**
      * Sends mail informing both sides about cancellation of order
-     * 
+     *
      * @param Organization $senderOrg
      * @param Order $order
      */
@@ -1829,9 +2038,9 @@ class OrderController extends DefaultController {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_canceled) {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = Yii::$app->sms->prepareText('sms.order_canceled', [
@@ -1862,10 +2071,10 @@ class OrderController extends DefaultController {
             $maTable = ManagerAssociate::tableName();
             $orderTable = Order::tableName();
             $order = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = $orderTable.client_id")
-                    ->where($condition)
-                    ->andWhere(["$maTable.manager_id" => $this->currentUser->id])
-                    ->one();
+                ->leftJoin("$maTable", "$maTable.organization_id = $orderTable.client_id")
+                ->where($condition)
+                ->andWhere(["$maTable.manager_id" => $this->currentUser->id])
+                ->one();
         }
         return $order;
     }

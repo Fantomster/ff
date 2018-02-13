@@ -26,7 +26,7 @@ class CartWidget extends Widget {
         }
         else {
             e.preventDefault();
-            $.pjax.reload("#side-cart", {url:"'.$cartUrl.'", replace: false,timeout:30000});
+            $.pjax.reload("#side-cart", {url:"' . $cartUrl . '", replace: false,timeout:30000});
             $(".block_right_basket").animate({"right": "0"}, 400);
             $(".maska1").fadeIn(300);
         }
@@ -43,7 +43,7 @@ class CartWidget extends Widget {
         )
         .done(function (result) {
             $(\'a[data-id="\'+result+\'"]\').parent().parent().removeClass("success");
-            $.pjax.reload("#side-cart", {url:"'.$cartUrl.'", replace: false,timeout:30000});
+            $.pjax.reload("#side-cart", {url:"' . $cartUrl . '", replace: false,timeout:30000});
         });
         return false;
     });

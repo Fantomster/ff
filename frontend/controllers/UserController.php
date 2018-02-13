@@ -70,7 +70,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $profile = $this->module->model("Profile", ["scenario" => "register"]);
         $organization = $this->module->model("Organization");
 
-        $organization->step = Organization::STEP_SET_INFO;
+        $organization->step = Organization::STEP_TUTORIAL;
 
         // load post data
         $post = Yii::$app->request->post();

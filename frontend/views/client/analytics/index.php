@@ -132,7 +132,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
                         ], ['prompt' => Yii::t('message', 'frontend.views.client.anal.all_two', ['ru'=>'Все']), 'class' => 'form-control', 'id' => 'filter_status'])
                 ?>         
             </div>
-            <div class="col-lg-5 col-md-6 col-sm-6"> 
+            <div class="col-lg-4 col-md-4 col-sm-4">
                 <?php
                 $layout = <<< HTML
                 {input1}
@@ -159,6 +159,12 @@ HTML;
                     ],
                     'removeButton' => false,
                 ]);
+                ?>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1">
+                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                <?=
+                Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
                 ?>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-2">
@@ -340,7 +346,7 @@ HTML;
                             'format' => 'raw',
                             'label' => Yii::t('message', 'frontend.views.client.anal.total_two', ['ru'=>'Итого']),
                             'value' => function ($data) {
-                                return (float) $data['price'] . "<i class=\"fa fa-fw fa-rub\"></i>";
+                                return (float) $data['price'] . ' ' . $data['iso_code'];
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
                         ]
@@ -530,13 +536,14 @@ $(document).on("click", ".alLi", function() {
 });
     
 
-$("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").on("change", function () {
-$("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").attr('disabled','disabled')      
+$("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee,#filter_currency").on("change", function () {
+$("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee,#filter_currency").attr('disabled','disabled')      
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
 var filter_supplier =  $("#filter_supplier").val();
 var filter_employee =  $("#filter_employee").val();        
+var filter_currency =  $("#filter_currency").val();        
     $.pjax({
      type: 'GET',
      push: false,
@@ -549,8 +556,9 @@ var filter_employee =  $("#filter_employee").val();
          filter_to_date: filter_to_date,
          filter_supplier: filter_supplier,
          filter_employee: filter_employee,
+         filter_currency: filter_currency
            }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").removeAttr('disabled') });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee,#filter_currency").removeAttr('disabled') });
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');
@@ -558,6 +566,7 @@ $("#reset").on("click", function () {
     $("#filter-date-2").val('$filter_clear_to_date');
     $("#filter_supplier").val('');     
     $("#filter_employee").val(''); 
+    $("#filter_currency").val('1'); 
     $.pjax({
      type: 'GET',
      push: false,
@@ -570,6 +579,7 @@ $("#reset").on("click", function () {
          filter_to_date: '$filter_clear_to_date',
          filter_supplier: '',
          filter_employee: '',
+         filter_currency: 1
            }
    });
 }); 

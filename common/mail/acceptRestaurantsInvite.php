@@ -15,7 +15,7 @@
     <br />
     <?= Yii::t('app', 'common.mail.accept_restaurant_invite.i_invite', ['ru'=>'Я приглашаю Вас, {org}, присоединиться, и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу', 'org'=>$vendor->organization->name]) ?>.</p>
 
-<p><?= Yii::t('app', 'common.mail.accept_restaurant_invite.sending_email', ['ru'=>'При отправке этого письма, автоматически был создан аккаунт для вас в <a href="https://mixcart.ru" style="color: #84bf76;">MixCart</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения']) ?>.</p>
+<p><?= Yii::t('app', 'common.mail.accept_restaurant_invite.sending_email', ['ru'=>'При отправке этого письма, автоматически был создан аккаунт для вас в <a href="'.Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/site/index"]).'" style="color: #84bf76;">MixCart</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения']) ?>.</p>
 <br />
 <div style="width: 100%; text-align: center;">
     <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]); ?>"

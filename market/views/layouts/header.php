@@ -84,10 +84,10 @@ if (!Yii::$app->user->isGuest) {
                     <li><a href="<?= Url::to(['site/restaurants']) ?>"><?= Yii::t('message', 'market.views.layouts.header.rest', ['ru'=>'РЕСТОРАНЫ']) ?></a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>"><?= Yii::t('message', 'market.views.layouts.header.vendors', ['ru'=>'ПОСТАВЩИКИ']) ?></a></li>
                     <li class="dropdown">
-                        <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/index']); ?>" class="dropdown-toggle">MIXCART <span class="caret"></span></a>
+                        <a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="dropdown-toggle">MIXCART <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/about']) ?>"><?= Yii::t('message', 'market.views.layouts.header.about', ['ru'=>'О&nbsp;нас']) ?></a></li>
-                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>"><?= Yii::t('message', 'market.views.layouts.header.contacts', ['ru'=>'Контакты']) ?></a></li>
+                            <li><a href="<?= Yii::$app->params['staticUrl']['about'] ?>"><?= Yii::t('message', 'market.views.layouts.header.about', ['ru'=>'О&nbsp;нас']) ?></a></li>
+                            <li><a href="<?= Yii::$app->params['staticUrl']['contacts'] ?>"><?= Yii::t('message', 'market.views.layouts.header.contacts', ['ru'=>'Контакты']) ?></a></li>
                         </ul>
                       </li>
 
@@ -122,17 +122,17 @@ if (!Yii::$app->user->isGuest) {
 //\frontend\assets\GoogleMapsAsset::register($this);
 if (!(Yii::$app->request->cookies->get('locality') || Yii::$app->request->cookies->get('country'))) {
 $this->registerJs("
-  $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
+  $(\"#location-modal\").length>0&&$(\"#location-modal\").modal({backdrop: \"static\", keyboard: false});
 ",yii\web\View::POS_END);    
 }
 ?>
 <?php
-\market\assets\GoogleMapsAsset::register($this);
+\common\assets\GoogleMapsAsset::register($this);
 echo $this->render("../site/main/_userLocation");
 $userLocation = Url::to(['/site/location-user']);
 $customJs = <<< JS
-$(document).on("click","#locHeader", function () { 
-    $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
+$(document).on("click","#locHeader", function () {
+    $("#location-modal").length>0&&$("#location-modal").modal({backdrop: "static", keyboard: false});
 });       
 JS;
 $this->registerJs($customJs, View::POS_READY);

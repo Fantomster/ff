@@ -30,11 +30,11 @@ class CatalogBaseGoods extends \common\models\CatalogBaseGoods
         return [
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating', 'units', 'vendor_id'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
-            [['article'], 'required', 'on' => 'uniqueArticle'],
+            //[['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],
-            [['article'], 'uniqueArticle','when' => function($model) {
+           /* [['article'], 'uniqueArticle','when' => function($model) {
             return !empty($model->cat_id);
-            }],
+            }],*/
             [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['note'], 'string', 'max' => 255],

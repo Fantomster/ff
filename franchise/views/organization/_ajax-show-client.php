@@ -22,27 +22,45 @@ use yii\helpers\Html;
                   </div>-->
                   <div class="col-md-12">
                     <div class="edite-place">
-                      <!--<div class="form-group">
-                        <label for="exampleInputEmail1">Название ресторана:</label>
-                        <p><?//= $client->name ?></p>
-                      </div>-->
+                      <div class="form-group">
+                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.rest_name_two', ['ru'=>'Название ресторана']) ?></label>
+                        <p><?= $client->name ?></p>
+                      </div>
                       
-                      <div class="form-group">
+                      <!--<div class="form-group">
                         <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.jur_name', ['ru'=>'Название юр. лица:']) ?></label>
-                        <p><?= $client->legal_entity ?></p>
-                      </div>
-                      <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.city', ['ru'=>'Город:']) ?></label>
-                        <p><?= $client->city ?></p>
-                      </div>
-                      <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.address', ['ru'=>'Адрес:']) ?></label>
-                        <p><?= $client->address ?></p>
-                      </div>
-                      <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.short_info', ['ru'=>'Краткая информация:']) ?></label>
-                        <p><?= $client->about ?></p>
-                      </div>
+                        <p><?//= $client->legal_entity ?></p>
+                      </div>-->
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.contact_phone_two', ['ru' => 'Телефон контактного лица:']) ?></label>
+                            <p><?= $client->phone ?></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.contact_email_two', ['ru' => 'E-mail контактного лица:']) ?></label>
+                            <p><?= $client->email ?></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.contact_fio_two', ['ru' => 'ФИО контактного лица:']) ?></label>
+                            <p><?= $client->contact_name ?></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.city', ['ru' => 'Город:']) ?></label>
+                            <p><?= $client->city ?></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.address', ['ru' => 'Адрес:']) ?></label>
+                            <p><?= $client->address ?></p>
+                        </div>
+
+                        <!--<div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.short_info', ['ru' => 'Краткая информация:']) ?></label>
+                            <p><?= $client->about ?></p>
+                        </div>-->
                       
                     </div>
                   </div>

@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use api\common\models\RkCategory;
 use api\common\models\RkPconst;
 use Yii;
 use yii\web\Controller;
@@ -73,6 +74,16 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 exit;
             }
 
+           if (Yii::$app->request->post('isTree')) // Update tree
+
+            Yii::$app->db_api->createCommand()
+                   ->update('rk_category', ['selected' => 0], ['acc' => $pConst->org])
+                   ->execute();
+
+            Yii::$app->db_api->createCommand()
+                ->update('rk_category', ['selected' => 1], 'id in ('.$pConst->value.')')
+                ->execute();
+
             return $this->redirect(['index']);
         } else {
             return $this->render($vi, [
@@ -84,8 +95,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
 
     protected function checkLic() {
-     
-    $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one(); 
+
+        $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
     if ($lic) {

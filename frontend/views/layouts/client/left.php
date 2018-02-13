@@ -33,7 +33,7 @@ $cartCount = $user->organization->getCartCount();
 
 $resArr = [];
 
-$arrService = RkService::find()->select('org')->asArray()->column();
+$arrService = \api\common\models\RkServicedata::find()->select('org')->asArray()->column();
 $arrServiceiiko = \api\common\models\iiko\iikoService::find()->select('org')->asArray()->column();
 $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
 ?>
@@ -61,10 +61,10 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                             'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
                         ],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor']],
 //                        [
-//                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 
-//                            'icon' => 'envelope', 
+//                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']),
+//                            'icon' => 'envelope',
 //                            'url' => ['client/messages'],
 //                            ],
                         ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl']['market'], 'options' => ['class' => 'l-fmarket']],
@@ -83,7 +83,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.custom', ['ru'=>'Общие']),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/settings'],
-                                    'visible' => in_array($user->role_id,$roles)
+                                    //'visible' => in_array($user->role_id,$roles)
                                 ],
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
@@ -95,19 +95,19 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.employees', ['ru'=>'Сотрудники']),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/employees'],
-                                    'visible' => in_array($user->role_id,$roles)
+                                    //'visible' => in_array($user->role_id,$roles)
                                 ],
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.notifications', ['ru'=>'Уведомления']),
                                     'icon' => 'circle-o',
                                     'url' => ['/settings/notifications'],
-                                    'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))
+                                    //'visible' => in_array($user->role_id,$roles)
                                 ],
                                 [
                                     'label' => Yii::t('app', 'Платежи'),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/payments'],
-                                    'visible' => in_array($user->role_id,$roles)
+                                    //'visible' => in_array($user->role_id,$roles)
                                 ],
                             ]
                         ],
@@ -127,7 +127,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                 </span>
             </div>
         </form>
-        
+
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;"><?= Yii::t('message', 'frontend.views.layouts.client.left.techno', ['ru'=>'ТЕХНИЧЕСКАЯ ПОДДЕРЖКА']) ?></span></li>
             <div style="text-align: center; color: #d8d7d7;padding-top:10px">
@@ -137,7 +137,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                     </a>
                 </p>
             </div>
-        </ul>     
+        </ul>
     </section>
 </aside>
 <?php
@@ -147,4 +147,4 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
   }); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');
   JS;
   $this->registerJs($sidebar_js, View::POS_READY); */
-?>        
+?>

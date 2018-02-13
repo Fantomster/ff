@@ -33,21 +33,34 @@ use yii\helpers\Html;
                         </div>
 
                         <div class="form-group">
-                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.jur_name_two', ['ru'=>'Название юр. лица:']) ?></label>
-                            <p><?= $vendor->buisinessInfo->legal_entity ?></p>
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.contact_phone_two', ['ru' => 'Телефон контактного лица:']) ?></label>
+                            <p><?= $vendor->phone ?></p>
                         </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.contact_email_two', ['ru' => 'E-mail контактного лица:']) ?></label>
+                            <p><?= $vendor->email ?></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.contact_fio_two', ['ru' => 'ФИО контактного лица:']) ?></label>
+                            <p><?= $vendor->contact_name ?></p>
+                        </div>
+
                         <div class="form-group">
                             <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.city_two', ['ru'=>'Город:']) ?></label>
                             <p><?= $vendor->city ?></p>
                         </div>
+
                         <div class="form-group">
                             <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.address_two', ['ru'=>'Адрес:']) ?></label>
                             <p><?= $vendor->address ?></p>
                         </div>
-                        <div class="form-group">
+
+                        <!--<div class="form-group">
                             <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.short_info_two', ['ru'=>'Краткая информация:']) ?></label>
-                            <p><?= $vendor->about ?></p>
-                        </div>
+                            <p><?//= $vendor->about ?></p>
+                        </div>-->
 
                     </div>
                 </div>

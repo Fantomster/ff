@@ -20,9 +20,12 @@ return [
     
     //static urls
     'staticUrl' => [
-        'market' => 'https://market.mixcart.ru/',
-        'franchise' => 'http://fr.mixcart.ru/',
-        'client' => 'https://client.mixcart.ru/',
+        'market' => 'https://market.mixcart.test/',
+        'franchise' => 'http://fr.mixcart.test/',
+        'client' => 'https://client.mixcart.test/',
+        'home' => 'https://mixcart.ru/',
+        'about' => 'https://mixcart.ru/about.html',
+        'contacts' => 'https://mixcart.ru/contacts.html',
     ],
 
     'enableYandexMetrics' => 1,

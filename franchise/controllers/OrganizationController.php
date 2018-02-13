@@ -2,6 +2,8 @@
 
 namespace franchise\controllers;
 
+use common\models\ManagerAssociate;
+use common\models\RelationSuppRest;
 use common\models\UserToken;
 use Yii;
 use yii\helpers\VarDumper;
@@ -519,6 +521,14 @@ class OrganizationController extends DefaultController {
         $user = User::findOne($user_id);
         $user->organization_id = $organization_id;
         $user->save();
+        $restaurants = RelationSuppRest::findAll(['supp_org_id' => $organization_id]);
+        foreach ($restaurants as $restaurant){
+            $rest_id = $restaurant->rest_org_id;
+            $ma = new ManagerAssociate();
+            $ma->manager_id = $this->currentUser->id;
+            $ma->organization_id = $rest_id;
+            $ma->save();
+        }
         return $this->redirect(Yii::$app->params['protocol'] . ':' . Yii::$app->urlManagerFrontend->baseUrl . "/user/login");
     }
 }

@@ -76,7 +76,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
                 'url' => ['site/category', 'slug' => $product->category->slug],
             ],
             [
-            'label' => Html::decode(Yii::t('app', $product->product), ['style'=>'text-overflow: ellipsis']),
+            'label' => Html::decode($product->product),
             'encode' => false,
             ]
         ],

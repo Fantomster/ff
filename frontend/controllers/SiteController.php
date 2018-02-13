@@ -33,12 +33,12 @@ class SiteController extends Controller {
                 'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier'],
                 'rules' => [
                     [
-                        'actions' => ['signup', 'index', 'about', 'faq', 'restaurant', 'supplier'],
+                        'actions' => ['signup'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'ajax-complete-registration', 'ajax-wizard-off'],
+                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'ajax-complete-registration', 'ajax-wizard-off', 'index', 'about', 'faq', 'restaurant', 'supplier'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],

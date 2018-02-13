@@ -13,7 +13,7 @@ $this->title = Yii::t('message', 'frontend.views.site.complete_registration', ['
 ?>
 <div class="login__block">
     <div class="login__inside">
-        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-inner.png" alt=""/></a>
+        <a href="<?= Yii::$app->params['staticUrl']['home'] ?>"><img src="/images/logo-inner.png" alt=""/></a>
         <div class="contact__form">
             <?php
             $form = ActiveForm::begin([

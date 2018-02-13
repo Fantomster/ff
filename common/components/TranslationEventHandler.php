@@ -15,6 +15,7 @@ class TranslationEventHandler {
 
     public function handleMissingTranslation(MissingTranslationEvent $event)
     {
+        //dd($event);
         if (!SourceMessage::findOne(['message' => $event->message])) {
             $sourceMessage = new SourceMessage();
             $sourceMessage->category = $event->category;

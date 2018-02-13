@@ -138,7 +138,7 @@ return [
         ],
         'urlManagerFrontend' => [
             'class' => 'yii\web\urlManager',
-            'baseUrl' => '//mixcart.ru',
+            'baseUrl' => '//app.mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [

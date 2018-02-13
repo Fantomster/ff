@@ -61,7 +61,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
 }
 ?>">
          <?php if ($flash): ?>
-        <div class="success-message"><a href="<?= Yii::$app->homeUrl; ?>" class="success-message__ico"></a>
+        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="success-message__ico"></a>
             <div class="success-message__text">
                 <?= $flash ?>
             </div>

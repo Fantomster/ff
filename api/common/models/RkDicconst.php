@@ -60,7 +60,7 @@ class RkDicconst extends \yii\db\ActiveRecord
 
         $pConst = \api\common\models\RkPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
 
-        $res =  (!empty($pConst)) ? $pConst->value : $this->def_value;
+        $res =  (!isset($pConst)) ? $this->def_value : $pConst->value;
 
         if ($pConst == 'taxVat')
             $res = $res/100;

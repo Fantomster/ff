@@ -34,7 +34,7 @@ class WaybillHelper extends AuthHelper {
     $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
 
     $exportApproved        = RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
-    $exportVAT             = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue();
+    $exportVAT             = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
     $exportAutoNumber      = RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue();
 
     $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';

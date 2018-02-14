@@ -38,7 +38,7 @@ class ProductHelper extends AuthHelper
         $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
         $dGroups = '';
         $currGroup = 0;
-        $groupArray = $defGoodGroup ? explode(',', $defGoodGroup) : 0;
+        $groupArray = $defGoodGroup ? explode(',', $defGoodGroup) : [0];
         $groupCount = sizeof($groupArray);
 
         foreach ($groupArray as $group) { // Start cycle for groups

@@ -1762,7 +1762,11 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($user->load($post)) {
                 if ($user->validate()) {
-                    $this->currentUser->sendInviteToClient($user);
+                    $user->setScenario('sendInviteFromActiveVendor');
+                    if($user->validate())
+                        $this->currentUser->sendInviteToActiveClient($user);
+                    else
+                        $this->currentUser->sendInviteToClient($user);
                     $message = Yii::t('message', 'frontend.controllers.vendor.inv_sent', ['ru'=>'Приглашение отправлено!']);
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }

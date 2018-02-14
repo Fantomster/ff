@@ -54,7 +54,7 @@ class CronController extends Controller {
                 $product_created_at = $catalogBaseGoods->created_at;
                 $product_partnership = $catalogBaseGoods->vendor->partnership;
                 $product_rating = $catalogBaseGoods->vendor->rating;
-                
+
                 if (!empty($product_image)) {
                     $product_rating = $product_rating + 5;
                 }
@@ -110,23 +110,26 @@ class CronController extends Controller {
                         ];
                         $es_product->save();
                     }
+                    $catalogBaseGoods->es_status = 0;
+                    $catalogBaseGoods->rating = $product_rating;
+                    $catalogBaseGoods->save();
                 } else {
                     if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
                         $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                         $es_product->delete();
+                        $catalogBaseGoods->es_status = 0;
+                        $catalogBaseGoods->save();
                     }
                 }
             } catch (\Exception $e) {
+                echo ($e->getMessage());
                 if (\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {
                     $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                     $es_product->delete();
+                    $catalogBaseGoods->es_status = 0;
+                    $catalogBaseGoods->save();
                 }
             }
-
-            Yii::$app->db->createCommand("update " . CatalogBaseGoods::tableName() . " set "
-                    . "es_status = 0, "
-                    . "rating = " . $product_rating . " "
-                    . "where id = " . $product_id)->execute();
         }
     }
 

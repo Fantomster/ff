@@ -1925,7 +1925,7 @@ class VendorController extends DefaultController {
 
         if (Yii::$app->user->can('manage')) {
             $headerStats["ordersCount"] = Order::find()
-                ->where(["vendor_id" => $vendor->id])
+                ->where(["vendor_id" => $vendor->id])->andWhere(['not in','status', [Order::STATUS_FORMING]])
                 ->count();
             $headerStats["clientsCount"] = RelationSuppRest::find()
                 ->where(["supp_org_id" => $vendor->id])

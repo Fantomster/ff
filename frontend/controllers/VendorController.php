@@ -1149,7 +1149,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, ['product', 'like', "%" . $catalogBaseGoods->product . "%"]]);
+                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product]);
                 if($checkBaseGood){
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -1196,7 +1196,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, ['product', 'like', "%" . $catalogBaseGoods->product . "%"]]);
+                $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
                 if($checkBaseGood){
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -1851,7 +1851,7 @@ class VendorController extends DefaultController {
                     $obsoleteAssociatedIds = array_diff($currentAssociatedIds, $postedAssociatedIds);
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        if (Yii::$app->user->can('manage')) {
+                        if (Yii::$app->user->can('manage') || in_array($currentUser->role_id, \common\models\Role::getFranchiseeEditorRoles())) {
                             foreach ($newAssociatedIds as $newId) {
                                 $new = new ManagerAssociate();
                                 $new->manager_id = $newId;
@@ -1876,7 +1876,7 @@ class VendorController extends DefaultController {
                 }
             }
         }
-        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor', 'canManage'));
+        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor', 'canManage', 'currentUser'));
     }
 
     public function actionViewCatalog($id) {

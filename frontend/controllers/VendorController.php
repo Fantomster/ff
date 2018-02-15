@@ -1148,9 +1148,9 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'article' => $catalogBaseGoods->article]);
+                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product]);
                 if($checkBaseGood){
-                    $message = Yii::t('error', 'frontend.controllers.vendor.wrong_art');
+                    $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
                 $catalogBaseGoods->status = 1;
@@ -1195,6 +1195,11 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
+                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product]);
+                if($checkBaseGood){
+                    $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
+                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                }
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
 

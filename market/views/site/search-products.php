@@ -45,7 +45,7 @@ $this->title = Yii::t('message', 'market.views.site.search_prods.results', ['ru'
                             <img class="product-image" src="<?=
                             !empty($row->product_image) ?
                                     $row->product_image :
-                                    Url::to('@web/fmarket/images/image-category/' . $row->product_category_id . ".jpg", true);
+                                    \market\components\ImagesHelper::getUrl($row->product_category_id);
                             ?>">
                         </a>
                         <div class="row">

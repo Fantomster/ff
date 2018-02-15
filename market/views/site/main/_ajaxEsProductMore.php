@@ -21,7 +21,7 @@ foreach ($pr as $row) {
             <a href="<?= Url::to(['/site/product', 'id' => $row->product_id]); ?>">
                 <img class="product-image" src="<?=
                 !empty($row->product_image) ? $row->product_image :
-                        Url::to('@web/fmarket/images/image-category/' . $row->product_category_id . ".jpg", true);
+                    \market\components\ImagesHelper::getUrl($row->product_category_i);
                 ?>">
             </a>
             <div class="row">

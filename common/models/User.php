@@ -46,7 +46,7 @@ class User extends \amnah\yii2\user\models\User {
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
             // email rules invite client
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru'=>'Введите эл.почту партнера'])],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
+            [['email'], 'unique', 'on' => ['sendInviteFromActiveVendor'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
             // admin crud rules
@@ -273,6 +273,32 @@ class User extends \amnah\yii2\user\models\User {
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        //return $result;
+    }
+
+    /**
+     * Send email invite to restaurant
+     * @param User $client
+     * @return int
+     */
+    public function sendInviteToActiveClient($client) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+        // send email
+        $vendor = $this->organization->name;
+        $email = $client->email;
+        $subject = Yii::t('app', 'common.models.invitation', ['ru'=>"Приглашение на MixCart"]);
+        $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;

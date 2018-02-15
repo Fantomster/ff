@@ -1362,7 +1362,7 @@ class ClientController extends DefaultController {
 
 
         $header_info_zakaz = \common\models\Order::find()->
-                        where(['client_id' => $currentUser->organization_id])->count();
+                        where(['client_id' => $currentUser->organization_id])->andWhere(['not in','status', [Order::STATUS_FORMING]])->count();
         empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
                         where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();

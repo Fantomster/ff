@@ -1148,7 +1148,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, ['product', 'like', "%" . $catalogBaseGoods->product . "%"]]);
+                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product]);
                 if($checkBaseGood){
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -1195,7 +1195,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, ['product', 'like', "%" . $catalogBaseGoods->product . "%"]]);
+                $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
                 if($checkBaseGood){
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);

@@ -234,6 +234,7 @@ $form = ActiveForm::begin([
                                 ])->label(false);
                                 echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods->category_id, ['id' => 'catalogBaseGoods_id1']);
                                 echo Html::hiddenInput('input-type-2', $catalogBaseGoods->sub2, ['id' => 'input-type-2']);
+                                echo Html::hiddenInput('CatalogBaseGoods[id]', $catalogBaseGoods->id);
                                 ?>
                                 <?php
                                 echo $form->field($catalogBaseGoods, 'sub2')->widget(DepDrop::classname(), [

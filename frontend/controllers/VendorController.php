@@ -1835,7 +1835,7 @@ class VendorController extends DefaultController {
                     $obsoleteAssociatedIds = array_diff($currentAssociatedIds, $postedAssociatedIds);
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        if (Yii::$app->user->can('manage')) {
+                        if (Yii::$app->user->can('manage') || in_array($currentUser->role_id, \common\models\Role::getFranchiseeEditorRoles())) {
                             foreach ($newAssociatedIds as $newId) {
                                 $new = new ManagerAssociate();
                                 $new->manager_id = $newId;
@@ -1860,7 +1860,7 @@ class VendorController extends DefaultController {
                 }
             }
         }
-        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor', 'canManage'));
+        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor', 'canManage', 'currentUser'));
     }
 
     public function actionViewCatalog($id) {

@@ -3,6 +3,7 @@ namespace market\components;
 
 use yii\base\Component;
 use Yii;
+use yii\helpers\Url;
 
 class ImagesHelper extends Component
 {

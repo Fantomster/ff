@@ -14,6 +14,7 @@ $form = ActiveForm::begin([
             ],
             'fieldConfig' => ['template' => '{input}'],
         ]);
+$language = (Yii::$app->language == 'en') ? 'gb' : Yii::$app->language;
 ?>
 <input type="email" name="fake_email" style="position: absolute; top: -100%;">
 <input type="password" name="fake_pwd" style="position: absolute; top: -100%;">
@@ -52,7 +53,7 @@ $form = ActiveForm::begin([
             $form->field($profile, 'phone')
             ->widget(\common\widgets\PhoneInput::className(), [
                                 'jsOptions' => [
-                                    'preferredCountries' => ['ru'],
+                                    'preferredCountries' => [$language],
                                     'nationalMode' => false,
                                     'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
                                 ],

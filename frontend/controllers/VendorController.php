@@ -1145,7 +1145,6 @@ class VendorController extends DefaultController {
         foreach ($countrys as &$country){
             $country['name'] = Yii::t('app', $country['name']);
         }
-
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {

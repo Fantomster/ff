@@ -1149,6 +1149,11 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
+                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'article' => $catalogBaseGoods->article]);
+                if($checkBaseGood){
+                    $message = Yii::t('error', 'frontend.controllers.vendor.wrong_art');
+                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                }
                 $catalogBaseGoods->status = 1;
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;

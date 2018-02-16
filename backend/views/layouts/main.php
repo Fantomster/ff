@@ -109,7 +109,11 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 [
                                     'label' => 'Поля для amoCRM',
                                     'url' => ['/amo/index'],
-                                ]
+                                ],
+                                [
+                                    'label' => 'Тестовая почта',
+                                    'url' => ['/site/send-test-mail'],
+                                ],
                             ],
                         ],
                         [

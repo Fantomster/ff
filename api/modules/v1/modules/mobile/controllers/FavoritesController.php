@@ -7,11 +7,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
-use common\models\CatalogGoods;
-use common\models\Order;
-use common\models\OrderContent;
-use common\models\GoodsNotes;
-use common\models\Organization;
+use yii\data\SqlDataProvider;
 use yii\helpers\Json;
 
 
@@ -63,7 +59,7 @@ class FavoritesController extends ActiveController {
     }
     
     /**
-     * @return ActiveDataProvider
+     * @return SqlDataProvider
      */
     public function prepareDataProvider()
     {
@@ -71,49 +67,96 @@ class FavoritesController extends ActiveController {
         $client = $user->organization;
         $params = new \api\modules\v1\modules\mobile\resources\FavoriteSearch();
 
-        $cbgTable = CatalogBaseGoods::tableName();
-        $orderTable = Order::tableName();
-        $ordContentTable = OrderContent::tableName();
-        $goodsNotesTable = GoodsNotes::tableName();
-        $organizationTable = Organization::tableName();
-        $currency = \common\models\Currency::tableName();
-        $catalog = \common\models\Catalog::tableName();
+        $query = "
+            SELECT
+                cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.article, cbg.supp_org_id, cbg.category_id, org.name as organization_name, cbg.ed, curr.symbol, cbg.note
+            FROM `order_content` AS oc
+                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
+                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
+                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
+                    AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
+                JOIN currency curr ON cat.currency_id = curr.id 
+            WHERE 
+                (cbg.status = 1) 
+                AND (cbg.deleted = 0) 
+            GROUP BY cbg.id
+            UNION ALL
+            (SELECT
+                cbg.id as id, cbg.product, cbg.units, cg.price, cg.cat_id, cbg.article, cbg.supp_org_id, cbg.category_id, org.name as organization_name, cbg.ed, curr.symbol, cbg.note
+            FROM `order_content` AS oc
+                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
+                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+                LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = oc.product_id 
+                    AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
+                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
+                LEFT JOIN catalog cat ON cg.cat_id = cat.id
+                JOIN currency curr ON cat.currency_id = curr.id 
+            WHERE 
+               (cbg.status = 1) 
+                AND (cbg.deleted = 0) 
+            GROUP BY cbg.id)
+        ";
 
-        $query = CatalogBaseGoods::find();
-        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
-        $query->leftJoin($catalog,"$catalog.id in (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=catalog_base_goods.supp_org_id) AND (rest_org_id = $client->id))");
-        $query->leftJoin($currency,"$currency.id = $catalog.currency_id");
-        $query->leftJoin($ordContentTable, "$cbgTable.id=$ordContentTable.product_id");
-        $query->leftJoin($orderTable, "$ordContentTable.order_id=$orderTable.id");
-        $query->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");
-        $query->leftJoin($goodsNotesTable, "$goodsNotesTable.catalog_base_goods_id = $cbgTable.id and $goodsNotesTable.rest_org_id = $organizationTable.id");
+        $query1 = "
+            SELECT
+                COUNT(DISTINCT cbg.id) 
+            FROM `order_content` AS oc
+                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
+                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
+                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
+                    AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
+                JOIN currency curr ON cat.currency_id = curr.id 
+            WHERE 
+                (cbg.status = 1) 
+                AND (cbg.deleted = 0) 
+                ";
 
-        // add conditions that should always apply here
-        //where ord.client_id = 1 and cbg.status=1 and cbg.deleted = 0
-        $query->where(["$orderTable.client_id" => $client->id, "$cbgTable.status" => CatalogBaseGoods::STATUS_ON, "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF]);
-        $query->groupBy(["$cbgTable.id"]);
+        $count1 = Yii::$app->db->createCommand($query1)->queryScalar();
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-             'pagination' => false,
+        $query2 = "
+            SELECT
+                COUNT(DISTINCT cbg.id) 
+            FROM `order_content` AS oc
+                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
+                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+                LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = oc.product_id 
+                    AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
+                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
+                LEFT JOIN catalog cat ON cg.cat_id = cat.id
+                JOIN currency curr ON cat.currency_id = curr.id 
+            WHERE 
+               (cbg.status = 1) 
+                AND (cbg.deleted = 0) 
+                ";
+
+        $count2 = Yii::$app->db->createCommand($query2)->queryScalar();
+
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query,
+            'totalCount' => 20,
+            'sort' => [
+                'attributes' => [
+                    'product',
+                ],
+                'defaultOrder' => [
+                    'product' => SORT_ASC
+                ]
+            ],
         ]);
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $dataProvider->pagination = false;
             return $dataProvider;
         }
-        
+
         if (isset($params->count)) {
-            $query->limit($params->count);
+            $dataProvider->pagination->pageSize = $params->count;
             if (isset($params->page)) {
-                $offset = ($params->page * $params->count) - $params->count;
-                $query->offset($offset);
+                $dataProvider->pagination->page = ($params->page - 1);
             }
         }
-
-        // grid filtering conditions
-        $query->andFilterWhere(['like', "$cbgTable.product", $params->searchString]);
 
         return $dataProvider;
     }

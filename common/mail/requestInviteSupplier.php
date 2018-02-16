@@ -30,7 +30,7 @@ use yii\helpers\Url;
                             <table align="center" border="0" cellpadding="0" cellspacing="0" >
                                     <tr>
                                             <td valign="top" style="text-align: center;">
-                                                    <a href=""><img src="https://mixcart.ru/img/request/logo-mail.png" alt="" /></a>
+                                                    <a href=""><img src="https://app.mixcart.ru/img/request/logo-mail.png" alt="" /></a>
                                             </td>
                                     </tr>
                             </table>

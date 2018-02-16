@@ -62,7 +62,7 @@ class ProductSearchController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new \api\modules\v1\modules\mobile\resources\OrderCatalogSearch();
+        $params = new \api\modules\v1\modules\mobile\resources\GuideProductSearch();
         $user = Yii::$app->user->getIdentity();
         $client = $user->organization;
         $vendors = $client->getSuppliers(null);

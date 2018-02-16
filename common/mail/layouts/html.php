@@ -18,7 +18,7 @@ use yii\helpers\Html;
         <?php $this->head() ?>
     </head>
 
-    <body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; background-image: url('https://mixcart.ru/img/pattern.png'); margin: 0; padding: 0;">
+    <body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; background-image: url('https://app.mixcart.ru/img/pattern.png'); margin: 0; padding: 0;">
         <?php $this->beginBody() ?>
         <div style="width: 600px; box-shadow: 0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -webkit-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -moz-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; margin: 40px auto; padding: 0;border: 1px solid #e4e4e4;">
             <!-- HEADER -->
@@ -72,9 +72,9 @@ use yii\helpers\Html;
                     <td style="margin: 0; padding: 0;">
                         <div style="margin: 0; padding: 0;">
                             <ul style="width: 100%; text-align: center; font-weight: normal; font-size: 14px; line-height: 1.6; list-style-type: none; margin: 0 0 10px; padding: 0;">
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/phone.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><span style="color: #3f3e3e; margin: 0; padding: 0; text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.phone', ['ru'=>'8-499-404-10-18']) ?></span></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/mail.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="mailto:info@mixcart.ru" style="color: #3f3e3e; margin: 0; padding: 0;">info@mixcart.ru</a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/web.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" style="color: #3f3e3e; margin: 0; padding: 0;">mixcart.ru</a></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://app.mixcart.ru/img/phone.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><span style="color: #3f3e3e; margin: 0; padding: 0; text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.phone', ['ru'=>'8-499-404-10-18']) ?></span></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://app.mixcart.ru/img/mail.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="mailto:<?= Yii::t('app', 'common.mail.layouts.infoemail') ?>" style="color: #3f3e3e; margin: 0; padding: 0;"><?= Yii::t('app', 'common.mail.layouts.infoemail') ?></a></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://app.mixcart.ru/img/web.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" style="color: #3f3e3e; margin: 0; padding: 0;"><?= Yii::t('app', 'common.mail.layouts.home') ?></a></li>
                             </ul>
                         </div>
                         <span style="display: block; clear: both; margin: 0; padding: 0;"></span>	

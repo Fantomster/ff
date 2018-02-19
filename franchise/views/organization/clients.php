@@ -137,6 +137,14 @@ $this->registerCss("
                 <?php
                 ActiveForm::end();
                 ?>
+
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <?=
+                    Html::dropDownList('filter_currency', $currencyData['currency_id'], $currencyData['currency_list'], ['class' => 'form-control', 'id' => 'filter_currency'])
+                    ?>
+                </div>
+
                 <div class="pull-right" style="margin-top: 30px; margin-right: 10px;">
                     <?= ExportMenu::widget([
                         'dataProvider' => $dataProvider,
@@ -279,7 +287,7 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'attribute' => 'orderSum',
-                                'value' => function ($data) {
+                                'value' => function ($data) use($currencyData) {
                                     $progress = $data["orderSum"] > 0 ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
 //                                            if ($progress > 0) {
                                     $divider = '<i class="fa fa-caret-up"></i>';
@@ -290,7 +298,7 @@ $this->registerCss("
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return ($data["orderSum"] ? $data["orderSum"] : 0) . " RUB <span class='description-percentage $class'>$divider $progress%";
+                                    return ($data["orderSum"] ? $data["orderSum"] : 0) . " " . $currencyData['iso_code'] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => Yii::t('app', 'franchise.views.organization.clients.sum', ['ru'=>'Сумма заказов']),
                             ],
@@ -351,6 +359,24 @@ $this->registerCss("
 <?php
 $url = Url::to(['organization/clients']);
 $customJs = <<< JS
+
+$("#filter_currency").on("change", function () {
+$("#filter_currency").attr('disabled','disabled')      
+       
+var filter_currency =  $("#filter_currency").val();
+
+    $.pjax({
+     type: 'GET',
+     push: false,
+     timeout: 10000,
+     url: "$url",
+     container: "#clientsList",
+     data: {
+         filter_currency: filter_currency
+           }
+   }).done(function() { $("#filter_currency").removeAttr('disabled') });
+});
+
 var timer;
 $('#search').on("keyup", function () {
 window.clearTimeout(timer);

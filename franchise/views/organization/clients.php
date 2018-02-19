@@ -367,10 +367,10 @@ var filter_currency =  $("#filter_currency").val();
 
     $.pjax({
      type: 'GET',
-     push: false,
+     push: true,
      timeout: 10000,
      url: "$url",
-     container: "#clientsList",
+     container: "#kv-unique-id-1",
      data: {
          filter_currency: filter_currency
            }

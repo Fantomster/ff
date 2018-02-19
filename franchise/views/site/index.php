@@ -25,7 +25,7 @@ use dosamigos\chartjs\ChartJs;
     <div class="col-lg-2 col-md-2 col-sm-2">
         <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
         <?=
-        Html::dropDownList('filter_currency', $currencyId, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
+        Html::dropDownList('filter_currency', $currencyId, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency', 'prompt'=>Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта'])])
         ?>
     </div>
     </div>

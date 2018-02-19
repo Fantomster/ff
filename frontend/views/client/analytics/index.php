@@ -164,7 +164,7 @@ HTML;
             <div class="col-lg-1 col-md-1 col-sm-1">
                 <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                 <?=
-                Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
+                Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency', 'prompt' => Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта'])])
                 ?>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-2">

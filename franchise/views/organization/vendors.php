@@ -141,7 +141,7 @@ $this->registerCss("
                 <div class="col-lg-2 col-md-2 col-sm-2">
                     <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <?=
-                    Html::dropDownList('filter_currency', $currencyData['currency_id'], $currencyData['currency_list'], ['class' => 'form-control', 'id' => 'filter_currency'])
+                    Html::dropDownList('filter_currency', null, $currencyData['currency_list'], ['class' => 'form-control', 'id' => 'filter_currency', 'prompt' => Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта'])])
                     ?>
                 </div>
 
@@ -364,7 +364,7 @@ var filter_currency =  $("#filter_currency").val();
      push: false,
      timeout: 10000,
      url: "$url",
-     container: "#vendorsList",
+     container: "#kv-unique-id-1",
      data: {
          filter_currency: filter_currency
            }

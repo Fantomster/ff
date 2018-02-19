@@ -114,7 +114,7 @@ JS;
         }
         if (!$isGuest && $organization->isEmpty()) {
             echo common\widgets\setinfo\SetInfoWidget::widget([
-                'action' => Url::to(['/site/ajax-complete-registration']),
+                'action' => '/site/ajax-complete-registration',
                 'organization' => $organization,
                 'profile' => $profile,
                 'events' => 'click',

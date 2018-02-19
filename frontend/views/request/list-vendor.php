@@ -169,7 +169,7 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
               </div>
             </div>
           </div>
-            <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs hidden-sm hidden-md']) ?>
+            <?php //echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs hidden-sm hidden-md']) ?>
         </div>
       </div>
     </div>

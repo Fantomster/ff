@@ -7,14 +7,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
-use common\models\CatalogGoods;
-use common\models\Order;
-use common\models\OrderContent;
-use common\models\GoodsNotes;
-use common\models\Organization;
-use yii\helpers\Json;
-use common\models\guides\GuideProduct;
-use yii\db\Query;
+use yii\data\SqlDataProvider;
 
 
 /**
@@ -72,90 +65,88 @@ class ProductSearchController extends ActiveController {
         $params = new \api\modules\v1\modules\mobile\resources\GuideProductSearch();
         $user = Yii::$app->user->getIdentity();
         $client = $user->organization;
-        
-        $cbgTable = CatalogBaseGoods::tableName();
-        $goodsNotesTable = GoodsNotes::tableName();
-        $organizationTable = Organization::tableName();
-        $currency = \common\models\Currency::tableName();
-        $catalog = \common\models\Catalog::tableName();
-        
-        $symbols_t = 'REPLACE(product, "&quot;", "\'"\) as product';
-        
-        $symbols_t = 'REPLACE(product, "&quot;", "\'"\) as product';
-        
-        $query = CatalogBaseGoods::find();
-       /* $query->select(["$cbgTable.id", "$cbgTable.cat_id", "$cbgTable.article", "REPLACE(product, '&quot;', '\"'\) as product", 
-                "$cbgTable.status", "$cbgTable.market_place", "$cbgTable.deleted", "$cbgTable.created_at", "$cbgTable.updated_at", "$cbgTable.supp_org_id",
-                "$cbgTable.price", "$cbgTable.units", "$cbgTable.category_id", "$cbgTable.note", "$cbgTable.ed", "$cbgTable.omage", "$cbgTable.brand",
-                "$cbgTable.region", "$cbgTable.weight", "$cbgTable.es_status", "$cbgTable.mp_show_price",
-                "$cbgTable.rating", "$organizationTable.name as organization_name", "$goodsNotesTable.note as comment"]);*/
-        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
+        $vendors = $client->getSuppliers(null);
+        $catalogs = $vendors ? $client->getCatalogs(null, null) : "(0)";
 
-        $query->from("guide_product");
-        $query->leftJoin($cbgTable,"$cbgTable.id = guide_product.cbg_id");
-        $query->leftJoin($catalog,"$catalog.id in (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=catalog_base_goods.supp_org_id) AND (rest_org_id = $client->id))");
-        $query->leftJoin($currency,"$currency.id = $catalog.currency_id");
-        $query->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");
-        $query->leftJoin($goodsNotesTable, "$goodsNotesTable.catalog_base_goods_id = $cbgTable.id and $goodsNotesTable.rest_org_id = $organizationTable.id");
-        // add conditions that should always apply here
-        
-        $orderTable = Order::tableName();
-        $ordContentTable = OrderContent::tableName();
+        $fieldsCBG = [
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
+            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name as organization_name',
+            "(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ];
+        $fieldsCG = [
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
+            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name as organization_name',
+            "(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+        ];
 
-        $query2 = CatalogBaseGoods::find();
-        /*$query2->select("$cbgTable.id", "$cbgTable.cat_id", "$cbgTable.article", "REPLACE(product, '&quot;', '\"'\) as product", 
-                "$cbgTable.status", "$cbgTable.market_place", "$cbgTable.deleted", "$cbgTable.created_at", "$cbgTable.updated_at", "$cbgTable.supp_org_id",
-                "$cbgTable.price", "$cbgTable.units", "$cbgTable.category_id", "$cbgTable.note", "$cbgTable.ed", "$cbgTable.omage", "$cbgTable.brand",
-                "$cbgTable.region", "$cbgTable.weight", "$cbgTable.es_status", "$cbgTable.mp_show_price",
-                "$cbgTable.rating", "$organizationTable.name as organization_name", "$goodsNotesTable.note as comment"]);*/
+        $where = '';
 
-        $query2->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
-        $query2->leftJoin($catalog,"$catalog.id in (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=catalog_base_goods.supp_org_id) AND (rest_org_id = $client->id))");
-        $query2->leftJoin($currency,"$currency.id = $catalog.currency_id");
-        $query2->leftJoin($ordContentTable, "$cbgTable.id=$ordContentTable.product_id");
-        $query2->leftJoin($orderTable, "$ordContentTable.order_id=$orderTable.id");
-        $query2->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");
-        $query2->leftJoin($goodsNotesTable, "$goodsNotesTable.catalog_base_goods_id = $cbgTable.id and $goodsNotesTable.rest_org_id = $organizationTable.id");
+        $sql = "
+        SELECT * FROM (
+           SELECT 
+              " . implode(',', $fieldsCBG) . "
+           FROM `catalog_base_goods` `cbg`
+             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
+             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           WHERE
+           cat_id IN (" . $catalogs . ")
+           ".$where."
+           AND (cbg.status = 1 AND cbg.deleted = 0)
+        UNION ALL
+          SELECT 
+          " . implode(',', $fieldsCG) . "
+          FROM `catalog_goods` `cg`
+           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
+           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
+           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+          WHERE 
+          cg.cat_id IN (" . $catalogs . ")
+          ".$where."
+          AND (cbg.status = 1 AND cbg.deleted = 0)
+        ) as c ";
 
-        // add conditions that should always apply here
-        //where ord.client_id = 1 and cbg.status=1 and cbg.deleted = 0
-        $query2->where(["$orderTable.client_id" => $client->id, "$cbgTable.status" => CatalogBaseGoods::STATUS_ON, "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF]);
+        $query = Yii::$app->db->createCommand($sql);
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
-            'pagination' => false,
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query->sql,
+            'sort' => [
+                'attributes' => [
+                    'product' => [
+                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc' => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
+                        'default' => SORT_ASC
+                    ],
+                    'price',
+                    'units',
+                    'c_article_1',
+                    'c_article',
+                    'i'
+                ],
+                'defaultOrder' => [
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
+                ]
+            ],
         ]);
 
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-                $query->leftJoin ("guide","guide.id = guide_product.guide_id")->where ("guide.client_id = ".$client->id);
-                $query->union($query2);
-                
-                $query_r = new Query();
-                $query_r->select('*')->from(['u' => $query]);//->orderBy(['id' => SORT_DESC]);
-                $dataProvider->query = $query_r;
-            return $dataProvider;
-        }
+          if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+              $dataProvider->pagination = false;
+              return $dataProvider;
+          }
 
-        $query->leftJoin ("guide","guide.id = guide_product.guide_id")->where ("guide.client_id = ".$client->id);
-        
-        $query->union($query2);
-        $query_r = new Query();
-        $query_r->select('*')->from(['u' => $query]);
-        $dataProvider->query = $query_r;
-        
         if (isset($params->count)) {
-            $query_r->limit($params->count);
+            $dataProvider->pagination->pageSize = $params->count;
             if (isset($params->page)) {
-                $offset = ($params->page * $params->count) - $params->count;
-                $query_r->offset($offset);
+                $dataProvider->pagination->page = ($params->page - 1);
             }
         }
-       
-        // grid filtering conditions
-        $query_r->andFilterWhere(['like', 'catalog_base_goods.product', $params->searchString]);
 
         return $dataProvider;
     }

@@ -27,7 +27,7 @@ $this->title = $name;
                         <?= Yii::t('error', 'frontend.views.site.error', ['ru'=>'Во время обработки вашего запроса произошла ошибка.']) ?>
                         <?= Yii::t('error', 'frontend.views.site.error_two', ['ru'=>'Если вы считаете, что это ошибка приложения, пожалуйста, свяжитесь с нами.']) ?>
                     </p><p>
-                        <?= Yii::t('message', 'frontend.views.site.home', ['ru'=>'А пока можно <a href="{home_url}">перейти на главную страницу</a>.', 'home_url'=>Yii::$app->homeUrl]) ?>
+                        <?= Yii::t('message', 'frontend.views.site.home', ['ru'=>'А пока можно <a href="{home_url}">перейти на главную страницу</a>.', 'home_url'=>Yii::$app->params['staticUrl']['home']]) ?>
                     </p>
 
                 </div>

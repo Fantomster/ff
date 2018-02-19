@@ -1,3 +1,7 @@
+.pac-container {
+    z-index: 1100 !important;
+}
+
 .animated {
     -webkit-animation-duration: 1s;
     -moz-animation-duration: 1s;

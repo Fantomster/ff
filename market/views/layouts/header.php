@@ -84,10 +84,10 @@ if (!Yii::$app->user->isGuest) {
                     <li><a href="<?= Url::to(['site/restaurants']) ?>"><?= Yii::t('message', 'market.views.layouts.header.rest', ['ru'=>'РЕСТОРАНЫ']) ?></a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>"><?= Yii::t('message', 'market.views.layouts.header.vendors', ['ru'=>'ПОСТАВЩИКИ']) ?></a></li>
                     <li class="dropdown">
-                        <a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="dropdown-toggle">MIXCART <span class="caret"></span></a>
+                        <a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" class="dropdown-toggle">MIXCART <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="<?= Yii::$app->params['staticUrl']['about'] ?>"><?= Yii::t('message', 'market.views.layouts.header.about', ['ru'=>'О&nbsp;нас']) ?></a></li>
-                            <li><a href="<?= Yii::$app->params['staticUrl']['contacts'] ?>"><?= Yii::t('message', 'market.views.layouts.header.contacts', ['ru'=>'Контакты']) ?></a></li>
+                            <li><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['about'] ?>"><?= Yii::t('message', 'market.views.layouts.header.about', ['ru'=>'О&nbsp;нас']) ?></a></li>
+                            <li><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['contacts'] ?>"><?= Yii::t('message', 'market.views.layouts.header.contacts', ['ru'=>'Контакты']) ?></a></li>
                         </ul>
                       </li>
 

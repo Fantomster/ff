@@ -9,7 +9,7 @@ if (empty($toFrontEnd)) {
     <?= Yii::t('app', 'common.mail.confirm_email.hello', ['ru'=>'Здравствуйте,']) ?> <small style="font-size: 60%; color: #787878; line-height: 0; text-transform: none; margin: 0; padding: 0;"><?= $profile->full_name ?></small>
 </h3>
 <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
-    <?= Yii::t('app', 'common.mail.confirm_email.you_registered', ['ru'=>'Вы зарегистрировались в сервисе']) ?> <a href="<?= Yii::$app->params['staticUrl']['home'] ?>" style="color: #84bf76; margin: 0; padding: 0;">MixCart</a>
+    <?= Yii::t('app', 'common.mail.confirm_email.you_registered', ['ru'=>'Вы зарегистрировались в сервисе']) ?> <a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" style="color: #84bf76; margin: 0; padding: 0;">MixCart</a>
 </p>
 <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;"><?= Yii::t('app', 'common.mail.confirm_email.go_to', ['ru'=>'Для завершения регистрации, пожалуйста, пройдите по следующей ссылке:']) ?></p>
 <br style="margin: 0; padding: 0;" />

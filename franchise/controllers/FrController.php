@@ -24,6 +24,8 @@ class FrController extends \yii\rest\Controller {
                         'https://franch.mixcart.ru',
                         'https://2017.mixcart.ru',
                         'https://gastreet2018.mixcart.ru',
+                        'https://mix-cart.com',
+                        'https://client.mix-cart.com',
                     ],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,

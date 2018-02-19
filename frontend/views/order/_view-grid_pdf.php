@@ -50,7 +50,10 @@ echo GridView::widget([
             ],
             'headerOptions' => [
                 'width' => '103'
-            ]
+            ],
+            'value' => function ($data) {
+                return Yii::t('app', $data['product']['ed']);
+            },
         ],
         [
             'attribute' => 'quantity',

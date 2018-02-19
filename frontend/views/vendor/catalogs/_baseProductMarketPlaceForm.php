@@ -314,6 +314,9 @@ $form = ActiveForm::begin([
                                 <div class="col-md-6">
                                     <label class="control-label" for=""><?= Yii::t('message', 'frontend.views.vendor.country', ['ru'=>'Страна производитель']) ?></label>
                                     <?php
+                                    foreach ($countrys as &$item){
+                                        $item['name'] = Yii::t('app', $item['name']);
+                                    }
                                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                                         'model' => $catalogBaseGoods->region,
                                         'data' => ArrayHelper::map($countrys, 'id', 'name'),

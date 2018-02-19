@@ -18,7 +18,7 @@ use yii\helpers\Url;
                             'enableAjaxValidation' => true,
                             'enableClientValidation' => false,
                             'validateOnSubmit' => true,
-                            'action' => $action,
+                            'action' => Url::to([$action]),
                             'options' => [
                                 'class' => 'auth-sidebar__form form-check data',
                             ],

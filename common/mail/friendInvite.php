@@ -11,7 +11,7 @@ use yii\helpers\Url;
 
 ?>
 
-<p><img src="https://mixcart.ru/img/invite-to-client.jpg" style="width: 100%;"/></p>
+<p><img src="https://app.mixcart.ru/img/invite-to-client.jpg" style="width: 100%;"/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.friend_invite.hello', ['ru'=>'Здравствуйте!']) ?></h3>
 <p><?= Yii::t('app', 'common.mail.friend_invite.we', ['ru'=>'Мы, <u>{we}</u>, стали использовать очень удобный инструмент для автоматизации работы с вами', 'we'=>$we]) ?>.
@@ -54,9 +54,9 @@ use yii\helpers\Url;
         </th>
     </tr>
     <tr align="center">
-        <td><img src="https://mixcart.ru/img/ico1-1.png" alt="" /></td>
-        <td><img src="https://mixcart.ru/img/ico2-1.png" alt="" /></td>
-        <td><img src="https://mixcart.ru/img/ico3-1.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico1-1.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico2-1.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico3-1.png" alt="" /></td>
     </tr>
 
 
@@ -76,9 +76,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="https://mixcart.ru/img/ico4-1.png" alt="" /></td>
-        <td><img src="https://mixcart.ru/img/ico5-1.png" alt="" /></td>
-        <td><img src="https://mixcart.ru/img/ico2.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico4-1.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico5-1.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico2.png" alt="" /></td>
     </tr>
 
 
@@ -98,9 +98,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="https://mixcart.ru/img/ico4.png" alt="" /></td>
-        <td><img src="https://mixcart.ru/img/ico8.png" alt="" /></td>
-        <td><img src="https://mixcart.ru/img/ico9.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico4.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico8.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico9.png" alt="" /></td>
     </tr>
 
 </table>

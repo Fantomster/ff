@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\ManagerAssociate;
 use common\models\PaymentSearch;
+use common\models\RelationSuppRestPotential;
 use common\models\UserToken;
 use Yii;
 use yii\web\UploadedFile;
@@ -58,6 +59,7 @@ class ClientController extends DefaultController {
                             'ajax-validate-vendor',
                             'employees',
                             'remove-supplier',
+                            'apply-supplier',
                             'add-first-vendor',
                         ],
                         'allow' => true,
@@ -1330,8 +1332,14 @@ class ClientController extends DefaultController {
     public function actionRemoveSupplier() {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
+            $type = \Yii::$app->request->post('type');
             $currentUser = User::findIdentity(Yii::$app->user->id);
-            RelationSuppRest::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            if($type == 0) {
+                RelationSuppRest::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            }
+            else {
+                RelationSuppRestPotential::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            }
         }
     }
 
@@ -1664,6 +1672,24 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
         } else {
             return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
+        }
+    }
+
+    public function actionApplySupplier ()
+    {
+        if (Yii::$app->request->isAjax) {
+            $id = \Yii::$app->request->post('id');
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $relationP = RelationSuppRestPotential::findOne(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            if ($relationP !== null) {
+                $relationP->id = null;
+                $relation = new RelationSuppRest();
+                $relation->attributes = $relationP->attributes;
+                $relation->status = 0;
+                $relation->invite = RelationSuppRest::INVITE_ON;
+                if($relation->save())
+                    $relationP->delete();
+            }
         }
     }
 

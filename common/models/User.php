@@ -295,7 +295,7 @@ class User extends \amnah\yii2\user\models\User {
         $vendor = $this->organization->name;
         $email = $client->email;
         $subject = Yii::t('app', 'common.models.invitation', ['ru'=>"Приглашение на MixCart"]);
-        $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
+        $result = $mailer->compose('acceptActiveVendorInvite', compact("subject", "client", "vendor"))
             ->setTo($email)
             ->setSubject($subject)
             ->send();

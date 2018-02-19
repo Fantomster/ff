@@ -10,6 +10,7 @@ use yii\widgets\Pjax;
 use common\models\Currency;
 use yii\helpers\Url;
 use yii\helpers\Json;
+use common\models\RelationSuppRestPotential;
 
 kartik\select2\Select2Asset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
@@ -121,7 +122,9 @@ $gridColumnsCatalog = [
         'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
         'format' => 'raw',
         'value' => function ($data) {
-            if ($data->invite == 0) {
+            if($data->status == 3)
+                return '<span class="text-yellow">' . Yii::t('message', 'frontend.views.client.suppliers.need_apply', ['ru'=>'Ожидает<br>вашего подтверждения']) . ' </span>';
+            elseif ($data->invite == 0) {
                 return '<span class="text-danger">' . Yii::t('message', 'frontend.views.client.suppliers.sent', ['ru'=>'Приглашение<br>отправлено']) . ' </span>';
             } elseif (isset($data->catalog) && $data->catalog->status == 1) {
                 return '<span class="text-success">' . Yii::t('message', 'frontend.views.client.suppliers.partner', ['ru'=>'Партнер']) . ' </span>';
@@ -138,11 +141,26 @@ $gridColumnsCatalog = [
         'value' => function ($data) {
             $result = "";
 
-            if ($data === null || $data->catalog === null) {
+            if ($data === null) {
                 return "<div class='btn-group'>" . $result . "</div>";
             }
 
-            if ($data->invite == 0 ||
+            if($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) {
+                //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
+                $result .= Html::button(
+                    '<i class="fa fa-shopping-cart m-r-xs"></i>'. Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru'=>'Сотрудничать']),
+                    [
+                    'class' => 'btn btn-success btn-sm apply',
+                    'data' => ['id' => $data["supp_org_id"]]
+                ]);
+                $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
+                    'class' => 'btn btn-default btn-sm',
+                    'disabled' => 'disabled']);
+                $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
+                    'class' => 'btn btn-default btn-sm',
+                    'disabled' => 'disabled']);
+            }
+            elseif ($data->invite == 0 ||
                 $data->cat_id == 0 ||
                 $data->catalog->status == 0) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
@@ -208,7 +226,7 @@ $gridColumnsCatalog = [
 
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                         'class' => 'btn btn-danger btn-sm del',
-                        'data' => ['id' => $data["supp_org_id"]],
+                        'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL)?1:0)]
             ]);
             return "<div class='btn-group'>" . $result . "</div>";
         }
@@ -341,6 +359,7 @@ $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
+$applySupplierUrl = Url::to(['client/apply-supplier']);
 
 $arr = [
     Yii::t('message', 'frontend.views.client.suppliers.var', ['ru'=>'Уведомление']),
@@ -719,8 +738,23 @@ $(document).on("click", ".resend-invite", function(e) {
         }
     });
 });
+
+$(document).on("click",".apply", function(e){
+    var id = $(this).attr('data-id');
+		$.ajax({
+	        url: "$applySupplierUrl",
+	        type: "POST",
+	        dataType: "json",
+	        data: {'id' : id},
+	        cache: false,
+	        success: function(response) {
+		        }	
+		    });
+		$.pjax.reload({container: "#sp-list",timeout:30000});
+})
 $(document).on("click",".del", function(e){
     var id = $(this).attr('data-id');
+    var type = $(this).attr('data-type');
         bootbox.confirm({
             title: "$arr[13]",
             message: "$arr[14]", 
@@ -741,7 +775,7 @@ $(document).on("click",".del", function(e){
 	        url: "$removeSupplierUrl",
 	        type: "POST",
 	        dataType: "json",
-	        data: {'id' : id},
+	        data: {'id' : id, 'type': type},
 	        cache: false,
 	        success: function(response) { 
 			         

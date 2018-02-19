@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\PaymentSearch;
+use common\models\RelationSuppRestPotential;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -1772,10 +1773,25 @@ class VendorController extends DefaultController {
             if ($user->load($post)) {
                 if ($user->validate()) {
                     $user->setScenario('sendInviteFromActiveVendor');
-                    if($user->validate())
+                    if(!$user->validate()) {
+                        $user = User::findOne(['email' => $user->email]);
+                        $currentUser = User::findIdentity(Yii::$app->user->id);
+                        $relationSuppRestPotential = new RelationSuppRestPotential();
+
+                        if (Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                            $supp_base_cat_id = Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => 1])->one()->id;
+                            $relationSuppRestPotential->cat_id = $supp_base_cat_id;
+                        }
+                        $relationSuppRestPotential->rest_org_id = $user->organization_id;
+                        $relationSuppRestPotential->supp_org_id = $currentUser->organization_id;
+                        $relationSuppRestPotential->invite = RelationSuppRest::INVITE_ON;
+                        $relationSuppRestPotential->status = 3;
+                        $relationSuppRestPotential->save();
                         $this->currentUser->sendInviteToActiveClient($user);
+                    }
                     else
                         $this->currentUser->sendInviteToClient($user);
+
                     $message = Yii::t('message', 'frontend.controllers.vendor.inv_sent', ['ru'=>'Приглашение отправлено!']);
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }

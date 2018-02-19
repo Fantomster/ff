@@ -109,7 +109,11 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 [
                                     'label' => 'Поля для amoCRM',
                                     'url' => ['/amo/index'],
-                                ]
+                                ],
+                                [
+                                    'label' => 'Тестовая почта',
+                                    'url' => ['/site/send-test-mail'],
+                                ],
                             ],
                         ],
                         [
@@ -229,7 +233,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
 
         <footer class="footer">
             <div class="container">
-                <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
+                <p class="pull-left">© 2016 - <?= date('Y') ?> MixCart</p>
 
                 <p class="pull-right">Работает, оно работает!</p>
 

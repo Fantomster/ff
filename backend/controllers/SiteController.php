@@ -33,11 +33,11 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'get-sub-cat'],
+                        'actions' => ['index', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'get-sub-cat', 'send-test-mail'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
-                            Role::ROLE_FKEEPER_OBSERVER,
+//                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
                     ],
                 ],
@@ -126,5 +126,26 @@ class SiteController extends Controller
 
     public function actionGetSubCat() {
         return \franchise\controllers\SiteController::actionGetSubCat();
+    }
+    
+    public function actionSendTestMail() {
+        $model = new \backend\models\TestMail;
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $subject = "mixcart - Проверка почтовой службы";
+                $result = Yii::$app->mailer->compose('test')
+                    ->setTo($model->email)
+                    ->setSubject($subject)
+                    ->send();
+                if ($result) {
+                    Yii::$app->session->setFlash("email-success", 'Письмо отослано на почту ' . $model->email);
+                    $model->email = '';
+                }
+            } catch (Exception $ex) {
+                //
+            }
+        }
+        
+        return $this->render('send-test-mail', compact('model'));
     }
 }

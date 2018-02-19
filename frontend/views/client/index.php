@@ -536,7 +536,7 @@ JS;
     $this->registerJs($customJs2, View::POS_READY);
 }
 echo common\widgets\setinfo\SetInfoWidget::widget([
-                'action' => Url::to(['/site/ajax-complete-registration']),
+                'action' => '/site/ajax-complete-registration',
                 'organization' => $organization,
                 'profile' => $profile,
                 'events' => 'invoke',

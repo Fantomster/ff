@@ -61,7 +61,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
 }
 ?>">
          <?php if ($flash): ?>
-        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="success-message__ico"></a>
+        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" class="success-message__ico"></a>
             <div class="success-message__text">
                 <?= $flash ?>
             </div>
@@ -70,7 +70,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
         <div class="auth-sidebar h-fx_center auth">
             <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
             <div class="auth-sidebar__content">
-                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
+                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
 
                 <div class="auth-sidebar__annotation"><?= Yii::t('message', 'frontend.views.user.default.enter_email', ['ru'=>'Введите email,<br>который вы использовали при регистрации']) ?></div>
                 <?php

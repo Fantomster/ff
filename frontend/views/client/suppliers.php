@@ -847,9 +847,12 @@ if ($currentOrganization->isEmpty()) {
                 $('#data-modal-wizard').trigger("invoke");
             })
 JS2;
+    $user = Yii::$app->user->identity;
+    $organization = $user->organization;
+    $profile = $user->profile;
     $this->registerJs($customJs, View::POS_READY);
     echo common\widgets\setinfo\SetInfoWidget::widget([
-                'action' => Url::to(['/site/ajax-complete-registration']),
+                'action' => '/site/ajax-complete-registration',
                 'organization' => $organization,
                 'profile' => $profile,
                 'events' => 'invoke',

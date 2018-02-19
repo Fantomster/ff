@@ -82,9 +82,6 @@ overflow-y:scroll
 tr:hover {
     cursor: pointer;
 }
-.pac-container {
-    z-index: 1100;
-}
 ');
 $this->registerCss('
 @media (max-width: 1320px){
@@ -536,7 +533,7 @@ JS;
     $this->registerJs($customJs2, View::POS_READY);
 }
 echo common\widgets\setinfo\SetInfoWidget::widget([
-                'action' => Url::to(['/site/ajax-complete-registration']),
+                'action' => '/site/ajax-complete-registration',
                 'organization' => $organization,
                 'profile' => $profile,
                 'events' => 'invoke',

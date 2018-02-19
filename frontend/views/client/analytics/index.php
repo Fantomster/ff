@@ -161,12 +161,14 @@ HTML;
                 ]);
                 ?>
             </div>
+            <?php if(count($currencyList)>0): ?>
             <div class="col-lg-1 col-md-1 col-sm-1">
                 <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                 <?=
                 Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency', 'prompt' => Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта'])])
                 ?>
             </div>
+    <?php endif; ?>
             <div class="col-lg-1 col-md-1 col-sm-2">
     <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
     <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        

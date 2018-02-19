@@ -1362,7 +1362,7 @@ class ClientController extends DefaultController {
             ->groupBy('iso_code')
             ->asArray()->all();
 
-        $currencyList = ['1' => 'RUB'];
+        $currencyList = [];
 
         foreach($currency_list as $c) {
             $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';

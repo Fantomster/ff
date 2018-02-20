@@ -95,7 +95,7 @@ if($i > 0){
                             <?php if (empty($arr['_source']['product_show_price'])){ ?>
                             <h5 class="media-price" style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.main.price_three', ['ru'=>'договорная цена']) ?></h5>
                             <?php } else {?>
-                            <h5 class="media-price"><?=floatval($arr['_source']['product_price']); ?> <small><?= $arr['_source']['product_currency'] ?></small></h5>
+                            <h5 class="media-price"><?=number_format($arr['_source']['product_price'], 2, '.', ''); ?> <small><?= $arr['_source']['product_currency'] ?></small></h5>
                             <?php } ?>                 
                         </div>
                       </div>

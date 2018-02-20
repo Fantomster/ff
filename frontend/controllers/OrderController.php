@@ -177,6 +177,11 @@ class OrderController extends DefaultController {
 
         $width = 30;
         $objPHPExcel = new \PHPExcel();
+
+        $objPHPExcel->getProperties()->setCreator("MixCart")
+            ->setLastModifiedBy("MixCart")
+            ->setTitle("otchet_zakaz_" . date("d-m-Y-His"));
+
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
         $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth($width);

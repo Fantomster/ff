@@ -255,10 +255,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             return $this->getThumbUploadUrl('image', 'image');
         } else {
             if ($this->category_id) {
-                if($this->mainCategory)
                     return ImagesHelper::getUrl($this->mainCategory->id);
-                else
-                    return ImagesHelper::getUrl("");
             } else {
                 return self::DEFAULT_IMAGE;
             }
@@ -278,7 +275,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
 
     public function getMainCategory() {
-        return MpCategory::find()->where(['id' => $this->category->parent]);
+        return MpCategory::find()->where(['id' => $this->category->parent])->one();
     }
 
     public static function getCurCategory($id) {

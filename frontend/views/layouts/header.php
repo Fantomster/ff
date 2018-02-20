@@ -191,6 +191,7 @@ if (!Yii::$app->user->isGuest) {
             $(this).data("url")
         ).done(function(result) {
             refreshMenu(result);
+            $(this).setAttribute('style','visibility: hidden;');
         });
     });
             

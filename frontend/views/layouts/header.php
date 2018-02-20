@@ -398,9 +398,11 @@ JS;
                                     ?>
                                 </ul>
                             </li>
+                            <?php if (count($unreadNotifications) > 0) { ?>
                             <li class="footer">
                                 <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read_two', ['ru' => 'Пометить как прочитанные']) ?></a>
                             </li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>

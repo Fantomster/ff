@@ -372,7 +372,7 @@ JS;
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read', ['ru' => 'Пометить как прочитанные']) ?></a>
+                                <a href="#" class="setRead" <?= (count($unreadMessages)==0) ? 'style = "pointer-events: none; cursor: default;"': "" ?>data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read', ['ru' => 'Пометить как прочитанные']) ?></a>
                             </li>
                         </ul>
                     </li>

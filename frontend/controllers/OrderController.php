@@ -337,7 +337,7 @@ class OrderController extends DefaultController {
        // var_dump(Yii::getAlias('@app').'/web/'.$filename);
         $objWriter->save(Yii::getAlias('@app').'/web/'.$filename);
 
-        $this->file_force_download(Yii::getAlias('@app').'/web/'.$filename);
+        $this->file_force_download(Yii::getAlias('@app').'/web/assets/'.$filename);
     }
 
     private function file_force_download($file) {

@@ -57,7 +57,7 @@ if (!empty($success) || !empty($invalidToken)) {
 }
 ?>">
 <?php if (!empty($success)): ?>
-        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="success-message__ico"></a>
+        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" class="success-message__ico"></a>
             <div class="success-message__text">
                 <p><?= Yii::t("user", "Password has been reset") ?></p>
                 <p><?= Html::a(Yii::t("user", "Log in here"), ["/user/login"]) ?></p>
@@ -66,7 +66,7 @@ if (!empty($success) || !empty($invalidToken)) {
 
 <?php elseif (!empty($invalidToken)): ?>
 
-        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="success-message__ico"></a>
+        <div class="success-message"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" class="success-message__ico"></a>
             <div class="success-message__text">
                 <p><?= Yii::t('message', 'frontend.views.user.default.block', ['ru'=>'Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту']) ?></p>
             </div>
@@ -76,7 +76,7 @@ if (!empty($success) || !empty($invalidToken)) {
         <div class="auth-sidebar h-fx_center auth">
             <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
             <div class="auth-sidebar__content">
-                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
+                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
 
                 <div class="auth-sidebar__annotation"><?= Yii::t('message', 'frontend.views.user.default.enter_pass', ['ru'=>'Введите новый пароль']) ?></div>
                 <?php

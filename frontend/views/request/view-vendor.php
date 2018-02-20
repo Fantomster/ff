@@ -64,8 +64,8 @@ use yii\widgets\ListView;
                       '';
                 ?>
             </div>
-            <p style="margin:0;margin-top:15px"><b><?= Yii::t('message', 'frontend.views.request.created', ['ru'=>'Создана']) ?></b> <?=$request->created_at?></p>
-            <p style="margin:0;margin-bottom:15px"><b><?= Yii::t('message', 'frontend.views.request.will_delete', ['ru'=>'Будет снята']) ?></b> <?=$request->end?></p>
+            <p style="margin:0;margin-top:15px"><b><?= Yii::t('message', 'frontend.views.request.created', ['ru'=>'Создана']) ?></b> <?=Yii::$app->formatter->format($request->created_at, 'datetime')?></p>
+            <p style="margin:0;margin-bottom:15px"><b><?= Yii::t('message', 'frontend.views.request.will_delete', ['ru'=>'Будет снята']) ?></b> <?=Yii::$app->formatter->format($request->end, 'datetime')?></p>
             <?php if(!$trueFalseCallback){?>
                         <?= Html::button(Yii::t('message', 'frontend.views.request.service', ['ru'=>'Предложить свои услуги']),
                                 ['class' => 'callback btn btn-success',

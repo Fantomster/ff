@@ -65,8 +65,8 @@ $this->title = Yii::t('message', 'frontend.views.request.request_no_two', ['ru'=
                       '<span style="color:#ccc;">' . Yii::t('message', 'frontend.views.request.not_set', ['ru'=>'не назначен']) . ' </span>';
                 ?>
             </div>
-            <p style="margin:0;margin-top:15px"><b><?= Yii::t('message', 'frontend.views.request.created_two', ['ru'=>'Создана']) ?></b> <?=$request->created_at?></p>
-            <p style="margin:0;margin-bottom:15px"><b><?= Yii::t('message', 'frontend.views.request.will_delete_two', ['ru'=>'Будет снята']) ?></b> <?=$request->end?></p>
+            <p style="margin:0;margin-top:15px"><b><?= Yii::t('message', 'frontend.views.request.created_two', ['ru'=>'Создана']) ?></b> <?=Yii::$app->formatter->format($request->created_at, 'datetime')?></p>
+            <p style="margin:0;margin-bottom:15px"><b><?= Yii::t('message', 'frontend.views.request.will_delete_two', ['ru'=>'Будет снята']) ?></b> <?=Yii::$app->formatter->format($request->end, 'datetime')?></p>
             <?php if ($request->active_status){
                 echo Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;' . Yii::t('message', 'frontend.views.request.off', ['ru'=>'Снять с размещения']), ['class' => 'r-close btn btn-outline-danger','data-id'=>$request->id]);
             }else{

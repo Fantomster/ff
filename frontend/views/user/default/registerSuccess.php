@@ -13,8 +13,8 @@ $this->title = Yii::t('message', 'frontend.views.user.default.success_two', ['ru
 
 <div class="main-page-wrapper success">
 
-    <div class="success-message"><a href="<?= Yii::$app->params['staticUrl']['home'] ?>" class="success-message__ico"></a>
-        <div class="success-message__text"><?= Yii::t('message', 'frontend.views.user.default.success', ['ru'=>'Вы успешно зарегистрировались в системе']) ?> <a href="<?= Yii::$app->params['staticUrl']['home'] ?>">MixCart</a><br><?= Yii::t('message', 'frontend.views.user.default.email', ['ru'=>'На указанную Вами почту']) ?> <b><?= $user->email ?></b> <?= Yii::t('message', 'frontend.views.user.default.sent', ['ru'=>'было выслано письмо с подтверждением.<br>Для продолжения работы в системе пройдите по ссылке в письме.']) ?></div>
+    <div class="success-message"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" class="success-message__ico"></a>
+        <div class="success-message__text"><?= Yii::t('message', 'frontend.views.user.default.success', ['ru'=>'Вы успешно зарегистрировались в системе']) ?> <a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>">MixCart</a><br><?= Yii::t('message', 'frontend.views.user.default.email', ['ru'=>'На указанную Вами почту']) ?> <b><?= $user->email ?></b> <?= Yii::t('message', 'frontend.views.user.default.sent', ['ru'=>'было выслано письмо с подтверждением.<br>Для продолжения работы в системе пройдите по ссылке в письме.']) ?></div>
     </div>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>

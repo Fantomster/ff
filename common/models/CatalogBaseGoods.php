@@ -255,7 +255,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             return $this->getThumbUploadUrl('image', 'image');
         } else {
             if ($this->category_id) {
-                return ImagesHelper::getUrl($this->mainCategory->id);
+                if($this->mainCategory)
+                    return ImagesHelper::getUrl($this->mainCategory->id);
+                else
+                    return ImagesHelper::getUrl("");
             } else {
                 return self::DEFAULT_IMAGE;
             }

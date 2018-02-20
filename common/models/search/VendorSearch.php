@@ -87,12 +87,20 @@ class VendorSearch extends RelationSuppRest {
         $dataProvider = new ActiveDataProvider([
             'query' => $query3,
             'sort'=> ['defaultOrder' =>
-                ['supp_org_id'=>SORT_ASC]
+                ['vendor_name'=>SORT_ASC],
+                'attributes' => [
+                    'vendor_name',
+                    'status' =>[
+                            'asc' => ['invite' => SORT_ASC, 'catalog_status' => SORT_ASC, 'status' => SORT_ASC,],
+                            'desc' => ['invite' => SORT_DESC, 'catalog_status' => SORT_DESC, 'status' => SORT_DESC],
+                    ],
+                ],
             ],
             'pagination' => [
                 'pageSize' => 10,
             ],
         ]);
+
 
         $this->load($params);
 
@@ -112,16 +120,16 @@ class VendorSearch extends RelationSuppRest {
             ['like', "vendor_name", $this->search_string],
         ]);
 
-        $dataProvider->sort->attributes['vendor_name'] = [
+        /*$dataProvider->sort->attributes['vendor_name'] = [
             'asc' => ["vendor_name" => SORT_ASC],
             'desc' => ["vendor_name" => SORT_DESC],
 
         ];
-        $dataProvider->sort->attributes['catalog_status'] = [
-            'asc' => ["catalog_status" => SORT_ASC],
-            'desc' => ["catalog_status" => SORT_DESC],
+        $dataProvider->sort->attributes['status'] = [
+            'asc' => ["status" => SORT_ASC],
+            'desc' => ["status" => SORT_DESC],
 
-        ];
+        ];*/
 
         return $dataProvider;
     }

@@ -335,7 +335,7 @@ class OrderController extends DefaultController {
         header('Cache-Control: max-age=0');*/
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
        // var_dump(Yii::getAlias('@app').'/web/'.$filename);
-        $objWriter->save(Yii::getAlias('@app').'/web//web/assets/'.$filename);
+        $objWriter->save(Yii::getAlias('@app').'/web/assets/'.$filename);
 
         $this->file_force_download(Yii::getAlias('@app').'/web/assets/'.$filename);
     }

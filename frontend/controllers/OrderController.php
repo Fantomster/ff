@@ -329,12 +329,37 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
         //$objPHPExcel->getActiveSheet()->freezePane("H$row");
 
-        header('Content-Type: application/vnd.ms-excel');
+        //header('Content-Type: application/vnd.ms-excel');
         $filename = "otchet_zakaz_" . date("d-m-Y-His") . ".xls";
-        header('Content-Disposition: attachment;filename=' . $filename . ' ');
-        header('Cache-Control: max-age=0');
+        /*header('Content-Disposition: attachment;filename=' . $filename . ' ');
+        header('Cache-Control: max-age=0');*/
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
+       // var_dump(Yii::getAlias('@app').'/web/'.$filename);
+        $objWriter->save(Yii::getAlias('@app').'/web/'.$filename);
+
+        $this->file_force_download(Yii::getAlias('@app').'/web/'.$filename);
+    }
+
+    private function file_force_download($file) {
+
+        // сбрасываем буфер вывода PHP, чтобы избежать переполнения памяти выделенной под скрипт
+        // если этого не сделать файл будет читаться в память полностью!
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+        // заставляем браузер показать окно сохранения файла
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . basename($file));
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($file));
+        // читаем файл и отправляем его пользователю
+        readfile($file);
+        unlink($file);
+
     }
 
 

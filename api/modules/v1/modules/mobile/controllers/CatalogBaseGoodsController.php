@@ -121,8 +121,17 @@ class CatalogBaseGoodsController extends ActiveController {
         ]);
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            $dataProvider->pagination = false;
             return $dataProvider;
         }
+
+        if($params->page == 0 || $params->count == 0 || $params->count == null || $params->page == null)
+            $dataProvider->pagination = false;
+        else {
+            $dataProvider->pagination->pageSize = $params->count;
+            $dataProvider->pagination->page = $params->page;
+        }
+
 
         $andWhere = "";
         if($params->list != null)

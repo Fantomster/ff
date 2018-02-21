@@ -271,21 +271,21 @@ class Order extends \yii\db\ActiveRecord {
         return 0;
     }
 
-    public function forFreeDelivery() {
+    public function forFreeDelivery($rawPrice = null) {
         if ($this->vendor->delivery->min_free_delivery_charge == 0) {
             return -1;
         }
         if (isset($this->vendor->delivery)) {
-            $diff = $this->vendor->delivery->min_free_delivery_charge - $this->rawPrice;
+            $diff = $this->vendor->delivery->min_free_delivery_charge - (!isset($rawPrice) ? $this->rawPrice : $rawPrice);
         } else {
             $diff = 0;
         }
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
-    public function forMinOrderPrice() {
+    public function forMinOrderPrice($rawPrice = null) {
         if (isset($this->vendor->delivery)) {
-            $diff = $this->vendor->delivery->min_order_price - $this->rawPrice;
+            $diff = $this->vendor->delivery->min_order_price - (!isset($rawPrice) ? $this->rawPrice : $rawPrice);
         } else {
             $diff = 0;
         }
@@ -296,8 +296,8 @@ class Order extends \yii\db\ActiveRecord {
         return OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
     }
 
-    public function calculateTotalPrice() {
-        $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+    public function calculateTotalPrice($save = true, $rawPrice = null) {
+        $total_price = !isset($rawPrice) ? OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar() : $rawPrice;
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
             $total_price -= $this->discount;
         }
@@ -309,10 +309,12 @@ class Order extends \yii\db\ActiveRecord {
             $total_price += $this->vendor->delivery->delivery_charge;
         }
         $this->total_price = number_format($total_price, 2, '.', '');
-        $this->save();
+        if ($save) {
+            $this->save();
+        }
         return $this->total_price;
     }
-
+    
     public function getTotalPriceWithOutDiscount() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         $free_delivery = $this->vendor->delivery->min_free_delivery_charge;

@@ -100,7 +100,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
     public function getProduct() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        $rprod = RkProduct::find()->andWhere('id = :id', [':id' => $this->product_rid]);
+        $rprod = RkProduct::find()->andWhere('id = :id', [':id' => $this->product_rid])->one();
 
         return $rprod;
 
@@ -110,7 +110,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
     public function getFproductname() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        $rprod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id]);
+        $rprod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id])->one();
 
         return $rprod;
 

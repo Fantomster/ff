@@ -175,6 +175,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }      
+
 var data = $arr;
 var container = document.getElementById('handsontable');
 var searchFiled = document.getElementById('search_field');        
@@ -407,7 +408,9 @@ return false;
 	                            {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
 	                        ).done(function (response) {
 	                            if (response.result === 'success') {
-	                                $.pjax.reload("#pjax-container", {timeout:30000});
+	                                //$.pjax.reload("#pjax-container", {timeout:30000});
+	                                data = JSON.parse(JSON.stringify(response.data));
+	                                hot.loadData(data);
 	                                resolve();
 	                            } else {
 	                                swal({

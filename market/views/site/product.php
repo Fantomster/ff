@@ -98,7 +98,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
               <?php if(empty($product->mp_show_price)){ ?>
               <h2 style="color:#dfdfdf;padding-bottom:15px"><?= Yii::t('message', 'market.views.site.product.price', ['ru'=>'договорная цена']) ?></h2>
               <?php } else {?>
-              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small><?= $currency ?></small></h2>
+              <h2 style="padding-bottom:15px"><?=number_format($product->price, 2, '.', ''); ?> <small><?= $currency ?></small></h2>
               <?php } ?>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">

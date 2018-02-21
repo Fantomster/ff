@@ -549,6 +549,8 @@ class OrganizationController extends DefaultController {
         $user->organization_id = $organization_id;
         $user->save();
 
+        ManagerAssociate::deleteAll(['manager_id'=>$user_id]);
+
         $restaurants = RelationSuppRest::findAll(['supp_org_id' => $organization_id]);
         foreach ($restaurants as $restaurant){
             $rest_id = $restaurant->rest_org_id;

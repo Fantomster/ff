@@ -72,6 +72,16 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                     <h4><?= Yii::t('message', 'frontend.views.vendor.step_three', ['ru'=>'ШАГ 3']) ?></h4>
                     <p><?= Yii::t('message', 'frontend.views.vendor.excellent_two', ['ru'=>'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.']) ?></p>
                 </div>
+                <?php if (Yii::$app->session->hasFlash('success')): ?>
+                    <div class="alert alert-danger alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        <h4>
+                            <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                        </h4>
+                        <?= Yii::$app->session->getFlash('success') ?>
+                    </div>
+                <?php endif; ?>
+               </div>
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="input-group">
@@ -168,7 +178,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 var data = $arr;
 var container = document.getElementById('handsontable');
 var searchFiled = document.getElementById('search_field');        
-height = $('.content-wrapper').height() - $("#handsontable").offset().top;
+var height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
         $("#handsontable").height($('.content-wrapper').height() - $("#handsontable").offset().top)
 });

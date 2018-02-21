@@ -177,6 +177,11 @@ class OrderController extends DefaultController {
 
         $width = 30;
         $objPHPExcel = new \PHPExcel();
+
+        $objPHPExcel->getProperties()->setCreator("MixCart")
+            ->setLastModifiedBy("MixCart")
+            ->setTitle("otchet_zakaz_" . date("d-m-Y-His"));
+
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
         $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth($width);
@@ -330,8 +335,8 @@ class OrderController extends DefaultController {
         header('Cache-Control: max-age=0');
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
         $objWriter->save('php://output');
+        exit;
     }
-
 
     private function fillCellData($objPHPExcel, $row, $client_string, $vendor_string):void
     {

@@ -68,7 +68,7 @@ $this->title = Yii::t('message', 'market.views.site.search_prods.results', ['ru'
                                         <?php if (empty($row->product_show_price)) { ?>
                                             <h4 style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.search_prods.price', ['ru'=>'договорная цена']) ?></h4>
                                         <?php } else { ?>
-                                            <h4><?= floatval($row->product_price); ?> <small><?= $row->product_currency ?></small></h4>
+                                            <h4><?= number_format($row->product_price, 2, '.', ''); ?> <small><?= $row->product_currency ?></small></h4>
                                         <?php } ?>
                                 </div>
 

@@ -13,7 +13,7 @@ $form = ActiveForm::begin([
             'id' => 'import-form',
             'enableAjaxValidation' => false,
             'options' => ['enctype' => 'multipart/form-data'],
-            'action' => Url::toRoute(['vendor/import', 'id' => Yii::$app->request->get('id')])])
+            'action' => Url::toRoute(['/goods/import', 'id' => Yii::$app->request->get('id')])])
 ?>
 
 <div class="modal-header">

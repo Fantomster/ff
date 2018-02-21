@@ -103,7 +103,6 @@ class VendorController extends DefaultController
                             'step-1-update',
                             'step-2',
                             'step-2-add-product',
-                            'step-3',
                             'step-3-copy',
                             'step-3-update-product',
                             'step-4',
@@ -1727,19 +1726,6 @@ class VendorController extends DefaultController
             }
         }
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
-    }
-
-    public function actionStep3($id)
-    {
-        $cat_id = $id;
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
-        if (empty($model)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_five', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
-        }
-        $searchModel = new CatalogGoods();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
-        return $this->render('newcatalog/step-3', compact('searchModel', 'dataProvider', 'exportModel'));
     }
 
     public function actionStep3UpdateProduct($id)

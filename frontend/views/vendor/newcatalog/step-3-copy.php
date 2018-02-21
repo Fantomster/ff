@@ -227,38 +227,43 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   startRows: 1,
   autoWrapRow: true,
   height: height,
-  /*afterOnCellMouseDown: function (changes, source) {
-    afterBeginEditing();
- },*/
-  beforeChangeRender: function (changes, source) {
-      if(source !== 'sum'){
-          var a, b, c, sum, i, value;
-            var change = changes[0];
-            var line = change[0];
+        
+beforeChangeRender: function (changes, source) {
+    if (source !== 'sum') {
+        var a, b, c, sum, i, value, line;
+        for (i = 0; i < changes.length; ++i) {
+            change = changes[i];
+            line = change[0];
             a = parseFloat(this.getDataAtCell(line, 4));
             b = parseFloat(this.getDataAtCell(line, 6));
             c = parseInt(this.getDataAtCell(line, 7));
-            if(c>100)c=100;
-            if(c<-100)c=-100;
-            if(changes[0][1]=='price'){ 
-            this.setDataAtCell(change[0], 6, '0,00', 'sum');
-            this.setDataAtCell(change[0], 7, '0', 'sum');
-            this.setDataAtCell(change[0], 8, a, 'sum');
+            if (c > 100) {
+                c = 100;
             }
-            if(changes[0][1]=='discount'){ 
-            this.setDataAtCell(change[0], 7, 0, 'sum');
-            value = a - b;
-            this.setDataAtCell(change[0], 8, value, 'sum');
+            if (c < -100) {
+                c = -100;
             }
-            if(changes[0][1]=='discount_percent'){
-            this.setDataAtCell(change[0], 6, '0,00', 'sum');
-            this.setDataAtCell(change[0], 7, c, 'sum');
-            valueTwo = a - (a/100 * c);
-            this.setDataAtCell(change[0], 8, valueTwo, 'sum');   
+            if (changes[0][1] == 'price') { 
+                this.setDataAtCell(change[0], 6, '0,00', 'sum');
+                this.setDataAtCell(change[0], 7, '0', 'sum');
+                this.setDataAtCell(change[0], 8, a, 'sum');
             }
-        }      
-      }
-  });
+            if (changes[0][1] == 'discount') { 
+                this.setDataAtCell(change[0], 7, 0, 'sum');
+                value = a - b;
+                this.setDataAtCell(change[0], 8, value, 'sum');
+            }
+            if (changes[0][1] == 'discount_percent') {
+                this.setDataAtCell(change[0], 6, '0,00', 'sum');
+                this.setDataAtCell(change[0], 7, c, 'sum');
+                valueTwo = a - (a/100 * c);
+                this.setDataAtCell(change[0], 8, valueTwo, 'sum');   
+            }
+        };
+    }      
+}
+        
+});
 colWidths[1] = 0.1;
 hot.updateSettings({colWidths: colWidths});
 function getRowsFromObjects(queryResult) {

@@ -847,7 +847,7 @@ class Organization extends \yii\db\ActiveRecord {
         }
         $mailer = Yii::$app->mailer;
         $email = $user->email;
-        $subject = Yii::$app->id . " - " . Yii::$app->params['password_generation'];
+        $subject = Yii::$app->id . " - " . Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']);
         $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
                 ->setTo($email)
                 ->setSubject($subject)

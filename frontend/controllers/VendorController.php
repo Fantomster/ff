@@ -1169,7 +1169,7 @@ class VendorController extends DefaultController
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product]);
+                $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'deleted' => 0]);
                 if ($checkBaseGood) {
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -1973,6 +1973,7 @@ class VendorController extends DefaultController
         ])->joinWith('currency as c')
             ->where('status <> :status', [':status' => Order::STATUS_FORMING])
             ->andWhere('vendor_id = :cid', [':cid' => $currentUser->organization_id])
+            ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
 

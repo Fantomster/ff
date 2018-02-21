@@ -120,7 +120,7 @@ Modal::end();
                     'tag' => 'a',
                     'data-target' => '#importToXls',
                     'class' => 'btn btn-outline-default btn-sm pull-right',
-                    'href' => Url::to(['/site/import-from-xls', 'id' => $id]),
+                    'href' => Url::to(['goods/import', 'id' => $id]),
                     'style' => 'margin-right:10px;',
                 ],
             ])
@@ -148,7 +148,7 @@ Modal::end();
                 'headerOptions' => ['class' => 'text-center'],
                 'value' => function ($data) {
             $link = Html::a($data['product'], ['ajax-update-product-market-place',
-                        'id' => $data['id']], [
+                        'id' => $data['id'], 'supp_org_id' => $data['supp_org_id']], [
                         'data' => [
                             'target' => '#add-product-market-place',
                             'toggle' => 'modal',

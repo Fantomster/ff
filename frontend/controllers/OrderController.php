@@ -1001,7 +1001,7 @@ class OrderController extends DefaultController {
                 $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $order->created_by_id = $this->currentUser->id;
                 $order->created_at = gmdate("Y-m-d H:i:s");
-                $order->save();
+                $order->calculateTotalPrice(); //also saves order
                 $this->sendNewOrder($order->vendor);
                 $this->sendOrderCreated($this->currentUser, $order);
             }

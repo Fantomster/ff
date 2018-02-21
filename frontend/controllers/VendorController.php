@@ -103,7 +103,6 @@ class VendorController extends DefaultController
                             'step-1-update',
                             'step-2',
                             'step-2-add-product',
-                            'step-3',
                             'step-3-copy',
                             'step-3-update-product',
                             'step-4',
@@ -1726,20 +1725,9 @@ class VendorController extends DefaultController
                     'total_price' => $c_price]);
             }
         }
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
-    }
 
-    public function actionStep3($id)
-    {
-        $cat_id = $id;
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
-        if (empty($model)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_five', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
-        }
-        $searchModel = new CatalogGoods();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
-        return $this->render('newcatalog/step-3', compact('searchModel', 'dataProvider', 'exportModel'));
+
+        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
     }
 
     public function actionStep3UpdateProduct($id)
@@ -2357,7 +2345,51 @@ class VendorController extends DefaultController
                 break;
         }
 
-        return ['result' => 'success'];
+        $sql = "SELECT "
+            . "catalog.id as id,"
+            . "article,"
+            . "case when LENGTH(article) != 0 then 1 ELSE 0 end as len,"
+            . "(`article` + 0) AS c_article_1,"
+            . "`article` REGEXP '^-?[0-9]+$' AS i,"
+            . "catalog_base_goods.product as product,"
+            . "catalog_base_goods.id as base_goods_id,"
+            . "catalog_goods.id as goods_id,"
+            . "units,"
+            . "ed,"
+            . "catalog_base_goods.price as base_price,"
+            . "catalog_goods.price as price,"
+            . "catalog_base_goods.status"
+            . " FROM `catalog` "
+            . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+            . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+            . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 "
+            . "ORDER BY len DESC, i DESC, c_article_1 ASC, article ASC ";
+
+
+        $arr = \Yii::$app->db->createCommand($sql)->queryAll();
+
+        $array = [];
+        foreach ($arr as $arrs) {
+            $c_article = $arrs['article'];
+            $c_product = Html::decode(Html::decode(Html::decode($arrs['product'])));
+            $c_base_goods_id = $arrs['base_goods_id'];
+            $c_goods_id = $arrs['goods_id'];
+            $c_base_price = $arrs['base_price'];
+            $c_ed = $arrs['ed'];
+            $c_price = $arrs['price'];
+
+            array_push($array, [
+                'article' => $c_article,
+                'product' => $c_product,
+                'base_goods_id' => $c_base_goods_id,
+                'goods_id' => $c_goods_id,
+                'base_price' => $c_base_price,
+                'price' => $c_price,
+                'ed' => $c_ed,
+                'total_price' => $c_price]);
+        }
+
+        return ['result' => 'success', 'data' => $array];
     }
 
     public

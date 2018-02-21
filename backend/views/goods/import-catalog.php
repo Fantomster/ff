@@ -43,7 +43,7 @@ $this->registerCss('#loader-show {position:absolute;width:100%;height:100%;displ
             </div>
         </div>
     <?php } else { ?>
-        <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]);
+        <?php $form = ActiveForm::begin(['action' => Url::toRoute('import', ['id' => $id]), 'options' => ['enctype' => 'multipart/form-data']]);
         ?>
         <?php if (Yii::$app->session->hasFlash('fail')): ?>
             <div class="row">

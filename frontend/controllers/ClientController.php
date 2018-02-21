@@ -1359,6 +1359,7 @@ class ClientController extends DefaultController {
         ])->joinWith('currency as c')
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
             ->andWhere('client_id = :cid', [':cid' => $currentUser->organization_id])
+            ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
 

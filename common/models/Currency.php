@@ -112,6 +112,7 @@ class Currency extends \yii\db\ActiveRecord {
             ->join('LEFT JOIN', 'franchisee_associate as fa', 'fa.organization_id = order.'.$orgField)
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
             ->andWhere('fa.franchisee_id = :fid', [':fid' => $franchId])
+            ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
 
@@ -128,6 +129,35 @@ class Currency extends \yii\db\ActiveRecord {
             $array['currency_id'] = $filter_currency;
         }
         $array['iso_code'] = $iso_code;
+        return $array;
+    }
+
+    public function getFullCurrencyList($franchId):array
+    {
+        $array = [];
+
+        //Список валют из заказов
+        $currency_list = Order::find()->distinct()->select([
+            'order.currency_id',
+            'order.client_id',
+            'order.vendor_id',
+            'c.id',
+            'c.iso_code',
+            'COUNT(order.id) as count'
+        ])->joinWith('currency as c')
+            ->join('LEFT JOIN', 'franchisee_associate as fa1', 'fa1.organization_id = order.client_id')
+            ->join('LEFT JOIN', 'franchisee_associate as fa2', 'fa2.organization_id = order.vendor_id')
+            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->andWhere('fa1.franchisee_id = :fid1', [':fid1' => $franchId])
+            ->andWhere('fa2.franchisee_id = :fid2', [':fid2' => $franchId])
+            ->orderBy('count DESC')
+            ->groupBy('iso_code')
+            ->asArray()->all();
+
+        foreach($currency_list as $c) {
+            $array[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+        }
+
         return $array;
     }
 }

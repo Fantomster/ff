@@ -1688,8 +1688,19 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 $relation->attributes = $relationP->attributes;
                 $relation->status = 0;
                 $relation->invite = RelationSuppRest::INVITE_ON;
-                if($relation->save())
-                    $relationP->delete();
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if ($relation->save()) {
+                        $new = new ManagerAssociate();
+                        $new->manager_id = $relationP->supp_user_id;
+                        $new->organization_id = $relationP->rest_org_id;
+                        $new->save();
+                        $relationP->delete();
+                    }
+                    $transaction->commit();
+                } catch (Exception $e) {
+                $transaction->rollBack();
+                }
             }
         }
     }

@@ -1018,7 +1018,10 @@ class OrderController extends DefaultController {
                     $rawPrice += $order->orderContent[$key]->price * $content[$item->id]["quantity"];
                     $position = $order->orderContent[$key];
                     $position->quantity = $content[$item->id]["quantity"];
-                    $expectedPositions[] = ["id" => $position->id, "price" => $this->renderPartial("_checkout-position-price", compact("position", "currencySymbol", "vendor_id"))];
+                    $expectedPositions[] = [
+                        "id" => $position->id,
+                        "price" => $this->renderPartial("_checkout-position-price", compact("position", "currencySymbol", "vendor_id")),
+                    ];
                 }
             }
             $forMinOrderPrice = $order->forMinOrderPrice($rawPrice);
@@ -1027,6 +1030,7 @@ class OrderController extends DefaultController {
             $result = [
                 "total" => $this->renderPartial("_checkout-total", compact('order', 'currencySymbol', 'forMinOrderPrice', 'forFreeDelivery')),
                 "expectedPositions" => $expectedPositions,
+                "button" => $this->renderPartial("_checkout-position-button", compact("order", "currencySymbol", "forMinOrderPrice")),
             ];
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return $result;

@@ -20,6 +20,7 @@ use yii\filters\AccessControl;
 use common\components\AccessRule;
 use yii\data\ActiveDataProvider;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 /**
  * GoodsController implements the CRUD actions for CatalogBaseGoods model.
@@ -320,7 +321,7 @@ class GoodsController extends Controller {
                     . Yii::t('app', '<small>Вы пытаетесь загрузить каталог объемом больше ') . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', ' позиций, обратитесь к нам и мы вам поможем')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
+                return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
             }
             //Проверяем наличие дублей в списке
             if ($importType == 2 || $importType == 3) {
@@ -337,7 +338,7 @@ class GoodsController extends Controller {
                     . Yii::t('app', '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! ')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
+                return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
             }
             unset($xlsArray);
 
@@ -385,13 +386,14 @@ class GoodsController extends Controller {
                     }
                     $transaction->commit();
                     unlink($path);
-                    return $this->redirect(['goods/vendor', 'id' => $vendor_id]);
+                    return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
                 } catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
                     Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error', ['ru' => 'Ошибка сохранения, повторите действие'])
                         . Yii::t('error', 'frontend.controllers.vendor.saving_error_two', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                    return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
                 }
             }
             if ($importType == 2) {
@@ -425,13 +427,14 @@ class GoodsController extends Controller {
                     }
                     $transaction->commit();
                     unlink($path);
-                    return $this->redirect(['goods/vendor', 'id' => $vendor_id]);
+                    return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
                 } catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
                     Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_three', ['ru' => 'Ошибка сохранения, повторите действие'])
                         . Yii::t('error', 'frontend.controllers.vendor.saving_error_four', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                    return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
                 }
             }
             if ($importType == 3) {
@@ -461,13 +464,14 @@ class GoodsController extends Controller {
                     }
                     $transaction->commit();
                     unlink($path);
-                    return $this->redirect(['goods/vendor', 'id' => $vendor_id]);
+                    return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
                 } catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
                     Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_five', ['ru' => 'Ошибка сохранения, повторите действие'])
                         . Yii::t('error', 'frontend.controllers.vendor.repeat_error', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                    return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
                 }
             }
         }

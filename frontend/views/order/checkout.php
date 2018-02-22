@@ -219,6 +219,9 @@ $this->registerJs(
             });
             
             $(document).on("click", "a", function(e) {
+                if ($(".block_wrap_bask_tover").length == 0) {
+                    dataEdited = 0;
+                }
                 if (dataEdited) {
                     e.preventDefault();
                     var link = $(this).attr("href");

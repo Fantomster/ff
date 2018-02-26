@@ -145,7 +145,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
                     $this->koef = round($this->quant / $this->defquant, 10);
                 }
             } else { // Создание
-                $this->koef = 1;
+               // $this->koef = 1;
             }
 
 

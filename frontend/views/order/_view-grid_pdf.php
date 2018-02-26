@@ -12,6 +12,12 @@ echo GridView::widget([
     'summary' => '',
     'tableOptions' => ['class' => 'pdf-table'],
     'columns' => [
+        ['class' => 'yii\grid\SerialColumn',
+        'header' => Yii::t('message', 'frontend.views.order.grid_row_number', ['ru'=>'№ п/п']),
+         'headerOptions' => [
+            'width' => '80'
+            ],
+        ],
         [
             'attribute' => 'product.product',
             'label' => Yii::t('message', 'frontend.views.order.grid_name', ['ru'=>'Наименование товара']),
@@ -50,6 +56,9 @@ echo GridView::widget([
             ],
             'headerOptions' => [
                 'width' => '103'
+            ],
+            'contentOptions' => [
+                'style' => 'word-break: break-all'
             ],
             'value' => function ($data) {
                 return Yii::t('app', $data['product']['ed']);

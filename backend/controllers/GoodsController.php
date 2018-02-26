@@ -297,7 +297,7 @@ class GoodsController extends Controller {
                     . Yii::t('error', 'frontend.controllers.vendor.error_repeat', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
+                return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);

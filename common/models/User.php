@@ -469,7 +469,7 @@ class User extends \amnah\yii2\user\models\User {
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if(RelationSuppRest::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
-            $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
+            $this->addError($attribute, Yii::t('message', 'common.models.rel_already_exists', ['ru'=>'Ресторан с таким email уже сотрудничает с вами. Проверьте список ваших клиентов!']));
     }
 
     public function validateInviteClient($attribute, $params)

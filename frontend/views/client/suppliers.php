@@ -148,7 +148,7 @@ $gridColumnsCatalog = [
             if($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::button(
-                    '<i class="fa fa-shopping-cart m-r-xs"></i>'. Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru'=>'Сотрудничать']),
+                    '<i class="fa fa-shopping-cart m-r-xs"></i> '. Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru'=>'Сотрудничать']),
                     [
                     'class' => 'btn btn-success btn-sm apply',
                     'data' => ['id' => $data["supp_org_id"]]

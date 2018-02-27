@@ -1815,6 +1815,7 @@ class VendorController extends DefaultController
                                 $relationSuppRestPotential->supp_org_id = $currentUser->organization_id;
                                 $relationSuppRestPotential->invite = RelationSuppRest::INVITE_ON;
                                 $relationSuppRestPotential->status = 3;
+                                $relationSuppRestPotential->supp_user_id = $currentUser->id;
                                 $relationSuppRestPotential->save();
                             }
                             $this->currentUser->sendInviteToActiveClient($user);

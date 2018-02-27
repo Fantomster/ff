@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property booolean $uploaded_processed
  * @property booolean $is_from_market
  * @property booolean $deleted
+ * @property integer $supp_user_id
  * 
  * @property Catalog $catalog
  * @property Organization $client
@@ -76,7 +77,7 @@ class RelationSuppRestPotential extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
-            [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
+            [['rest_org_id', 'supp_org_id', 'cat_id', 'supp_user_id'], 'integer'],
             [['uploaded_catalog'], 'file'],
             [['uploaded_processed', 'vendor_manager_id'], 'safe'],
         ];

@@ -158,7 +158,7 @@ class OrderContentController extends ActiveController {
         $quantityChanged = ($position['quantity'] != $product->quantity);
         $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
 
-        if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+        if (($organizationType == Organization::TYPE_RESTAURANT || in_array($order->status, $allowedStatuses)) && ($quantityChanged || $priceChanged)) {
             $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
             if ($quantityChanged) {
                 $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';

@@ -58,11 +58,11 @@ class OrderContentController extends ActiveController {
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
             ],*/
-            'delete' => [
+            /*'delete' => [
                 'class' => 'yii\rest\DeleteAction',
                 'modelClass' => 'common\models\OrderContent',
                 'checkAccess' => [$this, 'checkAccess'],
-            ]
+            ]*/
         ];
     }
 

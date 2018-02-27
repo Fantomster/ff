@@ -112,7 +112,7 @@ $currencySymbol = $order->currency->iso_code;
                     <b style="font-size: 14px;" >
                         <?= Yii::t('message', 'frontend.views.order.order_comment') ?>
                     </b>
-                    <p class = "pl" style="padding-top: 5px;">
+                    <p class = "pl" style="padding-top: 5px; padding-bottom: 5px;">
                         <?= $order->comment ?>
                     </p>
                 </div>

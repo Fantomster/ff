@@ -37,6 +37,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                                 $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
                                 $model->product_rid = $rkProd->id;
                                 $model->munit_rid = $rkProd->unit_rid;
+                             //   $model->koef = 1.8;
                                 $model->save(false);
                                 return $rkProd->denom;       // return formatted value if desired
                             }

@@ -86,7 +86,7 @@ class CatalogBaseGoodsController extends ActiveController {
         $client = $user->organization;
 
         $query1 = "
-            SELECT  cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note 
+            SELECT  cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note 
             FROM catalog_base_goods as cbg
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
@@ -96,7 +96,7 @@ class CatalogBaseGoodsController extends ActiveController {
                 AND (cbg.deleted = 0) 
                 ";
 
-        $query2 = "SELECT cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note
+        $query2 = "SELECT cbg.id as id, cbg.product, cbg.units, cg.price, cg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note
             FROM catalog_base_goods AS cbg 
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = cbg.id
                             AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
@@ -121,8 +121,17 @@ class CatalogBaseGoodsController extends ActiveController {
         ]);
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            $dataProvider->pagination = false;
             return $dataProvider;
         }
+
+        if($params->page == 0 || $params->count == 0 || $params->count == null || $params->page == null)
+            $dataProvider->pagination = false;
+        else {
+            $dataProvider->pagination->pageSize = $params->count;
+            $dataProvider->pagination->page = $params->page;
+        }
+
 
         $andWhere = "";
         if($params->list != null)

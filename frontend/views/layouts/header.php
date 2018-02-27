@@ -191,6 +191,7 @@ if (!Yii::$app->user->isGuest) {
             $(this).data("url")
         ).done(function(result) {
             refreshMenu(result);
+            $(this).setAttribute('style','visibility: hidden;');
         });
     });
             
@@ -371,9 +372,13 @@ JS;
                                     ?>
                                 </ul>
                             </li>
+                            <?php if((count($unreadMessages) > 0))
+                                {
+                                    ?>
                             <li class="footer">
                                 <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read', ['ru' => 'Пометить как прочитанные']) ?></a>
                             </li>
+                          <?php  } ?>
                         </ul>
                     </li>
                     <li class="dropdown messages-menu">
@@ -393,9 +398,11 @@ JS;
                                     ?>
                                 </ul>
                             </li>
+                            <?php if (count($unreadNotifications) > 0) { ?>
                             <li class="footer">
                                 <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read_two', ['ru' => 'Пометить как прочитанные']) ?></a>
                             </li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>

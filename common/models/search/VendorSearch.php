@@ -7,7 +7,9 @@ use common\models\ManagerAssociate;
 use common\models\Organization;
 use common\models\Order;
 use common\models\Catalog;
+use common\models\RelationSuppRestPotential;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 
 /**
  *
@@ -57,23 +59,48 @@ class VendorSearch extends RelationSuppRest {
     public function search($params, $client_id, $tmp = false)
     {
         $rspTable = RelationSuppRest::tableName();
+        $rspPTable = RelationSuppRestPotential::tableName();
         $orgTable = Organization::tableName();
         $catTable = Catalog::tableName();
 
         $query = RelationSuppRest::find()
-                ->select("$rspTable.*, $orgTable.name as vendor_name, $catTable.status as catalog_status")
+                ->select("$rspTable.rest_org_id, $rspTable.supp_org_id, $rspTable.cat_id, $rspTable.invite, 
+                $rspTable.created_at, $rspTable.updated_at, $rspTable.status, $rspTable.uploaded_catalog, $rspTable.uploaded_processed, 
+                $rspTable.is_from_market, $rspTable.deleted,           
+                $orgTable.name as vendor_name, $catTable.status as catalog_status")
                 ->joinWith('catalog')
                 ->joinWith('vendor');
         $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false]);
-//        $query->groupBy("$rspTable.supp_org_id");
-        
+
+        $query2 = RelationSuppRestPotential::find()
+            ->select("$rspPTable.rest_org_id, $rspPTable.supp_org_id, $rspPTable.cat_id, $rspPTable.invite, 
+                $rspPTable.created_at, $rspPTable.updated_at, $rspPTable.status, $rspPTable.uploaded_catalog, $rspPTable.uploaded_processed, 
+                $rspPTable.is_from_market, $rspPTable.deleted, 
+                $orgTable.name as vendor_name, $catTable.status as catalog_status")
+            ->joinWith('catalog')
+            ->joinWith('vendor');
+        $query2->where(["$rspPTable.rest_org_id" => $client_id, "$rspPTable.deleted" => false]);
+
+        $query3 = RelationSuppRest::find();
+        $query3->select('*')->from(['u' => $query->union($query2, true)]);
+
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort'=> ['defaultOrder' => ['supp_org_id'=>SORT_ASC]],
+            'query' => $query3,
+            'sort'=> ['defaultOrder' =>
+                ['vendor_name'=>SORT_ASC],
+                'attributes' => [
+                    'vendor_name',
+                    'status' =>[
+                            'asc' => ['invite' => SORT_ASC, 'catalog_status' => SORT_ASC, 'status' => SORT_ASC,],
+                            'desc' => ['invite' => SORT_DESC, 'catalog_status' => SORT_DESC, 'status' => SORT_DESC],
+                    ],
+                ],
+            ],
             'pagination' => [
                 'pageSize' => 10,
             ],
         ]);
+
 
         $this->load($params);
 
@@ -83,24 +110,26 @@ class VendorSearch extends RelationSuppRest {
             return $dataProvider;
         }
 
-        $dataProvider->sort->attributes['vendor_name'] = [
-            'asc' => ["$orgTable.name" => SORT_ASC],
-            'desc' => ["$orgTable.name" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['catalog_status'] = [
-            'asc' => ["$catTable.catalog_status" => SORT_ASC],
-            'desc' => ["$catTable.catalog_status" => SORT_DESC],
-        ];
-        
         // grid filtering conditions
-        $query->andFilterWhere([
-            "$rspTable.invite" => $this->invite,
-            "$catTable.id" => $this->cat_id,
+        $query3->andFilterWhere([
+            "invite" => $this->invite,
+            "catalog_id" => $this->cat_id,
         ]);
-        
-        $query->andFilterWhere(['or', 
-            ['like', "$orgTable.name", $this->search_string],
-            ]);
+
+        $query3->andFilterWhere(['or',
+            ['like', "vendor_name", $this->search_string],
+        ]);
+
+        /*$dataProvider->sort->attributes['vendor_name'] = [
+            'asc' => ["vendor_name" => SORT_ASC],
+            'desc' => ["vendor_name" => SORT_DESC],
+
+        ];
+        $dataProvider->sort->attributes['status'] = [
+            'asc' => ["status" => SORT_ASC],
+            'desc' => ["status" => SORT_DESC],
+
+        ];*/
 
         return $dataProvider;
     }

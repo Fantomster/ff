@@ -822,7 +822,7 @@ class Organization extends \yii\db\ActiveRecord {
     /**
      * @return organization data query
      */
-    protected function getOrganizationQuery($organization_id, $type = 'supp') {
+    protected function getOrganizationQuery($organization_id, $type = 'supp', $currency_id = 1) {
         $type_id = ($type == 'supp') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT;
         $prefix = ($type == 'rest') ? 'supp' : 'rest';
         $name = ($type == 'rest') ? 'client' : 'vendor';
@@ -831,8 +831,8 @@ class Organization extends \yii\db\ActiveRecord {
                 (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
                 (select count(id) from `order` where " . $name . "_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where " . $name . "_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from `order` where " . $name . "_id=org.id and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where " . $name . "_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
+                (select sum(total_price) from `order` where " . $name . "_id=org.id and currency_id=$currency_id and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where " . $name . "_id=org.id and currency_id=$currency_id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
                 FROM `relation_supp_rest` AS rel
                 LEFT JOIN  `organization` AS org ON org.id = rel." . $type . "_org_id
                 LEFT JOIN  `franchisee_associate` AS fa ON rel." . $type . "_org_id = fa.organization_id
@@ -847,7 +847,7 @@ class Organization extends \yii\db\ActiveRecord {
         }
         $mailer = Yii::$app->mailer;
         $email = $user->email;
-        $subject = Yii::$app->id . " - " . Yii::$app->params['password_generation'];
+        $subject = Yii::$app->id . " - " . Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']);
         $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
                 ->setTo($email)
                 ->setSubject($subject)

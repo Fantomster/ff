@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\ManagerAssociate;
 use common\models\PaymentSearch;
+use common\models\RelationSuppRestPotential;
 use common\models\UserToken;
 use Yii;
 use yii\web\UploadedFile;
@@ -58,6 +59,7 @@ class ClientController extends DefaultController {
                             'ajax-validate-vendor',
                             'employees',
                             'remove-supplier',
+                            'apply-supplier',
                             'add-first-vendor',
                         ],
                         'allow' => true,
@@ -417,7 +419,7 @@ class ClientController extends DefaultController {
                             /**
                              *
                              * Создаем нового поставщика и организацию
-                             *    
+                             *
                              * */
                             $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                             $user->status = User::STATUS_UNCONFIRMED_EMAIL;
@@ -440,11 +442,11 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * 1) Делаем связь категорий поставщика
-                         * 
+                         *
                          * */
 //                    if (!empty($categorys)) {
 //                        foreach ($categorys as $arrCategorys) {
-//                            
+//
 //                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
 //                            \Yii::$app->db->createCommand($sql)->execute();
 //                        }
@@ -452,7 +454,7 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * 2) Создаем базовый и каталог для ресторана
-                         *    
+                         *
                          * */
                         if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
@@ -502,7 +504,7 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
-                         *    
+                         *
                          * */
                         $article_create = 0;
                         foreach ($arrCatalog as $arrCatalogs) {
@@ -559,9 +561,9 @@ class ClientController extends DefaultController {
                         }
 
                         /**
-                         *  
+                         *
                          * 5) Связь ресторана и поставщика
-                         *     
+                         *
                          * */
                         $relationSuppRest->rest_org_id = $currentUser->organization_id;
                         $relationSuppRest->supp_org_id = $get_supp_org_id;
@@ -575,7 +577,7 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * Отправка почты
-                         * 
+                         *
                          * */
                         $currentUser->sendInviteToVendor($user);
                         $currentOrganization = $currentUser->organization;
@@ -615,7 +617,7 @@ class ClientController extends DefaultController {
                             /**
                              *
                              * Создаем нового поставщика и организацию
-                             *    
+                             *
                              * */
                             $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                             $user->status = User::STATUS_UNCONFIRMED_EMAIL;
@@ -638,11 +640,11 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * 1) Делаем связь категорий поставщика
-                         * 
+                         *
                          * */
 //                    if (!empty($categorys)) {
 //                        foreach ($categorys as $arrCategorys) {
-//                            
+//
 //                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
 //                            \Yii::$app->db->createCommand($sql)->execute();
 //                        }
@@ -650,7 +652,7 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * 2) Создаем базовый и каталог для ресторана
-                         *    
+                         *
                          * */
                         if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
@@ -700,7 +702,7 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
-                         *    
+                         *
                          * */
                         $article_create = 0;
                         foreach ($arrCatalog as $arrCatalogs) {
@@ -756,9 +758,9 @@ class ClientController extends DefaultController {
                         }
 
                         /**
-                         *  
+                         *
                          * 5) Связь ресторана и поставщика
-                         *     
+                         *
                          * */
                         $relationSuppRest->rest_org_id = $currentUser->organization_id;
                         $relationSuppRest->supp_org_id = $get_supp_org_id;
@@ -773,7 +775,7 @@ class ClientController extends DefaultController {
                         /**
                          *
                          * Отправка почты
-                         * 
+                         *
                          * */
                         $currentUser->sendInviteToVendor($user);
                         $currentOrganization = $currentUser->organization;
@@ -1194,7 +1196,7 @@ class ClientController extends DefaultController {
                     $ed = trim($arrCatalogs['dataItem']['ed']);
                     $note = trim($arrCatalogs['dataItem']['note']);
                     //сравниваем массивы каталога и пришедший массив
-                    //Если пришедший ID п есть в массиве каталога 
+                    //Если пришедший ID п есть в массиве каталога
                     if (!ArrayHelper::isIn($goods_id, $array_goods_id)) {
 
                         $CatalogBaseGoods = new CatalogBaseGoods();
@@ -1296,7 +1298,7 @@ class ClientController extends DefaultController {
                         'body' => Yii::t('message', 'frontend.controllers.client.please', ['ru' => 'Пожалуйста, повторите попытку сохранения'])]];
                 return $result;
             }
-            //$message =  'Успех';   
+            //$message =  'Успех';
             //return $this->renderAjax('suppliers/_success', ['message' => $message]);
         }
         $catalog = CatalogGoods::find()
@@ -1330,8 +1332,14 @@ class ClientController extends DefaultController {
     public function actionRemoveSupplier() {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
+            $type = \Yii::$app->request->post('type');
             $currentUser = User::findIdentity(Yii::$app->user->id);
-            RelationSuppRest::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            if($type == 0) {
+                RelationSuppRest::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            }
+            else {
+                RelationSuppRestPotential::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            }
         }
     }
 
@@ -1351,10 +1359,11 @@ class ClientController extends DefaultController {
         ])->joinWith('currency as c')
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
             ->andWhere('client_id = :cid', [':cid' => $currentUser->organization_id])
+            ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
 
-        $currencyList = ['1' => 'RUB'];
+        $currencyList = [];
 
         foreach($currency_list as $c) {
             $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
@@ -1362,7 +1371,7 @@ class ClientController extends DefaultController {
 
 
         $header_info_zakaz = \common\models\Order::find()->
-                        where(['client_id' => $currentUser->organization_id])->count();
+                        where(['client_id' => $currentUser->organization_id])->andWhere(['not in','status', [Order::STATUS_FORMING]])->count();
         empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
                         where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();
@@ -1447,9 +1456,9 @@ class ClientController extends DefaultController {
             array_push($arr_price, $area_charts['total_price']);
         }
         /*
-         * 
+         *
          * PIE CHART Аналитика по поставщикам
-         * 
+         *
          */
         $vendors_total_price_sql = Yii::$app->db->createCommand("
             SELECT vendor_id,sum(total_price) as total_price FROM `order` WHERE  
@@ -1475,15 +1484,15 @@ class ClientController extends DefaultController {
         }
         //$vendors_total_price = json_encode($vendors_total_price);
         /*
-         * 
+         *
          * PIE CHART Аналитика по поставщикам END
-         * 
+         *
          */
 
         /*
-         * 
+         *
          * GridView Аналитика ТОП продуктов
-         * 
+         *
          */
         $query = Yii::$app->db->createCommand("
             SELECT 
@@ -1514,15 +1523,15 @@ class ClientController extends DefaultController {
             ],
         ]);
         /*
-         * 
+         *
          * GridView Аналитика ТОП продуктов END
-         * 
+         *
          */
 
         /*
-         * 
+         *
          * BarChart заказы по поставщикам
-         * 
+         *
          */
         $chart_bar_value = [];
         $chart_bar_label = [];
@@ -1535,9 +1544,9 @@ class ClientController extends DefaultController {
 //        $chart_bar_value = json_encode($chart_bar_value);
 //        $chart_bar_label = json_encode($chart_bar_label);
         /*
-         * 
+         *
          * BarChart заказы по поставщикам END
-         * 
+         *
          */
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('analytics/index', compact(
@@ -1570,9 +1579,9 @@ class ClientController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $suppliers_where = "";
         /*
-         * 
+         *
          * Поставщики
-         * 
+         *
          */
         $searchString = "";
         $where = " AND `relation_supp_rest`.deleted = 0";
@@ -1598,9 +1607,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         ]);
 
         /*
-         * 
+         *
          * Поставщики END
-         * 
+         *
          */
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $orders = $currentUser->organization->getCart();
@@ -1664,6 +1673,35 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
         } else {
             return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
+        }
+    }
+
+    public function actionApplySupplier ()
+    {
+        if (Yii::$app->request->isAjax) {
+            $id = \Yii::$app->request->post('id');
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $relationP = RelationSuppRestPotential::findOne(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
+            if ($relationP !== null) {
+                $relationP->id = null;
+                $relation = new RelationSuppRest();
+                $relation->attributes = $relationP->attributes;
+                $relation->status = 0;
+                $relation->invite = RelationSuppRest::INVITE_ON;
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if ($relation->save()) {
+                        $new = new ManagerAssociate();
+                        $new->manager_id = $relationP->supp_user_id;
+                        $new->organization_id = $relationP->rest_org_id;
+                        $new->save();
+                        $relationP->delete();
+                    }
+                    $transaction->commit();
+                } catch (Exception $e) {
+                $transaction->rollBack();
+                }
+            }
         }
     }
 

@@ -49,7 +49,7 @@ class OrderSearch extends Order {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $franchisee_id, $prev30 = false) {
+    public function search($params, $franchisee_id, $prev30 = false, $currencyId = null) {
         $orderTable = Order::tableName();
         $query = Order::find();
         $this->load($params);
@@ -91,6 +91,9 @@ class OrderSearch extends Order {
         $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = vendor.id");
         $query->leftJoin("franchisee_associate as fa", "fa.organization_id = client.id");
         $query->where(Order::tableName() . '.status != ' .Order::STATUS_FORMING);
+        if($currencyId){
+            $query->where(Order::tableName() . '.currency_id= ' .$currencyId);
+        }
         $query->andWhere(['or', ['franchisee_associate.franchisee_id' => $franchisee_id], ['fa.franchisee_id' => $franchisee_id]]);
 
         $dataProvider = new ActiveDataProvider([

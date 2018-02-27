@@ -18,6 +18,7 @@ class VendorSearch extends Organization {
     public $searchString;
     public $date_from;
     public $date_to;
+    public $filter_currency;
 
     /**
      * @inheritdoc
@@ -65,8 +66,8 @@ class VendorSearch extends Organization {
                 (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
                 (select count(id) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
+                (select sum(total_price) from `order` where vendor_id=org.id and currency_id=$this->filter_currency and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where vendor_id=org.id and currency_id=$this->filter_currency and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
                 FROM `organization` AS org
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id 
@@ -74,7 +75,7 @@ class VendorSearch extends Organization {
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
 
         if($client_id){
-            $query = parent::getOrganizationQuery($client_id);
+            $query = parent::getOrganizationQuery($client_id, 'supp', $this->filter_currency);
         }
 
         if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){

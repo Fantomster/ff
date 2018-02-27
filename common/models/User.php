@@ -46,8 +46,9 @@ class User extends \amnah\yii2\user\models\User {
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
             // email rules invite client
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru'=>'Введите эл.почту партнера'])],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
-            // account page
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor2'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
+            [['email'],'validateClient', 'on'=>'sendInviteFromActiveVendor'],      // account page
+            [['email'],'validateInviteClient', 'on'=>'sendInviteFromActiveVendor2'],      // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
             // admin crud rules
             [['role_id', 'status'], 'required', 'on' => ['admin']],
@@ -284,6 +285,32 @@ class User extends \amnah\yii2\user\models\User {
      * @param User $client
      * @return int
      */
+    public function sendInviteToActiveClient($client) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+        // send email
+        $vendor = $this->organization->name;
+        $email = $client->email;
+        $subject = Yii::t('app', 'common.models.invitation', ['ru'=>"Приглашение на MixCart"]);
+        $result = $mailer->compose('acceptActiveVendorInvite', compact("subject", "client", "vendor"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        //return $result;
+    }
+
+    /**
+     * Send email invite to restaurant
+     * @param User $client
+     * @return int
+     */
     public function sendInviteToFriend($email) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -438,4 +465,17 @@ class User extends \amnah\yii2\user\models\User {
         return EmailFails::find()->where("email = :e", [':e' => $this->email])->orderBy('type DESC, id DESC')->one();
     }
 
+    public function validateClient($attribute, $params)
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        if(RelationSuppRest::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
+            $this->addError($attribute, Yii::t('message', 'common.models.rel_already_exists', ['ru'=>'Ресторан с таким email уже сотрудничает с вами. Проверьте список ваших клиентов!']));
+    }
+
+    public function validateInviteClient($attribute, $params)
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        if(RelationSuppRestPotential::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
+            $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
+    }
 }

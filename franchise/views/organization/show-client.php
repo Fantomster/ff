@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
@@ -182,18 +182,25 @@ $this->registerCss("
                     <div class="modal-header f-header">
                         <h4 class="modal-title f-title"><?= Yii::t('app', 'franchise.views.organization.vendors_list_two', ['ru'=>'Список поставщиков ресторана']) ?> <?= $organization->name ?></h4>
                     </div>
-                    <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
-                    ?>
+
+                    <div class="col-lg-2 col-md-2 col-sm-2" style="margin-bottom: 20px;">
+                        <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?=
+                        Html::dropDownList('filter_currency', null, $currencyData['currency_list'], ['class' => 'form-control', 'id' => 'filter_currency', 'prompt' => Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта'])])
+                        ?>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-12">
                             <?=
                             GridView::widget([
-                                'id' => 'vendorsList',
+                                'id' => 'clientsList',
                                 'dataProvider' => $dataProvider,
                                 'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
-                                //'filterModel' => $searchModel,
+                                'filterModel' => $searchModel,
                                 'filterPosition' => false,
+                                'pjax' => true,
+                                'pjaxSettings' => ['options' => ['id' => 'client-list'], 'loadingCssClass' => false],
                                 'summary' => '',
                                 'options' => ['class' => 'table-responsive'],
                                 'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
@@ -256,7 +263,7 @@ $this->registerCss("
                                     [
                                         'format' => 'raw',
                                         'attribute' => 'orderSum',
-                                        'value' => function ($data) {
+                                        'value' => function ($data) use($currencyData) {
                                             $progress = $data["orderSum"] ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
 //                                            if ($progress > 0) {
                                             $divider = '<i class="fa fa-caret-up"></i>';
@@ -267,7 +274,7 @@ $this->registerCss("
                                             } elseif ($progress > 0) {
                                                 $class = " text-orange";
                                             }
-                                            return ($data["orderSum"] ? $data["orderSum"] : 0) . " RUB <span class='description-percentage $class'>$divider $progress%";
+                                            return ($data["orderSum"] ? $data["orderSum"] : 0) . " " . $currencyData['iso_code'] . " <span class='description-percentage $class'>$divider $progress%";
                                         },
                                         'label' => Yii::t('app', 'franchise.views.organization.orders_sum_two', ['ru'=>'Сумма заказов']),
                                     ],
@@ -304,7 +311,6 @@ $this->registerCss("
                             ?>
                         </div>
                     </div>
-                    <?php Pjax::end() ?>
                 </div>
                 <div class="modal-body tab-pane" id="tab_4">
                     <div class="modal-header f-header">
@@ -334,3 +340,26 @@ $this->registerCss("
     ?>
     <?php Modal::end(); ?>
 </section>
+<?php
+$url = Url::to(['organization/show-client', 'id'=>$organization->id]);
+$customJs = <<< JS
+
+$("#filter_currency").on("change", function () {
+$("#filter_currency").attr('disabled','disabled')
+
+var filter_currency =  $("#filter_currency").val();
+
+$.pjax({
+type: 'GET',
+push: false,
+timeout: 10000,
+url: "$url",
+container: "#client-list",
+data: {
+filter_currency: filter_currency
+}
+}).done(function(text) { console.log(text); $("#filter_currency").removeAttr('disabled') });
+});
+
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_READY);

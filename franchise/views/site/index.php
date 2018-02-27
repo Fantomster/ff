@@ -20,8 +20,19 @@ use dosamigos\chartjs\ChartJs;
         <small><?= Yii::t('app', 'franchise.views.site.desktop_two', ['ru'=>'Рабочий стол']) ?></small>
     </h1>
 </section>
+<section class="content" style="min-height: 40px;">
+    <div class="row">
+    <div class="col-lg-2 col-md-2 col-sm-2">
+        <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+        <?=
+        Html::dropDownList('filter_currency', $currencyId, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency', 'prompt'=>Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта'])])
+        ?>
+    </div>
+    </div>
+</section>
 <section class="content">
     <div class="row hidden-xs">
+        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
         <div class="col-md-8">
             <div class="box box-info">
                 <div class="box-header with-border">
@@ -69,7 +80,7 @@ use dosamigos\chartjs\ChartJs;
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
                                 <span class="description-percentage text-green"><?= $franchiseeType->share ?>%</span>
-                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * $franchiseeType->share / 100, 2, '.', ' ') ?><?= Yii::t('app', ' руб.') ?></h5>
+                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * $franchiseeType->share / 100, 2, '.', ' ') ?> <?= $iso_code ?></h5>
                                 <span class="description-text"><?= Yii::t('app', 'franchise.views.site.your_income', ['ru'=>'Ваша прибыль']) ?></span>
                             </div>
                             <!-- /.description-block -->
@@ -78,7 +89,7 @@ use dosamigos\chartjs\ChartJs;
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
                                 <span class="description-percentage text-yellow"><?= 100 - $franchiseeType->share ?>%</span>
-                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.site.rouble', ['ru'=>'руб.']) ?></h5>
+                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> <?= $iso_code ?></h5>
                                 <span class="description-text"><?= Yii::t('app', 'franchise.views.site.royalty', ['ru'=>'Роялти MixCart']) ?></span>
                             </div>
                             <!-- /.description-block -->
@@ -112,6 +123,7 @@ use dosamigos\chartjs\ChartJs;
             </div>
             <!-- /.box -->
         </div>
+
         <div class="col-md-4">
             <div class="box box-info">
                 <div class="box-header with-border">
@@ -128,19 +140,19 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.site.vendors_to_me', ['ru'=>'Поставщики Мне:']) ?></td>
-                                    <td style="text-align: right; font-size: 18px; color: rgba(51, 54, 59, 0.8); font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'], 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.site.rouble_two', ['ru'=>'руб.']) ?></td>
+                                    <td style="text-align: right; font-size: 18px; color: rgba(51, 54, 59, 0.8); font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'], 2, '.', ' ') ?> <?= $iso_code ?></td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.site.mix_me', ['ru'=>'MixCart Мне:']) ?></td>
-                                    <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> <?= Yii::t('app', 'franchise.views.site.zero', ['ru'=>'0 руб.']) ?></td>
+                                    <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> 0 <?= $iso_code ?></td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.site.me_to_mix', ['ru'=>"Я MixCart\'у:"]) ?></td>
-                                    <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> <?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.site.rouble_three', ['ru'=>'руб.']) ?></td>
+                                    <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> <?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> <?= $iso_code ?></td>
                                 </tr>
                                 <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
                                     <td style="text-align: left; font-weight: bold;"><?= Yii::t('app', 'franchise.views.site.total_income', ['ru'=>'Итого заработано:']) ?></td>
-                                    <td style="text-align: right; font-size: 22px; font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'] - ($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100), 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.site.rouble_four', ['ru'=>'руб.']) ?></td>
+                                    <td style="text-align: right; font-size: 22px; font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'] - ($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100), 2, '.', ' ') ?> <?= $iso_code ?></td>
                                 </tr>
                                 <tr>
                                     <td></td>
@@ -166,7 +178,7 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.site.turnover', ['ru'=>'Оборот:']) ?></td>
-                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= number_format($totalIncome, 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.site.rouble_five', ['ru'=>'руб.']) ?></td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= number_format($totalIncome, 2, '.', ' ') ?> <?= $iso_code ?></td>
                                 </tr>
                             </tbody></table>
                     </div>         
@@ -174,6 +186,7 @@ use dosamigos\chartjs\ChartJs;
                 <!-- /.box-body -->
             </div>            <!-- /.box -->
         </div>
+        <?php Pjax::end(); ?>
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -278,3 +291,29 @@ use dosamigos\chartjs\ChartJs;
         </div>    
     </div>
 </section>
+
+<?php
+$analyticsUrl = Url::to(['/']);
+
+$customJs = <<< JS
+
+$("#filter_currency").on("change", function () {
+$("#filter_currency").attr('disabled','disabled')      
+       
+var filter_currency =  $("#filter_currency").val();
+
+    $.pjax({
+     type: 'GET',
+     push: false,
+     timeout: 10000,
+     url: "$analyticsUrl",
+     container: "#analytics-list",
+     data: {
+         filter_currency: filter_currency
+           }
+   }).done(function() { $("#filter_currency").removeAttr('disabled') });
+});
+
+JS;
+
+$this->registerJs($customJs, View::POS_READY);

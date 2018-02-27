@@ -76,7 +76,7 @@ $form = ActiveForm::begin([
             ?>
         </div>
     </div>
-    <?php if ($canManage) { ?>
+    <?php if ($canManage || in_array($currentUser->role_id, \common\models\Role::getFranchiseeEditorRoles())) { ?>
     <div class="row">
         <div class="col-md-12">
             <?=

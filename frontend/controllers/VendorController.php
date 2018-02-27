@@ -56,6 +56,7 @@ class VendorController extends DefaultController
                             'ajax-create-user',
                             'ajax-delete-user',
                             'ajax-update-user',
+                            'ajax-update-currency',
                             'ajax-validate-user',
                             'remove-client',
                             'payments'
@@ -1966,25 +1967,6 @@ class VendorController extends DefaultController
         $currentUser = $this->currentUser;
         $vendor = $currentUser->organization;
 
-        //Список валют из заказов
-        $currency_list = Order::find()->select([
-            'order.currency_id',
-            'c.id',
-            'c.iso_code',
-            'COUNT(order.id) as count'
-        ])->joinWith('currency as c')
-            ->where('status <> :status', [':status' => Order::STATUS_FORMING])
-            ->andWhere('vendor_id = :cid', [':cid' => $currentUser->organization_id])
-            ->orderBy('count DESC')
-            ->groupBy('iso_code')
-            ->asArray()->all();
-
-        $currencyList = [];
-
-        foreach ($currency_list as $c) {
-            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
-        }
-
         $orderTable = Order::tableName();
         $maTable = ManagerAssociate::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
@@ -2066,7 +2048,9 @@ class VendorController extends DefaultController
             empty($filter_employee) ? "" : $where .= " and accepted_by_id='" . $filter_employee . "'";
         }
 
-        $filter_currency = trim(\Yii::$app->request->get('filter_currency', 1));
+        $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
+
+        $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
         empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
 
         // Объем продаж чарт
@@ -2187,6 +2171,22 @@ class VendorController extends DefaultController
         return $this->render('analytics/index', compact('currencyList', 'filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee'
         ));
     }
+
+
+    public function actionAjaxUpdateCurrency()
+    {
+        if (Yii::$app->request->isPjax) {
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
+            $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+            $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
+            $count = count($currencyList);
+
+            return $this->renderPartial('analytics/currency', compact('currencyList', 'count'));
+        }
+        return '';
+    }
+
 
     /*
      *  index

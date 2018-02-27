@@ -163,17 +163,19 @@ HTML;
 
                 <div class="col-lg-2 col-md-2 col-sm-6">
                     <?= Html::label(Yii::t('message', 'frontend.views.vendor.client', ['ru' => 'Клиент']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+
                     <?= Html::dropDownList('filter_client', null, $filter_restaurant, ['prompt' => Yii::t('message', 'frontend.views.vendor.all_five', ['ru' => 'Все']), 'class' => 'form-control', 'id' => 'filter_client', 'options' => [\Yii::$app->request->get('filter_client') => ["Selected" => true]]])
                     ?>
                 </div>
-            <?php if(count($currencyList)>0): ?>
-                <div class="col-lg-1 col-md-1 col-sm-6">
-                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                    <?=
-                    Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
-                    ?>
+                <div class="col-lg-1 col-md-1 col-sm-6" id="alCurrencies">
+                    <?php if (count($currencyList) > 0): ?>
+                        <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?=
+                        Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
+                        ?>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+
                 <div class="col-lg-1 col-md-1 col-sm-2">
                     <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
                     <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
@@ -350,6 +352,7 @@ $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
 
 $analyticsUrl = Url::to(['vendor/analytics']);
+$analyticsCurrencyUrl = Url::to(['vendor/ajax-update-currency']);
 
 $customJs = <<< JS
 
@@ -423,6 +426,25 @@ var filter_currency =  $("#filter_currency").val();
          filter_currency: filter_currency,
            }
    }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee,#filter_currency").removeAttr('disabled') });
+});
+
+$("#filter-date,#filter-date-2").on("change", function () {
+$("#filter-date,#filter-date-2#filter_currency").attr('disabled','disabled')      
+var filter_from_date =  $("#filter-date").val();
+var filter_to_date =  $("#filter-date-2").val();        
+var filter_currency =  $("#filter_currency").val();        
+    $.pjax({
+     type: 'GET',
+     push: false,
+     timeout: 10000,
+     url: "$analyticsCurrencyUrl",
+     container: "#alCurrencies",
+     data: {
+         filter_from_date: filter_from_date,
+         filter_to_date: filter_to_date,
+         filter_currency: filter_currency
+           }
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee,#filter_currency").removeAttr('disabled') });
 });
 
 $("#reset").on("click", function () {

@@ -107,9 +107,9 @@ class SiteController extends DefaultController
     public function actionIndex()
     {
         $iso_code = "RUB";
-        $currencyId = null;
 
         $currencyList = Currency::getFullCurrencyList($this->currentFranchisee->id);
+        $currencyId = key($currencyList);
 
         if(Yii::$app->request->get() && Yii::$app->request->isPjax) {
             $currencyId = Yii::$app->request->get('filter_currency');

@@ -89,7 +89,7 @@ class OrganizationController extends DefaultController {
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
-        $searchModel['filter_currency'] = $searchModel->filter_currency = 1;
+        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
 
         if(\Yii::$app->request->get('searchString')){
             $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -268,7 +268,7 @@ class OrganizationController extends DefaultController {
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
-        $searchModel['filter_currency'] = $searchModel->filter_currency = 1;
+        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
 
         if(\Yii::$app->request->get('searchString')){
             $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -519,7 +519,7 @@ class OrganizationController extends DefaultController {
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
-        $searchModel['filter_currency'] = $searchModel->filter_currency = 1;
+        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
         }

@@ -20,6 +20,7 @@ use yii\filters\AccessControl;
 use common\components\AccessRule;
 use yii\data\ActiveDataProvider;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 /**
  * GoodsController implements the CRUD actions for CatalogBaseGoods model.
@@ -85,7 +86,7 @@ class GoodsController extends Controller {
         return $this->render('vendor', compact('id', 'searchModel', 'dataProvider', 'isEditable'));
     }
 
-    public function actionAjaxUpdateProductMarketPlace($id, $supp_org_id = null) {
+    public function actionAjaxUpdateProductMarketPlace($id, $cat_id = null, $supp_org_id = null) {
         if($id){
             $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         }else{
@@ -95,15 +96,7 @@ class GoodsController extends Controller {
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
-//        $categorys = new \yii\base\DynamicModel([
-//            'sub1', 'sub2'
-//        ]);
-//        $categorys->addRule(['sub1', 'sub2'], 'required', ['message' => Yii::t('app', 'Укажите категорию товара')])
-//                ->addRule(['sub1', 'sub2'], 'integer');
-//        if (!empty($catalogBaseGoods->category_id)) {
-//            $categorys->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
-//            $categorys->sub2 = $catalogBaseGoods->category_id;
-//        }
+
         if (!empty($catalogBaseGoods->category_id)) {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
             $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
@@ -112,26 +105,34 @@ class GoodsController extends Controller {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $catalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
-                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-                if($supp_org_id){
-                    $catalogBaseGoods->supp_org_id = $supp_org_id;
-                    $catalogBaseGoods->cat_id = Catalog::findOne(['supp_org_id' => $supp_org_id, 'type' => 1])->id;
+                if($id)
+                    $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
+                else
+                    $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'deleted' => 0]);
+
+                if ($checkBaseGood) {
+                    $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
+                    return $this->renderAjax('_success', ['message' => $message]);
                 }
+                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+                $catalogBaseGoods->supp_org_id = $supp_org_id;
+
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = Yii::t('app', 'Товар обновлен!');
+
                         return $this->renderAjax('_success', ['message' => $message]);
                     }
                 } else {
                     if ($post && $catalogBaseGoods->validate()) {
-                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub1 ? $catalogBaseGoods->sub2 : null;
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+
+                        $message = Yii::t('app', 'Товар обновлен!');
                         return $this->renderAjax('_success', ['message' => $message]);
                     }
                 }
@@ -296,7 +297,7 @@ class GoodsController extends Controller {
                     . Yii::t('error', 'frontend.controllers.vendor.error_repeat', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
+                return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
@@ -320,7 +321,7 @@ class GoodsController extends Controller {
                     . Yii::t('app', '<small>Вы пытаетесь загрузить каталог объемом больше ') . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', ' позиций, обратитесь к нам и мы вам поможем')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
+                return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
             }
             //Проверяем наличие дублей в списке
             if ($importType == 2 || $importType == 3) {
@@ -337,13 +338,12 @@ class GoodsController extends Controller {
                     . Yii::t('app', '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! ')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
+                return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
             }
             unset($xlsArray);
 
             if ($importType == 1) {
                 $transaction = Yii::$app->db->beginTransaction();
-                $cat_id = Catalog::findOne(['supp_org_id' => $id, 'type' => 1])->id;
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
@@ -386,13 +386,14 @@ class GoodsController extends Controller {
                     }
                     $transaction->commit();
                     unlink($path);
-                    return $this->redirect(['goods/vendor', 'id' => $vendor_id]);
+                    return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
                 } catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
                     Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error', ['ru' => 'Ошибка сохранения, повторите действие'])
                         . Yii::t('error', 'frontend.controllers.vendor.saving_error_two', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                    return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
                 }
             }
             if ($importType == 2) {
@@ -426,13 +427,14 @@ class GoodsController extends Controller {
                     }
                     $transaction->commit();
                     unlink($path);
-                    return $this->redirect(['goods/vendor', 'id' => $vendor_id]);
+                    return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
                 } catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
                     Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_three', ['ru' => 'Ошибка сохранения, повторите действие'])
                         . Yii::t('error', 'frontend.controllers.vendor.saving_error_four', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                    return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
                 }
             }
             if ($importType == 3) {
@@ -462,13 +464,14 @@ class GoodsController extends Controller {
                     }
                     $transaction->commit();
                     unlink($path);
-                    return $this->redirect(['goods/vendor', 'id' => $vendor_id]);
+                    return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
                 } catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
                     Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_five', ['ru' => 'Ошибка сохранения, повторите действие'])
                         . Yii::t('error', 'frontend.controllers.vendor.repeat_error', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                    return $this->redirect(Url::to(\Yii::$app->request->getReferrer()));
                 }
             }
         }

@@ -58,11 +58,11 @@ class OrderContentController extends ActiveController {
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
             ],*/
-            'delete' => [
+            /*'delete' => [
                 'class' => 'yii\rest\DeleteAction',
                 'modelClass' => 'common\models\OrderContent',
                 'checkAccess' => [$this, 'checkAccess'],
-            ]
+            ]*/
         ];
     }
 
@@ -158,7 +158,7 @@ class OrderContentController extends ActiveController {
         $quantityChanged = ($position['quantity'] != $product->quantity);
         $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
 
-        if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+        if (($organizationType == Organization::TYPE_RESTAURANT || in_array($order->status, $allowedStatuses)) && ($quantityChanged || $priceChanged)) {
             $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
             if ($quantityChanged) {
                 $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';

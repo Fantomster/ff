@@ -7,6 +7,7 @@ use yii\web\View;
 use yii\bootstrap\Modal;
 use common\assets\CroppieAsset;
 use yii\helpers\Url;
+use common\models\Catalog;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\CatalogBaseGoodsSearch */
@@ -84,6 +85,7 @@ JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
 <?php
+$cat_id = Catalog::findOne(['supp_org_id' => $id, 'type' => 1])->id;
 Modal::begin([
     'id' => 'add-product-market-place',
     'clientOptions' => false,
@@ -106,7 +108,7 @@ Modal::end();
                     'tag' => 'a',
                     'data-target' => '#add-product-market-place',
                     'class' => 'btn btn-fk-success btn-sm pull-right',
-                    'href' => Url::to(['goods/ajax-update-product-market-place', 'id' => 0, 'supp_org_id'=>$id]),
+                    'href' => Url::to(['goods/ajax-update-product-market-place', 'cat_id' => $cat_id, 'supp_org_id'=>$id, 'id' => 0]),
                 ],
             ])
             ?>
@@ -146,9 +148,9 @@ Modal::end();
                 'format' => 'raw',
                 'contentOptions' => ['style' => 'width:70px'],
                 'headerOptions' => ['class' => 'text-center'],
-                'value' => function ($data) {
+                'value' => function ($data) use ($cat_id) {
             $link = Html::a($data['product'], ['ajax-update-product-market-place',
-                        'id' => $data['id'], 'supp_org_id' => $data['supp_org_id']], [
+                        'cat_id'=> $cat_id, 'id' => $data['id'], 'supp_org_id' => $data['supp_org_id']], [
                         'data' => [
                             'target' => '#add-product-market-place',
                             'toggle' => 'modal',

@@ -219,6 +219,9 @@ $this->registerJs(
             });
             
             $(document).on("click", "a", function(e) {
+                if ($(".block_wrap_bask_tover").length == 0) {
+                    dataEdited = 0;
+                }
                 if (dataEdited) {
                     e.preventDefault();
                     var link = $(this).attr("href");
@@ -251,12 +254,14 @@ $this->registerJs(
             $(document).on("change", ".quantity", function(e) {
                 var url = $(this).closest(".block_wrap_bask_tover").find(".block_right").data("url");
                 var form = $("#cartForm");
-                var block = $(this).closest(".block_wrap_bask_tover").find(".block_right")
+                var block = $(this).closest(".block_wrap_bask_tover").find(".block_right");
+                var button = $(this).closest(".block_wrap_bask_tover").find(".checkout-button");
                 $.post(
                     url,
                     form.serialize()
                 ).done(function (result) {
                     block.html(result.total);
+                    button.html(result.button);
                     var i;
                     for (i = 0; i < result.expectedPositions.length; ++i) {
                         $("#position_" + result.expectedPositions[i].id).html(result.expectedPositions[i].price);
@@ -392,16 +397,9 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     </p>
                                 </div>
                                 <div class="checkout_buttons">
-                                    <?=
-                                    (!$forMinOrderPrice) ? Html::button(Yii::t('message', 'frontend.views.order.make_order', ['ru' => 'Оформить заказ']), [
-                                                'class' => 'but_go_zakaz create pull-right',
-                                                'data' => [
-                                                    'url' => Url::to(['/order/ajax-make-order']),
-                                                    'id' => $order->id,
-                                                    'all' => false,
-                                                ]
-                                            ]) : ('<div class="but_go_zakaz create pull-right alRightBlock"><button type="button" class="btn btn-default" disabled="disabled">' . Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']) . '</button><br><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru' => 'до минимального заказа']) . ' ' . $forMinOrderPrice . ' ' . $currencySymbol . '</p></div>');
-                                    ?>
+                                    <span class="checkout-button">
+                                    <?= $this->render("_checkout-position-button", compact("order", "forMinOrderPrice", "currencySymbol")) ?>
+                                    </span>
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
                                         'class' => 'but_comments comment pull-right',

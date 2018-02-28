@@ -146,7 +146,8 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 <?php
 $form = ActiveForm::begin([
             'id' => 'marketplace-product-form',
-            'action' => Url::toRoute(['ajax-update-product-market-place', 'id' => isset($catalogBaseGoods->id) ? $catalogBaseGoods->id : 0, 'supp_org_id' => isset($supp_org_id) ? $supp_org_id : 0]),
+            'action' =>
+                Url::toRoute(['ajax-update-product-market-place', 'id' => isset($catalogBaseGoods->id) ? $catalogBaseGoods->id : 0, 'supp_org_id' => isset($supp_org_id) ? $supp_org_id : 0]),
         ]);
 ?>
 
@@ -246,7 +247,7 @@ $form = ActiveForm::begin([
                     ]
                 ])->label(false);
                 ?>
-<?= $catalogBaseGoods->isNewRecord ? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value' => Yii::$app->request->get('id')])->label(false) : '' ?>
+<?= $catalogBaseGoods->isNewRecord ? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value' => Yii::$app->request->get('cat_id')])->label(false) : '' ?>
             </div>
         </div>
     </div>

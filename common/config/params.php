@@ -18,6 +18,7 @@ return [
     #id франчази к которому крепим организации, для которых не нашли франчей
     'default_franchisee_id' => 1,
     //static urls
+    'shortHome' => 'mixcart.ru',
     'staticUrl' => [
         'ru' => [
             'market' => 'https://market.mixcart.ru/',

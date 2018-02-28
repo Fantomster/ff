@@ -1546,16 +1546,16 @@ class ClientController extends DefaultController {
 
     public function actionAjaxUpdateCurrency()
     {
+        $count = 0;
+        $currencyList = [];
         if (Yii::$app->request->isPjax) {
             $currentUser = User::findIdentity(Yii::$app->user->id);
             $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
             $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
             $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
             $count = count($currencyList);
-
-            return $this->renderPartial('analytics/currency', compact('currencyList', 'count'));
         }
-        return '';
+        return $this->renderPartial('analytics/currency', compact('currencyList', 'count'));
     }
 
 

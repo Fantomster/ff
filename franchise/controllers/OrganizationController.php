@@ -39,10 +39,10 @@ class OrganizationController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent'],
+                'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent', 'ajax-update-currency'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization'],
+                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization', 'ajax-update-currency'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -81,15 +81,11 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionClients() {
-
-        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id);
-
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
-        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
 
         if(\Yii::$app->request->get('searchString')){
             $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -109,6 +105,9 @@ class OrganizationController extends DefaultController {
             $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
         }
 
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'client_id', $searchModel->date_from, $searchModel->date_to);
+        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
+
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getClientsExportColumns();
@@ -119,6 +118,23 @@ class OrganizationController extends DefaultController {
             return $this->render('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         }
     }
+
+
+    public function actionAjaxUpdateCurrency()
+    {
+        $count = 0;
+        $currencyList = [];
+        if (Yii::$app->request->isPjax) {
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
+            $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+            $currency_list = Currency::getCurrencyData($currentUser->organization_id, $this->currentFranchisee->id, 'client_id', $filter_from_date, $filter_to_date);
+            $currencyList = $currency_list['currency_list'];
+            $count = count($currencyList);
+        }
+        return $this->renderPartial('currency', compact('currencyList', 'count'));
+    }
+
 
     public function actionAjaxShowClient($id) {
         $client = Organization::find()
@@ -260,15 +276,12 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionVendors() {
-
-        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'vendor_id');
-
         $searchModel = new \franchise\models\VendorSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
-        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
+
 
         if(\Yii::$app->request->get('searchString')){
             $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -286,6 +299,9 @@ class OrganizationController extends DefaultController {
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
         }
+
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'vendor_id', $searchModel->date_from, $searchModel->date_to);
+        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 

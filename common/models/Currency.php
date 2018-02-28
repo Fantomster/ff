@@ -94,7 +94,7 @@ class Currency extends \yii\db\ActiveRecord {
     }
 
 
-    public function getCurrencyData($filter_currency, $franchId, $orgField = 'client_id'):array
+    public function getCurrencyData($filter_currency, $franchId, $orgField = 'client_id', $date_from, $date_to):array
     {
         $array = [];
         $iso_code = "RUB";
@@ -112,6 +112,7 @@ class Currency extends \yii\db\ActiveRecord {
             ->join('LEFT JOIN', 'franchisee_associate as fa', 'fa.organization_id = order.'.$orgField)
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
             ->andWhere('fa.franchisee_id = :fid', [':fid' => $franchId])
+            ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($date_from)), date('Y-m-d', strtotime($date_to))])
             ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
@@ -120,10 +121,9 @@ class Currency extends \yii\db\ActiveRecord {
             $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
         }
         $array['currency_list'] = $currencyList;
-
         if($filter_currency) {
             $currency = Currency::findOne($filter_currency);
-            $iso_code = $currency->iso_code;
+            $iso_code = $currency->iso_code ?? 'RUB';
             $array['currency_id'] = $filter_currency;
         }
         $array['iso_code'] = $iso_code;

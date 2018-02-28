@@ -402,7 +402,7 @@ $(document).on("click", ".alLi", function() {
     });
 });
 
-$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency").on("change", function () {
+$(document).on("change", "#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency", function () {
 $("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
@@ -428,7 +428,7 @@ var filter_currency =  $("#filter_currency").val();
    }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee,#filter_currency").removeAttr('disabled') });
 });
 
-$("#filter-date,#filter-date-2").on("change", function () {
+$(document).on("change", "#filter-date,#filter-date-2", function () {
 $("#filter-date,#filter-date-2#filter_currency").attr('disabled','disabled')      
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();        

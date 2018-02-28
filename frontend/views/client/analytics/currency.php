@@ -4,3 +4,4 @@
     \yii\helpers\Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
     ?>
 <?php endif; ?>
+<span>&nbsp;</span>

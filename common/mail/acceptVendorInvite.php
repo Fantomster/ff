@@ -11,7 +11,7 @@ use yii\helpers\Url;
 
 ?>
 
-<p><img src="https://app.mixcart.ru/img/invite-to-client.jpg" style="width: 100%;" alt=""/></p>
+<p><img src="https://app.mixcart.ru/images/invite-to-client.jpg" style="width: 100%;" alt=""/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.hello', ['ru'=>'Здравствуйте']) ?>!</h3>
 <p><?= Yii::t('app', 'common.mail.accept_vendor_invite.we', ['ru'=>'Мы, {vendor}, стали использовать очень удобный инструмент для автоматизации работы с вами', 'vendor'=>$vendor]) ?>.

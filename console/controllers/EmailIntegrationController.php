@@ -43,6 +43,7 @@ class EmailIntegrationController extends Controller
         /**
          * @var $setting IntegrationSettingFromEmail
          */
+        error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         //Получаем все активные настройки или конкретную настройку
         $where = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)->all();

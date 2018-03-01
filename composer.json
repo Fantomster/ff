@@ -67,7 +67,9 @@
         "codemix/yii2-localeurls": "*",
         "modernkernel/yii2-flag-icon-css": "*",
         "xj/yii2-user-agent": "^1.0.0",
-        "yandex-money/yandex-checkout-sdk-php": "*"
+        "yandex-money/yandex-checkout-sdk-php": "*",
+        "eden/mail": "dev-master",
+        "golovchanskiy/parse-torg12": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

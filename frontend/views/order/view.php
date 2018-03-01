@@ -234,7 +234,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             ],
             Yii::t('message', 'frontend.views.order.order_three', ['ru'=>'Заказ №']) . $order->id,
         ],
-    ])
+    ]);
     ?>
 </section>
 <section class="content">

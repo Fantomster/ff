@@ -33,6 +33,7 @@ use yii\helpers\Url;
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
  * @property integer positionCount
+ * @property integer invoice_relation
  * @property string $statusText
  * @property bool $isObsolete
  * @property string $rawPrice
@@ -82,7 +83,7 @@ class Order extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
             [['total_price', 'discount'], 'number'],
             [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -451,6 +452,14 @@ class Order extends \yii\db\ActiveRecord {
     
     public function getCurrency() {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+    }
+
+    public function getInvoice() {
+        return $this->hasOne(IntegrationInvoice::className(), ['order_id' => 'id']);
+    }
+
+    public function getInvoiceRelation() {
+        return $this->hasOne(IntegrationInvoice::className(), ['id' => 'invoice_relation']);
     }
     
     public function formatPrice() {

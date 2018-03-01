@@ -14,6 +14,6 @@ class Module extends \yii\base\Module
 
     public function renderMenu()
     {
-        return (new View())->renderFile($this->basePath . '\views\_menu.php');
+        return (new View())->renderFile(realpath($this->basePath . '/views/_menu.php'));
     }
 }

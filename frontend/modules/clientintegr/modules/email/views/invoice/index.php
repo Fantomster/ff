@@ -99,6 +99,7 @@ $this->title = 'Список накладных';
     </div>
 </section>
 <?php
+$url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
 ob_start();
 ?>
 
@@ -112,21 +113,21 @@ ob_start();
                 showCancelButton: false,
                 title: 'Выберите поставщика',
                 inputOptions: new Promise(function (resolve) {
-                    $.post('/ru/clientintegr/email/invoice/get-suppliers', function (data) {
+                    $.post('<?=$url?>/get-suppliers', function (data) {
                         resolve(data);
                     });
                 })
             }
         ).then(function (result) {
             if (result.value) {
-                $.get('invoice/get-orders', {
+                $.get('<?=$url?>/get-orders', {
                     OrderSearch: {vendor_search_id: result.value, vendor_id: result.value},
                     invoice_id: $invoice_id
                 }, function (data) {
                     $('#invoice-orders').html(data);
                 });
 
-                $.post('/ru/clientintegr/email/invoice/get-content', {
+                $.post('<?=$url?>/get-content', {
                     id: $invoice_id,
                     vendor_id: result.value
                 }, function (data) {
@@ -137,7 +138,7 @@ ob_start();
     });
 
     $('.box-body').on('click', '.create-order', function () {
-        $.post('invoice/create-order', $(this).data(), function (data) {
+        $.post('<?=$url?>/create-order', $(this).data(), function (data) {
             if (data.status === true) {
                 swal({title: 'Готово!', type:'success'});
             } else {

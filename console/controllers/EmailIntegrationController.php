@@ -219,6 +219,14 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
+            if(empty($parser->invoice->rows)) {
+                $this->log([
+                    PHP_EOL,
+                    'Error: empty rows ' . $name_file
+                ]);
+                continue;
+            }
+
             //Данные необходимые для сохранения в базу
             $result[] = [
                 'integration_setting_from_email_id' => $setting->id,

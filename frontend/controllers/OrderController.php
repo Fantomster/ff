@@ -281,7 +281,7 @@ class OrderController extends DefaultController {
             $i++;
             //dd($good->quantity);
             $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
-            $objPHPExcel->getActiveSheet()->setCellValue("A$row", $i);
+            $objPHPExcel->getActiveSheet()->setCellValue("A$row", ($row-17));
             $objPHPExcel->getActiveSheet()->getStyle("A$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode($good->product_name));

@@ -5,5 +5,6 @@ files:
     destination: /var/www/html/dev.mixcart.ru
 hooks:
   AfterInstall:
-    - location: /var/www/html/dev.mixcart.ru/deploy/scripts/init.sh
+    - location: composer update
+    - location: php yii migrate
       runas: ec2-user

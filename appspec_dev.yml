@@ -1,0 +1,10 @@
+version: 1.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/html/dev.mixcart.ru
+hooks:
+  AfterInstall:
+    - location: /var/www/html/dev.mixcart.ru/composer update
+    - location: /var/www/html/dev.mixcart.ru/php yii migrate --interactive=0
+      runas: ec2-user

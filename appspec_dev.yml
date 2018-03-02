@@ -6,4 +6,3 @@ files:
 hooks:
   AfterInstall:
     - location: deploy/scripts/init.sh
-      runas: ec2-user

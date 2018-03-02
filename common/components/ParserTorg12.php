@@ -4,6 +4,7 @@ namespace common\components;
 
 use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
+use yii\db\Query;
 
 class ParserTorg12
 {
@@ -99,6 +100,20 @@ class ParserTorg12
         $this->filePath = $filePath;
         $this->taxRateList = $taxRateList;
         $this->defaultTaxRate = $defaultTaxRate;
+        $this->getColumnSql();
+    }
+    
+    private function getColumnSql() {
+        $this->settingsRow = [];
+        $result = (new Query())->select('*')->from('integration_torg12_columns')->all();
+
+        foreach ($result as $row) {
+            if($row['regular_expression'] == 1) {
+                $this->settingsRow[$row['name']] = trim($row['value']);
+            } else {
+                $this->settingsRow[$row['name']] = explode('|', trim($row['value']));
+            }
+        }
     }
 
     /**

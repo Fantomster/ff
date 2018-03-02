@@ -26,9 +26,9 @@ $currencySymbol = $order->currency->iso_code;
 
     <div class="pdf_content" style="text-align: center;" >
 
-        <table>
+        <table width="100%">
             <tr>
-                <td>
+                <td width="50%">
                     <table style="font-size: 12px;">
                         <tr>
                             <td style="font-size: 14px;">
@@ -65,8 +65,8 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                     </table>
                 </td>
-                <td width="100"></td>
-                <td>
+
+                <td width="50%">
                     <table style="font-size: 12px;">
                         <tr>
                             <td style="font-size: 14px;"><b><?= Yii::t('app', 'Поставщик') ?></b></td>

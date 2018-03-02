@@ -181,7 +181,7 @@ class OrderController extends DefaultController {
 
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(8);
         $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth($width);
         $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth($width);
         $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(10);
@@ -253,6 +253,9 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getRowDimension(14)->setRowHeight(20);
         $objPHPExcel->getActiveSheet()->getRowDimension(15)->setRowHeight(30);
 
+        $objPHPExcel->getActiveSheet()->getStyle('B17')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getStyle('C17')->getAlignment()->setWrapText(true);
+
         $this->fillCellHeaderData($objPHPExcel, 'A', '№ п/п');
         $this->fillCellHeaderData($objPHPExcel, 'B', 'Наименование товара');
         $this->fillCellHeaderData($objPHPExcel, 'C', 'Комментарий');
@@ -279,7 +282,7 @@ class OrderController extends DefaultController {
             //dd($good->quantity);
             $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
             $objPHPExcel->getActiveSheet()->setCellValue("A$row", $i);
-            $objPHPExcel->getActiveSheet()->getStyle("A$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->getActiveSheet()->getStyle("A$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode($good->product_name));
             $objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setWrapText(true);
@@ -303,6 +306,9 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->setCellValueExplicit('H' . $row, number_format($good->quantity * $good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
             $objPHPExcel->getActiveSheet()->getStyle("H$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
             $objPHPExcel->getActiveSheet()->getStyle("A$row:H$row")->applyFromArray($styleArray);
+
+            $objPHPExcel->getActiveSheet()->getStyle("B$row")->getAlignment()->setWrapText(true);
+            $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setWrapText(true);
 
             $height = 19;
             $product_name_length = mb_strlen($good->product_name);
@@ -1484,6 +1490,7 @@ class OrderController extends DefaultController {
     public function actionPdf($id) {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
+
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_three', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }

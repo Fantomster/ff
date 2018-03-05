@@ -268,6 +268,7 @@ use dosamigos\chartjs\ChartJs;
                                         case Order::STATUS_CANCELLED:
                                             $statusClass = 'cancelled';
                                             break;
+                                        default: $statusClass='';
                                     }
                                     return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data['status']) . '</span>'; //fa fa-circle-thin
                                 },

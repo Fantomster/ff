@@ -517,7 +517,6 @@ class OrganizationController extends DefaultController {
 
 
     private function getOrganizationData($id, $type='vendor') {
-        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, $type.'_id');
         $organization = Organization::find()
             ->joinWith("franchiseeAssociate")
             ->where(['organization.id' => $id, 'organization.type_id' => ($type=='vendor') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT])
@@ -535,6 +534,7 @@ class OrganizationController extends DefaultController {
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, $type.'_id', $searchModel->date_from, $searchModel->date_to);
         $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));

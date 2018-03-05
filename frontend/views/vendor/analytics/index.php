@@ -402,6 +402,26 @@ $(document).on("click", ".alLi", function() {
     });
 });
 
+$(document).on("change", "#filter-date,#filter-date-2", function () {
+$("#filter-date,#filter-date-2#filter_currency").attr('disabled','disabled')      
+var filter_from_date =  $("#filter-date").val();
+var filter_to_date =  $("#filter-date-2").val();        
+var filter_currency =  $("#filter_currency").val(); 
+    $.ajax({
+     type: 'get',
+     push: true,
+     timeout: 0,
+     url: "$analyticsCurrencyUrl",
+     container: "#alCurrencies",
+     data: {
+         filter_from_date: filter_from_date,
+         filter_to_date: filter_to_date,
+         filter_currency: filter_currency,
+         organization_id: "$organizationId"
+           }
+   }).done(function(data) { $("#alCurrencies").html(data); $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee,#filter_currency").removeAttr('disabled') })
+});
+
 $(document).on("change", "#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency", function () {
 $("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
@@ -428,24 +448,6 @@ var filter_currency =  $("#filter_currency").val();
    }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee,#filter_currency").removeAttr('disabled') });
 });
 
-$(document).on("change", "#filter-date,#filter-date-2", function () {
-$("#filter-date,#filter-date-2#filter_currency").attr('disabled','disabled')      
-var filter_from_date =  $("#filter-date").val();
-var filter_to_date =  $("#filter-date-2").val();        
-var filter_currency =  $("#filter_currency").val();        
-    $.pjax({
-     type: 'GET',
-     push: false,
-     timeout: 10000,
-     url: "$analyticsCurrencyUrl",
-     container: "#alCurrencies",
-     data: {
-         filter_from_date: filter_from_date,
-         filter_to_date: filter_to_date,
-         filter_currency: filter_currency
-           }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee,#filter_currency").removeAttr('disabled') });
-});
 
 $("#reset").on("click", function () {
     $("#filter_status").val('');

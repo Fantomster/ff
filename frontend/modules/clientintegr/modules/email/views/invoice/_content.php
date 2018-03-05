@@ -1,9 +1,12 @@
+<?php
+    $url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
+?>
 <input type="hidden" id="invoice_id" value="<?=$model->id?>">
 <div class="panel panel-info">
     <div class="panel-heading">
         Накладная
 
-        <a class="btn btn-xs btn-primary" href="invoice/download?id=<?=$model->id?>" target="_blank">
+        <a class="btn btn-xs btn-primary" href="<?=$url?>/download?id=<?=$model->id?>" target="_blank">
             <i class="fa fa-save"></i>
         </a>
 

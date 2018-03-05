@@ -1,0 +1,8 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/html/dev.mixcart.ru
+hooks:
+  AfterInstall:
+    - location: deploy/scripts/init.sh

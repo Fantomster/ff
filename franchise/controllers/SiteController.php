@@ -3,6 +3,7 @@
 namespace franchise\controllers;
 
 use common\models\Catalog;
+use common\models\Currency;
 use common\models\FranchiseeAssociate;
 use common\models\RelationManagerLeader;
 use common\models\RelationSuppRest;
@@ -105,13 +106,25 @@ class SiteController extends DefaultController
      */
     public function actionIndex()
     {
+        $iso_code = "RUB";
+        $currencyId = null;
 
+        $currencyList = Currency::getFullCurrencyList($this->currentFranchisee->id);
+
+        if(Yii::$app->request->get() && Yii::$app->request->isPjax) {
+            $currencyId = Yii::$app->request->get('filter_currency');
+            $currency = Currency::findOne($currencyId);
+            $iso_code = $currency->iso_code;
+        }
         //---graph start
         $query = "SELECT truncate(sum(total_price),1) as spent, year(`order`.created_at) as year, month(`order`.created_at) as month, day(`order`.created_at) as day "
             . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
             . "where status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
-            . "and `order`.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " "
-            . "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
+            . "and `order`.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " ";
+        if($currencyId){
+            $query.= " AND `currency_id`=" . $currencyId . " ";
+        }
+            $query .= "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
@@ -143,18 +156,18 @@ class SiteController extends DefaultController
             ->count();
 
         $vendorsStats30 = $this->currentFranchisee->getMyVendorsStats($last30days);
-        $vendorsStats = $this->currentFranchisee->getMyVendorsStats();
+        $vendorsStats = $this->currentFranchisee->getMyVendorsStats(null, null, $currencyId);
 
         $params = Yii::$app->request->getQueryParams();
         $searchModel = new \franchise\models\OrderSearch();
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, $currencyId);
         $totalIncome = 0;
         foreach ($dataProvider->getModels('Order') as $one){
             $totalIncome+=$one->total_price;
         }
 
         $franchiseeType = $this->currentFranchisee->type;
-        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType', 'totalIncome'));
+        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType', 'totalIncome', 'currencyList', 'iso_code', 'currencyId'));
     }
 
 

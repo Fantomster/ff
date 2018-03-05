@@ -8,7 +8,7 @@
             <br>
             <?= Yii::t('app', 'Получатель') ?>:
             <?= $recipient->name ?>
-            <span class="type">(<?= Yii::t('app', "{$recipient->type->name}") ?>)</span>
+            <span class="type">(<?= $recipient->type->name ?>)</span>
         </span>
     </div>
     <div class="text">

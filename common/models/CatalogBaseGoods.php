@@ -2,12 +2,12 @@
 
 namespace common\models;
 
+use market\components\ImagesHelper;
 use Yii;
 use yii\data\ActiveDataProvider;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Url;
 
 /**
  * This is the model class for table "catalog_base_goods".
@@ -179,14 +179,14 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         ];
     }
 
-    public function beforeSave($insert) {
-        if (parent::beforeSave($insert)) {
-
-            $this->es_status = CatalogBaseGoods::ES_UPDATE;
-            return true;
-        }
-        return false;
-    }
+//    public function beforeSave($insert) {
+//        if (parent::beforeSave($insert)) {
+//
+//            $this->es_status = CatalogBaseGoods::ES_UPDATE;
+//            return true;
+//        }
+//        return false;
+//    }
 
     public function search($params, $id) {
         $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price', 'note', 'ed', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
@@ -255,7 +255,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             return $this->getThumbUploadUrl('image', 'image');
         } else {
             if ($this->category_id) {
-                return Url::to('@web/fmarket/images/image-category/' . $this->mainCategory->id . ".jpg", true);
+                    return ImagesHelper::getUrl($this->mainCategory->id);
             } else {
                 return self::DEFAULT_IMAGE;
             }
@@ -275,7 +275,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
 
     public function getMainCategory() {
-        return MpCategory::find()->where(['id' => $this->category->parent]);
+        return MpCategory::find()->where(['id' => $this->category->parent])->one();
     }
 
     public static function getCurCategory($id) {

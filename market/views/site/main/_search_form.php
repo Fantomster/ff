@@ -50,7 +50,7 @@ if($i > 0){
                         <div class="media-left media-middle">
                           <a href="<?=Url::to(['/site/category', 'slug' => $arr['_source']['category_slug']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
-                                 src="<?=Url::to('@web/fmarket/images/image-category/'.$arr['_source']['category_id'].".jpg", true)?>">
+                                 src="<?=\market\components\ImagesHelper::getUrl($arr['_source']['category_id'])?>">
                           </a>
                         </div>
                         <div class="media-body">
@@ -84,7 +84,7 @@ if($i > 0){
                           <a href="<?=Url::to(['/site/product', 'id' => $arr['_source']['product_id']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
                                  src="<?=empty($arr['_source']['product_image'])?
-                    Url::to('@web/fmarket/images/image-category/'.$arr['_source']['product_category_id'].".jpg", true)
+                                     \market\components\ImagesHelper::getUrl($arr['_source']['product_category_id'])
                     :$arr['_source']['product_image'] ?>">
                           </a>
                         </div>
@@ -95,7 +95,7 @@ if($i > 0){
                             <?php if (empty($arr['_source']['product_show_price'])){ ?>
                             <h5 class="media-price" style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.main.price_three', ['ru'=>'договорная цена']) ?></h5>
                             <?php } else {?>
-                            <h5 class="media-price"><?=floatval($arr['_source']['product_price']); ?> <small><?= $arr['_source']['product_currency'] ?></small></h5>
+                            <h5 class="media-price"><?=number_format($arr['_source']['product_price'], 2, '.', ''); ?> <small><?= $arr['_source']['product_currency'] ?></small></h5>
                             <?php } ?>                 
                         </div>
                       </div>

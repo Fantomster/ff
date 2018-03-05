@@ -242,6 +242,7 @@ class UserController extends ActiveController {
 
     public function actionBuisinessList(){
         $user = Yii::$app->user->getIdentity();
+        $params = Yii::$app->request->queryParams;
         //$organization = new Organization();
         $sql = "
         select distinct id as `id`,`name`,`type_id` from (
@@ -270,11 +271,13 @@ class UserController extends ActiveController {
         (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
         from `organization` o where id = " . $user->organization_id . "
         )tb where id is not null)tb2";
+
+        $pageSize = isset($params['per-page']) ? intval($params['per-page']) : 4;
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => \Yii::$app->db->createCommand($sql)->sql,
             'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),
             'pagination' => [
-                'pageSize' => 4,
+                'pageSize' => $pageSize,
             ],
         ]);
         return $dataProvider;

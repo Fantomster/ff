@@ -166,12 +166,14 @@ HTML;
                     <?= Html::dropDownList('filter_client', null, $filter_restaurant, ['prompt' => Yii::t('message', 'frontend.views.vendor.all_five', ['ru' => 'Все']), 'class' => 'form-control', 'id' => 'filter_client', 'options' => [\Yii::$app->request->get('filter_client') => ["Selected" => true]]])
                     ?>
                 </div>
+            <?php if(count($currencyList)>0): ?>
                 <div class="col-lg-1 col-md-1 col-sm-6">
                     <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <?=
                     Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
                     ?>
                 </div>
+            <?php endif; ?>
                 <div class="col-lg-1 col-md-1 col-sm-2">
                     <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
                     <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>

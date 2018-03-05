@@ -72,6 +72,16 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                     <h4><?= Yii::t('message', 'frontend.views.vendor.step_three', ['ru'=>'ШАГ 3']) ?></h4>
                     <p><?= Yii::t('message', 'frontend.views.vendor.excellent_two', ['ru'=>'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.']) ?></p>
                 </div>
+                <?php if (Yii::$app->session->hasFlash('success')): ?>
+                    <div class="alert alert-danger alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        <h4>
+                            <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                        </h4>
+                        <?= Yii::$app->session->getFlash('success') ?>
+                    </div>
+                <?php endif; ?>
+               </div>
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="input-group">
@@ -165,10 +175,11 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }      
+
 var data = $arr;
 var container = document.getElementById('handsontable');
 var searchFiled = document.getElementById('search_field');        
-height = $('.content-wrapper').height() - $("#handsontable").offset().top;
+var height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
         $("#handsontable").height($('.content-wrapper').height() - $("#handsontable").offset().top)
 });
@@ -217,38 +228,43 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   startRows: 1,
   autoWrapRow: true,
   height: height,
-  /*afterOnCellMouseDown: function (changes, source) {
-    afterBeginEditing();
- },*/
-  beforeChangeRender: function (changes, source) {
-      if(source !== 'sum'){
-          var a, b, c, sum, i, value;
-            var change = changes[0];
-            var line = change[0];
+        
+beforeChangeRender: function (changes, source) {
+    if (source !== 'sum') {
+        var a, b, c, sum, i, value, line;
+        for (i = 0; i < changes.length; ++i) {
+            change = changes[i];
+            line = change[0];
             a = parseFloat(this.getDataAtCell(line, 4));
             b = parseFloat(this.getDataAtCell(line, 6));
             c = parseInt(this.getDataAtCell(line, 7));
-            if(c>100)c=100;
-            if(c<-100)c=-100;
-            if(changes[0][1]=='price'){ 
-            this.setDataAtCell(change[0], 6, '0,00', 'sum');
-            this.setDataAtCell(change[0], 7, '0', 'sum');
-            this.setDataAtCell(change[0], 8, a, 'sum');
+            if (c > 100) {
+                c = 100;
             }
-            if(changes[0][1]=='discount'){ 
-            this.setDataAtCell(change[0], 7, 0, 'sum');
-            value = a - b;
-            this.setDataAtCell(change[0], 8, value, 'sum');
+            if (c < -100) {
+                c = -100;
             }
-            if(changes[0][1]=='discount_percent'){
-            this.setDataAtCell(change[0], 6, '0,00', 'sum');
-            this.setDataAtCell(change[0], 7, c, 'sum');
-            valueTwo = a - (a/100 * c);
-            this.setDataAtCell(change[0], 8, valueTwo, 'sum');   
+            if (changes[0][1] == 'price') { 
+                this.setDataAtCell(change[0], 6, '0,00', 'sum');
+                this.setDataAtCell(change[0], 7, '0', 'sum');
+                this.setDataAtCell(change[0], 8, a, 'sum');
             }
-        }      
-      }
-  });
+            if (changes[0][1] == 'discount') { 
+                this.setDataAtCell(change[0], 7, 0, 'sum');
+                value = a - b;
+                this.setDataAtCell(change[0], 8, value, 'sum');
+            }
+            if (changes[0][1] == 'discount_percent') {
+                this.setDataAtCell(change[0], 6, '0,00', 'sum');
+                this.setDataAtCell(change[0], 7, c, 'sum');
+                valueTwo = a - (a/100 * c);
+                this.setDataAtCell(change[0], 8, valueTwo, 'sum');   
+            }
+        };
+    }      
+}
+        
+});
 colWidths[1] = 0.1;
 hot.updateSettings({colWidths: colWidths});
 function getRowsFromObjects(queryResult) {
@@ -397,7 +413,9 @@ return false;
 	                            {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
 	                        ).done(function (response) {
 	                            if (response.result === 'success') {
-	                                $.pjax.reload("#pjax-container", {timeout:30000});
+	                                //$.pjax.reload("#pjax-container", {timeout:30000});
+	                                data = JSON.parse(JSON.stringify(response.data));
+	                                hot.loadData(data);
 	                                resolve();
 	                            } else {
 	                                swal({

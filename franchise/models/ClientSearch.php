@@ -18,6 +18,7 @@ class ClientSearch extends Organization {
     public $searchString;
     public $date_from;
     public $date_to;
+    public $filter_currency;
 
     /**
      * @inheritdoc
@@ -51,6 +52,7 @@ class ClientSearch extends Organization {
         $filter_date_from = strtotime($this->date_from);
         $filter_date_to = strtotime($this->date_to);
 
+
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
             $t1_f = $from->format('Y-m-d');
@@ -60,13 +62,14 @@ class ClientSearch extends Organization {
             $to->add(new \DateInterval('P1D'));
             $t2_f = $to->format('Y-m-d');
         }
+        //dd($this->filter_currency);
 
         $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as vendorCount, 
                 (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as vendorCount_prev30, 
                 (select count(id) from `order` where client_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderCount_prev30,
-                (select sum(total_price) from `order` where client_id=org.id and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderSum_prev30,
+                (select sum(total_price) from `order` where client_id=org.id and currency_id=$this->filter_currency and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where client_id=org.id and currency_id=$this->filter_currency and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderSum_prev30,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
                 FROM `organization` AS org
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id
@@ -74,7 +77,7 @@ class ClientSearch extends Organization {
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
 
         if($vendor_id){
-            $query = parent::getOrganizationQuery($vendor_id, 'rest');
+            $query = parent::getOrganizationQuery($vendor_id, 'rest', $this->filter_currency);
         }
 
         if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){

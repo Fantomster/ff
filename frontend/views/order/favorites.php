@@ -217,9 +217,9 @@ $this->registerJs('
                                         'options' => ['class' => 'quantity form-control '],
                             ]);
                         },
-                        'contentOptions' => ['style' => 'width: 20%;'],
+                        'contentOptions' => ['style' => 'width: 10%;'],
                     ],
-                    [
+                    /*[
                         'format' => 'raw',
                         'value' => function($data) use ($client) {
                             return Html::button('<i class="fa fa-comment"> <span class="circe_font"> ' . Yii::t('message', 'frontend.views.order.favorites.comment', ['ru'=>'Комментарий']) . ' </span></i>', [
@@ -234,18 +234,18 @@ $this->registerJs('
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 5%;'],
-                    ],
+                    ],*/
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
                             return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> ' . Yii::t('message', 'frontend.views.order.favorites.in_basket', ['ru'=>'В корзину']) . '</span></i>', [
-                                        'class' => 'add-to-cart btn btn-md btn-success pull-right circe_font',
+                                        'class' => 'add-to-cart btn btn-md btn-success pull-left circe_font',
                                         'data-id' => $data["cbg_id"],
                                         'data-cat' => $data["cat_id"],
                                         'title' => Yii::t('app', 'frontend.views.order.favorites.add_to_basket', ['ru'=>'Добавить в корзину']),
                             ]);
                         },
-                        'contentOptions' => ['style' => 'width: 5%;'],
+                        'contentOptions' => ['style' => 'width: 20%; '],
                     ],
                 ],
             ]);

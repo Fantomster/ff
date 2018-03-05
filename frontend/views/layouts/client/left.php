@@ -67,7 +67,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
 //                            'icon' => 'envelope',
 //                            'url' => ['client/messages'],
 //                            ],
-                        ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl']['market'], 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl'][Yii::$app->language]['market'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.requests', ['ru'=>'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.anal', ['ru'=>'Аналитика']), 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],

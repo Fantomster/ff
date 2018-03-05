@@ -929,10 +929,11 @@ class SiteController extends Controller {
     public function actionAjaxProductCatLoader($num, $category) {
         if (Yii::$app->request->isAjax) {
 
+            $category = \common\models\MpCategory::findOne(['id' => $category]);
             if (empty($category->parent)) {
                 $categoryIds = \yii\helpers\ArrayHelper::getColumn(\common\models\MpCategory::find()->where(['parent' => $category])->select('id')->asArray()->all(), 'id');
             } else {
-                $categoryIds = $category;
+                $categoryIds = $category->id;
             }
 
             $relationSuppliers = [];

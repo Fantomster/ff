@@ -83,7 +83,12 @@ class GuideController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         
         $filters['client_id'] = $user->organization_id;
-        
+
+        $query->select([
+            '`guide`.*',
+            '(select catalog_base_goods.product from guide_product left join catalog_base_goods on catalog_base_goods.id = guide_product.cbg_id where guide_product.guide_id = guide.id limit 1 ) as product1',
+            '(select catalog_base_goods.product from guide_product left join catalog_base_goods on catalog_base_goods.id = guide_product.cbg_id where guide_product.guide_id = guide.id limit 1 offset 1) as product2',
+            '(select catalog_base_goods.product from guide_product left join catalog_base_goods on catalog_base_goods.id = guide_product.cbg_id where guide_product.guide_id = guide.id limit 1 offset 2) as product3']);
         $query->leftJoin('(select count(id) as count, guide_id, cbg_id from guide_product group by guide_id) as gp', 'gp.guide_id = guide.id');
         $query->andWhere('gp.count is not null');
 

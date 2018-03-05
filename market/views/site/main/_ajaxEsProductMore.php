@@ -21,7 +21,7 @@ foreach ($pr as $row) {
             <a href="<?= Url::to(['/site/product', 'id' => $row->product_id]); ?>">
                 <img class="product-image" src="<?=
                 !empty($row->product_image) ? $row->product_image :
-                        Url::to('@web/fmarket/images/image-category/' . $row->product_category_id . ".jpg", true);
+                    \market\components\ImagesHelper::getUrl($row->product_category_id);
                 ?>">
             </a>
             <div class="row">
@@ -43,7 +43,7 @@ foreach ($pr as $row) {
                         <?php if (empty($row->product_show_price)) { ?>
                             <h4 style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.main.price', ['ru'=>'договорная цена']) ?></h4>
                         <?php } else { ?>
-                            <h4><?= floatval($row->product_price); ?> <small><?= $row->product_currency ?></small></h4>
+                            <h4><?= number_format($row->product_price, 2, '.', ''); ?> <small><?= $row->product_currency ?></small></h4>
     <?php } ?>
                     </div>
 

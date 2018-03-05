@@ -2,7 +2,9 @@
 
 namespace franchise\controllers;
 
+use common\models\Currency;
 use common\models\ManagerAssociate;
+use common\models\Order;
 use common\models\RelationSuppRest;
 use common\models\UserToken;
 use Yii;
@@ -72,17 +74,22 @@ class OrganizationController extends DefaultController {
         ];
     }
 
+
     /**
      * Displays clients list
      *
      * @return mixed
      */
     public function actionClients() {
+
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id);
+
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+        $searchModel['filter_currency'] = $searchModel->filter_currency = 1;
 
         if(\Yii::$app->request->get('searchString')){
             $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -93,6 +100,11 @@ class OrganizationController extends DefaultController {
         if(\Yii::$app->request->get('date_to')){
             $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
         }
+
+        if(\Yii::$app->request->get('filter_currency')){
+            $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
+        }
+
         if (Yii::$app->request->post("ClientSearch")) {
             $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
         }
@@ -102,9 +114,9 @@ class OrganizationController extends DefaultController {
         $exportColumns = (new Organization())->getClientsExportColumns();
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
+            return $this->renderPartial('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         } else {
-            return $this->render('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
+            return $this->render('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         }
     }
 
@@ -248,11 +260,15 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionVendors() {
+
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'vendor_id');
+
         $searchModel = new \franchise\models\VendorSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+        $searchModel['filter_currency'] = $searchModel->filter_currency = 1;
 
         if(\Yii::$app->request->get('searchString')){
             $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -267,15 +283,19 @@ class OrganizationController extends DefaultController {
             $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
         }
 
+        if(\Yii::$app->request->get('filter_currency')){
+            $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
+        }
+
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
         $exportFilename = 'vendors_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getVendorsExportColumns();
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('vendors', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
+            return $this->renderPartial('vendors', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         } else {
-            return $this->render('vendors', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
+            return $this->render('vendors', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         }
     }
 
@@ -481,6 +501,7 @@ class OrganizationController extends DefaultController {
 
 
     private function getOrganizationData($id, $type='vendor') {
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, $type.'_id');
         $organization = Organization::find()
             ->joinWith("franchiseeAssociate")
             ->where(['organization.id' => $id, 'organization.type_id' => ($type=='vendor') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT])
@@ -497,6 +518,12 @@ class OrganizationController extends DefaultController {
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+
+        $searchModel['filter_currency'] = $searchModel->filter_currency = 1;
+        if(\Yii::$app->request->get('filter_currency')){
+            $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
+        }
+
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, $id);
         $model = Organization::get_value($id);
         $managersDataProvider = $model->getOrganizationManagersDataProvider();
@@ -505,7 +532,7 @@ class OrganizationController extends DefaultController {
             $showButton = true;
             $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
         }
-        return $this->render("show-".$type, compact('organization','dataProvider', 'managersDataProvider', 'catalog', 'showButton'));
+        return $this->render("show-".$type, compact('organization','dataProvider', 'searchModel', 'managersDataProvider', 'catalog', 'showButton', 'currencyData'));
     }
 
 
@@ -521,6 +548,8 @@ class OrganizationController extends DefaultController {
         $user = User::findOne($user_id);
         $user->organization_id = $organization_id;
         $user->save();
+
+        ManagerAssociate::deleteAll(['manager_id'=>$user_id]);
 
         $restaurants = RelationSuppRest::findAll(['supp_org_id' => $organization_id]);
         foreach ($restaurants as $restaurant){

@@ -107,7 +107,7 @@ use kartik\form\ActiveForm;
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],
-                    [
+                    /*[
                         'format' => 'raw',
                         'value' => function($data) {
                             return Html::button('<i class="fa fa-comment"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.comment_two', ['ru'=>'Комментарий']) . ' </span></i>', [
@@ -122,7 +122,7 @@ use kartik\form\ActiveForm;
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 5%;'],
-                    ],
+                    ],*/
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
@@ -133,7 +133,7 @@ use kartik\form\ActiveForm;
                                         'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru'=>'Добавить в корзину']),
                             ]);
                         },
-                        'contentOptions' => ['style' => 'width: 5%;'],
+                        'contentOptions' => ['style' => 'width: 10%;'],
                     ],
                 ],
             ]);

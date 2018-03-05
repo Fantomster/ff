@@ -64,7 +64,7 @@ class Request extends \yii\db\ActiveRecord {
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
                 ],
                 'value' => function ($event) {
-                    return date("Y-m-d H:i:s");
+                    return gmdate("Y-m-d H:i:s");
                 },
             ],
         ];

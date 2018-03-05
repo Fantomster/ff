@@ -35,7 +35,7 @@ class TranslationsController extends SmsController
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'ajax-balance', 'message', 'message-update', 'create'],
+                        'actions' => ['index', 'ajax-balance', 'message', 'message-update', 'create', 'download-excel'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN
@@ -87,6 +87,63 @@ class TranslationsController extends SmsController
                 'message' => $message,
             ]);
         }
+    }
+
+
+
+    public function actionDownloadExcel(){
+        $objPHPExcel = new \PHPExcel();
+
+        $objPHPExcel->getProperties()->setCreator("MixCart")
+            ->setLastModifiedBy("MixCart")
+            ->setTitle("otchet_zakaz_" . date("d-m-Y-His"));
+
+        $sheet = 0;
+        $objPHPExcel->setActiveSheetIndex($sheet);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(40);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(40);
+
+        $objPHPExcel->getActiveSheet()->setCellValue('A1', 'Переменная');
+        $objPHPExcel->getActiveSheet()->setCellValue('B1', 'Англ.');
+        $objPHPExcel->getActiveSheet()->setCellValue('C1', 'Русс.');
+        $objPHPExcel->getActiveSheet()->setCellValue('D1', 'Перевод');
+        $objPHPExcel->getActiveSheet()->getStyle('A1:D1')->applyFromArray(['font' => ['bold' => true]]);
+
+        $arr = [];
+        $sourceMessages = SourceMessage::find()->all();
+        foreach ($sourceMessages as $sourceMessage){
+            $messageEn = Message::findOne(['id'=>$sourceMessage->id, 'language'=>'en']);
+            $messageRu = Message::findOne(['id'=>$sourceMessage->id, 'language'=>'ru']);
+            $var = null;
+            if($messageRu && (!$messageEn || $messageEn->translation=='')){
+                $var = $messageRu->translation;
+            }else{
+                $var = $messageEn->translation ?? null;
+            }
+            if($var){
+                $arr[$var]['var'] = $sourceMessage->message;
+                $arr[$var]['en'] = $messageEn->translation ?? '';
+                $arr[$var]['ru'] = $messageRu->translation ?? '';
+            }
+        }
+        ksort($arr);
+        $i = 2;
+        foreach ($arr as $item){
+            $objPHPExcel->getActiveSheet()->setCellValue("A$i", $item['var']);
+            $objPHPExcel->getActiveSheet()->setCellValue("B$i", $item['en']);
+            $objPHPExcel->getActiveSheet()->setCellValue("C$i", $item['ru']);
+            $i++;
+        }
+
+        header('Content-Type: application/vnd.ms-excel');
+        $filename = "translations_" . date("d-m-Y-His") . ".xls";
+        header('Content-Disposition: attachment;filename=' . $filename . ' ');
+        header('Cache-Control: max-age=0');
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+        exit;
     }
 
 }

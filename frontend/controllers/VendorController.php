@@ -2168,23 +2168,21 @@ class VendorController extends DefaultController
             $arr_clients_colors[] = hex();
         }
         //$arr_clients_price = json_encode($arr_clients_price);
+        $organizationId = $currentUser->organization_id;
 
-        return $this->render('analytics/index', compact('currencyList', 'filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee'
+        return $this->render('analytics/index', compact('currencyList', 'filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee', 'organizationId'
         ));
     }
 
 
     public function actionAjaxUpdateCurrency()
     {
-        $count = 0;
-        $currencyList = [];
-        if (Yii::$app->request->isPjax) {
-            $currentUser = User::findIdentity(Yii::$app->user->id);
-            $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
-            $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
-            $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
-            $count = count($currencyList);
-        }
+        $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
+        $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+        $organizationId = (int)\Yii::$app->request->get('organization_id');
+        $currencyList = Currency::getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, 'vendor_id');
+        $count = count($currencyList);
+
         return $this->renderPartial('analytics/currency', compact('currencyList', 'count'));
     }
 

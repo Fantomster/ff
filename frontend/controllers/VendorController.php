@@ -271,6 +271,15 @@ class VendorController extends DefaultController
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
+                }else{
+                    if(array_key_exists('email', $user->errors)){
+                        $existingUser = User::findOne(['email'=>$post['User']['email']]);
+                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization, $post['User']['role_id']);
+                        $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+
+                        $message = Yii::t('app', 'Пользователь добавлен!');
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
                 }
             }
         }
@@ -1217,7 +1226,7 @@ class VendorController extends DefaultController
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
+                $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'status'=>1])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
                 if ($checkBaseGood) {
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);

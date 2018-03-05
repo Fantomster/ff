@@ -90,7 +90,6 @@ class TranslationsController extends SmsController
     }
 
 
-
     public function actionDownloadExcel(){
         $objPHPExcel = new \PHPExcel();
 

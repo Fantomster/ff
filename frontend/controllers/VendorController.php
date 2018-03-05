@@ -2049,7 +2049,7 @@ class VendorController extends DefaultController
             empty($filter_employee) ? "" : $where .= " and accepted_by_id='" . $filter_employee . "'";
         }
 
-        $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
+        $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date, 'vendor_id');
 
         $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
         empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";

@@ -162,7 +162,7 @@ class Currency extends \yii\db\ActiveRecord {
     }
 
 
-    public function getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date){
+    public function getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, $field = 'client_id'){
         //Список валют из заказов
         $currency_list = Order::find()->distinct()->select([
             'order.currency_id',
@@ -171,7 +171,7 @@ class Currency extends \yii\db\ActiveRecord {
             'COUNT(order.id) as count'
         ])->joinWith('currency as c')
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
-            ->andWhere('client_id = :cid', [':cid' => $organizationId])
+            ->andWhere("$field = :cid", [':cid' => $organizationId])
             ->andWhere(['between', 'DATE(created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
             ->orderBy('count DESC')
             ->groupBy('iso_code')

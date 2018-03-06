@@ -5,4 +5,4 @@ files:
     destination: /var/www/html/dev.mixcart.ru
 hooks:
   AfterInstall:
-    - location: deploy/scripts/init.sh
+    - location: deploy/scripts/init_dev.sh

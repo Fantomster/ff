@@ -25,7 +25,9 @@ class MpCategory extends \common\models\MpCategory
        $category_id = ($category_id == null ) ? $this->id : $category_id;
        $categories = self::findall(['parent' => $category_id]);
        $res = 0;
-       $res += \common\models\CatalogBaseGoods::findall(['category_id' => $category_id])->count();
+       $res += \common\models\CatalogBaseGoods::find()
+           ->where(['category_id'=>$category_id])
+           ->count();
        foreach ($categories as $category)
            $res += $this->getCountProducts($category->id);
 

@@ -9,7 +9,7 @@ use yii\web\AssetBundle;
  */
 class ReadMoreAsset extends AssetBundle {
 
-    public $sourcePath = '@npm/readmore.js';
+    public $sourcePath = '@npm/readmore-js';
     public $js = [
         'readmore.min.js',
     ];

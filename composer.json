@@ -70,7 +70,8 @@
         "eden/mail": "dev-master",
         "golovchanskiy/parse-torg12": "dev-master",
         "bower-asset/bootstrap": "^3.3",
-        "npm-asset/jquery": "^2.2"
+        "npm-asset/jquery": "^2.2",
+        "oomphinc/composer-installers-extender": "^1.1"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
@@ -94,6 +95,11 @@
         "asset-installer-paths": {
             "npm-asset-library": "vendor/npm",
             "bower-asset-library": "vendor/bower"
+        },
+        "installer-types": ["bower-asset", "npm-asset"],
+        "installer-paths": {
+            "vendor/bower/{$name}/": ["type:bower-asset"],
+            "vendor/npm/{$name}/": ["type:npm-asset"]
         }
     },
     "scripts": {

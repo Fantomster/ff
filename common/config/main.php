@@ -98,7 +98,7 @@ return [
         'urlManager' => [
             'class' => 'codemix\localeurls\UrlManager',
             //Список языков, какая тут очередность, так и будет выводиться в виджите
-            'languages' => ['en','ru','es'],
+            'languages' => ['en', 'ru', 'es'],
             //Определение языка по заголовкам
             'enableLanguageDetection' => false,
             //Выводить язык по умолчанию в URL
@@ -225,11 +225,11 @@ return [
             'class' => 'frontend\modules\vendorintegr\Module',
             'layout' => '@frontend/views/layouts/main-vendor.php',
         ],
-        'treemanager' =>  [
+        'treemanager' => [
             'class' => '\kartik\tree\Module',
-            // enter other module properties if needed
-            // for advanced/personalized configuration
-            // (refer module properties available below)
+        // enter other module properties if needed
+        // for advanced/personalized configuration
+        // (refer module properties available below)
         ]
     ],
 ];

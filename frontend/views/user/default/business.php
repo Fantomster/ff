@@ -22,6 +22,7 @@ $js = <<<JS
         "$changeNetworkUrl",
         {id : id}
     ).done(function(result) {
+        console.log(result);
         if (result) {
             document.location = "$redirect";
         }
@@ -29,7 +30,7 @@ $js = <<<JS
 });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-        
+
 $this->registerCss('
 .h5, h4, h3, h2, h1{
      font-family: \'Circe-Bold\';  
@@ -113,7 +114,7 @@ a.btn-continue:hover{
 }
 ');
 ?>
-<?php 
+<?php
 $grid = [
     [
     'label'=>false,
@@ -121,7 +122,7 @@ $grid = [
     'value'=>function ($data) {
             if($data['type_id']==\common\models\Organization::TYPE_RESTAURANT){
             return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
-            }        
+            }
         return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
         },
     ],
@@ -130,7 +131,7 @@ $grid = [
     'format' => 'raw',
     'value'=>function ($data) {
             if($data['id'] == \common\models\User::findIdentity(Yii::$app->user->id)->organization_id){
-    
+
     return  Html::a('<i class="fa fa-toggle-on"  style="margin-top:5px;"></i>', '#', [
                 'class' => 'disabled pull-right',
                 'style' => 'font-size:26px;color:#84bf76;padding-right:25px;'
@@ -139,9 +140,9 @@ $grid = [
                 'class' => 'change-net-org pull-right',
                 'style' => 'font-size:26px;color:#ccc;padding-right:25px;',
                 'data' => ['id' => $data['id']],
-            ]);        
+            ]);
         },
-    ], 
+    ],
 ];
 ?>
 <section class="section">
@@ -157,7 +158,7 @@ $grid = [
                             <?=GridView::widget([
                                     'dataProvider' => $dataProvider,
                                     'filterPosition' => false,
-                                    'columns' => $grid, 
+                                    'columns' => $grid,
                                     'options' => [],
                                     'tableOptions' => ['class' => 'table'],
                                     'bordered' => false,
@@ -168,15 +169,54 @@ $grid = [
                                     'resizableColumns'=>false,
 
                             ]);
-                            ?> 
-                            <?php Pjax::end(); ?> 
+                            ?>
+                            <?php Pjax::end(); ?>
                         </div>
                     </div>
                     <?=Html::a(Yii::t('message', 'frontend.views.user.default.continue', ['ru'=>'ПРОДОЛЖИТЬ']), $redirect, [
                         'class' => 'btn-continue',
                     ]);?>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<?php if($relationCount): ?>
+    <section class="section" style="top: 600px;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <div class="block">
+                        <h5 class="business-title"><?= Yii::t('app', 'frontend.views.user.default.choose_organization', ['ru'=>'Выберите организацию']) ?></h5>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <?php Pjax::begin(['id' => 'pjax-network-list2', 'enablePushState' => false,'timeout' => 10000])?>
+                                <?=GridView::widget([
+                                    'dataProvider' => $dataProvider2,
+                                    'filterPosition' => false,
+                                    'columns' => $grid,
+                                    'options' => [],
+                                    'tableOptions' => ['class' => 'table'],
+                                    'bordered' => false,
+                                    'striped' => false,
+                                    'summary' => false,
+                                    'condensed' => false,
+                                    'showHeader'=>false,
+                                    'resizableColumns'=>false,
+
+                                ]);
+                                ?>
+                                <?php Pjax::end(); ?>
+                            </div>
+                        </div>
+                        <?=Html::a(Yii::t('message', 'frontend.views.user.default.continue', ['ru'=>'ПРОДОЛЖИТЬ']), $redirect, [
+                            'class' => 'btn-continue',
+                        ]);?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<?php endif; ?>
+

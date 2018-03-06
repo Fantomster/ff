@@ -163,6 +163,13 @@ class User extends \amnah\yii2\user\models\User {
         return $this;
     }
 
+
+    public function setRole($roleId){
+        $this->role_id = $roleId;
+        $this->save();
+        return $this;
+    }
+
     public function setFranchisee($fr_id) {
         $franchisee = Franchisee::findOne(['id' => $fr_id]);
         if ($franchisee) {
@@ -493,6 +500,10 @@ class User extends \amnah\yii2\user\models\User {
 
 
     public function setRelationUserOrganization($userId, $organizationId, $roleId){
+        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId, 'role_id'=>$roleId]);
+        if($check){
+            return $check->id;
+        }
         $rel = new RelationUserOrganization();
         $rel->user_id = $userId;
         $rel->organization_id = $organizationId;

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
+use common\models\RelationUserOrganization;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -272,7 +273,18 @@ class VendorController extends DefaultController
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
+                }else {
+                    if (array_key_exists('email', $user->errors)) {
+                        $existingUser = User::findOne(['email' => $post['User']['email']]);
+                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                        $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+                        $existingUser->setRole($post['User']['role_id'])->save();
+
+                        $message = Yii::t('app', 'Пользователь добавлен!');
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
                 }
+
             }
         }
 
@@ -1409,12 +1421,29 @@ class VendorController extends DefaultController
             $post = Yii::$app->request->post();
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
+                $del = 0;
+                $rel = RelationUserOrganization::findOne(['user_id'=>$post['id'], 'organization_id'=>$this->currentUser->organization->id]);
+                if($rel){
+                    $del = $rel->delete();
+                }
                 $usersCount = count($user->organization->users);
-                if ($user->id == $this->currentUser->id) {
+                if ($user->id == $this->currentUser->id && !$del) {
                     $message = Yii::t('message', 'frontend.controllers.vendor.delete_yourself', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
+                    if($user->id == $this->currentUser->id && $del){
+                        $rel2 = RelationUserOrganization::findOne(['user_id'=>$post['id']]);
+                        if($rel2){
+                            $user->organization_id = $rel2->organization_id;
+                            $user->save();
+                            Yii::$app->user->logout();
+                            return $this->goHome();
+                        }else{
+                            $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
+                            return $this->renderAjax('settings/_success', ['message' => $message]);
+                        }
+                    }
 //                    $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save()) {

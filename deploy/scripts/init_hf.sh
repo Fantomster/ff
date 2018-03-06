@@ -1,4 +1,4 @@
-cd /var/www/html/dev.mixcart.ru/
+cd /var/www/html/hf.mixcart.ru/
 composer update
 php yii migrate --interactive=0
 

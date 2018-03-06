@@ -19,4 +19,16 @@ class MpCategory extends \common\models\MpCategory
             [['name'], 'string', 'max' => 255],
         ];
     }
+
+    public function getCountProducts($category_id = null)
+    {
+       $category_id = ($category_id == null ) ? $this->id : $category_id;
+       $categories = self::findall(['parent' => $category_id]);
+       $res = 0;
+       $res += count(\common\models\CatalogBaseGoods::findall(['category_id' => $category_id]));
+       foreach ($categories as $category)
+           $res += $this->getCountProducts($category->id);
+
+       return $res;
+    }
 }

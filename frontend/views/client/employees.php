@@ -113,7 +113,6 @@ $this->registerJs(
                 <?php ActiveForm::end(); ?>
             </div>
             <div class="box-body no-padding">
-                <!--?= Html::button('Добавить пользователя', ['id' => 'add-user', 'class' => 'btn btn-primary']) ?-->
                 <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'users-list', 'timeout' => 5000]); ?>
                 <?=
                 GridView::widget([

@@ -80,6 +80,18 @@ use api\common\models\RkWaybill;
                                                     'format'=>'date',
                                                 ],
                                                 [
+                                                    'format'=>'date',
+                                                    'value' => function($data) {
+
+                                                     $fdate = $data->actual_delivery ? $data->actual_delivery :
+                                                            ( $data->requested_delivery ? $data->requested_delivery :
+                                                              $data->updated_at);
+
+                                                        return $fdate;
+                                                    },
+                                                    'label' => 'Финальная дата',
+                                                ],
+                                                [
                                                     'attribute' => 'positionCount',
                                                     'label' => 'Кол-во позиций',   
                                                     'format'=>'raw',

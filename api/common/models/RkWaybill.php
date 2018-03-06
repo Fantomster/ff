@@ -2,6 +2,7 @@
 
 namespace api\common\models;
 
+use common\models\Order;
 use common\models\User;
 
 use Yii;
@@ -99,6 +100,24 @@ class RkWaybill extends \yii\db\ActiveRecord {
         return RkWaybillstatus::find()->andWhere('id = :id', [':id' => $this->status_id])->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    }
+
+    public function getOrder() {
+
+        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
+        return Order::find()->andWhere('id = :id', [':id' => $this->order_id])->one();
+
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
+    }
+
+    public function getFinalDate() {
+
+        $fdate = $this->order->actual_delivery ? $this->order->actual_delivery :
+            ( $this->order->requested_delivery ? $this->order->requested_delivery :
+                $this->order->updated_at);
+
+        // return Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
+        return $fdate;
     }
     
     public function beforeSave($insert)

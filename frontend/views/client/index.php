@@ -8,7 +8,7 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 
-$this->title = Yii::t('message', 'frontend.views.client.index.desktop', ['ru'=>'Рабочий стол']);
+$this->title = Yii::t('message', 'frontend.views.client.index.desktop', ['ru' => 'Рабочий стол']);
 
 frontend\assets\TutorializeAsset::register($this);
 
@@ -93,17 +93,11 @@ $user = Yii::$app->user->identity;
 $organization = $user->organization;
 
 $infoUrl = Url::to(['/site/ajax-set-info']);
-
-//if ($organization->step == Organization::STEP_SET_INFO) {
-//    \frontend\assets\AuthAsset::register($this);
-//    \frontend\assets\GoogleMapsAsset::register($this);
-//    echo $this->render("dashboard/_wizard", compact("profile", "organization"));
-//}
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> <?= Yii::t('message', 'frontend.views.client.index.main', ['ru'=>'Главная']) ?>
-        <small><?= Yii::t('message', 'frontend.views.client.index.desktop_two', ['ru'=>'Рабочий стол']) ?></small>
+        <i class="fa fa-home"></i> <?= Yii::t('message', 'frontend.views.client.index.main', ['ru' => 'Главная']) ?>
+        <small><?= Yii::t('message', 'frontend.views.client.index.desktop_two', ['ru' => 'Рабочий стол']) ?></small>
     </h1>
 </section>
 <section class="content">
@@ -115,10 +109,10 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                         <div class="row">
                             <div class="dash-small-box step-order" data-target="order">
                                 <div class="inner" style="position:relative;z-index:2">
-                                    <h3><?= Yii::t('message', 'frontend.views.client.index.create', ['ru'=>'Создать заказ']) ?></h3>
-                                    <p><?= Yii::t('message', 'frontend.views.client.index.self', ['ru'=>'у своих поставщиков']) ?></p>
+                                    <h3><?= Yii::t('message', 'frontend.views.client.index.create', ['ru' => 'Создать заказ']) ?></h3>
+                                    <p><?= Yii::t('message', 'frontend.views.client.index.self', ['ru' => 'у своих поставщиков']) ?></p>
                                 </div>
-<?= Html::a(Yii::t('message', 'frontend.views.client.index.create_two', ['ru'=>'Создать']), ['order/create'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a(Yii::t('message', 'frontend.views.client.index.create_two', ['ru' => 'Создать']), ['order/create'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash.png) no-repeat bottom right;
                                      background-size: 140px;">
@@ -130,10 +124,10 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                         <div class="row">
                             <div class="dash-small-box step-cart" data-target="checkout">
                                 <div class="inner" style="position:relative;z-index:2">
-                                    <h3><?= Yii::t('message', 'frontend.views.client.index.basket', ['ru'=>'Корзина']) ?> </h3>
-                                    <p><?= Yii::t('app', 'frontend.views.client.index.orders', ['ru'=>'заказов']) ?> <b><?= $totalCart ?></b></p>
+                                    <h3><?= Yii::t('message', 'frontend.views.client.index.basket', ['ru' => 'Корзина']) ?> </h3>
+                                    <p><?= Yii::t('app', 'frontend.views.client.index.orders', ['ru' => 'заказов']) ?> <b><?= $totalCart ?></b></p>
                                 </div>
-<?= Html::a(Yii::t('message', 'frontend.views.client.index.basket_two', ['ru'=>'Корзина']), ['order/checkout'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a(Yii::t('message', 'frontend.views.client.index.basket_two', ['ru' => 'Корзина']), ['order/checkout'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash3.png) no-repeat center right;
                                      background-size: 150px;">
@@ -149,11 +143,10 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                         <div class="row">
                             <div class="dash-small-box" data-target="request">
                                 <div class="inner" style="position:relative;z-index:2">
-                                    <h3><?= Yii::t('message', 'frontend.views.client.index.request', ['ru'=>'Создать заявку']) ?></h3>
-                                    <p><?= Yii::t('message', 'frontend.views.client.index.for_vendors', ['ru'=>'для поставщиков']) ?></p>
+                                    <h3><?= Yii::t('message', 'frontend.views.client.index.request', ['ru' => 'Создать заявку']) ?></h3>
+                                    <p><?= Yii::t('message', 'frontend.views.client.index.for_vendors', ['ru' => 'для поставщиков']) ?></p>
                                 </div>
-<?= Html::a(Yii::t('message', 'frontend.views.client.index.requests', ['ru'=>'Заявки']), '#', ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
-<?= ''//Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2'])  ?>
+                                <?= Html::a(Yii::t('message', 'frontend.views.client.index.requests', ['ru' => 'Заявки']), '#', ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash1.png) no-repeat top right;
                                      background-size: 170px;">
@@ -167,9 +160,9 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                 <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
                                     <h3>MixMarket</h3>
-                                    <p><?= Yii::t('message', 'frontend.views.client.index.avail', ['ru'=>'доступно для заказа товаров']) ?> <b><?= $count_products_from_mp ?></b></p>
+                                    <p><?= Yii::t('message', 'frontend.views.client.index.avail', ['ru' => 'доступно для заказа товаров']) ?> <b><?= $count_products_from_mp ?></b></p>
                                 </div>
-<?= Html::a('MixMarket', 'https://market.mixcart.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a('MixMarket', 'https://market.mixcart.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash2.png) no-repeat bottom right;
                                      background-size: 120px;">
@@ -183,7 +176,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                 <div class="row">
                     <div class="dash-box step-vendors-list">
                         <div class="box-header with-border">
-<?= Html::a(Yii::t('message', 'frontend.views.client.index.my', ['ru'=>'<span style="color:#3F3E3E">Мои</span> поставщики']) . '  <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['client/suppliers'], ['class' => 'step-manage-vendors', 'style' => 'font-size: 18px;']) ?>
+                            <?= Html::a(Yii::t('message', 'frontend.views.client.index.my', ['ru' => '<span style="color:#3F3E3E">Мои</span> поставщики']) . '  <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['client/suppliers'], ['class' => 'step-manage-vendors', 'style' => 'font-size: 18px;']) ?>
 
                         </div>
                         <div class="box-body" style="height: 268px;overflow-y:scroll">
@@ -193,9 +186,9 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                         $url = empty($data->picture) ? Yii::getAlias('@web') . \common\models\Organization::DEFAULT_VENDOR_AVATAR : $data->pictureUrl;
                                         return Html::img($url, ['style' => 'width:70px']);
                                     }],
-                                ['attribute' => 'name', 'value' => 'name', 'label' => Yii::t('message', 'frontend.views.client.index.vendors', ['ru'=>'Поставщики'])],
+                                ['attribute' => 'name', 'value' => 'name', 'label' => Yii::t('message', 'frontend.views.client.index.vendors', ['ru' => 'Поставщики'])],
                                 ['attribute' => '', 'format' => 'raw', 'header' => false, 'value' => function($data) {
-                                        return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.index.order', ['ru'=>'Заказать']), ['order/create',
+                                        return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.index.order', ['ru' => 'Заказать']), ['order/create',
                                                     'OrderCatalogSearch[searchString]' => "",
                                                     'OrderCatalogSearch[selectedCategory]' => "",
                                                     'OrderCatalogSearch[selectedVendor]' => $data['supp_org_id'],
@@ -224,7 +217,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                       ], */
                             ]);
                             ?> 
-<?php Pjax::end(); ?>
+                            <?php Pjax::end(); ?>
                         </div>
                     </div>
                 </div>
@@ -240,7 +233,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
         <div class="col-md-12">
             <div class="box box-info" style="border: none;">
                 <div class="box-header with-border">
-                    <?= Html::a(Yii::t('message', 'frontend.views.client.index.history', ['ru'=>'<span style="color:#3F3E3E">История</span> заказов']) . '  <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['order/index'], ['class' => '', 'style' => 'font-size: 18px;']) ?>
+                    <?= Html::a(Yii::t('message', 'frontend.views.client.index.history', ['ru' => '<span style="color:#3F3E3E">История</span> заказов']) . '  <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['order/index'], ['class' => '', 'style' => 'font-size: 18px;']) ?>
 
                 </div>
                 <div class="box-body" style="display: block;">
@@ -254,17 +247,17 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                         [
                             'attribute' => 'vendor.name',
                             'value' => 'vendor.name',
-                            'label' => Yii::t('message', 'frontend.views.client.index.vendor', ['ru'=>'Поставщик']),
+                            'label' => Yii::t('message', 'frontend.views.client.index.vendor', ['ru' => 'Поставщик']),
                         ],
                         [
                             'attribute' => 'createdByProfile.full_name',
                             'value' => 'createdByProfile.full_name',
-                            'label' => Yii::t('message', 'frontend.views.client.index.created', ['ru'=>'Заказ создал']),
+                            'label' => Yii::t('message', 'frontend.views.client.index.created', ['ru' => 'Заказ создал']),
                         ],
                         [
                             'attribute' => 'acceptedByProfile.full_name',
                             'value' => 'acceptedByProfile.full_name',
-                            'label' => Yii::t('message', 'frontend.views.client.index.rec', ['ru'=>'Заказ принял']),
+                            'label' => Yii::t('message', 'frontend.views.client.index.rec', ['ru' => 'Заказ принял']),
                         ],
                         [
                             'format' => 'raw',
@@ -272,7 +265,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                             'value' => function($data) {
                                 return "<b>$data->total_price</b> " . $data->currency->symbol;
                             },
-                            'label' => Yii::t('message', 'frontend.views.client.index.sum', ['ru'=>'Сумма']),
+                            'label' => Yii::t('message', 'frontend.views.client.index.sum', ['ru' => 'Сумма']),
                         ],
                         [
                             'format' => 'raw',
@@ -281,7 +274,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                 $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
                                 return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                             },
-                            'label' => Yii::t('message', 'frontend.views.client.index.created_at', ['ru'=>'Дата создания']),
+                            'label' => Yii::t('message', 'frontend.views.client.index.created_at', ['ru' => 'Дата создания']),
                         ],
                         [
                             'format' => 'raw',
@@ -305,7 +298,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                 }
                                 return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
                             },
-                            'label' => Yii::t('message', 'frontend.views.client.index.status', ['ru'=>'Статус']),
+                            'label' => Yii::t('message', 'frontend.views.client.index.status', ['ru' => 'Статус']),
                         ],
                         [
                             'format' => 'raw',
@@ -314,11 +307,11 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                     case Order::STATUS_DONE:
                                     case Order::STATUS_REJECTED:
                                     case Order::STATUS_CANCELLED:
-                                        return Html::a(Yii::t('app', 'frontend.views.client.index.repeat', ['ru'=>'Повторить']), '#', [
+                                        return Html::a(Yii::t('app', 'frontend.views.client.index.repeat', ['ru' => 'Повторить']), '#', [
                                                     'class' => 'reorder btn btn-outline-processing',
                                                     'data' => [
                                                         'toggle' => 'tooltip',
-                                                        'original-title' => Yii::t('message', 'frontend.views.client.index.repeat', ['ru'=>'Повторить заказ']),
+                                                        'original-title' => Yii::t('message', 'frontend.views.client.index.repeat', ['ru' => 'Повторить заказ']),
                                                         'url' => Url::to(['order/repeat', 'id' => $data->id])
                                                     ],
                                         ]);
@@ -327,11 +320,11 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                     case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                                     case Order::STATUS_PROCESSING:
                                         if ($data->isObsolete) {
-                                            return Html::a(Yii::t('message', 'frontend.views.client.index.end', ['ru'=>'Завершить']), '#', [
+                                            return Html::a(Yii::t('message', 'frontend.views.client.index.end', ['ru' => 'Завершить']), '#', [
                                                         'class' => 'complete btn btn-outline-success',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
-                                                            'original-title' => Yii::t('message', 'frontend.views.client.index.end', ['ru'=>'Завершить заказ']),
+                                                            'original-title' => Yii::t('message', 'frontend.views.client.index.end', ['ru' => 'Завершить заказ']),
                                                             'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
                                                         ],
                                             ]);
@@ -366,7 +359,7 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                         },
                     ]);
                     ?> 
-<?php Pjax::end(); ?>   
+                    <?php Pjax::end(); ?>   
                 </div>
                 <!-- /.box-body -->
             </div>
@@ -375,25 +368,25 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
     </div>
 </section>
 <?php
-$vendorsText = strpos($user->email, '@delivery-club.ru') ? Yii::t('message', 'frontend.views.client.index.list', ['ru'=>"Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков"]) : Yii::t('message', 'frontend.views.client.index.vendor_list', ['ru'=>"Список ваших поставщиков."]);
+$vendorsText = strpos($user->email, '@delivery-club.ru') ? Yii::t('message', 'frontend.views.client.index.list', ['ru' => "Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков"]) : Yii::t('message', 'frontend.views.client.index.vendor_list', ['ru' => "Список ваших поставщиков."]);
 
 $checkoutUrl = Url::to(['order/checkout']);
 $createUrl = Url::to(['order/create']);
 $requestUrl = Url::to(['request/list']);
 
 $arr = [
-    Yii::t('message', 'frontend.views.client.index.var', ['ru'=>'Да']),
-    Yii::t('message', 'frontend.views.client.index.var1', ['ru'=>'Отмена']),
-    Yii::t('message', 'frontend.views.client.index.var2', ['ru'=>'Создание заказа из прайс-листов ваших поставщиков.']),
-    Yii::t('message', 'frontend.views.client.index.var3', ['ru'=>'Ваша корзина. Здесь хранятся заказы, готовые для отправки поставщику.']),
-    Yii::t('message', 'frontend.views.client.index.var4', ['ru'=>'Вы всегда можете добавить поставщиков, с которыми уже работаете.']),
-    Yii::t('message', 'frontend.views.client.index.var5', ['ru'=>'Или найти новых с помощью сервиса MixMarket.']),
-    Yii::t('message', 'frontend.views.client.index.var6', ['ru'=>'Навигация по системе.']),
-    Yii::t('message', 'frontend.views.client.index.var7', ['ru'=>'Вы всегда можете пройти обучение заново.']),
-    Yii::t('message', 'frontend.views.client.index.var8', ['ru'=>'Завершить']),
-    Yii::t('message', 'frontend.views.client.index.var9', ['ru'=>'Вперед']),
-    Yii::t('message', 'frontend.views.client.index.var10', ['ru'=>'Назад']),
-    Yii::t('message', 'frontend.views.client.index.var11', ['ru'=>'Начать работу']),
+    Yii::t('message', 'frontend.views.client.index.var', ['ru' => 'Да']),
+    Yii::t('message', 'frontend.views.client.index.var1', ['ru' => 'Отмена']),
+    Yii::t('message', 'frontend.views.client.index.var2', ['ru' => 'Создание заказа из прайс-листов ваших поставщиков.']),
+    Yii::t('message', 'frontend.views.client.index.var3', ['ru' => 'Ваша корзина. Здесь хранятся заказы, готовые для отправки поставщику.']),
+    Yii::t('message', 'frontend.views.client.index.var4', ['ru' => 'Вы всегда можете добавить поставщиков, с которыми уже работаете.']),
+    Yii::t('message', 'frontend.views.client.index.var5', ['ru' => 'Или найти новых с помощью сервиса MixMarket.']),
+    Yii::t('message', 'frontend.views.client.index.var6', ['ru' => 'Навигация по системе.']),
+    Yii::t('message', 'frontend.views.client.index.var7', ['ru' => 'Вы всегда можете пройти обучение заново.']),
+    Yii::t('message', 'frontend.views.client.index.var8', ['ru' => 'Завершить']),
+    Yii::t('message', 'frontend.views.client.index.var9', ['ru' => 'Вперед']),
+    Yii::t('message', 'frontend.views.client.index.var10', ['ru' => 'Назад']),
+    Yii::t('message', 'frontend.views.client.index.var11', ['ru' => 'Начать работу']),
 ];
 
 $customJs = <<< JS
@@ -533,10 +526,10 @@ JS;
     $this->registerJs($customJs2, View::POS_READY);
 }
 echo common\widgets\setinfo\SetInfoWidget::widget([
-                'action' => '/site/ajax-complete-registration',
-                'organization' => $organization,
-                'profile' => $profile,
-                'events' => 'invoke',
-                'selector' => '#data-modal-wizard',
-            ]);
+    'action' => '/site/ajax-complete-registration',
+    'organization' => $organization,
+    'profile' => $profile,
+    'events' => 'invoke',
+    'selector' => '#data-modal-wizard',
+]);
 ?>

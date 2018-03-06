@@ -88,7 +88,7 @@ use api\common\models\RkWaybill;
 
                                         $res = $model->getPconstValue();
 
-                                        $ret = ($model->denom == 'taxVat') ? $res/100 : (($res == 1) ? "Включено" : "Выключено");
+                                        $ret = ($model->denom == 'taxVat') ? $res : (($res == 1) ? "Включено" : "Выключено");
 
                                         if ($model->denom == 'defGoodGroup') $ret = 'Список';
 

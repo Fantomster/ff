@@ -284,7 +284,6 @@ class VendorController extends DefaultController
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
-
             }
         }
 

@@ -35,11 +35,11 @@ class MpCategoryController extends ActiveController {
      */
     public function actions() {
         return [
-            'index' => [
+            /*'index' => [
                 'class' => 'yii\rest\IndexAction',
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
-            ],
+            ],*/
         ];
     }
 
@@ -88,5 +88,17 @@ class MpCategoryController extends ActiveController {
             'name' => $params->name, 
            ]);
         return $dataProvider;
+    }
+
+    public function actionIndex()
+    {
+        $dataProvider = $this->prepareDataProvider();
+
+        $models = $dataProvider->getModels();
+        $res = [];
+        foreach ($models as $model)
+            $res[] = ['id' => $model->id, 'parent' => $model->parent, 'name' => $model->name, 'count' => $model->getCountProducts()];
+
+        return $res;
     }
 }

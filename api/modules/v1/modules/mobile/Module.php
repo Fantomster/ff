@@ -66,7 +66,9 @@ class Module extends \yii\base\Module
             'class' => CompositeAuth::className(),
             'only' => ['index', 'view', 'options', 'auth','complete-registration', 
                 'refresh-fcm-token', 'send', 'create', 
-                'viewed', 'update', 'create', 'delete', 'new-order', 'favorites', 'send', 'cancel-order', 'confirm-order', 'remove-supply', 'buisiness-list', 'change-buisiness'],
+                'viewed', 'update', 'create', 'delete', 'new-order', 'favorites', 'send', 'cancel-order', 'confirm-order', 'remove-supply', 'buisiness-list', 'change-buisiness',
+                'index', 'add-to-cart', 'checkout', 'set-delivery', 'set-note', 'set-comment', 'remove-position', 'make-order', 'delete-order'
+            ],
             'authMethods' => [
                 [
                     'class' => HttpBasicAuth::className(),

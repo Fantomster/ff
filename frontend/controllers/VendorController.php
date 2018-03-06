@@ -272,6 +272,15 @@ class VendorController extends DefaultController
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
+                }else{
+                    if(array_key_exists('email', $user->errors)){
+                        $existingUser = User::findOne(['email'=>$post['User']['email']]);
+                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization, $post['User']['role_id']);
+                        $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+
+                        $message = Yii::t('app', 'Пользователь добавлен!');
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
                 }
             }
         }

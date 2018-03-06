@@ -23,8 +23,8 @@ class InvoiceController extends Controller
         $organization = $user->organization;
         $models = IntegrationInvoice::find()
             ->where(['organization_id' => $organization->id])
-            ->andWhere('order_id is NULL')
             ->all();
+
         return $this->render('index', ['models' => $models]);
 
     }
@@ -32,10 +32,8 @@ class InvoiceController extends Controller
     public function actionGetContent()
     {
         $id = \Yii::$app->request->post('id');
-        $vendor_id = \Yii::$app->request->post('vendor_id');
         $model = IntegrationInvoice::findOne($id);
-        $vendor = Organization::findOne($vendor_id);
-        return $this->renderAjax('_content', ['model' => $model, 'vendor' => $vendor]);
+        return $this->renderAjax('_content', ['model' => $model]);
     }
 
     public function actionGetSuppliers()
@@ -61,25 +59,29 @@ class InvoiceController extends Controller
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->pageSize = 5;
 
+        $vendor_id = $params['OrderSearch']['vendor_id'];
         $invoice_id = $params['invoice_id'];
 
         return $this->renderAjax('_orders', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'vendor_id' => $vendor_id,
             'invoice_id' => $invoice_id,
-
         ]);
     }
 
     /**
      * Создание заказа, и товаров с накладной
+     * @return array
+     * @throws \Exception
+     * @throws \yii\db\Exception
      */
     public function actionCreateOrder()
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
 
         if (!\Yii::$app->request->isAjax) {
-            throw new Exception('is not AJAX request');
+            throw new \Exception('is not AJAX request');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -89,7 +91,7 @@ class InvoiceController extends Controller
             $vendor = Organization::findOne($params['vendor_id']);
 
             //Если прилетел связный заказ
-            if ($params['order_id']) {
+            if (isset($params['order_id'])) {
                 $order_model = Order::findOne($params['order_id']);
                 if ($order_model) {
                     $order_model->status = Order::STATUS_CANCELLED;
@@ -121,7 +123,7 @@ class InvoiceController extends Controller
             $order->client_id = $user->organization_id;
             $order->vendor_id = $vendor->id;
             $order->created_by_id = $user->id;
-            $order->status = Order::STATUS_PROCESSING;
+            $order->status = Order::STATUS_DONE;
             $order->total_price = 0;
             $order->currency_id = $vendor->baseCatalog->currency_id;
             if (!$order->save()) {

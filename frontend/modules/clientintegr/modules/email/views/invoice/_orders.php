@@ -1,7 +1,17 @@
+<b>Выберите заказ для связи с накладной:</b><br>
 <?php
 use \common\models\Order;
 
 $columns = [
+    [
+        'header' => 'выбрать / '.\yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_radio', 'style' => 'cursor:pointer;color:red']),
+        'format' => 'raw',
+        'value' => function($data) {
+            return \yii\helpers\Html::input('radio', 'order_id', $data->id, ['class' => 'orders_radio']);
+        },
+        'contentOptions' => ['class' => 'text-center'],
+        'headerOptions' => ['style' => 'width: 100px;'],
+    ],
     [
         'attribute' => 'id',
         'value' => 'id',
@@ -62,22 +72,7 @@ $columns = [
             return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i>
         },
         'label' => Yii::t('message', 'frontend.views.client.index.status', ['ru'=>'Статус']),
-    ],
-    [
-        'format' => 'raw',
-        'value' => function($data) use ($invoice_id) {
-            return \yii\helpers\Html::a('Привязать к заказу', '#', [
-                'class' => 'reorder btn btn-outline-processing btn-xs create-order',
-                'data' => [
-                    'order_id' => $data->id,
-                    'invoice_id' => $invoice_id,
-                    'vendor_id' => $data->vendor->id
-                ],
-            ]);
-        },
-        'contentOptions' => ['class' => 'text-center'],
-        'headerOptions' => ['style' => 'width: 20px;']
-    ],
+    ]
 ];
 ?>
 
@@ -85,6 +80,8 @@ $columns = [
 
 \yii\widgets\Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
 
+echo \yii\helpers\Html::input('hidden', 'vendor_id', $vendor_id);
+echo \yii\helpers\Html::input('hidden', 'invoice_id', $invoice_id);
 
 echo \kartik\grid\GridView::widget([
     'filterModel' => $searchModel,

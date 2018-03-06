@@ -97,6 +97,11 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
+    public function getVat() {
+
+
+    }
+
     public function getProduct() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);

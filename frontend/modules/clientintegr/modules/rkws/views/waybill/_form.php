@@ -107,13 +107,15 @@ use yii\web\JsExpression;
     <?php
 
     if (!$model->doc_date) {
-        $model->doc_date = date('d.m.Y', time());
+      //  $model->doc_date = date('d.m.Y', time()); // Добавить каскадную проверку на даты здесь
+          $rdate = date('d.m.Y', strtotime($model->getFinalDate()));
     } else {
-        $rdate = date('d.m.Y', strtotime($model->doc_date));
+          $rdate = date('d.m.Y', strtotime($model->doc_date));
         //  var_dump($rdate);
         // $rdate->format('m/d/y h:i a');
-        $model->doc_date = $rdate;
     }
+        $model->doc_date = $rdate;
+
     ?>
     <?php echo $form->field($model, 'doc_date')->label('Дата Документа')->
     widget(DatePicker::classname(), [

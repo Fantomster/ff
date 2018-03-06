@@ -290,6 +290,19 @@ $this->registerCss("
                                
                             ],
                             [
+                                'format'=>'raw',
+                                'value' => function($data) {
+
+                                    $fdate = $data->actual_delivery ? $data->actual_delivery :
+                                        ( $data->requested_delivery ? $data->requested_delivery :
+                                            $data->updated_at);
+
+                                    $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
+                                    return '<i class="fa fa-fw fa-calendar""></i> '. $fdate;
+                                },
+                                'label' => Yii::t('message', 'frontend.views.order.final_date', ['ru'=>'Дата финальная']),
+                            ],
+                            [
                                 'format' => 'raw',
                                 'attribute' => 'status',
                                 'value' => function($data) {

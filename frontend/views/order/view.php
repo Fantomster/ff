@@ -10,17 +10,19 @@ use yii\widgets\Breadcrumbs;
 $this->title = Yii::t('message', 'frontend.views.order.order', ['ru' => 'Заказ №']) . $order->id;
 
 if (!empty($order->invoice)) {
-    $title = 'Заказ №' . $order->id . ' создан на основании накладной 1С';
+    $title = $this->title . ' ' . Yii::t('message', 'frontend.views.order.order_invoice_create', ['ru' => 'создан на основании накладной 1С']);
 
     if(!empty($order->invoice->orderRelation)){
         $link = \yii\helpers\Html::a($order->invoice->orderRelation->id, '/order/' . $order->invoice->orderRelation->id);
-        $title .= ' (первичный заказ '. $link.')';
+        $lang = Yii::t('message', 'frontend.views.order.order_invoice', ['ru' => 'первичный заказ']);
+        $title .= " ($lang №$link)";
     }
 }
 
 if (!empty($order->invoiceRelation)) {
     $link = \yii\helpers\Html::a($order->invoiceRelation->order_id, '/order/' . $order->invoiceRelation->order_id);
-    $title = 'Заказ №' . $order->id . ' заменен заказом на основании накладной 1С №' . $link;
+    $lang = Yii::t('message', 'frontend.views.order.order_invoice_change', ['ru' => 'заменен заказом на основании накладной 1С']);
+    $title = $this->title . " $lang №" . $link;
 }
 
 $title = $title ?? $this->title;

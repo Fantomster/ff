@@ -35,7 +35,7 @@ class WaybillHelper extends AuthHelper {
 
     $exportApproved        = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
     $useAutoVAT            = (RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() : 1;
-    $exportVAT             = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 18;
+    $exportVAT             = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 0;
     $exportAutoNumber      = RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue();
 
     $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';
@@ -43,8 +43,12 @@ class WaybillHelper extends AuthHelper {
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/waybill' . '">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
-    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store->rid.'" active="'.$exportApproved.'"'
-            . ' duedate="1" note="'.$wmodel->note.'" '.$autoNumber.'>'.PHP_EOL;
+    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").
+        '" corr="'.$wmodel->corr_rid.
+        '" store="'.$wmodel->store->rid.
+        '" active="'.$exportApproved.'"'.
+        ' duedate="1" note="'.$wmodel->note.
+        '" '.$autoNumber.'>'.PHP_EOL;
     
    $recs = \api\common\models\RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.rid as prid')->leftJoin('rk_product','rk_product.id = product_rid')
            ->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();

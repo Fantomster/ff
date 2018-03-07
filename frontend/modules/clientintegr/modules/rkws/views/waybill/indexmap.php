@@ -101,7 +101,7 @@ Breadcrumbs::widget([
                                             }'],
                                 ]); ?>    
                         </div>
-                        <?php echo "!"; var_dump($useAutoVAT); ?>
+
 
 <?php
 $columns = array(

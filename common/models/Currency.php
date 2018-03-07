@@ -99,6 +99,7 @@ class Currency extends \yii\db\ActiveRecord {
         $array = [];
         $iso_code = "RUB";
         $array['currency_id'] = 1;
+        $currencyList = [];
 
         //Список валют из заказов
         $currency_list = Order::find()->distinct()->select([

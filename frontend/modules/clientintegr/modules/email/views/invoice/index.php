@@ -162,6 +162,35 @@ function renderButton($id)
 </section>
 <?php
 $url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
+
+$user = \Yii::$app->user->identity;
+/**
+ * @var $organization \common\models\Organization
+ */
+$organization = $user->organization;
+$integration = $organization->integrationOnly();
+
+$list_integration = '';
+
+if(!empty($integration)) {
+    $links = [
+            'rk' => [
+                'title' => 'R_keeper',
+                'url' => '/clientintegr/rkws/waybill/index'
+            ],
+            'iiko' => [
+                'title' => 'iiko Office',
+                'url' => '/clientintegr/iiko/waybill/index'
+            ]
+    ];
+    foreach($integration as $key => $row) {
+        $list_integration .=  '<br>' . \yii\helpers\Html::a($links[$key]['title'], \Yii::$app->urlManager->createUrl($links[$key]['url']),[
+            'class' => 'btn btn-primary'
+        ]);
+    }
+}
+
+
 ob_start();
 ?>
     $('.view-relations').click(function () {
@@ -248,7 +277,7 @@ ob_start();
                 if (data.status === true) {
                     swal(
                         'Накладная успешно привязана!',
-                        'Перейти в интеграцию: ',
+                        'Перейти в интеграцию: <?=$list_integration?>',
                         'success'
                     );
                 } else {

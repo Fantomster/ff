@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\common\models\iiko\iikoService;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
@@ -1303,4 +1304,25 @@ class Organization extends \yii\db\ActiveRecord {
         return (empty($this->name) || empty($this->place_id));
     }
 
+    /**
+     * @return array
+     */
+    public function integrationOnly()
+    {
+        $return = [];
+
+        $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org', ['org' => $this->id])->one();
+        $t = strtotime(date('Y-m-d H:i:s', time()));
+        if ($lic) {
+            if ($t >= strtotime($lic->fd) && $t <= strtotime($lic->td) && $lic->status_id === 2) {
+                $return['rk'] = true;
+            }
+        }
+
+        if(!empty(iikoService::getLicense())) {
+            $return['iiko'] = true;
+        }
+
+        return $return;
+    }
 }

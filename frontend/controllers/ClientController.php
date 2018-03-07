@@ -187,9 +187,6 @@ class ClientController extends DefaultController {
      */
 
     public function actionAjaxCreateUser() {
-        $user2 = User::findOne(['id'=>3795]);
-        $user2->organization_id=3768;
-        $user2->save();
         $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
         $this->loadCurrentUser();

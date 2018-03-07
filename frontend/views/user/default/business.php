@@ -145,6 +145,7 @@ $grid = [
     ],
 ];
 ?>
+<?php if(!$relationCount): ?>
 <section class="section">
     <div class="container">
         <div class="row">
@@ -181,9 +182,10 @@ $grid = [
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <?php if($relationCount): ?>
-    <section class="section" style="top: 600px;">
+    <section class="section">
         <div class="container">
             <div class="row">
                 <div class="col-md-offset-3 col-md-6">

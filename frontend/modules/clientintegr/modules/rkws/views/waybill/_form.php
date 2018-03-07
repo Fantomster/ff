@@ -23,7 +23,7 @@ use yii\web\JsExpression;
     <?php $data = ($agentModel) ? [ $agentModel->rid => $agentModel->denom ] : []; ?>
 
 
-    <?php if (empty($model->store_rid)) $model->store_rid = 1; ?>
+    <?php if (empty($model->store_rid)) $model->store_rid = -1; ?>
 
     <?php $form = ActiveForm::begin(); ?>
 

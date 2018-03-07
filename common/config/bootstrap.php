@@ -6,8 +6,8 @@ Yii::setAlias('@market', dirname(dirname(__DIR__)) . '/market');
 Yii::setAlias('@console', dirname(dirname(__DIR__)) . '/console');
 Yii::setAlias('@franchise', dirname(dirname(__DIR__)) . '/franchise');
 Yii::setAlias('@api', dirname(dirname(__DIR__)) . '/api');
-Yii::setAlias('@bower', dirname(dirname(__DIR__)) . '/vendor/bower-asset');
-Yii::setAlias('@npm', dirname(dirname(__DIR__)) . '/vendor/npm-asset');
+//Yii::setAlias('@bower', dirname(dirname(__DIR__)) . '/vendor/bower-asset');
+//Yii::setAlias('@npm', dirname(dirname(__DIR__)) . '/vendor/npm-asset');
 
 
 // настройки локальной машины

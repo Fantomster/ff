@@ -73,7 +73,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'organization_id' => 'Организация',
+            'organization_id' => 'Получатель накладной',
             'integration_setting_from_email_id' => 'Настройка',
             'number' => 'Номер накладной',
             'date' => 'Дата',
@@ -82,7 +82,9 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             'file_mime_type' => 'MimeType',
             'file_content' => 'File Content',
             'file_hash_summ' => 'File Hash Summ',
-            'created_at' => 'Дата создания',
+            'created_at' => 'Дата получения',
+            'count' => 'Кол-во позиций',
+            'total' => 'Итоговая сумма',
             'updated_at' => 'Updated At',
         ];
     }
@@ -93,6 +95,16 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     public function getContent()
     {
         return $this->hasMany(IntegrationInvoiceContent::className(), ['invoice_id' => 'id']);
+    }
+
+    public function getTotalSumm() {
+        $total = 0;
+        if($this->content){
+            foreach($this->content as $row) {
+                $total += $row->price_nds;
+            }
+        }
+        return round($total, 2);
     }
 
     /**
@@ -141,7 +153,11 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->file_content = $invoice['file_content'];
         $this->file_hash_summ = $invoice['file_hash_summ'];
         $this->number = $invoice['invoice']['number'];
-        $this->date = date('Y-m-d', strtotime($invoice['invoice']['date']));
+        $this->date = (!empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null);
+
+        if($this->date == '1970-01-01') {
+            $this->date = null;
+        }
 
         if (!$this->save()) {
             throw new Exception(implode(' ', $this->getFirstErrors()));

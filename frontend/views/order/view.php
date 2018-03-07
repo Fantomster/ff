@@ -203,7 +203,7 @@ $js = <<<JS
         })
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
-\yii2assets\printthis\PrintThisAsset::register($this);
+\common\assets\PrintThisAsset::register($this);
 
 $canRepeatOrder = false;
 if ($organizationType == Organization::TYPE_RESTAURANT) {

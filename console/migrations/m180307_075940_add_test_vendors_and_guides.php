@@ -12,8 +12,8 @@ class m180307_075940_add_test_vendors_and_guides extends Migration
      */
     public function safeUp()
     {
-        $organization = new \common\models\Organization();
-        dd($organization);
+        //$organization = new \common\models\Organization();
+        //dd($organization);
     }
 
     /**

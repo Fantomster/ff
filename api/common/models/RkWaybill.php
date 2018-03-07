@@ -50,6 +50,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
         return [
             [['order_id', 'doc_date', 'corr_rid'], 'required'],
             [['corr_rid', 'store_rid', 'status_id','num_code'], 'integer'],
+            [['store_rid'], 'number', 'min' => 0],
                 //     [['comment'], 'string', 'max' => 255],
             [['store_rid', 'org','vat_included','text_code','num_code','note'],'safe']
         ];

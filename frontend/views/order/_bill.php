@@ -3,21 +3,6 @@ $currencySymbol = $order->currency->symbol;
 ?>
 <div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 320px;">
     <div class="block__wrapp" style="width: 100%;	height: 100%; padding: 20px;">
-        <?php if(!empty($order->invoice)):?>
-            <blockquote >
-                Заказ создан на основании накладной 1С
-                <?php if(!empty($order->invoice->orderRelation)):?>
-                    <?php $link = \yii\helpers\Html::a($order->invoice->orderRelation->id, '/order/' . $order->invoice->orderRelation->id);?>
-                    (первичный заказ <?=$link?>)
-                <?php endif;?>
-            </blockquote >
-        <?php endif;?>
-        <?php if(!empty($order->invoiceRelation)):?>
-            <blockquote >
-                <?php $link = \yii\helpers\Html::a($order->invoiceRelation->order_id, '/order/' . $order->invoiceRelation->order_id);?>
-                Cоздан новый заказ <?=$link?> на основании накладной 1С
-            </blockquote >
-        <?php endif;?>
         <img  src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" alt="" class="block_logo">
 
         <div style="width: 100%;">

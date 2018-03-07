@@ -75,7 +75,7 @@ function renderButton($id)
                                         'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
                                     'format' => 'raw',
                                     'value' => function ($data) {
-                                        if($data->order_id) return '';
+                                        if ($data->order_id) return '';
                                         return \yii\helpers\Html::input('radio', 'invoice_id', $data->id, ['class' => 'invoice_radio']);
                                     },
                                     'contentOptions' => ['class' => 'text-center'],
@@ -208,8 +208,9 @@ ob_start();
     });
 
     $('#save-button').click(function () {
-        row_invoice = $('.invoice_radio:checked').parents('tr');
         var params = {};
+        var create_order = true;
+        row_invoice = $('.invoice_radio:checked').parents('tr');
         params.invoice_id = $(row_invoice).find('.invoice_radio:checked').val();
         params.vendor_id = $(row_invoice).find('.view-relations').data('vendor_id');
         params.order_id = $('.orders_radio:checked').val();
@@ -225,6 +226,7 @@ ob_start();
         }
 
         if (params.order_id === undefined) {
+            create_order = false;
             swal({
                 title: 'Будет создан новый заказ?',
                 text: "Вы уверены что не хотите прикрепить накладную к существующему заказу.",
@@ -236,20 +238,25 @@ ob_start();
                 cancelButtonText: 'Отмена',
             }).then(function (result) {
                 if (result.value) {
-                    $.post('<?= $url ?>/create-order', params, function (data) {
-                        if (data.status === true) {
-                            swal(
-                                'Накладная успешно привязана!',
-                                'Перейти в интеграцию: ',
-                                'success'
-                            );
-                        } else {
-                            errorSwal(data.error)
-                        }
-                    });
+                    create_order = true;
                 }
             });
         }
+
+        if (create_order === true) {
+            $.post('<?= $url ?>/create-order', params, function (data) {
+                if (data.status === true) {
+                    swal(
+                        'Накладная успешно привязана!',
+                        'Перейти в интеграцию: ',
+                        'success'
+                    );
+                } else {
+                    errorSwal(data.error)
+                }
+            });
+        }
+
     });
 
     function errorSwal(message) {

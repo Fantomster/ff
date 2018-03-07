@@ -7,19 +7,35 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 
-$this->title = Yii::t('message', 'frontend.views.order.order', ['ru'=>'Заказ №']) . $order->id;
+$this->title = Yii::t('message', 'frontend.views.order.order', ['ru' => 'Заказ №']) . $order->id;
+
+if (!empty($order->invoice)) {
+    $title = 'Заказ №' . $order->id . ' создан на основании накладной 1С';
+
+    if(!empty($order->invoice->orderRelation)){
+        $link = \yii\helpers\Html::a($order->invoice->orderRelation->id, '/order/' . $order->invoice->orderRelation->id);
+        $title .= ' (первичный заказ '. $link.')';
+    }
+}
+
+if (!empty($order->invoiceRelation)) {
+    $link = \yii\helpers\Html::a($order->invoiceRelation->order_id, '/order/' . $order->invoiceRelation->order_id);
+    $title = 'Заказ №' . $order->id . ' заменен заказом на основании накладной 1С №' . $link;
+}
+
+$title = $title ?? $this->title;
 
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
 } else {
     $quantityEditable = (in_array($order->status, [
-                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                Order::STATUS_PROCESSING]));
+        Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+        Order::STATUS_PROCESSING]));
     $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array($order->status, [
-                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
@@ -27,21 +43,21 @@ $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $edit = false;
 
 $arr = [
-    Yii::t('message', 'frontend.views.order.var1', ['ru'=>'Несохраненные изменения!']),
-    Yii::t('message', 'frontend.views.order.var2', ['ru'=>'Вы изменили заказ, но не сохранили изменения!']),
-    Yii::t('message', 'frontend.views.order.var3', ['ru'=>'Уйти']),
-    Yii::t('message', 'frontend.views.order.var4', ['ru'=>'Остаться']),
-    Yii::t('message', 'frontend.views.order.var5', ['ru'=>'Удаление позиции из заказа']),
-    Yii::t('message', 'frontend.views.order.var6', ['ru'=>'Товар будет удален из заказа. Продолжить?']),
-    Yii::t('message', 'frontend.views.order.var7', ['ru'=>'Да, удалить']),
-    Yii::t('message', 'frontend.views.order.var8', ['ru'=>'Отмена']),
-    Yii::t('message', 'frontend.views.order.var9', ['ru'=>'Товар удален из заказа!']),
-    Yii::t('message', 'frontend.views.order.var10', ['ru'=>'Действительно отменить заказ?']),
-    Yii::t('message', 'frontend.views.order.var11', ['ru'=>'Комментарий']),
-    Yii::t('message', 'frontend.views.order.var12', ['ru'=>'Нет']),
-    Yii::t('message', 'frontend.views.order.var13', ['ru'=>'Да']),
-    Yii::t('message', 'frontend.views.order.var14', ['ru'=>'Ошибка!']),
-    Yii::t('message', 'frontend.views.order.var15', ['ru'=>'Попробуйте еще раз']),
+    Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохраненные изменения!']),
+    Yii::t('message', 'frontend.views.order.var2', ['ru' => 'Вы изменили заказ, но не сохранили изменения!']),
+    Yii::t('message', 'frontend.views.order.var3', ['ru' => 'Уйти']),
+    Yii::t('message', 'frontend.views.order.var4', ['ru' => 'Остаться']),
+    Yii::t('message', 'frontend.views.order.var5', ['ru' => 'Удаление позиции из заказа']),
+    Yii::t('message', 'frontend.views.order.var6', ['ru' => 'Товар будет удален из заказа. Продолжить?']),
+    Yii::t('message', 'frontend.views.order.var7', ['ru' => 'Да, удалить']),
+    Yii::t('message', 'frontend.views.order.var8', ['ru' => 'Отмена']),
+    Yii::t('message', 'frontend.views.order.var9', ['ru' => 'Товар удален из заказа!']),
+    Yii::t('message', 'frontend.views.order.var10', ['ru' => 'Действительно отменить заказ?']),
+    Yii::t('message', 'frontend.views.order.var11', ['ru' => 'Комментарий']),
+    Yii::t('message', 'frontend.views.order.var12', ['ru' => 'Нет']),
+    Yii::t('message', 'frontend.views.order.var13', ['ru' => 'Да']),
+    Yii::t('message', 'frontend.views.order.var14', ['ru' => 'Ошибка!']),
+    Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте еще раз']),
 ];
 
 $js = <<<JS
@@ -219,20 +235,20 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.views.order.order_two', ['ru'=>'Заказ №']) ?><?= $order->id ?>
+        <i class="fa fa-history"></i> <?= $title ?>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
         'links' => [
             [
-                'label' => Yii::t('message', 'frontend.views.order.history', ['ru'=>'История заказов']),
+                'label' => Yii::t('message', 'frontend.views.order.history', ['ru' => 'История заказов']),
                 'url' => ['order/index'],
             ],
-            Yii::t('message', 'frontend.views.order.order_three', ['ru'=>'Заказ №']) . $order->id,
+            Yii::t('message', 'frontend.views.order.order_three', ['ru' => 'Заказ №']) . $order->id,
         ],
     ]);
     ?>
@@ -245,7 +261,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             </div>
 
             <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp" id="actionButtons">
-                <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
+                <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>
             </div>
             <?php
             echo Html::beginForm(Url::to(['/order/ajax-refresh-buttons']), 'post', ['id' => 'actionButtonsForm']);
@@ -253,7 +269,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             echo Html::endForm();
             ?>
             <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
-                <div class = "block_wrapper">
+                <div class="block_wrapper">
                     <div class="block_head_w">
                         <img src="/img/chat.png" alt="">
                     </div>
@@ -284,9 +300,9 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                             Html::textInput('message', null, [
                                 'id' => 'message-field',
                                 'class' => 'message',
-                                'placeholder' => Yii::t('message', 'frontend.views.order.send_message', ['ru'=>'Отправить сообщение'])
+                                'placeholder' => Yii::t('message', 'frontend.views.order.send_message', ['ru' => 'Отправить сообщение'])
                             ])
-                            ?>    
+                            ?>
                             <button type="submit"><img src="/img/message.png"></button>
                         </div>
                     </div>

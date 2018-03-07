@@ -88,7 +88,10 @@ class RequestController extends ActiveController {
             'query' => $query,
             'pagination' => false,
         ));
-        
+
+        $query->select("*, (select count(*) from request_counters where request_id = request.id) as `views`,
+(select count(*) from request_callback where request_id = request.id) as `callbacks`");
+
         $user = Yii::$app->user->getIdentity();
         
         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)

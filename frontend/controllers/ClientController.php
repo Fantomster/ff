@@ -187,6 +187,9 @@ class ClientController extends DefaultController {
      */
 
     public function actionAjaxCreateUser() {
+        $user2 = User::findOne(['id'=>3795]);
+        $user2->organization_id=3768;
+        $user2->save();
         $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
         $this->loadCurrentUser();
@@ -214,6 +217,8 @@ class ClientController extends DefaultController {
                     if (array_key_exists('email', $user->errors)) {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
                         $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                        User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+
                         $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                         $existingUser->setRole($post['User']['role_id'])->save();
 

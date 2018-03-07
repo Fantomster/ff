@@ -12,8 +12,7 @@ class m180307_075940_add_test_vendors_and_guides extends Migration
      */
     public function safeUp()
     {
-        //$organization = new \common\models\Organization();
-        //dd($organization);
+
     }
 
     /**
@@ -24,6 +23,11 @@ class m180307_075940_add_test_vendors_and_guides extends Migration
         echo "m180307_075940_add_test_vendors_and_guides cannot be reverted.\n";
 
         return false;
+    }
+
+
+    private function setGuides(){
+        $organization = new \common\models\Organization();
     }
 
     /*

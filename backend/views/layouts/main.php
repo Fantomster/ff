@@ -157,6 +157,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Платежи',
                                     'url' => ['/payment/index'],
                                 ],
+                                [
+                                    'label' => 'Тестовые вендоры',
+                                    'url' => ['/organization/test-vendors'],
+                                ],
                             ],
                         ],
                         [

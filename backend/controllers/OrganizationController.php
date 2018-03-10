@@ -2,8 +2,12 @@
 
 namespace backend\controllers;
 
+use backend\models\TestVendorsSearch;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
+use common\models\guides\Guide;
+use common\models\RelationSuppRest;
+use common\models\TestVendors;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
@@ -38,7 +42,7 @@ class OrganizationController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', ],
+                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -71,6 +75,21 @@ class OrganizationController extends Controller {
         ]);
     }
 
+
+    /**
+     * Lists all TestVendors models.
+     * @return mixed
+     */
+    public function actionTestVendors() {
+        $searchModel = new TestVendorsSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('test-vendors', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
     /**
      * Displays a single Organization model.
      * @param integer $id
@@ -82,24 +101,58 @@ class OrganizationController extends Controller {
         ]);
     }
 
-//    /**
-//     * Creates a new Organization model.
-//     * If creation is successful, the browser will be redirected to the 'view' page.
-//     * @return mixed
-//     */
-//    public function actionCreate()
-//    {
-//        $model = new Organization();
-//
-//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->id]);
-//        } else {
-//            return $this->render('create', [
-//                'model' => $model,
-//            ]);
-//        }
-//    }
-//
+    /**
+     * Creates a new TestVendors model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
+     */
+    public function actionCreateTestVendor()
+    {
+        $model = new TestVendors();
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['test-vendors']);
+        } else {
+            return $this->render('create-test-vendor', [
+                'model' => $model,
+            ]);
+        }
+    }
+
+
+    /**
+     * Updates TestVendors model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
+     */
+    public function actionUpdateTestVendor($id)
+    {
+        $model = TestVendors::findOne(['id'=>$id]);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['test-vendors']);
+        } else {
+            return $this->render('update-test-vendor', [
+                'model' => $model,
+            ]);
+        }
+    }
+
+
+    /**
+     * Updates TestVendors.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
+     */
+    public function actionStartTestVendorsUpdating()
+    {
+        $clients = Organization::findAll(['type_id'=>Organization::TYPE_RESTAURANT]);
+            foreach ($clients as $client){
+                TestVendors::setGuides($client);
+            }
+        return $this->redirect(['test-vendors']);
+    }
+
 
 
     /**

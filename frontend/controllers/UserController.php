@@ -9,6 +9,7 @@
 namespace frontend\controllers;
 
 use common\models\RelationUserOrganization;
+use common\models\TestVendors;
 use Yii;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -157,6 +158,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 }
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {
                     //$this->initDemoData($user, $profile, $organization);
+                }
+
+                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                    TestVendors::setGuides($organization);
                 }
                 $this->afterRegister($user);
 

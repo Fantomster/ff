@@ -111,6 +111,7 @@ class TestVendors extends \yii\db\ActiveRecord {
                     $rel->rest_org_id = $client->id;
                     $rel->supp_org_id = $testVendor->vendor_id;
                     $rel->cat_id = $baseCatId;
+                    $rel->invite = 1;
                     $rel->created_at = $now;
                     $rel->updated_at = $now;
                     $rel->status = 1;

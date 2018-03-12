@@ -163,7 +163,8 @@ class Currency extends \yii\db\ActiveRecord {
     }
 
 
-    public function getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, $field = 'client_id'){
+    public function getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, $field = 'client_id'):array
+    {
         //Список валют из заказов
         $currency_list = Order::find()->distinct()->select([
             'order.currency_id',
@@ -185,5 +186,31 @@ class Currency extends \yii\db\ActiveRecord {
         }
 
         return $currencyList;
+    }
+
+
+    public function getMostPopularIsoCode($franchId):string
+    {
+        $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -1 months"));
+        $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+        //Список валют из заказов
+        $currency_one = Order::find()->distinct()->select([
+            'order.currency_id',
+            'order.client_id',
+            'order.vendor_id',
+            'c.id',
+            'c.iso_code',
+            'COUNT(order.id) as count'
+        ])->joinWith('currency as c')
+            ->join('LEFT JOIN', 'franchisee_associate as fa1', 'fa1.organization_id = order.client_id')
+            ->join('LEFT JOIN', 'franchisee_associate as fa2', 'fa2.organization_id = order.vendor_id')
+            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->andWhere('fa1.franchisee_id = :fid1', [':fid1' => $franchId])
+            ->andWhere('fa2.franchisee_id = :fid2', [':fid2' => $franchId])
+            ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
+            ->orderBy('count DESC')
+            ->groupBy('iso_code')
+            ->asArray()->one();
+        return $currency_one['iso_code'] ?? "RUB";
     }
 }

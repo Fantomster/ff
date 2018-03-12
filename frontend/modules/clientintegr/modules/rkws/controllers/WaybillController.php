@@ -12,6 +12,9 @@ use yii\data\ActiveDataProvider;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
+use common\models\Organization;
+use common\models\Order;
+
 
 // use yii\mongosoft\soapserver\Action;
 
@@ -81,6 +84,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionIndex() {
 
         $searchModel = new \common\models\search\OrderSearch();
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
+
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
         
@@ -102,6 +110,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             ]);
         }
     }
+
 
     public function actionMap($waybill_id) {
 
@@ -358,6 +367,14 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+    protected function getEarliestOrder($org_id) {
+
+    $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
+
+    return $eDate->updated_at;
+
     }
 
 }

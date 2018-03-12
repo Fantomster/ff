@@ -511,4 +511,14 @@ class User extends \amnah\yii2\user\models\User {
         $rel->save();
         return $rel->id;
     }
+
+
+    public function updateRelationUserOrganization($userId, $organizationId, $roleId){
+        $rel = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+        $rel->user_id = $userId;
+        $rel->organization_id = $organizationId;
+        $rel->role_id = $roleId;
+        $rel->save();
+        return $rel->id;
+    }
 }

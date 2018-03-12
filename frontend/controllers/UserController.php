@@ -416,11 +416,15 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
         union all
+        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
+         where ruo.user_id=".$user->id ."
+        union all
         select `parent_id`,
         (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
         (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
         from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null";
+        )tb where id is not null order by `name` asc";
         $sql2 = "
         select count(*) from (
         select distinct id as `id`,`name`,`type_id` from (
@@ -429,6 +433,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
+         where ruo.user_id=".$user->id ."
         union all
         select `parent_id`,
         (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
@@ -618,11 +626,15 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
         union all
+        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
+         where ruo.user_id=".$user->id ."
+        union all
         select `parent_id`,
         (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
         (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
         from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null";
+        )tb where id is not null order by `name`";
         $sql2 = "
         select count(*) from (
         select distinct id as `id`,`name`,`type_id` from (
@@ -631,6 +643,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
+         where ruo.user_id=".$user->id ."
         union all
         select `parent_id`,
         (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
@@ -645,27 +661,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             ],
         ]);
 
-        $sql3 = "
-        select distinct org.`id`,org.`name`,org.`type_id`, ruo.role_id from organization as org
-         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
-         where ruo.user_id=".$user->id;
-        $sql4 = "
-        select count(*) from organization as org
-         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
-         where ruo.user_id=".$user->id;
-        $relationCount = \Yii::$app->db->createCommand($sql4)->queryScalar();
-        $dataProvider2 = new \yii\data\SqlDataProvider([
-            'sql' => \Yii::$app->db->createCommand($sql3)->sql,
-            'totalCount' => $relationCount,
-            'pagination' => [
-                'pageSize' => 4,
-            ],
-        ]);
-
-
         $loginRedirect = $this->module->loginRedirect;
         $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
-        return $this->render('business', compact('user','dataProvider', 'returnUrl', 'dataProvider2', 'relationCount'));
+        return $this->render('business', compact('user','dataProvider', 'returnUrl'));
     }
 
 }

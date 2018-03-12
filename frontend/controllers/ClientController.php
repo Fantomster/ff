@@ -258,6 +258,7 @@ class ClientController extends DefaultController {
                     }
                     $user->save();
                     $profile->save();
+                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);

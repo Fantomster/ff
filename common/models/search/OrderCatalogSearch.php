@@ -3,7 +3,6 @@
 namespace common\models\search;
 
 use common\models\CatalogBaseGoods;
-use common\models\TestVendors;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
@@ -62,17 +61,6 @@ class OrderCatalogSearch extends \yii\base\Model {
         if(!empty($this->selectedVendor)) {
             $where .= ' AND `org`.id = :searchVendor ';
             $params_sql[':searchVendor'] = $this->selectedVendor;
-        }
-        $testVenodrs = TestVendors::find()->indexBy('id')->all();
-        if($testVenodrs){
-            $testVendorsString = '';
-            foreach ($testVenodrs as $one){
-                $testVendorsString.= $one->vendor_id;
-                if(next($testVenodrs)){
-                    $testVendorsString.=', ';
-                }
-            }
-            $where.= " AND `org`.id NOT IN (" . $testVendorsString . ")";
         }
 
         $sql = "

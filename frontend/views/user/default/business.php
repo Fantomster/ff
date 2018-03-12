@@ -120,10 +120,17 @@ $grid = [
     'label'=>false,
     'format' => 'raw',
     'value'=>function ($data) {
+    $rel = \common\models\RelationUserOrganization::findOne(['organization_id'=>$data['id'], 'user_id'=>Yii::$app->user->id]);
+    if($rel){
+        $role = \common\models\Role::findOne(['id'=>$rel->role_id]);
+        $roleName = " (" . $role->name . ") ";
+    }else{
+        $roleName = '';
+    }
             if($data['type_id']==\common\models\Organization::TYPE_RESTAURANT){
-            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
             }
-        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
         },
     ],
     [
@@ -145,7 +152,7 @@ $grid = [
     ],
 ];
 ?>
-<?php if(!$relationCount): ?>
+
 <section class="section">
     <div class="container">
         <div class="row">
@@ -182,43 +189,4 @@ $grid = [
         </div>
     </div>
 </section>
-<?php endif; ?>
-
-<?php if($relationCount): ?>
-    <section class="section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-offset-3 col-md-6">
-                    <div class="block">
-                        <h5 class="business-title"><?= Yii::t('app', 'frontend.views.user.default.choose_organization', ['ru'=>'Выберите организацию']) ?></h5>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <?php Pjax::begin(['id' => 'pjax-network-list2', 'enablePushState' => false,'timeout' => 10000])?>
-                                <?=GridView::widget([
-                                    'dataProvider' => $dataProvider2,
-                                    'filterPosition' => false,
-                                    'columns' => $grid,
-                                    'options' => [],
-                                    'tableOptions' => ['class' => 'table'],
-                                    'bordered' => false,
-                                    'striped' => false,
-                                    'summary' => false,
-                                    'condensed' => false,
-                                    'showHeader'=>false,
-                                    'resizableColumns'=>false,
-
-                                ]);
-                                ?>
-                                <?php Pjax::end(); ?>
-                            </div>
-                        </div>
-                        <?=Html::a(Yii::t('message', 'frontend.views.user.default.continue', ['ru'=>'ПРОДОЛЖИТЬ']), $redirect, [
-                            'class' => 'btn-continue',
-                        ]);?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-<?php endif; ?>
 

@@ -214,12 +214,16 @@ class ClientController extends DefaultController {
                     if (array_key_exists('email', $user->errors)) {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
                         $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
-                        User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+                        if($success){
+                            User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+                            $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+                            $existingUser->setRole($post['User']['role_id'])->save();
+                            $message = Yii::t('app', 'Пользователь добавлен!');
+                        }
+                        else{
+                            $message = Yii::t('app', 'common.models.already_exists');
+                        }
 
-                        $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
-                        $existingUser->setRole($post['User']['role_id'])->save();
-
-                        $message = Yii::t('app', 'Пользователь добавлен!');
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }

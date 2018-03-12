@@ -500,9 +500,9 @@ class User extends \amnah\yii2\user\models\User {
 
 
     public function setRelationUserOrganization($userId, $organizationId, $roleId){
-        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId, 'role_id'=>$roleId]);
+        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
-            return $check->id;
+            return false;
         }
         $rel = new RelationUserOrganization();
         $rel->user_id = $userId;

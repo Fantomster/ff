@@ -154,8 +154,10 @@ class CatalogBaseGoodsController extends ActiveController {
                 ).')) ';
         }*/
 
-        if($params->category_id != null)
-            $andWhere .= "AND cbg.category_id = $params->category_id";
+        if($params->category_id != null) {
+            $categories = implode(",", $this->getCategories($params->category_id));
+            $andWhere .= "AND cbg.category_id in ($categories)";
+        }
 
 
         $query1 .= $andWhere;
@@ -183,5 +185,16 @@ class CatalogBaseGoodsController extends ActiveController {
             'rating' => $params->rating
             ]);*/
         return $dataProvider;
+    }
+
+    private function getCategories($cat_id) {
+        $res[] = $cat_id;
+        $cats = MpCategory::find()->where(["parent" => $cat_id])->all();
+        foreach ($cats as $cat) {
+            $res[] = $cat->id;
+            $res = array_merge($res, $this->getCategories($cat->id));
+        }
+
+        return $res;
     }
 }

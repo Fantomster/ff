@@ -531,6 +531,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             if ($organization->load($post)) {
                 $organization->parent_id = $parent_id;
                 $organization->save();
+                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                    TestVendors::setGuides($organization);
+                }
                     
                     foreach($networks as $network){
                         $relationSuppRest = new \common\models\RelationSuppRest();

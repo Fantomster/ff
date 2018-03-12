@@ -8,6 +8,8 @@ use common\models\Organization;
 use common\models\Order;
 use common\models\Catalog;
 use common\models\RelationSuppRestPotential;
+use common\models\RelationUserOrganization;
+use common\models\TestVendors;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
 
@@ -62,6 +64,11 @@ class VendorSearch extends RelationSuppRest {
         $rspPTable = RelationSuppRestPotential::tableName();
         $orgTable = Organization::tableName();
         $catTable = Catalog::tableName();
+        $rel = TestVendors::find()->indexBy('id')->all();
+        $relArray = [];
+        foreach ($rel as $one){
+            $relArray[] = $one->vendor_id;
+        }
 
         $query = RelationSuppRest::find()
                 ->select("$rspTable.rest_org_id, $rspTable.supp_org_id, $rspTable.cat_id, $rspTable.invite, 
@@ -70,7 +77,7 @@ class VendorSearch extends RelationSuppRest {
                 $orgTable.name as vendor_name, $catTable.status as catalog_status")
                 ->joinWith('catalog')
                 ->joinWith('vendor');
-        $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false]);
+        $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false])->andWhere(['not in', "$orgTable.id", $relArray]);
 
         $query2 = RelationSuppRestPotential::find()
             ->select("$rspPTable.rest_org_id, $rspPTable.supp_org_id, $rspPTable.cat_id, $rspPTable.invite, 

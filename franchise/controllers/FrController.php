@@ -141,10 +141,16 @@ class FrController extends \yii\rest\Controller {
         $contact_phone = $cphone; //Телефон контакта
         $contact_email = $cemail; //Емейл контакта
         $lead_partner = $lpartner; //Тип партнерства
+        
+        
+        if (!isset(Yii::$app->params['amo'])) {
+            return ['result' => 'error'];
+        }
+        
         //АВТОРИЗАЦИЯ
         $user = array(
-            'USER_LOGIN' => 'artur@f-keeper.ru', #логин
-            'USER_HASH' => '74ed35efba91ce97c029ceb8006b447b' #Хэш для доступа к API
+            'USER_LOGIN' => Yii::$app->params['amo']['email'], #логин
+            'USER_HASH' => Yii::$app->params['amo']['hash'] #Хэш для доступа к API
         );
         $subdomain = 'fkeeper';
         #Формируем ссылку для запроса

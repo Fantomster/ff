@@ -203,8 +203,8 @@ class OrderContent extends \yii\db\ActiveRecord
          return Currency::findOne($this->order->currency_id);
     }
 
-    public function afterDelete() {
-        parent::afterDelete();
+    public function beforeDelete() {
+        parent::beforeDelete();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if($this->order->status == Order::STATUS_FORMING)

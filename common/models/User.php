@@ -81,6 +81,8 @@ class User extends \amnah\yii2\user\models\User {
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert) {
+
+            $organization = $this->organization;
             /**
              * Уведомления по Email
              */
@@ -90,6 +92,7 @@ class User extends \amnah\yii2\user\models\User {
             $emailNotification->requests = true;
             $emailNotification->changes = true;
             $emailNotification->invites = true;
+            $emailNotification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
             $emailNotification->save();
 
             /**

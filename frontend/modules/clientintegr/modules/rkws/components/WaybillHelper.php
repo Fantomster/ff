@@ -40,6 +40,7 @@ class WaybillHelper extends AuthHelper {
 
     $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';
 
+
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/waybill' . '">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
@@ -58,7 +59,7 @@ class WaybillHelper extends AuthHelper {
     foreach($recs as $rec) {
        
        // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
-       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.(($useAutoVAT === 1) ? ($exportVAT*100) : ($rec['vat'])).'" />'.PHP_EOL;
+       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.(($useAutoVAT == 1) ? ($exportVAT*100) : ($rec['vat'])).'" />'.PHP_EOL;
 
     }
    
@@ -81,7 +82,7 @@ class WaybillHelper extends AuthHelper {
     exit;
      * 
      */
-    
+
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
     // var_dump($res);

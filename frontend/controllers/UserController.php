@@ -618,10 +618,14 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     public function actionBusiness()
     {
         $user = User::findIdentity(Yii::$app->user->id);
+        $roleSql = '';
+        if($user->role_id != Role::ROLE_RESTAURANT_EMPLOYEE && $user->role_id != Role::ROLE_SUPPLIER_EMPLOYEE){
+            $roleSql = "        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all";
+        }
         $sql = "
         select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
+        ". $roleSql . "
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
@@ -638,8 +642,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $sql2 = "
         select count(*) from (
         select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
+        ". $roleSql . "
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "

@@ -535,7 +535,7 @@ class OrganizationController extends DefaultController {
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
         $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, $type.'_id', $searchModel->date_from, $searchModel->date_to);
-        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
+
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
         }

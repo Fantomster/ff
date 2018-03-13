@@ -100,7 +100,6 @@ class EsController extends Controller
                         "product_id"  :{"type" : "long"},
                         "product_name" : { 
                             "type" : "string", 
-                            "term_vector" : "yes"
                         },
                         "product_supp_id" : {"type" : "long"},
                         "product_supp_name" : {"type" : "string"},
@@ -131,7 +130,6 @@ class EsController extends Controller
                         "supplier_id" : {"type" : "long"},
                         "supplier_name" : { 
                             "type" : "string", 
-                            "term_vector" : "yes"
                         },
                         "supplier_image" : {"type" : "string"},
                         "supplier_rating" : {"type" : "long"},

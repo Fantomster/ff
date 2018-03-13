@@ -410,7 +410,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $organization = new Organization();
         $sql = "
         select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select organization.`id` from `organization` left join `relation_user_organization` as ruo on ruo.organization_id = organization.id where organization.`id` = " . $user->organization_id . " and ruo.role_id IN(3, 5) and ruo.user_id = " . $user->id . ")
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
@@ -617,18 +617,18 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
     public function actionBusiness()
     {
-
+        //        select id,`name`,`type_id` from `organization` where `parent_id` = (select organization.`id` from `organization` left join `relation_user_organization` as ruo on ruo.organization_id = organization.id where organization.`id` = " . $user->organization_id . " and ruo.role_id IN(3, 5) and ruo.user_id = " . $user->id . ")
         $user = User::findIdentity(Yii::$app->user->id);
         $sql = "
         select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select organization.`id` from `organization` left join `relation_user_organization` as ruo on ruo.organization_id = organization.id where organization.`id` = " . $user->organization_id . " and ruo.role_id IN(3, 5) and ruo.user_id = " . $user->id . ")
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
         union all
         select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
-         left join `relation_user_organization` as ruo on ruo.organization_id = org.id
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
          where ruo.user_id=".$user->id ."
         union all
         select `parent_id`,

@@ -66,7 +66,6 @@ class ClientSearch extends Organization {
         if($this->filter_currency!=null){
             $currencyOption = " and currency_id=$this->filter_currency";
         }
-        //dd($this->filter_currency);
 
         $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as vendorCount, 
                 (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as vendorCount_prev30, 

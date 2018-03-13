@@ -61,4 +61,14 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     public function getUser(){
         return $this->hasOne(User::className(), ['id'=>'user_id']);
     }
+
+
+    public function checkRelationExisting($user):bool
+    {
+        $rel = RelationUserOrganization::findOne(['user_id'=>$user->id]);
+        if($rel){
+            return true;
+        }
+        return false;
+    }
 }

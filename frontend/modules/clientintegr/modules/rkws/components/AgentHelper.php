@@ -169,10 +169,14 @@ class AgentHelper extends AuthHelper {
                 if (!$checks) {
             
             $amodel = new RkAgent();
+
+            $nameEnc = iconv('Windows-1252', 'Windows-1251', $a['name']);
+            $nameEnc = iconv('Windows-1252', 'utf8', $nameEnc);
             
             $amodel->acc = $acc; // $tmodel->acc; 
             $amodel->rid = $a['rid'];
-            $amodel->denom = $a['name'];
+            // $amodel->denom = (RkDicconst::findOne(['denom' => 'useWinEncoding'])->getPconstValue() === 1) ? $nameEnc : $a['name'];
+            $amodel->denom =  $a['name'];
             $amodel->agent_type = $a['type'];
             $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
             

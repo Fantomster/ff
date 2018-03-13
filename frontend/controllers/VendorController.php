@@ -2213,11 +2213,12 @@ class VendorController extends DefaultController
     {
         $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+        $currencyId = \Yii::$app->request->get('filter_currency') ?? 1;
         $organizationId = (int)\Yii::$app->request->get('organization_id');
         $currencyList = Currency::getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, 'vendor_id');
         $count = count($currencyList);
 
-        return $this->renderPartial('analytics/currency', compact('currencyList', 'count'));
+        return $this->renderPartial('analytics/currency', compact('currencyList', 'count', 'currencyId'));
     }
 
 

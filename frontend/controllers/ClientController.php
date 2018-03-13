@@ -213,6 +213,10 @@ class ClientController extends DefaultController {
                 }else {
                     if (array_key_exists('email', $user->errors)) {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
+                        if(in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())){
+                            $message = Yii::t('app', 'common.models.already_exists');
+                            return $this->renderAjax('settings/_success', ['message' => $message]);
+                        }
                         $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
                         if($success){
                             User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
@@ -1584,11 +1588,12 @@ class ClientController extends DefaultController {
     {
         $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+        $currencyId = \Yii::$app->request->get('filter_currency') ?? 1;
         $organizationId = (int)\Yii::$app->request->get('organization_id');
         $currencyList = Currency::getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, 'client_id');
         $count = count($currencyList);
 
-        return $this->renderPartial('analytics/currency', compact('currencyList', 'count'));
+        return $this->renderPartial('analytics/currency', compact('currencyList', 'count', 'currencyId'));
     }
 
     public function actionTutorial() {

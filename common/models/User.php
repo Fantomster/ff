@@ -92,7 +92,7 @@ class User extends \amnah\yii2\user\models\User {
             $emailNotification->requests = true;
             $emailNotification->changes = true;
             $emailNotification->invites = true;
-            $emailNotification->order_done = ($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1;
+            $emailNotification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
             $emailNotification->save();
 
             /**
@@ -518,10 +518,13 @@ class User extends \amnah\yii2\user\models\User {
 
     public function updateRelationUserOrganization($userId, $organizationId, $roleId){
         $rel = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
-        $rel->user_id = $userId;
-        $rel->organization_id = $organizationId;
-        $rel->role_id = $roleId;
-        $rel->save();
-        return $rel->id;
+        if($rel){
+            $rel->user_id = $userId;
+            $rel->organization_id = $organizationId;
+            $rel->role_id = $roleId;
+            $rel->save();
+            return $rel->id;
+        }
+        return false;
     }
 }

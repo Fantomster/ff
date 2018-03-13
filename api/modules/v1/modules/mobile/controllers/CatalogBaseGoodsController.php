@@ -7,8 +7,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
-use common\models\CatalogGoods;
-use common\models\RelationSuppRest;
+use common\models\MpCategory;
 use yii\helpers\Json;
 use yii\data\SqlDataProvider;
 

@@ -99,6 +99,7 @@ class UserController extends ActiveController {
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {
                     //$this->initDemoData($user, $profile, $organization);
                 }
+                $user = User::findOne($user->id);
                 $this->afterRegister($user);
                 return ['success' => 1];  
             }

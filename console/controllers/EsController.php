@@ -20,7 +20,7 @@ class EsController extends Controller
                                         "type": "custom",
                                         "tokenizer": "mc_tokenizer",
                                         "char_filter": [
-                                            "mc_char_filter",
+                                            "mc_char_filter"
                                         ],
                                         "filter": [
                                             "ru_stopwords",
@@ -33,7 +33,7 @@ class EsController extends Controller
                                         "type": "custom",
                                         "tokenizer": "standard",
                                         "char_filter": [
-                                            "mc_char_filter",
+                                            "mc_char_filter"
                                         ],
                                         "filter": [
                                             "ru_stopwords",

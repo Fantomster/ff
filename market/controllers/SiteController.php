@@ -1075,7 +1075,7 @@ class SiteController extends Controller {
         $search_products = "";
         $search_suppliers = "";
         if (isset($_POST['searchText']) && strlen($_POST['searchText']) > 2) {
-            $search = $_POST['searchText'];
+            $search = trim($_POST['searchText'], '"');
             $params_categorys = [
                 'filtered' => [
                     'query' => [

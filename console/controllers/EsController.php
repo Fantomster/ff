@@ -12,17 +12,55 @@ class EsController extends Controller
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
     
-    $host = Yii::$app->elasticsearch->nodes[0]['http_address'];
-    $url = 'curl -XPUT \'http://' . $host . '/category\' -d \'{
-    "settings": {
+    $settings = '
+        "settings": {
 		"analysis": {
 			"analyzer": {
+                                "default": {
+                                        "type": "custom",
+                                        "tokenizer": "mc_tokenizer",
+                                        "char_filter": [
+                                            "mc_char_filter",
+                                        ],
+                                        "filter": [
+                                            "ru_stopwords",
+                                            "lowercase",
+                                            "russian_morphology",
+                                            "snowball"
+                                        ]
+                                },
 				"ru": {
-					"type": "custom",
-					"tokenizer": "lowercase",
-					"filter": ["lowercase", "russian_morphology", "ru_stopwords"],
+                                        "type": "custom",
+                                        "tokenizer": "standard",
+                                        "char_filter": [
+                                            "mc_char_filter",
+                                        ],
+                                        "filter": [
+                                            "ru_stopwords",
+                                            "lowercase",
+                                            "russian_morphology",
+                                            "snowball"
+                                        ]
 				}
 			},
+                        "char_filter": {
+                            "mc_char_filter": {
+                                "type": "mapping",
+                                "mappings": [
+                                    "ё => е",
+                                    "Ё => е"
+                                ]
+                            }
+                        },
+                        "tokenizer": {
+                            "type": "ngram",
+                            "min_gram": 3,
+                            "max_gram": 20,
+                            "token_chars": [
+                                "letter",
+                                "digit"
+                            ]
+                        },
 			"filter": {
 				"ru_stopwords": {
 					"type": "stop",
@@ -30,7 +68,11 @@ class EsController extends Controller
 				}
 			}
 		}
-	}
+	}';
+    
+    $host = Yii::$app->elasticsearch->nodes[0]['http_address'];
+    $url = 'curl -XPUT \'http://' . $host . '/category\' -d \'{
+    '.$settings.'
     }\' && echo
     curl -XPUT \'http://' . $host . '/category/category/_mapping\' -d \'{
             "category": {
@@ -50,22 +92,7 @@ class EsController extends Controller
     $res = shell_exec($url);  
     
     $url = 'curl -XPUT \'http://' . $host . '/product\' -d \'{
-    "settings": {
-		"analysis": {
-			"analyzer": {
-				"ru": {
-					"type": "custom",
-					"tokenizer": "lowercase",
-					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
-				}
-			},
-			"filter": {
-				"ru_stopwords": {
-					"type": "stop","stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
-				}
-			}
-		}
-	}
+    '.$settings.'
     }\' && echo
     curl -XPUT \'http://' . $host . '/product/product/_mapping\' -d \'{
             "product": {
@@ -73,7 +100,6 @@ class EsController extends Controller
                         "product_id"  :{"type" : "long"},
                         "product_name" : { 
                             "type" : "string", 
-                            "analyzer" : "ru",
                             "term_vector" : "yes"
                         },
                         "product_supp_id" : {"type" : "long"},
@@ -97,23 +123,7 @@ class EsController extends Controller
     
     
     $url = 'curl -XPUT \'http://' . $host . '/supplier\' -d \'{
-    "settings": {
-		"analysis": {
-			"analyzer": {
-				"ru": {
-					"type": "custom",
-					"tokenizer": "lowercase",
-					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
-				}
-			},
-			"filter": {
-				"ru_stopwords": {
-					"type": "stop",
-					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
-				}
-			}
-		}
-	}
+    '.$settings.'
     }\' && echo
     curl -XPUT \'http://' . $host . '/supplier/supplier/_mapping\' -d \'{
             "supplier": {
@@ -121,7 +131,6 @@ class EsController extends Controller
                         "supplier_id" : {"type" : "long"},
                         "supplier_name" : { 
                             "type" : "string", 
-                            "analyzer" : "ru",
                             "term_vector" : "yes"
                         },
                         "supplier_image" : {"type" : "string"},
@@ -133,6 +142,7 @@ class EsController extends Controller
     '; 
     $res = shell_exec($url);
     }
+    
     public function actionCreateAndMappingSuppliers(){
         ini_set("max_execution_time", "180");
         ini_set('memory_limit', '128M');

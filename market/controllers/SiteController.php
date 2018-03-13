@@ -1089,26 +1089,32 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
-                'filtered' => [
-                    'query' => [
-                        'match' => [
-                            'product_name' => [
-                                'query' => $search,
-                                'analyzer' => 'ru',
+                'query' => [
+                    'filtered' => [
+                        'query' => [
+                            'match' => [
+                                'product_name' => [
+                                    'query' => $search,
+                                    'analyzer' => 'ru',
+                                    'operator' => 'AND'
+                                ]
                             ]
                         ]
                     ]
                 ]
             ];
             $params_suppliers = [
-                'filtered' => [
-                    'query' => [
-                        'match' => [
-                            'supplier_name' => [
-                                'query' => $search,
-                                'analyzer' => 'ru',
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            'query_string' => [
+                                'query' => $search . "*",
+                                'fields' => [
+                                    'supplier_name',
+                                ],
+                                'default_operator' => 'AND'
                             ]
-                        ]
+                        ],
                     ]
                 ]
             ];
@@ -1273,7 +1279,7 @@ class SiteController extends Controller {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
-
+    
     private function sendInvite($client, $vendor) {
         foreach ($vendor->users as $recipient) {
             if (!empty($recipient->profile->phone)) {

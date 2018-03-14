@@ -204,11 +204,13 @@ class OrderContent extends \yii\db\ActiveRecord
     }
 
     public function beforeDelete() {
-        parent::beforeDelete();
+        $result = parent::beforeDelete();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if($this->order->status == Order::STATUS_FORMING)
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContentDelete($this);
         }
+        
+        return $result;
     }
 }

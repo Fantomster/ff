@@ -108,7 +108,7 @@ class SiteController extends DefaultController
     {
         $currencyList = Currency::getFullCurrencyList($this->currentFranchisee->id);
         $iso_code = Currency::getMostPopularIsoCode($this->currentFranchisee->id) ?? "RUB";
-        $currencyId =  null;
+        $currencyId =  key($currencyList);
 
         if(Yii::$app->request->get() && Yii::$app->request->isPjax) {
             $currencyId = Yii::$app->request->get('filter_currency');

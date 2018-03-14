@@ -128,9 +128,9 @@ $grid = [
         $roleName = '';
     }
             if($data['type_id']==\common\models\Organization::TYPE_RESTAURANT){
-            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . Html::decode($data['name']) . "</b></span>";
             }
-        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . Html::decode($data['name']) . "</b></span>";
         },
     ],
     [

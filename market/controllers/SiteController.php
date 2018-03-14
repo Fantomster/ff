@@ -1089,34 +1089,28 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
-                'query' => [
                     'filtered' => [
                         'query' => [
                             'match' => [
                                 'product_name' => [
                                     'query' => $search,
                                     'analyzer' => 'ru',
-                                    'operator' => 'AND'
                                 ]
                             ]
                         ]
                     ]
-                ]
             ];
             $params_suppliers = [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            'query_string' => [
-                                'query' => $search . "*",
-                                'fields' => [
-                                    'supplier_name',
-                                ],
-                                'default_operator' => 'AND'
+                    'filtered' => [
+                        'query' => [
+                            'match' => [
+                                'supplier_name' => [
+                                    'query' => $search,
+                                    'analyzer' => 'ru',
+                                ]
                             ]
-                        ],
+                        ]
                     ]
-                ]
             ];
 
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)

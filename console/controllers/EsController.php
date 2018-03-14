@@ -20,7 +20,7 @@ class EsController extends Controller
                                         "type": "custom",
                                         "tokenizer": "mc_tokenizer",
                                         "char_filter": [
-                                            "mc_char_filter",
+                                            "mc_char_filter"
                                         ],
                                         "filter": [
                                             "ru_stopwords",
@@ -33,7 +33,7 @@ class EsController extends Controller
                                         "type": "custom",
                                         "tokenizer": "standard",
                                         "char_filter": [
-                                            "mc_char_filter",
+                                            "mc_char_filter"
                                         ],
                                         "filter": [
                                             "ru_stopwords",
@@ -53,19 +53,25 @@ class EsController extends Controller
                             }
                         },
                         "tokenizer": {
-                            "type": "ngram",
-                            "min_gram": 3,
-                            "max_gram": 20,
-                            "token_chars": [
-                                "letter",
-                                "digit"
-                            ]
+                            "mc_tokenizer": {
+                                "type": "ngram",
+                                "min_gram": 3,
+                                "max_gram": 20,
+                                "token_chars": [
+                                    "letter",
+                                    "digit"
+                                ]
+                            }
                         },
 			"filter": {
 				"ru_stopwords": {
 					"type": "stop",
 					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
-				}
+				},
+                                "snowball": {
+                                    "type": "snowball",
+                                    "language": "russian"
+                                }
 			}
 		}
 	}';
@@ -79,10 +85,10 @@ class EsController extends Controller
                 "properties" : {
                         "category_id" : {"type" : "long"},
                         "category_slug" : { 
-                            "type" : "string",
+                            "type" : "string"
                         },
                         "category_name" : { 
-                            "type" : "string",
+                            "type" : "string"
                         },
                         "category_sub_id" : {"type" : "long"}
                 }
@@ -100,6 +106,7 @@ class EsController extends Controller
                         "product_id"  :{"type" : "long"},
                         "product_name" : { 
                             "type" : "string", 
+                            "term_vector" : "yes"
                         },
                         "product_supp_id" : {"type" : "long"},
                         "product_supp_name" : {"type" : "string"},
@@ -130,6 +137,7 @@ class EsController extends Controller
                         "supplier_id" : {"type" : "long"},
                         "supplier_name" : { 
                             "type" : "string", 
+                            "term_vector" : "yes"
                         },
                         "supplier_image" : {"type" : "string"},
                         "supplier_rating" : {"type" : "long"},

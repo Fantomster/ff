@@ -118,8 +118,16 @@ class Currency extends \yii\db\ActiveRecord {
             ->groupBy('iso_code')
             ->asArray()->all();
 
+        $i=0;
         foreach($currency_list as $c) {
+            if($i==0){
+                $iso_code = $c['iso_code'];
+            }
             $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+            $i++;
+        }
+        if(count($currencyList)){
+            $array['currency_id'] = key($currencyList);
         }
         $array['currency_list'] = $currencyList;
         if($filter_currency) {

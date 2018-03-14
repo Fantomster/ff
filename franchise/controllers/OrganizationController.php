@@ -106,7 +106,7 @@ class OrganizationController extends DefaultController {
         }
 
         $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'client_id', $searchModel->date_from, $searchModel->date_to);
-        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
+        $searchModel['filter_currency'] = $searchModel->filter_currency;
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
@@ -301,7 +301,7 @@ class OrganizationController extends DefaultController {
         }
 
         $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'vendor_id', $searchModel->date_from, $searchModel->date_to);
-        $searchModel['filter_currency'] = $searchModel->filter_currency = key($currencyData['currency_list']);
+        $searchModel['filter_currency'] = $searchModel->filter_currency;
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 

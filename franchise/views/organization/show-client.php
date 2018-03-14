@@ -358,7 +358,7 @@ container: "#client-list",
 data: {
 filter_currency: filter_currency
 }
-}).done(function(text) { console.log(text); $("#filter_currency").removeAttr('disabled') });
+}).done(function(text) { $("#filter_currency").removeAttr('disabled') });
 });
 
 JS;

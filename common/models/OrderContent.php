@@ -208,7 +208,7 @@ class OrderContent extends \yii\db\ActiveRecord
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if($this->order->status == Order::STATUS_FORMING)
-                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContentDelete($this->id);
+                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContentDelete($this);
         }
     }
 }

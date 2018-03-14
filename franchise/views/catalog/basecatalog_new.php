@@ -87,7 +87,9 @@ $exportColumns = [
     ],
     [
         'label' => Yii::t('app', 'franchise.views.catalog.name', ['ru' => 'Наименование']),
-        'value' => 'product',
+        'value' => function ($data) {
+            return Html::decode(Html::decode($data['product']));
+        },
     ],
     [
         'label' => Yii::t('app', 'franchise.views.catalog.multiplicity_two', ['ru' => 'Кратность']),
@@ -107,7 +109,7 @@ $exportColumns = [
 //            return $data['note'] ? $data['note'] : '';
 //        },
 //    ]
-]
+        ]
 ?>
 
 
@@ -130,71 +132,71 @@ $exportColumns = [
         <div class="tab-content">
             <div id="tabCatalog" class="tab-pane fade in active">
                 <div class="row">
-                <div class="col-md-2">
-                    <div class="btn-group" placement="left" style="margin-left: 10px">
-                        <?=
-                        ExportMenu::widget([
-                            'dataProvider' => $dataProvider,
-                            'columns' => $exportColumns,
-                            'fontAwesome' => true,
-                            'filename' => Yii::t('message', 'market.views.site.supplier.catalog', ['ru' => 'КАТАЛОГ']) . " " . $catalog->name . " - " . date('Y-m-d'),
-                            'encoding' => 'UTF-8',
-                            'batchSize' => 200,
-                            'timeout' => 0,
-                            'target' => ExportMenu::TARGET_SELF,
-                            'showConfirmAlert' => false,
-                            'showColumnSelector' => false,
-                            'dropdownOptions' => [
-                                'label' => '<span class="text-label">' . Yii::t('app', 'franchise.views.catalog.download_cat', ['ru' => 'Скачать каталог']) . ' </span>',
-                                'class' => ['btn btn-outline-default btn-sm pull-right']
-                            ],
-                            'exportConfig' => [
-                                ExportMenu::FORMAT_HTML => false,
-                                ExportMenu::FORMAT_TEXT => false,
-                                ExportMenu::FORMAT_EXCEL => false,
-                                ExportMenu::FORMAT_PDF => false,
-                                ExportMenu::FORMAT_CSV => false,
-                                ExportMenu::FORMAT_EXCEL_X => [
-                                    'label' => Yii::t('kvexport', 'Excel'),
-                                    'icon' => 'file-excel-o',
-                                    'iconOptions' => ['class' => 'text-success'],
-                                    'linkOptions' => [],
-                                    'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
-                                    'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
-                                    'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                    'extension' => 'xlsx',
-                                    //'writer' => 'Excel2007',
-                                    'styleOptions' => [
-                                        'font' => [
-                                            'bold' => true,
-                                            'color' => [
-                                                'argb' => 'FFFFFFFF',
-                                            ],
-                                        ],
-                                        'fill' => [
-                                            'type' => PHPExcel_Style_Fill::FILL_NONE,
-                                            'startcolor' => [
-                                                'argb' => 'FFFFFFFF',
-                                            ],
-                                            'endcolor' => [
-                                                'argb' => 'FFFFFFFF',
-                                            ],
-                                        ],
-                                    ]
+                    <div class="col-md-2">
+                        <div class="btn-group" placement="left" style="margin-left: 10px">
+                            <?=
+                            ExportMenu::widget([
+                                'dataProvider' => $dataProvider,
+                                'columns' => $exportColumns,
+                                'fontAwesome' => true,
+                                'filename' => Yii::t('message', 'market.views.site.supplier.catalog', ['ru' => 'КАТАЛОГ']) . " " . $catalog->name . " - " . date('Y-m-d'),
+                                'encoding' => 'UTF-8',
+                                'batchSize' => 200,
+                                'timeout' => 0,
+                                'target' => ExportMenu::TARGET_SELF,
+                                'showConfirmAlert' => false,
+                                'showColumnSelector' => false,
+                                'dropdownOptions' => [
+                                    'label' => '<span class="text-label">' . Yii::t('app', 'franchise.views.catalog.download_cat', ['ru' => 'Скачать каталог']) . ' </span>',
+                                    'class' => ['btn btn-outline-default btn-sm pull-right']
                                 ],
-                            ],
-                        ]);
-                        ?>
+                                'exportConfig' => [
+                                    ExportMenu::FORMAT_HTML => false,
+                                    ExportMenu::FORMAT_TEXT => false,
+                                    ExportMenu::FORMAT_EXCEL => false,
+                                    ExportMenu::FORMAT_PDF => false,
+                                    ExportMenu::FORMAT_CSV => false,
+                                    ExportMenu::FORMAT_EXCEL_X => [
+                                        'label' => Yii::t('kvexport', 'Excel'),
+                                        'icon' => 'file-excel-o',
+                                        'iconOptions' => ['class' => 'text-success'],
+                                        'linkOptions' => [],
+                                        'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                        'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                        'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'extension' => 'xlsx',
+                                        //'writer' => 'Excel2007',
+                                        'styleOptions' => [
+                                            'font' => [
+                                                'bold' => true,
+                                                'color' => [
+                                                    'argb' => 'FFFFFFFF',
+                                                ],
+                                            ],
+                                            'fill' => [
+                                                'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                                'startcolor' => [
+                                                    'argb' => 'FFFFFFFF',
+                                                ],
+                                                'endcolor' => [
+                                                    'argb' => 'FFFFFFFF',
+                                                ],
+                                            ],
+                                        ]
+                                    ],
+                                ],
+                            ]);
+                            ?>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="input-group">
+                    <div class="col-md-4">
+                        <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                        <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('app', 'frontend.views.order.favorites.search', ['ru' => 'Поиск по названию']), 'id' => 'search', 'value' => '']) ?>
+                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('app', 'frontend.views.order.favorites.search', ['ru' => 'Поиск по названию']), 'id' => 'search', 'value' => '']) ?>
+                        </div>
                     </div>
-                </div>
                 </div>
                 <div class="panel-body">
                     <?php
@@ -208,7 +210,9 @@ $exportColumns = [
                         [
                             'attribute' => 'product',
                             'label' => Yii::t('app', 'franchise.views.catalog.name_two', ['ru' => 'Наименование']),
-                            'value' => 'product',
+                            'value' => function ($data) {
+                                return Html::decode(Html::decode($data['product']));
+                            },
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [
@@ -316,17 +320,17 @@ $exportColumns = [
                         'contentOptions' => ['style' => 'width:50px;'],
                         'value' => function ($data) {
                             $link = CheckboxX::widget([
-                                'name' => 'setcatalog_' . $data->id,
-                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                'value' => $data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
-                                'autoLabel' => true,
-                                'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog'],
-                                'pluginOptions' => [
-                                    'threeState' => false,
-                                    'theme' => 'krajee-flatblue',
-                                    'enclosedLabel' => true,
-                                    'size' => 'lg',
-                                ]
+                                        'name' => 'setcatalog_' . $data->id,
+                                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                        'value' => $data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
+                                        'autoLabel' => true,
+                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog'],
+                                        'pluginOptions' => [
+                                            'threeState' => false,
+                                            'theme' => 'krajee-flatblue',
+                                            'enclosedLabel' => true,
+                                            'size' => 'lg',
+                                        ]
                             ]);
                             return $link;
                         },

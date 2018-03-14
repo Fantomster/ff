@@ -32,7 +32,7 @@ $form = ActiveForm::begin([
 
     <?= $form->field($user, 'newPassword')->label(Yii::t('app', 'frontend.views.user_form.new_pass', ['ru'=>'Новый пароль']))->passwordInput() ?>
 
-    <?= $form->field($profile, 'full_name') ?>
+    <?= $form->field($profile, 'full_name')->textInput(['value' => Html::decode($profile->full_name), ]) ?>
 
     <?=
     $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [

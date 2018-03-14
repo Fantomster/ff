@@ -192,7 +192,7 @@ $this->registerCss("
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
                                             ->label(Yii::t('message', 'frontend.views.client.settings.common.rest', ['ru'=>'Название ресторана']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.rest_name', ['ru'=>'Введите название ресторана'])])
+                                            ->textInput(['value' => Html::decode($organization->name), 'placeholder' => Yii::t('message', 'frontend.views.client.settings.rest_name', ['ru'=>'Введите название ресторана'])])
                                     ?>
                             </div>
                             <div class="form-group">
@@ -201,7 +201,7 @@ $this->registerCss("
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
                                             ->label(Yii::t('message', 'frontend.views.client.settings.jur_name', ['ru'=>'Название юридического лица']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.jur_name_fill', ['ru'=>'Введите название юридического лица'])])
+                                            ->textInput(['value' => Html::decode($organization->legal_entity), 'placeholder' => Yii::t('message', 'frontend.views.client.settings.jur_name_fill', ['ru'=>'Введите название юридического лица'])])
                                     ?>
                             </div>
                             <div class="form-group">
@@ -210,14 +210,14 @@ $this->registerCss("
                                             'addon' => ['prepend' => ['content' => '<i class="fa fa-globe"></i>']]
                                         ])
                                         ->label(Yii::t('message', 'frontend.views.client.settings.web_sit', ['ru'=>'Веб-сайт']))
-                                        ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.site', ['ru'=>'Введите адрес вашего веб-сайта'])])
+                                        ->textInput(['value' => Html::decode($organization->website), 'placeholder' => Yii::t('message', 'frontend.views.client.settings.site', ['ru'=>'Введите адрес вашего веб-сайта'])])
                                 ?>
                             </div>
                             <div class="form-group">
                         <?=
                                 $form->field($organization, 'about')
                                 ->label(Yii::t('message', 'frontend.views.client.settings.org_info', ['ru'=>'Информация об организации']))
-                                ->textarea(['placeholder' => Yii::t('message', 'frontend.views.client.settings.several', ['ru'=>"Несколько слов об организации ..."]), 'rows' => 2])
+                                ->textarea(['value' => Html::decode($organization->about), 'placeholder' => Yii::t('message', 'frontend.views.client.settings.several', ['ru'=>"Несколько слов об организации ..."]), 'rows' => 2])
                         ?>
                             </div>
                             <div class="form-group">
@@ -274,7 +274,7 @@ document.onkeypress = stopRKey;
                                         'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                     ])
                                     ->label(Yii::t('message', 'frontend.views.client.settings.contact_fio', ['ru'=>'ФИО контактного лица']))
-                                    ->textInput(['placeholder' => Yii::t('message', 'frontend.views.client.settings.contact_fio_two', ['ru'=>'Введите ФИО контактного лица'])])
+                                    ->textInput(['value' => Html::decode($organization->contact_name), 'placeholder' => Yii::t('message', 'frontend.views.client.settings.contact_fio_two', ['ru'=>'Введите ФИО контактного лица'])])
                             ?>                        </div>
                     </div>
                     <div class="col-md-4">

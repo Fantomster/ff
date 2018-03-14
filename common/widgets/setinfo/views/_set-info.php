@@ -39,7 +39,7 @@ use yii\helpers\Url;
                         <?=
                                 $form->field($profile, 'full_name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control-ip', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.fio', ['ru'=>'ФИО'])]);
+                                ->textInput(['value' => Html::decode($profile->full_name), 'class' => 'form-control-ip', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.fio', ['ru'=>'ФИО'])]);
                         ?>
                         <i class="fa fa-user"></i>
                     </label>
@@ -47,7 +47,7 @@ use yii\helpers\Url;
                         <?=
                                 $form->field($organization, 'name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control-ip', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.org_name', ['ru'=>'Название организации'])]);
+                                ->textInput(['value' => Html::decode($organization->name), 'class' => 'form-control-ip', 'placeholder' => Yii::t('message', 'frontend.views.client.dashboard.org_name', ['ru'=>'Название организации'])]);
                         ?>
                         <i class="fa fa-bank"></i>
                     </label>

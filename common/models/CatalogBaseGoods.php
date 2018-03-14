@@ -115,7 +115,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 //            [['article'], 'uniqueArticle','when' => function($model) {
 //            return !empty($model->cat_id);
 //            }],
-            [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
+            [['article', 'product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],

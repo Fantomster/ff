@@ -20,6 +20,7 @@ use dosamigos\chartjs\ChartJs;
         <small><?= Yii::t('app', 'franchise.views.site.desktop_two', ['ru'=>'Рабочий стол']) ?></small>
     </h1>
 </section>
+<?php if (count($currencyList) > 0): ?>
 <section class="content" style="min-height: 40px;">
     <div class="row">
     <div class="col-lg-2 col-md-2 col-sm-2">
@@ -30,6 +31,7 @@ use dosamigos\chartjs\ChartJs;
     </div>
     </div>
 </section>
+<?php endif; ?>
 <section class="content">
     <div class="row hidden-xs">
         <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>

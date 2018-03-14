@@ -90,7 +90,10 @@ $exportColumns = [
     ],
     [
         'label' => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']),
-        'value' => 'product',
+//        'value' => 'product',
+        'value' => function ($data) {
+            return Html::decode(Html::decode($data['product']));
+        },
     ],
     [
         'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_three', ['ru' => 'Кратность']),
@@ -112,7 +115,7 @@ $exportColumns = [
             return $data['note'] ? $data['note'] : '';
         },
     ]
-]
+        ]
 ?>
 <?php
 Modal::begin([
@@ -172,10 +175,10 @@ Modal::end();
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs" style="background-color: #f1f0ee;">
             <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5
-                            class="box-title"><?= Yii::t('message', 'frontend.views.vendor.edit_four', ['ru' => 'Редактирование']) ?></h5>
+                        class="box-title"><?= Yii::t('message', 'frontend.views.vendor.edit_four', ['ru' => 'Редактирование']) ?></h5>
                 </a></li>
             <li><a data-toggle="tab" href="#tabClients"><h5
-                            class="box-title"><?= Yii::t('message', 'frontend.views.vendor.set_for_rest', ['ru' => 'Назначить ресторану']) ?></h5>
+                        class="box-title"><?= Yii::t('message', 'frontend.views.vendor.set_for_rest', ['ru' => 'Назначить ресторану']) ?></h5>
                 </a></li>
         </ul>
         <div class="tab-content">
@@ -319,7 +322,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . ' ' .  $currentCatalog->currency->iso_code,
+                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . ' ' . $currentCatalog->currency->iso_code,
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
@@ -338,17 +341,17 @@ Modal::end();
                             'contentOptions' => ['style' => 'vertical-align:middle;width:80px'],
                             'value' => function ($data) {
                                 $link = CheckboxX::widget([
-                                    'name' => 'status_' . $data['id'],
-                                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                    'value' => $data['status'],
-                                    'autoLabel' => true,
-                                    'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status', 'value' => $data['status']],
-                                    'pluginOptions' => [
-                                        'threeState' => false,
-                                        'theme' => 'krajee-flatblue',
-                                        'enclosedLabel' => true,
-                                        'size' => 'lg',
-                                    ]
+                                            'name' => 'status_' . $data['id'],
+                                            'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                            'value' => $data['status'],
+                                            'autoLabel' => true,
+                                            'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status', 'value' => $data['status']],
+                                            'pluginOptions' => [
+                                                'threeState' => false,
+                                                'theme' => 'krajee-flatblue',
+                                                'enclosedLabel' => true,
+                                                'size' => 'lg',
+                                            ]
                                 ]);
                                 return $link;
                             },
@@ -361,8 +364,8 @@ Modal::end();
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
-                                    $res = '' :
-                                    $res = '<center><i style="font-size: 28px;color:#84bf76;" class="fa fa-check-square-o"></i></center>';
+                                        $res = '' :
+                                        $res = '<center><i style="font-size: 28px;color:#84bf76;" class="fa fa-check-square-o"></i></center>';
                                 return $res;
                             },
                         ],
@@ -374,24 +377,24 @@ Modal::end();
                             'headerOptions' => ['class' => 'text-center'],
                             'value' => function ($data) {
                                 $data['market_place'] == 0 ?
-                                    $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_two', ['ru' => 'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
-                                        'id' => $data['id']], [
-                                        'data' => [
-                                            'target' => '#add-product-market-place',
-                                            'toggle' => 'modal',
-                                            'backdrop' => 'static',
-                                        ],
-                                        'class' => 'btn btn-sm btn-outline-success'
-                                    ]) :
-                                    $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_three', ['ru' => 'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
-                                        'id' => $data['id']], [
-                                        'data' => [
-                                            'target' => '#add-product-market-place',
-                                            'toggle' => 'modal',
-                                            'backdrop' => 'static',
-                                        ],
-                                        'class' => 'btn btn-sm btn-success'
-                                    ]);
+                                        $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_two', ['ru' => 'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
+                                            'id' => $data['id']], [
+                                            'data' => [
+                                                'target' => '#add-product-market-place',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                            'class' => 'btn btn-sm btn-outline-success'
+                                        ]) :
+                                        $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_three', ['ru' => 'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
+                                            'id' => $data['id']], [
+                                            'data' => [
+                                                'target' => '#add-product-market-place',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                            'class' => 'btn btn-sm btn-success'
+                                ]);
                                 return $link;
                             },
                         ],
@@ -402,8 +405,8 @@ Modal::end();
                             'contentOptions' => ['style' => 'width:50px;'],
                             'value' => function ($data) {
                                 $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                                    'class' => 'btn btn-sm btn-danger del-product',
-                                    'data' => ['id' => $data['id']],
+                                            'class' => 'btn btn-sm btn-danger del-product',
+                                            'data' => ['id' => $data['id']],
                                 ]);
                                 return $link;
                             },
@@ -462,7 +465,7 @@ Modal::end();
                         'format' => 'raw',
                         'value' => function ($data) {
                             $catalog_name = $data->cat_id == 0 ? '' :
-                                common\models\Catalog::find()->where(['id' => $data->cat_id])->one()->name;
+                                    common\models\Catalog::find()->where(['id' => $data->cat_id])->one()->name;
                             return Yii::t('app', $catalog_name);
                         }
                     ],
@@ -473,17 +476,17 @@ Modal::end();
                         'value' => function ($data) {
                             $value = ($data->cat_id == Yii::$app->request->get('id')) ? 1 : 0;
                             $link = CheckboxX::widget([
-                                'name' => 'setcatalog_' . $data->id,
-                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                'value' => $value,
-                                'autoLabel' => true,
-                                'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog', 'value' => $value],
-                                'pluginOptions' => [
-                                    'threeState' => false,
-                                    'theme' => 'krajee-flatblue',
-                                    'enclosedLabel' => true,
-                                    'size' => 'lg',
-                                ]
+                                        'name' => 'setcatalog_' . $data->id,
+                                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                        'value' => $value,
+                                        'autoLabel' => true,
+                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog', 'value' => $value],
+                                        'pluginOptions' => [
+                                            'threeState' => false,
+                                            'theme' => 'krajee-flatblue',
+                                            'enclosedLabel' => true,
+                                            'size' => 'lg',
+                                        ]
                             ]);
                             return $link;
                         },

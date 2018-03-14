@@ -9,13 +9,10 @@ use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
-use yii\web\UploadedFile;
 use common\models\User;
 use common\models\Role;
 use common\models\Order;
 use common\models\Organization;
-use common\models\OrganizationType;
-use common\models\RelationCategory;
 use common\models\Category;
 use common\models\Profile;
 use common\models\Catalog;
@@ -27,6 +24,7 @@ use common\models\search\UserSearch;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
@@ -1363,7 +1361,7 @@ class ClientController extends DefaultController {
                 'goods_id' => $catalog_elem->id,
                 'base_goods_id' => $catalog_elem->base_goods_id,
                 'article' => $catalog_elem->baseProduct->article,
-                'product' => $catalog_elem->baseProduct->product,
+                'product' => Html::decode(Html::decode($catalog_elem->baseProduct->product)),
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
                 'price' => $catalog_elem->baseProduct->price,

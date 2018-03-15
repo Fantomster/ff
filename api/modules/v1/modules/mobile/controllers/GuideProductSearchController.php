@@ -71,7 +71,7 @@ class GuideProductSearchController extends ActiveController {
         $searchString = "%$params->searchString%";
         $query = "
         SELECT * FROM (
-            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note 
+            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name as name, cbg.ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name 
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
@@ -83,7 +83,7 @@ class GuideProductSearchController extends ActiveController {
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
             UNION ALL
-            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note
+            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name as name, cbg.ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 

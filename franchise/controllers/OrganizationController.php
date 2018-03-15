@@ -96,6 +96,10 @@ class OrganizationController extends DefaultController {
         if(\Yii::$app->request->get('date_to')){
             $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
         }
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'client_id', $searchModel->date_from, $searchModel->date_to);
+        if(count($currencyData['currency_list'])){
+            $searchModel['filter_currency'] = key($currencyData['currency_list']);
+        }
 
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
@@ -103,11 +107,6 @@ class OrganizationController extends DefaultController {
 
         if (Yii::$app->request->post("ClientSearch")) {
             $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
-        }
-
-        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'client_id', $searchModel->date_from, $searchModel->date_to);
-        if(count($currencyData['currency_list'])){
-            $searchModel['filter_currency'] = key($currencyData['currency_list']);
         }
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);

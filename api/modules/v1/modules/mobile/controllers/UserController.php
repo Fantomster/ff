@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\TestVendors;
 use Google\Spreadsheet\Exception\BadRequestException;
 use Yii;
 use api\modules\v1\modules\mobile\models\User;

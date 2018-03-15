@@ -69,10 +69,20 @@ class DeliveryRegions extends \yii\db\ActiveRecord
 
     /**
      * Вернет [id] организаций, с доступной доставкой в этом регионе
+     * @param null $city
+     * @param null $region
      * @return array
      */
-    public static function getSuppRegion()
+    public static function getSuppRegion($city = null, $region = null)
     {
+        if(empty($city)) {
+            $city = Yii::$app->request->cookies->get('locality');
+        }
+
+        if(empty($region)) {
+            $region = Yii::$app->request->cookies->get('region');
+        }
+
         $tableName = static::tableName();
         $sql = "SELECT supplier_id
                 FROM $tableName
@@ -83,8 +93,8 @@ class DeliveryRegions extends \yii\db\ActiveRecord
                   exception = :exception";
 
         $command = Yii::$app->db->createCommand($sql)
-            ->bindValue(':locality', Yii::$app->request->cookies->get('locality'))
-            ->bindValue(':region', Yii::$app->request->cookies->get('region'));
+            ->bindValue(':locality', $city)
+            ->bindValue(':region', $region);
 
         $supplierRegion = $command->bindValue(':exception', 0)->queryColumn();
         $exclude_region = $command->bindValue(':exception', 1)->queryColumn();

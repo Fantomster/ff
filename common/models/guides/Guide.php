@@ -64,6 +64,7 @@ class Guide extends \yii\db\ActiveRecord {
             [['created_at', 'updated_at'], 'safe'],
             [['name','color'], 'string', 'max' => 255],
             [['name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
+            ['color','custom_validate_color'],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
         ];
     }
@@ -124,6 +125,43 @@ class Guide extends \yii\db\ActiveRecord {
      */
     public function getProductCount() {
         return count($this->guideProducts);
+    }
+
+    /**
+     * Валидация цвета
+     */
+    public function custom_validate_color() {
+        $allow_color = [
+            "D81B60",
+            "8E24AA",
+            "5E35B1",
+            "5C6BC0",
+            "039BE5",
+            "009688",
+            "C0CA33",
+            "FFD600",
+            "FB8C00",
+            "F4511E",
+            "D32F2F",
+            "A1887F",
+            "5D4037",
+            "BDBDBD",
+            "757575",
+            "000000"
+        ];
+
+        $this->color = mb_strtoupper(ltrim(trim($this->color), '#'));
+
+        if(strlen($this->color) != 6) {
+            $this->addError('color','the field is not equal to 6 characters, please pass a value in HEX');
+        }
+
+        if(!in_array($this->color, $allow_color)) {
+            $this->addError('color',
+                'This color is forbidden to the selection, a list of available colors: '
+                . implode(', ', $allow_color)
+            );
+        }
     }
     
     public function delete() {

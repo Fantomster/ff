@@ -16,8 +16,10 @@ class OrderCatalogSearch extends \yii\base\Model {
     public $searchString;
     public $selectedCategory;
     public $selectedVendor;
+    public $searchPrice;
     public $catalogs;
     public $client;
+    public $searchCategory;
 
     /**
      * @inheritdoc
@@ -37,14 +39,14 @@ class OrderCatalogSearch extends \yii\base\Model {
         $this->load($params);
 
         $fieldsCBG = [
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id',
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
         ];
         $fieldsCG = [
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id',
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
@@ -52,6 +54,7 @@ class OrderCatalogSearch extends \yii\base\Model {
         ];
 
         $where = '';
+        $where_all = '';
         $params_sql = [];
         if(!empty($this->searchString)) {
             $where .= 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
@@ -59,8 +62,38 @@ class OrderCatalogSearch extends \yii\base\Model {
         }
 
         if(!empty($this->selectedVendor)) {
-            $where .= ' AND `org`.id = :searchVendor ';
-            $params_sql[':searchVendor'] = $this->selectedVendor;
+            if(is_array($this->selectedVendor)) {
+                foreach ($this->selectedVendor as $key => $supp_org_id) {
+                    $this->selectedVendor[$key] = (int) $supp_org_id;
+                }
+                $this->selectedVendor = implode(', ', $this->selectedVendor);
+            } else {
+                $this->selectedVendor = (int) $this->selectedVendor;
+            }
+            $where .= ' AND `org`.id IN (' .$this->selectedVendor. ') ';
+        }
+
+        if(!empty($this->searchCategory)) {
+            if(is_array($this->searchCategory)) {
+                foreach ($this->searchCategory as $key => $category_id) {
+                    $this->searchCategory[$key] = (int) $category_id;
+                }
+                $this->searchCategory = implode(', ', $this->searchCategory);
+            } else {
+                $this->searchCategory = (int) $this->searchCategory;
+            }
+            $where .= ' AND category_id IN (' .$this->searchCategory. ') ';
+        }
+
+        if(!empty($this->searchPrice)) {
+            if(isset($this->searchPrice['start'])) {
+                $params_sql[':price_start'] = $this->searchPrice['start'];
+                $where_all .= ' AND price >= :price_start ';
+            }
+            if(isset($this->searchPrice['end'])) {
+                $params_sql[':price_end'] = $this->searchPrice['end'];
+                $where_all .= ' AND price <= :price_end ';
+            }
         }
 
         $sql = "
@@ -87,7 +120,7 @@ class OrderCatalogSearch extends \yii\base\Model {
           cg.cat_id IN (" . $this->catalogs . ")
           ".$where."
           AND (cbg.status = 1 AND cbg.deleted = 0)
-        ) as c ";
+        ) as c WHERE id != 0 ".$where_all;
 
         $query = Yii::$app->db->createCommand($sql);
 
@@ -96,6 +129,7 @@ class OrderCatalogSearch extends \yii\base\Model {
             'params' => $params_sql,
             'pagination' => [
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
+                'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
                 'params' => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',
                 ]
@@ -109,6 +143,8 @@ class OrderCatalogSearch extends \yii\base\Model {
                     ],
                     'price',
                     'units',
+                    'article',
+                    'name',
                     'c_article_1',
                     'c_article',
                     'i'

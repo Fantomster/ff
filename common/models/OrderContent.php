@@ -13,6 +13,7 @@ use Yii;
  * @property string $initial_quantity
  * @property string $price
  * @property string $product_name
+ * @property string $article
  * @property integer $units
  * @property string $comment
  *

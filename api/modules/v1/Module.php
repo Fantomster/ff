@@ -22,7 +22,7 @@ class Module extends \yii\base\Module
             'mobile' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен
                 'class' => 'api\modules\v1\modules\mobile\Module',
-            ],
+            ]
         ];
     
     }

@@ -22,8 +22,10 @@ class OrderSearch extends Order {
     public $manager_id = null;
     private $status_array;
     public $date_from;
+    public $completion_date_from;
     public $date_to;
     public $docStatus;
+    public $completion_date_to;
 
     /**
      * @inheritdoc
@@ -68,8 +70,6 @@ class OrderSearch extends Order {
         $query = Order::find();
         $this->load($params);
 
-        $filter_date_from = strtotime($this->date_from);
-        $filter_date_to = strtotime($this->date_to);
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
@@ -80,6 +80,27 @@ class OrderSearch extends Order {
             $to->add(new \DateInterval('P1D'));
             $t2_f = $to->format('Y-m-d H:i:s');
         }
+
+        /**
+         * Дата завершения заказа
+         */
+        if(!empty($this->completion_date_from)) {
+            $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->completion_date_from . " 00:00:00");
+            if ($from) {
+                $completion_date_from = $from->format('Y-m-d H:i:s');
+            }
+        }
+
+        if(!empty($this->completion_date_to)) {
+            $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->completion_date_to . " 00:00:00");
+            if ($to) {
+                $to->add(new \DateInterval('P1D'));
+                $completion_date_to = $to->format('Y-m-d H:i:s');
+            }
+        }
+        /**
+         * END
+         */
 
         switch ($this->status) {
             case 1: //new
@@ -156,6 +177,13 @@ class OrderSearch extends Order {
         }
         if (isset($t2_f)) {
             $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $t2_f]);
+        }
+
+        if (isset($completion_date_from)) {
+            $query->andFilterWhere(['>=', Order::tableName() . '.completion_date', $completion_date_from]);
+        }
+        if (isset($completion_date_to)) {
+            $query->andFilterWhere(['<=', Order::tableName() . '.completion_date', $completion_date_to]);
         }
 
         $query->andFilterWhere(['vendor_id' => $this->vendor_id]);

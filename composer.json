@@ -67,6 +67,7 @@
         "modernkernel/yii2-flag-icon-css": "*",
         "xj/yii2-user-agent": "^1.0.0",
         "yandex-money/yandex-checkout-sdk-php": "*",
+        "light/yii2-swagger": "^1.0",
         "eden/mail": "dev-master",
         "golovchanskiy/parse-torg12": "dev-master",
         "bower-asset/bootstrap": "^3.3",

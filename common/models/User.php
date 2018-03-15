@@ -527,4 +527,53 @@ class User extends \amnah\yii2\user\models\User {
         }
         return false;
     }
+	
+    /**
+     * Список организаций доступных для пользователя
+     * @return array
+     */
+    public function getAllOrganization(){
+        $sql = <<<SQL
+        SELECT * FROM (
+            SELECT
+              *
+            FROM organization
+            WHERE
+              id = :oid OR parent_id = :oid
+            UNION DISTINCT
+            SELECT
+              *
+            FROM organization
+            WHERE
+              parent_id = :pid
+            UNION DISTINCT
+            SELECT
+              r.*
+            FROM `organization` o
+            INNER JOIN organization r ON r.id = o.parent_id
+            WHERE
+              o.id = :oid
+        ) t 
+        ORDER BY name 
+SQL;
+        return \Yii::$app->db->createCommand($sql)
+            ->bindValue(':oid',$this->organization_id)
+            ->bindValue(':pid',$this->organization->parent_id)
+            ->queryAll();
+    }
+
+    /**
+     * Проверка, можно ли переключиться на организацию
+     * @param $organization_id
+     * @return bool
+     */
+    public function isAllowOrganization($organization_id){
+        $all = $this->getAllOrganization();
+        foreach ($all as $item) {
+            if($item['id'] == $organization_id){
+                return true;
+            }
+        }
+        return false;
+    }
 }

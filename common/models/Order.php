@@ -100,15 +100,18 @@ class Order extends \yii\db\ActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'id' => 'ID',
+            'id' => Yii::t('app', 'Номер заказа'),
             'client_id' => 'Client ID',
             'vendor_id' => 'Vendor ID',
             'created_by_id' => 'Created By ID',
             'accepted_by_id' => 'Accepted By ID',
-            'status' => 'Status',
+            'status' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
+            'status_text' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
             'total_price' => Yii::t('app', 'common.models.total_price', ['ru'=>'Итоговая цена']),
-            'created_at' => 'Created At',
+            'created_at' => Yii::t('app', 'Дата создания'),
             'updated_at' => 'Updated At',
+            'vendor' => Yii::t('app', 'Поставщик'),
+            'create_user' => Yii::t('app', 'Заказ создал'),
         ];
     }
 
@@ -176,7 +179,28 @@ class Order extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getOrderChat() {
-        return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy(['created_at' => SORT_ASC]);
+        return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy([OrderChat::tableName().'.created_at' => SORT_ASC]);
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrderChatCount() {
+        return count($this->orderChat);
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrderChatUnreadCount() {
+        return count($this->getOrderChat()->where(['viewed' => 0])->all());
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrderChatLastMessage() {
+        return $this->getOrderChat()->orderBy(['created_at' => SORT_DESC])->one();
     }
 
     //check if order is obsolete i.e. can be set as done from any state by any side

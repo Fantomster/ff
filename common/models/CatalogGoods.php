@@ -148,4 +148,17 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     public function formatPrice() {
         return $this->price . " " . $this->catalog->currency->symbol;
     }
+
+    public function getDiscountPrice(){
+        $price = $this->price;
+        if(isset($this->discount_fixed) && $this->discount_fixed > 0) {
+            return round($price - $this->discount_fixed, 2);
+        }
+
+        if(isset($this->discount_percent) && $this->discount_percent > 0) {
+            return round(($price - ($price/100) * $this->discount_percent), 2);
+        }
+
+        return round($price, 2);
+    }
 }

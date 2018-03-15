@@ -106,7 +106,9 @@ class OrganizationController extends DefaultController {
         }
 
         $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'client_id', $searchModel->date_from, $searchModel->date_to);
-        $searchModel['filter_currency'] = $searchModel->filter_currency;
+        if(count($currencyData['currency_list'])){
+            $searchModel['filter_currency'] = key($currencyData['currency_list']);
+        }
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
@@ -296,12 +298,15 @@ class OrganizationController extends DefaultController {
             $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
         }
 
+        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'vendor_id', $searchModel->date_from, $searchModel->date_to);
+        if(count($currencyData['currency_list'])){
+            $searchModel['filter_currency'] = key($currencyData['currency_list']);
+        }
+
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
         }
 
-        $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, 'vendor_id', $searchModel->date_from, $searchModel->date_to);
-        $searchModel['filter_currency'] = $searchModel->filter_currency;
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
@@ -535,6 +540,9 @@ class OrganizationController extends DefaultController {
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
         $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, $type.'_id', $searchModel->date_from, $searchModel->date_to);
+        if(count($currencyData['currency_list'])){
+            $searchModel['filter_currency'] = key($currencyData['currency_list']);
+        }
 
         if(\Yii::$app->request->get('filter_currency')){
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));

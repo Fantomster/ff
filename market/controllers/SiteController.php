@@ -250,8 +250,7 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            'analyzer' => 'ru',
-                            'operator' => 'AND'
+                            'analyzer' => 'ru'
                         ]
                     ]
                 ]

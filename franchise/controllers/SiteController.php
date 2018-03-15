@@ -159,11 +159,12 @@ class SiteController extends DefaultController
 
         $params = Yii::$app->request->getQueryParams();
         $searchModel = new \franchise\models\OrderSearch();
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, null);
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, $currencyId);
         $totalIncome = 0;
         foreach ($dataProvider->getModels('Order') as $one){
             $totalIncome+=$one->total_price;
         }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, null);
 
         $franchiseeType = $this->currentFranchisee->type;
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType', 'totalIncome', 'currencyList', 'iso_code', 'currencyId'));

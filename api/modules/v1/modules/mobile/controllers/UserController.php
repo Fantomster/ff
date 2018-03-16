@@ -15,6 +15,7 @@ use common\models\Role;
 use common\models\UserToken;
 use common\models\UserFcmToken;
 use yii\data\SqlDataProvider;
+use api_web\classes\UserWebApi;
 
 
 /**

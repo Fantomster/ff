@@ -725,6 +725,9 @@ class Organization extends \yii\db\ActiveRecord {
                                 ->orderBy(['name' => SORT_ASC])
                                 ->asArray()
                                 ->all(), 'id', 'name');
+        foreach ($catalogs as $id=>&$catalog){
+            $catalogs[$id] = Yii::t('app', $catalog);
+        }
         return $catalogs;
     }
 

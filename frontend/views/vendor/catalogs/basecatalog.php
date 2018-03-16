@@ -338,7 +338,6 @@ Modal::end();
                             'attribute' => 'status',
                             'label' => Yii::t('message', 'frontend.views.vendor.in_stock_three', ['ru' => 'Наличие']),
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'vertical-align:middle;width:80px'],
                             'value' => function ($data) {
                                 $link = CheckboxX::widget([
                                             'name' => 'status_' . $data['id'],

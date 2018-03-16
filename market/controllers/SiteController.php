@@ -311,7 +311,7 @@ class SiteController extends Controller {
         $count = \common\models\ES\Product::find()->query($params)
                 ->where(['in', 'product_supp_id', $where])
                 ->offset($num)
-                ->limit(12)
+                ->limit(6)
                 ->count();
 
         if ($count > 0) {
@@ -319,7 +319,7 @@ class SiteController extends Controller {
                     ->where(['in', 'product_supp_id', $where])
                     ->orderBy(['product_rating' => SORT_DESC])
                     ->offset($num)
-                    ->limit(12)
+                    ->limit(6)
                     ->all();
             return $this->renderPartial('/site/main/_ajaxEsProductMore', compact('pr'));
         }

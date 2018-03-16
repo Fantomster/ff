@@ -178,10 +178,10 @@ class UserWebApi extends \api_web\components\WebApi
                     }
                 }
                 $this->user->organization_id = $organization->id;
-            }
-
-            if (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
+            } else if (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
                 $this->user->organization_id = $organization->id;
+            } else {
+                throw new \Exception('access denied');
             }
 
             $result = $this->user->save();

@@ -26,8 +26,6 @@ class EsController extends Controller
                                             "ru_stopwords",
                                             "lowercase",
                                             "russian_morphology",
-                                            "english_morphology",
-                                            "spanish_stemmer",
                                             "snowball"
                                         ]
                                 },
@@ -41,8 +39,6 @@ class EsController extends Controller
                                             "ru_stopwords",
                                             "lowercase",
                                             "russian_morphology",
-                                            "english_morphology",
-                                            "spanish_stemmer",
                                             "snowball"
                                         ]
 				}
@@ -335,24 +331,24 @@ class EsController extends Controller
                 "category_slug" => $category_slug,
             ];
             $category->save();
-            //en
-            $category = new \common\models\ES\Category();
-            $category->attributes = [
-                "category_id" => $category_id,
-                "category_sub_id" => $category_sub_id,
-                "category_name" => Yii::t('app', $category_name, 'en'),
-                "category_slug" => $category_slug,
-            ];
-            $category->save();
-            //es
-            $category = new \common\models\ES\Category();
-            $category->attributes = [
-                "category_id" => $category_id,
-                "category_sub_id" => $category_sub_id,
-                "category_name" => Yii::t('app', $category_name, 'es'),
-                "category_slug" => $category_slug,
-            ];
-            $category->save();
+//            //en
+//            $category = new \common\models\ES\Category();
+//            $category->attributes = [
+//                "category_id" => $category_id,
+//                "category_sub_id" => $category_sub_id,
+//                "category_name" => Yii::t('app', $category_name, 'en'),
+//                "category_slug" => $category_slug,
+//            ];
+//            $category->save();
+//            //es
+//            $category = new \common\models\ES\Category();
+//            $category->attributes = [
+//                "category_id" => $category_id,
+//                "category_sub_id" => $category_sub_id,
+//                "category_name" => Yii::t('app', $category_name, 'es'),
+//                "category_slug" => $category_slug,
+//            ];
+//            $category->save();
         }
     }
     public function actionUpdateSupplier() {

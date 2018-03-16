@@ -290,8 +290,9 @@ class UserController extends ActiveController {
         return $dataProvider;
     }
 
-    public function actionChangeBuisiness($id){
-        $user = Yii::$app->user->getIdentity();
+    public function actionChangeBuisiness($id)
+    {
+        /*$user = Yii::$app->user->getIdentity();
         $organization = Organization::findOne(['id'=>$id]);
 
         $sql = "
@@ -330,5 +331,7 @@ class UserController extends ActiveController {
             return compact('organization');
         }
         throw new BadRequestException;
+    */
+        return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
 }

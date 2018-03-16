@@ -412,16 +412,16 @@ class SiteController extends Controller {
                 $where = $regions;
             }
         }
+
         $params = [
             'query' => [
                 'bool' => [
                     'must' => [
-                        'query_string' => [
-                            'query' => $search . "*",
-                            'fields' => [
-                                'supplier_name',
-                            ],
-                            'default_operator' => 'AND'
+                        'match' => [
+                            'supplier_name' => [
+                                'query' => $search,
+                                'analyzer' => 'ru',
+                            ]
                         ]
                     ],
                     'filter' => [
@@ -1088,28 +1088,28 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
-                    'filtered' => [
-                        'query' => [
-                            'match' => [
-                                'product_name' => [
-                                    'query' => $search,
-                                    'analyzer' => 'ru',
-                                ]
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'product_name' => [
+                                'query' => $search,
+                                'analyzer' => 'ru',
                             ]
                         ]
                     ]
+                ]
             ];
             $params_suppliers = [
-                    'filtered' => [
-                        'query' => [
-                            'match' => [
-                                'supplier_name' => [
-                                    'query' => $search,
-                                    'analyzer' => 'ru',
-                                ]
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'supplier_name' => [
+                                'query' => $search,
+                                'analyzer' => 'ru',
                             ]
                         ]
                     ]
+                ]
             ];
 
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
@@ -1272,7 +1272,7 @@ class SiteController extends Controller {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
-    
+
     private function sendInvite($client, $vendor) {
         foreach ($vendor->users as $recipient) {
             if (!empty($recipient->profile->phone)) {

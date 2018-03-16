@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use api_web\exceptions\ValidationException;
 use Yii;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "catalog".

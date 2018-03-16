@@ -333,6 +333,9 @@ class UserController extends ActiveController {
         }
         throw new BadRequestException;
     */
-        return (new UserWebApi())->setOrganization(['organization_id' => $id]);
+        $user_api = new UserWebApi();
+        if (($user_api)->setOrganization(['organization_id' => $id]))
+            return $user_api->user->organization->attributes;
+        throw new BadRequestException;
     }
 }

@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use api_web\exceptions\ValidationException;
 use Yii;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "catalog".
@@ -112,5 +114,158 @@ class Catalog extends \yii\db\ActiveRecord
     
     public function getCurrency() {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+    }
+
+    public function addCatalog($arrCatalog){
+        if ($arrCatalog === Array()) {
+            throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
+        }
+
+        $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+        if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+            throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.more_position', ['ru' => 'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max' => CatalogBaseGoods::MAX_INSERT_FROM_XLS])
+                . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>');
+        }
+        $productNames = [];
+        foreach ($arrCatalog as $arrCatalogs) {
+            if(!isset($arrCatalogs['product'])){
+                throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
+            }
+            $product = strip_tags(trim($arrCatalogs['product']));
+            $price = floatval(trim(str_replace(',', '.', $arrCatalogs['price'])));
+            $ed = strip_tags(trim($arrCatalogs['ed']));
+            if (empty($product)) {
+                $result = ['attribute'=>'product', 'message' => Yii::t('error', 'frontend.controllers.client.empty_field', ['ru' => 'Ошибка: Пустое поле'])];
+                throw new ValidationException($result);
+            }
+
+            $price = str_replace(',', '.', $price);
+            if (empty($price) || !preg_match($numberPattern, $price)) {
+                $result = ['attribute'=>'price', 'message' => Yii::t('message', 'frontend.controllers.client.wrong_price', ['ru' => 'Ошибка: <strong>[Цена]</strong> в неверном формате!'])];
+                throw new ValidationException($result);
+            }
+            if (empty($units) || $units < 0) {
+                $units = 0;
+            }
+            $units = str_replace(',', '.', $units);
+            if (!empty($units) && !preg_match($numberPattern, $units)) {
+                $result = ['attribute'=>'units', 'message' => Yii::t('message', 'frontend.controllers.client.wrong_measure', ['ru' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'])];
+                throw new ValidationException($result);
+            }
+            if (empty($ed)) {
+                $result = ['attribute'=>'ed', 'message' => Yii::t('message', 'frontend.controllers.client.empty', ['ru' => 'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'])];
+                throw new ValidationException($result);
+            }
+            array_push($productNames, mb_strtolower(trim($product)));
+        }
+
+        if (count($productNames) !== count(array_flip($productNames))) {
+            throw new BadRequestHttpException(Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!'));
+        }
+    }
+
+
+    public function addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency = null)
+    {
+        /**
+         *
+         * 2) Создаем базовый и каталог для ресторана
+         *
+         * */
+        if ($check['eventType'] == 5) {
+            $newBaseCatalog = new Catalog();
+            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
+            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+            $newBaseCatalog->status = Catalog::STATUS_ON;
+            if (isset($currency)) {
+                $newBaseCatalog->currency_id = $currency->id;
+            }
+            $newBaseCatalog->save();
+            $newBaseCatalog->refresh();
+            $lastInsert_base_cat_id = $newBaseCatalog->id;
+        } else {
+            //Поставщик зарегистрирован, но не авторизован
+            //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+            if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
+                $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+            } else {
+                $newBaseCatalog = new Catalog();
+                $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
+                $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                $newBaseCatalog->status = Catalog::STATUS_ON;
+                if (isset($currency)) {
+                    $newBaseCatalog->currency_id = $currency->id;
+                }
+                $newBaseCatalog->save();
+                $newBaseCatalog->refresh();
+                $lastInsert_base_cat_id = $newBaseCatalog->id;
+            }
+        }
+
+        $newCatalog = new Catalog();
+        $newCatalog->supp_org_id = $get_supp_org_id;
+        $newCatalog->name = ($currentUser->organization->name=="") ? $currentUser->email : $currentUser->organization->name;
+        $newCatalog->type = Catalog::CATALOG;
+        $newCatalog->status = Catalog::STATUS_ON;
+        if (isset($currency)) {
+            $newCatalog->currency_id = $currency->id;
+        }
+        $newCatalog->save();
+        $lastInsert_cat_id = $newCatalog->id;
+        $newCatalog->refresh();
+
+        /**
+         *
+         * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
+         *
+         * */
+        $article_create = 0;
+        foreach ($arrCatalog as $arrCatalogs) {
+            $article_create++;
+            $article = $article_create;
+            $product = strip_tags(trim($arrCatalogs['product']));
+            $units = null;
+
+            if (empty($units) || $units < 0) {
+                $units = null;
+            }
+            $price = strip_tags(trim($arrCatalogs['price']));
+            $ed = strip_tags(trim($arrCatalogs['ed']));
+            $price = str_replace(',', '.', $price);
+            if (substr($price, -3, 1) == '.') {
+                $price = explode('.', $price);
+                $last = array_pop($price);
+                $price = join($price, '') . '.' . $last;
+            } else {
+                $price = str_replace('.', '', $price);
+            }
+            $newProduct = new CatalogBaseGoods();
+            $newProduct->scenario = "import";
+            $newProduct->cat_id = $lastInsert_base_cat_id;
+            $newProduct->supp_org_id = $get_supp_org_id;
+            $newProduct->article = (string)$article;
+            $newProduct->product = $product;
+            $newProduct->units = $units;
+            $newProduct->price = $price;
+            $newProduct->ed = $ed;
+            $newProduct->status = CatalogBaseGoods::STATUS_ON;
+            $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+            $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+            $newProduct->save();
+            $newProduct->refresh();
+
+            $lastInsert_base_goods_id = $newProduct->id;
+
+            $newGoods = new CatalogGoods();
+            $newGoods->cat_id = $lastInsert_cat_id;
+            $newGoods->base_goods_id = $lastInsert_base_goods_id;
+            $newGoods->price = $price;
+            $newGoods->save();
+            $newGoods->refresh();
+        }
+        return $lastInsert_cat_id;
     }
 }

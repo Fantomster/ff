@@ -303,7 +303,6 @@ class SiteController extends Controller {
                         'product_name' => [
                             'query' => $search,
                             'analyzer' => "ru",
-                            'operator' => 'AND'
                         ]
                     ]
                 ]

@@ -327,7 +327,7 @@ class EsController extends Controller
             $category->attributes = [
                 "category_id" => $category_id,
                 "category_sub_id" => $category_sub_id,
-                "category_name" => Yii::t('app', $category_name, 'ru'),
+                "category_name" => $category_name,//Yii::t('app', $category_name, 'ru'),
                 "category_slug" => $category_slug,
             ];
             $category->save();

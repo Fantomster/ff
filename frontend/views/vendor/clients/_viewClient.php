@@ -71,6 +71,10 @@ $form = ActiveForm::begin([
             ?>
         </div>
         <div class="col-md-6">
+            <?php
+            foreach ($catalogs as $id=>&$catalog){
+                $catalogs[$id] = Yii::t('app', $catalog);
+            } ?>
             <?=
             $form->field($relation_supp_rest, 'cat_id')->dropDownList($catalogs, ['prompt' => '']);
             ?>

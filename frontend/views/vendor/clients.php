@@ -100,7 +100,7 @@ $gridColumnsClients = [
                         ]
             ]);
             if (!empty($data->invite) && !empty($data->cat_id)) {
-                $result = Html::a($data->catalog->name, ['vendor/view-catalog', 'id' => $data->cat_id], [
+                $result = Html::a(Yii::t('app', $data->catalog->name), ['vendor/view-catalog', 'id' => $data->cat_id], [
                             'data' => [
                                 'target' => '#view-catalog',
                                 'toggle' => 'modal',

@@ -2,6 +2,7 @@
 
 namespace api_web\controllers;
 
+use api_web\components\WebApi;
 use Yii;
 use yii\web\Controller;
 use frontend\modules\billing\models\BillingPayment;
@@ -33,7 +34,8 @@ class SiteController extends Controller
                     Yii::getAlias('@api_web/controllers/OrderController.php'),
                     Yii::getAlias('@api_web/controllers/VendorController.php'),
                     Yii::getAlias('@api_web/controllers/GuideController.php'),
-                    Yii::getAlias('@api_web/controllers/ChatController.php')
+                    Yii::getAlias('@api_web/controllers/ChatController.php'),
+                    Yii::getAlias('@api_web/controllers/RequestController.php')
                 ],
                 'cache' => 'cache',
                 'cacheKey' => 'api-web-swagger-cache'

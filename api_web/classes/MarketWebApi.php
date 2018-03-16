@@ -77,11 +77,11 @@ class MarketWebApi extends WebApi
         if (isset($post['search'])) {
             foreach ($post['search'] as $key => $value) {
 
-                if(empty($value)) {
+                if (empty($value)) {
                     continue;
                 }
 
-                if($key == 'supplier_id') {
+                if ($key == 'supplier_id') {
                     $key = 'supp_org_id';
                 }
 
@@ -342,6 +342,10 @@ class MarketWebApi extends WebApi
      */
     public function prepareOrganization($model)
     {
+        if (empty($model)) {
+            return null;
+        }
+
         $item['id'] = (int)$model->id;
         $item['name'] = $model->name;
         $item['phone'] = $model->phone;

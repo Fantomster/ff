@@ -15,6 +15,7 @@ use common\models\Role;
 use common\models\UserToken;
 use common\models\UserFcmToken;
 use yii\data\SqlDataProvider;
+use api_web\classes\UserWebApi;
 
 
 /**
@@ -290,8 +291,9 @@ class UserController extends ActiveController {
         return $dataProvider;
     }
 
-    public function actionChangeBuisiness($id){
-        $user = Yii::$app->user->getIdentity();
+    public function actionChangeBuisiness($id)
+    {
+        /*$user = Yii::$app->user->getIdentity();
         $organization = Organization::findOne(['id'=>$id]);
 
         $sql = "
@@ -329,6 +331,11 @@ class UserController extends ActiveController {
             $user->save();
             return compact('organization');
         }
+        throw new BadRequestException;
+    */
+        $user_api = new UserWebApi();
+        if ($user_api->setOrganization(['organization_id' => $id]))
+            return $user_api->user->organization->attributes;
         throw new BadRequestException;
     }
 }

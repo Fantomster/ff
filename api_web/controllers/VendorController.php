@@ -41,7 +41,8 @@ class VendorController extends WebApiController
     "price": 499.80,
     "ed": "шт."
     }
-     *                               }
+     *                               },
+     *     "currency_id": 1
      *                           }
      *                      }
      *              )

@@ -27,7 +27,7 @@ class EsController extends Controller
                                             "lowercase",
                                             "russian_morphology",
                                             "english_morphology",
-                                            "spanish_morphology",
+                                            "spanish_stemmer",
                                             "snowball"
                                         ]
                                 },
@@ -42,7 +42,7 @@ class EsController extends Controller
                                             "lowercase",
                                             "russian_morphology",
                                             "english_morphology",
-                                            "spanish_morphology",
+                                            "spanish_stemmer",
                                             "snowball"
                                         ]
 				}
@@ -104,6 +104,10 @@ class EsController extends Controller
 					"type": "stop",
 					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
 				},
+                                "spanish_stemmer": {
+                                        "type": "stemmer",
+                                        "language": "light_spanish"
+                                },
                                 "snowball": {
                                     "type": "snowball",
                                     "language": "russian"

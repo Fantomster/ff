@@ -2,6 +2,7 @@
 
 namespace api\common\models;
 
+use Aws\Ec2\Iterator\DescribeInstancesIterator;
 use common\models\Order;
 use common\models\User;
 
@@ -178,6 +179,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
                             ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
                             ->andWhere('org = :org',['org' => $wdmodel->org]) 
                             ->andWhere('product_rid is not null')
+                            ->orderBy(['linked_at' => SORT_DESC])
+                            ->limit(1)
                             ->one();
                     
                     if ($ch) {

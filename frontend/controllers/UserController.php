@@ -57,7 +57,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     ]
                 ],
                 'denyCallback' => function($rule, $action) {
-                    $this->redirect('\site\index');
+                    $this->redirect(['/site/index']);
                 }                
             ]
         ];

@@ -139,6 +139,15 @@ class OrderController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         $res = [];
 
+        $newOrder = new \common\models\Order();
+        $newOrder->load($post, 'Order');
+        $min_delivery = $this->vendor->delivery->min_order_price;
+
+        if($newOrder->total_price < $min_delivery) {
+            echo "Total price is less than the minimum";
+            return;
+        }
+
         $transaction = Yii::$app->db->beginTransaction();
         try {
             if (isset($post['GoodsNotes'])) {

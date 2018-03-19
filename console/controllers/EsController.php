@@ -48,8 +48,40 @@ class EsController extends Controller
                                 "type": "mapping",
                                 "mappings": [
                                     "ё => е",
-                                    "Ё => е"
-                                ]
+                                    "Ё => е",
+                                    "` => ё",
+				    "q => й",
+				    "w => ц",
+				    "e => у",
+				    "r => к",
+				    "t => е",
+				    "y => н",
+				    "u => г",
+				    "i => ш",
+				    "o => щ",
+				    "p => з",
+				    "[ => х",
+				    "] => ъ",
+				    "a => ф",
+				    "s => ы",
+				    "d => в",
+				    "f => а",
+				    "g => п",
+				    "h => р",
+				    "j => о",
+				    "k => л",
+				    "l => д",
+				    "; => ж",
+				    "\" => э",
+				    "z => я",
+				    "x => ч",
+				    "c => с",
+				    "v => м",
+				    "b => и",
+				    "n => т",
+				    "m => ь",
+				    ", => б",
+				    ". => ю"                                ]
                             }
                         },
                         "tokenizer": {
@@ -68,6 +100,10 @@ class EsController extends Controller
 					"type": "stop",
 					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
 				},
+                                "spanish_stemmer": {
+                                        "type": "stemmer",
+                                        "language": "light_spanish"
+                                },
                                 "snowball": {
                                     "type": "snowball",
                                     "language": "russian"
@@ -286,14 +322,33 @@ class EsController extends Controller
             $category_sub_id = $name->id;
             $category_name = $name->name;
             $category_slug = $name->slug;
+            //ru
             $category = new \common\models\ES\Category();
             $category->attributes = [
                 "category_id" => $category_id,
                 "category_sub_id" => $category_sub_id,
-                "category_name" => $category_name,
+                "category_name" => $category_name,//Yii::t('app', $category_name, 'ru'),
                 "category_slug" => $category_slug,
             ];
             $category->save();
+//            //en
+//            $category = new \common\models\ES\Category();
+//            $category->attributes = [
+//                "category_id" => $category_id,
+//                "category_sub_id" => $category_sub_id,
+//                "category_name" => Yii::t('app', $category_name, 'en'),
+//                "category_slug" => $category_slug,
+//            ];
+//            $category->save();
+//            //es
+//            $category = new \common\models\ES\Category();
+//            $category->attributes = [
+//                "category_id" => $category_id,
+//                "category_sub_id" => $category_sub_id,
+//                "category_name" => Yii::t('app', $category_name, 'es'),
+//                "category_slug" => $category_slug,
+//            ];
+//            $category->save();
         }
     }
     public function actionUpdateSupplier() {

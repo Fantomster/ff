@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use common\models\MpCategory;
 use yii\helpers\Json;
 use yii\data\SqlDataProvider;
+use yii\data\Pagination;
 
 
 /**
@@ -108,6 +109,10 @@ class CatalogBaseGoodsController extends ActiveController {
 
         $dataProvider = new SqlDataProvider([
             'sql' => "$query1  UNION ALL ($query2)",
+            'pagination' => [
+                'pageSize' => 20,
+                //'totalCount' => $totalCount ,
+                ],
             'sort' => [
                 'attributes' => [
                     'product',
@@ -124,10 +129,10 @@ class CatalogBaseGoodsController extends ActiveController {
             return $dataProvider;
         }
 
-        if($params->page == 0 || $params->count == 0 || $params->count == null || $params->page == null)
+        if(empty($params->page) && empty($params->count))
             $dataProvider->pagination = false;
         else {
-            $dataProvider->pagination->pageSize = $params->count;
+            $dataProvider->pagination->pageSize = (!empty($params->count)) ? $params->count : 20;
             $dataProvider->pagination->page = $params->page;
         }
 

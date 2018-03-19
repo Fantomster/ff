@@ -644,6 +644,12 @@ class ClientController extends DefaultController {
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.vendor', ['ru'=>'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru'=>' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
                             return $result;
                         } else {
+                            if ($user && $currentUser) {
+                                $managerAssociate = new ManagerAssociate();
+                                $managerAssociate->manager_id = $user->id;
+                                $managerAssociate->organization_id = $currentUser->organization_id;
+                                $managerAssociate->save();
+                            }
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
                             return $result;
                         }

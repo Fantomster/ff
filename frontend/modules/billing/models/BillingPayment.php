@@ -44,6 +44,8 @@ class BillingPayment extends ActiveRecord
     CONST STATUS_SUCCESS = 2;
     CONST STATUS_REFUND = 9;
 
+    public $return_url = 'https://mixcart.ru/billing/payment';
+
     /**
      * @inheritdoc
      */

@@ -16,7 +16,7 @@ interface ProviderInterface
      * @param BillingPayment $payment
      * @return mixed
      */
-    public function createPayment(BillingPayment $payment);
+    public function makePayment(BillingPayment $payment);
 
     /**
      * @param BillingPayment $payment
@@ -28,13 +28,13 @@ interface ProviderInterface
      * @param BillingPayment $payment
      * @return mixed
      */
-    public function capturePayment(BillingPayment $payment);
+    public function confirmPayment(BillingPayment $payment);
 
     /**
      * @param BillingPayment $payment
      * @return mixed
      */
-    public function cancelPayment(BillingPayment $payment);
+    public function refusePayment(BillingPayment $payment);
 
     /**
      * @return bool

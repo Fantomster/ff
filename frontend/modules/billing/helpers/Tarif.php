@@ -50,7 +50,11 @@ class Tarif
                     ->andWhere(['payment_type_id' => $type])
                     ->one();
             }
-            return ['price' => $model->price, 'type' => $model->payment_type_id];
+            return [
+                'price' => $model->price,
+                'type' => $model->payment_type_id,
+                'title' => $model->paymentType->title
+            ];
         }
         return ['price' => 100000, 'type' => 0];
     }

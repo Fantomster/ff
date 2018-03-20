@@ -1,0 +1,8 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/html/qas.mixcart.ru
+hooks:
+  AfterInstall:
+    - location: deploy/scripts/init_qas.sh

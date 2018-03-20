@@ -16,6 +16,9 @@ class Module extends \yii\base\Module
             'iiko' => [
                 'class' => 'frontend\modules\clientintegr\modules\iiko\Module',
             ],
+            'email' => [
+                'class' => 'frontend\modules\clientintegr\modules\email\Module',
+            ],
 /*            
             'supp' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен

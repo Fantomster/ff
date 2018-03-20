@@ -24,13 +24,11 @@ class Yandex extends Client implements ProviderInterface
     /**
      * Создание платежа https://kassa.yandex.ru/docs/checkout-api/#sozdanie-platezha
      * @param BillingPayment $payment
-     * @return mixed
+     * @return \YandexCheckout\Request\Payments\CreatePaymentResponse
      * @throws \Exception
      */
-    public function createPayment(BillingPayment $payment)
+    public function makePayment(BillingPayment $payment)
     {
-        $return_url = \Yii::$app->request->post('return_url', 'https://mixcart.ru/billing/payment');
-
         try {
             $item = new ReceiptItem();
             $item->setPrice((new MonetaryAmount($payment->amount, $payment->currency->iso_code)));
@@ -48,9 +46,7 @@ class Yandex extends Client implements ProviderInterface
                     'currency' => $payment->currency->iso_code
                 ],
                 'receipt' => $receipt,
-                'payment_method_data' => [
-                    'type' => 'bank_card'
-                ],
+                'description' => $payment->paymentType->title . ' (' . $payment->organization->name . ')',
                 'metadata' => [
                     'billing_payment_id' => $payment->billing_payment_id,
                     'currency_id' => $payment->currency_id,
@@ -59,10 +55,11 @@ class Yandex extends Client implements ProviderInterface
                 ],
                 'confirmation' => [
                     'type' => 'redirect',
-                    'return_url' => $return_url
+                    'enforce' => true,
+                    'return_url' => $payment->return_url
                 ],
                 'client_ip' => \Yii::$app->request->getUserIP(),
-                'capture' => true
+                'capture' => false
             ];
             //Создаем платеж
             $response = parent::createPayment($pay, $payment->idempotency_key);
@@ -89,7 +86,7 @@ class Yandex extends Client implements ProviderInterface
      * @return mixed
      * @throws \Exception
      */
-    public function capturePayment(BillingPayment $payment)
+    public function confirmPayment(BillingPayment $payment)
     {
         try {
             if (empty($payment->external_payment_id)) {
@@ -150,7 +147,7 @@ class Yandex extends Client implements ProviderInterface
      * @return mixed
      * @throws \Exception
      */
-    public function cancelPayment(BillingPayment $payment)
+    public function refusePayment(BillingPayment $payment)
     {
         try {
             if (empty($payment->external_payment_id)) {
@@ -202,7 +199,8 @@ class Yandex extends Client implements ProviderInterface
             '185.71.77.5',
             '185.71.76.2',
             '185.71.76.3',
-            '185.71.76.4'
+            '185.71.76.4',
+            '127.0.0.1'
         ];
 
         return in_array(\Yii::$app->request->getUserIP(), $allow_ips_yandex);

@@ -45,7 +45,7 @@ class BillingLogger
     private static function getHeaders()
     {
         $headers = Yii::$app->request->getHeaders()->toArray();
-        $return = '';
+        $return = [];
         foreach ($headers as $header => $value) {
             $value = implode('', $value);
             $return[] = $header . ': ' . $value;

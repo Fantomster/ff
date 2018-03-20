@@ -12,10 +12,17 @@ $grid = [
         'label' => false,
         'format' => 'raw',
         'value' => function ($data) {
-            if ($data['type_id'] == \common\models\Organization::TYPE_RESTAURANT) {
-                return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer', ['ru' => 'Закупщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            $rel = \common\models\RelationUserOrganization::findOne(['organization_id'=>$data['id'], 'user_id'=>Yii::$app->user->id]);
+            if($rel){
+                $role = \common\models\Role::findOne(['id'=>$rel->role_id]);
+                $roleName = " (" . $role->name . ") ";
+            }else{
+                $roleName = '';
             }
-            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor', ['ru' => 'Поставщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            if ($data['type_id'] == \common\models\Organization::TYPE_RESTAURANT) {
+                return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer', ['ru' => 'Закупщик']) . " </span><span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            }
+            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor', ['ru' => 'Поставщик']) . " </span><span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
         },
     ],
     [

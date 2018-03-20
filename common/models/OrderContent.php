@@ -13,6 +13,7 @@ use Yii;
  * @property string $initial_quantity
  * @property string $price
  * @property string $product_name
+ * @property string $article
  * @property integer $units
  * @property string $comment
  *
@@ -193,24 +194,24 @@ class OrderContent extends \yii\db\ActiveRecord
             $order->save();
         }
         
-//        if (!is_a(Yii::$app, 'yii\console\Application')) {
-//            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
-//                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
-//            }
-//        }
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if($this->order->status == Order::STATUS_FORMING)
+                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContent($this->id);
+        }
     }
 
     public function getCurrency() {
          return Currency::findOne($this->order->currency_id);
     }
 
-    public function afterDelete() {
-        parent::afterDelete();
+    public function beforeDelete() {
+        $result = parent::beforeDelete();
+
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if($this->order->status == Order::STATUS_FORMING)
+                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContentDelete($this);
+        }
         
-//        if (!is_a(Yii::$app, 'yii\console\Application')) {
-//            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
-//                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
-//            }
-//        }
+        return $result;
     }
 }

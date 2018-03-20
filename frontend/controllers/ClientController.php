@@ -2,18 +2,17 @@
 
 namespace frontend\controllers;
 
+use common\models\Currency;
 use common\models\ManagerAssociate;
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
+use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
-use yii\web\UploadedFile;
 use common\models\User;
 use common\models\Role;
 use common\models\Order;
 use common\models\Organization;
-use common\models\OrganizationType;
-use common\models\RelationCategory;
 use common\models\Category;
 use common\models\Profile;
 use common\models\Catalog;
@@ -25,6 +24,7 @@ use common\models\search\UserSearch;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
@@ -55,6 +55,7 @@ class ClientController extends DefaultController {
                             'ajax-create-user',
                             'ajax-delete-user',
                             'ajax-update-user',
+                            'ajax-update-currency',
                             'ajax-validate-user',
                             'ajax-validate-vendor',
                             'employees',
@@ -208,6 +209,31 @@ class ClientController extends DefaultController {
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
+//                else {
+//                    if (array_key_exists('email', $user->errors)) {
+//                        $existingUser = User::findOne(['email' => $post['User']['email']]);
+//                        if($existingUser){
+//                            if(in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())){
+//                                $message = Yii::t('app', 'common.models.already_exists');
+//                                return $this->renderAjax('settings/_success', ['message' => $message]);
+//                            }
+//                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+//                            if($success){
+//                                User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+//                                $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+//                                $existingUser->setRole($post['User']['role_id'])->save();
+//                                $message = Yii::t('app', 'Пользователь добавлен!');
+//                            }
+//                            else{
+//                                $message = Yii::t('app', 'common.models.already_exists');
+//                            }
+//                        }else{
+//                            $message = Yii::t('app', 'common.models.already_exists');
+//                        }
+//
+//                        return $this->renderAjax('settings/_success', ['message' => $message]);
+//                    }
+//                }
             }
         }
 
@@ -239,6 +265,7 @@ class ClientController extends DefaultController {
                     }
                     $user->save();
                     $profile->save();
+                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -258,12 +285,29 @@ class ClientController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
+                $del = 0;
+                $rel = RelationUserOrganization::findOne(['user_id'=>$post['id'], 'organization_id'=>$this->currentUser->organization->id]);
+                if($rel){
+                    $del = $rel->delete();
+                }
                 $usersCount = count($user->organization->users);
-                if ($user->id == $this->currentUser->id) {
+                if ($user->id == $this->currentUser->id && !$del) {
                     $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
+                    if($user->id == $this->currentUser->id && $del){
+                        $rel2 = RelationUserOrganization::findOne(['user_id'=>$post['id']]);
+                        if($rel2){
+                            $user->organization_id = $rel2->organization_id;
+                            $user->save();
+                            Yii::$app->user->logout();
+                            return $this->goHome();
+                        }else{
+                            $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
+                            return $this->renderAjax('settings/_success', ['message' => $message]);
+                        }
+                    }
 //                    $user->role_id = Role::ROLE_USER;
                     $email_notification = $user->emailNotification;
                     $sms_notification = $user->smsNotification;
@@ -601,6 +645,12 @@ class ClientController extends DefaultController {
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.vendor', ['ru'=>'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru'=>' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
                             return $result;
                         } else {
+                            if ($user && $currentUser) {
+                                $managerAssociate = new ManagerAssociate();
+                                $managerAssociate->manager_id = $user->id;
+                                $managerAssociate->organization_id = $currentUser->organization_id;
+                                $managerAssociate->save();
+                            }
                             $result = ['success' => true, 'message' => Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
                             return $result;
                         }
@@ -1318,7 +1368,7 @@ class ClientController extends DefaultController {
                 'goods_id' => $catalog_elem->id,
                 'base_goods_id' => $catalog_elem->base_goods_id,
                 'article' => $catalog_elem->baseProduct->article,
-                'product' => $catalog_elem->baseProduct->product,
+                'product' => Html::decode(Html::decode($catalog_elem->baseProduct->product)),
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
                 'price' => $catalog_elem->baseProduct->price,
@@ -1349,26 +1399,6 @@ class ClientController extends DefaultController {
 
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-
-        //Список валют из заказов
-        $currency_list = Order::find()->distinct()->select([
-            'order.currency_id',
-            'c.id',
-            'c.iso_code',
-            'COUNT(order.id) as count'
-        ])->joinWith('currency as c')
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
-            ->andWhere('client_id = :cid', [':cid' => $currentUser->organization_id])
-            ->orderBy('count DESC')
-            ->groupBy('iso_code')
-            ->asArray()->all();
-
-        $currencyList = [];
-
-        foreach($currency_list as $c) {
-            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
-        }
-
 
         $header_info_zakaz = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id])->andWhere(['not in','status', [Order::STATUS_FORMING]])->count();
@@ -1426,7 +1456,9 @@ class ClientController extends DefaultController {
             empty($filter_employee) ? "" : $where .= " and created_by_id='" . $filter_employee . "'";
         }
 
-        $filter_currency = trim(\Yii::$app->request->get('filter_currency', 1));
+        $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
+
+        $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
         empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
 
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
@@ -1548,15 +1580,29 @@ class ClientController extends DefaultController {
          * BarChart заказы по поставщикам END
          *
          */
+        $organizationId = $currentUser->organization_id;
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('analytics/index', compact(
-                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label', 'organizationId'
             ));
         } else {
             return $this->render('analytics/index', compact(
-                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label', 'organizationId'
             ));
         }
+    }
+
+
+    public function actionAjaxUpdateCurrency()
+    {
+        $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
+        $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+        $currencyId = \Yii::$app->request->get('filter_currency') ?? 1;
+        $organizationId = (int)\Yii::$app->request->get('organization_id');
+        $currencyList = Currency::getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, 'client_id');
+        $count = count($currencyList);
+
+        return $this->renderPartial('analytics/currency', compact('currencyList', 'count', 'currencyId'));
     }
 
     public function actionTutorial() {

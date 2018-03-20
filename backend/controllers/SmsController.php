@@ -86,7 +86,7 @@ class SmsController extends \yii\web\Controller
 
             $balance = Yii::$app->cache->get('sms_balance');
 
-            echo \kartik\alert\Alert::widget([
+            return \kartik\alert\Alert::widget([
                 'options' => [
                     'class' => ($balance > 1000 ? 'alert-info' : 'alert-danger')
                 ],

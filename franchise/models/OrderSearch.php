@@ -92,9 +92,10 @@ class OrderSearch extends Order {
         $query->leftJoin("franchisee_associate as fa", "fa.organization_id = client.id");
         $query->where(Order::tableName() . '.status != ' .Order::STATUS_FORMING);
         if($currencyId){
-            $query->where(Order::tableName() . '.currency_id= ' .$currencyId);
+            $query->where(Order::tableName() . '.currency_id= ' .$currencyId . " AND " . Order::tableName() . '.status NOT IN ('.Order::STATUS_FORMING.') ');
         }
         $query->andWhere(['or', ['franchisee_associate.franchisee_id' => $franchisee_id], ['fa.franchisee_id' => $franchisee_id]]);
+        //$query->andWhere(Order::tableName() . '.status NOT 7 ');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -149,6 +150,7 @@ class OrderSearch extends Order {
                 ['vendor.manager_id'=>$searchArr],
             ]);
         }
+        //dd($this->status_array);
 
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,

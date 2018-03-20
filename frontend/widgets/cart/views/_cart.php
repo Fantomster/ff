@@ -68,7 +68,7 @@ $count = count($orders);
         <div class="block_wrap_dont_tovar">
             <p class = "block_wrap_dont_tovar_name"><?= Yii::t('app', 'frontend.widgets.cart.views.no_goods', ['ru'=>'В вашей корзине нет товаров.']) ?></p>
             <p class = "block_wrap_dont_tovar_p"><?= Yii::t('app', 'frontend.widgets.cart.views.empty', ['ru'=>'Ваша корзина пуста и это нужно исправить!']) ?><br>
-                <?= Yii::t('app', 'frontend.widgets.cart.views.seek', ['ru'=>'Ищите кнопки <span>&laquo;Купить&raquo;</span> на нашем сайте. Они рядом  с товарами, которые вы хотите приобрести.<br><br>Вы можете начать с выбора товаров в нашем {cat}', 'cat'=>Html::a('каталоге', ['/order/create'], ['data-pjax' => 0])]) ?>
+                <?= Yii::t('app', 'frontend.widgets.cart.views.seek', ['ru'=>'Ищите кнопки <span>&laquo;Купить&raquo;</span> на нашем сайте. Они рядом  с товарами, которые вы хотите приобрести.<br><br>Вы можете начать с выбора товаров в нашем {cat} ', 'cat'=>' ' . Html::a(Yii::t('app', 'frontend.widgets.cart.views.catalog', ['ru'=>'каталоге']), ['/order/create'], ['data-pjax' => 0])]) ?>
             </p>
         </div>
     <?php } ?>

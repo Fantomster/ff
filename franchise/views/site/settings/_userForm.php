@@ -32,7 +32,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
             <?= $form->field($user, 'newPassword')->passwordInput() ?>
 
-            <?= $form->field($profile, 'full_name') ?>
+            <?= $form->field($profile, 'full_name')->textInput(['value' => Html::decode($profile->full_name), ]) ?>
 
             <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
                                 'jsOptions' => [

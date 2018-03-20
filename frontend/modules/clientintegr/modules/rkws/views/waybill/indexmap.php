@@ -46,6 +46,7 @@ Breadcrumbs::widget([
     ],
 ])
 ?>
+<?php $useAutoVAT            = (RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() : 1; ?>
 </section>
 <section class="content-header">
 <?= $this->render('/default/_menu.php'); ?>
@@ -99,61 +100,58 @@ Breadcrumbs::widget([
                                             // alert(this.value);
                                             }'],
                                 ]); ?>    
-                        </div>   
-<?=
-GridView::widget([
-    'dataProvider' => $dataProvider,
-    'pjax' => true, // pjax is set to always true for this demo
-    'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
-    'filterPosition' => false,
-    'columns' => [
-        'product_id',
-        [
-           'attribute' => 'product_id',
-           'value' => function ($model) {
-                      return $model->fproductname->product;
-                      },
-           'format' => 'raw',
-           'label' => 'Наименование F-keeper',                   
-         ],
-         [
-           'attribute' => 'product_id',
-           'value' => function ($model) {
-                      return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
-                      },
-           'format' => 'raw',
-           'label' => 'Ед. изм. F-keeper',                   
-         ],                     
+                        </div>
 
-     //   'munit_rid',
 
-        [
-            'class' => 'kartik\grid\EditableColumn',
-            'attribute' => 'pdenom',
-               //       'value' => function ($model) {
-               //       $model->pdenom = $model->product->denom;
-               //       return $model->pdenom;
-               //       },
-            'label' => 'Наименование в Store House',
-          //  'pageSummary' => 'Total',
-            'vAlign' => 'middle',
-            'width' => '210px',
-            'refreshGrid' => true,
+<?php
+$columns = array(
+    'product_id',
+    [
+        'attribute' => 'product_id',
+        'value' => function ($model) {
+            return $model->fproductname->product;
+        },
+        'format' => 'raw',
+        'label' => 'Наименование F-keeper',
+    ],
+    [
+        'attribute' => 'product_id',
+        'value' => function ($model) {
+            return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
+        },
+        'format' => 'raw',
+        'label' => 'Ед. изм. F-keeper',
+    ],
 
-            'editableOptions'=>[
-                'asPopover' => $isAndroid ? false : true,
-                 'formOptions' => ['action' => ['edit']],
-        'header'=>'Продукт R-keeper', 
-        'size'=>'md',
-        'inputType'=>\kartik\editable\Editable::INPUT_SELECT2,
-        //'widgetClass'=> 'kartik\datecontrol\DateControl',
-        'options'=>[
-          //   'initValueText' => $productDesc,
+    //   'munit_rid',
 
-            //'data' => $pdenom,
-            'options' => ['placeholder' => 'Выберите продукт из списка',           
+    [
+        'class' => 'kartik\grid\EditableColumn',
+        'attribute' => 'pdenom',
+        //       'value' => function ($model) {
+        //       $model->pdenom = $model->product->denom;
+        //       return $model->pdenom;
+        //       },
+        'label' => 'Наименование в Store House',
+        //  'pageSummary' => 'Total',
+        'vAlign' => 'middle',
+        'width' => '210px',
+        'refreshGrid' => true,
+
+        'editableOptions'=>[
+            'asPopover' => $isAndroid ? false : true,
+            'formOptions' => ['action' => ['edit']],
+            'header'=>'Продукт R-keeper',
+            'size'=>'md',
+            'inputType'=>\kartik\editable\Editable::INPUT_SELECT2,
+            //'widgetClass'=> 'kartik\datecontrol\DateControl',
+            'options'=>[
+                //   'initValueText' => $productDesc,
+
+                //'data' => $pdenom,
+                'options' => ['placeholder' => 'Выберите продукт из списка',
                 ],
-             'pluginOptions' => [
+                'pluginOptions' => [
                     'minimumInputLength' => 2,
                     'ajax' => [
                         'url' => Url::toRoute('autocomplete'),
@@ -170,156 +168,182 @@ GridView::widget([
                             $('#agent-modal').modal('show');
                         }
                     }",
-                    ]
-            
-        ]
+                ]
+
+            ]
         ]],
-             /*   [
-                'attribute' => 'product_rid',
-                'value' => function ($model) {
-                     if (!empty($model->product)) {
-                         
-                         return $model->product->denom;
-                     }     
-                          
-                    return 'Не задано';
-                },
-                'format' => 'raw',
-                'label' => 'Наименование StoreHouse', 
-                ], */
-                [
-                'attribute' => 'munit_rid',
-                'value' => function ($model) {
-                    if (!empty($model->product)) {
-                         
-                         return $model->product->unitname;
-                     }                   
-                    return 'Не задано';
-                },
-                'format' => 'raw',
-                'label' => 'Ед.изм. StoreHouse',         
-                ],  
-                [
-                'attribute' => 'defquant',                
-                'format' => 'raw',
-                'label' => 'Кол-во в Заказе',                   
-                ],           
-                [
-                'class'=>'kartik\grid\EditableColumn',
-                'attribute'=>'koef',
-                'refreshGrid' => true,
-                'editableOptions'=>[
-                    'asPopover' => $isAndroid ? false : true,
-                    'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
-                'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
-                'formOptions' => [
-                              'action' => Url::toRoute('changekoef'),
-                              'enableClientValidation' => false,
-                                 ],    
-                ],
-                'hAlign'=>'right',
-                'vAlign'=>'middle',
-                // 'width'=>'100px',
-                'format'=>['decimal',6],
+    /*   [
+       'attribute' => 'product_rid',
+       'value' => function ($model) {
+            if (!empty($model->product)) {
 
-                'pageSummary'=>true
-                ],      
-                [
-                'class'=>'kartik\grid\EditableColumn',
-                'attribute'=>'quant',
-                'refreshGrid' => true,
-                'editableOptions'=>[
-                    'asPopover' => $isAndroid ? false : true,
-                    'header'=>':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
-                'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
-                'formOptions' => [
-                              'action' => Url::toRoute('changekoef'),
-                              'enableClientValidation' => false,
-                                 ],    
-                ],
-                'hAlign'=>'right',
-                'vAlign'=>'middle',
-                // 'width'=>'100px',
-                'format'=>['decimal'],
+                return $model->product->denom;
+            }
 
-                'pageSummary'=>true
-                ],  
-                [
-                'class'=>'kartik\grid\EditableColumn',
-                'attribute'=>'sum',
-                'refreshGrid' => true,
-                'editableOptions'=>[
-                    'asPopover' => $isAndroid ? false : true,
-                    'header'=>'<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
-                'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
-                'formOptions' => [
-                              'action' => Url::toRoute('changekoef'),
-                              'enableClientValidation' => false,
-                                 ],    
-                ],
-                'hAlign'=>'right',
-                'vAlign'=>'middle',
-                // 'width'=>'100px',
-                'format'=>['decimal',2],
+           return 'Не задано';
+       },
+       'format' => 'raw',
+       'label' => 'Наименование StoreHouse',
+       ], */
+    [
+        'attribute' => 'munit_rid',
+        'value' => function ($model) {
+            if (!empty($model->product)) {
 
-                'pageSummary'=>true
-                ],
-                [
-                 'attribute' => 'vat',
-                 'format' => 'raw',
-                 'label' => 'Ставка НДС',
-                 'contentOptions' => ['class' => 'text-right'],
-                 'value' => function($model) {
-                    $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue()/100;
-                    return $exportVAT;
-                 }
-                ],
-               /*  [
-                'class'=>'kartik\grid\EditableColumn',
-                'attribute'=>'vat',
-             //   'data' => $exportVAT;
-                'label' => 'Ставка НДС',
-                'value' => function ($model) {
-                         return $model->vat/100;
-                },
-                'refreshGrid' => true,
-                'editableOptions'=>[
-                    'asPopover' => $isAndroid ? false : true,
-                'header'=>'<strong>Новая ставка НДС равна:&nbsp; &nbsp;</srong>',
-                'inputType'=>\kartik\editable\Editable::INPUT_DROPDOWN_LIST, 
-                'data' => ['0' => '0', '1000' => '10', '1800' => '18'],    
-                'formOptions' => [
-                              'action' => Url::toRoute('changekoef')
-                                 ],    
-                ],
-                'hAlign'=>'right',
-                'vAlign'=>'middle',
-                // 'width'=>'100px',
-                'format'=>['decimal'],
-
-                'pageSummary'=>true
-                ], */
-                
-                [        
-                'class' => 'yii\grid\ActionColumn',
-                'contentOptions'=>['style'=>'width: 6%;'],
-                'template'=>'{clear}&nbsp;',
-                'visibleButtons' => [
-                    'clear' => function ($model, $key, $index) {
-                              // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-                               return true;     
-                                },                 
-                                    ],
-                'buttons'=>[                
-                    'clear' =>  function ($url, $model) {
-                              //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\cleardata', 'id'=>$model->id]);
-                                return \yii\helpers\Html::a( '<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
-                                ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax'=>"0"]);
-                                },                                                     
-                            ]                               
-                ],          
+                return $model->product->unitname;
+            }
+            return 'Не задано';
+        },
+        'format' => 'raw',
+        'label' => 'Ед.изм. StoreHouse',
     ],
+    [
+        'attribute' => 'defquant',
+        'format' => 'raw',
+        'label' => 'Кол-во в Заказе',
+    ],
+    [
+        'class'=>'kartik\grid\EditableColumn',
+        'attribute'=>'koef',
+        'refreshGrid' => true,
+        'editableOptions'=>[
+            'asPopover' => $isAndroid ? false : true,
+            'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
+            'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
+            'formOptions' => [
+                'action' => Url::toRoute('changekoef'),
+                'enableClientValidation' => false,
+            ],
+        ],
+        'hAlign'=>'right',
+        'vAlign'=>'middle',
+        // 'width'=>'100px',
+        'format'=>['decimal',6],
+
+        'pageSummary'=>true
+    ],
+    [
+        'class'=>'kartik\grid\EditableColumn',
+        'attribute'=>'quant',
+        'refreshGrid' => true,
+        'editableOptions'=>[
+            'asPopover' => $isAndroid ? false : true,
+            'header'=>':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
+            'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
+            'formOptions' => [
+                'action' => Url::toRoute('changekoef'),
+                'enableClientValidation' => false,
+            ],
+        ],
+        'hAlign'=>'right',
+        'vAlign'=>'middle',
+        // 'width'=>'100px',
+        'format'=>['decimal'],
+
+        'pageSummary'=>true
+    ],
+    [
+        'class'=>'kartik\grid\EditableColumn',
+        'attribute'=>'sum',
+        'refreshGrid' => true,
+        'editableOptions'=>[
+            'asPopover' => $isAndroid ? false : true,
+            'header'=>'<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
+            'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
+            'formOptions' => [
+                'action' => Url::toRoute('changekoef'),
+                'enableClientValidation' => false,
+            ],
+        ],
+        'hAlign'=>'right',
+        'vAlign'=>'middle',
+        // 'width'=>'100px',
+        'format'=>['decimal',2],
+
+        'pageSummary'=>true
+    ]);
+
+if ($useAutoVAT) {
+
+    array_push($columns,
+        [
+            'attribute' => 'vat',
+            'format' => 'raw',
+            'label' => 'Ставка НДС',
+            'contentOptions' => ['class' => 'text-right'],
+            'value' => function($model) {
+                $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue();
+                return $exportVAT; }
+        ]);
+} else {
+
+    array_push($columns,
+    [
+        'class'=>'kartik\grid\EditableColumn',
+        'attribute'=>'vat',
+        //   'data' => $exportVAT;
+        'label' => 'Ставка НДС',
+        'value' => function ($model) {
+            return $model->vat/100;
+        },
+        'refreshGrid' => true,
+        'editableOptions'=>[
+            'asPopover' => $isAndroid ? false : true,
+            'header'=>'<strong>Новая ставка НДС равна:&nbsp; &nbsp;</srong>',
+            'inputType'=>\kartik\editable\Editable::INPUT_DROPDOWN_LIST,
+            'data' => ['0' => '0', '1000' => '10', '1800' => '18'],
+            'formOptions' => [
+                'action' => Url::toRoute('changekoef')
+            ],
+        ],
+        'hAlign'=>'right',
+        'vAlign'=>'middle',
+        // 'width'=>'100px',
+        'format'=>['decimal'],
+
+        'pageSummary'=>true
+    ]);
+}
+
+    /*   [
+        'attribute' => 'vat',
+        'format' => 'raw',
+        'label' => 'Ставка НДС',
+        'contentOptions' => ['class' => 'text-right'],
+        'value' => function($model) {
+           $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue()/100;
+           return $exportVAT;
+        }
+       ], */
+
+array_push($columns,
+    [
+        'class' => 'yii\grid\ActionColumn',
+        'contentOptions'=>['style'=>'width: 6%;'],
+        'template'=>'{clear}&nbsp;',
+        'visibleButtons' => [
+            'clear' => function ($model, $key, $index) {
+                // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                return true;
+            },
+        ],
+        'buttons'=>[
+            'clear' =>  function ($url, $model) {
+                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\cleardata', 'id'=>$model->id]);
+                return \yii\helpers\Html::a( '<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
+                    ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax'=>"0"]);
+            },
+        ]
+    ]);
+?>
+                        <?=
+GridView::widget([
+    'dataProvider' => $dataProvider,
+    'pjax' => true, // pjax is set to always true for this demo
+    'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
+    'filterPosition' => false,
+    'columns' => $columns,
     /* 'rowOptions' => function ($data, $key, $index, $grid) {
       return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
       }, */

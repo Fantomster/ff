@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
+use common\models\RelationUserOrganization;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -56,6 +57,7 @@ class VendorController extends DefaultController
                             'ajax-create-user',
                             'ajax-delete-user',
                             'ajax-update-user',
+                            'ajax-update-currency',
                             'ajax-validate-user',
                             'remove-client',
                             'payments'
@@ -272,6 +274,22 @@ class VendorController extends DefaultController
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
+//                else {
+//                    if (array_key_exists('email', $user->errors)) {
+//                        $existingUser = User::findOne(['email' => $post['User']['email']]);
+//                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+//                        if($success){
+//                            User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+//                            $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+//                            $existingUser->setRole($post['User']['role_id'])->save();
+//                            $message = Yii::t('app', 'Пользователь добавлен!');
+//                        }else{
+//                            $message = Yii::t('app', 'common.models.already_exists');
+//                        }
+//
+//                        return $this->renderAjax('settings/_success', ['message' => $message]);
+//                    }
+//                }
             }
         }
 
@@ -305,6 +323,7 @@ class VendorController extends DefaultController
 
                     $user->save();
                     $profile->save();
+                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -1217,8 +1236,8 @@ class VendorController extends DefaultController
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
-                if ($checkBaseGood) {
+                $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'deleted'=>0])->andWhere(['<>', 'id', $id])->all();
+                if (count($checkBaseGood)) {
                     $message = Yii::t('error', 'frontend.controllers.vendor.cat_error_five_two');
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
@@ -1408,12 +1427,29 @@ class VendorController extends DefaultController
             $post = Yii::$app->request->post();
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
+                $del = 0;
+                $rel = RelationUserOrganization::findOne(['user_id'=>$post['id'], 'organization_id'=>$this->currentUser->organization->id]);
+                if($rel){
+                    $del = $rel->delete();
+                }
                 $usersCount = count($user->organization->users);
-                if ($user->id == $this->currentUser->id) {
+                if ($user->id == $this->currentUser->id && !$del) {
                     $message = Yii::t('message', 'frontend.controllers.vendor.delete_yourself', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
+                    if($user->id == $this->currentUser->id && $del){
+                        $rel2 = RelationUserOrganization::findOne(['user_id'=>$post['id']]);
+                        if($rel2){
+                            $user->organization_id = $rel2->organization_id;
+                            $user->save();
+                            Yii::$app->user->logout();
+                            return $this->goHome();
+                        }else{
+                            $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
+                            return $this->renderAjax('settings/_success', ['message' => $message]);
+                        }
+                    }
 //                    $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save()) {
@@ -1967,25 +2003,6 @@ class VendorController extends DefaultController
         $currentUser = $this->currentUser;
         $vendor = $currentUser->organization;
 
-        //Список валют из заказов
-        $currency_list = Order::find()->select([
-            'order.currency_id',
-            'c.id',
-            'c.iso_code',
-            'COUNT(order.id) as count'
-        ])->joinWith('currency as c')
-            ->where('status <> :status', [':status' => Order::STATUS_FORMING])
-            ->andWhere('vendor_id = :cid', [':cid' => $currentUser->organization_id])
-            ->orderBy('count DESC')
-            ->groupBy('iso_code')
-            ->asArray()->all();
-
-        $currencyList = [];
-
-        foreach ($currency_list as $c) {
-            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
-        }
-
         $orderTable = Order::tableName();
         $maTable = ManagerAssociate::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
@@ -2067,7 +2084,9 @@ class VendorController extends DefaultController
             empty($filter_employee) ? "" : $where .= " and accepted_by_id='" . $filter_employee . "'";
         }
 
-        $filter_currency = trim(\Yii::$app->request->get('filter_currency', 1));
+        $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date, 'vendor_id');
+
+        $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
         empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
 
         // Объем продаж чарт
@@ -2184,10 +2203,25 @@ class VendorController extends DefaultController
             $arr_clients_colors[] = hex();
         }
         //$arr_clients_price = json_encode($arr_clients_price);
+        $organizationId = $currentUser->organization_id;
 
-        return $this->render('analytics/index', compact('currencyList', 'filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee'
+        return $this->render('analytics/index', compact('currencyList', 'filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee', 'organizationId'
         ));
     }
+
+
+    public function actionAjaxUpdateCurrency()
+    {
+        $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
+        $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+        $currencyId = \Yii::$app->request->get('filter_currency') ?? 1;
+        $organizationId = (int)\Yii::$app->request->get('organization_id');
+        $currencyList = Currency::getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, 'vendor_id');
+        $count = count($currencyList);
+
+        return $this->renderPartial('analytics/currency', compact('currencyList', 'count', 'currencyId'));
+    }
+
 
     /*
      *  index

@@ -8,6 +8,9 @@
 
 namespace frontend\controllers;
 
+use common\models\RelationUserOrganization;
+use common\models\TestVendors;
+use api_web\classes\UserWebApi;
 use Yii;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -54,7 +57,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     ]
                 ],
                 'denyCallback' => function($rule, $action) {
-                    $this->redirect('\site\index');
+                    $this->redirect(['/site/index']);
                 }                
             ]
         ];
@@ -156,6 +159,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 }
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {
                     //$this->initDemoData($user, $profile, $organization);
+                }
+
+                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                    TestVendors::setGuides($organization);
                 }
                 $this->afterRegister($user);
 
@@ -284,12 +291,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
             from `organization` o where id = " . $user->organization_id . "
             )tb where id is not null)tb2";
+            $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
             if(!empty($user->organization_id)){
-                if(\Yii::$app->db->createCommand($sql)->queryScalar()>1 && 
+                if(count($rel) || (\Yii::$app->db->createCommand($sql)->queryScalar()>1 &&
                       ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
                        $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                        $user->role_id == Role::ROLE_ADMIN ||
-                       $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
+                       $user->role_id == Role::ROLE_FKEEPER_MANAGER))){
                    //Yii::$app->user->login($user, 1);
                    $returnUrl = $this->performLogin($user, 1);
                    return $this->redirect(['business']); 
@@ -398,85 +406,24 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         }
         return ['success' => false];
     }
-    public function actionChangeForm(){
+
+    public function actionChangeForm()
+    {
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = new Organization();
-        $sql = "
-        select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
-        union all
-        select `parent_id`,
-        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
-        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
-        from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null";
-        $sql2 = "
-        select count(*) from (
-        select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
-        union all
-        select `parent_id`,
-        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
-        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
-        from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null)tb2";
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => \Yii::$app->db->createCommand($sql)->sql,
-            'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),
+        $dataProvider = new \yii\data\ArrayDataProvider([
+            'allModels' => (new UserWebApi())->getAllOrganization(),
             'pagination' => [
                 'pageSize' => 4,
             ],
         ]);
+
         return $this->renderAjax('_changeForm', compact('user','dataProvider','organization'));
     }
-    public function actionChange($id){
-        $user = User::findIdentity(Yii::$app->user->id);
-        $organization = Organization::findOne(['id'=>$id]);
-        
-        $sql = "
-        select distinct id as `id`,`name` from (
-        select id,`name` from organization where parent_id = (select id from organization where id = " . $user->organization_id . ")
-        union all
-        select id,`name` from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
-        union all
-        select id,`name` from organization where id = " . $user->organization_id . "
-        union all
-        select parent_id,(select `name` from organization where id = o.parent_id) as name from organization o where id = " . $user->organization_id . "
-        )tb where id = " . $id;
-        if(\Yii::$app->db->createCommand($sql)->queryScalar() && 
-                ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
-                 $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
-                 $user->role_id == Role::ROLE_ADMIN ||
-                 $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
-            if($organization->type_id == Organization::TYPE_RESTAURANT && 
-                    ($user->role_id != Role::ROLE_ADMIN &&
-                     $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
-                
-                $user->role_id = Role::ROLE_RESTAURANT_MANAGER;   
-            }
-            if($organization->type_id == Organization::TYPE_SUPPLIER && 
-                    ($user->role_id != Role::ROLE_ADMIN &&
-                     $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
-                     $user->role_id = Role::ROLE_SUPPLIER_MANAGER;   
-            }
-            $user->organization_id = $id;
-            $user->save();
-            return true;
-        }
-        if(in_array($user->role_id, Role::getFranchiseeEditorRoles())){
-            $user->organization_id = $id;
-            $user->save();
-            return true;
-        }
-        return false;
+
+    public function actionChange($id)
+    {
+        return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
     
     public function actionCreate(){
@@ -517,6 +464,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             if ($organization->load($post)) {
                 $organization->parent_id = $parent_id;
                 $organization->save();
+                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                    TestVendors::setGuides($organization);
+                }
                     
                     foreach($networks as $network){
                         $relationSuppRest = new \common\models\RelationSuppRest();
@@ -592,6 +542,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
     public function actionBusiness()
     {
+        //        select id,`name`,`type_id` from `organization` where `parent_id` = (select organization.`id` from `organization` left join `relation_user_organization` as ruo on ruo.organization_id = organization.id where organization.`id` = " . $user->organization_id . " and ruo.role_id IN(3, 5) and ruo.user_id = " . $user->id . ")
         $user = User::findIdentity(Yii::$app->user->id);
         $sql = "
         select distinct id as `id`,`name`,`type_id` from (
@@ -601,11 +552,15 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
         union all
+        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
+         where ruo.user_id=".$user->id ."
+        union all
         select `parent_id`,
         (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
         (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
         from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null";
+        )tb where id is not null order by `name`";
         $sql2 = "
         select count(*) from (
         select distinct id as `id`,`name`,`type_id` from (
@@ -614,6 +569,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
         union all
         select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
+         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
+         where ruo.user_id=".$user->id ."
         union all
         select `parent_id`,
         (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
@@ -627,6 +586,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 'pageSize' => 4,
             ],
         ]);
+
         $loginRedirect = $this->module->loginRedirect;
         $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
         return $this->render('business', compact('user','dataProvider', 'returnUrl'));

@@ -227,7 +227,7 @@ Modal::end();
                                 'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
                                 'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                                 'extension' => 'xlsx',
-                                'writer' => 'Excel2007',
+                                //'writer' => 'Excel2007',
                                 'styleOptions' => [
                                     'font' => [
                                         'bold' => true,

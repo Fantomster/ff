@@ -2,6 +2,8 @@
 
 namespace api\common\models;
 
+use Aws\Ec2\Iterator\DescribeInstancesIterator;
+use common\models\Order;
 use common\models\User;
 
 use Yii;
@@ -49,6 +51,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
         return [
             [['order_id', 'doc_date', 'corr_rid'], 'required'],
             [['corr_rid', 'store_rid', 'status_id','num_code'], 'integer'],
+            [['store_rid'], 'number', 'min' => 0],
                 //     [['comment'], 'string', 'max' => 255],
             [['store_rid', 'org','vat_included','text_code','num_code','note'],'safe']
         ];
@@ -99,6 +102,24 @@ class RkWaybill extends \yii\db\ActiveRecord {
         return RkWaybillstatus::find()->andWhere('id = :id', [':id' => $this->status_id])->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    }
+
+    public function getOrder() {
+
+        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
+        return Order::find()->andWhere('id = :id', [':id' => $this->order_id])->one();
+
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
+    }
+
+    public function getFinalDate() {
+
+        $fdate = $this->order->actual_delivery ? $this->order->actual_delivery :
+            ( $this->order->requested_delivery ? $this->order->requested_delivery :
+                $this->order->updated_at);
+
+        // return Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
+        return $fdate;
     }
     
     public function beforeSave($insert)
@@ -158,6 +179,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
                             ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
                             ->andWhere('org = :org',['org' => $wdmodel->org]) 
                             ->andWhere('product_rid is not null')
+                            ->orderBy(['linked_at' => SORT_DESC])
+                            ->limit(1)
                             ->one();
                     
                     if ($ch) {

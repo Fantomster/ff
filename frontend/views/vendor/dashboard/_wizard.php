@@ -87,7 +87,7 @@ $this->registerJs('
                         <?=
                                 $form->field($profile, 'full_name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru'=>'ФИО'])]);
+                                ->textInput(['value' => Html::decode($profile->full_name), 'class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru'=>'ФИО'])]);
                         ?>
                         <i class="fa fa-user"></i>
                     </label>
@@ -95,7 +95,7 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.org_name', ['ru'=>'Название организации'])]);
+                                ->textInput(['value' => Html::decode($organization->name), 'class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.org_name', ['ru'=>'Название организации'])]);
                         ?>
                         <i class="fa fa-bank"></i>
                     </label>

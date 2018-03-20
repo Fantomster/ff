@@ -19,8 +19,8 @@ class VendorSearch extends RelationSuppRest {
     
     public $vendor_name;
     public $search_string;
+    public $search_address;
     public $catalog_status;
-    
     /**
      * @inheritdoc
      */
@@ -72,6 +72,15 @@ class VendorSearch extends RelationSuppRest {
                 ->joinWith('vendor');
         $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false]);
 
+        if(isset($this->search_address)) {
+            $query->andFilterWhere(['or',
+                ['like', "$orgTable.locality", $this->search_address],
+                ['like', "$orgTable.administrative_area_level_1", $this->search_address],
+                ['like', "$orgTable.country", $this->search_address],
+                ['like', "$orgTable.route", $this->search_address],
+            ]);
+        }
+        
         $query2 = RelationSuppRestPotential::find()
             ->select("$rspPTable.rest_org_id, $rspPTable.supp_org_id, $rspPTable.cat_id, $rspPTable.invite, 
                 $rspPTable.created_at, $rspPTable.updated_at, $rspPTable.status, $rspPTable.uploaded_catalog, $rspPTable.uploaded_processed, 

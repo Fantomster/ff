@@ -81,6 +81,8 @@ class User extends \amnah\yii2\user\models\User {
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert) {
+
+            $organization = $this->organization;
             /**
              * Уведомления по Email
              */
@@ -90,6 +92,7 @@ class User extends \amnah\yii2\user\models\User {
             $emailNotification->requests = true;
             $emailNotification->changes = true;
             $emailNotification->invites = true;
+            $emailNotification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
             $emailNotification->save();
 
             /**
@@ -160,6 +163,13 @@ class User extends \amnah\yii2\user\models\User {
             }
         }
 
+        return $this;
+    }
+
+
+    public function setRole($roleId){
+        $this->role_id = $roleId;
+        $this->save();
         return $this;
     }
 
@@ -477,5 +487,93 @@ class User extends \amnah\yii2\user\models\User {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if(RelationSuppRestPotential::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
             $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
+    }
+
+
+    public function getOrganizations() {
+        $organization = $this->module->model("Organization");
+        return $this->hasMany($organization::className(), ['id' => 'organization_id'])
+            ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
+    }
+
+
+    public function getRelationUserOrganization(){
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id']);
+    }
+
+
+    public function setRelationUserOrganization($userId, $organizationId, $roleId){
+        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+        if($check){
+            return false;
+        }
+        $rel = new RelationUserOrganization();
+        $rel->user_id = $userId;
+        $rel->organization_id = $organizationId;
+        $rel->role_id = $roleId;
+        $rel->save();
+        return $rel->id;
+    }
+
+
+    public function updateRelationUserOrganization($userId, $organizationId, $roleId){
+        $rel = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+        if($rel){
+            $rel->user_id = $userId;
+            $rel->organization_id = $organizationId;
+            $rel->role_id = $roleId;
+            $rel->save();
+            return $rel->id;
+        }
+        return false;
+    }
+	
+    /**
+     * Список организаций доступных для пользователя
+     * @return array
+     */
+    public function getAllOrganization(){
+        $sql = <<<SQL
+        SELECT * FROM (
+            SELECT
+              *
+            FROM organization
+            WHERE
+              id = :oid OR parent_id = :oid
+            UNION DISTINCT
+            SELECT
+              *
+            FROM organization
+            WHERE
+              parent_id = :pid
+            UNION DISTINCT
+            SELECT
+              r.*
+            FROM `organization` o
+            INNER JOIN organization r ON r.id = o.parent_id
+            WHERE
+              o.id = :oid
+        ) t 
+        ORDER BY name 
+SQL;
+        return \Yii::$app->db->createCommand($sql)
+            ->bindValue(':oid',$this->organization_id)
+            ->bindValue(':pid',$this->organization->parent_id)
+            ->queryAll();
+    }
+
+    /**
+     * Проверка, можно ли переключиться на организацию
+     * @param $organization_id
+     * @return bool
+     */
+    public function isAllowOrganization($organization_id){
+        $all = $this->getAllOrganization();
+        foreach ($all as $item) {
+            if($item['id'] == $organization_id){
+                return true;
+            }
+        }
+        return false;
     }
 }

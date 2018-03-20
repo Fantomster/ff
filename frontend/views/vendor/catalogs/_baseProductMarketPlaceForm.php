@@ -269,7 +269,7 @@ $form = ActiveForm::begin([
                                 <div class="col-md-6">
                                     <?=
                                             $form->field($catalogBaseGoods, 'product', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.good_name', ['ru'=>'НАИМЕНОВАНИЕ ТОВАРА']), 'style' => 'border-radius:3px'])
+                                            textInput(['value' => Html::decode($catalogBaseGoods->product), 'placeholder' => Yii::t('message', 'frontend.views.vendor.good_name', ['ru'=>'НАИМЕНОВАНИЕ ТОВАРА']), 'style' => 'border-radius:3px'])
                                     ?>
                                     <?=
                                             $form->field($catalogBaseGoods, 'article', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
@@ -277,7 +277,7 @@ $form = ActiveForm::begin([
     data-toggle="tooltip" 
     title="' . Yii::t('message', 'frontend.views.vendor.art', ['ru'=>'Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара']) . ' ">
     </span></span></div>{error}'])->
-                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.art_two', ['ru'=>'АРТИКУЛ'])])
+                                            textInput(['value' => Html::decode($catalogBaseGoods->article), 'placeholder' => Yii::t('message', 'frontend.views.vendor.art_two', ['ru'=>'АРТИКУЛ'])])
                                     ?>
                                     <?=
                                             $form->field($catalogBaseGoods, 'price', ['template' => ' {label}<div class="input-group">{input}<span class="input-group-addon">
@@ -331,13 +331,13 @@ $form = ActiveForm::begin([
 
                                     <?=
                                             $form->field($catalogBaseGoods, 'brand', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
-                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.vendor_name_two', ['ru'=>'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ']), 'style' => 'border-radius:3px'])
+                                            textInput(['value' => Html::decode($catalogBaseGoods->brand), 'placeholder' => Yii::t('message', 'frontend.views.vendor.vendor_name_two', ['ru'=>'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ']), 'style' => 'border-radius:3px'])
                                     ?>
                                     <?=
                                             $form->field($catalogBaseGoods, 'weight', ['template' => ' {label}<div class="input-group">{input}</div>{error}'])->
                                             textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.wrappers_weight', ['ru'=>'ВЕС УПАКОВКИ']), 'style' => 'border-radius:3px'])
                                     ?>
-                                    <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
+                                    <?= $form->field($catalogBaseGoods, 'note')->textArea(['value' => Html::decode($catalogBaseGoods->note), 'style' => 'height: 100%;min-height: 104px;']) ?>
 
                                 </div>
                             </div>

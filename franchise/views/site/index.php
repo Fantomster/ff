@@ -20,16 +20,18 @@ use dosamigos\chartjs\ChartJs;
         <small><?= Yii::t('app', 'franchise.views.site.desktop_two', ['ru'=>'Рабочий стол']) ?></small>
     </h1>
 </section>
+<?php if (count($currencyList) > 0): ?>
 <section class="content" style="min-height: 40px;">
     <div class="row">
     <div class="col-lg-2 col-md-2 col-sm-2">
         <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
         <?=
-        Html::dropDownList('filter_currency', $currencyId, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency', 'prompt'=>Yii::t('message', 'frontend.views.client.anal.currency', ['ru'=>'Валюта'])])
+        Html::dropDownList('filter_currency', $currencyId, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
         ?>
     </div>
     </div>
 </section>
+<?php endif; ?>
 <section class="content">
     <div class="row hidden-xs">
         <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
@@ -268,6 +270,7 @@ use dosamigos\chartjs\ChartJs;
                                         case Order::STATUS_CANCELLED:
                                             $statusClass = 'cancelled';
                                             break;
+                                        default: $statusClass='';
                                     }
                                     return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data['status']) . '</span>'; //fa fa-circle-thin
                                 },

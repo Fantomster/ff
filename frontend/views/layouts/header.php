@@ -415,13 +415,13 @@ JS;
                     <!-- Tasks: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                            <img src="<?= $user->profile->miniAvatarUrl ?>" class="user-image avatar" alt="User Image">
-                            <span class="hidden-xs"><?= $user->profile->full_name ?></span>
+                            <img src="<?= $user->profile->miniAvatarUrl ?? '' ?>" class="user-image avatar" alt="User Image">
+                            <span class="hidden-xs"><?= $user->profile->full_name ?? '' ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <!-- User image -->
                             <li class="user-header">
-                                <img src="<?= $user->profile->avatarUrl ?>" class="img-circle avatar" alt="User Image">
+                                <img src="<?= $user->profile->avatarUrl ?? '' ?>" class="img-circle avatar" alt="User Image">
 
                                 <p>
                                     <?= empty($user->profile->full_name) ? '&nbsp;' : $user->profile->full_name ?> - <?= Yii::t('app', $user->role->name) ?>
@@ -433,7 +433,7 @@ JS;
                                         $user->role_id == Role::ROLE_SUPPLIER_MANAGER ||
                                         $user->role_id == Role::ROLE_ADMIN ||
                                         $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
-                                        in_array($user->role_id, Role::getFranchiseeEditorRoles()))) {
+                                        in_array($user->role_id, Role::getFranchiseeEditorRoles())) || \common\models\RelationUserOrganization::checkRelationExisting($user)) {
                                     echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru' => "БИЗНЕСЫ"]), "#", [
                                         'id' => 'change_business',
                                         'class' => 'btn btn-lg btn-business',

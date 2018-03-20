@@ -106,10 +106,9 @@ class SiteController extends DefaultController
      */
     public function actionIndex()
     {
-        $iso_code = "RUB";
-        $currencyId = null;
-
         $currencyList = Currency::getFullCurrencyList($this->currentFranchisee->id);
+        $iso_code = Currency::getMostPopularIsoCode($this->currentFranchisee->id) ?? "RUB";
+        $currencyId =  key($currencyList);
 
         if(Yii::$app->request->get() && Yii::$app->request->isPjax) {
             $currencyId = Yii::$app->request->get('filter_currency');
@@ -124,7 +123,7 @@ class SiteController extends DefaultController
         if($currencyId){
             $query.= " AND `currency_id`=" . $currencyId . " ";
         }
-            $query .= "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
+        $query .= "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
@@ -165,6 +164,7 @@ class SiteController extends DefaultController
         foreach ($dataProvider->getModels('Order') as $one){
             $totalIncome+=$one->total_price;
         }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, null);
 
         $franchiseeType = $this->currentFranchisee->type;
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType', 'totalIncome', 'currencyList', 'iso_code', 'currencyId'));

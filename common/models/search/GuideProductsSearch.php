@@ -13,7 +13,10 @@ use yii\data\SqlDataProvider;
 class GuideProductsSearch extends \yii\base\Model {
     
     public $searchString;
-    
+    public $vendor_id;
+    public $price_from;
+    public $price_to;
+
     /**
      * @inheritdoc
      */
@@ -37,6 +40,30 @@ class GuideProductsSearch extends \yii\base\Model {
         
         $searchString = "%$this->searchString%";
 
+        $where = [];
+
+        if($this->vendor_id) {
+            $where[] = ['cbg.supp_org_id', '=', $this->vendor_id];
+        }
+
+        if($this->price_from) {
+            $where[] = ['cbg.price', '>=', $this->price_from];
+        }
+
+        if($this->price_to) {
+            $where[] = ['cbg.price', '<=', $this->price_to];
+        }
+
+        if(!empty($where)) {
+            $s = '';
+            foreach ($where as $field => $condition) {
+                $s .= $condition[0] . ' ' . $condition[1] . ' ' . $condition[2] . ' AND ';
+            }
+            $where = trim($s);
+        } else {
+            $where = '';
+        }
+
         $query = "
             SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note 
             FROM guide_product AS gp
@@ -45,7 +72,7 @@ class GuideProductsSearch extends \yii\base\Model {
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
                             AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
                 JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (gp.guide_id = $guideId)
+            WHERE ($where gp.guide_id = $guideId)
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
@@ -58,7 +85,7 @@ class GuideProductsSearch extends \yii\base\Model {
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog AS cat ON cg.cat_id = cat.id 
                 JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (gp.guide_id = $guideId)
+            WHERE ($where gp.guide_id = $guideId)
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0))

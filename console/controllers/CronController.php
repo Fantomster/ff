@@ -112,23 +112,23 @@ class CronController extends Controller {
                     }
                     $catalogBaseGoods->es_status = 0;
                     $catalogBaseGoods->rating = $product_rating;
-                    $catalogBaseGoods->save();
+                    $catalogBaseGoods->save(false);
                 } else {
                     if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
                         $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                         $es_product->delete();
-                        $catalogBaseGoods->es_status = 0;
-                        $catalogBaseGoods->save();
                     }
+                    $catalogBaseGoods->es_status = 0;
+                    $catalogBaseGoods->save(false);
                 }
             } catch (\Exception $e) {
                 echo ($e->getMessage());
                 if (\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {
                     $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                     $es_product->delete();
-                    $catalogBaseGoods->es_status = 0;
-                    $catalogBaseGoods->save();
                 }
+                $catalogBaseGoods->es_status = 0;
+                $catalogBaseGoods->save(false);
             }
         }
     }

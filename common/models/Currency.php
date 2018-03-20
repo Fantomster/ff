@@ -94,12 +94,11 @@ class Currency extends \yii\db\ActiveRecord {
     }
 
 
-    public function getCurrencyData($filter_currency, $franchId, $orgField = 'client_id', $date_from, $date_to):array
+    public function getCurrencyData($filter_currency, $franchId, $orgField = 'client_id'):array
     {
         $array = [];
         $iso_code = "RUB";
         $array['currency_id'] = 1;
-        $currencyList = [];
 
         //Список валют из заказов
         $currency_list = Order::find()->distinct()->select([
@@ -113,26 +112,20 @@ class Currency extends \yii\db\ActiveRecord {
             ->join('LEFT JOIN', 'franchisee_associate as fa', 'fa.organization_id = order.'.$orgField)
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
             ->andWhere('fa.franchisee_id = :fid', [':fid' => $franchId])
-            ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($date_from)), date('Y-m-d', strtotime($date_to))])
             ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
 
-        $i=0;
+        $currencyList = ['1' => 'RUB'];
+
         foreach($currency_list as $c) {
-            if($i==0){
-                $iso_code = $c['iso_code'];
-            }
-            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
-            $i++;
-        }
-        if(count($currencyList)){
-            $array['currency_id'] = key($currencyList);
+            $currencyList[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders') . " " . $c['count'] . ')';
         }
         $array['currency_list'] = $currencyList;
+
         if($filter_currency) {
             $currency = Currency::findOne($filter_currency);
-            $iso_code = $currency->iso_code ?? 'RUB';
+            $iso_code = $currency->iso_code;
             $array['currency_id'] = $filter_currency;
         }
         $array['iso_code'] = $iso_code;
@@ -142,8 +135,7 @@ class Currency extends \yii\db\ActiveRecord {
     public function getFullCurrencyList($franchId):array
     {
         $array = [];
-        $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -1 months"));
-        $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
+
         //Список валют из заказов
         $currency_list = Order::find()->distinct()->select([
             'order.currency_id',
@@ -158,67 +150,14 @@ class Currency extends \yii\db\ActiveRecord {
             ->where('status <> :status',[':status' => Order::STATUS_FORMING])
             ->andWhere('fa1.franchisee_id = :fid1', [':fid1' => $franchId])
             ->andWhere('fa2.franchisee_id = :fid2', [':fid2' => $franchId])
-            ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
             ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
 
         foreach($currency_list as $c) {
-            $array[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+            $array[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders_new') . " " . $c['count'] . ')';
         }
 
         return $array;
-    }
-
-
-    public function getAnalCurrencyList($organizationId, $filter_from_date, $filter_to_date, $field = 'client_id'):array
-    {
-        //Список валют из заказов
-        $currency_list = Order::find()->distinct()->select([
-            'order.currency_id',
-            'c.id',
-            'c.iso_code',
-            'COUNT(order.id) as count'
-        ])->joinWith('currency as c')
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
-            ->andWhere("$field = :cid", [':cid' => $organizationId])
-            ->andWhere(['between', 'DATE(created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
-            ->orderBy('count DESC')
-            ->groupBy('iso_code')
-            ->asArray()->all();
-
-        $currencyList = [];
-
-        foreach($currency_list as $c) {
-            $currencyList[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders') . " " . $c['count'] . ')';
-        }
-
-        return $currencyList;
-    }
-
-
-    public function getMostPopularIsoCode($franchId):string
-    {
-        $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -1 months"));
-        $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
-        //Список валют из заказов
-        $currency_one = Order::find()->distinct()->select([
-            'order.currency_id',
-            'order.client_id',
-            'order.vendor_id',
-            'c.id',
-            'c.iso_code',
-            'COUNT(order.id) as count'
-        ])->joinWith('currency as c')
-            ->join('LEFT JOIN', 'franchisee_associate as fa1', 'fa1.organization_id = order.client_id')
-            ->join('LEFT JOIN', 'franchisee_associate as fa2', 'fa2.organization_id = order.vendor_id')
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
-            ->andWhere('fa1.franchisee_id = :fid1', [':fid1' => $franchId])
-            ->andWhere('fa2.franchisee_id = :fid2', [':fid2' => $franchId])
-            ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
-            ->orderBy('count DESC')
-            ->groupBy('iso_code')
-            ->asArray()->one();
-        return $currency_one['iso_code'] ?? "RUB";
     }
 }

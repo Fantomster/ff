@@ -208,31 +208,32 @@ class ClientController extends DefaultController {
 
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
-                }else {
-                    if (array_key_exists('email', $user->errors)) {
-                        $existingUser = User::findOne(['email' => $post['User']['email']]);
-                        if($existingUser){
-                            if(in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())){
-                                $message = Yii::t('app', 'common.models.already_exists');
-                                return $this->renderAjax('settings/_success', ['message' => $message]);
-                            }
-                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
-                            if($success){
-                                User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
-                                $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
-                                $existingUser->setRole($post['User']['role_id'])->save();
-                                $message = Yii::t('app', 'Пользователь добавлен!');
-                            }
-                            else{
-                                $message = Yii::t('app', 'common.models.already_exists');
-                            }
-                        }else{
-                            $message = Yii::t('app', 'common.models.already_exists');
-                        }
-
-                        return $this->renderAjax('settings/_success', ['message' => $message]);
-                    }
                 }
+//                else {
+//                    if (array_key_exists('email', $user->errors)) {
+//                        $existingUser = User::findOne(['email' => $post['User']['email']]);
+//                        if($existingUser){
+//                            if(in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())){
+//                                $message = Yii::t('app', 'common.models.already_exists');
+//                                return $this->renderAjax('settings/_success', ['message' => $message]);
+//                            }
+//                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+//                            if($success){
+//                                User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+//                                $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+//                                $existingUser->setRole($post['User']['role_id'])->save();
+//                                $message = Yii::t('app', 'Пользователь добавлен!');
+//                            }
+//                            else{
+//                                $message = Yii::t('app', 'common.models.already_exists');
+//                            }
+//                        }else{
+//                            $message = Yii::t('app', 'common.models.already_exists');
+//                        }
+//
+//                        return $this->renderAjax('settings/_success', ['message' => $message]);
+//                    }
+//                }
             }
         }
 

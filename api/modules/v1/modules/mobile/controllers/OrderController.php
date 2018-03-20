@@ -339,7 +339,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_done) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_done) {
                 $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -348,7 +348,7 @@ class OrderController extends ActiveController {
             
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
+            if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
                 $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 Yii::$app->sms->send($text, $target);
@@ -376,7 +376,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_processing) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_processing) {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -384,7 +384,7 @@ class OrderController extends ActiveController {
             }
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
+            if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
                 $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 Yii::$app->sms->send($text, $target);
@@ -415,7 +415,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_created) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_created) {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -424,7 +424,7 @@ class OrderController extends ActiveController {
 
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
+            if ($profile->phone && $recipient->getSsmsNotification($order->vendor_id)->order_created) {
                 //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $text = "Новый заказ от " . $senderOrg->name . ' ' . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $profile->phone;
@@ -453,7 +453,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_canceled) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_canceled) {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -462,7 +462,7 @@ class OrderController extends ActiveController {
 
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_canceled) {
+            if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ " . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);

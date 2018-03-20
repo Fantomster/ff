@@ -64,6 +64,16 @@ use api\common\models\RkAccess;
                         </div>
                     </div>
                 </div>
+                <div class="hpanel" style="display:none">
+                    <div class="panel-body">
+                        <div class="col-md-6 text-left">
+                            <?= Html::a('<h4 class="m-b-xs text-info">Email ТОРГ-12</h4>', ['email/default']) ?>
+                            <p class="small">Интеграция Email ТОРГ-12</p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- /.box-body -->
             <!--div class="box-footer clearfix">

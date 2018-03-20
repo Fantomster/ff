@@ -115,7 +115,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 //            [['article'], 'uniqueArticle','when' => function($model) {
 //            return !empty($model->cat_id);
 //            }],
-            [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
+            [['article', 'product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
@@ -160,10 +160,12 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'cat_id' => Yii::t('app', 'common.models.catalog', ['ru'=>'Каталог']),
             'category_id' => Yii::t('app', 'common.models.category', ['ru'=>'Категория']),
             'article' => Yii::t('app', 'common.models.art', ['ru'=>'Артикул']),
-            'product' => Yii::t('app', 'common.models.good', ['ru'=>'Товар']),
+            'product' => Yii::t('app', 'common.models.name', ['ru'=>'Название']),
             'supp_org_id' => Yii::t('app', 'common.models.vendors_id', ['ru'=>'id поставщика']),
+            'supplier' => Yii::t('app', 'common.models.vendor_two', ['ru'=>'Поставщик']),
             'units' => Yii::t('app', 'common.models.multiplicity', ['ru'=>'Кратность']),
             'price' => Yii::t('app', 'common.models.price', ['ru'=>'Цена']),
+            'discount_price' => Yii::t('app', 'common.models.discount_price', ['ru'=>'Цена со скидкой']),
             'status' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
             'market_place' => Yii::t('app', 'common.models.settled_on_f_market', ['ru'=>'Размещен на F-MARKET']),
             'deleted' => Yii::t('app', 'Deleted'),

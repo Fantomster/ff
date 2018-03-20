@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\TestVendors;
 use Google\Spreadsheet\Exception\BadRequestException;
 use Yii;
 use api\modules\v1\modules\mobile\models\User;
@@ -14,6 +15,7 @@ use common\models\Role;
 use common\models\UserToken;
 use common\models\UserFcmToken;
 use yii\data\SqlDataProvider;
+use api_web\classes\UserWebApi;
 
 
 /**
@@ -99,6 +101,12 @@ class UserController extends ActiveController {
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {
                     //$this->initDemoData($user, $profile, $organization);
                 }
+
+                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                    TestVendors::setGuides($organization);
+                }
+
+                $user = User::findOne($user->id);
                 $this->afterRegister($user);
                 return ['success' => 1];  
             }
@@ -283,8 +291,9 @@ class UserController extends ActiveController {
         return $dataProvider;
     }
 
-    public function actionChangeBuisiness($id){
-        $user = Yii::$app->user->getIdentity();
+    public function actionChangeBuisiness($id)
+    {
+        /*$user = Yii::$app->user->getIdentity();
         $organization = Organization::findOne(['id'=>$id]);
 
         $sql = "
@@ -322,6 +331,11 @@ class UserController extends ActiveController {
             $user->save();
             return compact('organization');
         }
+        throw new BadRequestException;
+    */
+        $user_api = new UserWebApi();
+        if ($user_api->setOrganization(['organization_id' => $id]))
+            return $user_api->user->organization->attributes;
         throw new BadRequestException;
     }
 }

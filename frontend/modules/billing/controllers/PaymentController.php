@@ -2,6 +2,7 @@
 
 namespace frontend\modules\billing\controllers;
 
+use frontend\modules\billing\providers\ProviderInterface;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
@@ -11,6 +12,10 @@ use frontend\modules\billing\handler\BillingAccessControl;
 
 class PaymentController extends Controller
 {
+    /**
+     * @var \common\models\User $user
+     * @var ProviderInterface $provider
+     */
     private $provider;
     private $log = true;
 
@@ -73,6 +78,7 @@ class PaymentController extends Controller
     {
         if ($this->provider->isProviderRequest()) {
             $notification = \GuzzleHttp\json_decode(file_get_contents("php://input"), true);
+            file_put_contents($_SERVER['DOCUMENT_ROOT'].'/notification.txt', print_r($notification,1), FILE_APPEND);
             if ($notification) {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
@@ -122,7 +128,7 @@ class PaymentController extends Controller
             //Валидируем, сохраняем
             if ($payment->validate() && $payment->save()) {
                 //Отправляем на сервер
-                $response = $this->provider->createPayment($payment);
+                $response = $this->provider->makePayment($payment);
             } else {
                 throw new \Exception(array_keys($payment->getFirstErrors())[0] . ':' . array_pop($payment->getFirstErrors()));
             }
@@ -148,7 +154,7 @@ class PaymentController extends Controller
             $payment = BillingPayment::findOne($id);
             if ($payment) {
                 $payment->checkProvider($this->provider);
-                $response = $this->provider->capturePayment($payment);
+                $response = $this->provider->confirmPayment($payment);
                 $transaction->commit();
                 return $response;
             } else {
@@ -190,7 +196,7 @@ class PaymentController extends Controller
             $payment = BillingPayment::findOne($id);
             if ($payment) {
                 $payment->checkProvider($this->provider);
-                $response = $this->provider->cancelPayment($payment);
+                $response = $this->provider->refusePayment($payment);
                 $transaction->commit();
                 return $response;
             }

@@ -58,11 +58,11 @@ class OrderContentController extends ActiveController {
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
             ],*/
-            'delete' => [
+            /*'delete' => [
                 'class' => 'yii\rest\DeleteAction',
                 'modelClass' => 'common\models\OrderContent',
                 'checkAccess' => [$this, 'checkAccess'],
-            ]
+            ]*/
         ];
     }
 
@@ -100,7 +100,7 @@ class OrderContentController extends ActiveController {
         $orderTable = \common\models\Order::tableName();
         $currencyTable = \common\models\Currency::tableName();
         
-        $query->select("order_content.*, $cbgTable.ed as ed, $currencyTable.symbol as symbol");
+        $query->select("order_content.*, order_content.product_name as product, $cbgTable.ed as ed, $currencyTable.symbol as symbol");
         $query->leftJoin($cbgTable,"$cbgTable.id = order_content.product_id");
         $query->leftJoin($orderTable,"$orderTable.id = order_content.order_id");
         $query->leftJoin($currencyTable,"$currencyTable.id = $orderTable.currency_id");
@@ -158,7 +158,7 @@ class OrderContentController extends ActiveController {
         $quantityChanged = ($position['quantity'] != $product->quantity);
         $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
 
-        if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+        if (($organizationType == Organization::TYPE_RESTAURANT || in_array($order->status, $allowedStatuses)) && ($quantityChanged || $priceChanged)) {
             $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
             if ($quantityChanged) {
                 $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';

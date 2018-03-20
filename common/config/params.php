@@ -51,5 +51,5 @@ return [
      * Запись идет в файлы
      *  /runtime/logs/iiko_api_response_{ID}.log
      */
-    'iikoLogOrganization' => []
+    'iikoLogOrganization' => [],
 ];

@@ -7,10 +7,10 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
-use common\models\CatalogGoods;
-use common\models\RelationSuppRest;
+use common\models\MpCategory;
 use yii\helpers\Json;
 use yii\data\SqlDataProvider;
+use yii\data\Pagination;
 
 
 /**
@@ -86,7 +86,7 @@ class CatalogBaseGoodsController extends ActiveController {
         $client = $user->organization;
 
         $query1 = "
-            SELECT  cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note 
+            SELECT  cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at  
             FROM catalog_base_goods as cbg
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
@@ -96,7 +96,7 @@ class CatalogBaseGoodsController extends ActiveController {
                 AND (cbg.deleted = 0) 
                 ";
 
-        $query2 = "SELECT cbg.id as id, cbg.product, cbg.units, cg.price, cg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note
+        $query2 = "SELECT cbg.id as id, cbg.product, cbg.units, cg.price, cg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at
             FROM catalog_base_goods AS cbg 
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = cbg.id
                             AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
@@ -109,6 +109,10 @@ class CatalogBaseGoodsController extends ActiveController {
 
         $dataProvider = new SqlDataProvider([
             'sql' => "$query1  UNION ALL ($query2)",
+            'pagination' => [
+                'pageSize' => 20,
+                //'totalCount' => $totalCount ,
+                ],
             'sort' => [
                 'attributes' => [
                     'product',
@@ -125,10 +129,10 @@ class CatalogBaseGoodsController extends ActiveController {
             return $dataProvider;
         }
 
-        if($params->page == 0 || $params->count == 0 || $params->count == null || $params->page == null)
+        if(empty($params->page) && empty($params->count))
             $dataProvider->pagination = false;
         else {
-            $dataProvider->pagination->pageSize = $params->count;
+            $dataProvider->pagination->pageSize = (!empty($params->count)) ? $params->count : 20;
             $dataProvider->pagination->page = $params->page;
         }
 
@@ -154,8 +158,10 @@ class CatalogBaseGoodsController extends ActiveController {
                 ).')) ';
         }*/
 
-        if($params->category_id != null)
-            $andWhere .= "AND cbg.category_id = $params->category_id";
+        if($params->category_id != null) {
+            $categories = implode(",", $this->getCategories($params->category_id));
+            $andWhere .= "AND cbg.category_id in ($categories)";
+        }
 
 
         $query1 .= $andWhere;
@@ -183,5 +189,16 @@ class CatalogBaseGoodsController extends ActiveController {
             'rating' => $params->rating
             ]);*/
         return $dataProvider;
+    }
+
+    private function getCategories($cat_id) {
+        $res[] = $cat_id;
+        $cats = MpCategory::find()->where(["parent" => $cat_id])->all();
+        foreach ($cats as $cat) {
+            $res[] = $cat->id;
+            $res = array_merge($res, $this->getCategories($cat->id));
+        }
+
+        return $res;
     }
 }

@@ -9,6 +9,7 @@
 namespace common\models\search;
 
 use yii\data\ActiveDataProvider;
+use common\models\RelationUserOrganization;
 
 /**
  *  Model for user search form
@@ -59,9 +60,12 @@ class UserSearch extends \common\models\User {
         $user = $this->module->model("User");
         $profile = $this->module->model("Profile");
         $role = $this->module->model("Role");
+        $organization = $this->module->model("Organization");
         $userTable = $user::tableName();
         $profileTable = $profile::tableName();
         $roleTable = $role::tableName();
+        $organizationTable = $organization::tableName();
+        $relationUserOrganizationTable = RelationUserOrganization::tableName();
 
         $query = $user::find();
         $query->joinWith(['profile' => function ($query) use ($profileTable) {
@@ -69,6 +73,12 @@ class UserSearch extends \common\models\User {
         }]);
         $query->joinWith(['role' => function ($query) use ($roleTable) {
             $query->from(['role' => $roleTable]);
+        }]);
+        $query->joinWith(['organization' => function ($query) use ($organizationTable) {
+            $query->from(['organization' => $organizationTable]);
+        }]);
+        $query->joinWith(['relationUserOrganization' => function ($query) use ($relationUserOrganizationTable) {
+            $query->from(['relationUserOrganization' => $relationUserOrganizationTable]);
         }]);
 
         // create data provider
@@ -92,10 +102,11 @@ class UserSearch extends \common\models\User {
         $query->orFilterWhere(['like', 'email', $this->searchString])
             ->orFilterWhere(['like', "profile.full_name", $this->searchString])
             ->orFilterWhere(['like', "profile.phone", $this->searchString])
-            ->orFilterWhere(['like', "role.name", $this->searchString]);
+            ->orFilterWhere(['like', "role.name", $this->searchString])
+            ->orFilterWhere(['user.organization_id' => $this->organization_id])
+            ->orFilterWhere(['relationUserOrganization.organization_id' => $this->organization_id]);
         $query->andFilterWhere([
             'status' => $this->status,
-            'organization_id' => $this->organization_id,
         ]);
         return $dataProvider;
     }

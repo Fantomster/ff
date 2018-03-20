@@ -250,8 +250,7 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            'analyzer' => 'ru',
-                            'operator' => 'AND'
+                            'analyzer' => 'ru'
                         ]
                     ]
                 ]
@@ -304,7 +303,6 @@ class SiteController extends Controller {
                         'product_name' => [
                             'query' => $search,
                             'analyzer' => "ru",
-                            'operator' => 'AND'
                         ]
                     ]
                 ]
@@ -313,7 +311,7 @@ class SiteController extends Controller {
         $count = \common\models\ES\Product::find()->query($params)
                 ->where(['in', 'product_supp_id', $where])
                 ->offset($num)
-                ->limit(12)
+                ->limit(6)
                 ->count();
 
         if ($count > 0) {
@@ -321,7 +319,7 @@ class SiteController extends Controller {
                     ->where(['in', 'product_supp_id', $where])
                     ->orderBy(['product_rating' => SORT_DESC])
                     ->offset($num)
-                    ->limit(12)
+                    ->limit(6)
                     ->all();
             return $this->renderPartial('/site/main/_ajaxEsProductMore', compact('pr'));
         }
@@ -413,16 +411,16 @@ class SiteController extends Controller {
                 $where = $regions;
             }
         }
+
         $params = [
             'query' => [
                 'bool' => [
                     'must' => [
-                        'query_string' => [
-                            'query' => $search . "*",
-                            'fields' => [
-                                'supplier_name',
-                            ],
-                            'default_operator' => 'AND'
+                        'match' => [
+                            'supplier_name' => [
+                                'query' => $search,
+                                'analyzer' => 'ru',
+                            ]
                         ]
                     ],
                     'filter' => [
@@ -1075,7 +1073,7 @@ class SiteController extends Controller {
         $search_products = "";
         $search_suppliers = "";
         if (isset($_POST['searchText']) && strlen($_POST['searchText']) > 2) {
-            $search = $_POST['searchText'];
+            $search = trim($_POST['searchText'], '"');
             $params_categorys = [
                 'filtered' => [
                     'query' => [
@@ -1089,32 +1087,26 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
-                'query' => [
-                    'filtered' => [
-                        'query' => [
-                            'match' => [
-                                'product_name' => [
-                                    'query' => $search,
-                                    'analyzer' => 'ru',
-                                    'operator' => 'AND'
-                                ]
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'product_name' => [
+                                'query' => $search,
+                                'analyzer' => 'ru',
                             ]
                         ]
                     ]
                 ]
             ];
             $params_suppliers = [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            'query_string' => [
-                                'query' => $search . "*",
-                                'fields' => [
-                                    'supplier_name',
-                                ],
-                                'default_operator' => 'AND'
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'supplier_name' => [
+                                'query' => $search,
+                                'analyzer' => 'ru',
                             ]
-                        ],
+                        ]
                     ]
                 ]
             ];
@@ -1279,7 +1271,7 @@ class SiteController extends Controller {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
-    
+
     private function sendInvite($client, $vendor) {
         foreach ($vendor->users as $recipient) {
             if (!empty($recipient->profile->phone)) {

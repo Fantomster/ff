@@ -95,9 +95,12 @@ class OrderController extends ActiveController {
 
         $currencyTable = \common\models\Currency::tableName();
         $orderTable = \common\models\Order::tableName();
+        $organizationTable = Organization::tableName();
         
-        $query->select("$orderTable.*, $currencyTable.symbol as symbol");
+        $query->select("$orderTable.*, $currencyTable.symbol as symbol, client_org.name as client_name, vendor_org.name as vendor_name ");
         $query->leftJoin($currencyTable,"$currencyTable.id = $orderTable.currency_id");
+        $query->leftJoin("$organizationTable as client_org","client_org.id = $orderTable.client_id");
+        $query->leftJoin("$organizationTable as vendor_org","vendor_org.id = $orderTable.vendor_id");
         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $query->andFilterWhere($filters);
@@ -135,6 +138,15 @@ class OrderController extends ActiveController {
         $post = Yii::$app->request->post();
         $user = Yii::$app->user->getIdentity();
         $res = [];
+
+        $newOrder = new \common\models\Order();
+        $newOrder->load($post, 'Order');
+        $min_delivery = $this->vendor->delivery->min_order_price;
+
+        if($newOrder->total_price < $min_delivery) {
+            echo "Total price is less than the minimum";
+            return;
+        }
 
         $transaction = Yii::$app->db->beginTransaction();
         try {

@@ -22,6 +22,7 @@ $js = <<<JS
         "$changeNetworkUrl",
         {id : id}
     ).done(function(result) {
+        console.log(result);
         if (result) {
             document.location = "$redirect";
         }
@@ -29,7 +30,7 @@ $js = <<<JS
 });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-        
+
 $this->registerCss('
 .h5, h4, h3, h2, h1{
      font-family: \'Circe-Bold\';  
@@ -113,16 +114,23 @@ a.btn-continue:hover{
 }
 ');
 ?>
-<?php 
+<?php
 $grid = [
     [
     'label'=>false,
     'format' => 'raw',
     'value'=>function ($data) {
+    $rel = \common\models\RelationUserOrganization::findOne(['organization_id'=>$data['id'], 'user_id'=>Yii::$app->user->id]);
+    if($rel){
+        $role = \common\models\Role::findOne(['id'=>$rel->role_id]);
+        $roleName = " (" . $role->name . ") ";
+    }else{
+        $roleName = '';
+    }
             if($data['type_id']==\common\models\Organization::TYPE_RESTAURANT){
-            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
-            }        
-        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . Html::decode($data['name']) . "</b></span>";
+            }
+        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span> <span style='color: #cacaca;'> $roleName </span><br><span style='color:#84bf76'><b>" . Html::decode($data['name']) . "</b></span>";
         },
     ],
     [
@@ -130,7 +138,7 @@ $grid = [
     'format' => 'raw',
     'value'=>function ($data) {
             if($data['id'] == \common\models\User::findIdentity(Yii::$app->user->id)->organization_id){
-    
+
     return  Html::a('<i class="fa fa-toggle-on"  style="margin-top:5px;"></i>', '#', [
                 'class' => 'disabled pull-right',
                 'style' => 'font-size:26px;color:#84bf76;padding-right:25px;'
@@ -139,11 +147,12 @@ $grid = [
                 'class' => 'change-net-org pull-right',
                 'style' => 'font-size:26px;color:#ccc;padding-right:25px;',
                 'data' => ['id' => $data['id']],
-            ]);        
+            ]);
         },
-    ], 
+    ],
 ];
 ?>
+
 <section class="section">
     <div class="container">
         <div class="row">
@@ -157,7 +166,7 @@ $grid = [
                             <?=GridView::widget([
                                     'dataProvider' => $dataProvider,
                                     'filterPosition' => false,
-                                    'columns' => $grid, 
+                                    'columns' => $grid,
                                     'options' => [],
                                     'tableOptions' => ['class' => 'table'],
                                     'bordered' => false,
@@ -168,15 +177,16 @@ $grid = [
                                     'resizableColumns'=>false,
 
                             ]);
-                            ?> 
-                            <?php Pjax::end(); ?> 
+                            ?>
+                            <?php Pjax::end(); ?>
                         </div>
                     </div>
                     <?=Html::a(Yii::t('message', 'frontend.views.user.default.continue', ['ru'=>'ПРОДОЛЖИТЬ']), $redirect, [
                         'class' => 'btn-continue',
                     ]);?>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
 </section>
+

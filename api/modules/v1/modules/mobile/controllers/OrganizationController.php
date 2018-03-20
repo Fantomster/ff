@@ -87,6 +87,7 @@ class OrganizationController extends ActiveController {
           
             $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
             ));
             
             return $dataProvider;

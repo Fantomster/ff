@@ -100,7 +100,7 @@ $gridColumnsClients = [
                         ]
             ]);
             if (!empty($data->invite) && !empty($data->cat_id)) {
-                $result = Html::a($data->catalog->name, ['vendor/view-catalog', 'id' => $data->cat_id], [
+                $result = Html::a(Yii::t('app', $data->catalog->name), ['vendor/view-catalog', 'id' => $data->cat_id], [
                             'data' => [
                                 'target' => '#view-catalog',
                                 'toggle' => 'modal',
@@ -211,7 +211,7 @@ $form = ActiveForm::begin([
             '0' => Yii::t('message', 'frontend.views.vendor.not_accepted', ['ru'=>'Не подтвержден']),
             '1' => Yii::t('message', 'frontend.views.vendor.accepted', ['ru'=>'Подтвержден']),
                 ], ['prompt' => Yii::t('app', 'Все'), 'class' => 'form-control', 'id' => 'filter_invite'])
-        ->label("Статус", ['class' => 'label filter_invite', 'style' => 'color:#555'])
+        ->label(Yii::t('app', 'frontend.views.client.emp.status', ['ru'=>'Статус']), ['class' => 'label filter_invite', 'style' => 'color:#555'])
 ?>
                 </div>
                 <div class="col-sm-3 col-md-2 col-lg-1">

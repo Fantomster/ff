@@ -28,7 +28,7 @@ class CatalogBaseGoods extends \common\models\CatalogBaseGoods
      */
     public function rules() {
         return [
-            [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating', 'units', 'vendor_id'], 'integer'],
+            [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating', 'units', 'vendor_id', 'page', 'count'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             //[['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],

@@ -104,9 +104,6 @@ use yii\helpers\Html;
                     <td style="margin: 0; padding: 0;"></td>
                 </tr>
             </table><!-- /FOOTER -->
-
-
-
         </div>
         <?php $this->endBody() ?>
     </body>

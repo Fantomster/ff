@@ -29,6 +29,7 @@ JS;
 $this->registerJs($customJs, yii\web\View::POS_READY);
 ?>
 <?php $this->beginPage() ?>
+
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
     <head>
@@ -155,6 +156,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 [
                                     'label' => 'Платежи',
                                     'url' => ['/payment/index'],
+                                ],
+                                [
+                                    'label' => 'Тестовые вендоры',
+                                    'url' => ['/organization/test-vendors'],
                                 ],
                             ],
                         ],

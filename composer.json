@@ -46,7 +46,7 @@
         "kartik-v/yii2-widget-typeahead": "*",
         "2amigos/yii2-chartjs-widget": "~2.0",
         "bower-asset/sweetalert2": "7.3.0",
-        "bower-asset/core.js": "*",
+        "npm-asset/core-js": "*",
         "yii2assets/yii2-fullscreen-modal": "*",
         "delocker/yii2-animate.css": "dev-master",
         "borales/yii2-phone-input": "*",
@@ -56,18 +56,23 @@
         "yiisoft/yii2-httpclient": "^2.0",
         "bower-asset/perfect-scrollbar": "*",
         "bower-asset/slick-carousel": "*",
-        "bower-asset/svg4everybody": "*",
         "yiisoft/yii2-jui": "~2.0.0",
         "understeam/yii2-fcm": "~0.1",
         "ofat/yii2-yashop-ses": "*",
         "kartik-v/yii2-tree-manager": "@dev",
         "branchonline/yii2-lightbox": "*",
-        "npm-asset/readmore.js": "*",
+        "npm-asset/readmore-js": "*",
         "insolita/yii2-migration-generator": "~2.3",
         "codemix/yii2-localeurls": "*",
         "modernkernel/yii2-flag-icon-css": "*",
         "xj/yii2-user-agent": "^1.0.0",
-        "yandex-money/yandex-checkout-sdk-php": "*"
+        "yandex-money/yandex-checkout-sdk-php": "*",
+        "light/yii2-swagger": "^1.0",
+        "eden/mail": "dev-master",
+        "golovchanskiy/parse-torg12": "dev-master",
+        "bower-asset/bootstrap": "^3.3",
+        "npm-asset/jquery": "^2.2",
+        "oomphinc/composer-installers-extender": "^1.1"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
@@ -75,13 +80,27 @@
         "yiisoft/yii2-gii": "*",
         "yiisoft/yii2-faker": "*"
     },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
     "config": {
-        "process-timeout": 1800
+        "process-timeout": 1800,
+         "fxp-asset": {
+            "enabled": false
+        }
     },
     "extra": {
         "asset-installer-paths": {
             "npm-asset-library": "vendor/npm",
             "bower-asset-library": "vendor/bower"
+        },
+        "installer-types": ["bower-asset", "npm-asset"],
+        "installer-paths": {
+            "vendor/bower/{$name}/": ["type:bower-asset"],
+            "vendor/npm/{$name}/": ["type:npm-asset"]
         }
     },
     "scripts": {

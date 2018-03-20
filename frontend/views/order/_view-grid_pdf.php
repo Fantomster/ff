@@ -12,6 +12,16 @@ echo GridView::widget([
     'summary' => '',
     'tableOptions' => ['class' => 'pdf-table'],
     'columns' => [
+        ['class' => 'yii\grid\SerialColumn',
+        'header' => Yii::t('message', 'frontend.views.order.grid_row_number', ['ru'=>'№ п/п']),
+         'headerOptions' => [
+            'width' => 'auto',
+             'style' => 'word-break: break-all; padding-left: 5px; padding-right:5px'
+            ],
+            'contentOptions' => [
+                'style' => 'word-break: break-all; text-align:center;'
+            ],
+        ],
         [
             'attribute' => 'product.product',
             'label' => Yii::t('message', 'frontend.views.order.grid_name', ['ru'=>'Наименование товара']),
@@ -45,11 +55,13 @@ echo GridView::widget([
         [
             'label' => Yii::t('message', 'frontend.views.order.grid_unit', ['ru'=>'Ед. измерения']),
             'attribute' => 'product.ed',
-            'contentOptions' => [
-                'style' => 'text-align:center;',
-            ],
             'headerOptions' => [
-                'width' => '103'
+                //'width' => '103'
+                 'width' => 'auto',
+                 'style' => 'padding-left: 5px; padding-right:5px'
+            ],
+            'contentOptions' => [
+                'style' => 'word-break: break-all; text-align:center;'
             ],
             'value' => function ($data) {
                 return Yii::t('app', $data['product']['ed']);
@@ -65,7 +77,8 @@ echo GridView::widget([
                 'style' => 'text-align:right;',
             ],
             'headerOptions' => [
-                'width' => '50'
+                'width' => '50',
+                'style' => 'padding-left: 5px; padding-right:5px'
             ],
         ],
         [

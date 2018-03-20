@@ -138,11 +138,13 @@ $this->registerCss("
                 ActiveForm::end();
                 ?>
 
-                <div class="col-lg-2 col-md-2 col-sm-2">
-                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                    <?=
-                    Html::dropDownList('filter_currency', null, $currencyData['currency_list'], ['class' => 'form-control', 'id' => 'filter_currency', 'prompt' => Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта'])])
-                    ?>
+                <div class="col-lg-2 col-md-2 col-sm-6" id="alCurrencies">
+                    <?php if (count($currencyData['currency_list']) > 0): ?>
+                        <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?=
+                        Html::dropDownList('filter_currency', null, $currencyData['currency_list'], ['class' => 'form-control', 'id' => 'filter_currency'])
+                        ?>
+                    <?php endif; ?>
                 </div>
 
                 <div class="pull-right" style="margin-top: 30px; margin-right: 10px;">
@@ -352,9 +354,26 @@ $this->registerCss("
 </section>
 <?php
 $url = Url::to(['organization/vendors']);
+$analyticsCurrencyUrl = Url::to(['organization/ajax-update-currency']);
 $customJs = <<< JS
 
-$("#filter_currency").on("change", function () {
+$(document).on("change", "#dateFrom,#dateTo", function () {   
+var filter_from_date =  $("#dateFrom").val();
+var filter_to_date =  $("#dateTo").val();        
+    $.pjax({
+     type: 'GET',
+     push: true,
+     timeout: 10000,
+     url: "$analyticsCurrencyUrl",
+     container: "#alCurrencies",
+     data: {
+         filter_from_date: filter_from_date,
+         filter_to_date: filter_to_date
+           }
+   }).done(function() {});
+});
+
+$(document).on("change", "#filter_currency", function () {
 $("#filter_currency").attr('disabled','disabled')      
        
 var filter_currency =  $("#filter_currency").val();
@@ -386,7 +405,7 @@ data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_t
 }, 700);
 });
 
-$('#dateFrom').on("change", function () {
+$(document).on("change", '#dateFrom', function () {
 window.clearTimeout(timer);
 timer = setTimeout(function () {
 $.pjax({
@@ -400,7 +419,7 @@ data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_t
 }, 700);
 });
 
-$('#dateTo').on("change", function () {
+$(document).on("change", '#dateTo', function () {
 window.clearTimeout(timer);
 timer = setTimeout(function () {
 $.pjax({

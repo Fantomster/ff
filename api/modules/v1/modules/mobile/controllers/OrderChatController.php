@@ -71,59 +71,7 @@ class OrderChatController extends ActiveController {
     public function prepareDataProvider()
     {
         $params = new OrderChat();
-        $query = OrderChat::find();
 
-       /* $dataProvider =  new ActiveDataProvider(array(
-            'query' => $query,
-            'pagination' => false,
-        ));
-        $filters = [];
-       
-        $query->select(
-            'order_chat.*,profile.full_name, '
-            . 'organization.name as organization_name, organization.picture as organization_picture')
-            ->from('order_chat')
-            ->innerJoin('user', 'user.id = order_chat.sent_by_id')
-            //->innerJoin('user as sender', 'sender.id = '.Yii::$app->user->id)
-            ->innerJoin('profile', 'profile.user_id = order_chat.sent_by_id')
-            ->innerJoin('organization', 'organization.id = user.organization_id')
-            ->innerJoin('order', '`order`.id = order_chat.order_id and `order`.client_id = '.Yii::$app->user->identity->organization_id.' OR `order`.vendor_id = '.Yii::$app->user->identity->organization_id)
-            ->orderBy(['created_at' => SORT_DESC]);
-         
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            return $dataProvider;
-        }
-        
-        if($params->type == OrderChat::TYPE_DIALOGS)
-            $query->andWhere('order_chat.id in (
-                        SELECT order_chat.id 
-                        FROM order_chat
-                        INNER JOIN (
-                          SELECT order_id, MAX(created_at) AS created_at
-                          FROM order_chat GROUP BY order_id
-                        ) AS max USING (order_id, created_at))');
-
-        if(isset($params->count))
-        {
-        $query->limit($params->count);
-            if(isset($params->page))
-            {
-                $offset = ($params->page * $params->count) - $params->count;
-                $query->offset($offset);
-            }
-        }
-        
-        $filters['id'] = $params->id; 
-        $filters['order_id'] = $params->order_id; 
-        $filters['is_system'] = $params->is_system;
-        $filters['message'] = $params->message;
-        $filters['created_at'] = $params->created_at;
-        $filters['viewed'] = $params->viewed;
-        $filters['recipient_id'] = $params->recipient_id;
-        $filters['danger'] = $params->danger;
-
-        $query->andFilterWhere($filters);*/
-        
         $query = "SELECT 
                     order_chat.*, profile.full_name, 
                     organization.name AS organization_name, 

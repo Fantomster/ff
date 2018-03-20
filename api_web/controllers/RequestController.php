@@ -103,4 +103,43 @@ class RequestController extends WebApiController
     {
         $this->response = $this->container->get('RequestWebApi')->getList($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/request/category-list",
+     *     tags={"Request"},
+     *     summary="Список категорий",
+     *     description="Список категорий",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={{"id": 74, "name": "цукен"}}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionCategoryList()
+    {
+        $this->response = $this->container->get('RequestWebApi')->getCategoryList();
+    }
 }

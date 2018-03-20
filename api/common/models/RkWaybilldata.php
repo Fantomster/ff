@@ -23,7 +23,7 @@ use yii\base\Exception;
  * @property string $usereq 
  * @property string $comment
  * @property string $salespoint
- * 
+ * @property datetime $linked_at
  * 
  */
 class RkWaybilldata extends \yii\db\ActiveRecord {
@@ -64,7 +64,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             }],
             [['koef', 'sum', 'quant'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
-            [['waybill_id', 'product_rid', 'product_id', 'munit_rid', 'updated_at', 'quant', 'sum', 'vat', 'pdenom', 'koef', 'org', 'vat_included'], 'safe']
+            [['waybill_id', 'product_rid', 'product_id', 'munit_rid', 'updated_at', 'quant', 'sum', 'vat', 'pdenom', 'koef', 'org', 'vat_included', 'linked_at'], 'safe']
         ];
     }
 

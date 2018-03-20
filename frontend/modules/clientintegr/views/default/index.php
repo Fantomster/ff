@@ -64,7 +64,7 @@ use api\common\models\RkAccess;
                         </div>
                     </div>
                 </div>
-                <div class="hpanel">
+                <div class="hpanel" style="display:none">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
                             <?= Html::a('<h4 class="m-b-xs text-info">Email ТОРГ-12</h4>', ['email/default']) ?>

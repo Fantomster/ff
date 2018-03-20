@@ -119,7 +119,7 @@ class Currency extends \yii\db\ActiveRecord {
         $currencyList = ['1' => 'RUB'];
 
         foreach($currency_list as $c) {
-            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+            $currencyList[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders') . " " . $c['count'] . ')';
         }
         $array['currency_list'] = $currencyList;
 
@@ -155,7 +155,7 @@ class Currency extends \yii\db\ActiveRecord {
             ->asArray()->all();
 
         foreach($currency_list as $c) {
-            $array[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+            $array[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders_new') . " " . $c['count'] . ')';
         }
 
         return $array;

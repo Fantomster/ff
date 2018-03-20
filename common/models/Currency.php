@@ -153,7 +153,6 @@ class Currency extends \yii\db\ActiveRecord {
             ->orderBy('count DESC')
             ->groupBy('iso_code')
             ->asArray()->all();
-
         foreach($currency_list as $c) {
             $array[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders_new') . " " . $c['count'] . ')';
         }

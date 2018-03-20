@@ -188,6 +188,7 @@ class Currency extends \yii\db\ActiveRecord {
             ->asArray()->all();
 
         $currencyList = [];
+
         foreach($currency_list as $c) {
             $currencyList[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders') . " " . $c['count'] . ')';
         }

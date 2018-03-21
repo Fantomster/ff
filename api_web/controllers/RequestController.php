@@ -239,4 +239,277 @@ class RequestController extends WebApiController
     {
         $this->response = $this->container->get('RequestWebApi')->getCategoryList();
     }
+
+    /**
+     * @SWG\Post(path="/request/create",
+     *     tags={"Request"},
+     *     summary="Создание заявки",
+     *     description="Создание заявки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="
+    regular
+    1 - Разово (default)
+    2 - Ежедневно
+    3 - Каждую неделю
+    4 - Каждый месяц
+
+    payment_type
+    1- Наличные (default)
+    2- безнал",
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                  "category_id": 74,
+     *                  "product": "Огурцы",
+     *                  "comment": "Комментарий",
+     *                  "regular": 1,
+     *                  "amount": "10 кг",
+     *                  "urgent": true,
+     *                  "payment_type": 1,
+     *                  "deferment_payment": "Отсрочка нужна 7 дней"
+     *              }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                        "id": 282,
+     *                        "name": "Огурцы",
+     *                        "status": 1,
+     *                        "created_at": "21.03.2018 07:17",
+     *                        "category": "Овощи и зелень",
+     *                        "category_id": 83,
+     *                        "amount": "10 кг",
+     *                        "comment": "Комментарий",
+     *                        "client": {
+     *                              "id": 1,
+     *                              "name": "Космическая пятница",
+     *                              "phone": "",
+     *                              "email": "investor@f-keeper.ru",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "type_id": 1,
+     *                              "type": "Ресторан",
+     *                              "rating": 0,
+     *                              "city": "Казань",
+     *                              "administrative_area_level_1": "Республика Татарстан",
+     *                              "country": "Россия",
+     *                              "about": ""
+     *                        },
+     *                        "vendor": {
+     *                              "id": 1,
+     *                              "name": "Космическая пятница",
+     *                              "phone": "",
+     *                              "email": "investor@f-keeper.ru",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "type_id": 1,
+     *                              "type": "Ресторан",
+     *                              "rating": 0,
+     *                              "city": "Казань",
+     *                              "administrative_area_level_1": "Республика Татарстан",
+     *                              "country": "Россия",
+     *                              "about": ""
+     *                        },
+     *                        "hits": 0,
+     *                        "count_callback": 0,
+     *                        "urgent": 1,
+     *                        "payment_method": 1,
+     *                        "deferment_payment": "Отсрочка нужна 7 дней",
+     *                        "regular": "1",
+     *                        "regular_name": "Разово"
+     *                    }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionCreate()
+    {
+        $this->response = $this->container->get('RequestWebApi')->create($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/request/close",
+     *     tags={"Request"},
+     *     summary="Снятие заявки",
+     *     description="Снятие заявки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"request_id": 74}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                        "id": 282,
+     *                        "name": "Огурцы",
+     *                        "status": 0,
+     *                        "created_at": "21.03.2018 07:17",
+     *                        "category": "Овощи и зелень",
+     *                        "category_id": 83,
+     *                        "amount": "10 кг",
+     *                        "comment": "Комментарий",
+     *                        "client": {
+     *                              "id": 1,
+     *                              "name": "Космическая пятница",
+     *                              "phone": "",
+     *                              "email": "investor@f-keeper.ru",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "type_id": 1,
+     *                              "type": "Ресторан",
+     *                              "rating": 0,
+     *                              "city": "Казань",
+     *                              "administrative_area_level_1": "Республика Татарстан",
+     *                              "country": "Россия",
+     *                              "about": ""
+     *                        },
+     *                        "vendor": {
+     *                              "id": 1,
+     *                              "name": "Космическая пятница",
+     *                              "phone": "",
+     *                              "email": "investor@f-keeper.ru",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "type_id": 1,
+     *                              "type": "Ресторан",
+     *                              "rating": 0,
+     *                              "city": "Казань",
+     *                              "administrative_area_level_1": "Республика Татарстан",
+     *                              "country": "Россия",
+     *                              "about": ""
+     *                        },
+     *                        "hits": 0,
+     *                        "count_callback": 0,
+     *                        "urgent": 1,
+     *                        "payment_method": 1,
+     *                        "deferment_payment": "Отсрочка нужна 7 дней",
+     *                        "regular": "1",
+     *                        "regular_name": "Разово"
+     *                    }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionClose()
+    {
+        $this->response = $this->container->get('RequestWebApi')->close($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/request/add-callback",
+     *     tags={"Request"},
+     *     summary="Оставить предложение для ресторана",
+     *     description="Оставить предложение для ресторана от поставщика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"request_id": 74, "price": 1000, "comment":"Комментарий"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionAddCallback()
+    {
+        $this->response = $this->container->get('RequestWebApi')->addCallback($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/request/callback-list",
+     *     tags={"Request"},
+     *     summary="Список предложений по заявке",
+     *     description="Список предложений по заявке ресторана",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                               "request_id": 279,
+     *                               "pagination":{
+     *                                   "page":1,
+     *                                   "page_size":12
+     *                               }
+     *                           }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionCallbackList()
+    {
+        $this->response = $this->container->get('RequestWebApi')->getCallbackList($this->request);
+    }
 }

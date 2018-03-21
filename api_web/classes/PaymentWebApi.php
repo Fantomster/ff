@@ -48,12 +48,10 @@ class PaymentWebApi extends \api_web\components\WebApi
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $this->validatePaymentPost($post);
-
             /**
              * @var ProviderInterface $provider
              */
             $provider = (new \frontend\modules\billing\Module('billing'))->getProvider();
-
             $payment = new BillingPayment($post);
             //Валюта, передаем iso_code
             $payment->setCurrency($post['currency']);

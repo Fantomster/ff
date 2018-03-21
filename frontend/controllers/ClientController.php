@@ -370,7 +370,6 @@ class ClientController extends DefaultController {
                 $user = new User();
             }
             $relationSuppRest = new RelationSuppRest();
-            //$relationCategory = new RelationCategory();
             $organization = new Organization();
             $profile = new Profile();
             $profile->scenario = "invite";

@@ -123,7 +123,7 @@ class Currency extends \yii\db\ActiveRecord {
             if($i==0){
                 $iso_code = $c['iso_code'];
             }
-            $currencyList[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+            $currencyList[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders_new') . " " . $c['count'] . ')';
             $i++;
         }
         if(count($currencyList)){
@@ -138,6 +138,7 @@ class Currency extends \yii\db\ActiveRecord {
         $array['iso_code'] = $iso_code;
         return $array;
     }
+
 
     public function getFullCurrencyList($franchId):array
     {
@@ -164,7 +165,7 @@ class Currency extends \yii\db\ActiveRecord {
             ->asArray()->all();
 
         foreach($currency_list as $c) {
-            $array[$c['id']] = $c['iso_code'] . ' (заказов ' . $c['count'] . ')';
+            $array[$c['id']] = $c['iso_code'] . ' (' . Yii::t('app', 'frontend.views.client.index.orders') . " " . $c['count'] . ')';
         }
 
         return $array;

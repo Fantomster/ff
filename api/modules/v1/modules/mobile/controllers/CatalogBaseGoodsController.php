@@ -74,45 +74,76 @@ class CatalogBaseGoodsController extends ActiveController {
     public function prepareDataProvider()
     {
         $params = new CatalogBaseGoods();
+        $params->load(Yii::$app->request->queryParams);
 
-        /*$query = CatalogBaseGoods::find();
+        $fieldsCBG = "cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
+        $fieldsCG = "cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
 
-        $dataProvider =  new ActiveDataProvider(array(
-            'query' => $query,
-        ));
-        */
+        $where = '';
+        $where_all = '';
+        $params_sql = [];
 
         $user = Yii::$app->user->getIdentity();
         $client = $user->organization;
+        $selectedVendor = null;
+        $selectedCategory = null;
 
-        $query1 = "
-            SELECT  cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at  
-            FROM catalog_base_goods as cbg
-                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
-                            AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
-                JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (cbg.status = 1) 
-                AND (cbg.deleted = 0) 
-                ";
+        if(!empty($params->product)) {
+            $where .= 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
+            $params_sql[':searchString'] = "%" . $params->product . "%";
+        }
 
-        $query2 = "SELECT cbg.id as id, cbg.product, cbg.units, cg.price, cg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at
-            FROM catalog_base_goods AS cbg 
-                    LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = cbg.id
-                            AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
-                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-                LEFT JOIN catalog AS cat ON cg.cat_id = cat.id 
-                JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (cbg.status = 1) 
-                AND (cbg.deleted = 0)
-                ";
+        if(!empty($params->vendor_id)) {
+            $where .= ' AND `org`.id IN (' .$params->vendor_id. ') ';
+            $selectedVendor = $params->vendor_id;
+        }
+
+        if(!empty($params->category_id)) {
+            $where .= ' AND category_id IN (' .$params->category_id. ') ';
+        }
+
+        if (isset($params['OrderCatalogSearch'])) {
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int) $params['OrderCatalogSearch']['selectedVendor'] : null;
+        }
+
+        $vendors = $client->getSuppliers($selectedCategory);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+
+        $sql = "
+        SELECT * FROM (
+           SELECT 
+              $fieldsCBG
+           FROM `catalog_base_goods` `cbg`
+             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
+             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           WHERE
+           cat_id IN (" . $catalogs . ")
+           ".$where."
+           AND (cbg.status = 1 AND cbg.deleted = 0)
+        UNION ALL
+          SELECT 
+          $fieldsCG
+          FROM `catalog_goods` `cg`
+           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
+           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
+           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+          WHERE 
+          cg.cat_id IN (" . $catalogs . ")
+          ".$where."
+          AND (cbg.status = 1 AND cbg.deleted = 0)
+        ) as c WHERE id != 0 ".$where_all;
+
+        $query = Yii::$app->db->createCommand($sql);
 
         $dataProvider = new SqlDataProvider([
-            'sql' => "$query1  UNION ALL ($query2)",
+            'sql' => $query->sql,
+            'params' => $params_sql,
             'pagination' => [
-                'pageSize' => 20,
-                //'totalCount' => $totalCount ,
-                ],
+                'page' => isset($params->page) ? ($params->page-1) : 0,
+                'pageSize' => isset($params->count) ? $params->count : null,
+            ],
             'sort' => [
                 'attributes' => [
                     'product',
@@ -124,70 +155,6 @@ class CatalogBaseGoodsController extends ActiveController {
             ],
         ]);
 
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            $dataProvider->pagination = false;
-            return $dataProvider;
-        }
-
-        if(empty($params->page) && empty($params->count))
-            $dataProvider->pagination = false;
-        else {
-            $dataProvider->pagination->pageSize = (!empty($params->count)) ? $params->count : 20;
-            $dataProvider->pagination->page = $params->page;
-        }
-
-
-        $andWhere = "";
-        if($params->list != null)
-        {
-            $andWhere = 'AND (cbg.id IN('.implode(',', Json::decode($params->list)).')) ';
-        }
-
-        if($params->vendor_id != null) {
-            $andWhere .= 'AND (cbg.id IN (select base_goods_id from catalog_goods where cat_id in (select cat_id from relation_supp_rest where supp_org_id = '.$params->vendor_id.'))) ';
-        }
-
-        if($params->product != null)
-        {
-            $andWhere = 'AND (product LIKE \'%'.$params->product.'%\') ';
-        }
-
-        /*if($params->rest_org_id != null) {
-            $andWhere = 'AND id IN ('.implode(',',  CatalogGoods::find()->select('base_goods_id')->where(['in', 'cat_id',
-                    RelationSuppRest::find()->select('cat_id')->where(['rest_org_id' => $params->rest_org_id])])
-                ).')) ';
-        }*/
-
-        if($params->category_id != null) {
-            $categories = implode(",", $this->getCategories($params->category_id));
-            $andWhere .= "AND cbg.category_id in ($categories)";
-        }
-
-
-        $query1 .= $andWhere;
-        $query2 .= $andWhere;
-        $dataProvider->sql = "$query1  UNION ALL ($query2)";
-
-        /*$query->andFilterWhere([
-            'id' => $params->id, 
-            'cat_id' => $params->cat_id, 
-            'article' => $params->article, 
-            'product' => $params->product, 
-            'status' => ($params->status == null)?CatalogBaseGoods::STATUS_ON:$params->status, 
-            //'market_place' => $params->market_place, 
-            'deleted' => $params->deleted, 
-            'created_at' => $params->created_at, 
-            'updated_at' => $params->updated_at, 
-            'category_id' => $params->category_id, 
-            'note' => $params->note, 
-            'ed' => $params->ed, 
-            'brand' => $params->brand, 
-            'region' => $params->region, 
-            'weight' => $params->weight, 
-            'es_status' => $params->es_status, 
-            //'mp_show_price' => $params->mp_show_price, 
-            'rating' => $params->rating
-            ]);*/
         return $dataProvider;
     }
 

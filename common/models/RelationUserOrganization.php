@@ -37,6 +37,7 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['user_id', 'organization_id', 'role_id'], 'integer'],
+            [['user_id', 'organization_id'], 'unique', 'targetAttribute' => ['user_id', 'organization_id']],
         ];
     }
 
@@ -65,8 +66,8 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
 
     public function checkRelationExisting($user):bool
     {
-        $rel = RelationUserOrganization::findOne(['user_id'=>$user->id]);
-        if($rel){
+        $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
+        if(count($rel)>1){
             return true;
         }
         return false;

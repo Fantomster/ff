@@ -58,7 +58,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
             [['organization_id'], 'integer'],
-            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => RelationUserOrganization::className(), 'targetAttribute' => 'organization_id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 
         // add required for currentPassword on account page
@@ -77,6 +77,16 @@ class User extends \amnah\yii2\user\models\User {
 
         return $rules;
     }
+
+
+    public function getOrganization_id(): int {
+        $rel = RelationUserOrganization::findOne(['user_id'=>$this->id, 'is_active'=>1]);
+        if(!$rel){
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.user.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+        }
+        return $rel->organization_id;
+    }
+
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -139,6 +149,12 @@ class User extends \amnah\yii2\user\models\User {
     {
         $this->organization_id = $organization->id;
 
+        $userOrganization = new RelationUserOrganization();
+        $userOrganization->organization_id = $this->organization_id;
+        $userOrganization->user_id = $this->id;
+        $userOrganization->role_id = $this->role_id;
+        $userOrganization->save();
+
         if ($first && isset($this->profile->phone)) {
             $organization->phone = $this->profile->phone;
         }
@@ -189,8 +205,21 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getOrganization() {
         $organization = $this->module->model("Organization");
+
         return $this->hasOne($organization::className(), ['id' => 'organization_id']);
     }
+
+    public function getOrganizations() {
+        $organization = $this->module->model("Organization");
+        return $this->hasMany($organization::className(), ['id' => 'organization_id'])
+            ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
+    }
+
+
+    public function getRelationUserOrganization(){
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id']);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -490,18 +519,6 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function getOrganizations() {
-        $organization = $this->module->model("Organization");
-        return $this->hasMany($organization::className(), ['id' => 'organization_id'])
-            ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
-    }
-
-
-    public function getRelationUserOrganization(){
-        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id']);
-    }
-
-
     public function setRelationUserOrganization($userId, $organizationId, $roleId){
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
@@ -533,32 +550,8 @@ class User extends \amnah\yii2\user\models\User {
      * @return array
      */
     public function getAllOrganization(){
-        $sql = <<<SQL
-        SELECT * FROM (
-            SELECT
-              *
-            FROM organization
-            WHERE
-              id = :oid OR parent_id = :oid
-            UNION DISTINCT
-            SELECT
-              *
-            FROM organization
-            WHERE
-              parent_id = :pid
-            UNION DISTINCT
-            SELECT
-              r.*
-            FROM `organization` o
-            INNER JOIN organization r ON r.id = o.parent_id
-            WHERE
-              o.id = :oid
-        ) t 
-        ORDER BY name 
-SQL;
+        $sql = "select org.id as `id`,org.`name` as `name`,org.`type_id` as `type_id` from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $this->id . " order by org.`name`";
         return \Yii::$app->db->createCommand($sql)
-            ->bindValue(':oid',$this->organization_id)
-            ->bindValue(':pid',$this->organization->parent_id)
             ->queryAll();
     }
 

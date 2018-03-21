@@ -167,7 +167,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $allow_roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER];
 
-            if (in_array($this->user->role_id, $allow_roles)) {
+            if (in_array($this->user->role_id, $allow_roles) || \common\models\RelationUserOrganization::checkRelationExisting($this->user)) {
                 if (!in_array($this->user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER])) {
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                         $this->user->role_id = Role::ROLE_RESTAURANT_MANAGER;

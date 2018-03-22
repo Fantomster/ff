@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\data\Pagination;
 use common\models\Request;
@@ -88,39 +89,7 @@ class RequestWebApi extends WebApi
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $query = Request::find()->joinWith('client')->orderBy('id DESC');
-        //Массив в доставками
-        $deliveryRegions = $organization->deliveryRegionAsArray;
-        //Доступные для доставки регионы
-        if (!empty($deliveryRegions['allow'])) {
-            foreach ($deliveryRegions['allow'] as $row) {
-                if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
-                    $p = $row['administrative_area_level_1'] . $row['locality'];
-                    $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p', [':p' => $p]);
-                } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
-                    $query->orWhere(['=', 'locality', $row['locality']]);
-                } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
-                    $query->orWhere(['=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
-                }
-            }
-        }
-        //Условия для исключения доставки с регионов
-        if (!empty($deliveryRegions['exclude'])) {
-            if (!empty($deliveryRegions['exclude'])) {
-                foreach ($deliveryRegions['exclude'] as $row) {
-                    if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
-                        $p = $row['administrative_area_level_1'] . $row['locality'];
-                        $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s', [':s' => $p]);
-                    } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
-                        $query->andWhere(['!=', 'locality', $row['locality']]);
-                    } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
-                        $query->andWhere(['!=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
-                    }
-                }
-            }
-        }
-
-        $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])->andWhere(['active_status' => Request::ACTIVE]);
+        $query = $this->getVendorRequestsQuery();
 
         /**
          * только мои заявки, на которые откликнулся
@@ -145,8 +114,13 @@ class RequestWebApi extends WebApi
             /**
              * только срочные заявки
              */
-            if (isset($post['search']['urgent']) && $post['search']['urgent'] == true) {
-                $query->andWhere(['rush_order' => 1]);
+            if (!empty($post['search']['urgent'])) {
+                if($post['search']['urgent'] === true) {
+                    $query->andWhere(['rush_order' => 1]);
+                } else {
+                    $query->andWhere(['rush_order' => 0]);
+                    $query->andWhere('rush_order is null');
+                }
             }
         }
 
@@ -210,12 +184,12 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Empty request_id');
         }
 
-        $model = Request::find()
-            ->where(['id' => (int)$post['request_id'], 'rest_org_id' => $this->user->organization->id])
-            ->one();
+        $model = Request::find()->where(['id' => (int)$post['request_id']])->one();
         if (empty($model)) {
             throw new BadRequestHttpException('Not found request');
         }
+
+        $this->checkAccess($model);
 
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
@@ -262,6 +236,8 @@ class RequestWebApi extends WebApi
         if (empty($model)) {
             throw new BadRequestHttpException('Not found request');
         }
+
+        $this->checkAccess($model);
 
         return $this->prepareRequest($model);
     }
@@ -345,12 +321,12 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Empty request_id');
         }
 
-        $model = Request::find()
-            ->where(['id' => (int)$post['request_id'], 'rest_org_id' => $this->user->organization->id])
-            ->one();
+        $model = Request::findOne((int)$post['request_id']);
         if (empty($model)) {
             throw new BadRequestHttpException('Not found request');
         }
+
+        $this->checkAccess($model);
 
         $model->active_status = Request::INACTIVE;
         $model->save();
@@ -387,6 +363,8 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Request not active');
         }
 
+        $this->checkAccess($request);
+
         $model = RequestCallback::find()->where(['request_id' => $request->id])
             ->andWhere(['supp_org_id' => $this->user->organization->id]);
 
@@ -417,6 +395,71 @@ class RequestWebApi extends WebApi
             $transaction->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Проверка на доступ к заявке
+     * @param Request $model
+     * @return bool
+     * @throws BadRequestHttpException
+     */
+    private function checkAccess(Request $model)
+    {
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            if ($model->rest_org_id !== $this->user->organization->id) {
+                throw new BadRequestHttpException('Вы не можете смотреть чужие заявки.');
+            }
+        }
+        if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
+            $requests = ArrayHelper::map($this->getVendorRequestsQuery()->all(), 'id', 'product');
+            if (empty($requests[$model->id])) {
+                throw new BadRequestHttpException('Вы не можете видеть эту заявку, она вне зоны вашей доставки.');
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    private function getVendorRequestsQuery()
+    {
+        $organization = $this->user->organization;
+        $query = Request::find()->joinWith('client')->orderBy('id DESC');
+        //Массив в доставками
+        $deliveryRegions = $organization->deliveryRegionAsArray;
+        //Доступные для доставки регионы
+        if (!empty($deliveryRegions['allow'])) {
+            foreach ($deliveryRegions['allow'] as $row) {
+                if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                    $p = $row['administrative_area_level_1'] . $row['locality'];
+                    $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p', [':p' => $p]);
+                } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
+                    $query->orWhere(['=', 'locality', $row['locality']]);
+                } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
+                    $query->orWhere(['=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                }
+            }
+        }
+        //Условия для исключения доставки с регионов
+        if (!empty($deliveryRegions['exclude'])) {
+            if (!empty($deliveryRegions['exclude'])) {
+                foreach ($deliveryRegions['exclude'] as $row) {
+                    if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                        $p = $row['administrative_area_level_1'] . $row['locality'];
+                        $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s', [':s' => $p]);
+                    } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
+                        $query->andWhere(['!=', 'locality', $row['locality']]);
+                    } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
+                        $query->andWhere(['!=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                    }
+                }
+            }
+        }
+
+        $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])->andWhere(['active_status' => Request::ACTIVE]);
+
+        return $query;
     }
 
     /**

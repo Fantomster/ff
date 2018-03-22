@@ -84,6 +84,7 @@ class UserSearch extends \common\models\User {
         // create data provider
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => false
         ]);
 
         // enable sorting for the related columns

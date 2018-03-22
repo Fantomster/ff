@@ -55,7 +55,7 @@ return [
             ],
         ],
         'errorHandler' => [
-            'errorAction' => 'site/error',
+            'class' => \api_web\handler\WebApiErrorHandler::className(),
         ]
     ],
     'modules' => [

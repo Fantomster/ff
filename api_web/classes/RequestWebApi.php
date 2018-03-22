@@ -247,6 +247,26 @@ class RequestWebApi extends WebApi
     }
 
     /**
+     * Карточка заявки
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getRequest(array $post)
+    {
+        if (empty($post['request_id'])) {
+            throw new BadRequestHttpException('Empty request_id');
+        }
+
+        $model = Request::find()->where(['id' => (int)$post['request_id']])->one();
+        if (empty($model)) {
+            throw new BadRequestHttpException('Not found request');
+        }
+
+        return $this->prepareRequest($model);
+    }
+
+    /**
      * Создание заявки
      * @param array $post
      * @return array
@@ -365,6 +385,13 @@ class RequestWebApi extends WebApi
 
         if ($request->active_status == 0) {
             throw new BadRequestHttpException('Request not active');
+        }
+
+        $model = RequestCallback::find()->where(['request_id' => $request->id])
+            ->andWhere(['supp_org_id' => $this->user->organization->id]);
+
+        if ($model->exists()) {
+            throw new BadRequestHttpException('Вы уже оставили отклик');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();

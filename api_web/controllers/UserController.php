@@ -208,9 +208,7 @@ class UserController extends WebApiController
      */
     public function actionOrganization()
     {
-        $this->response = [
-            'organization' => $this->container->get('UserWebApi')->getAllOrganization()
-        ];
+        $this->response = $this->container->get('UserWebApi')->getAllOrganization();
     }
 
     /**

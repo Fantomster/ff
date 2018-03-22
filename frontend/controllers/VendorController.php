@@ -270,26 +270,26 @@ class VendorController extends DefaultController
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
+                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id, $this->currentUser->id);
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
-//                else {
-//                    if (array_key_exists('email', $user->errors)) {
-//                        $existingUser = User::findOne(['email' => $post['User']['email']]);
-//                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
-//                        if($success){
-//                            User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
-//                            $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
-//                            $existingUser->setRole($post['User']['role_id'])->save();
-//                            $message = Yii::t('app', 'Пользователь добавлен!');
-//                        }else{
-//                            $message = Yii::t('app', 'common.models.already_exists');
-//                        }
-//
-//                        return $this->renderAjax('settings/_success', ['message' => $message]);
-//                    }
-//                }
+                else {
+                    if (array_key_exists('email', $user->errors)) {
+                        $existingUser = User::findOne(['email' => $post['User']['email']]);
+                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id'], $this->currentUser->id);
+                        if($success){
+                            $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+                            $existingUser->setRole($post['User']['role_id'])->save();
+                            $message = Yii::t('app', 'Пользователь добавлен!');
+                        }else{
+                            $message = Yii::t('app', 'common.models.already_exists');
+                        }
+
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
+                }
             }
         }
 

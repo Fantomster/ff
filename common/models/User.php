@@ -149,11 +149,7 @@ class User extends \amnah\yii2\user\models\User {
     {
         $this->organization_id = $organization->id;
 
-        $userOrganization = new RelationUserOrganization();
-        $userOrganization->organization_id = $this->organization_id;
-        $userOrganization->user_id = $this->id;
-        $userOrganization->role_id = $this->role_id;
-        $userOrganization->save();
+        $this->setRelationUserOrganization($this->id, $this->organization_id, $this->role_id);
 
         if ($first && isset($this->profile->phone)) {
             $organization->phone = $this->profile->phone;
@@ -519,7 +515,23 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function setRelationUserOrganization($userId, $organizationId, $roleId){
+    public function setRelationUserOrganization($userId, $organizationId, $roleId, $currentUserId = null):bool
+    {
+        if($currentUserId && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
+            dd($currentUserId);
+            $relations = RelationUserOrganization::findAll(['user_id'=>$currentUserId]);
+            foreach ($relations as $relation){
+                self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);
+            }
+            return true;
+        }else{
+            return self::createRelationUserOrganization($userId, $organizationId, $roleId);
+        }
+    }
+
+
+    private function createRelationUserOrganization($userId, $organizationId, $roleId):bool
+    {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
             return false;
@@ -529,7 +541,7 @@ class User extends \amnah\yii2\user\models\User {
         $rel->organization_id = $organizationId;
         $rel->role_id = $roleId;
         $rel->save();
-        return $rel->id;
+        return true;
     }
 
 

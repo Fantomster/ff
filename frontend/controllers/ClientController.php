@@ -205,6 +205,7 @@ class ClientController extends DefaultController {
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
+                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id, $this->currentUser->id);
 
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -217,9 +218,9 @@ class ClientController extends DefaultController {
                                 $message = Yii::t('app', 'common.models.already_exists');
                                 return $this->renderAjax('settings/_success', ['message' => $message]);
                             }
-                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id'], $this->currentUser->id);
                             if($success){
-                                User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
+                                User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id, $this->currentUser->id);
                                 $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                                 $existingUser->setRole($post['User']['role_id'])->save();
                                 $message = Yii::t('app', 'Пользователь добавлен!');

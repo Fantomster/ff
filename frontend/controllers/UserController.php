@@ -281,9 +281,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
             if(!empty($user->organization_id)){
                 if(count($rel) > 1 || (
-                      ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
-                       $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
-                       $user->role_id == Role::ROLE_ADMIN ||
+                      ($user->role_id == Role::ROLE_ADMIN ||
                        $user->role_id == Role::ROLE_FKEEPER_MANAGER))){
                    $returnUrl = $this->performLogin($user, 1);
                    return $this->redirect(['business']); 

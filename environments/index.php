@@ -41,7 +41,9 @@ return [
             'franchise/runtime',
             'franchise/web/assets',
             'api/runtime',
-            'api/web/assets'
+            'api/web/assets',
+            'api_web/runtime',
+            'api_web/web/assets',
         ],
         'setExecutable' => [
             'yii',
@@ -52,7 +54,8 @@ return [
             'frontend/config/main-local.php',
             'market/config/main-local.php',
             'franchise/config/main-local.php',
-            'api/config/main-local.php'
+            'api/config/main-local.php',
+            'api_web/config/main-local.php',
         ],
     ],
     'Production' => [
@@ -67,7 +70,9 @@ return [
             'franchise/runtime',
             'franchise/web/assets',
             'api/runtime',
-            'api/web/assets'
+            'api/web/assets',
+            'api_web/runtime',
+            'api_web/web/assets',
         ],
         'setExecutable' => [
             'yii',
@@ -77,7 +82,8 @@ return [
             'frontend/config/main-local.php',
             'market/config/main-local.php',
             'franchise/config/main-local.php',
-            'api/config/main-local.php'
+            'api/config/main-local.php',
+            'api_web/config/main-local.php',
         ],
     ],
 ];

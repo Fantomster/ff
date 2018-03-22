@@ -89,7 +89,7 @@ class RequestWebApi extends WebApi
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $query = $this->getVendorRequestsQuery();
+        $query = $this->getVendorRequestsQuery()->andWhere(['active_status' => Request::ACTIVE]);
 
         /**
          * только мои заявки, на которые откликнулся
@@ -115,11 +115,10 @@ class RequestWebApi extends WebApi
              * только срочные заявки
              */
             if (!empty($post['search']['urgent'])) {
-                if($post['search']['urgent'] === true) {
+                if ($post['search']['urgent'] === true) {
                     $query->andWhere(['rush_order' => 1]);
                 } else {
-                    $query->andWhere(['rush_order' => 0]);
-                    $query->andWhere('rush_order is null');
+                    $query->andWhere(['or', [['rush_order' => 0], 'rush_order is null']]);
                 }
             }
         }
@@ -398,6 +397,55 @@ class RequestWebApi extends WebApi
     }
 
     /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function setContractor(array $post)
+    {
+        if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
+        }
+
+        if (empty($post['request_id'])) {
+            throw new BadRequestHttpException('Empty request_id');
+        }
+
+        if (empty($post['callback_id'])) {
+            throw new BadRequestHttpException('Empty callback_id');
+        }
+
+        $request = Request::findOne((int)$post['request_id']);
+        if (empty($request)) {
+            throw new BadRequestHttpException('Not found request');
+        }
+
+        $this->checkAccess($request);
+
+        $callback = RequestCallback::find()->where(['request_id' => $request->id, 'id' => (int)$post['callback_id']])->one();
+        if (empty($callback)) {
+            throw new BadRequestHttpException('Not found RequestCallback');
+        }
+
+        if ($request->responsible_supp_org_id == $callback->supp_org_id) {
+            throw new BadRequestHttpException('Вы уже установлены исполнителем.');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $request->responsible_supp_org_id = $callback->supp_org_id;
+            $request->save();
+            $request->refresh();
+            Notice::init('Request')->setContractor($request, $callback, $this->user);
+            $transaction->commit();
+            return $this->prepareRequest($request);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * Проверка на доступ к заявке
      * @param Request $model
      * @return bool
@@ -415,12 +463,17 @@ class RequestWebApi extends WebApi
             if (empty($requests[$model->id])) {
                 throw new BadRequestHttpException('Вы не можете видеть эту заявку, она вне зоны вашей доставки.');
             }
+
+            if ($model->active_status == Request::INACTIVE) {
+                throw new BadRequestHttpException('Заявка закрыта.');
+            }
         }
         return true;
     }
 
     /**
      * @return ActiveQuery
+     * @throws BadRequestHttpException
      */
     private function getVendorRequestsQuery()
     {
@@ -440,7 +493,10 @@ class RequestWebApi extends WebApi
                     $query->orWhere(['=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
                 }
             }
+        } else {
+            throw new BadRequestHttpException('Необходимо установить регионы доставки.');
         }
+
         //Условия для исключения доставки с регионов
         if (!empty($deliveryRegions['exclude'])) {
             if (!empty($deliveryRegions['exclude'])) {
@@ -457,7 +513,7 @@ class RequestWebApi extends WebApi
             }
         }
 
-        $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])->andWhere(['active_status' => Request::ACTIVE]);
+        $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')]);
 
         return $query;
     }

@@ -66,11 +66,11 @@ class SiteController extends Controller {
      * @return string
      */
     public function beforeAction($action) {
-        if (!(Yii::$app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index') {
+        /*if (!(Yii::$app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index') {
             return $this->redirect(['/site/index']);
         } else {
             
-        }
+        }*/
         if (!parent::beforeAction($action)) {
             return false;
         }

@@ -8,7 +8,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\SqlDataProvider;
-
+use yii\helpers\Json;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>

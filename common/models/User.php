@@ -10,6 +10,8 @@ namespace common\models;
 
 use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;
+use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use Yii;
 
 /**
@@ -243,21 +245,23 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEmailNotification($org_id) {
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->user_id, 'organization_id' => $org_id]);
+    public function getEmailNotification($org_id = null) {
+        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
         if ($rel === null)
             return null;
-        return $this->hasOne(notifications\EmailNotification::className(), ['rel_user_org_id' => $rel->id]);
+        return EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSmsNotification($org_id) {
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->user_id, 'organization_id' => $org_id]);
+    public function getSmsNotification($org_id = null) {
+        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
         if ($rel === null)
             return null;
-        return $this->hasOne(notifications\SmsNotification::className(), ['rel_user_org_id' => $rel->id]);
+        return SmsNotification::findOne(['rel_user_org_id' => $rel->id]);
     }
 
     /**

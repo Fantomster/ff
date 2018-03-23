@@ -547,17 +547,17 @@ class RequestWebApi extends WebApi
             "status" => (int)$model->active_status,
             "created_at" => date('d.m.Y H:i', strtotime($model->created_at)),
             "category" => $model->categoryName->name,
-            "category_id" => $model->category,
+            "category_id" => (int)$model->category,
             "amount" => $model->amount,
             "comment" => $model->comment,
             "client" => $this->container->get('MarketWebApi')->prepareOrganization($model->client),
             "vendor" => $this->container->get('MarketWebApi')->prepareOrganization($model->vendor) ?? null,
             "hits" => (int)$model->count_views ?? 0,
             "count_callback" => (int)$model->countCallback ?? 0,
-            "urgent" => $model->rush_order ?? 0,
+            "urgent" => (int)$model->rush_order ?? 0,
             "payment_method" => $model->payment_method,
             "deferment_payment" => $model->deferment_payment,
-            "regular" => $model->regular,
+            "regular" => (int)$model->regular,
             "regular_name" => $model->regularName
         ];
     }
@@ -571,7 +571,7 @@ class RequestWebApi extends WebApi
     {
         return [
             'id' => (int)$model->id,
-            "request_id" => $model->request_id,
+            "request_id" => (int)$model->request_id,
             "client" => $this->container->get('MarketWebApi')->prepareOrganization($model->request->client),
             "vendor" => $this->container->get('MarketWebApi')->prepareOrganization($model->organization),
             "price" => round($model->price, 2),

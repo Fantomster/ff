@@ -341,14 +341,14 @@ class CartWebApi extends \api_web\components\WebApi
     {
         $item['id'] = (int)$model->model->id;
         $item['product'] = $model->model->product;
-        $item['catalog_id'] = $model->cat_id;
+        $item['catalog_id'] = (int)$model->cat_id;
         $item['price'] = round($model->price, 2);
         $item['rating'] = round($model->model->ratingStars, 1);
         $item['supplier'] = $model->model->vendor->name;
         $item['brand'] = ($model->model->brand ? $model->model->brand : '');
         $item['article'] = $model->model->article;
         $item['ed'] = $model->model->ed;
-        $item['units'] = $model->model->units;
+        $item['units'] = (int)$model->model->units;
         $item['currency'] = $model->model->catalog->currency->symbol;
         $item['image'] = (new MarketWebApi())->getProductImage($model->model);
         $item['in_basket'] = $this->countProductInCart($model->model->id);

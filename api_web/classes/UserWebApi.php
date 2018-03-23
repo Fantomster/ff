@@ -355,9 +355,9 @@ class UserWebApi extends \api_web\components\WebApi
 
 
         return [
-            'id' => $model->vendor->id,
+            'id' => (int)$model->vendor->id,
             'name' => $model->vendor->name,
-            'cat_id' => $model->cat_id,
+            'cat_id' => (int)$model->cat_id,
             'status' => $status,
             'picture' => $model->vendor->getPictureUrl(),
             'address' => implode(', ', $locality)

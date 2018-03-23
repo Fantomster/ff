@@ -515,10 +515,10 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function setRelationUserOrganization($userId, $organizationId, $roleId, $currentUserId = null):bool
+    public function setRelationUserOrganization($userId, $organizationId, $roleId):bool
     {
-        if($currentUserId && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
-            $relations = RelationUserOrganization::findAll(['user_id'=>$currentUserId]);
+        if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
+            $relations = RelationUserOrganization::findAll(['user_id'=>Yii::$app->user->id]);
             foreach ($relations as $relation){
                 self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);
             }

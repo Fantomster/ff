@@ -270,7 +270,7 @@ class VendorController extends DefaultController
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
-                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id, $this->currentUser->id);
+                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -278,7 +278,7 @@ class VendorController extends DefaultController
                 else {
                     if (array_key_exists('email', $user->errors)) {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
-                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id'], $this->currentUser->id);
+                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
                         if($success){
                             $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                             $existingUser->setRole($post['User']['role_id'])->save();

@@ -149,8 +149,6 @@ class User extends \amnah\yii2\user\models\User {
     {
         $this->organization_id = $organization->id;
 
-        $this->setRelationUserOrganization($this->id, $this->organization_id, $this->role_id);
-
         if ($first && isset($this->profile->phone)) {
             $organization->phone = $this->profile->phone;
         }
@@ -544,16 +542,57 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function updateRelationUserOrganization($userId, $organizationId, $roleId){
-        $rel = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
-        if($rel){
-            $rel->user_id = $userId;
-            $rel->organization_id = $organizationId;
-            $rel->role_id = $roleId;
-            $rel->save();
-            return $rel->id;
+    private function deleteRelationUserOrganization($userId, $organizationId):bool
+    {
+        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+        if($check){
+            $check->delete();
+        }
+        return true;
+    }
+
+
+    public function deleteUserFromOrganization($userId):bool
+    {
+        $user = User::findIdentity(Yii::$app->user->id);
+        $relations = RelationUserOrganization::find()->where(['user_id'=>$user->id])->all();
+        foreach ($relations as $relation) {
+            self::deleteRelationUserOrganization($userId, $relation->organization_id);
+        }
+        $check = RelationUserOrganization::findOne(['user_id'=>$userId]);
+        if($check){
+            $existingUser = $user = User::findIdentity($userId);
+            $existingUser->organization_id = $check->organization_id;
+            $existingUser->save();
+            return true;
         }
         return false;
+    }
+
+
+    public function updateRelationUserOrganization($userId, $organizationId, $roleId):bool
+    {
+        $user = User::findIdentity(Yii::$app->user->id);
+        $currentUser = User::findIdentity($userId);
+        if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
+            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
+            foreach ($relations as $relation){
+                self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);
+            }
+            $currentUser->organization_id = $user->organization->id;
+            $currentUser->role_id = $roleId;
+            $currentUser->save();
+            return true;
+        }else{
+            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->andWhere(['<>','organization_id', $user->organization->id])->all();
+            foreach ($relations as $relation) {
+                self::deleteRelationUserOrganization($userId, $relation->organization_id);
+            }
+            $currentUser->organization_id = $user->organization->id;
+            $currentUser->role_id = $roleId;
+            $currentUser->save();
+            return true;
+        }
     }
 	
     /**

@@ -113,6 +113,12 @@ class Role extends \amnah\yii2\user\models\Role {
         return $dropdown;
     }
 
+    public static function getRoleName($roleId):string
+    {
+        $role = static::findOne(['id'=>$roleId]);
+        return $role->name ?? '';
+    }
+
 
     public static function getExceptionArray(){
         return [self::ROLE_ADMIN, self::ROLE_FKEEPER_OBSERVER];

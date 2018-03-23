@@ -429,11 +429,11 @@ class GuideWebApi extends \api_web\components\WebApi
         if ($model) {
 
             $return = [
-                'id' => $model->id,
+                'id' => (int)$model->id,
                 'name' => $model->name,
                 'color' => $model->color,
                 'created_at' => \Yii::$app->formatter->asDate($model->created_at),
-                'product_count' => $model->productCount,
+                'product_count' => (int)$model->productCount,
             ];
 
             if ($product_list === true) {

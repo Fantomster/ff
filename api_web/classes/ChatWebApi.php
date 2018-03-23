@@ -247,13 +247,13 @@ class ChatWebApi extends WebApi
     private function prepareDialog(Order $model)
     {
         return [
-            'dialog_id' => $model->id,
+            'dialog_id' => (int)$model->id,
             'client' => $model->client->name,
-            'client_id' => $model->client->id,
+            'client_id' => (int)$model->client->id,
             'vendor' => $model->vendor->name,
-            'vendor_id' => $model->vendor->id,
-            'count_message' => $model->orderChatCount ?? 0,
-            'unread_message' => $model->orderChatUnreadCount ?? 0,
+            'vendor_id' => (int)$model->vendor->id,
+            'count_message' => (int)$model->orderChatCount ?? 0,
+            'unread_message' => (int)$model->orderChatUnreadCount ?? 0,
             'last_message' => $model->orderChatLastMessage->message ?? 'Нет сообщений',
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];
@@ -275,11 +275,11 @@ class ChatWebApi extends WebApi
         }
 
         return [
-            'message_id' => $model->id,
+            'message_id' => (int)$model->id,
             'message' => $model->message,
             'sender' => $model->is_system ? 'MixCart Bot' : $model->sentBy->profile->full_name,
             'recipient_name' => $model->recipient->name,
-            'recipient_id' => $model->recipient->id,
+            'recipient_id' => (int)$model->recipient->id,
             'is_my_message' => $is_my_message,
             'is_system' => $model->is_system ? true : false,
             'viewed' => $model->viewed ? true : false,

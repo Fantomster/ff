@@ -319,12 +319,12 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = $model->catalog->id;
+        $item['catalog_id'] = (int)$model->catalog->id;
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
         $item['rating'] = round($model->ratingStars, 1);
         $item['supplier'] = $model->vendor->name;
-        $item['supplier_id'] = $model->vendor->id;
+        $item['supplier_id'] = (int)$model->vendor->id;
         $item['brand'] = $model->brand ?? '';
         $item['article'] = $model->article;
         $item['ed'] = $model->ed;
@@ -352,7 +352,7 @@ class MarketWebApi extends WebApi
         $item['email'] = $model->email;
         $item['address'] = $model->address;
         $item['image'] = $model->pictureUrl;
-        $item['type_id'] = $model->type_id;
+        $item['type_id'] = (int)$model->type_id;
         $item['type'] = $model->type->name;
         $item['rating'] = round($model->ratingStars, 1);
         $item['city'] = ($model->locality === 'undefined' ? null : $model->locality);

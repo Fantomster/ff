@@ -19,6 +19,7 @@ use common\models\User;
  * @property integer $order_changed
  * @property integer $order_processing
  * @property integer $order_done
+ * @property integer $rel_user_org_id
  *
  * @property User $user
  */
@@ -38,8 +39,8 @@ class EmailNotification extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id'], 'required'],
-            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'receive_employee_email'], 'integer'],
+            [['rel_user_org_id'], 'required'],
+            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'receive_employee_email', 'rel_user_org_id'], 'integer'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }

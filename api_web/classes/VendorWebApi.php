@@ -136,13 +136,24 @@ class VendorWebApi extends \api_web\components\WebApi
                     Yii::$app->sms->send($text, $profile->phone);
                 }
                 $transaction->commit();
+
+                $result = [
+                    'success' => true,
+                    'organization_id' => $organization->id,
+                    'user_id' => $user->id
+                ];
+
                 if ($check['eventType'] == 5) {
-                    $result = ['success' => true, 'organization_id'=>$organization->id, 'user_id'=>$user->id, 'message' => Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
-                    return $result;
+                    $result['message'] =
+                        Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                        $organization->name .
+                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
+                        $email;
                 } else {
-                    $result = ['success' => true, 'organization_id'=>$organization->id, 'user_id'=>$user->id, 'message' => Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
-                    return $result;
+                    $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
+                return $result;
+
             } catch (Exception $e) {
                 $transaction->rollback();
                 throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));

@@ -311,8 +311,8 @@ class ClientController extends DefaultController {
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
 //                    $user->role_id = Role::ROLE_USER;
-                    $email_notification = $user->emailNotification;
-                    $sms_notification = $user->smsNotification;
+                    $email_notification = $user->getEmailNotification($user->organization_id);
+                    $sms_notification = $user->getSmsNotification($user->organization_id);
                     $user_token = UserToken::findOne(['user_id' => $user->id]);
                     $profile = $user->profile;
                     if ($profile) {
@@ -940,13 +940,13 @@ class ClientController extends DefaultController {
                     $managerAssociate->save();
 
                     foreach ($rows as $row) {
-                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
+                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->getSmsNotification($get_supp_org_id)->receive_employee_sms)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $row->profile->phone);
                         }
-                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->emailNotification->receive_employee_email) {
+                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->getEmailNotification($get_supp_org_id)->receive_employee_email) {
                             $email = $row->email;
                             $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
                             $mailer->htmlLayout = 'layouts/html';

@@ -8,7 +8,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\SqlDataProvider;
-
+use yii\helpers\Json;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -69,6 +69,12 @@ class GuideProductSearchController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         $client = $user->organization;
         $searchString = "%$params->searchString%";
+
+        if($params->guide_list != null)
+            $where = 'gp.guide_id IN('.implode(',', Json::decode($params->guide_list)).')';
+        else
+            $where = "gp.guide_id = $params->guide_id";
+
         $query = "
         SELECT * FROM (
             SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name as name, cbg.ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name, cbg.created_at as created_at 
@@ -78,7 +84,7 @@ class GuideProductSearchController extends ActiveController {
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
                             AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
                 JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (gp.guide_id = $params->guide_id)
+            WHERE ($where)
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
@@ -91,7 +97,7 @@ class GuideProductSearchController extends ActiveController {
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog AS cat ON cg.cat_id = cat.id 
                 JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (gp.guide_id = $params->guide_id)
+            WHERE ($where)
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0))

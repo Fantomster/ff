@@ -273,11 +273,11 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             if ($field == 'name') {
-                $field = 'organization.name ' . $sort;
+                $field = 'vendor_name ' . $sort;
             }
 
             if ($field == 'address') {
-                $field = 'organization.locality ' . $sort;
+                //$field = 'organization.locality ' . $sort;
             }
 
             if ($field == 'status') {

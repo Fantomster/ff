@@ -114,11 +114,12 @@ class RequestWebApi extends WebApi
             /**
              * только срочные заявки
              */
-            if (!empty($post['search']['urgent'])) {
-                if ($post['search']['urgent'] === true) {
+            if (isset($post['search']['urgent'])) {
+                $urgent = (int)$post['search']['urgent'];
+                if ($urgent === 1) {
                     $query->andWhere(['rush_order' => 1]);
                 } else {
-                    $query->andWhere(['or', [['rush_order' => 0], 'rush_order is null']]);
+                    $query->andWhere(['OR',['=', 'rush_order', 0],['is', 'rush_order', null]]);
                 }
             }
         }

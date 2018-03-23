@@ -420,4 +420,50 @@ class UserController extends WebApiController
     {
         $this->response = $this->container->get('UserWebApi')->getVendors($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/user/remove-vendor",
+     *     tags={"User"},
+     *     summary="Открепить поставщика",
+     *     description="Удаляем связь между рестораном и поставщиком",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                               "vendor_id":1
+     *                           }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"result": true}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRemoveVendor()
+    {
+        $this->response = $this->container->get('UserWebApi')->removeVendor($this->request);
+    }
 }

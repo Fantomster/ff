@@ -9,10 +9,8 @@ use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;
-use common\models\CatalogGoods;
 use common\models\Organization;
 use common\models\RelationSuppRest;
-use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
 
 /**

@@ -8,6 +8,7 @@ use api_web\models\User;
 use common\models\Profile;
 use common\models\UserToken;
 use api_web\components\Notice;
+use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -319,6 +320,47 @@ class UserWebApi extends \api_web\components\WebApi
             2 => \Yii::t('message', 'frontend.views.client.suppliers.catalog_not_set'),
             3 => \Yii::t('message', 'frontend.views.client.suppliers.send_invite'),
         ];
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     * @throws \yii\db\Exception
+     */
+    public function removeVendor(array $post)
+    {
+        if (empty($post['vendor_id'])) {
+            throw new BadRequestHttpException('Empty vendor_id');
+        }
+
+        $id = (int)$post['vendor_id'];
+        $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
+
+        if (empty($vendor)) {
+            throw new BadRequestHttpException('Not found vendor');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $where = [
+                'rest_org_id' => $this->user->organization->id,
+                'supp_org_id' => $vendor->id
+            ];
+
+            if (RelationSuppRest::find()->where($where)->exists() || RelationSuppRestPotential::find()->where($where)->exists()) {
+                RelationSuppRest::deleteAll($where);
+                RelationSuppRestPotential::deleteAll($where);
+            } else {
+                throw new BadRequestHttpException('Вы не работаете с этим поставщиком');
+            }
+            $transaction->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     /**

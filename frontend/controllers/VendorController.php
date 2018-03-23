@@ -1311,11 +1311,10 @@ class VendorController extends DefaultController
                         }
                     }
                 }
-                echo Json::encode(['output' => $out, 'selected' => $selected]);
-                return;
+                return Json::encode(['output' => $out, 'selected' => $selected]);
             }
         }
-        echo Json::encode(['output' => '', 'selected' => '']);
+        return Json::encode(['output' => '', 'selected' => '']);
     }
 
     public function actionChangecatalogprop()

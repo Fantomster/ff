@@ -518,7 +518,6 @@ class User extends \amnah\yii2\user\models\User {
     public function setRelationUserOrganization($userId, $organizationId, $roleId, $currentUserId = null):bool
     {
         if($currentUserId && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
-            dd($currentUserId);
             $relations = RelationUserOrganization::findAll(['user_id'=>$currentUserId]);
             foreach ($relations as $relation){
                 self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);

@@ -98,6 +98,7 @@ class User extends \amnah\yii2\user\models\User {
              */
             $emailNotification = new notifications\EmailNotification();
             $emailNotification->user_id = $this->id;
+            $emailNotification->rel_user_org_id = $this->relationUserOrganization;
             $emailNotification->orders = true;
             $emailNotification->requests = true;
             $emailNotification->changes = true;
@@ -113,6 +114,7 @@ class User extends \amnah\yii2\user\models\User {
                 $smsNotification = new notifications\SmsNotification();
             }
             $smsNotification->user_id = $this->id;
+            $smsNotification->rel_user_org_id = $this->relationUserOrganization;
             $smsNotification->orders = true;
             $smsNotification->requests = true;
             $smsNotification->changes = true;
@@ -241,15 +243,21 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEmailNotification() {
-        return $this->hasOne(notifications\EmailNotification::className(), ['user_id' => 'id']);
+    public function getEmailNotification($org_id) {
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->user_id, 'organization_id' => $org_id]);
+        if ($rel === null)
+            return null;
+        return $this->hasOne(notifications\EmailNotification::className(), ['rel_user_org_id' => $rel->id]);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSmsNotification() {
-        return $this->hasOne(notifications\SmsNotification::className(), ['user_id' => 'id']);
+    public function getSmsNotification($org_id) {
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->user_id, 'organization_id' => $org_id]);
+        if ($rel === null)
+            return null;
+        return $this->hasOne(notifications\SmsNotification::className(), ['rel_user_org_id' => $rel->id]);
     }
 
     /**

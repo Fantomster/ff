@@ -201,11 +201,11 @@ class RequestController extends ActiveController {
                     //Поехали рассылать
                     foreach ($vendor_users as $user) {
                         //Отправляем смс поставщику, о принятии решения по его отклику
-                        if ($user->profile->phone && $user->smsNotification->request_accept == 1) {
+                        if ($user->profile->phone && $user->getSmsNotification($supp_org_id)->request_accept == 1) {
                             Yii::$app->sms->send($templateMessage['sms_text'], $user->profile->phone);
                         }
                         //Отправляем емайлы поставщику, о принятии решения по его отклику
-                        if ($user->email && $user->emailNotification->request_accept == 1) {
+                        if ($user->email && $user->getEmailNotification($supp_org_id)->request_accept == 1) {
                             $mailer = Yii::$app->mailer;
                             $mailer->htmlLayout = 'layouts/request';
                             $mailer->compose($templateMessage['email_template'], [
@@ -286,11 +286,11 @@ class RequestController extends ActiveController {
                     //Поехали рассылать
                     foreach ($vendor_users as $user) {
                         //Отправляем смс поставщику, о принятии решения по его отклику
-                        if ($user->profile->phone && $user->smsNotification->request_accept == 1) {
+                        if ($user->profile->phone && $user->getSmsNotification($model->responsible_supp_org_id)->request_accept == 1) {
                             Yii::$app->sms->send($templateMessage['sms_text'], $user->profile->phone);
                         }
                         //Отправляем емайлы поставщику, о принятии решения по его отклику
-                        if ($user->email && $user->emailNotification->request_accept == 1) {
+                        if ($user->email && $user->getEmailNotification($model->responsible_supp_org_id)->request_accept == 1) {
                             $mailer = Yii::$app->mailer;
                             $mailer->htmlLayout = 'layouts/request';
                             $mailer->compose($templateMessage['email_template'], [

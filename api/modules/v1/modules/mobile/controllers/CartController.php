@@ -456,7 +456,7 @@ class CartController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_created) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_created) {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -465,7 +465,7 @@ class CartController extends ActiveController {
 
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
+            if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
                 //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $text = "Новый заказ от " . $senderOrg->name . ' ' . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $profile->phone;

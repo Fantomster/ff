@@ -1937,13 +1937,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if (isset($recipient->emailNotification->order_changed) && $recipient->emailNotification->order_changed) {
+            if (isset($recipient->getEmailNotification($order->vendor_id)->order_changed) && $recipient->emailNotification->order_changed) {
                 $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+            if ($recipient->profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_changed) {
                 $text = Yii::$app->sms->prepareText('sms.order_changed', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -1974,13 +1974,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_done) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_done) {
                 $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
+            if ($recipient->profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_done) {
                 $text = Yii::$app->sms->prepareText('sms.order_done', [
                     'name' => $order->vendor->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -2013,13 +2013,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_created) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_created) {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
+            if ($recipient->profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
                 $text = Yii::$app->sms->prepareText('sms.order_new', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -2049,13 +2049,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_processing) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_processing) {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
+            if ($recipient->profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_processing) {
                 $text = Yii::$app->sms->prepareText('sms.order_processing', [
                     'vendor_name' => $order->vendor->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -2085,13 +2085,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_canceled) {
+            if ($recipient->getEmailNotification($order->vendor_id)->order_canceled) {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
+            if ($recipient->profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_canceled) {
                 $text = Yii::$app->sms->prepareText('sms.order_canceled', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)

@@ -74,4 +74,60 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('VendorWebApi')->create($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/vendor/update",
+     *     tags={"Vendor"},
+     *     summary="Редактирование поставщика",
+     *     description="Редактирование поставщика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                             "id": 3551,
+     *                             "email":"test@test.ru",
+     *                             "fio":"Donald Trump",
+     *                             "phone": "+79182225588",
+     *                             "organization_name": "ООО Рога и Копыта",
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "id": 3551,
+     *                  "name": "PIXAR STUDIO",
+     *                  "cat_id": 1,
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.gif",
+     *                  "address": "Ханты-Мансийск, улица Ленина",
+     *                  "status":"Партнер"
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdate()
+    {
+        $this->response = $this->container->get('VendorWebApi')->update($this->request);
+    }
 }

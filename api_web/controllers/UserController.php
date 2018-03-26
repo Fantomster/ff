@@ -183,14 +183,18 @@ class UserController extends WebApiController
      *         "organization": {
      *           {
      *               "id": 1,
+     *               "name": "El postavshik",
+     *               "phone": "",
+     *               "email": "El-postavshik@El1postavshik.ru",
+     *               "address": "ул. Егорьевская, 1, Москва, Россия, 109387",
+     *               "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
      *               "type_id": 2,
-     *               "name": "ООО Рога и Копыта",
+     *               "type": "Поставщик",
+     *               "rating": 0,
      *               "city": "Москва",
-     *               "address": "ул. Госпитальный Вал, Москва, Россия",
-     *               "phone": "+79162225588",
-     *               "email": "test@test.ru",
-     *               "picture": "http://mixcart.ru/pic/pic1.jpeg",
-     *               "rating": 23
+     *               "administrative_area_level_1": null,
+     *               "country": "Россия",
+     *               "about": ""
      *           }
      *         }
      *   }
@@ -224,7 +228,8 @@ class UserController extends WebApiController
      *         @SWG\Schema (
      *              @SWG\Property(
      *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
+     *                  type="object",
+     *                  default={"token":"asdasdasdasd"}
      *              ),
      *              @SWG\Property(
      *                  property="request",
@@ -392,8 +397,9 @@ class UserController extends WebApiController
      *                               {
      *                                       "id": 3551,
      *                                       "name": "PIXAR STUDIO",
+     *                                       "cat_id": 1,
      *                                       "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.gif",
-     *                                       "location": "Ханты-Мансийск, улица Ленина",
+     *                                       "address": "Ханты-Мансийск, улица Ленина",
      *                                       "status":"Партнер"
      *                               }}
      *                               ,
@@ -419,5 +425,51 @@ class UserController extends WebApiController
     public function actionVendors()
     {
         $this->response = $this->container->get('UserWebApi')->getVendors($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/user/remove-vendor",
+     *     tags={"User"},
+     *     summary="Открепить поставщика",
+     *     description="Удаляем связь между рестораном и поставщиком",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                               "vendor_id":1
+     *                           }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"result": true}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRemoveVendor()
+    {
+        $this->response = $this->container->get('UserWebApi')->removeVendor($this->request);
     }
 }

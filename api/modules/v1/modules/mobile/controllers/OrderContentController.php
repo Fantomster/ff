@@ -349,7 +349,10 @@ class OrderContentController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->getEmailNotification($order->vendor_id)->order_canceled) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_canceled)
+                {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -357,8 +360,11 @@ class OrderContentController extends ActiveController {
             }
             
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
-            
-            if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)>order_canceled) {
+
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($profile->phone && $notification->order_canceled)
+                {
                 $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);

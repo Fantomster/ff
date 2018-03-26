@@ -60,13 +60,19 @@ class OrderNotice
         $order->recipientsList;
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->getEmailNotification($order->vendor_id)->order_created) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_created)
+                {
                 $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                     ->setTo($email)
                     ->setSubject($subject)
                     ->send();
             }
-            if ($recipient->profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($recipient->profile->phone && $notification->order_created)
+                {
                 $text = Yii::$app->sms->prepareText('sms.order_new', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)

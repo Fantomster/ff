@@ -9,10 +9,8 @@ use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;
-use common\models\CatalogGoods;
 use common\models\Organization;
 use common\models\RelationSuppRest;
-use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -161,4 +159,13 @@ class VendorWebApi extends \api_web\components\WebApi
         }
     }
 
+    /**
+     * Обновление поставщика
+     * @param array $post
+     * @throws BadRequestHttpException
+     */
+    public function update(array $post)
+    {
+        throw new BadRequestHttpException('В работе');
+    }
 }

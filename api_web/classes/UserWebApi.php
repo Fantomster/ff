@@ -8,6 +8,7 @@ use api_web\models\User;
 use common\models\Profile;
 use common\models\UserToken;
 use api_web\components\Notice;
+use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -195,11 +196,23 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @return mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function getAllOrganization()
     {
-        return $this->user->getAllOrganization();
+        $list_organisation = $this->user->getAllOrganization();
+        if (empty($list_organisation)) {
+            throw new BadRequestHttpException('Нет доступных организаций');
+        }
+
+        $result = [];
+        foreach ($list_organisation as $item) {
+            $model = Organization::findOne($item['id']);
+            $result[] = (new MarketWebApi())->prepareOrganization($model);
+        }
+
+        return $result;
     }
 
     /**
@@ -322,6 +335,47 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     * @throws \yii\db\Exception
+     */
+    public function removeVendor(array $post)
+    {
+        if (empty($post['vendor_id'])) {
+            throw new BadRequestHttpException('Empty vendor_id');
+        }
+
+        $id = (int)$post['vendor_id'];
+        $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
+
+        if (empty($vendor)) {
+            throw new BadRequestHttpException('Not found vendor');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $where = [
+                'rest_org_id' => $this->user->organization->id,
+                'supp_org_id' => $vendor->id
+            ];
+
+            if (RelationSuppRest::find()->where($where)->exists() || RelationSuppRestPotential::find()->where($where)->exists()) {
+                RelationSuppRest::deleteAll($where);
+                RelationSuppRestPotential::deleteAll($where);
+            } else {
+                throw new BadRequestHttpException('Вы не работаете с этим поставщиком');
+            }
+            $transaction->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Информация о поставщике
      * @param RelationSuppRest $model
      * @return array
@@ -353,14 +407,16 @@ class UserWebApi extends \api_web\components\WebApi
             $status = $status_list[3];
         }
 
-
         return [
             'id' => (int)$model->vendor->id,
             'name' => $model->vendor->name,
             'cat_id' => (int)$model->cat_id,
+            'email' => $model->vendor->email,
+            'phone' => $model->vendor->phone,
             'status' => $status,
             'picture' => $model->vendor->getPictureUrl(),
-            'address' => implode(', ', $locality)
+            'address' => implode(', ', $locality),
+            'rating' => $model->vendor->rating
         ];
     }
 }

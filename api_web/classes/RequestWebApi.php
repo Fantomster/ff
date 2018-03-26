@@ -102,13 +102,13 @@ class RequestWebApi extends WebApi
             /**
              * Фильтр по Категории
              */
-            if (isset($post['search']['category'])) {
+            if (!empty($post['search']['category'])) {
                 $query->andWhere(['category' => (int)$post['search']['category']]);
             }
             /**
              * поиск по продукту
              */
-            if (isset($post['search']['product'])) {
+            if (!empty($post['search']['product'])) {
                 $query->andWhere(['like', 'product', $post['search']['product']]);
             }
             /**

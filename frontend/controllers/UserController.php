@@ -153,6 +153,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
+                    $user->setRelationUserOrganization($user->id, $organization->id, $role::getManagerRole($organization->type_id));
                     $transaction->commit();
                 } catch (Exception $ex) {
                     $transaction->rollBack();

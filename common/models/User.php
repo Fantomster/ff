@@ -60,7 +60,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
             [['organization_id'], 'integer'],
-            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => RelationUserOrganization::className(), 'targetAttribute' => 'organization_id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 
         // add required for currentPassword on account page
@@ -78,15 +78,6 @@ class User extends \amnah\yii2\user\models\User {
         }
 
         return $rules;
-    }
-
-
-    public function getOrganization_id(): int {
-        $rel = RelationUserOrganization::findOne(['user_id'=>$this->id, 'is_active'=>1]);
-        if(!$rel){
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.user.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
-        }
-        return $rel->organization_id;
     }
 
 

@@ -183,14 +183,18 @@ class UserController extends WebApiController
      *         "organization": {
      *           {
      *               "id": 1,
+     *               "name": "El postavshik",
+     *               "phone": "",
+     *               "email": "El-postavshik@El1postavshik.ru",
+     *               "address": "ул. Егорьевская, 1, Москва, Россия, 109387",
+     *               "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
      *               "type_id": 2,
-     *               "name": "ООО Рога и Копыта",
+     *               "type": "Поставщик",
+     *               "rating": 0,
      *               "city": "Москва",
-     *               "address": "ул. Госпитальный Вал, Москва, Россия",
-     *               "phone": "+79162225588",
-     *               "email": "test@test.ru",
-     *               "picture": "http://mixcart.ru/pic/pic1.jpeg",
-     *               "rating": 23
+     *               "administrative_area_level_1": null,
+     *               "country": "Россия",
+     *               "about": ""
      *           }
      *         }
      *   }
@@ -224,7 +228,8 @@ class UserController extends WebApiController
      *         @SWG\Schema (
      *              @SWG\Property(
      *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
+     *                  type="object",
+     *                  default={"token":"asdasdasdasd"}
      *              ),
      *              @SWG\Property(
      *                  property="request",

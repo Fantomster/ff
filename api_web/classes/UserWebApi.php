@@ -196,11 +196,23 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @return mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function getAllOrganization()
     {
-        return $this->user->getAllOrganization();
+        $list_organisation = $this->user->getAllOrganization();
+        if (empty($list_organisation)) {
+            throw new BadRequestHttpException('Нет доступных организаций');
+        }
+
+        $result = [];
+        foreach ($list_organisation as $item) {
+            $model = Organization::findOne($item['id']);
+            $result[] = (new MarketWebApi())->prepareOrganization($model);
+        }
+
+        return $result;
     }
 
     /**
@@ -395,14 +407,16 @@ class UserWebApi extends \api_web\components\WebApi
             $status = $status_list[3];
         }
 
-
         return [
             'id' => (int)$model->vendor->id,
             'name' => $model->vendor->name,
             'cat_id' => (int)$model->cat_id,
+            'email' => $model->vendor->email,
+            'phone' => $model->vendor->phone,
             'status' => $status,
             'picture' => $model->vendor->getPictureUrl(),
-            'address' => implode(', ', $locality)
+            'address' => implode(', ', $locality),
+            'rating' => $model->vendor->rating
         ];
     }
 }

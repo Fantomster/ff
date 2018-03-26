@@ -159,4 +159,13 @@ class VendorWebApi extends \api_web\components\WebApi
         }
     }
 
+    /**
+     * Обновление поставщика
+     * @param array $post
+     * @throws BadRequestHttpException
+     */
+    public function update(array $post)
+    {
+        throw new BadRequestHttpException('В работе');
+    }
 }

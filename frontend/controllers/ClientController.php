@@ -353,7 +353,7 @@ class ClientController extends DefaultController {
     public function actionChkmail() {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $result = RestaurantChecker::checkEmail(\Yii::$app->request->post('email'));
+            $result = Organization::checkEmail(\Yii::$app->request->post('email'));
             return $result;
         }
     }

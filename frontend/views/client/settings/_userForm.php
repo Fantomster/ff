@@ -7,7 +7,10 @@ use common\models\Role;
 use kartik\checkbox\CheckboxX;
 
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
+kartik\select2\Select2Asset::register($this);
+\frontend\assets\HandsOnTableAsset::register($this);
 ?>
+<?php \yii\widgets\Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
 <?php
 $form = ActiveForm::begin([
             'id' => 'user-form',
@@ -68,3 +71,50 @@ $form = ActiveForm::begin([
     <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('message', 'frontend.views.client.settings.cancel_two', ['ru'=>'Отмена']) ?></a>
 </div>
 <?php ActiveForm::end(); ?>
+<?php \yii\widgets\Pjax::end(); ?>
+
+
+<?php
+$chkmailUrl = Url::to(['client/chkmail']);
+
+$customJs = <<< JS
+
+$('#user-form').on('afterValidateAttribute', function (event, attribute, messages) {	
+	var hasError = messages.length !==0;
+    var field = $(attribute.container);
+    var input = field.find(attribute.input);
+	input.attr("aria-invalid", hasError ? "true" : "false");
+    if (attribute.name === 'email' && !hasError)
+        {
+            $.ajax({
+            url: "$chkmailUrl",
+            type: "POST",
+            dataType: "json",
+            data: {'email' : input.val()},
+            success: function(response) {
+                if(response.success){
+	                if(response.eventType==6){
+		                var fio = response.fio;
+                        var phone = response.phone; 
+                        var organization = response.organization;
+	                    $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
+                        $('#organization-name').val(organization);
+                        $('#user-newpassword').val('********');
+                        $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').attr('readonly','readonly');
+		                console.log('type = 6');    
+	                }               
+                } else {
+		            console.log(response.message); 
+                }
+            },
+            error: function(response) {
+		        console.log(response.message); 
+            }
+        }); 
+	}	 
+});
+
+JS;
+
+$this->registerJs($customJs, \yii\web\View::POS_READY);

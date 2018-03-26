@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
+use common\models\vendor\VendorChecker;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -115,6 +116,7 @@ class VendorController extends DefaultController
                             'remove-delivery-region',
                             'ajax-change-currency',
                             'ajax-calculate-prices',
+                            'chkmail'
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -2439,6 +2441,14 @@ class VendorController extends DefaultController
         $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
 
         return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+    }
+
+    public function actionChkmail() {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = Organization::checkEmail(\Yii::$app->request->post('email'));
+            return $result;
+        }
     }
 
 }

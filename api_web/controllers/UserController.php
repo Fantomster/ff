@@ -392,8 +392,9 @@ class UserController extends WebApiController
      *                               {
      *                                       "id": 3551,
      *                                       "name": "PIXAR STUDIO",
+     *                                       "cat_id": 1,
      *                                       "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.gif",
-     *                                       "location": "Ханты-Мансийск, улица Ленина",
+     *                                       "address": "Ханты-Мансийск, улица Ленина",
      *                                       "status":"Партнер"
      *                               }}
      *                               ,

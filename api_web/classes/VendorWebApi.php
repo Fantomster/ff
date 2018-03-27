@@ -2,8 +2,8 @@
 
 namespace api_web\classes;
 
-use api_web\exceptions\ValidationException;
 use Yii;
+use api_web\exceptions\ValidationException;
 use common\models\Profile;
 use common\models\restaurant\RestaurantChecker;
 use common\models\User;
@@ -152,19 +152,33 @@ class VendorWebApi extends \api_web\components\WebApi
                 }
                 return $result;
 
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $transaction->rollback();
                 throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
             }
         }
     }
 
+    /**
+     * Поиск поставщика по емайл
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function search(array $post)
+    {
+        if (empty($post['email'])) {
+            throw new BadRequestHttpException('Empty search attribute email');
+        }
 
-    public function search(array $post) {
+        $model = Organization::find()->where(['email' => $post['email'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
+        if (!empty($model)) {
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        }
 
-        return $post;
-
+        return [];
     }
+
     /**
      * Обновление поставщика
      * @param array $post

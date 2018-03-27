@@ -36,14 +36,14 @@ class VendorController extends WebApiController
      *                               },
      *                               "catalog":{
      *                                   "products":{
-    {
-    "product": "Треска горячего копчения",
-    "price": 499.80,
-    "ed": "шт."
-    }
-     *                               },
-     *     "currency_id": 1
-     *                           }
+     *                                      {
+     *                                          "product": "Треска горячего копчения",
+     *                                          "price": 499.80,
+     *                                          "ed": "шт."
+     *                                      }
+     *                                  },
+     *                                  "currency_id": 1
+     *                              }
      *                      }
      *              )
      *         )
@@ -53,11 +53,11 @@ class VendorController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-                                "success": true,
-     *                          "organization_id": 2222,
-     *                          "user_id": 1111,
-                                "message": "Поставщик ООО Рога и Копыта и каталог добавлен! Инструкция по авторизации была отправлена на почту test@test.ru"
-    }
+     *                "success": true,
+     *                "organization_id": 2222,
+     *                "user_id": 1111,
+     *                "message": "Поставщик ООО Рога и Копыта и каталог добавлен! Инструкция по авторизации была отправлена на почту test@test.ru"
+     *              }
      *          ),
      *     ),
      *     @SWG\Response(
@@ -103,13 +103,17 @@ class VendorController extends WebApiController
      *              default={
      *                         "id": 3449,
      *                         "name": "testsellfknm4 - поставщик",
-     *                         "cat_id": 0,
-     *                         "email": "testsellfknm4@yandex.ru",
      *                         "phone": "+7 925 764-84-45",
-     *                         "status": "Партнер. Каталог не назначен",
-     *                         "picture": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
-     *                         "address": "Россия, Москва, Волгоградский проспект",
-     *                         "rating": 31
+     *                         "email": "testsellfknm4@yandex.ru",
+     *                         "address": "Волгоградский пр., 143к2, Москва, Россия, 109378",
+     *                         "image": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
+     *                         "type_id": 2,
+     *                         "type": "Поставщик",
+     *                         "rating": 5,
+     *                         "city": "Москва",
+     *                         "administrative_area_level_1": null,
+     *                         "country": "Россия",
+     *                         "about": "1233"
      *             }
      *          ),
      *     ),

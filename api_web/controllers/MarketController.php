@@ -45,29 +45,49 @@ class MarketController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default=
-     *{
+     *    {
      *          "headers":{
      *              {
      *                  "id": "ID",
-    "product": "Название"
+     *                  "product": "Название",
+     *                  "catalog_id": "Catalog Id",
+     *                  "category_id ": "Category Id",
+     *                  "price": "Цена",
+     *                  "discount_price": "common.models.discount_price",
+     *                  "rating": "Рейтинг",
+     *                  "supplier": "Поставщик",
+     *                  "supplier_id": "Supplier Id",
+     *                  "brand": "Производитель",
+     *                  "article": "Артикул",
+     *                  "ed": "Единица измерения",
+     *                  "units": "Кратность",
+     *                  "currency": "Currency",
+     *                  "image": "Картинка продукта",
+     *                  "in_basket": "In Basket"
      *              }
      *          }
      *          ,
-     *          "products":{
+     *          "products":
      *          {
-     *              "id": 95940,
-    "product":"Ячменное фирменное св. фильтрованное паст. (20 шт.)",
-    "catalog_id":652,
-    "price":995.5,
-    "rating":3.3,
-    "supplier":"ООО АН-ПРИНТ",
-    "brand":"",
-    "article":"843",
-    "currency":"RUB",
-    "ed":"шт",
-    "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
-    "in_basket":0
-     *          }}
+     *              {
+     *                  "id": 110350,
+     *                  "product": "Ячневая крупа ГЛОБАЛ ФУД 600гр/12шт",
+     *                  "catalog_id": 706,
+     *                  "category_id ": 129,
+     *                  "price": 17.82,
+     *                  "discount_price": 0,
+     *                  "rating": 0.7,
+     *                  "supplier": "ООО Глобал Фуд",
+     *                  "supplier_id": 754,
+     *                  "brand": "",
+     *                  "article": "49",
+     *                  "ed": "шт",
+     *                  "units": 1,
+     *                  "currency": "RUB",
+     *                  "image": "https://mixcart.ru/fmarket/images/product_placeholder.jpg",
+     *                  "in_basket": 0
+     *              }
+     *          }
      *          ,
      *          "pagination":{
      *              "page":1,
@@ -172,23 +192,26 @@ class MarketController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              default=
-     *{
-     *       "product": {
-     *          "id": 95940,
-    "product":"Ячменное фирменное св. фильтрованное паст. (20 шт.)",
-    "catalog_id":652,
-    "price":995.5,
-    "rating":3.3,
-    "supplier":"ООО АН-ПРИНТ",
-    "brand":"",
-    "article":"843",
-    "currency":"RUB",
-    "ed":"шт",
-    "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
-    "in_basket":0
-     *       }
-     *}
+     *              default={
+     *                "product":{
+     *                    "id": 95940,
+     *                    "product": "Ячменное фирменное св. фильтрованное паст. (20 шт.)",
+     *                    "catalog_id": 652,
+     *                    "category_id ": 56,
+     *                    "price": 995.5,
+     *                    "discount_price": 0,
+     *                    "rating": 3.3,
+     *                    "supplier": "ООО АН-ПРИНТ",
+     *                    "supplier_id": 935,
+     *                    "brand": "",
+     *                    "article": "843",
+     *                    "ed": "упаковка",
+     *                    "units": 1,
+     *                    "currency": "RUB",
+     *                    "image": "https://mixcart.ru/fmarket/images/product_placeholder.jpg",
+     *                    "in_basket": 0
+     *                }
+     *             }
      *          ),
      *     ),
      *     @SWG\Response(
@@ -244,26 +267,37 @@ class MarketController extends WebApiController
      *              default={
      *                               "headers":{
      *                                   {
+     *                                       "id": "ID",
      *                                       "name": "Название организации",
-     *                                       "phone": "Телефон"
+     *                                       "phone": "Телефон",
+     *                                       "email": "Email организации",
+     *                                       "address": "Адрес",
+     *                                       "image": "Image",
+     *                                       "type_id": "Тип бизнеса",
+     *                                       "type": "Type",
+     *                                       "rating": "Rating",
+     *                                       "city": "Город",
+     *                                       "administrative_area_level_1": "Область",
+     *                                       "country": "Страна",
+     *                                       "about": "Информация об организации"
      *                                   }
      *                               }
      *                               ,
      *                               "organizations":{
      *                               {
-     *                                      "id": 3551,
-     *                                       "name": "PIXAR STUDIO",
-     *                                       "phone": "89162802800",
-     *                                       "email": "test@test.ru",
-     *                                       "address": "улица Ленина",
-     *                                       "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.gif",
-     *                                       "type_id": 2,
-     *                                       "type": "Поставщик",
-     *                                       "rating": 2.9,
-     *                                       "city": "Ханты-Мансийск",
-     *                                       "administrative_area_level_1": "Ханты-Мансийский автономный округ",
-     *                                       "country": "Россия",
-     *                                       "about": "О компании"
+     *                                      "id": 88,
+     *                                      "name": "Фрутти Рум",
+     *                                      "phone": "+7 926 844-31-82",
+     *                                      "email": "fruttiroom@mail.ru",
+     *                                      "address": "Новохохловская улица, 14, Москва, Москва, Россия",
+     *                                      "image": "https://fkeeper.s3.amazonaws.com/org-picture/7a845f0eaf944721f11a53bc06640268.jpg",
+     *                                      "type_id": 2,
+     *                                      "type": "Поставщик",
+     *                                      "rating": 5,
+     *                                      "city": "Москва",
+     *                                      "administrative_area_level_1": "Москва",
+     *                                      "country": "Россия",
+     *                                      "about": "Доставка овощей и фруктов, а также высококачественных продуктов, для кафе, баров, ресторанов, столовых, линий фудкортов, служб кейтеринговых услуг и др."
      *                               }}
      *                               ,
      *                               "pagination":{

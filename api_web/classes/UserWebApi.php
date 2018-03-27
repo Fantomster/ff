@@ -10,6 +10,7 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
@@ -229,11 +230,6 @@ class UserWebApi extends \api_web\components\WebApi
         $currentOrganization = $this->user->organization;
         $searchModel = new \common\models\search\VendorSearch();
 
-        //Поиск по адресу
-        if (isset($post['search']['address'])) {
-            $searchModel->search_address = $post['search']['address'];
-        }
-
         $dataProvider = $searchModel->search([], $currentOrganization->id);
         $dataProvider->pagination->setPage($page - 1);
         $dataProvider->pagination->pageSize = $pageSize;
@@ -244,20 +240,42 @@ class UserWebApi extends \api_web\components\WebApi
         if (isset($post['search']['status'])) {
             switch ($post['search']['status']) {
                 case 1:
-                    $addWhere = ['invite' => 1, 'relation_supp_rest.status' => 1];
+                    $addWhere = ['invite' => 1, 'u.status' => 1];
                     break;
                 case 2:
-                    $addWhere = ['invite' => 1, 'relation_supp_rest.status' => 0];
+                    $addWhere = ['invite' => 1, 'u.status' => 0];
                     break;
                 case 3:
                     $addWhere = ['or',
-                        ['invite' => 0, 'relation_supp_rest.status' => 1],
-                        ['invite' => 0, 'relation_supp_rest.status' => 0]
+                        ['invite' => 0, 'u.status' => 1],
+                        ['invite' => 0, 'u.status' => 0]
                     ];
                     break;
             }
             if (isset($addWhere)) {
-                $dataProvider->query->andWhere($addWhere);
+                $dataProvider->query->andFilterWhere($addWhere);
+            }
+        }
+
+        //Поиск по адресу
+        if (isset($post['search']['location'])) {
+            if(strstr($post['search']['location'], ':') !== false) {
+                $location = explode(':', $post['search']['location']);
+                if (is_array($location)) {
+                    if (isset($location[0])) {
+                        $dataProvider->query->andFilterWhere(['u.country' => $location[0]]);
+                    }
+                    if (isset($location[1])) {
+                        $dataProvider->query->andFilterWhere(['u.locality' => $location[1]]);
+                    }
+                }
+            } else {
+                $dataProvider->query->andFilterWhere(
+                    ['or',
+                        ['u.country' => $post['search']['location']],
+                        ['u.locality' => $post['search']['location']]
+                    ]
+                );
             }
         }
 
@@ -335,6 +353,53 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Список географического расположения поставщиков ресторана
+     * @return array
+     */
+    public function getVendorLocationList()
+    {
+        $currentOrganization = $this->user->organization;
+        $searchModel = new \common\models\search\VendorSearch();
+        $dataProvider = $searchModel->search([], $currentOrganization->id);
+
+        $return = [];
+        $vendor_ids = [];
+
+        $models = $dataProvider->getModels();
+        if (!empty($models)) {
+            foreach ($models as $model) {
+                $vendor_ids[] = $model->supp_org_id;
+            }
+
+            $vendor_ids = array_unique($vendor_ids);
+
+            $query = new Query();
+            $query->distinct();
+            $query->from(Organization::tableName());
+            $query->select(['country', 'locality']);
+            $query->where(['in', 'id', $vendor_ids]);
+            $query->andWhere('country is not null');
+            $query->andWhere("country != 'undefined'");
+            $query->andWhere('locality is not null');
+            $query->andWhere("locality != 'undefined'");
+
+            $result = $query->all();
+
+            if ($result) {
+                foreach ($result as $row) {
+                    $return[] = [
+                        'title' => $row['country'] . ', г. ' . $row['locality'],
+                        'value' => trim($row['country']) . ':' . trim($row['locality'])
+                    ];
+                }
+            }
+
+        }
+
+        return $return;
+    }
+
+    /**
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -409,14 +474,14 @@ class UserWebApi extends \api_web\components\WebApi
 
         return [
             'id' => (int)$model->vendor->id,
-            'name' => $model->vendor->name,
+            'name' => $model->vendor->name ?? "",
             'cat_id' => (int)$model->cat_id,
-            'email' => $model->vendor->email,
-            'phone' => $model->vendor->phone,
+            'email' => $model->vendor->email ?? "",
+            'phone' => $model->vendor->phone ?? "",
             'status' => $status,
-            'picture' => $model->vendor->getPictureUrl(),
+            'picture' => $model->vendor->getPictureUrl() ?? "",
             'address' => implode(', ', $locality),
-            'rating' => $model->vendor->rating
+            'rating' => $model->vendor->rating ?? 0
         ];
     }
 }

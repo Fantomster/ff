@@ -392,7 +392,7 @@ class UserWebApi extends \api_web\components\WebApi
             if ($result) {
                 foreach ($result as $row) {
                     $return[] = [
-                        'title' => $row['country'] . ', г. ' . $row['locality'],
+                        'title' => $row['country'] . ', ' . $row['locality'],
                         'value' => trim($row['country']) . ':' . trim($row['locality'])
                     ];
                 }

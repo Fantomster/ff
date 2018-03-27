@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use market\components\ImagesHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use common\behaviors\SluggableBehavior;
@@ -92,5 +93,13 @@ class MpCategory extends \yii\db\ActiveRecord {
 
     public function getParentCategory() {
         return MpCategory::find()->where(["id" => $this->parent])->one();
+    }
+
+    /**
+     * Картинка категории
+     * @return string
+     */
+    public function getImage() {
+        return ImagesHelper::getUrl($this->id);
     }
 }

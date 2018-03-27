@@ -145,7 +145,8 @@ class MarketWebApi extends WebApi
                 foreach ($all_child as $child) {
                     $return[$model->name][] = [
                         'id' => $child->id,
-                        'name' => $child->name
+                        'name' => $child->name,
+                        'image' => $child->image
                     ];
                 }
             }

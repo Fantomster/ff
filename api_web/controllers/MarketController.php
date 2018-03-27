@@ -120,13 +120,15 @@ class MarketController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default=
-     *{
-     *          "Мясо": {
-    {
-    "id": 2,
-    "name": "Баранина"
-    }
-     *         }}
+     *              {
+     *                  "Мясо": {
+     *                           {
+     *                              "id": 2,
+     *                              "name": "Баранина",
+     *                              "image": "http://web.mixcart.local/fmarket/images/product_placeholder.jpg"
+     *                           }
+     *                   }
+     *              }
      *          ),
      *     ),
      *     @SWG\Response(

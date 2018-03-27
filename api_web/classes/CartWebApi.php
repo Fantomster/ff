@@ -236,7 +236,7 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function recalculationQuantity($product, $quantity)
     {
-        if ($quantity < $product->model->units) {
+        if ($quantity < $product->model->units OR $product->model->units == 0) {
             $quantity = $product->model->units;
         } else {
             $quantity = round($quantity / $product->model->units, 0) * $product->model->units;

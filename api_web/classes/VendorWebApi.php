@@ -171,9 +171,16 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty search attribute email');
         }
 
-        $model = Organization::find()->where(['email' => $post['email'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
+        $email = $post['email'];
+
+        $model = Organization::find()->where(['email' => $email, 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (!empty($model)) {
             return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        }
+
+        $user = User::find()->where(['email' => $email])->one();
+        if (!empty($user)) {
+            throw new BadRequestHttpException("Email $email является пользователем. Необходимо уточнить email адрес поставщика.");
         }
 
         return [];

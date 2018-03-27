@@ -314,8 +314,8 @@ class CartWebApi extends \api_web\components\WebApi
         /**
          * Если не установлена кратность, считаем кратность 0
          */
-        if ($baseModel->units <= 0) {
-            $baseModel->units = 1;
+        if (empty($baseModel->units)) {
+            $baseModel->units = 0;
         }
 
         if ($model instanceof CatalogGoods) {
@@ -348,7 +348,7 @@ class CartWebApi extends \api_web\components\WebApi
         $item['brand'] = ($model->model->brand ? $model->model->brand : '');
         $item['article'] = $model->model->article;
         $item['ed'] = $model->model->ed;
-        $item['units'] = round(($model->model->units ?? 0), 2);
+        $item['units'] = round(($model->model->units ?? 0), 3);
         $item['currency'] = $model->model->catalog->currency->symbol;
         $item['image'] = (new MarketWebApi())->getProductImage($model->model);
         $item['in_basket'] = $this->countProductInCart($model->model->id);

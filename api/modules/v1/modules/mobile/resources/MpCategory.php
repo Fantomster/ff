@@ -7,16 +7,17 @@ namespace api\modules\v1\modules\mobile\resources;
  */
 class MpCategory extends \common\models\MpCategory
 {
+    public $language;
     public function fields()
     {
-        return ['id', 'parent', 'name'];
+        return ['id', 'parent', 'name','language'];
     }
     
     public function rules()
     {
         return [
             [['parent'], 'integer'],
-            [['name'], 'string', 'max' => 255],
+            [['name','language'], 'string', 'max' => 255],
         ];
     }
 

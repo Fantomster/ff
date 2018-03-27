@@ -88,6 +88,10 @@ class SettingsController extends DefaultController {
         $smsNotification = ($smsNotification == null ) ? new SmsNotification() : $smsNotification;
 
         if($emailNotification && $smsNotification){
+            if($emailNotification->isNewRecord)
+                $emailNotification->loadDefaultValues();
+            if($smsNotification->isNewRecord)
+                $smsNotification->loadDefaultValues();
             if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post())) {
                 $emailNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;
                 $smsNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;

@@ -386,6 +386,7 @@ class UserWebApi extends \api_web\components\WebApi
             $query->andWhere('locality is not null');
             $query->andWhere("locality != 'undefined'");
             $query->andWhere("locality != ''");
+            $query->orderBy('country');
 
             $result = $query->all();
 

@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\DeliveryRegions;
 use common\models\CatalogBaseGoods;
 use common\models\RelationSuppRest;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -139,13 +140,15 @@ class MarketWebApi extends WebApi
     {
         $return = [];
         $categories = MpCategory::find()->where('parent is null')->all();
+        \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
             $all_child = $model->child;
             if (!empty($all_child)) {
                 foreach ($all_child as $child) {
                     $return[$model->name][] = [
                         'id' => $child->id,
-                        'name' => $child->name
+                        'name' => $child->name,
+                        'image' => $this->getCategoryImage($child->id)
                     ];
                 }
             }
@@ -319,7 +322,8 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = (int)$model->catalog->id;
+        $item['catalog_id'] = ((int)$model->catalog->id ?? null);
+        $item['category_id '] = ((int)$model->category->id ?? null);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
         $item['rating'] = round($model->ratingStars, 1);
@@ -375,6 +379,18 @@ class MarketWebApi extends WebApi
             return \Yii::$app->params['web'] . preg_replace('#http(.+?)\/\/(.+?)\/(.+?)#', '$3', $url);
         } else {
             return $url;
+        }
+    }
+
+    /**
+     *
+     */
+    private function getCategoryImage($id)
+    {
+        if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
+            return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);
+        } else {
+            return Url::to('@market_web/fmarket/images/product_placeholder.jpg', true);
         }
     }
 }

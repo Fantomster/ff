@@ -259,7 +259,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         //Поиск по адресу
         if (isset($post['search']['location'])) {
-            if(strstr($post['search']['location'], ':') !== false) {
+            if (strstr($post['search']['location'], ':') !== false) {
                 $location = explode(':', $post['search']['location']);
                 if (is_array($location)) {
                     if (isset($location[0])) {
@@ -361,6 +361,8 @@ class UserWebApi extends \api_web\components\WebApi
         $currentOrganization = $this->user->organization;
         $searchModel = new \common\models\search\VendorSearch();
         $dataProvider = $searchModel->search([], $currentOrganization->id);
+        $dataProvider->pagination->setPage(0);
+        $dataProvider->pagination->pageSize = 1000;
 
         $return = [];
         $vendor_ids = [];
@@ -380,15 +382,18 @@ class UserWebApi extends \api_web\components\WebApi
             $query->where(['in', 'id', $vendor_ids]);
             $query->andWhere('country is not null');
             $query->andWhere("country != 'undefined'");
+            $query->andWhere("country != ''");
             $query->andWhere('locality is not null');
             $query->andWhere("locality != 'undefined'");
+            $query->andWhere("locality != ''");
+            $query->orderBy('country');
 
             $result = $query->all();
 
             if ($result) {
                 foreach ($result as $row) {
                     $return[] = [
-                        'title' => $row['country'] . ', г. ' . $row['locality'],
+                        'title' => $row['country'] . ', ' . $row['locality'],
                         'value' => trim($row['country']) . ':' . trim($row['locality'])
                     ];
                 }

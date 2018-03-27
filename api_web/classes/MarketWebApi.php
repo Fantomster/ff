@@ -145,10 +145,17 @@ class MarketWebApi extends WebApi
             $all_child = $model->child;
             if (!empty($all_child)) {
                 foreach ($all_child as $child) {
+                    //Картинка категории
+                    $image = $this->getCategoryImage($child->id);
+                    //Если нет картинки, ставим картинку родителя
+                    if (strstr($image, 'product_placeholder') !== false) {
+                        $image = $this->getCategoryImage($model->id);
+                    }
+
                     $return[$model->name][] = [
                         'id' => $child->id,
                         'name' => $child->name,
-                        'image' => $this->getCategoryImage($child->id)
+                        'image' => $image
                     ];
                 }
             }
@@ -323,7 +330,7 @@ class MarketWebApi extends WebApi
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
         $item['catalog_id'] = ((int)$model->catalog->id ?? null);
-        $item['category_id '] = ((int)$model->category->id ?? null);
+        $item['category_id'] = ((int)$model->category->id ?? null);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
         $item['rating'] = round($model->ratingStars, 1);
@@ -383,7 +390,9 @@ class MarketWebApi extends WebApi
     }
 
     /**
-     *
+     * Картинка категории
+     * @param $id
+     * @return string
      */
     private function getCategoryImage($id)
     {

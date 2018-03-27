@@ -67,7 +67,7 @@ class VendorSearch extends RelationSuppRest {
                 ->select("$rspTable.rest_org_id, $rspTable.supp_org_id, $rspTable.cat_id, $rspTable.invite, 
                 $rspTable.created_at, $rspTable.updated_at, $rspTable.status, $rspTable.uploaded_catalog, $rspTable.uploaded_processed, 
                 $rspTable.is_from_market, $rspTable.deleted,           
-                $orgTable.name as vendor_name, $catTable.status as catalog_status")
+                $orgTable.name as vendor_name, $catTable.status as catalog_status, $orgTable.country, $orgTable.locality")
                 ->joinWith('catalog')
                 ->joinWith('vendor');
         $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false]);
@@ -85,7 +85,7 @@ class VendorSearch extends RelationSuppRest {
             ->select("$rspPTable.rest_org_id, $rspPTable.supp_org_id, $rspPTable.cat_id, $rspPTable.invite, 
                 $rspPTable.created_at, $rspPTable.updated_at, $rspPTable.status, $rspPTable.uploaded_catalog, $rspPTable.uploaded_processed, 
                 $rspPTable.is_from_market, $rspPTable.deleted, 
-                $orgTable.name as vendor_name, $catTable.status as catalog_status")
+                $orgTable.name as vendor_name, $catTable.status as catalog_status, $orgTable.country, $orgTable.locality")
             ->joinWith('catalog')
             ->joinWith('vendor');
         $query2->where(["$rspPTable.rest_org_id" => $client_id, "$rspPTable.deleted" => false]);

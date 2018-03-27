@@ -76,6 +76,59 @@ class VendorController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/vendor/search",
+     *     tags={"Vendor"},
+     *     summary="Поиск поставщика по email",
+     *     description="Поиск поставщика по email",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"email":"test@test.ru"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                         "id": 3449,
+     *                         "name": "testsellfknm4 - поставщик",
+     *                         "cat_id": 0,
+     *                         "email": "testsellfknm4@yandex.ru",
+     *                         "phone": "+7 925 764-84-45",
+     *                         "status": "Партнер. Каталог не назначен",
+     *                         "picture": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
+     *                         "address": "Россия, Москва, Волгоградский проспект",
+     *                         "rating": 31
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionSearch()
+    {
+        $this->response = $this->container->get('VendorWebApi')->search($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/vendor/update",
      *     tags={"Vendor"},
      *     summary="Редактирование поставщика",

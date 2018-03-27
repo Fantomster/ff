@@ -159,6 +159,12 @@ class VendorWebApi extends \api_web\components\WebApi
         }
     }
 
+
+    public function search(array $post) {
+
+        return $post;
+
+    }
     /**
      * Обновление поставщика
      * @param array $post

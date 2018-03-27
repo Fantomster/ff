@@ -239,7 +239,7 @@ class CartWebApi extends \api_web\components\WebApi
         if ($quantity < $product->model->units OR $product->model->units == 0) {
             $quantity = $product->model->units;
         } else {
-            $quantity = round($quantity / $product->model->units, 0) * $product->model->units;
+            $quantity = round($quantity / $product->model->units, 3) * $product->model->units;
         }
         return $quantity;
     }

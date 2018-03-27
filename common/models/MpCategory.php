@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use market\components\ImagesHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use common\behaviors\SluggableBehavior;

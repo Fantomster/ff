@@ -74,6 +74,7 @@ $this->registerJs('
 ');
 $this->registerCss("
     tr:hover{cursor: pointer;}
+    #orderHistory a:not(.btn){color: #333;}
         ");
 ?>
 <section class="content-header">
@@ -119,7 +120,7 @@ $this->registerCss("
                         <span class="info-box-number status done"><?= $fulfilledCount ?></span>
                         <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.ended', ['ru'=>'Завершено']) ?></span>
                     </div>
-                </div>    
+                </div>
             </div>
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box bg-total-price">
@@ -127,7 +128,7 @@ $this->registerCss("
                         <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> <i class="fa fa-fw fa-rub"></i></span>
                         <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.summ_completed', ['ru'=>'Всего выполнено на сумму']) ?></span>
                     </div>
-                </div>    
+                </div>
             </div>
             <div style="clear: both;">
             </div>
@@ -170,7 +171,7 @@ $this->registerCss("
                     }
                     ?>
                 </div>
-                <div class="col-lg-5 col-md-6 col-sm-6"> 
+                <div class="col-lg-5 col-md-6 col-sm-6">
                         <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru'=>'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
@@ -192,7 +193,7 @@ $this->registerCss("
                     </div>
                 </div>
                 <div class="col-lg-5 col-md-6 col-sm-6">
-                    
+
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
@@ -226,46 +227,46 @@ $this->registerCss("
                                 'value' => 'id',
                                 'label' => '№',
                                 'contentOptions'   =>   ['class' => 'small_cell_id'],
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                                return Html::a($data->id, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                },
                             ],
                             $organization->type_id == Organization::TYPE_RESTAURANT ? [
                                 'attribute' => 'vendor.name',
                                 'value' => 'vendor.name',
                                 'contentOptions'   =>   ['class' => 'small_cell_supp'],
                                 'label' => Yii::t('message', 'frontend.views.order.vendor', ['ru'=>'Поставщик']),
-                                    //'headerOptions' => ['class'=>'sorting',],
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                },
                                     ] : [
                                 'attribute' => 'client.name',
                                 'value' => 'client.name',
                                 'label' => Yii::t('message', 'frontend.views.order.rest_two', ['ru'=>'Ресторан']),
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return Html::a($data->client->name, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                },
                                     ],
                             [
                                 'attribute' => 'createdByProfile.full_name',
                                 'value' => 'createdByProfile.full_name',
                                 'label' => Yii::t('message', 'frontend.views.order.order_created_by', ['ru'=>'Заказ создал']),
                                 'contentOptions'   =>   ['class' => 'small_cell_sozdal'],
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return Html::a($data->createdByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                },
                             ],
                             [
                                 'attribute' => 'acceptedByProfile.full_name',
                                 'value' => 'acceptedByProfile.full_name',
-//                                'value' => function($data) {
-//                                    $arr = [];
-//                                    foreach ($data->orderChat as $chat){
-//                                        if(in_array($chat->user->role_id, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_ADMIN])){
-//                                            $arr[$chat->user->profile->full_name]=$chat->user->profile->full_name;
-//                                        }
-//                                    }
-//                                    if(isset($data->acceptedByProfile->full_name)){
-//                                        $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;
-//                                    }
-//                                    $string = '';
-//                                    foreach ($arr as $key => $value){
-//                                        $string.=$value;
-//                                        if($key!=end($arr)){
-//                                            $string.=', ';
-//                                        }
-//                                    }
-//                                    return $string;
-//                                },
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return Html::a($data->acceptedByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                },
                                 'label' => Yii::t('message', 'frontend.views.order.accepted_by', ['ru'=>'Заказ принял']),
                                 'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                             ],
@@ -273,7 +274,7 @@ $this->registerCss("
                                 'format' => 'raw',
                                 'attribute' => 'total_price',
                                 'value' => function($data) {
-                                    return "<b>$data->total_price</b> " . $data->currency->symbol;
+                                    return Html::a("<b>$data->total_price</b> " . $data->currency->symbol ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.summ', ['ru'=>'Сумма']),
                                 'contentOptions'   =>   ['class' => 'small_cell_sum'],
@@ -283,11 +284,11 @@ $this->registerCss("
                                 'attribute' => 'created_at',
                                 'value' => function($data) {
                                     $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                                    return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> ' . $date ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.creating_date', ['ru'=>'Дата создания']),
                                 'contentOptions'   =>   ['style' => 'min-width:120px;'],
-                               
+
                             ],
                             [
                                 'format'=>'raw',
@@ -298,7 +299,7 @@ $this->registerCss("
                                             $data->updated_at);
 
                                     $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
-                                    return '<i class="fa fa-fw fa-calendar""></i> '. $fdate;
+                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> '. $fdate ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.final_date', ['ru'=>'Дата финальная']),
                             ],
@@ -322,7 +323,7 @@ $this->registerCss("
                                             $statusClass = 'cancelled';
                                             break;
                                     }
-                                    return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
+                                    return Html::a('<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.status_two', ['ru'=>'Статус']),
                                 'contentOptions'   =>   ['class' => 'small_cell_status'],
@@ -365,9 +366,6 @@ $this->registerCss("
                                 'headerOptions' => ['style' => 'width: 20px;']
                             ],
                         ],
-                        'rowOptions' => function ($model, $key, $index, $grid) {
-                            return ['data-url' => Url::to(['order/view', 'id' => $model->id])];
-                        },
                     ]);
                     ?>
                 </div></div>

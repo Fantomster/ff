@@ -319,7 +319,8 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = (int)$model->catalog->id;
+        $item['catalog_id'] = ((int)$model->catalog->id ?? null);
+        $item['category_id '] = ((int)$model->category->id ?? null);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
         $item['rating'] = round($model->ratingStars, 1);

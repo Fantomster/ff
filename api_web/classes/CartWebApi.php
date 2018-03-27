@@ -314,8 +314,8 @@ class CartWebApi extends \api_web\components\WebApi
         /**
          * Если не установлена кратность, считаем кратность 0
          */
-        if ($baseModel->units <= 0) {
-            $baseModel->units = 1;
+        if (empty($baseModel->units)) {
+            $baseModel->units = 0;
         }
 
         if ($model instanceof CatalogGoods) {

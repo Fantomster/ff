@@ -380,8 +380,10 @@ class UserWebApi extends \api_web\components\WebApi
             $query->where(['in', 'id', $vendor_ids]);
             $query->andWhere('country is not null');
             $query->andWhere("country != 'undefined'");
+            $query->andWhere("country != ''");
             $query->andWhere('locality is not null');
             $query->andWhere("locality != 'undefined'");
+            $query->andWhere("locality != ''");
 
             $result = $query->all();
 

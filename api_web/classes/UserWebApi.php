@@ -361,6 +361,8 @@ class UserWebApi extends \api_web\components\WebApi
         $currentOrganization = $this->user->organization;
         $searchModel = new \common\models\search\VendorSearch();
         $dataProvider = $searchModel->search([], $currentOrganization->id);
+        $dataProvider->pagination->setPage(0);
+        $dataProvider->pagination->pageSize = 1000;
 
         $return = [];
         $vendor_ids = [];

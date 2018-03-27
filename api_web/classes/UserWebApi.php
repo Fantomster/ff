@@ -259,7 +259,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         //Поиск по адресу
         if (isset($post['search']['location'])) {
-            if(strstr($post['search']['location'], ':') !== false) {
+            if (strstr($post['search']['location'], ':') !== false) {
                 $location = explode(':', $post['search']['location']);
                 if (is_array($location)) {
                     if (isset($location[0])) {

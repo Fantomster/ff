@@ -94,12 +94,4 @@ class MpCategory extends \yii\db\ActiveRecord {
     public function getParentCategory() {
         return MpCategory::find()->where(["id" => $this->parent])->one();
     }
-
-    /**
-     * Картинка категории
-     * @return string
-     */
-    public function getImage() {
-        return ImagesHelper::getUrl($this->id);
-    }
 }

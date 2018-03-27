@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\DeliveryRegions;
 use common\models\CatalogBaseGoods;
 use common\models\RelationSuppRest;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -139,6 +140,7 @@ class MarketWebApi extends WebApi
     {
         $return = [];
         $categories = MpCategory::find()->where('parent is null')->all();
+        \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
             $all_child = $model->child;
             if (!empty($all_child)) {
@@ -146,7 +148,7 @@ class MarketWebApi extends WebApi
                     $return[$model->name][] = [
                         'id' => $child->id,
                         'name' => $child->name,
-                        'image' => $child->image
+                        'image' => $this->getCategoryImage($child->id)
                     ];
                 }
             }
@@ -377,6 +379,18 @@ class MarketWebApi extends WebApi
             return \Yii::$app->params['web'] . preg_replace('#http(.+?)\/\/(.+?)\/(.+?)#', '$3', $url);
         } else {
             return $url;
+        }
+    }
+
+    /**
+     *
+     */
+    private function getCategoryImage($id)
+    {
+        if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
+            return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);
+        } else {
+            return Url::to('@market_web/fmarket/images/product_placeholder.jpg', true);
         }
     }
 }

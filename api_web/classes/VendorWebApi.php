@@ -2,8 +2,8 @@
 
 namespace api_web\classes;
 
-use api_web\exceptions\ValidationException;
 use Yii;
+use api_web\exceptions\ValidationException;
 use common\models\Profile;
 use common\models\restaurant\RestaurantChecker;
 use common\models\User;
@@ -152,11 +152,38 @@ class VendorWebApi extends \api_web\components\WebApi
                 }
                 return $result;
 
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $transaction->rollback();
                 throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
             }
         }
+    }
+
+    /**
+     * Поиск поставщика по емайл
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function search(array $post)
+    {
+        if (empty($post['email'])) {
+            throw new BadRequestHttpException('Empty search attribute email');
+        }
+
+        $email = $post['email'];
+
+        $model = Organization::find()->where(['email' => $email, 'type_id' => Organization::TYPE_SUPPLIER])->one();
+        if (!empty($model)) {
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        }
+
+        $user = User::find()->where(['email' => $email])->one();
+        if (!empty($user)) {
+            throw new BadRequestHttpException("Email $email является пользователем. Необходимо уточнить email адрес поставщика.");
+        }
+
+        return [];
     }
 
     /**

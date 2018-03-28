@@ -17,7 +17,7 @@ class CatalogImport {
     }
 
     /**
-     * Валидация главного каталога
+     * Валидация индивидуального каталога
      * @param array $data
      * @return array
      */

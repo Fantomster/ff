@@ -17,8 +17,8 @@ use yii\web\BadRequestHttpException;
  * Class VendorWebApi
  * @package api_web\classes
  */
-class VendorWebApi extends \api_web\components\WebApi
-{
+class VendorWebApi extends \api_web\components\WebApi {
+
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
      * @param array $post
@@ -26,8 +26,7 @@ class VendorWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function create(array $post)
-    {
+    public function create(array $post) {
         $email = $post['user']['email'];
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
@@ -142,16 +141,14 @@ class VendorWebApi extends \api_web\components\WebApi
                 ];
 
                 if ($check['eventType'] == 5) {
-                    $result['message'] =
-                        Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
-                        $organization->name .
-                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
-                        $email;
+                    $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                            $organization->name .
+                            Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
+                            $email;
                 } else {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
                 return $result;
-
             } catch (Exception $e) {
                 $transaction->rollback();
                 throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
@@ -164,8 +161,30 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $post
      * @throws BadRequestHttpException
      */
-    public function update(array $post)
-    {
+    public function update(array $post) {
         throw new BadRequestHttpException('В работе');
     }
+
+    /**
+     * Импорт главного каталога
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function importMain(array $post) {
+        //
+    }
+
+    /**
+     * Импорт индивидуального каталога
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function importCustom(array $post) {
+        //
+    }
+
 }

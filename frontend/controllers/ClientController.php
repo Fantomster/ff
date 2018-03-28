@@ -2,13 +2,13 @@
 
 namespace frontend\controllers;
 
+use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
 use common\models\UserToken;
-use Yii;
 use common\models\User;
 use common\models\Role;
 use common\models\Order;

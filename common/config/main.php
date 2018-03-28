@@ -31,6 +31,12 @@ return [
                 'path' => '/public/http/'
             ]
         ],
+        'amo' => [
+            'class' => 'common\components\AmoCRM',
+            'url' => 'https://fkeeper.amocrm.ru',
+            'email' => 'zalina@f-keeper.ru',
+            'hash' => '6dab1d5a50b87036c49f4cd1e1593dfb',
+        ],
         'user' => [
             'class' => 'amnah\yii2\user\components\User',
             'identityClass' => 'common\models\User',

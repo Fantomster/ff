@@ -1429,24 +1429,29 @@ class VendorController extends DefaultController
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
 
-                $usersCount = count($user->organization->users);
-                if ($user->id == $this->currentUser->id) {
-                    $message = Yii::t('message', 'frontend.controllers.vendor.delete_yourself', ['ru' => 'Может воздержимся от удаления себя?']);
+                $relations = RelationUserOrganization::findAll(['organization_id'=>$this->currentUser->organization_id]);
+
+                $usersCount = count($relations);
+                if ($user->id == $this->currentUser->id && $usersCount < 2) {
+                    $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
-                    if($user->id == $this->currentUser->id){
-                        $rel2 = RelationUserOrganization::findOne(['user_id'=>$post['id']]);
-                        if($rel2){
-                            $user->organization_id = $rel2->organization_id;
+                    if($user->id == $this->currentUser->id) {
+                        $rel2 = RelationUserOrganization::find()->where(['user_id' => $post['id']])->andWhere(['not', ['organization_id' => $this->currentUser->organization_id]])->all();
+                        if (count($rel2) > 1) {
+                            $user->organization_id = $rel2[0]->organization_id;
+                            $user->role_id = $rel2[0]->role_id;
                             $user->save();
+                            User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
                             Yii::$app->user->logout();
                             return $this->goHome();
-                        }else{
+                        } else {
                             $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                             return $this->renderAjax('settings/_success', ['message' => $message]);
                         }
                     }
+
                     $isExists = User::deleteUserFromOrganization($post['id']);
                     if($isExists && $user->id != $this->currentUser->id){
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);

@@ -545,7 +545,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    private function deleteRelationUserOrganization($userId, $organizationId):bool
+    public function deleteRelationUserOrganization($userId, $organizationId):bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
@@ -587,10 +587,13 @@ class User extends \amnah\yii2\user\models\User {
             $currentUser->save();
             return true;
         }else{
-            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->andWhere(['<>','organization_id', $user->organization->id])->all();
+            $relations = RelationUserOrganization::find()->where(['user_id'=>$user->id])->andWhere(['<>','organization_id', $user->organization_id])->all();
             foreach ($relations as $relation) {
                 self::deleteRelationUserOrganization($userId, $relation->organization_id);
             }
+            $relation = RelationUserOrganization::find()->where(['user_id'=>$userId, 'organization_id'=>$organizationId])->one();
+            $relation->role_id = $roleId;
+            $relation->save();
             $currentUser->organization_id = $user->organization->id;
             $currentUser->role_id = $roleId;
             $currentUser->save();

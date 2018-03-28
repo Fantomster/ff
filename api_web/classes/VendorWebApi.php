@@ -187,10 +187,119 @@ class VendorWebApi extends \api_web\components\WebApi {
     /**
      * Обновление поставщика
      * @param array $post
+     * @return mixed
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
-    public function update(array $post) {
-        throw new BadRequestHttpException('В работе');
+    public function update(array $post)
+    {
+        if (empty($post['id'])) {
+            throw new BadRequestHttpException('Empty attribute id');
+        }
+        //Поиск поставщика в системе
+        $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
+        if (empty($model)) {
+            throw new BadRequestHttpException('Vendor not found');
+        }
+
+        //Если запрос от ресторана
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            //Проверяем, работает ли ресторан с этим поставщиком
+            $vendor_ids = [];
+            $searchModel = new \common\models\search\VendorSearch();
+            $dataProvider = $searchModel->search([], $this->user->organization->id);
+            $dataProvider->pagination->setPage(0);
+            $dataProvider->pagination->pageSize = 1000;
+            $vendors = $dataProvider->getModels();
+            if (!empty($vendors)) {
+                foreach ($vendors as $vendor) {
+                    $vendor_ids[] = $vendor->supp_org_id;
+                }
+                if (!in_array($model->id, array_unique($vendor_ids))) {
+                    throw new BadRequestHttpException('You are not working with this supplier.');
+                }
+            } else {
+                throw new BadRequestHttpException('You need to add vendors.');
+            }
+
+            //Можно ли ресторану редактировать этого поставщика
+            if ($model->getAttribute('allow_editing') == 0) {
+                throw new BadRequestHttpException('Vendor not allow editing.');
+            }
+        }
+
+        //Если запрос на изменение прилетел от поставщика
+        if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
+            //Разрешаем редактировать только свои данные
+            if ($model->id != $this->user->organization->id) {
+                throw new BadRequestHttpException('Вы можете редактировать только свои данные.');
+            }
+        }
+
+        //прошли все проверки, будем обновлять поставщика
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+
+            if (!empty($post['phone'])) {
+                $model->phone = $post['phone'];
+            }
+
+            if (!empty($post['site'])) {
+                $model->website = $post['site'];
+            }
+
+            if (!empty($post['email'])) {
+                $model->email = $post['email'];
+            }
+
+            if (!empty($post['name'])) {
+                $model->name = $post['name'];
+            }
+
+            if (!empty($post['address'])) {
+                if (!empty($post['address']['country'])) {
+                    $model->country = $post['address']['country'];
+                }
+                if (!empty($post['address']['region'])) {
+                    $model->administrative_area_level_1 = $post['address']['region'];
+                }
+                if (!empty($post['address']['locality'])) {
+                    $model->locality = $post['address']['locality'];
+                    $model->city = $post['address']['locality'];
+                }
+                if (!empty($post['address']['route'])) {
+                    $model->route = $post['address']['route'];
+                }
+                if (!empty($post['address']['house'])) {
+                    $model->street_number = $post['address']['house'];
+                }
+                if (!empty($post['address']['lat'])) {
+                    $model->lat = $post['address']['lat'];
+                }
+                if (!empty($post['address']['lng'])) {
+                    $model->lng = $post['address']['lng'];
+                }
+                unset($post['address']['lat']);
+                unset($post['address']['lng']);
+                $model->address = implode(', ', $post['address']);
+            }
+
+            if (!$model->validate()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+
+            $transaction->commit();
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+
     }
 
     /**

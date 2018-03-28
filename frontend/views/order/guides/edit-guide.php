@@ -138,7 +138,7 @@ $this->registerJs('
                                 ?>
                                 <?= $this->render('_vendor-list', compact('vendorDataProvider', 'selectedVendor')) ?>
                                 <?php Pjax::end(); ?>
-                            </div>   
+                            </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
                             <div class="guid_table_block">
@@ -187,7 +187,7 @@ $this->registerJs('
                                 <div class="guid_table_block_title">
                                     <div class="guid_block_title_r pull-left"><?= Yii::t('message', 'frontend.views.order.guides.template', ['ru'=>'Шаблон:']) ?> <?= $guide->name ?></div>
                                     <div class="guid_block_title_l pull-right"><?= Yii::t('message', 'frontend.views.order.guides.step_three', ['ru'=>'ШАГ 3']) ?></div>
-                                </div> 
+                                </div>
                                 <?php
                                 $form = ActiveForm::begin([
                                             'options' => [
@@ -230,11 +230,11 @@ $this->registerJs('
                                         <?= Html::a('<i class="fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.order.guides.cancel', ['ru'=>'Отменить']), ['order/reset-guide'], ['class' => 'btn btn-md btn-gray guide-cancel']) ?>
                                     </div>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>            
+            </div>
         </div>
     </div>
 </section>

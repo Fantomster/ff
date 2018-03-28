@@ -483,9 +483,8 @@ class ParserTorg12
             }
 
             $currentRow = [];
-            $currentRow['num'] = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
+            //$currentRow['num'] = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
             $currentRow['code'] = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($this->columnList['code']['col'], $row)->getValue());
-
             // добавляем строку в обработку
             if ($this->validateRow($row, $currentRow)) {
                 $this->rowsToProcess[] = $row;
@@ -522,16 +521,25 @@ class ParserTorg12
             return false;
         }
 
+        if(count($row) < 12) {
+            return false;
+        }
+
+        if($row[1] == 'А' and $row[2] == 'Б') {
+            return false;
+        }
+
+        if($row[1] == '1' and $row[2] == '2') {
+            return false;
+        }
+
         // пропускаем строку без порядкового номера
-        if (!intval($currentRow['num'])) {
+        if (!intval($row[1])) {
             return false;
         }
 
         // пропускаем повторные заголовки (достаточно, если в двух столбцах будет заголовок)
-        if (
-            in_array($currentRow['code'], $this->settingsRow['code']) ||
-            preg_match('#' . $this->settingsRow['num'] . '#siu', $currentRow['num'])
-        ) {
+        if (in_array($currentRow['code'], $this->settingsRow['code'])) {
             return false;
         }
 

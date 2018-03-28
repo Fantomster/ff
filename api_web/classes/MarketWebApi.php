@@ -361,6 +361,7 @@ class MarketWebApi extends WebApi
         $item['name'] = $model->name;
         $item['phone'] = $model->phone;
         $item['email'] = $model->email;
+        $item['site'] = $model->website;
         $item['address'] = $model->address;
         $item['image'] = $model->pictureUrl;
         $item['type_id'] = (int)$model->type_id;
@@ -370,7 +371,11 @@ class MarketWebApi extends WebApi
         $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? null : $model->administrative_area_level_1);
         $item['country'] = ($model->country === 'undefined' ? null : $model->country);
         $item['about'] = $model->about;
-        //$item['delivery_regions'] = $model->deliveryRegionsAllow;
+
+        if ($model->type_id == Organization::TYPE_SUPPLIER) {
+            $item['allow_editing'] = $model->getAttribute('allow_editing');
+        }
+
         return $item;
     }
 

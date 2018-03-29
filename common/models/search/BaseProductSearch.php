@@ -12,7 +12,8 @@ use yii\data\ActiveDataProvider;
  */
 class BaseProductSearch extends \common\models\CatalogBaseGoods {
     public $searchString;
-    
+    public $sort;
+
     /**
      * @inheritdoc
      */
@@ -32,12 +33,27 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
      */
     public function search($params, $guideList) {
         $query = CatalogBaseGoods::find();
+        $sort = ['id' => SORT_ASC];
+
+        if (isset($params['sort'])){
+            $arr = explode(' ', $params['sort']);
+            $sort = [$arr[0] => (int)$arr[1]];
+        }
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'page' => isset($params['page']) ? ($params['page']-1) : 0,
+                'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
+                'params' => [
+                    'sort' => $sort,
+                ]
+            ],
+            'sort' => [
+                'defaultOrder' => $sort
+            ],
         ]);
 
         $this->load($params);
@@ -51,6 +67,8 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
         $query->where([
             'id' => $guideList,
         ]);
+
+        //$query->orderBy($sort);
         
         // grid filtering conditions
         $query->andFilterWhere(['like', 'product', $this->searchString]);

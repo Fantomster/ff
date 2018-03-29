@@ -249,9 +249,9 @@ $this->registerJs('
                                         'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru'=>'Наименованию по возрастанию']),
                                         'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru'=>'Наименованию по убыванию']),
                                     ], [
-                                        'prompt' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru'=>'Сортировка по'])
-                                    ])
+                                        'prompt' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru'=>'Сортировка по']), ])
                                     ->label(false)
+                                // 'options' => [(!empty($session['sort']) ? $session['sort'] : 1) => ['selected'=>true]]
                                 ?>
 
 

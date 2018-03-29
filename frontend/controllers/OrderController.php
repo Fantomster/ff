@@ -520,6 +520,10 @@ class OrderController extends DefaultController {
 
         if (Yii::$app->request->get("sort")){
             $params['sort'] = Yii::$app->request->get("sort");
+            if(isset($session['sort'])){
+                unset($session['sort']);
+            }
+            $session['sort'] = Yii::$app->request->get("sort");
         }
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
@@ -557,7 +561,7 @@ class OrderController extends DefaultController {
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
             return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session'));
         }
     }
 

@@ -44,16 +44,6 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'pagination' => [
-                'page' => isset($params['page']) ? ($params['page']-1) : 0,
-                'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
-                'params' => [
-                    'sort' => $sort,
-                ]
-            ],
-            'sort' => [
-                'defaultOrder' => $sort
-            ],
         ]);
 
         $this->load($params);
@@ -68,7 +58,8 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
             'id' => $guideList,
         ]);
 
-        //$query->orderBy($sort);
+        $query->orderBy($sort);
+
         
         // grid filtering conditions
         $query->andFilterWhere(['like', 'product', $this->searchString]);

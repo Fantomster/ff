@@ -6,6 +6,7 @@ use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 
 $this->title = Yii::t('message', 'frontend.views.order.guides.edit_templ', ['ru'=>"Редактирование шаблона"]);
+$guideUrl = Url::to(['order/edit-guide', 'id'=>$guide->id]);
 
 $this->registerJs('
     $(document).on("click", ".select-vendor", function() {
@@ -70,6 +71,20 @@ $this->registerJs('
                     .html(\'<i class="fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.guides.add_to_templ_two', ['ru'=>'Добавить в шаблон']) . ' \');
             }
         });
+    });
+    
+    $(document).on("change", "#baseproductsearch-sort", function() {
+        var sort = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: true,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    sort: sort,
+                   }
+   }).done(function() { console.log(222); });
     });
     
     $(document).on("click", ".btnSubmit", function() {
@@ -176,7 +191,9 @@ $this->registerJs('
                                             'placeholder' => Yii::t('message', 'frontend.views.order.guides.products_search', ['ru'=>'Поиск по продуктам выбранного поставщика'])])
                                         ->label(false)
                                 ?>
+
                                 <?php ActiveForm::end(); ?>
+
                                 <?php Pjax::begin(['formSelector' => '#searchProductForm', 'enablePushState' => false, 'id' => 'productList', 'timeout' => 30000]); ?>
                                 <?= $this->render('_product-list', compact('productDataProvider', 'guideProductList')) ?>
                                 <?php Pjax::end(); ?>
@@ -193,7 +210,6 @@ $this->registerJs('
                                             'options' => [
                                                 'id' => 'searchGuideProductForm',
                                                 'role' => 'search',
-                                                'style' => 'height:51px;'
                                             ],
                                 ]);
                                 ?>
@@ -218,8 +234,29 @@ $this->registerJs('
                                             'placeholder' => Yii::t('message', 'frontend.views.order.guides.templ_search', ['ru'=>'Поиск по набранному шаблону'])])
                                         ->label(false)
                                 ?>
+
+                                <?=
+                                $form->field($guideSearchModel, 'sort', [
+                                    'options' => [
+                                        'id'=>'alSortSelect',
+                                        'class' => "form-group",
+                                        'style' => "padding:8px;border-top:1px solid #f4f4f4;"
+                                    ],
+                                ])
+                                    ->dropDownList([
+                                        'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru'=>'Порядку добавления по возрастанию']),
+                                        'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru'=>'Порядку добавления по убыванию']),
+                                        'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru'=>'Наименованию по возрастанию']),
+                                        'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru'=>'Наименованию по убыванию']),
+                                    ], [
+                                        'prompt' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru'=>'Сортировка по'])
+                                    ])
+                                    ->label(false)
+                                ?>
+
+
                                 <?php ActiveForm::end(); ?>
-                                <?php Pjax::begin(['formSelector' => '#searchGuideProductForm', 'enablePushState' => false, 'id' => 'guideProductList', 'timeout' => 30000]); ?>
+                                <?php Pjax::begin(['formSelector' => '#searchGuideProductForm', 'enablePushState' => true, 'id' => 'guideProductList', 'timeout' => 30000]); ?>
                                 <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList')) ?>
                                 <?php Pjax::end(); ?>
                                 <div style="width:100%;">

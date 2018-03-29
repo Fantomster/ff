@@ -36,18 +36,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     if(\common\models\FranchiseeGeo::find()->where(['franchisee_id'=>$data['id']])->exists()){
                     return Html::a('Изменить', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-success']);
                     }else{
-                    return Html::a('Указать', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-danger']);   
+                    return Html::a('Указать', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-danger']);
                     }
                 },
             ],
-            'signed',         
+            'signed',
             [
                 'format' => 'raw',
                 'label' => 'Клиентов',
                 'value' => function($data) {
                        $c_all = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
                                'franchisee_id'=>$data->id])->count();
-                       
+
                        $c_client = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
                                'franchisee_id'=>$data->id,
                                'organization.type_id'=>1,
@@ -95,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'info:ntext',
             // 'created_at',
             // 'updated_at',
-            
+
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

@@ -62,7 +62,7 @@ use yii\widgets\Breadcrumbs;
                             'type' => DatePicker::TYPE_INPUT,
                             'pluginOptions' => [
                                 'format' => 'MM yyyy',
-                                'viewMode' => 'months', 
+                                'viewMode' => 'months',
                                 'minViewMode' => 'months',
                                 'autoclose' => true,
                                 'endDate' => "0d",
@@ -111,7 +111,7 @@ use yii\widgets\Breadcrumbs;
                         'options' => ['class' => 'table-responsive'],
                         'tableOptions' => ['class' => 'table table-hover table-max', 'role' => 'grid'],
                         'pager' => [
-                            'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                            'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed
                         ],
                         'columns' => [
                             [

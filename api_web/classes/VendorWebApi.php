@@ -284,6 +284,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 unset($post['address']['lat']);
                 unset($post['address']['lng']);
                 $model->address = implode(', ', $post['address']);
+                $model->formatted_address = $model->address;
             }
 
             if (!$model->validate()) {

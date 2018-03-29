@@ -392,7 +392,7 @@ class OrderController extends ActiveController {
 
             if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
                 $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
-                $target = $recipient->profile->phone;
+                $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }
         }

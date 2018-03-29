@@ -566,6 +566,7 @@ class User extends \amnah\yii2\user\models\User {
         if($check){
             $existingUser = $user = User::findIdentity($userId);
             $existingUser->organization_id = $check->organization_id;
+            $existingUser->role_id = $check->role_id;
             $existingUser->save();
             return true;
         }
@@ -577,6 +578,9 @@ class User extends \amnah\yii2\user\models\User {
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentUser = User::findIdentity($userId);
+        $relation = RelationUserOrganization::find()->where(['user_id'=>$userId, 'organization_id'=>$organizationId])->one();
+        $relation->role_id = $roleId;
+        $relation->save();
         if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
             $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
             foreach ($relations as $relation){
@@ -591,9 +595,6 @@ class User extends \amnah\yii2\user\models\User {
             foreach ($relations as $relation) {
                 self::deleteRelationUserOrganization($userId, $relation->organization_id);
             }
-            $relation = RelationUserOrganization::find()->where(['user_id'=>$userId, 'organization_id'=>$organizationId])->one();
-            $relation->role_id = $roleId;
-            $relation->save();
             $currentUser->organization_id = $user->organization->id;
             $currentUser->role_id = $roleId;
             $currentUser->save();

@@ -486,7 +486,8 @@ class UserWebApi extends \api_web\components\WebApi
             'status' => $status,
             'picture' => $model->vendor->getPictureUrl() ?? "",
             'address' => implode(', ', $locality),
-            'rating' => $model->vendor->rating ?? 0
+            'rating' => $model->vendor->rating ?? 0,
+            'allow_editing' => $model->vendor->getAttribute('allow_editing')
         ];
     }
 }

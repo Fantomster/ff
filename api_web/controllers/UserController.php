@@ -443,7 +443,8 @@ class UserController extends WebApiController
      *                                       "status": "Status",
      *                                       "picture": "Аватар",
      *                                       "address": "Адрес",
-     *                                       "rating": "Rating"
+     *                                       "rating": "Rating",
+     *                                       "allow_editing": "Allow Editing"
      *                                   }
      *                               }
      *                               ,
@@ -457,7 +458,8 @@ class UserController extends WebApiController
      *                                       "status": "Партнер. Каталог не назначен",
      *                                       "picture": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
      *                                       "address": "Россия, Москва, Волгоградский проспект",
-     *                                       "rating": 31
+     *                                       "rating": 31,
+     *                                       "allow_editing": 1
      *                               }}
      *                               ,
      *                               "pagination":{

@@ -38,6 +38,31 @@ class EmailIntegrationController extends Controller
         return parent::afterAction($action, $result);
     }
 
+
+    public function actionTest() {
+
+        $temp_file = 'D:\OSPanel\1.xls';
+
+        $parser = new ParserTorg12($temp_file);
+        try {
+            $parser->parse();
+        } catch (ParseTorg12Exception $e) {
+            exit('ERROR PARSING TORG12 FILE' . $e->getMessage());
+        }
+
+        if(empty($parser->invoice->rows)) {
+            exit('Error: empty rows ');
+        }
+
+        //Данные необходимые для сохранения в базу
+        $result[] = [
+            'invoice' => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
+        ];
+
+        print_r($result);
+    }
+
+
     public function actionIndex()
     {
         /**

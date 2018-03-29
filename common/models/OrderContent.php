@@ -42,7 +42,7 @@ class OrderContent extends \yii\db\ActiveRecord
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
             [['order_id', 'product_id'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units'], 'number'],
-            [['comment'], 'safe'],
+            [['comment', 'article'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],

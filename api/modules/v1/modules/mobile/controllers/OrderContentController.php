@@ -52,6 +52,12 @@ class OrderContentController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'findModel' => [$this, 'findModel']
             ],
+            /* 'create' => [
+               'class' => 'yii\rest\CreateAction',
+               'modelClass' => 'common\models\OrderContent',
+               'checkAccess' => [$this, 'checkAccess'],
+               'scenario' => $this->updateScenario,
+           ],*/
             /* 'update' => [
                 'class' => 'api\modules\v1\modules\mobile\controllers\actions\OrderContentEdit',
                 'modelClass' => 'common\models\OrderContent',
@@ -246,6 +252,63 @@ class OrderContentController extends ActiveController {
             $order->save();
         return $product;
     }
+
+    public function actionCreate()
+    {
+        $product = new \common\models\OrderContent();
+        $product->setAttributes(Yii::$app->request->post());
+
+        if (!$product->validate())
+            throw new BadRequestHttpException('Data error');
+
+        $this->checkAccess('create', $product);
+
+        if (OrderContent::findOne(['order_id' => $product->order_id, 'product_id' => $product->product_id]) != null)
+            throw new BadRequestHttpException('This product already exists');
+
+        $order = $product->order;
+
+        $product->save(false);
+
+        $message = "добавил ".$product->product_name." ".$product->quantity." ".$product->product->ed;
+
+        $user = Yii::$app->user->getIdentity();
+        $organizationType = $user->organization->type_id;
+
+        if ($organizationType == Organization::TYPE_RESTAURANT) {
+            $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+            $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+            foreach ($order->recipientsList as $recipient) {
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                if (($recipient->organization_id == $order->vendor_id) && $profile->phone && $recipient->smsNotification->order_changed) {
+                    $text = $subject;
+                    $target = $profile->phone;
+                    Yii::$app->sms->send($text, $target);
+                }
+            }
+            $order->calculateTotalPrice();
+            $order->save();
+            $this->sendOrderChange($order->client, $order);
+        } elseif ($organizationType == Organization::TYPE_SUPPLIER) {
+            $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+            $order->accepted_by_id = $user->id;
+            $order->calculateTotalPrice();
+            $order->save();
+            $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+            $this->sendOrderChange($order->vendor, $order);
+            $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+            foreach ($order->client->users as $recipient) {
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                if ($profile->phone && $recipient->smsNotification->order_changed) {
+                    $text = $subject;
+                    $target = $profile->phone;
+                    Yii::$app->sms->send($text, $target);
+                }
+            }
+        }
+        return $product;
+    }
     
     
     
@@ -265,7 +328,7 @@ class OrderContentController extends ActiveController {
    {
        // check if the user can access $action and $model
        // throw ForbiddenHttpException if access should be denied
-       if ($action === 'update' || $action === 'delete') {
+       if ($action === 'update' || $action === 'delete' || $action == 'create') {
            $user = Yii::$app->user->identity;
 
            if (($model->order->client_id !== $user->organization_id)&&($model->order->vendor_id !== $user->organization_id))

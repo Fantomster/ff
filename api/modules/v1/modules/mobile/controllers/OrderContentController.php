@@ -155,7 +155,7 @@ class OrderContentController extends ActiveController {
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
             Order::STATUS_PROCESSING
         ];
-        $quantityChanged = ($position['quantity'] != $product->quantity);
+        $quantityChanged = isset($position['quantity']) ? ($position['quantity']!= $product->quantity) : false;
         $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
 
         if (($organizationType == Organization::TYPE_RESTAURANT || in_array($order->status, $allowedStatuses)) && ($quantityChanged || $priceChanged)) {

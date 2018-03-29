@@ -512,13 +512,15 @@ class OrderController extends DefaultController {
         $test = $session['selectedVendor'];
         $test2 = $session['guideProductList'];
 
-        $params = Yii::$app->request->getQueryParams();
-
         $vendorSearchModel = new VendorSearch();
         if (Yii::$app->request->post("VendorSearch")) {
             $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
         }
         $params['VendorSearch'] = $session['vendorSearchString'];
+
+        if (Yii::$app->request->get("sort")){
+            $params['sort'] = Yii::$app->request->get("sort");
+        }
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
 

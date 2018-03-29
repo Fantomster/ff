@@ -78,7 +78,7 @@ class MpCategoryController extends ActiveController {
             mp_category.text, mp_category.description, mp_category.keywords, 
             IFNULL(`message`.`translation`, `mp_category`.`name`) as name ');
             $query->innerJoin('source_message', "source_message.category = 'app' and source_message.message = mp_category.name");
-            $query->innerJoin('message', "message.id = source_message.id and message.language = $params->language");
+            $query->innerJoin('message', 'message.id = source_message.id and message.language = "'.$params->language.'"');
         }
 
         if($params->parent == 0)

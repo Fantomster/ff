@@ -281,6 +281,9 @@ class VendorWebApi extends \api_web\components\WebApi
                 if (!empty($post['address']['lng'])) {
                     $model->lng = $post['address']['lng'];
                 }
+                if (!empty($post['address']['place_id'])) {
+                    $model->place_id = $post['address']['place_id'];
+                }
                 unset($post['address']['lat']);
                 unset($post['address']['lng']);
                 $model->address = implode(', ', $post['address']);
@@ -303,5 +306,10 @@ class VendorWebApi extends \api_web\components\WebApi
         }
 
 
+    }
+
+
+    public function uploadLogo($post) {
+        return $post;
     }
 }

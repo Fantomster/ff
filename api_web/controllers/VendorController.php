@@ -207,4 +207,73 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('VendorWebApi')->update($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/vendor/upload-logo",
+     *     tags={"Vendor"},
+     *     summary="Смена логотипа поставщика",
+     *     description="Смена логотипа поставщика",
+     *     operationId="uploadFile",
+     *     consumes={"multipart/form-data"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="file",
+     *         required=true,
+     *         type="file"
+     *     ),
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         type="string",
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"id": 3551}
+     *              )
+     *         )
+     *     ),
+     *
+     *     produces={"application/json"},
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                         "id": 3948,
+     *                         "name": "ООО Рога и Копыта",
+     *                         "phone": "+79182225588",
+     *                         "email": "cn13@cn13.ru",
+     *                         "site": "www.mixcart.ru",
+     *                         "address": "Россия, Московская область, Люберцы, улица Побратимов, 7",
+     *                         "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
+     *                         "type_id": 2,
+     *                         "type": "Поставщик",
+     *                         "rating": 0,
+     *                         "city": "Люберцы",
+     *                         "administrative_area_level_1": "Московская область",
+     *                         "country": "Россия",
+     *                         "about": "",
+     *                         "allow_editing": 1
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUploadLogo()
+    {
+        $this->response = $this->container->get('VendorWebApi')->uploadLogo($this->request);
+    }
 }

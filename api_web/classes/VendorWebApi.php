@@ -307,4 +307,9 @@ class VendorWebApi extends \api_web\components\WebApi
 
 
     }
+
+
+    public function uploadLogo($post) {
+        return $post;
+    }
 }

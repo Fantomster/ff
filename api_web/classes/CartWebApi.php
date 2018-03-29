@@ -349,7 +349,7 @@ class CartWebApi extends \api_web\components\WebApi
         $item['id'] = (int)$model->model->id;
         $item['product'] = $model->model->product;
         $item['catalog_id'] = (int)$model->cat_id;
-        $item['category_id'] = (int)$model->model->category->id ?? 0;
+        $item['category_id'] = isset($model->model->category) ? (int)$model->model->category->id : 0;
         $item['price'] = round($model->price, 2);
         $item['rating'] = round($model->model->ratingStars, 1);
         $item['supplier'] = $model->model->vendor->name;

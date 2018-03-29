@@ -164,6 +164,7 @@ class VendorController extends WebApiController
      *                                  "house": "владение 107",
      *                                  "lat": 55.7713,
      *                                  "lng": 37.7055,
+     *                                  "place_id":"ChIJM4NYCODJSkERVeMzXqoIJho"
      *                             }
      *                  }
      *              )

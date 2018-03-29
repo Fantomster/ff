@@ -330,7 +330,7 @@ class MarketWebApi extends WebApi
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
         $item['catalog_id'] = ((int)$model->catalog->id ?? null);
-        $item['category_id'] = ((int)$model->category->id ?? null);
+        $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
         $item['rating'] = round($model->ratingStars, 1);
@@ -339,7 +339,7 @@ class MarketWebApi extends WebApi
         $item['brand'] = $model->brand ?? '';
         $item['article'] = $model->article;
         $item['ed'] = $model->ed;
-        $item['units'] = $model->units ?? 1;
+        $item['units'] = $model->units ?? 0;
         $item['currency'] = $model->catalog->currency->symbol;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);

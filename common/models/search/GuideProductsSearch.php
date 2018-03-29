@@ -120,20 +120,27 @@ class GuideProductsSearch extends \yii\base\Model {
 //                AND (cbg.deleted = 0)            
 //                ";
 //        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $searchString])->queryScalar();
+        $sort = [
+            'attributes' => [
+                'product',
+            ],
+            'defaultOrder' => [
+                'product' => SORT_ASC
+            ]
+        ];
+        $session = Yii::$app->session;
+        if(isset($session['sort'])){
+            $arr = explode(' ', $session['sort']);
+            $query.= " ORDER BY ";
+            $query.= str_replace('3', "ASC", str_replace('4', "DESC", $session['sort']));
+        }
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query,
             'params' => [':searchString' => $searchString],
             //'totalCount' => $count1 + $count2,
             'pagination' => false,
-            'sort' => [
-                'attributes' => [
-                    'product',
-                ],
-                'defaultOrder' => [
-                    'product' => SORT_ASC
-                    ]
-            ],
+            'sort' => $sort,
         ]);
         
         return $dataProvider;

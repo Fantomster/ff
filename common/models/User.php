@@ -59,7 +59,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
-            [['organization_id'], 'integer'],
+            [['organization_id', 'type'], 'integer'],
             [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 
@@ -238,7 +238,7 @@ class User extends \amnah\yii2\user\models\User {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
         $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
         if ($rel === null)
-            return null;
+            return new EmailNotification();
         return EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
     }
 
@@ -249,7 +249,7 @@ class User extends \amnah\yii2\user\models\User {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
         $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
         if ($rel === null)
-            return null;
+            return new SmsNotification();
         return SmsNotification::findOne(['rel_user_org_id' => $rel->id]);
     }
 

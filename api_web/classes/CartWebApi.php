@@ -349,7 +349,7 @@ class CartWebApi extends \api_web\components\WebApi
         $item['id'] = (int)$model->model->id;
         $item['product'] = $model->model->product;
         $item['catalog_id'] = (int)$model->cat_id;
-        $item['category_id'] = (int)$model->model->category->id ?? 0;
+        $item['category_id'] = isset($model->model->category) ? (int)$model->model->category->id : 0;
         $item['price'] = round($model->price, 2);
         $item['rating'] = round($model->model->ratingStars, 1);
         $item['supplier'] = $model->model->vendor->name;
@@ -377,8 +377,11 @@ class CartWebApi extends \api_web\components\WebApi
         $order->calculateTotalPrice();
 
         $order_r = $order->attributes;
+        $order_r['total_price'] = round($order->calculateTotalPrice(), 2);
+        $order_r['min_order_price'] = round($order->forMinOrderPrice(), 2);
+        $order_r['delivery_price'] = round($order->calculateDelivery(), 2);
         $order_r['status_text'] = $order->statusText;
-        $order_r['position_count'] = $order->positionCount;
+        $order_r['position_count'] = (int)$order->positionCount;
         return $order_r;
     }
 }

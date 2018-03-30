@@ -121,7 +121,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
-            [['is_allowed_for_franchisee'], 'boolean'],
+            [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
         ];
     }
 
@@ -191,7 +191,8 @@ class Organization extends \yii\db\ActiveRecord {
             'franchisee_sorted' => Yii::t('app', 'common.models.settled_franchisee', ['ru' => 'Назначен Франшизы']),
             'manager_id' => Yii::t('app', 'common.models.manager', ['ru' => 'Менеджер']),
             'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru'=>'Каталог']),
-            'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет'])
+            'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
+            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе'])
         ];
     }
 

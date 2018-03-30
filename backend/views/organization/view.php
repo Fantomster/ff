@@ -89,6 +89,18 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
             ],
             'step',
             [
+                'attribute' => 'is_work',
+                'label' => 'Поставщик работает в системе',
+                'value' => function ($data) use ($model) {
+                    if($data->is_work == 1) {
+                        return 'Да';
+                    } else {
+                        return 'Нет';
+                    }
+                },
+                'visible' => ($model->type_id == Organization::TYPE_SUPPLIER)
+            ],
+            [
                 'format' => 'raw',
                 'label' => 'Работники',
                 'value' => Html::a('Список', ['client/index', 'UserSearch[organization_id]' => $model->id])

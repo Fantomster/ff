@@ -32,6 +32,7 @@ use common\models\guides\Guide;
  * @property string $es_status
  * @property bool $partnership
  * @property integer $rating
+ * @property integer $allow_editing
  * @property double $lat
  * @property double $lng
  * @property string $country

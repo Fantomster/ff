@@ -11,8 +11,8 @@ use yii\helpers\ArrayHelper;
  * This is the model class for table "relation_supp_rest".
  *
  * @property integer $id
- * @property integer $manager_id
- * @property integer $leader_id
+ * @property integer $responsible_user_id
+ * @property integer $pipeline_id
  */
 class AmoFields extends \yii\db\ActiveRecord {
 

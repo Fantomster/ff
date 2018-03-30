@@ -103,7 +103,9 @@ $('#user-form').on('afterValidateAttribute', function (event, attribute, message
                         $('#user-newpassword').val('********');
                         $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').attr('readonly','readonly');
 		                console.log('type = 6');    
-	                }               
+	                }else{
+	                    $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').removeAttr('readonly');
+	                }            
                 } else {
 		            console.log(response.message); 
                 }

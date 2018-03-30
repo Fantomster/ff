@@ -77,7 +77,8 @@ class GuideProductSearchController extends ActiveController {
 
         $query = "
         SELECT * FROM (
-            SELECT gp.id, cbg.id as catalog_base_goods_id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name as name, cbg.ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name, cbg.created_at as created_at, cbg.updated_at as updated_at 
+            SELECT cbg.id as catalog_base_goods_id, cbg.id as cbg_id, cbg.product as product, cbg.units as units, cbg.price as price, cbg.cat_id, org.name as name, cbg.ed as ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name, cbg.created_at as created_at, cbg.updated_at as updated_at, 
+            cbg.article as article, cbg.id as id, 0 as count
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
@@ -89,7 +90,8 @@ class GuideProductSearchController extends ActiveController {
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
             UNION ALL
-            (SELECT gp.id, cbg.id as catalog_base_goods_id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name as name, cbg.ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name, cbg.created_at as created_at, cbg.updated_at as updated_at 
+            (SELECT cbg.id as catalog_base_goods_id, cbg.id as cbg_id, cbg.product as product, cbg.units as units, cbg.price as price, cbg.cat_id, org.name as name, cbg.ed as ed, curr.symbol, cbg.note, org.id as supp_org_id, org.name as organization_name, cbg.created_at as created_at, cbg.updated_at as updated_at, 
+            cbg.article as article, cbg.id as id, 0 as count
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 

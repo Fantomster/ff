@@ -7,11 +7,22 @@ namespace api_web\components;
  * @package api\modules\v1\modules\web\components
  */
 
+use yii\web\UploadedFile;
+
 /**
  * @SWG\Swagger(
  *     schemes={"https", "http"},
+ *     @SWG\SecurityScheme(
+ *         securityDefinition="Bearer",
+ *         type="apiKey",
+ *         name="Authorization",
+ *         in="header",
+ *         description="Bearer {token}"
+ *     ),
  *     basePath="/"
  * )
+ *
+ *
  * @SWG\Info(
  *     title="MixCart API WEB - Документация",
  *     description = "Взаимодействие с сервисом MixCart",
@@ -22,8 +33,6 @@ namespace api_web\components;
  *     }
  * )
  */
-
-
 class WebApiController extends \yii\rest\Controller
 {
     /**
@@ -65,7 +74,7 @@ class WebApiController extends \yii\rest\Controller
                 WebApiAuth::className(),
                 \yii\filters\auth\HttpBearerAuth::className(),
                 \yii\filters\auth\QueryParamAuth::className(),
-                [
+                /*[
                     'class' => \yii\filters\auth\HttpBasicAuth::className(),
                     'auth' => function ($username, $password) {
                         $model = new \common\models\forms\LoginForm();
@@ -73,7 +82,7 @@ class WebApiController extends \yii\rest\Controller
                         $model->password = $password;
                         return ($model->validate()) ? $model->getUser() : null;
                     }
-                ]
+                ]*/
             ]
         ];
 
@@ -124,6 +133,17 @@ class WebApiController extends \yii\rest\Controller
         if (parent::beforeAction($action)) {
             $this->user = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
+
+            if (strstr(\Yii::$app->request->contentType, 'multipart/form-data') !== false) {
+                $this->request = [
+                    'post' => \Yii::$app->request->post()
+                ];
+
+                if (!empty($_FILES)) {
+                    $this->request['files'] = $_FILES;
+                }
+            }
+
             if (isset($this->request)) {
                 return true;
             } else {

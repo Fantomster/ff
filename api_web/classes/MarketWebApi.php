@@ -373,7 +373,7 @@ class MarketWebApi extends WebApi
         $item['about'] = $model->about;
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
-            $item['allow_editing'] = $model->getAttribute('allow_editing');
+            $item['allow_editing'] = $model->allow_editing;
         }
 
         return $item;

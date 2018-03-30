@@ -33,6 +33,7 @@ use common\models\guides\Guide;
  * @property bool $partnership
  * @property integer $rating
  * @property integer $allow_editing
+ * @property integer $is_work
  * @property double $lat
  * @property double $lng
  * @property string $country
@@ -216,6 +217,17 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function getType() {
         return $this->hasOne(OrganizationType::className(), ['id' => 'type_id']);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getAllow_editing()
+    {
+        if ($this->type_id != self::TYPE_SUPPLIER) {
+            return null;
+        }
+        return abs($this->is_work - 1);
     }
 
     /**

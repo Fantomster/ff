@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\guides\GuideProduct;
 use market\components\ImagesHelper;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -243,6 +244,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     public function getCategory() {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
+    }
+
+    public function getGuideProduct() {
+        return $this->hasOne(GuideProduct::className(), ['cbg_id' => 'id']);
     }
 
     /**

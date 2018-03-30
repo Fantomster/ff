@@ -1350,7 +1350,6 @@ class Organization extends \yii\db\ActiveRecord {
             $userProfileFullName = $vendor->profile->full_name;
             $userProfilePhone = $vendor->profile->phone;
             $userOrgId = $vendor->organization_id;
-            $userOrgTypeId = $vendor->organization->type_id;
             $userOrgName = $vendor->organization->name;
 
             if(RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId,'deleted'=>false])->exists())

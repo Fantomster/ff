@@ -211,33 +211,29 @@ class VendorController extends WebApiController
     /**
      * @SWG\Post(path="/vendor/upload-logo",
      *     tags={"Vendor"},
+     *     security={
+     *         {
+     *             "Bearer": {}
+     *         }
+     *     },
+     *     consumes={"multipart/form-data"},
      *     summary="Смена логотипа поставщика",
-     *     description="Смена логотипа поставщика",
-     *     operationId="uploadFile",
+     *     description="Смена логотипа поставщика.
+     * Необходима авторизация по Header:Bearer xxxxxxxxx",
      *     consumes={"multipart/form-data"},
      *     @SWG\Parameter(
      *         in="formData",
-     *         name="file",
+     *         name="Organization[picture]",
      *         required=true,
      *         type="file"
      *     ),
      *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=false,
-     *         type="string",
-     *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={"id": 3551}
-     *              )
-     *         )
+     *         name="vendor_id",
+     *         in="formData",
+     *         required=true,
+     *         format="int32",
+     *         type="integer"
      *     ),
-     *
      *     produces={"application/json"},
      *     @SWG\Response(
      *         response = 200,

@@ -12,6 +12,7 @@ use common\models\Catalog;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\web\BadRequestHttpException;
+use yii\web\UploadedFile;
 
 /**
  * Class VendorWebApi
@@ -223,7 +224,7 @@ class VendorWebApi extends \api_web\components\WebApi {
             }
 
             //Можно ли ресторану редактировать этого поставщика
-            if ($model->getAttribute('allow_editing') == 0) {
+            if ($model->allow_editing == 0) {
                 throw new BadRequestHttpException('Vendor not allow editing.');
             }
         }
@@ -307,28 +308,61 @@ class VendorWebApi extends \api_web\components\WebApi {
     }
 
     /**
-     * Импорт главного каталога
-     * @param array $post
+     * Обновление логотипа поставщика
+     * @param array $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws ValidationException
      */
-    public function importMain(array $post) {
-        //
-    }
+    public function uploadLogo(array $request)
+    {
+        if (empty($request['post']['vendor_id'])) {
+            throw new BadRequestHttpException('Empty attribute vendor_id');
+        }
 
-    /**
-     * Импорт индивидуального каталога
-     * @param array $post
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws \Exception
-     */
-    public function importCustom(array $post) {
-        //
-    }
+        $vendor = Organization::findOne($request['post']['vendor_id']);
+        if (empty($vendor)) {
+            throw new BadRequestHttpException('Vendor not found');
+        }
 
-    public function uploadLogo($post) {
-        return $post;
+        if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
+            throw new BadRequestHttpException('The organization is not a vendor.');
+        }
+
+        //Можно ли ресторану редактировать этого поставщика
+        if ($vendor->allow_editing == 0) {
+            throw new BadRequestHttpException('Vendor not allow editing.');
+        }
+
+        /**
+         * @var $file UploadedFile
+         */
+        $file = UploadedFile::getInstancesByName('Organization');
+        if (empty($file[0])) {
+            throw new BadRequestHttpException('Empty file');
+        } else {
+            $file = array_pop($file);
+        }
+
+        $allowExtensions = ['jpeg', 'jpg', 'png'];
+        if (!in_array($file->getExtension(), $allowExtensions)) {
+            throw new BadRequestHttpException('Allow extensions: ' . implode(', ', $allowExtensions));
+        }
+
+        /**
+         * Поехало обновление картинки
+         */
+        $vendor->scenario = "settings";
+        $vendor->picture = 'update';
+
+        if (!$vendor->validate()) {
+            throw new ValidationException($vendor->getFirstErrors());
+        }
+
+        if (!$vendor->save()) {
+            throw new ValidationException($vendor->getFirstErrors());
+        }
+
+        return $this->container->get('MarketWebApi')->prepareOrganization($vendor);
     }
 }

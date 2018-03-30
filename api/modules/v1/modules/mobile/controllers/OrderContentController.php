@@ -268,6 +268,9 @@ class OrderContentController extends ActiveController {
 
         $order = $product->order;
 
+        if($order->status >=4 && $order->status !=7)
+            throw new BadRequestHttpException('This order is close');
+
         $product->save(false);
 
         $message = "добавил ".$product->product_name." ".$product->quantity." ".$product->product->ed;

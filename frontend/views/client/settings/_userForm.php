@@ -107,7 +107,7 @@ $('#user-form').on('afterValidateAttribute', function (event, attribute, message
 	                    $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').removeAttr('readonly');
 	                }            
                 } else {
-		            console.log(response.message); 
+		            $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').removeAttr('readonly');
                 }
             },
             error: function(response) {

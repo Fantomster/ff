@@ -218,7 +218,7 @@ class OrderContentController extends ActiveController {
                 }
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->recipientsList as $recipient) {
@@ -233,7 +233,7 @@ class OrderContentController extends ActiveController {
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->status = ($order->status == Order::STATUS_PROCESSING)? Order::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();

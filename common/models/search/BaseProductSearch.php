@@ -33,14 +33,6 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
      */
     public function search($params, $guideList) {
         $query = CatalogBaseGoods::find();
-        $sort = ['id' => SORT_ASC];
-
-        if (isset($params['sort'])){
-            $arr = explode(' ', $params['sort']);
-            $sort = [$arr[0] => (int)$arr[1]];
-        }
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -49,18 +41,33 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        $query->where([
-            'id' => $guideList,
-        ]);
+        if(!$params['show_sorting']){
+            $query->where([
+                'id' => $guideList,
+            ]);
 
-        $query->orderBy($sort);
+        }else{
+            $sort = ['guide_product.id' => SORT_ASC];
+            //dd($guideList);
+            if (isset($params['sort'])){
+                $arr = explode(' ', $params['sort']);
+                $sort = [str_replace('id', 'guide_product.id', $arr[0]) => (int)$arr[1]];
+            }
 
-        // grid filtering conditions
+            $query->leftJoin('guide_product', '`guide_product`.`cbg_id` = `catalog_base_goods`.`id`');
+
+            $query->where([
+                'catalog_base_goods.id' => $guideList,
+                'guide_product.guide_id' => $params['guide_id']
+            ]);
+
+            $query->orderBy($sort);
+
+        }
+
         $query->andFilterWhere(['like', 'product', $this->searchString]);
 
         return $dataProvider;

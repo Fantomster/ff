@@ -146,7 +146,6 @@ class ClientController extends DefaultController {
     public function actionEmployees() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        //$params = Yii::$app->request->getQueryParams();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;

@@ -429,11 +429,11 @@ JS;
                                     <small><?= $organization->name ?></small>
                                 </p>
                                 <?php
-                                if ($user->status == \common\models\User::STATUS_ACTIVE && ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
+                                if (\common\models\RelationUserOrganization::checkRelationExisting($user) && $user->status == \common\models\User::STATUS_ACTIVE && ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
                                         $user->role_id == Role::ROLE_SUPPLIER_MANAGER ||
                                         $user->role_id == Role::ROLE_ADMIN ||
                                         $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
-                                        in_array($user->role_id, Role::getFranchiseeEditorRoles())) || \common\models\RelationUserOrganization::checkRelationExisting($user)) {
+                                        in_array($user->role_id, Role::getFranchiseeEditorRoles()))) {
                                     echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru' => "БИЗНЕСЫ"]), "#", [
                                         'id' => 'change_business',
                                         'class' => 'btn btn-lg btn-business',

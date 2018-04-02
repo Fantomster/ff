@@ -38,12 +38,7 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
         if (isset($params['sort'])){
             $arr = explode(' ', $params['sort']);
             $sort = [$arr[0] => (int)$arr[1]];
-            if(isset($sort['id']) && $sort['id']==4){
-                $guideList = array_reverse($guideList);
-                $sort = [];
-            }
         }
-
 
         // add conditions that should always apply here
 
@@ -65,7 +60,6 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
 
         $query->orderBy($sort);
 
-        
         // grid filtering conditions
         $query->andFilterWhere(['like', 'product', $this->searchString]);
 

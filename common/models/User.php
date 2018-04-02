@@ -606,10 +606,9 @@ class User extends \amnah\yii2\user\models\User {
      * Список организаций доступных для пользователя
      * @return array
      */
-    public function getAllOrganization(){
-        $sql = "select org.id as `id`,org.`name` as `name`,org.`type_id` as `type_id` from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $this->id . " order by org.`name`";
-        return \Yii::$app->db->createCommand($sql)
-            ->queryAll();
+    public function getAllOrganization():array
+    {
+        return Organization::find()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
     }
 
     /**
@@ -617,7 +616,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param $organization_id
      * @return bool
      */
-    public function isAllowOrganization($organization_id){
+    public function isAllowOrganization(int $organization_id):bool
+    {
         $all = $this->getAllOrganization();
         foreach ($all as $item) {
             if($item['id'] == $organization_id){

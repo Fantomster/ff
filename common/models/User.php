@@ -626,4 +626,29 @@ class User extends \amnah\yii2\user\models\User {
         }
         return false;
     }
+
+
+    public static function checkInvitingUser(string $email): array
+    {
+        $result = [];
+        if (User::find()->select('email')->where(['email' => $email])->exists()) {
+            $vendor = User::find()->where(['email' => $email])->one();
+            $userProfileFullName = $vendor->profile->full_name;
+            $userProfilePhone = $vendor->profile->phone;
+            $userOrgId = $vendor->organization_id;
+            $userOrgName = $vendor->organization->name;
+
+            $result = [
+                'success' => true,
+                'eventType' => 6,
+                'message' => Yii::t('app', 'common.models.already_register', ['ru' => 'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>']),
+                'fio' => $userProfileFullName,
+                'phone' => $userProfilePhone,
+                'organization' => $userOrgName,
+                'org_id' => $userOrgId
+            ];
+        }
+        return $result;
+    }
+
 }

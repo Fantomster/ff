@@ -196,6 +196,12 @@ class Organization extends \yii\db\ActiveRecord {
         ];
     }
 
+
+    public function getRelationUserOrganization(){
+        return $this->hasOne(RelationUserOrganization::className(), ['organization_id'=>'id', 'organization_id' => 'id']);
+    }
+
+
     public function beforeSave($insert) {
         if (parent::beforeSave($insert)) {
             $this->es_status = Organization::ES_UPDATED;

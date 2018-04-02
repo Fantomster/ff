@@ -2450,7 +2450,7 @@ class VendorController extends DefaultController
     public function actionChkmail() {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $result = Organization::checkEmail(\Yii::$app->request->post('email'));
+            $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
             return $result;
         }
     }

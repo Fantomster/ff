@@ -365,6 +365,10 @@ class OrganizationController extends DefaultController {
             $showEditButton = false;
         }
 
+        if($vendor->allow_editing == 0) {
+            $showEditButton = false;
+        }
+
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($vendor);

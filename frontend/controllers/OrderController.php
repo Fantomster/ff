@@ -490,9 +490,11 @@ class OrderController extends DefaultController {
         endif;
     }
 
-    public function actionEditGuide($id) {
+
+    public function actionEditGuide(int $id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $params['show_sorting'] = true;
 
         if (empty($guide)) {
             return $this->redirect(['order/guides']);
@@ -509,21 +511,29 @@ class OrderController extends DefaultController {
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
 
-        $test = $session['selectedVendor'];
-        $test2 = $session['guideProductList'];
+        if(!count($session['guideProductList']))$params['show_sorting'] = false;
+        if (is_iterable($session['guideProductList'])){
+            foreach ($session['guideProductList'] as $one){
+                if(gettype($one) == "integer"){
+                    $params['show_sorting'] = false;
+                    break;
+                }
+            }
+        }
 
         $vendorSearchModel = new VendorSearch();
         if (Yii::$app->request->post("VendorSearch")) {
             $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
         }
         $params['VendorSearch'] = $session['vendorSearchString'];
+        $params['guide_id'] = $id;
 
         if (Yii::$app->request->get("sort")){
             $params['sort'] = Yii::$app->request->get("sort");
             if(isset($session['sort'])){
                 unset($session['sort']);
             }
-            $session['sort'] = Yii::$app->request->get("sort");
+            $session['sort'] = $params['sort'] = Yii::$app->request->get("sort");
         }
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
@@ -534,7 +544,7 @@ class OrderController extends DefaultController {
         if (empty($selectedVendor)) {
             $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
         }
-        //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
@@ -555,15 +565,16 @@ class OrderController extends DefaultController {
 
         $pjax = Yii::$app->request->get("_pjax");
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
-            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
+            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor', 'session', 'params'));
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
-            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList', 'session', 'params'));
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
-            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
+            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params'));
         }
     }
+
 
     public function actionSaveGuide($id) {
         $client = $this->currentUser->organization;

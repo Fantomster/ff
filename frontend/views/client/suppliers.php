@@ -37,7 +37,7 @@ Modal::widget([
 ])
 ?>
 <?php
-$this->title = Yii::t('message', 'frontend.views.client.suppliers.vendors', ['ru'=>'Поставщики']);
+$this->title = Yii::t('message', 'frontend.views.client.suppliers.vendors', ['ru' => 'Поставщики']);
 $this->params['breadcrumbs'][] = $this->title;
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
@@ -59,7 +59,8 @@ $currencySymbolList = Json::encode($currencySymbolListList);
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
                     <h5 class="modal-title">
-                        <b class="client-manager-name"></b><?= Yii::t('message', 'frontend.views.client.suppliers.set_goods', ['ru'=>', укажите товары, которые Вы покупаете у поставщика']) ?> <b class="supplier-org-name"></b>
+                        <b class="client-manager-name"></b><?= Yii::t('message', 'frontend.views.client.suppliers.set_goods', ['ru' => ', укажите товары, которые Вы покупаете у поставщика']) ?>
+                        <b class="supplier-org-name"></b>
                     </h5>
                 </div>
             </div>
@@ -74,25 +75,29 @@ $currencySymbolList = Json::encode($currencySymbolListList);
                     'id' => 'changeCurrency',
                 ])
                 ?>
-                <button id="btnCancel" type="button" class="btn btn-gray" data-dismiss="modal"><?= Yii::t('message', 'frontend.views.client.suppliers.cancel', ['ru'=>'Отмена']) ?></button>
-                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('message', 'frontend.views.client.suppliers.sending', ['ru'=>'Отправляем...']) ?>"><span><?= Yii::t('message', 'frontend.views.client.suppliers.send', ['ru'=>'Отправить']) ?></span></button>
+                <button id="btnCancel" type="button" class="btn btn-gray"
+                        data-dismiss="modal"><?= Yii::t('message', 'frontend.views.client.suppliers.cancel', ['ru' => 'Отмена']) ?></button>
+                <button id="invite" type="button" class="btn btn-success"
+                        data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('message', 'frontend.views.client.suppliers.sending', ['ru' => 'Отправляем...']) ?>">
+                    <span><?= Yii::t('message', 'frontend.views.client.suppliers.send', ['ru' => 'Отправить']) ?></span>
+                </button>
             </div>
         </div>
     </div>
 </div>
 <section class="content-header">
     <h1>
-        <i class="fa fa-users"></i> <?= Yii::t('message', 'frontend.views.client.suppliers.vendors_two', ['ru'=>'Поставщики']) ?>
-        <small><?= Yii::t('message', 'frontend.views.client.suppliers.vendors_search', ['ru'=>'Находите и добавляйте в Вашу систему новых поставщиков']) ?></small>
+        <i class="fa fa-users"></i> <?= Yii::t('message', 'frontend.views.client.suppliers.vendors_two', ['ru' => 'Поставщики']) ?>
+        <small><?= Yii::t('message', 'frontend.views.client.suppliers.vendors_search', ['ru' => 'Находите и добавляйте в Вашу систему новых поставщиков']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb'
         ],
-        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
         'links' => [
-            Yii::t('message', 'frontend.views.client.suppliers.vendors_three', ['ru'=>'Поставщики'])
+            Yii::t('message', 'frontend.views.client.suppliers.vendors_three', ['ru' => 'Поставщики'])
         ],
     ])
     ?>
@@ -103,33 +108,33 @@ $currencySymbolList = Json::encode($currencySymbolListList);
 $gridColumnsCatalog = [
     [
         'attribute' => 'vendor_name',
-        'label' => Yii::t('message', 'frontend.views.client.suppliers.organization', ['ru'=>'Организация']),
+        'label' => Yii::t('message', 'frontend.views.client.suppliers.organization', ['ru' => 'Организация']),
         'format' => 'raw',
         'contentOptions' => ['class' => 'text-bold', 'style' => 'vertical-align:middle;width:45%;font-size:14px'],
         'value' => function ($data) {
             return Html::a(Html::encode($data->vendor->name), ['client/view-supplier', 'id' => $data->supp_org_id], [
-                        'data' => [
-                            'target' => '#view-supplier',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
+                'data' => [
+                    'target' => '#view-supplier',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                ],
             ]);
         }
     ],
     [
         'attribute' => 'status',
-        'label' => Yii::t('message', 'frontend.views.client.suppliers.status', ['ru'=>'Статус сотрудничества']),
+        'label' => Yii::t('message', 'frontend.views.client.suppliers.status', ['ru' => 'Статус сотрудничества']),
         'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
         'format' => 'raw',
         'value' => function ($data) {
-            if($data->status == 3)
-                return '<span class="text-yellow">' . Yii::t('message', 'frontend.views.client.suppliers.need_apply', ['ru'=>'Ожидает<br>вашего подтверждения']) . ' </span>';
+            if ($data->status == 3)
+                return '<span class="text-yellow">' . Yii::t('message', 'frontend.views.client.suppliers.need_apply', ['ru' => 'Ожидает<br>вашего подтверждения']) . ' </span>';
             elseif ($data->invite == 0) {
-                return '<span class="text-danger">' . Yii::t('message', 'frontend.views.client.suppliers.sent', ['ru'=>'Приглашение<br>отправлено']) . ' </span>';
+                return '<span class="text-danger">' . Yii::t('message', 'frontend.views.client.suppliers.sent', ['ru' => 'Приглашение<br>отправлено']) . ' </span>';
             } elseif (isset($data->catalog) && $data->catalog->status == 1) {
-                return '<span class="text-success">' . Yii::t('message', 'frontend.views.client.suppliers.partner', ['ru'=>'Партнер']) . ' </span>';
+                return '<span class="text-success">' . Yii::t('message', 'frontend.views.client.suppliers.partner', ['ru' => 'Партнер']) . ' </span>';
             } else {
-                return '<span class="text-yellow">' . Yii::t('message', 'frontend.views.client.suppliers.not_set', ['ru'=>'Партнер<br> Каталог не назначен']) . ' </span>';
+                return '<span class="text-yellow">' . Yii::t('message', 'frontend.views.client.suppliers.not_set', ['ru' => 'Партнер<br> Каталог не назначен']) . ' </span>';
             }
         }
     ],
@@ -145,88 +150,87 @@ $gridColumnsCatalog = [
                 return "<div class='btn-group'>" . $result . "</div>";
             }
 
-            if($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) {
+            if ($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL && $data->vendor->allow_editing == 1) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::button(
-                    '<i class="fa fa-shopping-cart m-r-xs"></i> '. Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru'=>'Сотрудничать']),
+                    '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru' => 'Сотрудничать']),
                     [
-                    'class' => 'btn btn-success btn-sm apply',
-                    'data' => ['id' => $data["supp_org_id"]]
-                ]);
+                        'class' => 'btn btn-success btn-sm apply',
+                        'data' => ['id' => $data["supp_org_id"]]
+                    ]);
                 $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
                     'class' => 'btn btn-default btn-sm',
                     'disabled' => 'disabled']);
                 $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
                     'class' => 'btn btn-default btn-sm',
                     'disabled' => 'disabled']);
-            }
-            elseif ($data->invite == 0 ||
-                $data->cat_id == 0 ||
-                $data->catalog->status == 0) {
+            } elseif (($data->invite == 0 ||
+                    $data->cat_id == 0 ||
+                    $data->catalog->status == 0) && $data->vendor->allow_editing == 1) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
-                $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru'=>'Заказ']), [
-                            'class' => 'btn btn-success btn-sm',
-                            'disabled' => 'disabled']);
+                $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru' => 'Заказ']), [
+                    'class' => 'btn btn-success btn-sm',
+                    'disabled' => 'disabled']);
                 $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                            'class' => 'btn btn-default btn-sm',
-                            'disabled' => 'disabled']);
+                    'class' => 'btn btn-default btn-sm',
+                    'disabled' => 'disabled']);
                 $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                            'class' => 'btn btn-default btn-sm',
-                            'disabled' => 'disabled']);
+                    'class' => 'btn btn-default btn-sm',
+                    'disabled' => 'disabled']);
             } else {
-                if (!$data->vendor->hasActiveUsers()) {
-                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_two', ['ru'=>'Заказ']) . ' ', ['order/create',
-                                'OrderCatalogSearch[searchString]' => "",
-                                'OrderCatalogSearch[selectedCategory]' => "",
-                                'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                                    ], [
-                                'class' => 'btn btn-success btn-sm',
-                                'data-pjax' => 0,
+                if (!$data->vendor->hasActiveUsers() && $data->vendor->allow_editing == 1) {
+                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_two', ['ru' => 'Заказ']) . ' ', ['order/create',
+                        'OrderCatalogSearch[searchString]' => "",
+                        'OrderCatalogSearch[selectedCategory]' => "",
+                        'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
+                    ], [
+                        'class' => 'btn btn-success btn-sm',
+                        'data-pjax' => 0,
                     ]);
 
                     $result .= Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-                                'class' => 'btn btn-default btn-sm',
-                                'style' => 'text-center',
-                                'data-pjax' => 0,
-                                'data' => [
-                                    'target' => '#edit-catalog',
-                                    'toggle' => 'modal',
-                                    'backdrop' => 'static',]
+                        'class' => 'btn btn-default btn-sm',
+                        'style' => 'text-center',
+                        'data-pjax' => 0,
+                        'data' => [
+                            'target' => '#edit-catalog',
+                            'toggle' => 'modal',
+                            'backdrop' => 'static',]
                     ]);
 
                     $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
-                                'id' => $data["supp_org_id"],
-                                    ], [
-                                'class' => 'btn btn-default btn-sm resend-invite',
-                                'data-pjax' => 0,]);
+                        'id' => $data["supp_org_id"],
+                    ], [
+                        'class' => 'btn btn-default btn-sm resend-invite',
+                        'data-pjax' => 0,]);
                 } else {
-                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_three', ['ru'=>'Заказ']), ['order/create',
-                                'OrderCatalogSearch[searchString]' => "",
-                                'OrderCatalogSearch[selectedCategory]' => "",
-                                'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                                    ], [
-                                'class' => 'btn btn-success btn-sm',
-                                'data-pjax' => 0,
+                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_three', ['ru' => 'Заказ']), ['order/create',
+                        'OrderCatalogSearch[searchString]' => "",
+                        'OrderCatalogSearch[selectedCategory]' => "",
+                        'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
+                    ], [
+                        'class' => 'btn btn-success btn-sm',
+                        'data-pjax' => 0,
                     ]);
                     $result .= Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
-                                'class' => 'btn btn-default btn-sm',
-                                'style' => 'text-center',
-                                'data-pjax' => 0,
-                                'data' => [
-                                    'target' => '#view-catalog',
-                                    'toggle' => 'modal',
-                                    'backdrop' => 'static',
-                                ],
+                        'class' => 'btn btn-default btn-sm',
+                        'style' => 'text-center',
+                        'data-pjax' => 0,
+                        'data' => [
+                            'target' => '#view-catalog',
+                            'toggle' => 'modal',
+                            'backdrop' => 'static',
+                        ],
                     ]);
                     $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                                'class' => 'btn btn-default btn-sm',
-                                'disabled' => 'disabled']);
+                        'class' => 'btn btn-default btn-sm',
+                        'disabled' => 'disabled']);
                 }
             }
 
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                        'class' => 'btn btn-danger btn-sm del',
-                        'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL)?1:0)]
+                'class' => 'btn btn-danger btn-sm del',
+                'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
             ]);
             return "<div class='btn-group'>" . $result . "</div>";
         }
@@ -238,32 +242,32 @@ $gridColumnsCatalog = [
         <div class="col-sm-12 col-md-8">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.suppliers.vendors_list', ['ru'=>'Список поставщиков']) ?></h3>
+                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.suppliers.vendors_list', ['ru' => 'Список поставщиков']) ?></h3>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-6">
                             <?php
                             $form = ActiveForm::begin([
-                                        'options' => [
-                                            'id' => 'search-form',
-                                            'role' => 'search',
-                                        ],
+                                'options' => [
+                                    'id' => 'search-form',
+                                    'role' => 'search',
+                                ],
                             ]);
                             ?>
                             <?=
-                                    $form->field($searchModel, "search_string", [
-                                        'addon' => [
-                                            'append' => [
-                                                'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
-                                                'options' => [
-                                                    'class' => 'append',
-                                                ],
-                                            ],
+                            $form->field($searchModel, "search_string", [
+                                'addon' => [
+                                    'append' => [
+                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                        'options' => [
+                                            'class' => 'append',
                                         ],
-                                    ])
-                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'searchString'])
-                                    ->label(false)
+                                    ],
+                                ],
+                            ])
+                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'searchString'])
+                                ->label(false)
                             ?>
                             <?php ActiveForm::end(); ?>
                         </div>
@@ -297,53 +301,53 @@ $gridColumnsCatalog = [
             <?php $form = ActiveForm::begin(['id' => 'SuppliersFormSend', 'enableClientValidation' => true]); ?>
             <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.suppliers.vendor_add', ['ru'=>'Добавить поставщика']) ?></h3>
+                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.suppliers.vendor_add', ['ru' => 'Добавить поставщика']) ?></h3>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
                     <?= $form->field($user, 'email') ?>
-                    <?= $form->field($profile, 'full_name')->label(Yii::t('message', 'frontend.views.client.suppliers.fio', ['ru'=>'ФИО'])) ?>
+                    <?= $form->field($profile, 'full_name')->label(Yii::t('message', 'frontend.views.client.suppliers.fio', ['ru' => 'ФИО'])) ?>
                     <?=
-                            $form->field($profile, 'phone')
-                            ->widget(\common\widgets\PhoneInput::className(), [
-                                'jsOptions' => [
-                                    'preferredCountries' => ['ru'],
-                                    'nationalMode' => false,
-                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
-                                ],
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                            ])
-                            ->label(Yii::t('message', 'frontend.views.client.suppliers.phone', ['ru'=>'Телефон']))
-                            ->textInput()
+                    $form->field($profile, 'phone')
+                        ->widget(\common\widgets\PhoneInput::className(), [
+                            'jsOptions' => [
+                                'preferredCountries' => ['ru'],
+                                'nationalMode' => false,
+                                'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                            ],
+                            'options' => [
+                                'class' => 'form-control',
+                            ],
+                        ])
+                        ->label(Yii::t('message', 'frontend.views.client.suppliers.phone', ['ru' => 'Телефон']))
+                        ->textInput()
                     ?>
-                    <?= $form->field($organization, 'name')->label(Yii::t('message', 'frontend.views.client.suppliers.org', ['ru'=>'Организация'])) ?>
+                    <?= $form->field($organization, 'name')->label(Yii::t('message', 'frontend.views.client.suppliers.org', ['ru' => 'Организация'])) ?>
                 </div>
                 <div class="box-footer">
                     <div class="form-group">
-                        <?= $currentOrganization->isEmpty() ? 
-                        Html::a(Yii::t('message', 'frontend.views.client.suppliers.add_goods', ['ru'=>'Добавить товары']), ['#'], [
-                            'class' => 'btn btn-success btn-sm setInfo',
-                            'disabled' => 'disabled',
-                            'id' => 'addProduct',
-                        ])
-                    :
-                        Html::a(Yii::t('message', 'frontend.views.client.suppliers.add_goods', ['ru'=>'Добавить товары']), ['#'], [
-                            'class' => 'btn btn-success btn-sm',
-                            'disabled' => 'disabled',
-                            'name' => 'addProduct',
-                            'id' => 'addProduct',
-                            'data' => [
-                                'target' => '#modal_addProduct',
-                                'toggle' => 'modal',
-                                'backdrop' => 'static',
-                            ],
-                        ]);
+                        <?= $currentOrganization->isEmpty() ?
+                            Html::a(Yii::t('message', 'frontend.views.client.suppliers.add_goods', ['ru' => 'Добавить товары']), ['#'], [
+                                'class' => 'btn btn-success btn-sm setInfo',
+                                'disabled' => 'disabled',
+                                'id' => 'addProduct',
+                            ])
+                            :
+                            Html::a(Yii::t('message', 'frontend.views.client.suppliers.add_goods', ['ru' => 'Добавить товары']), ['#'], [
+                                'class' => 'btn btn-success btn-sm',
+                                'disabled' => 'disabled',
+                                'name' => 'addProduct',
+                                'id' => 'addProduct',
+                                'data' => [
+                                    'target' => '#modal_addProduct',
+                                    'toggle' => 'modal',
+                                    'backdrop' => 'static',
+                                ],
+                            ]);
                         ?>
                     </div>
                     <div class="form-group">
-                        <?= Html::submitButton(Yii::t('message', 'frontend.views.client.suppliers.invite', ['ru'=>'Пригласить']), ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
+                        <?= Html::submitButton(Yii::t('message', 'frontend.views.client.suppliers.invite', ['ru' => 'Пригласить']), ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
                     </div>
                 </div>
             </div>
@@ -362,28 +366,28 @@ $removeSupplierUrl = Url::to(['client/remove-supplier']);
 $applySupplierUrl = Url::to(['client/apply-supplier']);
 
 $arr = [
-    Yii::t('message', 'frontend.views.client.suppliers.var', ['ru'=>'Уведомление']),
-    Yii::t('message', 'frontend.views.client.suppliers.var1', ['ru'=>'Окей!']),
-    Yii::t('message', 'frontend.views.client.suppliers.var2', ['ru'=>'Наименование товара']),
-    Yii::t('message', 'frontend.views.client.suppliers.var3', ['ru'=>'Ед. измерения']),
-    Yii::t('message', 'frontend.views.client.suppliers.var4', ['ru'=>'Цена (руб)']),
-    Yii::t('message', 'frontend.views.client.suppliers.var5', ['ru'=>'Уведомление']),
-    Yii::t('message', 'frontend.views.client.suppliers.var6', ['ru'=>'Завершить']),
-    Yii::t('message', 'frontend.views.client.suppliers.var7', ['ru'=>'Уведомление']),
-    Yii::t('message', 'frontend.views.client.suppliers.var8', ['ru'=>'Завершить']),
-    Yii::t('message', 'frontend.views.client.suppliers.var9', ['ru'=>'Приглашение на MixCart']),
-    Yii::t('message', 'frontend.views.client.suppliers.var10', ['ru'=>'Отправить приглашение повторно?']),
-    Yii::t('message', 'frontend.views.client.suppliers.var11', ['ru'=>'Закрыть']),
-    Yii::t('message', 'frontend.views.client.suppliers.var12', ['ru'=>'Отправить']),
-    Yii::t('message', 'frontend.views.client.suppliers.var13', ['ru'=>'Удалить поставщика?']),
-    Yii::t('message', 'frontend.views.client.suppliers.var14', ['ru'=>'Поставщик будет удален из Вашего списка поставщиков']),
-    Yii::t('message', 'frontend.views.client.suppliers.var15', ['ru'=>'Удалить']),
-    Yii::t('message', 'frontend.views.client.suppliers.var16', ['ru'=>'Отмена']),
-    Yii::t('app', 'frontend.views.client.suppliers.var17', ['ru'=>'Изменение валюты каталога']),
-    Yii::t('app', 'frontend.views.client.suppliers.var18', ['ru'=>'Отмена']),
-    Yii::t('app', 'frontend.views.client.suppliers.var19', ['ru'=>'Отмена']),
-    Yii::t('app', 'frontend.views.client.suppliers.var20', ['ru'=>'Отмена']),
-    Yii::t('app', 'frontend.views.client.suppliers.var21', ['ru'=>'Отмена']),
+    Yii::t('message', 'frontend.views.client.suppliers.var', ['ru' => 'Уведомление']),
+    Yii::t('message', 'frontend.views.client.suppliers.var1', ['ru' => 'Окей!']),
+    Yii::t('message', 'frontend.views.client.suppliers.var2', ['ru' => 'Наименование товара']),
+    Yii::t('message', 'frontend.views.client.suppliers.var3', ['ru' => 'Ед. измерения']),
+    Yii::t('message', 'frontend.views.client.suppliers.var4', ['ru' => 'Цена (руб)']),
+    Yii::t('message', 'frontend.views.client.suppliers.var5', ['ru' => 'Уведомление']),
+    Yii::t('message', 'frontend.views.client.suppliers.var6', ['ru' => 'Завершить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var7', ['ru' => 'Уведомление']),
+    Yii::t('message', 'frontend.views.client.suppliers.var8', ['ru' => 'Завершить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var9', ['ru' => 'Приглашение на MixCart']),
+    Yii::t('message', 'frontend.views.client.suppliers.var10', ['ru' => 'Отправить приглашение повторно?']),
+    Yii::t('message', 'frontend.views.client.suppliers.var11', ['ru' => 'Закрыть']),
+    Yii::t('message', 'frontend.views.client.suppliers.var12', ['ru' => 'Отправить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var13', ['ru' => 'Удалить поставщика?']),
+    Yii::t('message', 'frontend.views.client.suppliers.var14', ['ru' => 'Поставщик будет удален из Вашего списка поставщиков']),
+    Yii::t('message', 'frontend.views.client.suppliers.var15', ['ru' => 'Удалить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var16', ['ru' => 'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var17', ['ru' => 'Изменение валюты каталога']),
+    Yii::t('app', 'frontend.views.client.suppliers.var18', ['ru' => 'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var19', ['ru' => 'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var20', ['ru' => 'Отмена']),
+    Yii::t('app', 'frontend.views.client.suppliers.var21', ['ru' => 'Отмена']),
 ];
 $language = Yii::$app->sourceLanguage;
 $customJs = <<< JS
@@ -852,11 +856,11 @@ JS2;
     $profile = $user->profile;
     $this->registerJs($customJs, View::POS_READY);
     echo common\widgets\setinfo\SetInfoWidget::widget([
-                'action' => '/site/ajax-complete-registration',
-                'organization' => $organization,
-                'profile' => $profile,
-                'events' => 'invoke',
-                'selector' => '#data-modal-wizard',
-            ]);
+        'action' => '/site/ajax-complete-registration',
+        'organization' => $organization,
+        'profile' => $profile,
+        'events' => 'invoke',
+        'selector' => '#data-modal-wizard',
+    ]);
 }
 ?>

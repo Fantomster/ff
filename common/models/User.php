@@ -606,10 +606,9 @@ class User extends \amnah\yii2\user\models\User {
      * Список организаций доступных для пользователя
      * @return array
      */
-    public function getAllOrganization(){
-        $sql = "select org.id as `id`,org.`name` as `name`,org.`type_id` as `type_id` from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $this->id . " order by org.`name`";
-        return \Yii::$app->db->createCommand($sql)
-            ->queryAll();
+    public function getAllOrganization():array
+    {
+        return Organization::find()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
     }
 
     /**
@@ -617,7 +616,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param $organization_id
      * @return bool
      */
-    public function isAllowOrganization($organization_id){
+    public function isAllowOrganization(int $organization_id):bool
+    {
         $all = $this->getAllOrganization();
         foreach ($all as $item) {
             if($item['id'] == $organization_id){
@@ -626,4 +626,29 @@ class User extends \amnah\yii2\user\models\User {
         }
         return false;
     }
+
+
+    public static function checkInvitingUser(string $email): array
+    {
+        $result = [];
+        if (User::find()->select('email')->where(['email' => $email])->exists()) {
+            $vendor = User::find()->where(['email' => $email])->one();
+            $userProfileFullName = $vendor->profile->full_name;
+            $userProfilePhone = $vendor->profile->phone;
+            $userOrgId = $vendor->organization_id;
+            $userOrgName = $vendor->organization->name;
+
+            $result = [
+                'success' => true,
+                'eventType' => 6,
+                'message' => Yii::t('app', 'common.models.already_register', ['ru' => 'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>']),
+                'fio' => $userProfileFullName,
+                'phone' => $userProfilePhone,
+                'organization' => $userOrgName,
+                'org_id' => $userOrgId
+            ];
+        }
+        return $result;
+    }
+
 }

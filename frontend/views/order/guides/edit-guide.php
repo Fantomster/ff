@@ -235,30 +235,10 @@ $this->registerJs('
                                         ->label(false)
                                 ?>
 
-                                <?=
-                                $form->field($guideSearchModel, 'sort', [
-                                    'options' => [
-                                        'id'=>'alSortSelect',
-                                        'class' => "form-group",
-                                        'style' => "padding:8px;border-top:1px solid #f4f4f4;"
-                                    ],
-                                ])
-                                    ->dropDownList([
-                                        'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru'=>'Порядку добавления по возрастанию']),
-                                        'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru'=>'Порядку добавления по убыванию']),
-                                        'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru'=>'Наименованию по возрастанию']),
-                                        'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru'=>'Наименованию по убыванию']),
-                                    ], [
-                                        'prompt' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru'=>'Сортировка по']), ])
-                                    ->label(false)
-                                // 'options' => [(!empty($session['sort']) ? $session['sort'] : 1) => ['selected'=>true]]
-                                ?>
-
-
-                                <?php ActiveForm::end(); ?>
                                 <?php Pjax::begin(['formSelector' => '#searchGuideProductForm', 'enablePushState' => true, 'id' => 'guideProductList', 'timeout' => 30000]); ?>
-                                <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList')) ?>
+                                <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList', 'form', 'guideSearchModel', 'session', 'params')) ?>
                                 <?php Pjax::end(); ?>
+                                <?php ActiveForm::end(); ?>
                                 <div style="width:100%;">
                                     <div style="width:50%;float:left;padding-right:2px;">
                                         <?= Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.guides.save', ['ru'=>'Сохранить']), ['order/save-guide', 'id' => $guide->id], ['class' => 'btn btn-md btn-success guide-save']) ?>

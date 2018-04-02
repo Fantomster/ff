@@ -319,6 +319,11 @@ function changeFields(fields, results) {
             ]
         ])->label('Название франшизы') ?>
 
+
+    <?php if($model->type_id == \common\models\Organization::TYPE_SUPPLIER):?>
+        <?= $form->field($model, 'is_work')->dropDownList(['1' => 'Да', '0' => 'Нет'])->label('Поствщик работает в системе') ?>
+    <?php endif; ?>
+
     <?= Html::activeHiddenInput($franchiseeModel, 'organization_id', ['value'=>$model->id]); ?>
 
 

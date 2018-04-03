@@ -5,6 +5,7 @@ namespace common\models;
 use api\common\models\iiko\iikoService;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
@@ -492,7 +493,15 @@ class Organization extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getUsers() {
-        return $this->hasMany(User::className(), ['organization_id' => 'id']);
+        $userTable = self::tableName();
+        $relationTable = RelationUserOrganization::tableName();
+
+        $query = self::find();
+        $query->leftJoin($relationTable, "$relationTable.user_id = $userTable.id")
+            ->where("$relationTable.organization_id = $this->id");
+        $query->multiple = true;
+
+        return $query;
     }
 
     /**
@@ -792,10 +801,12 @@ class Organization extends \yii\db\ActiveRecord {
     public function getAssociatedManagers($vendor_id) {
         $usrTable = User::tableName();
         $assocTable = ManagerAssociate::tableName();
+        $relationTable = RelationUserOrganization::tableName();
 
         return User::find()
-                        ->joinWith('associated')
-                        ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+                        ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
+                        ->leftJoin($relationTable, "$relationTable.organization_id = $vendor_id and $relationTable.user_id = $assocTable.manager_id")
+                        ->where(["$assocTable.organization_id" => $this->id])
                         ->all();
     }
 

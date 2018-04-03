@@ -464,7 +464,7 @@ class ClientController extends DefaultController {
                                 $currentOrganization->step = Organization::STEP_OK;
                                 $currentOrganization->save();
                             }
-                            $user->setRelationUserOrganization($user->id, $organization->id, Role::getManagerRole($organization->type_id));
+                            User::createRelationUserOrganization($user->id, $organization->id, Role::getManagerRole($organization->type_id));
                         } else {
                             //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                             $get_supp_org_id = $check['org_id'];

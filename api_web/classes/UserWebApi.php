@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\Role;
 use api_web\models\User;
 use common\models\Profile;
@@ -169,14 +170,15 @@ class UserWebApi extends \api_web\components\WebApi
 
             $allow_roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER];
 
-            if (in_array($this->user->role_id, $allow_roles) || \common\models\RelationUserOrganization::checkRelationExisting($this->user)) {
+            if (in_array($this->user->role_id, $allow_roles) || RelationUserOrganization::checkRelationExisting($this->user)) {
                 if (!in_array($this->user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER])) {
+                    $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                        $this->user->role_id = Role::ROLE_RESTAURANT_MANAGER;
+                        $this->user->role_id = $roleID ?? Role::ROLE_RESTAURANT_MANAGER;
                     }
 
                     if ($organization->type_id == Organization::TYPE_SUPPLIER) {
-                        $this->user->role_id = Role::ROLE_SUPPLIER_MANAGER;
+                        $this->user->role_id = $roleID ?? Role::ROLE_SUPPLIER_MANAGER;
                     }
                 }
                 $this->user->organization_id = $organization->id;

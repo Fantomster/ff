@@ -63,11 +63,18 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
 
     public function checkRelationExisting(User $user):bool
     {
-        $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
+        $rel = self::findAll(['user_id'=>$user->id]);
         if(count($rel)>1){
             return true;
         }
         return false;
+    }
+
+
+    public function getRelationRole(int $organizationID, int $userID):int
+    {
+        $rel = self::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
+        return $rel->role_id ?? null;
     }
 
 

@@ -187,6 +187,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
                         $wdmodel->product_rid = $ch->product_rid;
                         $wdmodel->munit_rid = $ch->munit_rid;
                         $wdmodel->koef = $ch->koef;
+                        $wdmodel->quant = $wdmodel->quant*$ch->koef;
 
                     }
                     

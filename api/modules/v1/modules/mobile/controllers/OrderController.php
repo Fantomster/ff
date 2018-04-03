@@ -220,12 +220,13 @@ class OrderController extends ActiveController {
         return compact('Order', 'OrderContents', 'GoodsNotes');
     }
 
-    public function actionCancelOrder($order_id = null) {
+    public function actionCancelOrder() {
 
         $user = Yii::$app->user->getIdentity();
         $initiator = $user->organization;
 
         if (Yii::$app->request->post()) {
+            $order_id = Yii::$app->request->post('id');
             switch ($initiator->type_id) {
                 case Organization::TYPE_RESTAURANT:
                     $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
@@ -288,6 +289,7 @@ class OrderController extends ActiveController {
                 $this->sendOrderDone($order->createdBy, $order);
             }
 
+            if(!empty($systemMessage))
             if ($order->save()) {
                 $this->sendSystemMessage($currentUser, $order->id, $systemMessage, $danger);
                 return ["title" => $systemMessage, "type" => "success"];

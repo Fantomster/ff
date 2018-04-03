@@ -112,7 +112,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
-            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id'], 'integer'],
+            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id','blacklisted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],

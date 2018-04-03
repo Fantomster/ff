@@ -297,6 +297,7 @@ class UserController extends ActiveController
         $organization->setAttributes($organizationTemp->attributes);
         $organization->type_id = Organization::TYPE_RESTAURANT;
         $organization->name = "Тестовый ресторан";
+        $organization->blacklisted = 1;
 
         $transaction = Yii::$app->db->beginTransaction();
         try {

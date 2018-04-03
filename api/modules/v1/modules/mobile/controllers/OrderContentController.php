@@ -268,7 +268,7 @@ class OrderContentController extends ActiveController {
 
         $order = $product->order;
 
-        if($order->status >=4 && $order->status !=7)
+        if($order->status == 5 || $order->status == 6)
             throw new BadRequestHttpException('This order is close');
 
         $product->save(false);
@@ -367,7 +367,7 @@ class OrderContentController extends ActiveController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-        /*foreach ($clientUsers as $clientUser) {
+        foreach ($clientUsers as $clientUser) {
             $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
@@ -390,7 +390,7 @@ class OrderContentController extends ActiveController {
                     'order_id' => $order_id,
                 ])
             ]);
-        }*/
+        }
 
         return true;
     }

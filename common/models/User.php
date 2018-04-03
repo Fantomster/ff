@@ -555,21 +555,31 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function deleteUserFromOrganization($userId):bool
+    public function deleteUserFromOrganization(int $userId):bool
     {
-        $user = User::findIdentity(Yii::$app->user->id);
-        $relations = RelationUserOrganization::find()->where(['user_id'=>$user->id])->all();
-        foreach ($relations as $relation) {
-            self::deleteRelationUserOrganization($userId, $relation->organization_id);
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
+
+            foreach ($relations as $relation) {
+                self::deleteRelationUserOrganization($userId, $relation->organization_id);
+            }
+            $check = RelationUserOrganization::findOne(['user_id'=>$userId]);
+            if($check){
+                $existingUser = $user = User::findIdentity($userId);
+                $existingUser->organization_id = $check->organization_id;
+                $existingUser->role_id = $check->role_id;
+                $existingUser->save();
+                $transaction->commit();
+                return true;
+            }else{
+                $transaction->rollBack();
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
         }
-        $check = RelationUserOrganization::findOne(['user_id'=>$userId]);
-        if($check){
-            $existingUser = $user = User::findIdentity($userId);
-            $existingUser->organization_id = $check->organization_id;
-            $existingUser->role_id = $check->role_id;
-            $existingUser->save();
-            return true;
-        }
+
         return false;
     }
 

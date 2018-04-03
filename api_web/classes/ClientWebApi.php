@@ -10,6 +10,7 @@ use common\models\Role;
 use common\models\search\UserSearch;
 use common\models\User;
 use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -18,6 +19,21 @@ use yii\web\BadRequestHttpException;
  */
 class ClientWebApi extends WebApi
 {
+
+    /**
+     * Поиск сотрудника по id
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function employeeGet(array $post)
+    {
+        if (empty($post['id'])) {
+            throw new BadRequestHttpException('Empty id.');
+        }
+        return $this->prepareEmployee($this->userGet($post['id']));
+    }
+
     /**
      * Поиск сотрудника по email
      * @param array $post
@@ -112,6 +128,13 @@ class ClientWebApi extends WebApi
         return $return;
     }
 
+    /**
+     * Добавляем сотрудника
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
     public function employeeAdd(array $post)
     {
         if (empty($post['email'])) {
@@ -137,7 +160,6 @@ class ClientWebApi extends WebApi
                     throw new BadRequestHttpException('Empty role_id.');
                 }
 
-                $user_api = new UserWebApi();
                 $request = [
                     'user' => [
                         'email' => $post['email'],
@@ -148,6 +170,11 @@ class ClientWebApi extends WebApi
                         'full_name' => $post['name']
                     ]
                 ];
+
+                /**
+                 * @var $user_api UserWebApi
+                 */
+                $user_api = $this->container->get('UserWebApi');
                 //Создаем пользователя
                 $user = $user_api->createUser($request, (int)$post['role_id']);
                 //Устанавливаем текущую организацию
@@ -188,17 +215,144 @@ class ClientWebApi extends WebApi
     }
 
     /**
+     * Обновляем сотрудника
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function employeeUpdate(array $post)
+    {
+        if (empty($post['id'])) {
+            throw new BadRequestHttpException('Empty id.');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $user = $this->userGet($post['id']);
+
+            $relation = RelationUserOrganization::findOne([
+                'user_id' => $user->id,
+                'organization_id' => $this->user->organization->id
+            ]);
+
+            if (!empty($post['name'])) {
+                $user->profile->full_name = $post['name'];
+            }
+
+            if (!empty($post['phone'])) {
+                $user->profile->setAttribute('phone', $post['phone']);
+            }
+
+            if (!empty($post['email'])) {
+
+                if (User::find()->where(['email' => $post['email']])->exists()) {
+                    throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+                }
+
+                $user->email = $post['email'];
+            }
+
+            if (!empty($post['role_id'])) {
+                $user->role_id = $post['role_id'];
+                $relation->role_id = $user->role_id;
+            }
+
+            //Валидация и сохранение
+            if (!$user->validate() || !$user->save()) {
+                throw new ValidationException($user->getFirstErrors());
+            }
+
+            if (!$user->profile->validate() || !$user->profile->save()) {
+                throw new ValidationException($user->profile->getFirstErrors());
+            }
+
+            if (!$relation->validate() || !$relation->save()) {
+                throw new ValidationException($relation->getFirstErrors());
+            }
+
+            $transaction->commit();
+            return $this->prepareEmployee($user);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Удаляем сотрудника
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function employeeDelete(array $post)
+    {
+        if (empty($post['id'])) {
+            throw new BadRequestHttpException('Empty id.');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $user = $this->userGet($post['id']);
+
+            $relation = RelationUserOrganization::findOne([
+                'user_id' => $user->id,
+                'organization_id' => $this->user->organization->id
+            ]);
+
+            if($user->organization->id == $this->user->organization->id) {
+                $user->organization_id = null;
+                $user->save();
+            }
+
+            if (!$relation->delete()) {
+                throw new ValidationException($relation->getFirstErrors());
+            }
+
+            $transaction->commit();
+            return [];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * @param User $model
      * @return array
      */
     private function prepareEmployee(User $model)
     {
         return [
-            'id' => $model->id,
+            'id' => (int)$model->id,
             'name' => $model->profile->full_name,
-            'email' => $model->email,
-            'phone' => $model->profile->phone,
-            'role' => $model->role->name
+            'email' => $model->email ?? '',
+            'phone' => $model->profile->phone ?? '',
+            'role' => $model->role->name,
+            'role_id' => (int)$model->role->id
         ];
+    }
+
+    /**
+     * Поиск пользователя
+     * @param $id
+     * @return User
+     * @throws BadRequestHttpException
+     */
+    private function userGet($id)
+    {
+        $model = User::findOne($id);
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('User not found id.');
+        }
+
+        $organizations = ArrayHelper::map($model->getAllOrganization(), 'id', 'id');
+        if (!in_array($this->user->organization->id, $organizations)) {
+            throw new BadRequestHttpException('This user is not a member of your staff.');
+        }
+
+        return $model;
     }
 }

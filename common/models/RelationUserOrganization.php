@@ -9,6 +9,7 @@ namespace common\models;
  * @property integer $id
  * @property integer $user_id
  * @property integer $leader_id
+ * @property integer $organization_id
  * @property integer $role_id
  */
 class RelationUserOrganization extends \yii\db\ActiveRecord {
@@ -51,11 +52,17 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     }
 
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOrganization(){
         return $this->hasOne(Organization::className(), ['id'=>'organization_id']);
     }
 
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUser(){
         return $this->hasOne(User::className(), ['id'=>'user_id']);
     }

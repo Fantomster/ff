@@ -22,6 +22,7 @@ use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use common\models\ManagerAssociate;
 use common\models\Currency;
+use yii\web\BadRequestHttpException;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -1439,13 +1440,22 @@ class VendorController extends DefaultController
                 if ($user && ($usersCount > 1)) {
                     if($user->id == $this->currentUser->id) {
                         $rel2 = RelationUserOrganization::find()->where(['user_id' => $post['id']])->andWhere(['not', ['organization_id' => $this->currentUser->organization_id]])->all();
-                        if (count($rel2) > 1) {
-                            $user->organization_id = $rel2[0]->organization_id;
-                            $user->role_id = $rel2[0]->role_id;
-                            $user->save();
-                            User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
-                            Yii::$app->user->logout();
-                            return $this->goHome();
+                        if (count($rel2) > 0) {
+                            $transaction = \Yii::$app->db->beginTransaction();
+                            try {
+                                $user->organization_id = $rel2[0]->organization_id;
+                                $user->role_id = $rel2[0]->role_id;
+                                $user->save();
+                                User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
+                                Yii::$app->user->logout();
+
+                                $transaction->commit();
+
+                                return $this->goHome();
+                            } catch (\Exception $e) {
+                                $transaction->rollBack();
+                                throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+                            }
                         } else {
                             $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                             return $this->renderAjax('settings/_success', ['message' => $message]);

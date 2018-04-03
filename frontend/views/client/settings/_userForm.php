@@ -75,7 +75,7 @@ $form = ActiveForm::begin([
 
 
 <?php
-$chkmailUrl = Url::to(['client/chkmail']);
+$chkmailUrl = Url::to(['client/check-email']);
 
 $customJs = <<< JS
 

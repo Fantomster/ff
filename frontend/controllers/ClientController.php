@@ -79,6 +79,7 @@ class ClientController extends DefaultController {
                             'tutorial',
                             'analytics',
                             'chkmail',
+                            'check-email',
                             'create',
                             'edit-catalog',
                             'events',
@@ -1831,6 +1832,16 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
 
         return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+    }
+
+
+    public function actionCheckEmail():array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
+            return $result;
+        }
     }
 
 }

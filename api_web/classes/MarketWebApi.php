@@ -341,6 +341,7 @@ class MarketWebApi extends WebApi
         $item['ed'] = $model->ed;
         $item['units'] = $model->units ?? 0;
         $item['currency'] = $model->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
         return $item;

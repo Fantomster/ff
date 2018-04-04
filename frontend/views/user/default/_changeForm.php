@@ -15,7 +15,7 @@ $grid = [
             $rel = \common\models\RelationUserOrganization::findOne(['organization_id'=>$data['id'], 'user_id'=>Yii::$app->user->id]);
             if($rel){
                 $role = \common\models\Role::findOne(['id'=>$rel->role_id]);
-                $roleName = " (" . $role->name . ") ";
+                $roleName = " (" . Yii::t('app', $role->name) . ") ";
             }else{
                 $roleName = '';
             }

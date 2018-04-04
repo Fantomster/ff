@@ -208,6 +208,9 @@ class OrderWebApi extends \api_web\components\WebApi
         unset($result['currency_id']);
         unset($result['discount_type']);
         $result['currency'] = $order->currency->symbol;
+        $result['currency_id'] = $order->currency->id;
+        $result['total_price'] = round($order->total_price, 2);
+        $result['discount'] = round($order->discount, 2);
         $result['status_text'] = $order->statusText;
         $result['position_count'] = (int)$order->positionCount;
         $result['delivery_price'] = round($order->calculateDelivery(), 2);
@@ -429,7 +432,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'category_id' => (int)$model['category_id'],
                 'price' => round($model['price'], 2),
                 'ed' => $model['ed'],
-                'units' =>(int)$model['units'] ?? 1,
+                'units' => (int)$model['units'] ?? 1,
                 'currency' => $model['symbol'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket' => $this->container->get('CartWebApi')->countProductInCart($model['id']),
@@ -448,6 +451,137 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Отмена заказа
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function cancel(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne($post['order_id']);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+                $order->status = Order::STATUS_CANCELLED;
+            } else {
+                $order->status = Order::STATUS_REJECTED;
+            }
+
+            if (!$order->validate() || !$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+
+            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+                $organization = $order->client;
+            } else {
+                $organization = $order->vendor;
+            }
+
+            Notice::init('Order')->cancelOrder($this->user, $organization, $order);
+
+            $t->commit();
+            return [];
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Повторить заказ
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function repeat(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne($post['order_id']);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $request = [];
+            foreach ($order->orderContent as $item) {
+                $request[] = $this->prepareProduct($item);
+            }
+            //Добавляем товары для заказа в корзину
+            $result = $this->container->get('CartWebApi')->add($request);
+            $t->commit();
+            return $result;
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+
+    /**
+     * Заверщить заказ
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function complete(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne($post['order_id']);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $order->status = Order::STATUS_DONE;
+            $order->actual_delivery = gmdate("Y-m-d H:i:s");
+            if ($order->validate() && $order->save()) {
+                Notice::init('Order')->doneOrder($order, $this->user);
+            } else {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            $t->commit();
+            return $this->getInfo(['order_id' => $order->id]);
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * @param OrderContent $model
      * @return array
      * @throws \yii\base\InvalidConfigException
@@ -458,7 +592,8 @@ class OrderWebApi extends \api_web\components\WebApi
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
-        $item['catalog_id'] = (int)$model->product->cat_id;
+        $item['product_id'] = $model->productFromCatalog->base_goods_id;
+        $item['catalog_id'] = (int)$model->productFromCatalog->cat_id;
         $item['price'] = round($model->price, 2);
         $item['quantity'] = (int)$model->quantity;
         $item['comment'] = $model->comment;
@@ -468,6 +603,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
         $item['currency'] = $model->product->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;
     }

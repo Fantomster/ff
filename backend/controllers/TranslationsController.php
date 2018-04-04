@@ -90,7 +90,7 @@ class TranslationsController extends SmsController
     }
 
 
-    public function actionDownloadExcel(){
+    public function actionDownloadExcel(int $outsource=0){
         $objPHPExcel = new \PHPExcel();
 
         $objPHPExcel->getProperties()->setCreator("MixCart")
@@ -115,16 +115,22 @@ class TranslationsController extends SmsController
         foreach ($sourceMessages as $sourceMessage){
             $messageEn = Message::findOne(['id'=>$sourceMessage->id, 'language'=>'en']);
             $messageRu = Message::findOne(['id'=>$sourceMessage->id, 'language'=>'ru']);
-            $var = null;
-            if($messageRu && (!$messageEn || $messageEn->translation=='')){
-                $var = $messageRu->translation;
+            if($outsource){
+                $var = null;
+                if ($messageRu && $messageRu!='') {
+                    $var = $messageRu->translation;
+                } else {
+                    $var = $messageEn->translation ?? null;
+                }
+                if ($var) {
+                    $arr[$var]['var'] = $sourceMessage->message;
+                    $arr[$var]['en'] = $messageEn->translation ?? '';
+                    $arr[$var]['ru'] = $messageRu->translation ?? '';
+                }
             }else{
-                $var = $messageEn->translation ?? null;
-            }
-            if($var){
-                $arr[$var]['var'] = $sourceMessage->message;
-                $arr[$var]['en'] = $messageEn->translation ?? '';
-                $arr[$var]['ru'] = $messageRu->translation ?? '';
+                $arr[$sourceMessage->message]['var'] = $sourceMessage->message;
+                $arr[$sourceMessage->message]['en'] = $messageEn->translation ?? '';
+                $arr[$sourceMessage->message]['ru'] = $messageRu->translation ?? '';
             }
         }
         ksort($arr);

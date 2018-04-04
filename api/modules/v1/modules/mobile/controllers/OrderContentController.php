@@ -268,7 +268,7 @@ class OrderContentController extends ActiveController {
 
         $order = $product->order;
 
-        if($order->status >=4 && $order->status !=7)
+        if($order->status == 5 || $order->status == 6)
             throw new BadRequestHttpException('This order is close');
 
         $product->save(false);
@@ -367,7 +367,7 @@ class OrderContentController extends ActiveController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-        /*foreach ($clientUsers as $clientUser) {
+        foreach ($clientUsers as $clientUser) {
             $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
@@ -390,7 +390,7 @@ class OrderContentController extends ActiveController {
                     'order_id' => $order_id,
                 ])
             ]);
-        }*/
+        }
 
         return true;
     }
@@ -415,7 +415,7 @@ class OrderContentController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_canceled)
                 {
@@ -427,7 +427,7 @@ class OrderContentController extends ActiveController {
             
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($profile->phone && $notification->order_canceled)
                 {

@@ -43,39 +43,8 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
-            if (mb_substr($phone, 0, 1) == '8') {
-                $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
-            }
 
-            $post['user']['newPassword'] = $post['user']['password'];
-            unset($post['user']['password']);
-
-            $user = new User(["scenario" => "register"]);
-            $user->load($post, 'user');
-            if (!$user->validate()) {
-                throw new ValidationException($user->getFirstErrors());
-            }
-
-            if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-                throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
-            }
-
-            $profile = new Profile (["scenario" => "register"]);
             $organization = new Organization (["scenario" => "register"]);
-
-            if (User::findOne(['email' => $post['user']['email']])) {
-                throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
-            }
-
-            $user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
-
-            $profile->load($post, 'profile');
-            if (!$profile->validate()) {
-                throw new ValidationException($profile->getFirstErrors());
-            }
-            $profile->setUser($user->id)->save();
-
             $organization->load($post, 'organization');
 
             if ($organization->rating == null or empty($organization->rating) or empty(trim($organization->rating))) {
@@ -86,10 +55,13 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new ValidationException($organization->getFirstErrors());
             }
             $organization->save();
+
+            $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
             $user->setOrganization($organization, true);
+            $profile = $this->createProfile($post, $user);
 
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
-            Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $user->profile->phone);
+            Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $profile->phone);
             $transaction->commit();
             return $user->id;
         } catch (ValidationException $e) {
@@ -99,6 +71,59 @@ class UserWebApi extends \api_web\components\WebApi
             $transaction->rollBack();
             throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Создание пользователя
+     * @param array $post
+     * @param $role_id
+     * @return User
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function createUser(array $post, $role_id)
+    {
+        if (User::findOne(['email' => $post['user']['email']])) {
+            throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+        }
+
+        $post['user']['newPassword'] = $post['user']['password'];
+        unset($post['user']['password']);
+
+        $user = new User(["scenario" => "register"]);
+        $user->load($post, 'user');
+        if (!$user->validate()) {
+            throw new ValidationException($user->getFirstErrors());
+        }
+        $user->setRegisterAttributes($role_id)->save();
+        return $user;
+    }
+
+    /**
+     * Создание профиля пользователя
+     * @param array $post
+     * @param User $user
+     * @return Profile
+     * @throws ValidationException
+     */
+    public function createProfile(array $post, User $user)
+    {
+        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
+        if (mb_substr($phone, 0, 1) == '8') {
+            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
+        }
+
+        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+            throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+        }
+
+        $profile = new Profile (["scenario" => "register"]);
+        $profile->load($post, 'profile');
+        if (!$profile->validate()) {
+            throw new ValidationException($profile->getFirstErrors());
+        }
+        $profile->setUser($user->id)->save();
+        return $profile;
     }
 
     /**

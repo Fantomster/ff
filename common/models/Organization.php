@@ -5,6 +5,7 @@ namespace common\models;
 use api\common\models\iiko\iikoService;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
@@ -112,7 +113,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
-            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id'], 'integer'],
+            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id','blacklisted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -492,7 +493,15 @@ class Organization extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getUsers() {
-        return $this->hasMany(User::className(), ['organization_id' => 'id']);
+        $userTable = self::tableName();
+        $relationTable = RelationUserOrganization::tableName();
+
+        $query = self::find();
+        $query->leftJoin($relationTable, "$relationTable.user_id = $userTable.id")
+            ->where("$relationTable.organization_id = $this->id");
+        $query->multiple = true;
+
+        return $query;
     }
 
     /**
@@ -792,10 +801,12 @@ class Organization extends \yii\db\ActiveRecord {
     public function getAssociatedManagers($vendor_id) {
         $usrTable = User::tableName();
         $assocTable = ManagerAssociate::tableName();
+        $relationTable = RelationUserOrganization::tableName();
 
         return User::find()
-                        ->joinWith('associated')
-                        ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+                        ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
+                        ->leftJoin($relationTable, "$relationTable.organization_id = $vendor_id and $relationTable.user_id = $assocTable.manager_id")
+                        ->where(["$assocTable.organization_id" => $this->id])
                         ->all();
     }
 

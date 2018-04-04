@@ -238,8 +238,9 @@ class User extends \amnah\yii2\user\models\User {
     public function getEmailNotification($org_id = null) {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
         $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
-        if ($rel === null)
+        if ($rel === null) {
             return new EmailNotification();
+        }
         return EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
     }
 
@@ -531,7 +532,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    private function createRelationUserOrganization($userId, $organizationId, $roleId): bool
+    public function createRelationUserOrganization($userId, $organizationId, $roleId):bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){

@@ -150,7 +150,7 @@ $gridColumnsCatalog = [
                 return "<div class='btn-group'>" . $result . "</div>";
             }
 
-            if ($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL && $data->vendor->allow_editing == 1) {
+            if ($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::button(
                     '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru' => 'Сотрудничать']),
@@ -165,8 +165,8 @@ $gridColumnsCatalog = [
                     'class' => 'btn btn-default btn-sm',
                     'disabled' => 'disabled']);
             } elseif (($data->invite == 0 ||
-                    $data->cat_id == 0 ||
-                    $data->catalog->status == 0) && $data->vendor->allow_editing == 1) {
+                $data->cat_id == 0 ||
+                $data->catalog->status == 0)) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru' => 'Заказ']), [
                     'class' => 'btn btn-success btn-sm',

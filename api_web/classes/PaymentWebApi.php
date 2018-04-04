@@ -21,11 +21,17 @@ class PaymentWebApi extends \api_web\components\WebApi
      */
     public function currencyList()
     {
-        return Currency::find()
+        $list = Currency::find()
             ->select(['id', 'symbol as iso_code'])
             ->where(['is_active' => true])
             ->asArray()
             ->all();
+
+        foreach($list as &$item) {
+            $item['id'] = (int) $item['id'];
+        }
+
+        return $list;
     }
 
     /**

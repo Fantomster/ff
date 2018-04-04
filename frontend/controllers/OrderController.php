@@ -2026,6 +2026,7 @@ class OrderController extends DefaultController {
      * @param Organization $sender
      * @param Order $order
      */
+
     private function sendOrderCreated($sender, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -2043,8 +2044,7 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
-            if ($notification)
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
                 if($notification->order_created)
                 {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
@@ -2052,7 +2052,7 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($recipient->profile->phone && $notification->order_created)
                 {

@@ -220,12 +220,13 @@ class OrderController extends ActiveController {
         return compact('Order', 'OrderContents', 'GoodsNotes');
     }
 
-    public function actionCancelOrder($order_id = null) {
+    public function actionCancelOrder() {
 
         $user = Yii::$app->user->getIdentity();
         $initiator = $user->organization;
 
         if (Yii::$app->request->post()) {
+            $order_id = Yii::$app->request->post('id');
             switch ($initiator->type_id) {
                 case Organization::TYPE_RESTAURANT:
                     $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
@@ -288,6 +289,7 @@ class OrderController extends ActiveController {
                 $this->sendOrderDone($order->createdBy, $order);
             }
 
+            if(!empty($systemMessage))
             if ($order->save()) {
                 $this->sendSystemMessage($currentUser, $order->id, $systemMessage, $danger);
                 return ["title" => $systemMessage, "type" => "success"];
@@ -339,7 +341,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_done)
                 {
@@ -351,12 +353,12 @@ class OrderController extends ActiveController {
             
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($profile->phone && $notification->order_done)
                 {
                 $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
+                $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }
         }
@@ -421,7 +423,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_created)
                 {
@@ -433,7 +435,7 @@ class OrderController extends ActiveController {
 
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($profile->phone && $notification->order_created)
                 {
@@ -465,7 +467,7 @@ class OrderController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_canceled)
                 {
@@ -477,7 +479,7 @@ class OrderController extends ActiveController {
 
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($profile->phone && $notification->order_canceled)
              {

@@ -525,12 +525,7 @@ class OrderWebApi extends \api_web\components\WebApi
         try {
             $request = [];
             foreach ($order->orderContent as $item) {
-                $item = $this->prepareProduct($item);
-                $request[] = [
-                    'product_id' => $item['id'],
-                    'catalog_id' => $item['catalog_id'],
-                    'quantity' => $item['quantity']
-                ];
+                $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину
             $result = $this->container->get('CartWebApi')->add($request);
@@ -552,7 +547,8 @@ class OrderWebApi extends \api_web\components\WebApi
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
-        $item['catalog_id'] = (int)$model->product->cat_id;
+        $item['product_id'] = $model->productFromCatalog->base_goods_id;
+        $item['catalog_id'] = (int)$model->productFromCatalog->cat_id;
         $item['price'] = round($model->price, 2);
         $item['quantity'] = (int)$model->quantity;
         $item['comment'] = $model->comment;

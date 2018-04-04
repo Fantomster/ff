@@ -139,6 +139,62 @@ class OrderNotice
         $this->sendSystemMessage($user, $order->id, $systemMessage, true);
     }
 
+    /**
+     * Заказ завершен
+     * @param Order $order
+     * @param User $user
+     */
+    public function doneOrder(Order $order, User $user)
+    {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $sender = $order->createdBy;
+        $mailer = Yii::$app->mailer;
+        $senderOrg = $sender->organization;
+        $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification) {
+                if ($notification->order_done) {
+                    $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+                }
+            }
+
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification) {
+                if (!empty($recipient->profile->phone) && $notification->order_done) {
+                    $text = Yii::$app->sms->prepareText('sms.order_done', [
+                        'name' => $order->vendor->name,
+                        'url' => $order->getUrlForUser($recipient)
+                    ]);
+                    Yii::$app->sms->send($text, $recipient->profile->phone);
+                }
+            }
+
+        }
+
+        $systemMessage = $order->client->name . \Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru' => ' получил заказ!']);
+        $this->sendSystemMessage($user, $order->id, $systemMessage, false);
+    }
+
+    /**
+     * Системные сообщения, с сохранением в чат
+     * @param $user
+     * @param $order_id
+     * @param $message
+     * @param bool $danger
+     * @return bool
+     */
     private function sendSystemMessage($user, $order_id, $message, $danger = false)
     {
         $order = Order::findOne(['id' => $order_id]);

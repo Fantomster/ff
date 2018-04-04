@@ -208,6 +208,9 @@ class OrderWebApi extends \api_web\components\WebApi
         unset($result['currency_id']);
         unset($result['discount_type']);
         $result['currency'] = $order->currency->symbol;
+        $result['currency_id'] = $order->currency->id;
+        $result['total_price'] = round($order->total_price, 2);
+        $result['discount'] = round($order->discount, 2);
         $result['status_text'] = $order->statusText;
         $result['position_count'] = (int)$order->positionCount;
         $result['delivery_price'] = round($order->calculateDelivery(), 2);
@@ -536,6 +539,48 @@ class OrderWebApi extends \api_web\components\WebApi
             throw $e;
         }
     }
+
+
+    /**
+     * Заверщить заказ
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function complete(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne($post['order_id']);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $order->status = Order::STATUS_DONE;
+            $order->actual_delivery = gmdate("Y-m-d H:i:s");
+            if ($order->validate() && $order->save()) {
+                Notice::init('Order')->doneOrder($order, $this->user);
+            } else {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            $t->commit();
+            return $this->getInfo(['order_id' => $order->id]);
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
     /**
      * @param OrderContent $model
      * @return array

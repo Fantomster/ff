@@ -61,7 +61,6 @@ class UserSearch extends \common\models\User {
         $profile = $this->module->model("Profile");
         $role = $this->module->model("Role");
         $organization = $this->module->model("Organization");
-        $userTable = $user::tableName();
         $profileTable = $profile::tableName();
         $roleTable = $role::tableName();
         $organizationTable = $organization::tableName();

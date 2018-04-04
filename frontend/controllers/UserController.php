@@ -472,7 +472,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $rel = new RelationUserOrganization();
                 $rel->user_id = $user->id;
                 $rel->organization_id = $organization->id;
-                $rel->role_id = $user->role_id;
+                $rel->role_id = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
                 $rel->save();
             }
         }

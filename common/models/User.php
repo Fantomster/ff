@@ -13,6 +13,7 @@ use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
+use yii\web\BadRequestHttpException;
 
 /**
  * User model
@@ -206,7 +207,7 @@ class User extends \amnah\yii2\user\models\User {
 
 
     public function getRelationUserOrganization(){
-        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id', 'organization_id' => 'organization_id']);
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id']);
     }
 
 
@@ -516,7 +517,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function setRelationUserOrganization($userId, $organizationId, $roleId):bool
+    public function setRelationUserOrganization($userId, $organizationId, $roleId): bool
     {
         if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
             $relations = RelationUserOrganization::findAll(['user_id'=>Yii::$app->user->id]);
@@ -530,7 +531,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    private function createRelationUserOrganization($userId, $organizationId, $roleId):bool
+    private function createRelationUserOrganization($userId, $organizationId, $roleId): bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
@@ -545,7 +546,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function deleteRelationUserOrganization($userId, $organizationId):bool
+    public function deleteRelationUserOrganization($userId, $organizationId): bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
@@ -555,18 +556,38 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function deleteUserFromOrganization(int $userId):bool
+    public function deleteUserFromOrganization(int $userId): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
-
-            foreach ($relations as $relation) {
-                self::deleteRelationUserOrganization($userId, $relation->organization_id);
+            $relationsOrg = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>Yii::$app->user->id])->all();
+            $deleteAll = false;
+            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>$userId])->all();
+            $orgArray = [];
+            foreach ($relationsOrg as $item){
+                $orgArray[] = $item->organization_id;
             }
+            foreach ($relationsTwo as $one){
+                if(!in_array($one->organization_id, $orgArray)){
+                    $deleteAll = true;
+                }
+            }
+
+            if($deleteAll){
+                $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
+                foreach ($relations as $relation) {
+                    self::deleteRelationUserOrganization($userId, $relation->organization_id);
+                }
+
+            }else{
+                $user = User::findIdentity(Yii::$app->user->id);
+                self::deleteRelationUserOrganization($userId, $user->organization_id);
+            }
+
             $check = RelationUserOrganization::findOne(['user_id'=>$userId]);
-            if($check){
-                $existingUser = $user = User::findIdentity($userId);
+
+            if($check!=null){
+                $existingUser = User::findOne(['id' => $userId]);
                 $existingUser->organization_id = $check->organization_id;
                 $existingUser->role_id = $check->role_id;
                 $existingUser->save();
@@ -574,6 +595,7 @@ class User extends \amnah\yii2\user\models\User {
                 return true;
             }else{
                 $transaction->rollBack();
+                return false;
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -584,7 +606,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function updateRelationUserOrganization($userId, $organizationId, $roleId):bool
+    public function updateRelationUserOrganization($userId, $organizationId, $roleId): bool
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentUser = User::findIdentity($userId);
@@ -616,7 +638,7 @@ class User extends \amnah\yii2\user\models\User {
      * Список организаций доступных для пользователя
      * @return array
      */
-    public function getAllOrganization():array
+    public function getAllOrganization(): array
     {
         return Organization::find()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
     }
@@ -626,7 +648,7 @@ class User extends \amnah\yii2\user\models\User {
      * @param $organization_id
      * @return bool
      */
-    public function isAllowOrganization(int $organization_id):bool
+    public function isAllowOrganization(int $organization_id): bool
     {
         $all = $this->getAllOrganization();
         foreach ($all as $item) {

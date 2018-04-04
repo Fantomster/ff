@@ -173,13 +173,13 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function setRole($roleId){
+    public function setRole(int $roleId){
         $this->role_id = $roleId;
         $this->save();
         return $this;
     }
 
-    public function setFranchisee($fr_id) {
+    public function setFranchisee(int $fr_id) {
         $franchisee = Franchisee::findOne(['id' => $fr_id]);
         if ($franchisee) {
             $franchiseeUser = new FranchiseeUser();
@@ -461,7 +461,8 @@ class User extends \amnah\yii2\user\models\User {
         return $result;
     }
 
-    public static function getAllowedRoles($role_id) {
+    public static function getAllowedRoles(int $role_id): array
+    {
         $clientRoles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE];
         $vendorRoles = [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE];
         $franchiseeRoles = [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
@@ -518,7 +519,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function setRelationUserOrganization($userId, $organizationId, $roleId): bool
+    public function setRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
     {
         if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
             $relations = RelationUserOrganization::findAll(['user_id'=>Yii::$app->user->id]);
@@ -532,7 +533,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function createRelationUserOrganization($userId, $organizationId, $roleId):bool
+    public function createRelationUserOrganization(int $userId, int $organizationId, int $roleId):bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
@@ -547,7 +548,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function deleteRelationUserOrganization($userId, $organizationId): bool
+    public function deleteRelationUserOrganization(int $userId, int $organizationId): bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
         if($check){
@@ -607,7 +608,7 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function updateRelationUserOrganization($userId, $organizationId, $roleId): bool
+    public function updateRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentUser = User::findIdentity($userId);

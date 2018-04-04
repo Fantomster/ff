@@ -493,10 +493,10 @@ class Organization extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getUsers() {
-        $userTable = self::tableName();
+        $userTable = User::tableName();
         $relationTable = RelationUserOrganization::tableName();
 
-        $query = self::find();
+        $query = User::find();
         $query->leftJoin($relationTable, "$relationTable.user_id = $userTable.id")
             ->where("$relationTable.organization_id = $this->id");
         $query->multiple = true;

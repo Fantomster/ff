@@ -324,4 +324,90 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->products($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/order/cancel",
+     *     tags={"Order"},
+     *     summary="Отменить заказ",
+     *     description="Отменить заказ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={}
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCancel()
+    {
+        $this->response = $this->container->get('OrderWebApi')->cancel($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/order/repeat",
+     *     tags={"Order"},
+     *     summary="Повторить заказ",
+     *     description="Повторить заказ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={}
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRepeat()
+    {
+        $this->response = $this->container->get('OrderWebApi')->repeat($this->request);
+    }
 }

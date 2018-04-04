@@ -429,7 +429,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'category_id' => (int)$model['category_id'],
                 'price' => round($model['price'], 2),
                 'ed' => $model['ed'],
-                'units' =>(int)$model['units'] ?? 1,
+                'units' => (int)$model['units'] ?? 1,
                 'currency' => $model['symbol'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket' => $this->container->get('CartWebApi')->countProductInCart($model['id']),
@@ -447,6 +447,100 @@ class OrderWebApi extends \api_web\components\WebApi
         return $return;
     }
 
+    /**
+     * Отмена заказа
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function cancel(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne($post['order_id']);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+                $order->status = Order::STATUS_CANCELLED;
+            } else {
+                $order->status = Order::STATUS_REJECTED;
+            }
+
+            if (!$order->validate() || !$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+
+            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+                $organization = $order->client;
+            } else {
+                $organization = $order->vendor;
+            }
+
+            Notice::init('Order')->cancelOrder($this->user, $organization, $order);
+
+            $t->commit();
+            return [];
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Повторить заказ
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function repeat(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne($post['order_id']);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $request = [];
+            foreach ($order->orderContent as $item) {
+                $item = $this->prepareProduct($item);
+                $request[] = [
+                    'product_id' => $item['id'],
+                    'catalog_id' => $item['catalog_id'],
+                    'quantity' => $item['quantity']
+                ];
+            }
+            //Добавляем товары для заказа в корзину
+            $result = $this->container->get('CartWebApi')->add($request);
+            $t->commit();
+            return $result;
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
     /**
      * @param OrderContent $model
      * @return array
@@ -468,6 +562,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
         $item['currency'] = $model->product->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;
     }

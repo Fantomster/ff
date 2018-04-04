@@ -90,7 +90,8 @@ class OrderNotice
 
     /**
      * Отмена заказа
-     * @param $user
+     * @param User $user
+     * @param Organization $organization
      * @param Order $order
      */
     public function cancelOrder(User $user, Organization $organization, Order $order)

@@ -540,7 +540,6 @@ class OrderWebApi extends \api_web\components\WebApi
         }
     }
 
-
     /**
      * Заверщить заказ
      * @param array $post

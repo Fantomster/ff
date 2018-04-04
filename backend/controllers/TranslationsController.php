@@ -117,7 +117,7 @@ class TranslationsController extends SmsController
             $messageRu = Message::findOne(['id'=>$sourceMessage->id, 'language'=>'ru']);
             if($outsource){
                 $var = null;
-                if ($messageRu && (!$messageEn || $messageEn->translation == '')) {
+                if ($messageRu && $messageRu!='') {
                     $var = $messageRu->translation;
                 } else {
                     $var = $messageEn->translation ?? null;

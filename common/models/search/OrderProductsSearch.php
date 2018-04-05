@@ -81,7 +81,9 @@ class OrderProductsSearch extends \yii\base\Model {
             'sql' => $query,
             'params' => [':searchString' => $searchString],
             //'totalCount' => $count1 + $count2,
-            'pagination' => false,
+            'pagination' => [
+                'page' => isset($params['page']) ? ($params['page']-1) : 0,
+                'pageSize' => 8,],
             'sort' => $sort,
         ]);
         

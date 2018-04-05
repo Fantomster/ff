@@ -99,7 +99,7 @@ $this->registerJs('
     <div class="row">
         <div class="col-md-12">   
             <?php
-            Pjax::begin(['formSelector' => '#searchProductForm', 'enablePushState' => false, 'id' => 'AjaxProductList', 'timeout' => 30000, 'clientOptions' => ['url' => Url::to(['/order/ajax-show-products', 'order_id' => $order->id])]]);
+            Pjax::begin(['formSelector' => '#searchProductForm', 'enablePushState' => false, 'id' => 'AjaxProductList', 'timeout' => 30000]);
             ?>
             <?php
             $form = ActiveForm::begin([
@@ -116,6 +116,9 @@ $this->registerJs('
                 'summary' => '',
                 'showHeader' => false,
                 'tableOptions' => ['class' => 'table table-hover'],
+                'pager' => [
+                    'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed
+                ],
                 'columns' => [
                     [
                         'format' => 'raw',

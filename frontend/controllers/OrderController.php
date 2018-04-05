@@ -2190,7 +2190,7 @@ class OrderController extends DefaultController {
         $productsSearchModel = new OrderProductsSearch();
         $params['OrderProductsSearch'] = Yii::$app->request->post("OrderProductsSearch");
         $productsDataProvider = $productsSearchModel->search($params, $order);
-        $productsDataProvider->pagination = false; //['pageSize' => 8];
+        $productsDataProvider->pagination = ['pageSize' => 8];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('/order/add-position/_view', compact('productsSearchModel', 'productsDataProvider', 'order'));

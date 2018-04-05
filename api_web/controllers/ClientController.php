@@ -10,6 +10,148 @@ use api_web\components\WebApiController;
  */
 class ClientController extends WebApiController
 {
+    /**
+     * @SWG\Post(path="/client/detail",
+     *     tags={"Client"},
+     *     summary="Данные ресторана",
+     *     description="Данные ресторана",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object"
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                          "id": 1,
+     *                          "name": "Космическая пятница",
+     *                          "legal_entity": "ООО 'Космическая пятница'",
+     *                          "contact_name": "Космический Чел",
+     *                          "phone": "+7 9279279279",
+     *                          "email": "investor@f-keeper.ru",
+     *                          "site": "mixcart.ru",
+     *                          "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
+     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
+     *                          "type_id": 1,
+     *                          "type": "Ресторан",
+     *                          "rating": 0,
+     *                          "house": "50А",
+     *                          "route": "Бакалейная улица",
+     *                          "city": "Казань",
+     *                          "administrative_area_level_1": "Республика Татарстан",
+     *                          "country": "Россия",
+     *                          "about": "Вот контора так контора"
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDetail()
+    {
+        $this->response = $this->container->get('ClientWebApi')->detail();
+    }
+
+    /**
+     * @SWG\Post(path="/client/detail-update",
+     *     tags={"Client"},
+     *     summary="Обновление данных ресторана",
+     *     description="Обновление данных ресторана",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                             "name": "Космическая пятница",
+     *                             "legal_entity": "ООО 'Космическая пятница'",
+     *                             "contact_name": "Космический Чел",
+     *                             "phone": "+79182225588",
+     *                             "email":"test@test.ru",
+     *                             "about": "Вот контора так контора",
+     *                             "address": {
+     *                                  "country":"Россия",
+     *                                  "region": "Московская область",
+     *                                  "locality": "Люберцы",
+     *                                  "route": "улица Побратимов",
+     *                                  "house": "владение 107",
+     *                                  "lat": 55.7713,
+     *                                  "lng": 37.7055,
+     *                                  "place_id":"ChIJM4NYCODJSkERVeMzXqoIJho"
+     *                             }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                          "id": 1,
+     *                          "name": "Космическая пятница",
+     *                          "legal_entity": "ООО 'Космическая пятница'",
+     *                          "contact_name": "Космический Чел",
+     *                          "phone": "+7 9279279279",
+     *                          "email": "investor@f-keeper.ru",
+     *                          "site": "mixcart.ru",
+     *                          "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
+     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
+     *                          "type_id": 1,
+     *                          "type": "Ресторан",
+     *                          "rating": 0,
+     *                          "house": "50А",
+     *                          "route": "Бакалейная улица",
+     *                          "city": "Казань",
+     *                          "administrative_area_level_1": "Республика Татарстан",
+     *                          "country": "Россия",
+     *                          "about": "Вот контора так контора"
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDetailUpdate()
+    {
+        $this->response = $this->container->get('ClientWebApi')->detailUpdate($this->request);
+    }
 
     /**
      * @SWG\Post(path="/client/employee-create",

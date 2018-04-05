@@ -21,6 +21,110 @@ class ClientWebApi extends WebApi
 {
 
     /**
+     * Детальная информация о ресторане
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function detail()
+    {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
+        return $this->container->get('MarketWebApi')->prepareOrganization($this->user->organization);
+    }
+
+    /**
+     * Обновление поставщика
+     * @param array $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function detailUpdate(array $post)
+    {
+        //Поиск ресторана в системе
+        $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
+        if (empty($model)) {
+            throw new BadRequestHttpException('Client not found');
+        }
+
+        //прошли все проверки, будем обновлять
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+
+            if (!empty($post['legal_entity'])) {
+                $model->legal_entity = $post['legal_entity'];
+            }
+
+            if (!empty($post['about'])) {
+                $model->about = $post['about'];
+            }
+
+            if (!empty($post['contact_name'])) {
+                $model->contact_name = $post['contact_name'];
+            }
+
+            if (!empty($post['phone'])) {
+                $model->phone = $post['phone'];
+            }
+
+            if (!empty($post['email'])) {
+                $model->email = $post['email'];
+            }
+
+            if (!empty($post['name'])) {
+                $model->name = $post['name'];
+            }
+
+            if (!empty($post['address'])) {
+                if (!empty($post['address']['country'])) {
+                    $model->country = $post['address']['country'];
+                }
+                if (!empty($post['address']['region'])) {
+                    $model->administrative_area_level_1 = $post['address']['region'];
+                }
+                if (!empty($post['address']['locality'])) {
+                    $model->locality = $post['address']['locality'];
+                    $model->city = $post['address']['locality'];
+                }
+                if (!empty($post['address']['route'])) {
+                    $model->route = $post['address']['route'];
+                }
+                if (!empty($post['address']['house'])) {
+                    $model->street_number = $post['address']['house'];
+                }
+                if (!empty($post['address']['lat'])) {
+                    $model->lat = $post['address']['lat'];
+                }
+                if (!empty($post['address']['lng'])) {
+                    $model->lng = $post['address']['lng'];
+                }
+                if (!empty($post['address']['place_id'])) {
+                    $model->place_id = $post['address']['place_id'];
+                }
+                unset($post['address']['lat']);
+                unset($post['address']['lng']);
+                unset($post['address']['place_id']);
+                $model->address = implode(', ', $post['address']);
+                $model->formatted_address = $model->address;
+            }
+
+            if (!$model->validate() || !$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+
+            $transaction->commit();
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+
+    }
+
+    /**
      * Поиск сотрудника по id
      * @param array $post
      * @return array
@@ -301,7 +405,7 @@ class ClientWebApi extends WebApi
                 'organization_id' => $this->user->organization->id
             ]);
 
-            if($user->organization->id == $this->user->organization->id) {
+            if ($user->organization->id == $this->user->organization->id) {
                 $user->organization_id = null;
                 $user->save();
             }

@@ -138,7 +138,7 @@ $this->registerJs('
                         'content' => function($data) {
                             $units = $data["units"];
                             return TouchSpin::widget([
-                                        'name' => 'GuideProduct[' . $data["id"] . ']',
+                                        'name' => 'GuideProduct[' . $data["cbg_id"] . ']',
                                         'pluginOptions' => [
                                             'initval' => 0, //0.100,
                                             'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,

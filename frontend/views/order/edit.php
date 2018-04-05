@@ -6,6 +6,7 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+use yii\bootstrap\Modal;
 
 $this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru'=>'Редактирование заказа №']) . $order->id;
 
@@ -30,6 +31,7 @@ $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $urlViewOrder = Url::to(['/order/view', 'id' => $order->id]);
 $edit = true;
+$refreshUrl = Url::to(['/order/edit', "id" => $order->id]);
 
 $arr = [
     Yii::t('message', 'frontend.views.order.var1', ['ru'=>'Несохраненные изменения!']),
@@ -201,6 +203,20 @@ $js = <<<JS
         $(document).on('pjax:complete', function() {
             dataEdited = 0;
         })
+        $(document).on("change paste keyup", ".quantity", function() {
+        var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
+        if ($(this).val() > 0) {
+            btnAddToCart.removeClass("disabled");
+        } else {
+            btnAddToCart.addClass("disabled");
+        }
+    });
+        $(document).on("hidden.bs.modal", "#showProducts", function() {
+        $(this).data("bs.modal", null);
+        $(".modal-header").html("<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span>");
+        $(".modal-body").html("");
+        window.location.replace(window.location.protocol + "//" + window.location.host + "$refreshUrl");
+    });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);
@@ -244,6 +260,18 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                 <?php //Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
                 <div class="box-header">
                     <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru'=>'Заказ']) ?> №<?= $order->id ?></h4><hr>
+                    <?=
+                    ($order->status == 1) ?
+                    Html::a('<span><i class="icon fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']) . ' </span>',
+                        Url::to(['order/ajax-show-products', 'order_id' => $order->id]), [
+                                'class' => 'btn btn-success pull-right btnAdd',
+                    'data' => [
+                    'target' => '#showProducts',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                    ],
+                    'title' => Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']),
+                    ]): "" ?>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
@@ -313,3 +341,12 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
         </div>
     </div>
 </section>
+
+<?=
+Modal::widget([
+    'id' => 'showProducts',
+    'clientOptions' => false,
+    'size' => Modal::SIZE_LARGE,
+    'header' => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
+])
+?>

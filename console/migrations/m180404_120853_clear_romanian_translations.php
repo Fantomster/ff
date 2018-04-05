@@ -12,7 +12,7 @@ class m180404_120853_clear_romanian_translations extends Migration
      */
     public function safeUp()
     {
-        $this->alterColumn('source_message', 'message', 'varchar(500)');
+        $this->alterColumn('source_message', 'message', 'varchar(300)');
         $sourceMessages = \common\models\SourceMessage::find()->orderBy(['id'=>'desc'])->all();
         foreach ($sourceMessages as $sourceMessage){
             $count = \common\models\SourceMessage::find()->where(['message'=>$sourceMessage->message, 'category'=>$sourceMessage->category])->count();

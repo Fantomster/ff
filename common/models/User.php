@@ -211,6 +211,13 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
+    public function getRelationUserOrganizationRoleID(int $userID): int
+    {
+        $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$this->organization_id]);
+        return $rel->role_id;
+    }
+
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -558,13 +565,14 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function deleteUserFromOrganization(int $userId): bool
+    public function deleteUserFromOrganization(int $userID): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $relationsOrg = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>Yii::$app->user->id])->all();
             $deleteAll = false;
-            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>$userId])->all();
+            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>$userID])->all();
+
             $orgArray = [];
             foreach ($relationsOrg as $item){
                 $orgArray[] = $item->organization_id;
@@ -578,32 +586,74 @@ class User extends \amnah\yii2\user\models\User {
             if($deleteAll){
                 $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
                 foreach ($relations as $relation) {
-                    self::deleteRelationUserOrganization($userId, $relation->organization_id);
+                    self::deleteRelationUserOrganization($userID, $relation->organization_id);
                 }
 
             }else{
                 $user = User::findIdentity(Yii::$app->user->id);
-                self::deleteRelationUserOrganization($userId, $user->organization_id);
+                self::deleteRelationUserOrganization($userID, $user->organization_id);
             }
 
-            $check = RelationUserOrganization::findOne(['user_id'=>$userId]);
+            $check = RelationUserOrganization::findOne(['user_id'=>$userID]);
 
             if($check!=null){
-                $existingUser = User::findOne(['id' => $userId]);
+                $existingUser = User::findOne(['id' => $userID]);
                 $existingUser->organization_id = $check->organization_id;
                 $existingUser->role_id = $check->role_id;
                 $existingUser->save();
                 $transaction->commit();
                 return true;
             }else{
-                $transaction->rollBack();
-                return false;
+                $result = self::deleteAllUserData($userID);
+                if($result){
+                    $transaction->commit();
+                }else{
+                    $transaction->rollBack();
+                }
+                return $result;
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
         }
 
+        return false;
+    }
+
+
+    public function deleteAllUserData(int $userID): bool
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $user = User::findOne(['id' => $userID]);
+            if ($user->id == Yii::$app->user->id) {
+                return false;
+            }
+            if ($user) {
+                EmailNotification::deleteAll(['user_id' => $userID]);
+                SmsNotification::deleteAll(['user_id' => $userID]);
+                $user_token = UserToken::findOne(['user_id' => $userID]);
+                $profile = $user->profile;
+                if ($profile) {
+                    $profile->delete();
+                }
+
+                if ($user_token) {
+                    $user_token->delete();
+                }
+                if ($user->delete()) {
+                    $transaction->commit();
+                    return true;
+                }
+                $transaction->rollBack();
+                return false;
+            }
+            $transaction->rollBack();
+            return false;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+        }
         return false;
     }
 

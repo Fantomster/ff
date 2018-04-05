@@ -402,11 +402,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->renderAjax('_changeForm', compact('user','dataProvider','organization'));
     }
 
-    public function actionChange($id)
+
+    public function actionChange(int $id)
     {
         return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
-    
+
+
     public function actionCreate(){
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganziation = $user->organization;

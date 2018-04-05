@@ -1031,6 +1031,7 @@ class OrderController extends DefaultController {
                 $order->created_by_id = $this->currentUser->id;
                 $order->created_at = gmdate("Y-m-d H:i:s");
                 $order->calculateTotalPrice(); //also saves order
+                $order->setOrderCode();
                 $this->sendNewOrder($order->vendor);
                 $this->sendOrderCreated($this->currentUser, $order);
             }

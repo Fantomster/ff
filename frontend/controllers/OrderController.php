@@ -2010,7 +2010,7 @@ class OrderController extends DefaultController {
 
             $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
-                if($recipient->profile->phone && $notification->order_done)
+                if(!empty($recipient->profile->phone) && $notification->order_done)
                 {
                 $text = Yii::$app->sms->prepareText('sms.order_done', [
                     'name' => $order->vendor->name,

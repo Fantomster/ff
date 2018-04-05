@@ -1,4 +1,5 @@
 <?php
+
 namespace api_web\components\notice_class;
 
 use common\models\RequestCallback;

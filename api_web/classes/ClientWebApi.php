@@ -43,6 +43,9 @@ class ClientWebApi extends WebApi
      */
     public function detailUpdate(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
         //Поиск ресторана в системе
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
         if (empty($model)) {

@@ -18,7 +18,7 @@ $gridColumns = [
         'format' => 'raw',
         'attribute' => 'id',
         'value' => function($data) {
-            return Html::a($data['id'], ['order/view', 'id' => $data['id']]);
+            return Html::a($data['order_code'] ?? $data['id'], ['order/view', 'id' => $data['id']]);
         },
     ],
     [
@@ -113,6 +113,7 @@ $gridColumns = [
     GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'options' => [ 'style' => 'table-layout:fixed;' ],
         'columns' => $gridColumns,
     ]);
     ?>

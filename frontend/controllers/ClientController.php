@@ -309,6 +309,9 @@ class ClientController extends DefaultController {
                     if($isExists && $user->id != $this->currentUser->id){
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }else{
+                        $message = Yii::t('message', 'frontend.controllers.client.cant_del', ['ru' => 'Не удалось удалить пользователя!']);
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                     $user->organization_id = null;
                     if ($user->save()) {

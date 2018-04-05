@@ -329,9 +329,17 @@ class OrderWebApi extends \api_web\components\WebApi
              * @var $model Order
              */
             foreach ($models as $model) {
+
+                if($model->status == Order::STATUS_DONE) {
+                    $date = $model->completion_date ?? $model->actual_delivery;
+                } else {
+                    $date = $model->updated_at;
+                }
+
                 $orders[] = [
                     'id' => (int)$model->id,
                     'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
+                    'completion_date' => \Yii::$app->formatter->asDate($date, "dd.MM.yyyy"),
                     'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,

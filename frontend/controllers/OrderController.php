@@ -165,8 +165,11 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionOrderToXls($id) {
+
+    public function actionOrderToXls(int $id): void
+    {
         $order = Order::findOne($id);
+        $orderCode = $order->order_code ?? $order->id;
         $styleArray = [
             'borders' => [
                 'allborders' => [
@@ -180,7 +183,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getProperties()->setCreator("MixCart")
                 ->setLastModifiedBy("MixCart")
-                ->setTitle("otchet_zakaz_" . date("d-m-Y-His"));
+                ->setTitle("order_" . $orderCode);
 
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
@@ -196,7 +199,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getActiveSheet()->mergeCells('A1:H1');
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
-                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
+                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $orderCode);
         $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
 
@@ -271,7 +274,6 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->setCellValue("G17", Yii::t('message', 'frontend.views.order.grid_price') . " " . $order->currency->iso_code);
         $objPHPExcel->getActiveSheet()->getStyle("G17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getStyle("G17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        ;
 
         $this->fillCellHeaderData($objPHPExcel, 'H', 'frontend.widgets.cart.views.sum_two');
 
@@ -282,7 +284,6 @@ class OrderController extends DefaultController {
         $i = 0;
         foreach ($goods as $good) {
             $i++;
-            //dd($good->quantity);
             $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
             $objPHPExcel->getActiveSheet()->setCellValue("A$row", ($row-17));
             $objPHPExcel->getActiveSheet()->getStyle("A$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -343,16 +344,10 @@ class OrderController extends DefaultController {
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Итого:'), " " . $order->getTotalPriceWithOutDiscount() . " " . $order->currency->iso_code);
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
 
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(1);
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
-        //$objPHPExcel->getActiveSheet()->freezePane("H$row");
 
         header('Content-Type: application/vnd.ms-excel');
-        $filename = "otchet_zakaz_" . date("d-m-Y-His") . ".xls";
+        $filename = "order_" . $orderCode . ".xls";
         header('Content-Disposition: attachment;filename=' . $filename . ' ');
         header('Cache-Control: max-age=0');
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
@@ -360,7 +355,9 @@ class OrderController extends DefaultController {
         exit;
     }
 
-    private function fillCellData($objPHPExcel, $row, $client_string, $vendor_string): void {
+
+    private function fillCellData(\PHPExcel $objPHPExcel, int $row, string $client_string, string $vendor_string): void
+    {
         $objPHPExcel->getActiveSheet()->mergeCells("A$row:D$row");
         $objPHPExcel->getActiveSheet()->setCellValue("A$row", $client_string);
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:H$row");
@@ -368,13 +365,17 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(20);
     }
 
-    private function fillCellHeaderData($objPHPExcel, $column, $data): void {
+
+    private function fillCellHeaderData(\PHPExcel $objPHPExcel, string $column, string $data): void
+    {
         $objPHPExcel->getActiveSheet()->setCellValue($column . "17", Yii::t('app', $data));
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
     }
 
-    private function fillCellBottomData($objPHPExcel, $row, $leftData, $rightData, $bold = false): int {
+
+    private function fillCellBottomData(\PHPExcel $objPHPExcel, int $row, string $leftData, string $rightData, bool $bold = false): int
+    {
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:G$row");
         $objPHPExcel->getActiveSheet()->setCellValue("E$row", $leftData);
         $objPHPExcel->getActiveSheet()->getStyle("E$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
@@ -389,6 +390,7 @@ class OrderController extends DefaultController {
         $row++;
         return $row;
     }
+
 
     public function actionCreate() {
         $session = Yii::$app->session;
@@ -1034,6 +1036,7 @@ class OrderController extends DefaultController {
                 $order->created_by_id = $this->currentUser->id;
                 $order->created_at = gmdate("Y-m-d H:i:s");
                 $order->calculateTotalPrice(); //also saves order
+                $order->setOrderCode();
                 $this->sendNewOrder($order->vendor);
                 $this->sendOrderCreated($this->currentUser, $order);
             }

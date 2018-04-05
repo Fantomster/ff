@@ -6,6 +6,8 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+use yii\bootstrap\Modal;
+
 $orderCode = $order->order_code ?? $order->id;
 $this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru'=>'Редактирование заказа №']) . $orderCode;
 

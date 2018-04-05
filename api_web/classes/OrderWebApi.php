@@ -463,23 +463,20 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty param order_id');
         }
 
-        $order = Order::findOne($post['order_id']);
+        $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
         if (empty($order)) {
             throw new BadRequestHttpException("Order not found");
         }
 
-        if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        if ($order->status == Order::STATUS_CANCELLED) {
+            throw new BadRequestHttpException("This order has been cancelled.");
         }
 
         $t = \Yii::$app->db->beginTransaction();
         try {
-            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
-                $order->status = Order::STATUS_CANCELLED;
-            } else {
-                $order->status = Order::STATUS_REJECTED;
-            }
+
+            $order->status = Order::STATUS_CANCELLED;
 
             if (!$order->validate() || !$order->save()) {
                 throw new ValidationException($order->getFirstErrors());
@@ -494,7 +491,7 @@ class OrderWebApi extends \api_web\components\WebApi
             Notice::init('Order')->cancelOrder($this->user, $organization, $order);
 
             $t->commit();
-            return [];
+            return ['result' => true];
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;
@@ -514,14 +511,10 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty param order_id');
         }
 
-        $order = Order::findOne($post['order_id']);
+        $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
         if (empty($order)) {
             throw new BadRequestHttpException("Order not found");
-        }
-
-        if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -553,14 +546,14 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty param order_id');
         }
 
-        $order = Order::findOne($post['order_id']);
+        $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
         if (empty($order)) {
             throw new BadRequestHttpException("Order not found");
         }
 
-        if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение заказа");
+        if ($order->status == Order::STATUS_DONE) {
+            throw new BadRequestHttpException("This order has been completed.");
         }
 
         $t = \Yii::$app->db->beginTransaction();

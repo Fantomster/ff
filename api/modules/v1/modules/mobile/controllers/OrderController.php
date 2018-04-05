@@ -282,7 +282,7 @@ class OrderController extends ActiveController {
                 $order->status = Order::STATUS_PROCESSING;
                 $edit = true;
                 $this->sendOrderProcessing($order->vendor, $order);
-            } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+            } elseif (($organizationType == Organization::TYPE_RESTAURANT)) {
                 $systemMessage = $order->client->name . ' получил заказ!';
                 $order->status = Order::STATUS_DONE;
                 $order->actual_delivery = gmdate("Y-m-d H:i:s");

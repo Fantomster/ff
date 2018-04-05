@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use common\models\AdditionalEmail;
 use common\models\Organization;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -125,6 +126,171 @@ class ClientWebApi extends WebApi
         }
 
 
+    }
+
+    /**
+     * Создание дополнительного емайла
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function additionalEmailCreate(array $post)
+    {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
+        if (!isset($post['email'])) {
+            throw new BadRequestHttpException('Empty email');
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+
+            $model = new AdditionalEmail();
+            $model->organization_id = $this->user->organization->id;
+            $model->email = $post['email'];
+
+            $params = [
+                "order_created",
+                "order_canceled",
+                "order_changed",
+                "order_processing",
+                "order_done",
+                "request_accept"
+            ];
+
+            foreach ($params as $param) {
+                if (isset($post[$param])) {
+                    $model->$param = $post[$param];
+                }
+            }
+
+            if ($model->validate() && $model->save()) {
+                $t->commit();
+                $model->refresh();
+                return $model->getAttributes();
+            } else {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Список дополнительных емайл адресов
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function additionalEmailList()
+    {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
+        $emails = $this->user->organization->additionalEmail;
+
+        $result = [];
+        if (!empty($emails)) {
+            $result = $emails;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Обновление дополнительного емайла
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function additionalEmailUpdate(array $post)
+    {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
+        if (!isset($post['id'])) {
+            throw new BadRequestHttpException('Empty id');
+        }
+
+        $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('Additional email not found.');
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+
+            $params = [
+                "order_created",
+                "order_canceled",
+                "order_changed",
+                "order_processing",
+                "order_done",
+                "request_accept"
+            ];
+
+            foreach ($params as $param) {
+                if (isset($post[$param])) {
+                    $model->$param = $post[$param];
+                }
+            }
+
+            if (isset($post['email']) && $model->email != $post['email']) {
+                $model->email = $post['email'];
+            }
+
+            if ($model->validate() && $model->save()) {
+                $t->commit();
+                return $model->getAttributes();
+            } else {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Удаление дополнительного емайла
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function additionalEmailDelete(array $post)
+    {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
+        if (!isset($post['id'])) {
+            throw new BadRequestHttpException('Empty id');
+        }
+
+        $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('Additional email not found.');
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            if ($model->delete()) {
+                $t->commit();
+                return ['result' => true];
+            } else {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
     }
 
     /**

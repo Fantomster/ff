@@ -280,34 +280,34 @@ class OrderController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default=
-                 *      {
-                 *          "headers":{
-                 *                  "id": "ID",
-                                    "product": "Название"
-                 *          },
-                 *          "products":{
-                               {
-                                        "id": "5269",
-                                        "product": "Треска горячего копчения",
-                                        "article": "457",
-                                        "supplier": "ООО Рога и Копыта",
-                                        "supp_org_id": 4,
-                                        "cat_id": "3",
+     *      {
+     *          "headers":{
+     *                  "id": "ID",
+    "product": "Название"
+     *          },
+     *          "products":{
+    {
+    "id": "5269",
+    "product": "Треска горячего копчения",
+    "article": "457",
+    "supplier": "ООО Рога и Копыта",
+    "supp_org_id": 4,
+    "cat_id": "3",
      *                                  "category_id": 24,
-                                        "price": 499.80,
-                                        "ed": "шт.",
-                                        "currency": "RUB",
-                                        "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
-                                        "in_basket": 0
-                               }
-                 *          },
-                 *          "pagination":{
-                 *              "page":1,
-                 *              "total_page":17,
-                 *              "page_size":12
-                 *          },
-                 *          "sort":"-product"
-                 *     }
+    "price": 499.80,
+    "ed": "шт.",
+    "currency": "RUB",
+    "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
+    "in_basket": 0
+    }
+     *          },
+     *          "pagination":{
+     *              "page":1,
+     *              "total_page":17,
+     *              "page_size":12
+     *          },
+     *          "sort":"-product"
+     *     }
      *            ),
      *     ),
      *     @SWG\Response(
@@ -323,6 +323,63 @@ class OrderController extends WebApiController
     public function actionProducts()
     {
         $this->response = $this->container->get('OrderWebApi')->products($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/order/status-list",
+     *     tags={"Order"},
+     *     summary="Список статусов заказа",
+     *     description="Список статусов заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default=
+     *              {
+     *                 {
+     *                      "id": 1,
+     *                      "title": "Ожидает подтверждения поставщика"
+     *                 },
+     *                 {
+     *                      "id": 2,
+     *                      "title": "Ожидает подтверждения клиента"
+     *                 }
+     *              }
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionStatusList()
+    {
+        $result = [];
+        foreach ((new \common\models\Order)->getStatusList() as $key => $value) {
+            $result[] = ['id' => (int)$key, 'title' => $value];
+        }
+        $this->response = $result;
     }
 
     /**

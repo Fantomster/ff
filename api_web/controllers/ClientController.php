@@ -154,8 +154,235 @@ class ClientController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/client/additional-email-create",
+     *     tags={"Client/AdditionalEmail"},
+     *     summary="Создать дополнительный email адрес для уведомлений",
+     *     description="Создать дополнительный email адрес для уведомлений",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "email": "email@email.ru",
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_processing": 0,
+     *                      "order_done": 1,
+     *                      "request_accept": 0
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "id": 2,
+     *                      "email": "email@email.ru",
+     *                      "organization_id": 1,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_processing": 0,
+     *                      "order_done": 1,
+     *                      "request_accept": 0
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAdditionalEmailCreate()
+    {
+        $this->response = $this->container->get('ClientWebApi')->additionalEmailCreate($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/client/additional-email-list",
+     *     tags={"Client/AdditionalEmail"},
+     *     summary="Список дополнительных email адресом для уведомлений",
+     *     description="Список дополнительных email адресом для уведомлений",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={ }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "id": 2,
+     *                      "email": "email@email.ru",
+     *                      "organization_id": 1,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_processing": 0,
+     *                      "order_done": 1,
+     *                      "request_accept": 0
+     *                 }
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAdditionalEmailList()
+    {
+        $this->response = $this->container->get('ClientWebApi')->additionalEmailList();
+    }
+
+    /**
+     * @SWG\Post(path="/client/additional-email-update",
+     *     tags={"Client/AdditionalEmail"},
+     *     summary="Обновить дополнительный email адрес для уведомлений",
+     *     description="Обновить дополнительный email адрес для уведомлений",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 2,
+     *                      "email": "email@email.ru",
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_processing": 0,
+     *                      "order_done": 1,
+     *                      "request_accept": 0
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "id": 2,
+     *                      "email": "email@email.ru",
+     *                      "organization_id": 1,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_processing": 0,
+     *                      "order_done": 1,
+     *                      "request_accept": 0
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAdditionalEmailUpdate()
+    {
+        $this->response = $this->container->get('ClientWebApi')->additionalEmailUpdate($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/client/additional-email-delete",
+     *     tags={"Client/AdditionalEmail"},
+     *     summary="Удалить дополнительный email адрес для уведомлений",
+     *     description="Удалить дополнительный email адрес для уведомлений",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  type="object",
+     *                  default={"token":"123123", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 2
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"result":true}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAdditionalEmailDelete()
+    {
+        $this->response = $this->container->get('ClientWebApi')->additionalEmailDelete($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/client/employee-create",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Создаем сотрудника в организации",
      *     description="Создаем сотрудника в организации",
      *     produces={"application/json"},
@@ -212,7 +439,7 @@ class ClientController extends WebApiController
 
     /**
      * @SWG\Post(path="/client/employee-get",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Получить сотрудника по id",
      *     description="Получить сотрудника по id",
      *     produces={"application/json"},
@@ -264,7 +491,7 @@ class ClientController extends WebApiController
 
     /**
      * @SWG\Post(path="/client/employee-update",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Обновление данных о сотруднике",
      *     description="Обновление данных о сотруднике",
      *     produces={"application/json"},
@@ -322,7 +549,7 @@ class ClientController extends WebApiController
 
     /**
      * @SWG\Post(path="/client/employee-delete",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Удаление сотрудника из организации",
      *     description="Удаление сотрудника из организации",
      *     produces={"application/json"},
@@ -367,7 +594,7 @@ class ClientController extends WebApiController
 
     /**
      * @SWG\Post(path="/client/employee-list",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Список сотрудников ресторана",
      *     description="Список сотрудников ресторана",
      *     produces={"application/json"},
@@ -446,7 +673,7 @@ class ClientController extends WebApiController
 
     /**
      * @SWG\Post(path="/client/employee-search",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Поиск сотрудника по Email",
      *     description="Поиск сотрудника по Email",
      *     produces={"application/json"},
@@ -498,7 +725,7 @@ class ClientController extends WebApiController
 
     /**
      * @SWG\Post(path="/client/employee-roles",
-     *     tags={"Client"},
+     *     tags={"Client/Employee"},
      *     summary="Список ролей для сотрудников ресторана",
      *     description="Список ролей для сотрудников ресторана",
      *     produces={"application/json"},

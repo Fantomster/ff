@@ -229,7 +229,7 @@ $this->registerCss("
                                 'contentOptions'   =>   ['class' => 'small_cell_id'],
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                                return Html::a($data->id, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                                return Html::a($data->order_code ?? $data->id, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                             ],
                             $organization->type_id == Organization::TYPE_RESTAURANT ? [

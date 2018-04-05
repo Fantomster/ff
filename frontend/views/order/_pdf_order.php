@@ -9,7 +9,7 @@ $currencySymbol = $order->currency->iso_code;
 <div>
     <div class="pdf_header" style="text-align: center;">
         <span style="font-size: 20px;" >
-            <b><?= Yii::t('message', 'frontend.views.order.order_no', ['ru'=>'Заказ №']) ?><?=$order->id?></b>
+            <b><?= Yii::t('message', 'frontend.views.order.order_no', ['ru'=>'Заказ №']) ?><?=$order->order_code ?? $order->id?></b>
         </span>
         <br>
         <small>

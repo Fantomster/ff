@@ -6,8 +6,8 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
-
-$this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru'=>'Редактирование заказа №']) . $order->id;
+$orderCode = $order->order_code ?? $order->id;
+$this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru'=>'Редактирование заказа №']) . $orderCode;
 
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
@@ -219,7 +219,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.views.order.order_five', ['ru'=>'Заказ №']) ?><?= $order->id ?>
+        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.views.order.order_five', ['ru'=>'Заказ №']) ?><?= $orderCode ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -232,7 +232,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                 'label' => Yii::t('message', 'frontend.views.order.orders_history', ['ru'=>'История заказов']),
                 'url' => ['order/index'],
             ],
-            Yii::t('message', 'frontend.views.order.order_number', ['ru'=>'Заказ №']) . $order->id,
+            Yii::t('message', 'frontend.views.order.order_number', ['ru'=>'Заказ №']) . $orderCode,
         ],
     ])
     ?>
@@ -243,7 +243,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             <div class="box box-info">
                 <?php //Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
                 <div class="box-header">
-                    <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru'=>'Заказ']) ?> №<?= $order->id ?></h4><hr>
+                    <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru'=>'Заказ']) ?> №<?= $orderCode ?></h4><hr>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">

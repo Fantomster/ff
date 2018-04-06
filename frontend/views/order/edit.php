@@ -204,7 +204,7 @@ $js = <<<JS
         $(document).on('pjax:complete', function() {
             dataEdited = 0;
         })
-        $(document).on("change paste keyup", ".quantity", function() {
+        $(document).on("change paste keyup", ".quantityAdd", function() {
         var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
         if ($(this).val() > 0) {
             btnAddToCart.removeClass("disabled");

@@ -13,7 +13,7 @@ $Url = Url::to(['order/ajax-show-products', 'order_id'=>$order->id]);
 $this->registerJs('
      $(document).on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
-                quantity = $(this).parent().parent().find(".quantity").val();
+                quantity = $(this).parent().parent().find(".quantityAdd").val();
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-order']) . '",
                     {"product_id": $(this).data("id"), "quantity": quantity, "order_id": '.$order->id.', "cat_id": $(this).data("cat")}
@@ -137,11 +137,11 @@ $this->registerJs('
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],
                     [
-                        'attribute' => 'quantity',
+                        'attribute' => 'quantity2',
                         'content' => function($data) {
                             $units = $data["units"];
                             return TouchSpin::widget([
-                                        'name' => 'GuideProduct[' . $data["cbg_id"] . ']',
+                                        'name' => 'AddProduct[' . $data["cbg_id"] . '][quantity]',
                                         'pluginOptions' => [
                                             'initval' => 0, //0.100,
                                             'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,
@@ -154,7 +154,7 @@ $this->registerJs('
                                             'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                             'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                                         ],
-                                        'options' => ['class' => 'quantity form-control '],
+                                        'options' => ['class' => 'quantityAdd form-control ', 'id' => 'addp' . $data["cbg_id"]],
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],

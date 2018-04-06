@@ -2250,7 +2250,7 @@ class OrderController extends DefaultController {
         $organizationType = $user->organization->type_id;
 
         if ($organizationType == Organization::TYPE_RESTAURANT) {
-            //$this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+            $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->recipientsList as $recipient) {
                 $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
@@ -2266,7 +2266,7 @@ class OrderController extends DefaultController {
         } elseif ($organizationType == Organization::TYPE_SUPPLIER) {
             $order->calculateTotalPrice();
             $order->save();
-            //$this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+            $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $this->sendOrderChange($order->vendor, $order);
             $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->client->users as $recipient) {

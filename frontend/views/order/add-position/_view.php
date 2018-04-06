@@ -166,7 +166,7 @@ $this->registerJs('
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
                                         'data-id' => $data["cbg_id"],
                                         'data-cat' => $data["cat_id"],
-                                        'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru'=>'Добавить в корзину']),
+                                        'title' => Yii::t('message', 'frontend.views.order.guides.add_to_order', ['ru'=>'Добавить в заказ']),
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 10%;'],

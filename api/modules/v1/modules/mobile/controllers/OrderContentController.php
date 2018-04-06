@@ -268,19 +268,20 @@ class OrderContentController extends ActiveController {
 
         $order = $product->order;
 
-        if($order->status == 5 || $order->status == 6)
+        if($order->status != 1)
             throw new BadRequestHttpException('This order is close');
 
         $product->save(false);
 
-        $message = "добавил ".$product->product_name." ".$product->quantity." ".$product->product->ed;
+        $message = $message = Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "<br/>добавил {prod} {quantity} {ed} по цене {productPrice} {currencySymbol}/{ed} ",
+            'prod' => $product->product_name, 'productPrice' => $product->price, 'currencySymbol' => $order->currency->symbol, 'ed' => $product->product->ed, 'quantity' => $product->quantity]);
 
         $user = Yii::$app->user->getIdentity();
         $organizationType = $user->organization->type_id;
 
         if ($organizationType == Organization::TYPE_RESTAURANT) {
-            $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-            $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+            //$order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->recipientsList as $recipient) {
                 $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
@@ -294,11 +295,11 @@ class OrderContentController extends ActiveController {
             $order->save();
             $this->sendOrderChange($order->client, $order);
         } elseif ($organizationType == Organization::TYPE_SUPPLIER) {
-            $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
-            $order->accepted_by_id = $user->id;
+            //$order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+            //$order->accepted_by_id = $user->id;
             $order->calculateTotalPrice();
             $order->save();
-            $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+            $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $this->sendOrderChange($order->vendor, $order);
             $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->client->users as $recipient) {

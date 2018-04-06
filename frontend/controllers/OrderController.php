@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\search\OrderProductsSearch;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -55,7 +56,9 @@ class OrderController extends DefaultController {
                             'ajax-calculate-total',
                             'pdf',
                             'export-to-xls',
-                            'order-to-xls'
+                            'order-to-xls',
+                            'ajax-show-products',
+                            'ajax-add-to-order',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2179,4 +2182,102 @@ class OrderController extends DefaultController {
         return $order;
     }
 
+    public function actionAjaxShowProducts($order_id) {
+        $order = Order::findOne(['id' => $order_id]);
+
+        $params = Yii::$app->request->getQueryParams();
+
+        $productsSearchModel = new OrderProductsSearch();
+        $params['OrderProductsSearch'] = Yii::$app->request->post("OrderProductsSearch");
+        $productsDataProvider = $productsSearchModel->search($params, $order);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('/order/add-position/_view', compact('productsSearchModel', 'productsDataProvider', 'order'));
+        } else {
+            return $this->renderAjax('/order/add-position/_view', compact('productsSearchModel', 'productsDataProvider', 'order'));
+        }
+    }
+
+    public function actionAjaxAddToOrder()
+    {
+        $post = Yii::$app->request->post();
+
+        if (OrderContent::findOne(['order_id' => $post['order_id'], 'product_id' => $post['product_id']]) != null)
+            throw new BadRequestHttpException('This product already exists');
+
+        $product = CatalogGoods::findOne(['base_goods_id' => $post['product_id'], 'cat_id' => $post['cat_id']]);
+
+        if ($product) {
+            $product_id = $product->baseProduct->id;
+            $price = $product->price;
+            $product_name = $product->baseProduct->product;
+            $vendor = $product->organization;
+            $units = $product->baseProduct->units;
+            $article = $product->baseProduct->article;
+        } else {
+            $product = CatalogBaseGoods::findOne(['id' => $post['product_id'], 'cat_id' => $post['cat_id']]);
+            if ($product == null) {
+                throw new BadRequestHttpException('This product not found');
+            }
+            $product_id = $product->id;
+            $product_name = $product->product;
+            $price = $product->price;
+            $units = $product->units;
+            $article = $product->article;
+        }
+
+            $position = new OrderContent();
+            $position->order_id = $post['order_id'];
+            $position->product_id = $product_id;
+            $position->quantity = $post['quantity'];
+            $position->price = $price;
+            $position->product_name = $product_name;
+            $position->units = $units;
+            $position->article = $article;
+
+        $order = $position->order;
+
+        if($order->status !=1)
+            throw new BadRequestHttpException('Access denided');
+
+        if(!$position->save(false))
+            throw new BadRequestHttpException('SaveError');
+
+        $message = Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "<br/>добавил {prod} {quantity} {ed} по цене {productPrice} {currencySymbol}/{ed} ",
+            'prod' => $position->product_name, 'productPrice' => $position->price, 'currencySymbol' => $order->currency->symbol, 'ed' => $position->product->ed, 'quantity' => $position->quantity]);
+
+        $user = Yii::$app->user->getIdentity();
+        $organizationType = $user->organization->type_id;
+
+        if ($organizationType == Organization::TYPE_RESTAURANT) {
+            $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+            $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+            foreach ($order->recipientsList as $recipient) {
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                if (($recipient->organization_id == $order->vendor_id) && $profile->phone && $recipient->smsNotification->order_changed) {
+                    $text = $subject;
+                    $target = $profile->phone;
+                    Yii::$app->sms->send($text, $target);
+                }
+            }
+            $order->calculateTotalPrice();
+            $order->save();
+            $this->sendOrderChange($order->client, $order);
+        } elseif ($organizationType == Organization::TYPE_SUPPLIER) {
+            $order->calculateTotalPrice();
+            $order->save();
+            $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+            $this->sendOrderChange($order->vendor, $order);
+            $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+            foreach ($order->client->users as $recipient) {
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                if ($profile->phone && $recipient->smsNotification->order_changed) {
+                    $text = $subject;
+                    $target = $profile->phone;
+                    Yii::$app->sms->send($text, $target);
+                }
+            }
+        }
+        return true;
+    }
 }

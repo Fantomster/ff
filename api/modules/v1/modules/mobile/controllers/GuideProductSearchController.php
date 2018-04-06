@@ -128,8 +128,9 @@ class GuideProductSearchController extends ActiveController {
             $pagination->pageSize = $params->count;
             if(isset($params->page))
             {
-                /*$offset = ($params->page * $params->count) - $params->count;
-                $query .= " OFFSET $offset";*/
+                $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+                if(strpos($agent, 'okhttp') !== false)
+                    $params->page--;
                 $pagination->page = $params->page;
             }
             $dataProvider->pagination = $pagination;

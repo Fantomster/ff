@@ -330,7 +330,7 @@ class OrderWebApi extends \api_web\components\WebApi
              */
             foreach ($models as $model) {
 
-                if($model->status == Order::STATUS_DONE) {
+                if ($model->status == Order::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
                     $date = $model->updated_at;
@@ -471,7 +471,13 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty param order_id');
         }
 
-        $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
+        $query = Order::find()->where(['id' => $post['order_id']]);
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            $query->andWhere(['client_id' => $this->user->organization->id]);
+        } else {
+            $query->andWhere(['vendor_id' => $this->user->organization->id]);
+        }
+        $order = $query->one();
 
         if (empty($order)) {
             throw new BadRequestHttpException("Order not found");
@@ -529,7 +535,7 @@ class OrderWebApi extends \api_web\components\WebApi
         try {
 
             $content = $order->orderContent;
-            if(empty($content)) {
+            if (empty($content)) {
                 throw new BadRequestHttpException("Order content is empty.");
             }
 
@@ -560,7 +566,13 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty param order_id');
         }
 
-        $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
+        $query = Order::find()->where(['id' => $post['order_id']]);
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            $query->andWhere(['client_id' => $this->user->organization->id]);
+        } else {
+            $query->andWhere(['vendor_id' => $this->user->organization->id]);
+        }
+        $order = $query->one();
 
         if (empty($order)) {
             throw new BadRequestHttpException("Order not found");

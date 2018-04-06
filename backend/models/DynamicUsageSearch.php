@@ -110,7 +110,7 @@ class DynamicUsageSearch extends \yii\base\Model {
             $where[] = "(org_name LIKE '%$this->org_name%')";
 
         if($this->franchisee_name)
-            $where[] = "(franchisee_name LIKE '%$this->franchisee_namee%')";
+            $where[] = "(franchisee_name LIKE '%$this->franchisee_name%')";
 
         if(count($where) > 0)
             $where = "WHERE ".implode(' AND ', $where)." ";

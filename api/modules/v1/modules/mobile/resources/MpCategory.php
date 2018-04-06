@@ -25,7 +25,7 @@ class MpCategory extends \common\models\MpCategory
     public function getCountProducts($category_id = null)
     {
        $category_id = ($category_id == null ) ? $this->id : $category_id;
-       $categories = $this->getCategories($category_id);
+       $categories = self::getCategories($category_id);
        $categories = implode(",", $categories);
 
        $res = 0;
@@ -56,12 +56,12 @@ class MpCategory extends \common\models\MpCategory
        return $res;
     }
 
-    private function getCategories($cat_id) {
+    public static function getCategories($cat_id) {
         $res = [];
         $cats = MpCategory::find()->where(["parent" => $cat_id])->all();
         foreach ($cats as $cat) {
             $res[] = $cat->id;
-            $res = array_merge($res, $this->getCategories($cat->id));
+            $res = array_merge($res, self::getCategories($cat->id));
         }
 
         return $res;

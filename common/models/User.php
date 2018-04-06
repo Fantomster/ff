@@ -213,7 +213,8 @@ class User extends \amnah\yii2\user\models\User {
 
     public function getRelationUserOrganizationRoleID(int $userID): int
     {
-        $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$this->organization_id]);
+        $user = self::findIdentity(Yii::$app->user->id);
+        $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$user->organization_id]);
         return $rel->role_id;
     }
 
@@ -692,7 +693,7 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getAllOrganization(): array
     {
-        return Organization::find()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
+        return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
     }
 
     /**

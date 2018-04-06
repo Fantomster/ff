@@ -50,7 +50,7 @@ $form = ActiveForm::begin([
     ])
     ?>
 
-    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label(Yii::t('message', 'frontend.views.vendor.role', ['ru'=>"Роль"])) ?>
+    <?= $form->field($user, 'role_id')->dropDownList($dropDown, ['options' =>[ $selected => ['Selected' => true]]])->label(Yii::t('message', 'frontend.views.client.settings.role', ['ru'=>"Роль"])) ?>
 
 </div>
 <div class="modal-footer">

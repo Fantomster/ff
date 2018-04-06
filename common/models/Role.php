@@ -131,5 +131,16 @@ class Role extends \amnah\yii2\user\models\Role {
     {
         return [self::ROLE_FRANCHISEE_OWNER, self::ROLE_FRANCHISEE_OPERATOR, self::ROLE_FRANCHISEE_LEADER, self::ROLE_FRANCHISEE_MANAGER];
     }
-    
+
+
+    public function getRelationOrganizationType(int $userID, int $organizationID): int
+    {
+        $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
+        $roleID = $rel->role_id;
+        if($roleID==self::ROLE_RESTAURANT_MANAGER || $roleID==self::ROLE_RESTAURANT_EMPLOYEE){
+            return Organization::TYPE_RESTAURANT;
+        }else{
+            return Organization::TYPE_SUPPLIER;
+        }
+    }
 }

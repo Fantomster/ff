@@ -89,7 +89,9 @@ $this->registerCss('
         min-width:140px;
         }
     }
-        #order-analytic-list a:not(.btn){color: #333;}');
+        #order-analytic-list a:not(.btn){color: #333;}
+        #order-analytic-list a{width: 100%; min-height: 17px; display: inline-block;}
+        ');
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 

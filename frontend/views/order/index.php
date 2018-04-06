@@ -75,6 +75,7 @@ $this->registerJs('
 $this->registerCss("
     tr:hover{cursor: pointer;}
     #orderHistory a:not(.btn){color: #333;}
+    #orderHistory a{width: 100%; min-height: 17px; display: inline-block;}
         ");
 ?>
 <section class="content-header">

@@ -21,6 +21,7 @@ $this->registerCss('
         z-index: 1100;
     }
     #order-analytic-list a:not(.btn){color: #333;}
+    #order-analytic-list a{width: 100%; min-height: 17px; display: inline-block;}
     ');
 if ($organization->step == Organization::STEP_SET_INFO) {
     \common\assets\AuthAsset::register($this);

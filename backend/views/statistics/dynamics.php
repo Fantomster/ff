@@ -34,46 +34,46 @@ $this->title = implode(' - ',[
                 'order_cnt',
                 ['format' => 'raw',
                     'attribute' => 'w5_count',
-                    'value' => function($model) {
-                        if($model->w5_count == 0 || $model->w5_vendor == 0)
+                    'value' => function($data) {
+                        if($data['w5_count'] == 0 || $data['w5_vendor'] == 0)
                             return 0;
-                        return $model->w5_sum / $model->w5_count / $model->w5_vendor;
+                        return $data['w5_sum'] / $data['w5_count'] / $data['w5_vendor'];
                     },
                     'contentOptions' => ['style' => 'width: 20%;'],
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w4_count',
-                    'value' => function($model) {
-                        if($model->w4_count == 0 || $model->w4_vendor == 0)
+                    'value' => function($data) {
+                        if($data['w4_count'] == 0 || $data['w4_vendor'] == 0)
                             return 0;
-                        return $model->w4_sum / $model->w4_count / $model->w4_vendor;
+                        return $data['w4_sum'] / $data['w4_count'] / $data['w4_vendor'];
                     },
                     'contentOptions' => ['style' => 'width: 20%;'],
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w3_count',
-                    'value' => function($model) {
-                        if($model->w3_count == 0 || $model->w3_vendor == 0)
+                    'value' => function($data) {
+                        if($data['w3_count'] == 0 || $data['w3_vendor'] == 0)
                             return 0;
-                        return $model->w3_sum / $model->w3_count / $model->w3_vendor;
+                        return $data['w3_sum'] / $data['w3_count'] / $data['w3_vendor'];
                     },
                     'contentOptions' => ['style' => 'width: 20%;'],
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w2_count',
-                    'value' => function($model) {
-                        if($model->w2_count == 0 || $model->w2_vendor == 0)
+                    'value' => function($data) {
+                        if($data['w2_count'] == 0 || $data['w2_vendor'] == 0)
                             return 0;
-                        return $model->w2_sum / $model->w2_count / $model->w2_vendor;
+                        return $data['w2_sum'] / $data['w2_count'] / $data['w2_vendor'];
                     },
                     'contentOptions' => ['style' => 'width: 20%;'],
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w1_count',
-                    'value' => function($model) {
-                        if($model->w1_count == 0 || $model->w1_vendor == 0)
+                    'value' => function($data) {
+                        if($data['w1_count'] == 0 || $data['w1_vendor'] == 0)
                             return 0;
-                        return $model->w1_sum / $model->w1_count / $model->w1_vendor;
+                        return $data['w1_sum'] / $data['w1_count'] / $data['w1_vendor'];
                     },
                     'contentOptions' => ['style' => 'width: 20%;'],
                 ],

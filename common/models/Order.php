@@ -517,7 +517,18 @@ class Order extends \yii\db\ActiveRecord {
     public function setOrderCode(): void
     {
         $date = gmdate('ymd');
-        $this->order_code = $date . "-" . $this->id;
+        $orderSequence = new OrderSequence();
+        $orderSequence->order_id = $this->id;
+        $orderSequence->save();
+        $this->order_code = $date . "-" . $orderSequence->id;
         $this->save();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderSequence(): object
+    {
+        return $this->hasOne(OrderSequence::className(), ['order_id' => 'id']);
     }
 }

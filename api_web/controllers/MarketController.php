@@ -23,7 +23,7 @@ class MarketController extends WebApiController
      *         @SWG\Schema (
      *              @SWG\Property(
      *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
+     *                  ref="#/definitions/UserWithLocation"
      *              ),
      *              @SWG\Property(
      *                  property="request",
@@ -124,11 +124,7 @@ class MarketController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object"
@@ -177,11 +173,7 @@ class MarketController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={"id":1}
@@ -240,10 +232,7 @@ class MarketController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserWithLocation"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={

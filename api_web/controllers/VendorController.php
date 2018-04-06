@@ -21,10 +21,7 @@ class VendorController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -86,10 +83,7 @@ class VendorController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={"email":"test@test.ru"}
@@ -100,21 +94,7 @@ class VendorController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              default={
-     *                         "id": 3449,
-     *                         "name": "testsellfknm4 - поставщик",
-     *                         "phone": "+7 925 764-84-45",
-     *                         "email": "testsellfknm4@yandex.ru",
-     *                         "address": "Волгоградский пр., 143к2, Москва, Россия, 109378",
-     *                         "image": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
-     *                         "type_id": 2,
-     *                         "type": "Поставщик",
-     *                         "rating": 5,
-     *                         "city": "Москва",
-     *                         "administrative_area_level_1": null,
-     *                         "country": "Россия",
-     *                         "about": "1233"
-     *             }
+     *              ref="#/definitions/Organization"
      *          ),
      *     ),
      *     @SWG\Response(
@@ -144,10 +124,7 @@ class VendorController extends WebApiController
      *         required=true,
      *         description="id - обязательное поле",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -211,30 +188,24 @@ class VendorController extends WebApiController
     /**
      * @SWG\Post(path="/vendor/upload-logo",
      *     tags={"Vendor"},
-     *     security={
-     *         {
-     *             "Bearer": {}
-     *         }
-     *     },
-     *     consumes={"multipart/form-data"},
      *     summary="Смена логотипа поставщика",
-     *     description="Смена логотипа поставщика.
-     * Необходима авторизация по Header:Bearer xxxxxxxxx",
-     *     consumes={"multipart/form-data"},
-     *     @SWG\Parameter(
-     *         in="formData",
-     *         name="Organization[picture]",
-     *         required=true,
-     *         type="file"
-     *     ),
-     *     @SWG\Parameter(
-     *         name="vendor_id",
-     *         in="formData",
-     *         required=true,
-     *         format="int32",
-     *         type="integer"
-     *     ),
+     *     description="Смена логотипа поставщика.",
      *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 1,
+     *                      "image_source": "data:image/png;base64,iVBORw0KGgoAA=="
+     *                  }
+     *              )
+     *         )
+     *     ),
      *     @SWG\Response(
      *         response = 200,
      *         description = "success",

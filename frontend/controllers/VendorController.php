@@ -258,6 +258,8 @@ class VendorController extends DefaultController
         $profile = new Profile();
         $this->loadCurrentUser();
         $organizationType = $this->currentUser->organization->type_id;
+        $dropDown = Role::dropdown($organizationType);
+        $selected = null;
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -296,7 +298,7 @@ class VendorController extends DefaultController
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     /*
@@ -309,7 +311,9 @@ class VendorController extends DefaultController
         $user->setScenario("manage");
         $oldRole = $user->role_id;
         $profile = $user->profile;
-        $organizationType = $user->organization->type_id;
+        $currentUserOrganizationID = $this->currentUser->organization_id;
+        $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
+        $selected = $user->getRelationUserOrganizationRoleID($id);
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -336,7 +340,7 @@ class VendorController extends DefaultController
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     public function actionCatalogs()

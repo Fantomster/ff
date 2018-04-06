@@ -593,9 +593,9 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
         $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
-        $item['catalog_id'] = (int)$model->productFromCatalog->cat_id ?? $model->product->cat_id;
+        $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
         $item['price'] = round($model->price, 2);
-        $item['quantity'] = $model->quantity ?? $model->product->units;
+        $item['quantity'] = !empty($model->quantity) ? $model->quantity : $model->product->units;
         $item['comment'] = $model->comment;
         $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);

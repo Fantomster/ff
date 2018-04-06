@@ -39,13 +39,14 @@ class DynamicUsageSearch extends \yii\base\Model {
     public $w1_count;
     public $w1_vendor;
     public $sort;
+    public $start_date;
 
     /**
      * @inheritdoc
      */
     public function rules() {
         return [
-            [['org', 'cbg_id'], 'safe'],
+            [['org_name', 'franchisee_name', 'start_date'], 'string'],
         ];
     }
 
@@ -66,19 +67,19 @@ class DynamicUsageSearch extends \yii\base\Model {
             'order_max_date' => 'Дата последнего заказа',
             'order_cnt' => 'Общее количество заказов',
             'w5_sum' => '',
-            'w5_count' => 'Заказов 5 недель назад',
+            'w5_count' => 'Заказов 5 недель назад Оборот \ Зак-в \ Пост-в',
             'w5_vendor' => '',
             'w4_sum'  => '',
-            'w4_count' => 'Заказов 4 недели назад',
+            'w4_count' => 'Заказов 4 недели назад Оборот \ Зак-в \ Пост-в',
             'w4_vendor' => '',
             'w3_sum' => '',
-            'w3_count' => 'Заказов 3 недели назад',
+            'w3_count' => 'Заказов 3 недели назад Оборот \ Зак-в \ Пост-в',
             'w3_vendor' => '',
             'w2_sum' => '',
-            'w2_count' => 'Заказов 2 недели назад',
+            'w2_count' => 'Заказов 2 недели назад Оборот \ Зак-в \ Пост-в',
             'w2_vendor' => '',
             'w1_sum' => '',
-            'w1_count' => 'Заказов 1 неделю назад',
+            'w1_count' => 'Заказов 1 неделю назад Оборот \ Зак-в \ Пост-в',
             'w1_vendor' => '',
         ];
     }
@@ -94,27 +95,51 @@ class DynamicUsageSearch extends \yii\base\Model {
      */
     public function search(array $params) {
         $this->load($params);
+        $this->start_date = Yii::$app->request->get("start_date");
+        $where = [];
+
+        if($this->start_date!= null)
+        {
+            $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $this->start_date . " 00:00:00");
+            $start_date = " '".$dt->format('Y-m-d H:i:s')."' ";
+        }
+        else
+            $start_date = " NOW() ";
+
+        if($this->org_name)
+            $where[] = "(org_name LIKE '%$this->org_name%')";
+
+        if($this->franchisee_name)
+            $where[] = "(franchisee_name LIKE '%$this->franchisee_namee%')";
+
+        if(count($where) > 0)
+            $where = "WHERE ".implode(' AND ', $where)." ";
+        else
+            $where = '';
+
+        /*var_dump($start_date);
+        var_dump($this->start_date);*/
 
         $query = "select q.*
                       from (
                     select org.*,
                            DATE_FORMAT(max(o.created_at), '%Y-%m-%d') order_max_date,
                            count(o.id) order_cnt,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 37 day) and DATE_SUB(NOW(), INTERVAL 30 day) then o.total_price else 0 end) w5_sum,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 37 day) and DATE_SUB(NOW(), INTERVAL 30 day) then 1 else 0 end) w5_count,
-                           count(distinct case when o.created_at between DATE_SUB(NOW(), INTERVAL 37 day) and DATE_SUB(NOW(), INTERVAL 30 day) then o.vendor_id else null end) w5_vendor,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 31 day) and DATE_SUB(NOW(), INTERVAL 24 day) then o.total_price else 0 end) w4_sum,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 31 day) and DATE_SUB(NOW(), INTERVAL 24 day) then 1 else 0 end) w4_count,
-                           count(distinct case when o.created_at between DATE_SUB(NOW(), INTERVAL 31 day) and DATE_SUB(NOW(), INTERVAL 24 day) then o.vendor_id else null end) w4_vendor,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 23 day) and DATE_SUB(NOW(), INTERVAL 16 day) then o.total_price else 0 end) w3_sum,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 23 day) and DATE_SUB(NOW(), INTERVAL 16 day) then 1 else 0 end) w3_count,
-                           count(distinct case when o.created_at between DATE_SUB(NOW(), INTERVAL 23 day) and DATE_SUB(NOW(), INTERVAL 16 day) then o.vendor_id else null end) w3_vendor,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 15 day) and DATE_SUB(NOW(), INTERVAL 8 day) then o.total_price else 0 end) w2_sum,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 15 day) and DATE_SUB(NOW(), INTERVAL 8 day) then 1 else 0 end) w2_count,
-                           count(distinct case when o.created_at between DATE_SUB(NOW(), INTERVAL 15 day) and DATE_SUB(NOW(), INTERVAL 8 day) then o.vendor_id else null end) w2_vendor,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 7 day) and NOW() then o.total_price else 0 end) w1_sum,
-                           sum(case when o.created_at between DATE_SUB(NOW(), INTERVAL 7 day) and NOW() then 1 else 0 end) w1_count,
-                           count(distinct case when o.created_at between DATE_SUB(NOW(), INTERVAL 7 day) and NOW() then o.vendor_id else null end) w1_vendor
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 37 day) and DATE_SUB($start_date, INTERVAL 30 day) then o.total_price else 0 end) w5_sum,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 37 day) and DATE_SUB($start_date, INTERVAL 30 day) then 1 else 0 end) w5_count,
+                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 37 day) and DATE_SUB($start_date, INTERVAL 30 day) then o.vendor_id else null end) w5_vendor,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 31 day) and DATE_SUB($start_date, INTERVAL 24 day) then o.total_price else 0 end) w4_sum,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 31 day) and DATE_SUB($start_date, INTERVAL 24 day) then 1 else 0 end) w4_count,
+                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 31 day) and DATE_SUB($start_date, INTERVAL 24 day) then o.vendor_id else null end) w4_vendor,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 23 day) and DATE_SUB($start_date, INTERVAL 16 day) then o.total_price else 0 end) w3_sum,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 23 day) and DATE_SUB($start_date, INTERVAL 16 day) then 1 else 0 end) w3_count,
+                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 23 day) and DATE_SUB($start_date, INTERVAL 16 day) then o.vendor_id else null end) w3_vendor,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 15 day) and DATE_SUB($start_date, INTERVAL 8 day) then o.total_price else 0 end) w2_sum,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 15 day) and DATE_SUB($start_date, INTERVAL 8 day) then 1 else 0 end) w2_count,
+                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 15 day) and DATE_SUB($start_date, INTERVAL 8 day) then o.vendor_id else null end) w2_vendor,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 7 day) and $start_date then o.total_price else 0 end) w1_sum,
+                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 7 day) and $start_date then 1 else 0 end) w1_count,
+                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 7 day) and $start_date then o.vendor_id else null end) w1_vendor
                     from (select a.name org_name, a.contact_name org_contact_name, a.city org_city, a.email org_email, a.id org_id,
                                    case a.type_id 
                                      when 1 then 'Ресторан'
@@ -141,6 +166,7 @@ class DynamicUsageSearch extends \yii\base\Model {
                             ) o on org.org_id = o.org_id
                         group by org_name, org_contact_name, org_city, org_email, org_id, org_type, org_registred,
                     org_registred_peroiod, franchisee_name, franchisee_region) as q
+                    $where
                     order by case when order_cnt > 0 then 1 else 2 end, franchisee_region, org_type_id,
                              case when w1_count=0 and w2_count=0 and w3_count=0 and w4_count=0 and w5_count>0 then 1 else 2 end,
                              case when w1_count=0 and w2_count=0 and w3_count=0 and (w4_count>0 or w5_count>0) then 1 else 2 end,

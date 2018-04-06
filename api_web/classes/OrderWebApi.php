@@ -330,7 +330,7 @@ class OrderWebApi extends \api_web\components\WebApi
              */
             foreach ($models as $model) {
 
-                if($model->status == Order::STATUS_DONE) {
+                if ($model->status == Order::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
                     $date = $model->updated_at;
@@ -535,7 +535,7 @@ class OrderWebApi extends \api_web\components\WebApi
         try {
 
             $content = $order->orderContent;
-            if(empty($content)) {
+            if (empty($content)) {
                 throw new BadRequestHttpException("Order content is empty.");
             }
 

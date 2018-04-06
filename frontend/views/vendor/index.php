@@ -154,8 +154,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                         <?php
                         $columns = [
                             [
-                                'attribute' => 'id',
-                                'value' => 'id',
+                                'attribute' => 'order_code',
                                 'label' => '№',
                                 'contentOptions'   =>   ['class' => 'small_cell_id'],
                                 'format' => 'raw',

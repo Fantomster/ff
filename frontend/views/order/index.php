@@ -224,8 +224,7 @@ $this->registerCss("
                                 }
                             ],
                             [
-                                'attribute' => 'id',
-                                'value' => 'id',
+                                'attribute' => 'order_code',
                                 'label' => '№',
                                 'contentOptions'   =>   ['class' => 'small_cell_id'],
                                 'format' => 'raw',

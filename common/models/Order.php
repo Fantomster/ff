@@ -92,7 +92,7 @@ class Order extends \yii\db\ActiveRecord {
             [['created_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by_id' => 'id']],
             [['vendor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['vendor_id' => 'id']],
             [['currency_id'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::className(), 'targetAttribute' => ['currency_id' => 'id']],
-            [['order_code'], 'string'],
+            [['order_code'], 'number'],
         ];
     }
 
@@ -516,11 +516,10 @@ class Order extends \yii\db\ActiveRecord {
 
     public function setOrderCode(): void
     {
-        $date = gmdate('ymd');
         $orderSequence = new OrderSequence();
         $orderSequence->order_id = $this->id;
         $orderSequence->save();
-        $this->order_code = $date . "-" . $orderSequence->id;
+        $this->order_code = $orderSequence->id;
         $this->save();
     }
 

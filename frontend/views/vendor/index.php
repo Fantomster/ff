@@ -21,7 +21,7 @@ $this->registerCss('
         z-index: 1100;
     }
     #order-analytic-list a:not(.btn){color: #333;}
-    #order-analytic-list a{width: 100%; min-height: 17px; display: inline-block;}
+    .kv-table-wrap a{width: 100%; min-height: 17px; display: inline-block;}
     ');
 if ($organization->step == Organization::STEP_SET_INFO) {
     \common\assets\AuthAsset::register($this);
@@ -160,7 +160,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'contentOptions'   =>   ['class' => 'small_cell_id'],
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a($data->order_code ?? $data->id, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a($data->order_code ?? $data->id, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                             ],
                             $organization->type_id == Organization::TYPE_RESTAURANT ? [
@@ -170,7 +170,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'label' => Yii::t('message', 'frontend.views.order.vendor', ['ru'=>'Поставщик']),
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                             ] : [
                                 'attribute' => 'client.name',
@@ -178,7 +178,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'label' => Yii::t('message', 'frontend.views.order.rest_two', ['ru'=>'Ресторан']),
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a($data->client->name, Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a($data->client->name, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                             ],
                             [
@@ -188,7 +188,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'contentOptions'   =>   ['class' => 'small_cell_sozdal'],
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a($data->createdByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a($data->createdByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                             ],
                             [
@@ -196,7 +196,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'value' => 'acceptedByProfile.full_name',
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a($data->acceptedByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a($data->acceptedByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.accepted_by', ['ru'=>'Заказ принял']),
                                 'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
@@ -205,7 +205,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'format' => 'raw',
                                 'attribute' => 'total_price',
                                 'value' => function($data) {
-                                    return Html::a("<b>$data->total_price</b> " . $data->currency->symbol ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a("<b>$data->total_price</b> " . $data->currency->symbol ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.summ', ['ru'=>'Сумма']),
                                 'contentOptions'   =>   ['class' => 'small_cell_sum'],
@@ -215,7 +215,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                 'attribute' => 'created_at',
                                 'value' => function($data) {
                                     $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> ' . $date ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> ' . $date ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.creating_date', ['ru'=>'Дата создания']),
                                 'contentOptions'   =>   ['style' => 'min-width:120px;'],
@@ -230,7 +230,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                             $data->updated_at);
 
                                     $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
-                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> '. $fdate ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> '. $fdate ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.final_date', ['ru'=>'Дата финальная']),
                             ],
@@ -254,7 +254,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                             $statusClass = 'cancelled';
                                             break;
                                     }
-                                    return Html::a('<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '', Url::to(['order/view', 'id' => $data->id]), ['target'=>'_blank', 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a('<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                                 'label' => Yii::t('message', 'frontend.views.order.status_two', ['ru'=>'Статус']),
                                 'contentOptions'   =>   ['class' => 'small_cell_status'],

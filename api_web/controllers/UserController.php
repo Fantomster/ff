@@ -22,11 +22,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -69,11 +65,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -116,11 +108,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -164,10 +152,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object"
@@ -226,11 +211,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"asdasdasdasd"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -273,11 +254,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -316,11 +293,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={}
@@ -360,11 +333,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={}
@@ -407,11 +376,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -497,16 +462,12 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                               "vendor_id":1
-     *                           }
+     *                      "vendor_id":1
+     *                  }
      *              )
      *         )
      *     ),

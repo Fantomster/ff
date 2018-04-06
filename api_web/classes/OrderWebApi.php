@@ -527,8 +527,14 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $t = \Yii::$app->db->beginTransaction();
         try {
+
+            $content = $order->orderContent;
+            if(empty($content)) {
+                throw new BadRequestHttpException("Order content is empty.");
+            }
+
             $request = [];
-            foreach ($order->orderContent as $item) {
+            foreach ($content as $item) {
                 $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину
@@ -592,10 +598,10 @@ class OrderWebApi extends \api_web\components\WebApi
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
-        $item['product_id'] = $model->productFromCatalog->base_goods_id;
-        $item['catalog_id'] = (int)$model->productFromCatalog->cat_id;
+        $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
+        $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
         $item['price'] = round($model->price, 2);
-        $item['quantity'] = (int)$model->quantity;
+        $item['quantity'] = !empty($model->quantity) ? $model->quantity : $model->product->units;
         $item['comment'] = $model->comment;
         $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);

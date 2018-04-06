@@ -25,8 +25,8 @@ class SiteController extends Controller
             'api' => [
                 'class' => 'light\swagger\SwaggerApiAction',
                 'scanDir' => [
+                    Yii::getAlias('@api_web/components/definitions/'),
                     Yii::getAlias('@api_web/components/WebApiController.php'),
-                    Yii::getAlias('@api_web/components/UserWebApiDefinition.php'),
                     Yii::getAlias('@api_web/controllers/UserController.php'),
                     Yii::getAlias('@api_web/controllers/MarketController.php'),
                     Yii::getAlias('@api_web/controllers/PaymentController.php'),

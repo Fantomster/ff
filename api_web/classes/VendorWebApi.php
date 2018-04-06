@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\WebApiHelper;
 use Yii;
 use api_web\exceptions\ValidationException;
 use common\models\Profile;
@@ -312,20 +313,24 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Обновление логотипа поставщика
-     * @param array $request
+     * @param array $post
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadLogo(array $request)
+    public function uploadLogo(array $post)
     {
-        if (empty($request['post']['vendor_id'])) {
+        if (empty($post['vendor_id'])) {
             throw new BadRequestHttpException('Empty attribute vendor_id');
         }
 
-        $vendor = Organization::findOne($request['post']['vendor_id']);
+        $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
             throw new BadRequestHttpException('Vendor not found');
+        }
+
+        if (empty($post['image_source'])) {
+            throw new BadRequestHttpException('Empty image_source');
         }
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
@@ -337,26 +342,11 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-        /**
-         * @var $file UploadedFile
-         */
-        $file = UploadedFile::getInstancesByName('Organization');
-        if (empty($file[0])) {
-            throw new BadRequestHttpException('Empty file');
-        } else {
-            $file = array_pop($file);
-        }
-
-        $allowExtensions = ['jpeg', 'jpg', 'png'];
-        if (!in_array($file->getExtension(), $allowExtensions)) {
-            throw new BadRequestHttpException('Allow extensions: ' . implode(', ', $allowExtensions));
-        }
-
-        /**
+         /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";
-        $vendor->picture = 'update';
+        $vendor->picture = WebApiHelper::convertLogoFile($post['image_source']);
 
         if (!$vendor->validate()) {
             throw new ValidationException($vendor->getFirstErrors());

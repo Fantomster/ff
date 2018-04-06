@@ -21,10 +21,7 @@ class CartController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={{"catalog_id":1, "product_id":1, "quantity":10}}
@@ -125,10 +122,7 @@ class CartController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object"
@@ -230,10 +224,7 @@ class CartController extends WebApiController
      *         required=true,
      *         description = "Если request пустой, удаляются все заказы",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default= {"order_id":"1"}

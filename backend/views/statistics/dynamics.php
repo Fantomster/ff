@@ -76,6 +76,7 @@ $this->registerJs('
                 'order_cnt',
                 ['format' => 'raw',
                     'attribute' => 'w5_count',
+                    'encodeLabel' => false,
                     'value' => function($data) {
                         return $data['w5_sum'].' / '.$data['w5_count'].' / '.$data['w5_vendor'];
                     },
@@ -83,6 +84,7 @@ $this->registerJs('
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w4_count',
+                    'encodeLabel' => false,
                     'value' => function($data) {
                         return $data['w4_sum'].' / '.$data['w4_count'].' / '.$data['w4_vendor'];
                     },
@@ -90,6 +92,7 @@ $this->registerJs('
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w3_count',
+                    'encodeLabel' => false,
                     'value' => function($data) {
                         return $data['w3_sum'].' / '.$data['w3_count'].' / '.$data['w3_vendor'];
                     },
@@ -97,6 +100,7 @@ $this->registerJs('
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w2_count',
+                    'encodeLabel' => false,
                     'value' => function($data) {
                         return $data['w2_sum'].' / '.$data['w2_count'].' / '.$data['w2_vendor'];
                     },
@@ -104,6 +108,7 @@ $this->registerJs('
                 ],
                 ['format' => 'raw',
                     'attribute' => 'w1_count',
+                    'encodeLabel' => false,
                     'value' => function($data) {
                         return $data['w1_sum'].' / '.$data['w1_count'].' / '.$data['w1_vendor'];
                     },
@@ -116,4 +121,6 @@ $this->registerJs('
 
         <?php Pjax::end() ?>
     </div>
+    <div style="display: block; width: 2000px"><br></div>
 </div>
+

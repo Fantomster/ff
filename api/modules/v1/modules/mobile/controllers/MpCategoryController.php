@@ -70,6 +70,7 @@ class MpCategoryController extends ActiveController {
         ));
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            $query->andWhere (['parent' => null]);
             return $dataProvider;
         }
 

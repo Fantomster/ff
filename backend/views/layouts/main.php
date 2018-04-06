@@ -68,6 +68,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             'url' => ['/statistics/turnover'],
                         ],
                         [
+                            'label' => 'Динамика',
+                            'url' => ['/statistics/dynamics'],
+                        ],
+                        [
                             'label' => 'Разное',
                             'url' => ['/statistics/misc'],
                         ],

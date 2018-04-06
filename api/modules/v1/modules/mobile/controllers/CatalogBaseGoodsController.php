@@ -99,7 +99,10 @@ class CatalogBaseGoodsController extends ActiveController {
         }
 
         if(!empty($params->category_id)) {
-            $where .= ' AND category_id IN (' .$params->category_id. ') ';
+            $categories = \api\modules\v1\modules\mobile\resources\MpCategory::getCategories($params->category_id);
+            $categories[] = $params->category_id;
+            $categories = implode(",", $categories);
+            $where .= ' AND category_id IN (' .$categories. ') ';
         }
 
         if (isset($params['OrderCatalogSearch'])) {

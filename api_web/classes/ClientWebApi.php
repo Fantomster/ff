@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\WebApiHelper;
 use common\models\AdditionalEmail;
 use common\models\Organization;
 use common\models\RelationUserOrganization;
@@ -126,6 +127,48 @@ class ClientWebApi extends WebApi
         }
 
 
+    }
+
+    /**
+     * Загрузка логотипа ресторана
+     * @param array $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function detailUpdateLogo(array $post)
+    {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
+        if (empty($post['image_source'])) {
+            throw new BadRequestHttpException('Empty image_source');
+        }
+
+        //Поиск ресторана в системе
+        $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
+        if (empty($model)) {
+            throw new BadRequestHttpException('Client not found');
+        }
+
+        //прошли все проверки, будем обновлять
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $model->scenario = "settings";
+            $model->picture = WebApiHelper::convertLogoFile($post['image_source']);
+
+            if (!$model->validate() || !$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+
+            $transaction->commit();
+            $model->refresh();
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     /**

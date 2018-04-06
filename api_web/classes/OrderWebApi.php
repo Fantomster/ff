@@ -527,8 +527,14 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $t = \Yii::$app->db->beginTransaction();
         try {
+
+            $content = $order->orderContent;
+            if(empty($content)) {
+                throw new BadRequestHttpException("Order content is empty.");
+            }
+
             $request = [];
-            foreach ($order->orderContent as $item) {
+            foreach ($content as $item) {
                 $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину

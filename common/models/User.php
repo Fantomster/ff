@@ -529,6 +529,9 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
+    /**
+     * Creating user-organization relations
+     */
     public function setRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
     {
         if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
@@ -543,21 +546,28 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function createRelationUserOrganization(int $userId, int $organizationId, int $roleId):bool
+    /**
+     * Creating single user-organization relation
+     */
+    public function createRelationUserOrganization(int $userID, int $organizationID, int $roleID):bool
     {
-        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+        $check = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
         if($check){
             return false;
         }
         $rel = new RelationUserOrganization();
-        $rel->user_id = $userId;
-        $rel->organization_id = $organizationId;
-        $rel->role_id = $roleId;
+        $rel->user_id = $userID;
+        $rel->organization_id = $organizationID;
+        $roleID = self::getRelationRole($roleID, $organizationID);
+        $rel->role_id = $roleID;
         $rel->save();
         return true;
     }
 
 
+    /**
+     * Deleting single user-organization relation
+     */
     public function deleteRelationUserOrganization(int $userId, int $organizationId): bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
@@ -568,6 +578,9 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
+    /**
+     * Deleting all user-organization relations
+     */
     public function deleteUserFromOrganization(int $userID): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
@@ -624,6 +637,35 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
+    /**
+     * Getting user role for relation
+     */
+    private function getRelationRole(int $roleID, int $organizationID): int
+    {
+        $children = (new \yii\db\Query())->select(['type_id'])->from('organization')->where(['id'=>$organizationID])->one();
+        if($children['type_id'] == Organization::TYPE_RESTAURANT){
+            if($roleID == Role::ROLE_SUPPLIER_MANAGER){
+                $roleID = Role::ROLE_RESTAURANT_MANAGER;
+            }
+            if($roleID == Role::ROLE_SUPPLIER_EMPLOYEE){
+                $roleID = Role::ROLE_RESTAURANT_EMPLOYEE;
+            }
+        }
+        if($children['type_id'] == Organization::TYPE_SUPPLIER){
+            if($roleID == Role::ROLE_RESTAURANT_MANAGER){
+                $roleID = Role::ROLE_SUPPLIER_MANAGER;
+            }
+            if($roleID == Role::ROLE_RESTAURANT_EMPLOYEE){
+                $roleID = Role::ROLE_SUPPLIER_EMPLOYEE;
+            }
+        }
+        return $roleID;
+    }
+
+
+    /**
+     * Deleting user completely
+     */
     public function deleteAllUserData(int $userID): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
@@ -661,6 +703,9 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
+    /**
+     * Updating user-organization relations
+     */
     public function updateRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
     {
         $user = User::findIdentity(Yii::$app->user->id);
@@ -715,6 +760,9 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
+    /**
+     * Checking if email exists in DB
+     */
     public static function checkInvitingUser(string $email): array
     {
         $result = [];

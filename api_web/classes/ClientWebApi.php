@@ -684,13 +684,14 @@ class ClientWebApi extends WebApi
      */
     private function prepareEmployee(User $model)
     {
+        $r = RelationUserOrganization::findOne(['user_id' => $model->id, 'organization_id' => $this->user->organization->id]);
         return [
             'id' => (int)$model->id,
             'name' => $model->profile->full_name,
             'email' => $model->email ?? '',
             'phone' => $model->profile->phone ?? '',
-            'role' => $model->role->name,
-            'role_id' => (int)$model->role->id
+            'role' => Role::findOne($r->role_id)->name,
+            'role_id' => (int) $r->role_id
         ];
     }
 

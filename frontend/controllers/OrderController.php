@@ -2189,7 +2189,7 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
 
         $productsSearchModel = new OrderProductsSearch();
-        $params['OrderProductsSearch'] = Yii::$app->request->post("OrderProductsSearch");
+        $params['OrderProductsSearch'] = (Yii::$app->request->isPost)?Yii::$app->request->post("OrderProductsSearch"):Yii::$app->request->get("OrderProductsSearch");
         $productsDataProvider = $productsSearchModel->search($params, $order);
 
         if (Yii::$app->request->isPjax) {

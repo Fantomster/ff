@@ -20,7 +20,7 @@ class OrderProductsSearch extends \yii\base\Model {
      */
     public function rules() {
         return [
-            [['searchString', 'cbg_id'], 'safe'],
+            [['searchString', 'cbg_id', 'sort'], 'safe'],
         ];
     }
     

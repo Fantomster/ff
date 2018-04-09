@@ -498,6 +498,8 @@ class ClientWebApi extends WebApi
                     throw new BadRequestHttpException('Empty role_id.');
                 }
 
+                $post['role_id'] = (int)$post['role_id'];
+
                 $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
                 if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
                     throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
@@ -525,6 +527,10 @@ class ClientWebApi extends WebApi
                 //Создаем профиль пользователя
                 $user_api->createProfile($request, $user);
                 $user->refresh();
+                $user->role_id = (int)$post['role_id'];
+                if(!$user->save()) {
+                    throw new ValidationException($user->getFirstErrors());
+                }
                 $user_id = $user->id;
             }
 

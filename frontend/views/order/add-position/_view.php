@@ -22,7 +22,7 @@ $this->registerJs('
                 });
             });
 
-    $(document).on("change", "#productssearch-sort", function() {
+    $(document).on("change", "#orderproductssearch-sort", function() {
         var sort = $(this).val();
             $.pjax({
              type: "GET",

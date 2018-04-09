@@ -528,7 +528,6 @@ class OrderController extends WebApiController
      *              {
      *                   "id": 6618,
      *                   "total_price": 510.00,
-     *                   "invoice_relation": null,
      *                   "created_at": "2018-04-02 12:33:44",
      *                   "requested_delivery": "2018-04-02 19:00:00",
      *                   "actual_delivery": "2018-04-04 12:34:21",

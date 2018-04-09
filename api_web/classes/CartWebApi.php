@@ -377,11 +377,15 @@ class CartWebApi extends \api_web\components\WebApi
         $order->calculateTotalPrice();
 
         $order_r = $order->attributes;
+        $order_r['status_text'] = $order->statusText;
+        $order_r['currency'] = $order->currency->symbol;
+        $order_r['currency_id'] = $order->currency->id;
         $order_r['total_price'] = round($order->calculateTotalPrice(), 2);
         $order_r['min_order_price'] = round($order->forMinOrderPrice(), 2);
         $order_r['delivery_price'] = round($order->calculateDelivery(), 2);
-        $order_r['status_text'] = $order->statusText;
         $order_r['position_count'] = (int)$order->positionCount;
+        $order_r['total_price_without_discount'] = round($order->getTotalPriceWithOutDiscount(), 2);
+
         return $order_r;
     }
 }

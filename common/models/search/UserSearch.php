@@ -99,7 +99,7 @@ class UserSearch extends \common\models\User {
             return $dataProvider;
         }
 
-        $query->orFilterWhere(['like', 'email', $this->searchString])
+        $query->orFilterWhere(['like', 'user.email', $this->searchString])
             ->orFilterWhere(['like', "profile.full_name", $this->searchString])
             ->orFilterWhere(['like', "profile.phone", $this->searchString])
             ->orFilterWhere(['like', "role.name", $this->searchString]);
@@ -107,6 +107,7 @@ class UserSearch extends \common\models\User {
             'relationUserOrganization.organization_id' => $this->organization_id,
             'status' => $this->status,
         ]);
+
         return $dataProvider;
     }
 }

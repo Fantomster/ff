@@ -1,5 +1,6 @@
 <?php
 
+namespace api_web\components\definitions;
 
 /**
  * @SWG\Definition(type="object", @SWG\Xml(name="User"))

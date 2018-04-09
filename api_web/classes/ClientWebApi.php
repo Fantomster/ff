@@ -527,10 +527,6 @@ class ClientWebApi extends WebApi
                 //Создаем профиль пользователя
                 $user_api->createProfile($request, $user);
                 $user->refresh();
-                $user->role_id = (int)$post['role_id'];
-                if(!$user->save()) {
-                    throw new ValidationException($user->getFirstErrors());
-                }
                 $user_id = $user->id;
             }
 
@@ -539,7 +535,7 @@ class ClientWebApi extends WebApi
             }
 
             $relation = new RelationUserOrganization();
-            $relation->role_id = $post['role_id'];
+            $relation->role_id = (int) $post['role_id'];
             $relation->user_id = $user_id;
             $relation->organization_id = $this->user->organization->id;
 
@@ -548,6 +544,7 @@ class ClientWebApi extends WebApi
             }
 
             $relation->save();
+            $relation->refresh();
             $transaction->commit();
 
             //Тут нужно отправить письмо для смены пароля пользователю

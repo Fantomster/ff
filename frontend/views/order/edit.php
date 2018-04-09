@@ -262,7 +262,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                 <div class="box-header">
                     <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru'=>'Заказ']) ?> №<?= $orderCode ?></h4><hr>
                     <?=
-                    ($order->status == 1) ?
+                    ($order->status < 3) ?
                     Html::a('<span><i class="icon fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']) . ' </span>',
                         Url::to(['order/ajax-show-products', 'order_id' => $order->id]), [
                                 'class' => 'btn btn-success pull-right btnAdd',

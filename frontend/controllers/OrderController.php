@@ -2237,8 +2237,7 @@ class OrderController extends DefaultController {
             $position->article = $article;
 
         $order = $position->order;
-
-        if($order->status !=1)
+        if($order->status >= 3)
             throw new BadRequestHttpException('Access denided');
 
         if(!$position->save(false))
@@ -2251,7 +2250,7 @@ class OrderController extends DefaultController {
         $organizationType = $user->organization->type_id;
 
         if ($organizationType == Organization::TYPE_RESTAURANT) {
-            $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+           $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->recipientsList as $recipient) {
                 $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);

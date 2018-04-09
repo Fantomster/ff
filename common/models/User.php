@@ -532,16 +532,19 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Creating user-organization relations
      */
-    public function setRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
+    public function setRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
     {
-        if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
+        if(RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID])){
+            return false;
+        }
+        if(Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)){
             $relations = RelationUserOrganization::findAll(['user_id'=>Yii::$app->user->id]);
             foreach ($relations as $relation){
-                self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);
+                self::createRelationUserOrganization($userID, $relation->organization_id, $roleID);
             }
             return true;
         }else{
-            return self::createRelationUserOrganization($userId, $organizationId, $roleId);
+            return self::createRelationUserOrganization($userID, $organizationID, $roleID);
         }
     }
 

@@ -344,6 +344,10 @@ class ClientWebApi extends WebApi
      */
     public function employeeGet(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         if (empty($post['id'])) {
             throw new BadRequestHttpException('Empty id.');
         }
@@ -358,6 +362,10 @@ class ClientWebApi extends WebApi
      */
     public function employeeSearch(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         if (empty($post['email'])) {
             throw new BadRequestHttpException('Empty email.');
         }
@@ -374,9 +382,14 @@ class ClientWebApi extends WebApi
     /**
      * Список ролей для сотрудников ресторана
      * @return array
+     * @throws BadRequestHttpException
      */
     public function employeeRoles()
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
         $result = [];
         if (!empty($list)) {
@@ -394,9 +407,14 @@ class ClientWebApi extends WebApi
      * Список сотрудников в ресторане
      * @param array $post
      * @return array
+     * @throws BadRequestHttpException
      */
     public function employeeList(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
@@ -453,6 +471,10 @@ class ClientWebApi extends WebApi
      */
     public function employeeAdd(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         if (empty($post['email'])) {
             throw new BadRequestHttpException('Empty email.');
         }
@@ -474,6 +496,11 @@ class ClientWebApi extends WebApi
                 }
                 if (empty($post['role_id'])) {
                     throw new BadRequestHttpException('Empty role_id.');
+                }
+
+                $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
+                if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
+                    throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
                 }
 
                 $request = [
@@ -539,6 +566,10 @@ class ClientWebApi extends WebApi
      */
     public function employeeUpdate(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         if (empty($post['id'])) {
             throw new BadRequestHttpException('Empty id.');
         }
@@ -560,7 +591,7 @@ class ClientWebApi extends WebApi
                 $user->profile->setAttribute('phone', $post['phone']);
             }
 
-            if (!empty($post['email'])) {
+            if (!empty($post['email']) && $post['email'] != $user->email) {
 
                 if (User::find()->where(['email' => $post['email']])->exists()) {
                     throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
@@ -570,6 +601,12 @@ class ClientWebApi extends WebApi
             }
 
             if (!empty($post['role_id'])) {
+
+                $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
+                if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
+                    throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
+                }
+
                 $user->role_id = $post['role_id'];
                 $relation->role_id = $user->role_id;
             }
@@ -604,6 +641,10 @@ class ClientWebApi extends WebApi
      */
     public function employeeDelete(array $post)
     {
+        if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+        }
+
         if (empty($post['id'])) {
             throw new BadRequestHttpException('Empty id.');
         }

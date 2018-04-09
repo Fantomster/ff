@@ -1,5 +1,6 @@
 <?php
 
+namespace api_web\components\definitions;
 
 /**
  * @SWG\Definition(type="object", @SWG\Xml(name="Organization"))
@@ -84,4 +85,15 @@ class Organization
      */
     public $about;
 
+}
+
+/**
+ * @SWG\Definition(type="object", @SWG\Xml(name="Vendor"))
+ */
+class Vendor extends Organization {
+    /**
+     * @SWG\Property(@SWG\Xml(name="allow_editing"), example=1)
+     * @var integer
+     */
+    public $allow_editing;
 }

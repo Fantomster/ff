@@ -24,15 +24,14 @@ $this->registerJs('
 
     $(document).on("change", "#orderproductssearch-sort", function() {
         var sort = $(this).val();
+        var form = $("#searchProductForm");
             $.pjax({
              type: "GET",
              push: false,
              timeout: 10000,
              url: "' . $Url . '",
              container: "#AjaxProductList",
-             data: {
-                    sort: sort,
-                   }
+             data: form.serialize() + "&sort=" + sort,
    }).done(function() { console.log(222); });
     });
     ', \yii\web\View::POS_READY);
@@ -78,13 +77,11 @@ $this->registerJs('
         $form->field($productsSearchModel, 'sort', [
             'options' => [
                 'id' => 'alSortSelect',
-                'class' => "form-group"
+                'class' => "form-group",
             ],
         ])
             ->dropDownList([
                 '1' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru' => 'Сортировка по']),
-                'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru' => 'Порядку добавления по возрастанию']),
-                'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru' => 'Порядку добавления по убыванию']),
                 'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru' => 'Наименованию по возрастанию']),
                 'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru' => 'Наименованию по убыванию']),
             ], [
@@ -162,7 +159,7 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.in_basket_two', ['ru'=>'В корзину']) . ' </span></i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']) . ' </span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
                                         'data-id' => $data["cbg_id"],
                                         'data-cat' => $data["cat_id"],

@@ -48,12 +48,12 @@ class OrderController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'findModel' => [$this, 'findModel']
             ],
-            'update' => [
+            /*'update' => [
                 'class' => 'yii\rest\UpdateAction',
                 'modelClass' => 'common\models\Order',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
-            ],
+            ],*/
             'delete' => [
                 'class' => 'yii\rest\DeleteAction',
                 'modelClass' => 'common\models\Order',

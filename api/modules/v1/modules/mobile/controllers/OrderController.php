@@ -309,7 +309,7 @@ class OrderController extends ActiveController {
                 $this->sendOrderProcessing($order->vendor, $order);
             } elseif (*/
 
-            if ($organizationType == Organization::TYPE_RESTAURANT && $order->status < 3) {
+            if ($organizationType == Organization::TYPE_RESTAURANT && $order->status < 4) {
                 $systemMessage = $order->client->name . ' получил заказ!';
                 $order->status = Order::STATUS_DONE;
                 $order->actual_delivery = gmdate("Y-m-d H:i:s");

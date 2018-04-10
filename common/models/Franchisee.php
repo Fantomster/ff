@@ -254,10 +254,10 @@ class Franchisee extends \yii\db\ActiveRecord {
             }
             $i++;
         }
-        $json = json_encode($arr);
+        $json = json_encode($arr, JSON_UNESCAPED_UNICODE);
         $tmpFile = '/tmp/php3zU3t5'.md5(time()).'.json';
         $fp = fopen($tmpFile, 'w');
-        fwrite($fp, $json);
+        fwrite($fp, "\xEF\xBB\xBF".$json);
         fclose($fp);
         $_FILES['files1'] = [
             'name' => $tmpFile,

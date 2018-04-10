@@ -231,8 +231,8 @@ class OrderController extends ActiveController {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }
 
-        $currentUser = Yii::$app->user->getIdentity();
         if(($model->oldAttributes['status'] <> $model->status) && ($model->status == Order::STATUS_DONE)) {
+            $currentUser = Yii::$app->user->getIdentity();
             $systemMessage = $model->client->name . ' получил заказ!';
             $model->actual_delivery = gmdate("Y-m-d H:i:s");
             $this->sendOrderDone($model->createdBy, $model);

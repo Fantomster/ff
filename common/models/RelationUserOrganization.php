@@ -11,6 +11,7 @@ namespace common\models;
  * @property integer $leader_id
  * @property integer $organization_id
  * @property integer $role_id
+ * @property User $user
  */
 class RelationUserOrganization extends \yii\db\ActiveRecord {
 

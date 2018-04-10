@@ -552,7 +552,7 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Creating single user-organization relation
      */
-    public function createRelationUserOrganization(int $userID, int $organizationID, int $roleID):bool
+    public function createRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
     {
         $check = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
         if($check){

@@ -409,9 +409,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     }
 
 
-    public function actionCreate(){
+    public function actionCreate(): void
+    {
         $user = User::findIdentity(Yii::$app->user->id);
-        $currentOrganziation = $user->organization;
+        $currentOrganization = $user->organization;
         
         $sql = "select distinct parent_id as `parent_id` from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
@@ -471,11 +472,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         }
                            
                     }
-                $rel = new RelationUserOrganization();
-                $rel->user_id = $user->id;
-                $rel->organization_id = $organization->id;
-                $rel->role_id = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
-                $rel->save();
+                $roleID = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
+                User::createRelationUserOrganization($user->id, $organization->id, $roleID);
+                $currentOrganizationID = $currentOrganization->id;
+                $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
+                foreach ($relations as $relation){
+                    User::createRelationUserOrganization($relation->user_id, $organization->id, $roleID);
+                }
             }
         }
     }

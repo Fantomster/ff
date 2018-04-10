@@ -154,12 +154,12 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                         <?php
                         $columns = [
                             [
-                                'attribute' => 'order_code',
+                                'attribute' => 'id',
                                 'label' => '№',
                                 'contentOptions'   =>   ['class' => 'small_cell_id'],
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a($data->order_code ?? $data->id, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                                    return Html::a($data->id, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                                 },
                             ],
                             $organization->type_id == Organization::TYPE_RESTAURANT ? [

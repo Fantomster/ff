@@ -441,15 +441,6 @@ class Order extends \yii\db\ActiveRecord {
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
 
         }
-        if($this->status != self::STATUS_FORMING){
-            if($this->order_code < 1){
-                $orderSequence = new OrderSequence();
-                $orderSequence->order_id = $this->id;
-                $orderSequence->save();
-                $this->order_code = $orderSequence->id;
-                $this->save();
-            }
-        }
     }
 
     public function afterDelete()
@@ -522,12 +513,4 @@ class Order extends \yii\db\ActiveRecord {
         return $this->total_price . " " . $this->currency->symbol;
     }
 
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getOrderSequence(): object
-    {
-        return $this->hasOne(OrderSequence::className(), ['order_id' => 'id']);
-    }
 }

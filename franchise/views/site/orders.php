@@ -168,7 +168,7 @@ $this->registerCss("
                                 [
                                     'attribute' => 'id',
                                     'value' => function($data) {
-                                        return $data['order_code'] ?? $data['id'];
+                                        return $data['id'];
                                     },
                                     'label' => '№',
                                 ],

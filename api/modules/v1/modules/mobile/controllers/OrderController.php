@@ -11,6 +11,7 @@ use yii\web\BadRequestHttpException;
 use common\models\Organization;
 use common\models\OrderChat;
 use common\models\search\OrderContentSearch;
+use yii\helpers\Json;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>

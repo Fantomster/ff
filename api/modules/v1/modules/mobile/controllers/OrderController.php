@@ -223,7 +223,7 @@ class OrderController extends ActiveController {
     public function actionUpdate($id)
     {
         $model = Order::findOne(['id'=>$id]);
-
+        $status = $model->status;
         $this->checkAccess ($model->id, $model);
 
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
@@ -231,7 +231,7 @@ class OrderController extends ActiveController {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }
 
-        if(($model->oldAttributes['status'] <> $model->status) && ($model->status == Order::STATUS_DONE)) {
+        if(($status <> $model->status) && ($model->status == Order::STATUS_DONE)) {
             $currentUser = Yii::$app->user->getIdentity();
             $systemMessage = $model->client->name . ' получил заказ!';
             $model->actual_delivery = gmdate("Y-m-d H:i:s");
@@ -241,7 +241,7 @@ class OrderController extends ActiveController {
                 return ["title" => $systemMessage, "type" => "success"];
             }
         }
-        return compact('model');
+        return $model;
     }
 
     public function actionCancelOrder() {

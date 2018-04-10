@@ -92,7 +92,6 @@ class Order extends \yii\db\ActiveRecord {
             [['created_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by_id' => 'id']],
             [['vendor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['vendor_id' => 'id']],
             [['currency_id'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::className(), 'targetAttribute' => ['currency_id' => 'id']],
-            [['order_code'], 'number'],
         ];
     }
 
@@ -102,7 +101,6 @@ class Order extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => Yii::t('app', 'Номер заказа'),
-            'order_code' => Yii::t('app', 'Номер заказа'),
             'client_id' => 'Client ID',
             'vendor_id' => 'Vendor ID',
             'created_by_id' => 'Created By ID',

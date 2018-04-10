@@ -236,11 +236,18 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function recalculationQuantity($product, $quantity)
     {
-        if ($quantity < $product->model->units) {
-            $quantity = $product->model->units;
-        } else {
-            $quantity = round($quantity / $product->model->units, 0) * $product->model->units;
+        $units = $product->model->units;
+
+        if ($units == 0) {
+            return round($quantity, 3);
         }
+
+        if ($quantity < $units) {
+            $quantity = $units;
+        } else {
+            $quantity = round($quantity / $units, 3) * $units;
+        }
+
         return $quantity;
     }
 
@@ -314,8 +321,8 @@ class CartWebApi extends \api_web\components\WebApi
         /**
          * Если не установлена кратность, считаем кратность 0
          */
-        if ($baseModel->units <= 0) {
-            $baseModel->units = 1;
+        if (empty($baseModel->units)) {
+            $baseModel->units = 0;
         }
 
         if ($model instanceof CatalogGoods) {
@@ -341,14 +348,15 @@ class CartWebApi extends \api_web\components\WebApi
     {
         $item['id'] = (int)$model->model->id;
         $item['product'] = $model->model->product;
-        $item['catalog_id'] = $model->cat_id;
+        $item['catalog_id'] = (int)$model->cat_id;
+        $item['category_id'] = isset($model->model->category) ? (int)$model->model->category->id : 0;
         $item['price'] = round($model->price, 2);
         $item['rating'] = round($model->model->ratingStars, 1);
         $item['supplier'] = $model->model->vendor->name;
         $item['brand'] = ($model->model->brand ? $model->model->brand : '');
         $item['article'] = $model->model->article;
         $item['ed'] = $model->model->ed;
-        $item['units'] = $model->model->units;
+        $item['units'] = round(($model->model->units ?? 0), 3);
         $item['currency'] = $model->model->catalog->currency->symbol;
         $item['image'] = (new MarketWebApi())->getProductImage($model->model);
         $item['in_basket'] = $this->countProductInCart($model->model->id);
@@ -370,7 +378,14 @@ class CartWebApi extends \api_web\components\WebApi
 
         $order_r = $order->attributes;
         $order_r['status_text'] = $order->statusText;
-        $order_r['position_count'] = $order->positionCount;
+        $order_r['currency'] = $order->currency->symbol;
+        $order_r['currency_id'] = $order->currency->id;
+        $order_r['total_price'] = round($order->calculateTotalPrice(), 2);
+        $order_r['min_order_price'] = round($order->forMinOrderPrice(), 2);
+        $order_r['delivery_price'] = round($order->calculateDelivery(), 2);
+        $order_r['position_count'] = (int)$order->positionCount;
+        $order_r['total_price_without_discount'] = round($order->getTotalPriceWithOutDiscount(), 2);
+
         return $order_r;
     }
 }

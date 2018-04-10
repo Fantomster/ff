@@ -208,16 +208,19 @@ class OrderWebApi extends \api_web\components\WebApi
         unset($result['currency_id']);
         unset($result['discount_type']);
         $result['currency'] = $order->currency->symbol;
+        $result['currency_id'] = $order->currency->id;
+        $result['total_price'] = round($order->total_price, 2);
+        $result['discount'] = round($order->discount, 2);
         $result['status_text'] = $order->statusText;
-        $result['position_count'] = $order->positionCount;
-        $result['delivery_price'] = $order->calculateDelivery();
-        $result['min_order_price'] = $order->forMinOrderPrice();
-        $result['total_price_without_discount'] = $order->getTotalPriceWithOutDiscount();
+        $result['position_count'] = (int)$order->positionCount;
+        $result['delivery_price'] = round($order->calculateDelivery(), 2);
+        $result['min_order_price'] = round($order->forMinOrderPrice(), 2);
+        $result['total_price_without_discount'] = round($order->getTotalPriceWithOutDiscount(), 2);
 
         $result['items'] = [];
 
         $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order->id;
+        $params['OrderContentSearch']['order_id'] = (int)$order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
@@ -326,10 +329,18 @@ class OrderWebApi extends \api_web\components\WebApi
              * @var $model Order
              */
             foreach ($models as $model) {
+
+                if ($model->status == Order::STATUS_DONE) {
+                    $date = $model->completion_date ?? $model->actual_delivery;
+                } else {
+                    $date = $model->updated_at;
+                }
+
                 $orders[] = [
-                    'id' => $model->id,
+                    'id' => (int)$model->id,
                     'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
-                    'status' => $model->status,
+                    'completion_date' => \Yii::$app->formatter->asDate($date, "dd.MM.yyyy"),
+                    'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,
                     'create_user' => $model->createdByProfile->full_name
@@ -361,6 +372,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * Список доступных для заказа продуктов
      * @param $post
      * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function products($post)
     {
@@ -418,16 +431,16 @@ class OrderWebApi extends \api_web\components\WebApi
         $result = $dataProvider->getModels();
         foreach ($result as $model) {
             $return['products'][] = [
-                'id' => $model['id'],
+                'id' => (int)$model['id'],
                 'product' => $model['product'],
                 'article' => $model['article'],
                 'supplier' => $model['name'],
-                'supp_org_id' => $model['supp_org_id'],
-                'cat_id' => $model['cat_id'],
-                'category_id' => $model['category_id'],
-                'price' => $model['price'],
+                'supp_org_id' => (int)$model['supp_org_id'],
+                'cat_id' => (int)$model['cat_id'],
+                'category_id' => (int)$model['category_id'],
+                'price' => round($model['price'], 2),
                 'ed' => $model['ed'],
-                'units' => $model['units'] ?? 1,
+                'units' => (int)$model['units'] ?? 1,
                 'currency' => $model['symbol'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket' => $this->container->get('CartWebApi')->countProductInCart($model['id']),
@@ -446,24 +459,169 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Отмена заказа
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function cancel(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $query = Order::find()->where(['id' => $post['order_id']]);
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            $query->andWhere(['client_id' => $this->user->organization->id]);
+        } else {
+            $query->andWhere(['vendor_id' => $this->user->organization->id]);
+        }
+        $order = $query->one();
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if ($order->status == Order::STATUS_CANCELLED) {
+            throw new BadRequestHttpException("This order has been cancelled.");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+
+            $order->status = Order::STATUS_CANCELLED;
+
+            if (!$order->validate() || !$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+
+            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+                $organization = $order->client;
+            } else {
+                $organization = $order->vendor;
+            }
+
+            Notice::init('Order')->cancelOrder($this->user, $organization, $order);
+
+            $t->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Повторить заказ
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function repeat(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+
+            $content = $order->orderContent;
+            if (empty($content)) {
+                throw new BadRequestHttpException("Order content is empty.");
+            }
+
+            $request = [];
+            foreach ($content as $item) {
+                $request[] = $this->prepareProduct($item);
+            }
+            //Добавляем товары для заказа в корзину
+            $result = $this->container->get('CartWebApi')->add($request);
+            $t->commit();
+            return $result;
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Заверщить заказ
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function complete(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $query = Order::find()->where(['id' => $post['order_id']]);
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            $query->andWhere(['client_id' => $this->user->organization->id]);
+        } else {
+            $query->andWhere(['vendor_id' => $this->user->organization->id]);
+        }
+        $order = $query->one();
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("Order not found");
+        }
+
+        if ($order->status == Order::STATUS_DONE) {
+            throw new BadRequestHttpException("This order has been completed.");
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $order->status = Order::STATUS_DONE;
+            $order->actual_delivery = gmdate("Y-m-d H:i:s");
+            if ($order->validate() && $order->save()) {
+                Notice::init('Order')->doneOrder($order, $this->user);
+            } else {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            $t->commit();
+            return $this->getInfo(['order_id' => $order->id]);
+        } catch (\Exception $e) {
+            $t->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * @param OrderContent $model
      * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     private function prepareProduct(OrderContent $model)
     {
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
-        $item['catalog_id'] = $model->product->cat_id;
+        $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
+        $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
         $item['price'] = round($model->price, 2);
-        $item['quantity'] = $model->quantity;
+        $item['quantity'] = !empty($model->quantity) ? $model->quantity : $model->product->units;
         $item['comment'] = $model->comment;
-        $item['total'] = $model->total;
+        $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);
         $item['brand'] = ($model->product->brand ? $model->product->brand : '');
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
         $item['currency'] = $model->product->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;
     }

@@ -79,6 +79,7 @@ class ClientController extends DefaultController {
                             'tutorial',
                             'analytics',
                             'chkmail',
+                            'check-email',
                             'create',
                             'edit-catalog',
                             'events',
@@ -146,7 +147,6 @@ class ClientController extends DefaultController {
     public function actionEmployees() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        //$params = Yii::$app->request->getQueryParams();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
@@ -189,6 +189,8 @@ class ClientController extends DefaultController {
         $profile = new Profile();
         $this->loadCurrentUser();
         $organizationType = $this->currentUser->organization->type_id;
+        $dropDown = Role::dropdown($organizationType);
+        $selected = null;
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -205,39 +207,39 @@ class ClientController extends DefaultController {
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
+                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
 
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
-//                else {
-//                    if (array_key_exists('email', $user->errors)) {
-//                        $existingUser = User::findOne(['email' => $post['User']['email']]);
-//                        if($existingUser){
-//                            if(in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())){
-//                                $message = Yii::t('app', 'common.models.already_exists');
-//                                return $this->renderAjax('settings/_success', ['message' => $message]);
-//                            }
-//                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
-//                            if($success){
-//                                User::setRelationUserOrganization($existingUser->id, $existingUser->organization->id, $existingUser->role_id);
-//                                $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
-//                                $existingUser->setRole($post['User']['role_id'])->save();
-//                                $message = Yii::t('app', 'Пользователь добавлен!');
-//                            }
-//                            else{
-//                                $message = Yii::t('app', 'common.models.already_exists');
-//                            }
-//                        }else{
-//                            $message = Yii::t('app', 'common.models.already_exists');
-//                        }
-//
-//                        return $this->renderAjax('settings/_success', ['message' => $message]);
-//                    }
-//                }
+                else {
+                    if (array_key_exists('email', $user->errors)) {
+                        $existingUser = User::findOne(['email' => $post['User']['email']]);
+                        if($existingUser){
+                            if(in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())){
+                                $message = Yii::t('app', 'common.models.already_exists');
+                                return $this->renderAjax('settings/_success', ['message' => $message]);
+                            }
+                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                            if($success){
+                                $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+                                $existingUser->setRole($post['User']['role_id'])->save();
+                                $message = Yii::t('app', 'Пользователь добавлен!');
+                            }
+                            else{
+                                $message = Yii::t('app', 'common.models.already_exists');
+                            }
+                        }else{
+                            $message = Yii::t('app', 'common.models.already_exists');
+                        }
+
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
+                }
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     /*
@@ -247,9 +249,10 @@ class ClientController extends DefaultController {
     public function actionAjaxUpdateUser($id) {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
-        $oldRole = $user->role_id;
         $profile = $user->profile;
-        $organizationType = $user->organization->type_id;
+        $currentUserOrganizationID = $this->currentUser->organization_id;
+        $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
+        $selected = $user->getRelationUserOrganizationRoleID($id);
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -258,14 +261,10 @@ class ClientController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
 
-                    if (!in_array($user->role_id, User::getAllowedRoles($oldRole))) {
-                        $user->role_id = $oldRole;
-                    } elseif ($user->role_id == Role::ROLE_RESTAURANT_EMPLOYEE && $oldRole == Role::ROLE_RESTAURANT_MANAGER && $user->organization->managersCount == 1) {
-                        $user->role_id = $oldRole;
-                    }
+                    $user->role_id = $post['User']['role_id'];
                     $user->save();
                     $profile->save();
-                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
+                    User::updateRelationUserOrganization($user->id, $this->currentUser->organization_id, $post['User']['role_id']);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -273,7 +272,7 @@ class ClientController extends DefaultController {
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     /*
@@ -285,48 +284,41 @@ class ClientController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
-                $del = 0;
-                $rel = RelationUserOrganization::findOne(['user_id'=>$post['id'], 'organization_id'=>$this->currentUser->organization->id]);
-                if($rel){
-                    $del = $rel->delete();
-                }
-                $usersCount = count($user->organization->users);
-                if ($user->id == $this->currentUser->id && !$del) {
+
+                $relations = RelationUserOrganization::findAll(['organization_id'=>$this->currentUser->organization_id]);
+
+                $usersCount = count($relations);
+                if ($user->id == $this->currentUser->id && $usersCount < 2) {
                     $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
-                    if($user->id == $this->currentUser->id && $del){
-                        $rel2 = RelationUserOrganization::findOne(['user_id'=>$post['id']]);
-                        if($rel2){
-                            $user->organization_id = $rel2->organization_id;
+                    if($user->id == $this->currentUser->id) {
+                        $rel2 = RelationUserOrganization::find()->where(['user_id' => $post['id']])->andWhere(['not', ['organization_id' => $this->currentUser->organization_id]])->all();
+                        if (count($rel2) > 1) {
+                            $user->organization_id = $rel2[0]->organization_id;
+                            $user->role_id = $rel2[0]->role_id;
                             $user->save();
+                            User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
                             Yii::$app->user->logout();
                             return $this->goHome();
-                        }else{
+                        } else {
                             $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                             return $this->renderAjax('settings/_success', ['message' => $message]);
                         }
                     }
-//                    $user->role_id = Role::ROLE_USER;
-                    $email_notification = $user->emailNotification;
-                    $sms_notification = $user->smsNotification;
-                    $user_token = UserToken::findOne(['user_id' => $user->id]);
-                    $profile = $user->profile;
-                    if ($profile) {
-                        $profile->delete();
-                    }
-                    if ($email_notification) {
-                        $email_notification->delete();
-                    }
-                    if ($sms_notification) {
-                        $sms_notification->delete();
-                    }
-                    if ($user_token) {
-                        $user_token->delete();
-                    }
-                    if ($user->delete()) {
+
+                    $isExists = User::deleteUserFromOrganization($post['id']);
+                    if($isExists && $user->id != $this->currentUser->id){
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }else{
+                        $message = Yii::t('message', 'frontend.controllers.client.cant_del', ['ru' => 'Не удалось удалить пользователя!']);
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
+                    $user->organization_id = null;
+                    if ($user->save()) {
+                        $message = Yii::t('message', 'frontend.controllers.vendor.user_added', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
@@ -370,7 +362,6 @@ class ClientController extends DefaultController {
                 $user = new User();
             }
             $relationSuppRest = new RelationSuppRest();
-            //$relationCategory = new RelationCategory();
             $organization = new Organization();
             $profile = new Profile();
             $profile->scenario = "invite";
@@ -479,6 +470,7 @@ class ClientController extends DefaultController {
                                 $currentOrganization->step = Organization::STEP_OK;
                                 $currentOrganization->save();
                             }
+                            User::createRelationUserOrganization($user->id, $organization->id, Role::getManagerRole($organization->type_id));
                         } else {
                             //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                             $get_supp_org_id = $check['org_id'];
@@ -939,13 +931,13 @@ class ClientController extends DefaultController {
                     $managerAssociate->save();
 
                     foreach ($rows as $row) {
-                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->smsNotification->receive_employee_sms)) {
+                        if ($row->profile->phone && $row->profile->sms_allow && ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->getSmsNotification($get_supp_org_id)->receive_employee_sms)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $row->profile->phone);
                         }
-                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->emailNotification->receive_employee_email) {
+                        if ($row->role_id != Role::ROLE_SUPPLIER_MANAGER || $row->getEmailNotification($get_supp_org_id)->receive_employee_email) {
                             $email = $row->email;
                             $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
                             $mailer->htmlLayout = 'layouts/html';
@@ -1846,6 +1838,16 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
 
         return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+    }
+
+
+    public function actionCheckEmail():array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
+            return $result;
+        }
     }
 
 }

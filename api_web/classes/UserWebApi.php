@@ -3,12 +3,15 @@
 namespace api_web\classes;
 
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\Role;
 use api_web\models\User;
 use common\models\Profile;
 use common\models\UserToken;
 use api_web\components\Notice;
+use common\models\RelationSuppRestPotential;
 use common\models\Organization;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
@@ -40,39 +43,8 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
-            if (mb_substr($phone, 0, 1) == '8') {
-                $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
-            }
 
-            $post['user']['newPassword'] = $post['user']['password'];
-            unset($post['user']['password']);
-
-            $user = new User(["scenario" => "register"]);
-            $user->load($post, 'user');
-            if (!$user->validate()) {
-                throw new ValidationException($user->getFirstErrors());
-            }
-
-            if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-                throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
-            }
-
-            $profile = new Profile (["scenario" => "register"]);
             $organization = new Organization (["scenario" => "register"]);
-
-            if (User::findOne(['email' => $post['user']['email']])) {
-                throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
-            }
-
-            $user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
-
-            $profile->load($post, 'profile');
-            if (!$profile->validate()) {
-                throw new ValidationException($profile->getFirstErrors());
-            }
-            $profile->setUser($user->id)->save();
-
             $organization->load($post, 'organization');
 
             if ($organization->rating == null or empty($organization->rating) or empty(trim($organization->rating))) {
@@ -83,10 +55,13 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new ValidationException($organization->getFirstErrors());
             }
             $organization->save();
+
+            $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
             $user->setOrganization($organization, true);
+            $profile = $this->createProfile($post, $user);
 
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
-            Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $user->profile->phone);
+            Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $profile->phone);
             $transaction->commit();
             return $user->id;
         } catch (ValidationException $e) {
@@ -96,6 +71,59 @@ class UserWebApi extends \api_web\components\WebApi
             $transaction->rollBack();
             throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Создание пользователя
+     * @param array $post
+     * @param $role_id
+     * @return User
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function createUser(array $post, $role_id)
+    {
+        if (User::findOne(['email' => $post['user']['email']])) {
+            throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+        }
+
+        $post['user']['newPassword'] = $post['user']['password'];
+        unset($post['user']['password']);
+
+        $user = new User(["scenario" => "register"]);
+        $user->load($post, 'user');
+        if (!$user->validate()) {
+            throw new ValidationException($user->getFirstErrors());
+        }
+        $user->setRegisterAttributes($role_id)->save();
+        return $user;
+    }
+
+    /**
+     * Создание профиля пользователя
+     * @param array $post
+     * @param User $user
+     * @return Profile
+     * @throws ValidationException
+     */
+    public function createProfile(array $post, User $user)
+    {
+        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
+        if (mb_substr($phone, 0, 1) == '8') {
+            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
+        }
+
+        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+            throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+        }
+
+        $profile = new Profile (["scenario" => "register"]);
+        $profile->load($post, 'profile');
+        if (!$profile->validate()) {
+            throw new ValidationException($profile->getFirstErrors());
+        }
+        $profile->setUser($user->id)->save();
+        return $profile;
     }
 
     /**
@@ -167,14 +195,15 @@ class UserWebApi extends \api_web\components\WebApi
 
             $allow_roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER];
 
-            if (in_array($this->user->role_id, $allow_roles)) {
+            if (in_array($this->user->role_id, $allow_roles) || RelationUserOrganization::checkRelationExisting($this->user)) {
                 if (!in_array($this->user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER])) {
+                    $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                        $this->user->role_id = Role::ROLE_RESTAURANT_MANAGER;
+                        $this->user->role_id = $roleID ?? Role::ROLE_RESTAURANT_MANAGER;
                     }
 
                     if ($organization->type_id == Organization::TYPE_SUPPLIER) {
-                        $this->user->role_id = Role::ROLE_SUPPLIER_MANAGER;
+                        $this->user->role_id = $roleID ?? Role::ROLE_SUPPLIER_MANAGER;
                     }
                 }
                 $this->user->organization_id = $organization->id;
@@ -195,11 +224,23 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @return mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function getAllOrganization()
     {
-        return $this->user->getAllOrganization();
+        $list_organisation = $this->user->getAllOrganization();
+        if (empty($list_organisation)) {
+            throw new BadRequestHttpException('Нет доступных организаций');
+        }
+
+        $result = [];
+        foreach ($list_organisation as $item) {
+            $model = Organization::findOne($item['id']);
+            $result[] = (new MarketWebApi())->prepareOrganization($model);
+        }
+
+        return $result;
     }
 
     /**
@@ -216,11 +257,6 @@ class UserWebApi extends \api_web\components\WebApi
         $currentOrganization = $this->user->organization;
         $searchModel = new \common\models\search\VendorSearch();
 
-        //Поиск по адресу
-        if (isset($post['search']['address'])) {
-            $searchModel->search_address = $post['search']['address'];
-        }
-
         $dataProvider = $searchModel->search([], $currentOrganization->id);
         $dataProvider->pagination->setPage($page - 1);
         $dataProvider->pagination->pageSize = $pageSize;
@@ -231,20 +267,42 @@ class UserWebApi extends \api_web\components\WebApi
         if (isset($post['search']['status'])) {
             switch ($post['search']['status']) {
                 case 1:
-                    $addWhere = ['invite' => 1, 'relation_supp_rest.status' => 1];
+                    $addWhere = ['invite' => 1, 'u.status' => 1];
                     break;
                 case 2:
-                    $addWhere = ['invite' => 1, 'relation_supp_rest.status' => 0];
+                    $addWhere = ['invite' => 1, 'u.status' => 0];
                     break;
                 case 3:
                     $addWhere = ['or',
-                        ['invite' => 0, 'relation_supp_rest.status' => 1],
-                        ['invite' => 0, 'relation_supp_rest.status' => 0]
+                        ['invite' => 0, 'u.status' => 1],
+                        ['invite' => 0, 'u.status' => 0]
                     ];
                     break;
             }
             if (isset($addWhere)) {
-                $dataProvider->query->andWhere($addWhere);
+                $dataProvider->query->andFilterWhere($addWhere);
+            }
+        }
+
+        //Поиск по адресу
+        if (isset($post['search']['location'])) {
+            if (strstr($post['search']['location'], ':') !== false) {
+                $location = explode(':', $post['search']['location']);
+                if (is_array($location)) {
+                    if (isset($location[0])) {
+                        $dataProvider->query->andFilterWhere(['u.country' => $location[0]]);
+                    }
+                    if (isset($location[1])) {
+                        $dataProvider->query->andFilterWhere(['u.locality' => $location[1]]);
+                    }
+                }
+            } else {
+                $dataProvider->query->andFilterWhere(
+                    ['or',
+                        ['u.country' => $post['search']['location']],
+                        ['u.locality' => $post['search']['location']]
+                    ]
+                );
             }
         }
 
@@ -273,11 +331,11 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             if ($field == 'name') {
-                $field = 'organization.name ' . $sort;
+                $field = 'vendor_name ' . $sort;
             }
 
             if ($field == 'address') {
-                $field = 'organization.locality ' . $sort;
+                //$field = 'organization.locality ' . $sort;
             }
 
             if ($field == 'status') {
@@ -322,6 +380,99 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Список географического расположения поставщиков ресторана
+     * @return array
+     */
+    public function getVendorLocationList()
+    {
+        $currentOrganization = $this->user->organization;
+        $searchModel = new \common\models\search\VendorSearch();
+        $dataProvider = $searchModel->search([], $currentOrganization->id);
+        $dataProvider->pagination->setPage(0);
+        $dataProvider->pagination->pageSize = 1000;
+
+        $return = [];
+        $vendor_ids = [];
+
+        $models = $dataProvider->getModels();
+        if (!empty($models)) {
+            foreach ($models as $model) {
+                $vendor_ids[] = $model->supp_org_id;
+            }
+
+            $vendor_ids = array_unique($vendor_ids);
+
+            $query = new Query();
+            $query->distinct();
+            $query->from(Organization::tableName());
+            $query->select(['country', 'locality']);
+            $query->where(['in', 'id', $vendor_ids]);
+            $query->andWhere('country is not null');
+            $query->andWhere("country != 'undefined'");
+            $query->andWhere("country != ''");
+            $query->andWhere('locality is not null');
+            $query->andWhere("locality != 'undefined'");
+            $query->andWhere("locality != ''");
+            $query->orderBy('country');
+
+            $result = $query->all();
+
+            if ($result) {
+                foreach ($result as $row) {
+                    $return[] = [
+                        'title' => $row['country'] . ', ' . $row['locality'],
+                        'value' => trim($row['country']) . ':' . trim($row['locality'])
+                    ];
+                }
+            }
+
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     * @throws \yii\db\Exception
+     */
+    public function removeVendor(array $post)
+    {
+        if (empty($post['vendor_id'])) {
+            throw new BadRequestHttpException('Empty vendor_id');
+        }
+
+        $id = (int)$post['vendor_id'];
+        $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
+
+        if (empty($vendor)) {
+            throw new BadRequestHttpException('Not found vendor');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $where = [
+                'rest_org_id' => $this->user->organization->id,
+                'supp_org_id' => $vendor->id
+            ];
+
+            if (RelationSuppRest::find()->where($where)->exists() || RelationSuppRestPotential::find()->where($where)->exists()) {
+                RelationSuppRest::deleteAll($where);
+                RelationSuppRestPotential::deleteAll($where);
+            } else {
+                throw new BadRequestHttpException('Вы не работаете с этим поставщиком');
+            }
+            $transaction->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Информация о поставщике
      * @param RelationSuppRest $model
      * @return array
@@ -353,14 +504,17 @@ class UserWebApi extends \api_web\components\WebApi
             $status = $status_list[3];
         }
 
-
         return [
-            'id' => $model->vendor->id,
-            'name' => $model->vendor->name,
-            'cat_id' => $model->cat_id,
+            'id' => (int)$model->vendor->id,
+            'name' => $model->vendor->name ?? "",
+            'cat_id' => (int)$model->cat_id,
+            'email' => $model->vendor->email ?? "",
+            'phone' => $model->vendor->phone ?? "",
             'status' => $status,
-            'picture' => $model->vendor->getPictureUrl(),
-            'address' => implode(', ', $locality)
+            'picture' => $model->vendor->getPictureUrl() ?? "",
+            'address' => implode(', ', $locality),
+            'rating' => $model->vendor->rating ?? 0,
+            'allow_editing' => $model->vendor->allow_editing
         ];
     }
 }

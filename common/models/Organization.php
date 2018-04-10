@@ -5,10 +5,12 @@ namespace common\models;
 use api\common\models\iiko\iikoService;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
 use common\models\guides\Guide;
+
 
 /**
  * This is the model class for table "organization".
@@ -31,6 +33,8 @@ use common\models\guides\Guide;
  * @property string $es_status
  * @property bool $partnership
  * @property integer $rating
+ * @property integer $allow_editing
+ * @property integer $is_work
  * @property double $lat
  * @property double $lng
  * @property string $country
@@ -81,6 +85,13 @@ class Organization extends \yii\db\ActiveRecord {
     const ES_DELETED = 2;
     const MAX_RATING = 31;
 
+    const RELATION_INVITED = 1; //есть связь с поставщиком invite_on
+    const RELATION_INVITE_IN_PROGRESS = 2; //поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
+    const NO_AUTH_ADD_RELATION_AND_CATALOG = 3; //поставщик не авторизован // добавляем к базовому каталогу поставщика каталог ресторана и создаем связь
+    const THIS_IS_RESTAURANT = 4; //email ресторана
+    const NEW_VENDOR = 5; //нет в базе такого email
+    const AUTH_SEND_INVITE = 6; //поставщик авторизован invite
+
     public $resourceCategory = 'org-picture';
     public $manager_ids;
 
@@ -102,7 +113,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
-            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id'], 'integer'],
+            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id','blacklisted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -111,7 +122,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
-            [['is_allowed_for_franchisee'], 'boolean'],
+            [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
         ];
     }
 
@@ -181,9 +192,16 @@ class Organization extends \yii\db\ActiveRecord {
             'franchisee_sorted' => Yii::t('app', 'common.models.settled_franchisee', ['ru' => 'Назначен Франшизы']),
             'manager_id' => Yii::t('app', 'common.models.manager', ['ru' => 'Менеджер']),
             'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru'=>'Каталог']),
-            'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет'])
+            'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
+            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе'])
         ];
     }
+
+
+    public function getRelationUserOrganization(){
+        return $this->hasOne(RelationUserOrganization::className(), ['organization_id'=>'id', 'organization_id' => 'id']);
+    }
+
 
     public function beforeSave($insert) {
         if (parent::beforeSave($insert)) {
@@ -207,6 +225,17 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function getType() {
         return $this->hasOne(OrganizationType::className(), ['id' => 'type_id']);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getAllow_editing()
+    {
+        if ($this->type_id != self::TYPE_SUPPLIER) {
+            return null;
+        }
+        return abs($this->is_work - 1);
     }
 
     /**
@@ -464,7 +493,15 @@ class Organization extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getUsers() {
-        return $this->hasMany(User::className(), ['organization_id' => 'id']);
+        $userTable = User::tableName();
+        $relationTable = RelationUserOrganization::tableName();
+
+        $query = User::find();
+        $query->leftJoin($relationTable, "$relationTable.user_id = $userTable.id")
+            ->where("$relationTable.organization_id = $this->id");
+        $query->multiple = true;
+
+        return $query;
     }
 
     /**
@@ -764,10 +801,12 @@ class Organization extends \yii\db\ActiveRecord {
     public function getAssociatedManagers($vendor_id) {
         $usrTable = User::tableName();
         $assocTable = ManagerAssociate::tableName();
+        $relationTable = RelationUserOrganization::tableName();
 
         return User::find()
-                        ->joinWith('associated')
-                        ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+                        ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
+                        ->leftJoin($relationTable, "$relationTable.organization_id = $vendor_id and $relationTable.user_id = $assocTable.manager_id")
+                        ->where(["$assocTable.organization_id" => $this->id])
                         ->all();
     }
 
@@ -1330,4 +1369,5 @@ class Organization extends \yii\db\ActiveRecord {
 
         return $return;
     }
+
 }

@@ -6,6 +6,25 @@ use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use kartik\touchspin\TouchSpin;
 use kartik\form\ActiveForm;
+
+
+$guideUrl = Url::to(['order/ajax-show-guide', 'id'=>$guide->id]);
+
+$this->registerJs('
+    $(document).on("change", "#guideproductssearch-sort", function() {
+        var sort = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: false,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    sort: sort,
+                   }
+   }).done(function() { console.log(222); });
+    });
+    ', \yii\web\View::POS_READY);
 ?>
 
 <div class="modal-header">
@@ -23,6 +42,7 @@ use kartik\form\ActiveForm;
                     ],
         ]);
         ?>
+
         <?=
                 $form->field($guideSearchModel, 'searchString', [
                     'addon' => [
@@ -43,6 +63,25 @@ use kartik\form\ActiveForm;
                     'placeholder' => Yii::t('message', 'frontend.views.order.guides.search', ['ru'=>'Поиск по названию'])])
                 ->label(false)
         ?>
+
+        <?=
+        $form->field($guideSearchModel, 'sort', [
+            'options' => [
+                'id' => 'alSortSelect',
+                'class' => "form-group"
+            ],
+        ])
+            ->dropDownList([
+                '1' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru' => 'Сортировка по']),
+                'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru' => 'Порядку добавления по возрастанию']),
+                'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru' => 'Порядку добавления по убыванию']),
+                'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru' => 'Наименованию по возрастанию']),
+                'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru' => 'Наименованию по убыванию']),
+            ], [
+                'options' => [$params['sort'] ?? 1 => ['selected' => true], '1' => ['disabled' => true]]])
+            ->label(false)
+        ?>
+
         <?php ActiveForm::end(); ?>
     </div>
 </div>

@@ -7,23 +7,25 @@ namespace api\modules\v1\modules\mobile\resources;
  */
 class MpCategory extends \common\models\MpCategory
 {
+    public $language;
+    public $empty;
     public function fields()
     {
-        return ['id', 'parent', 'name'];
+        return ['id', 'parent', 'name','language', 'empty'];
     }
     
     public function rules()
     {
         return [
             [['parent'], 'integer'],
-            [['name'], 'string', 'max' => 255],
+            [['name','language', 'empty'], 'string', 'max' => 255],
         ];
     }
 
     public function getCountProducts($category_id = null)
     {
        $category_id = ($category_id == null ) ? $this->id : $category_id;
-       $categories = $this->getCategories($category_id);
+       $categories = self::getCategories($category_id);
        $categories = implode(",", $categories);
 
        $res = 0;
@@ -54,12 +56,12 @@ class MpCategory extends \common\models\MpCategory
        return $res;
     }
 
-    private function getCategories($cat_id) {
+    public static function getCategories($cat_id) {
         $res = [];
         $cats = MpCategory::find()->where(["parent" => $cat_id])->all();
         foreach ($cats as $cat) {
             $res[] = $cat->id;
-            $res = array_merge($res, $this->getCategories($cat->id));
+            $res = array_merge($res, self::getCategories($cat->id));
         }
 
         return $res;

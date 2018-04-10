@@ -139,6 +139,7 @@ class Currency extends \yii\db\ActiveRecord {
         return $array;
     }
 
+
     public function getFullCurrencyList($franchId):array
     {
         $array = [];

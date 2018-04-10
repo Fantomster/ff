@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\RelationUserOrganization;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\BadRequestHttpException;
@@ -456,16 +457,22 @@ class CartController extends ActiveController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_created) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_created)
+                {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
-            }
+                }
 
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
-            if ($profile->phone && $recipient->smsNotification->order_created) {
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($profile->phone && $notification->order_created)
+            {
                 //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $text = "Новый заказ от " . $senderOrg->name . ' ' . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $profile->phone;

@@ -88,7 +88,10 @@ $this->registerCss('
        th{
         min-width:140px;
         }
-    }');
+    }
+        #order-analytic-list a:not(.btn){color: #333;}
+        .kv-table-wrap a{width: 100%; min-height: 17px; display: inline-block;}
+        ');
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 
@@ -241,40 +244,83 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                     $columns = [
                         [
                             'attribute' => 'id',
-                            'value' => 'id',
                             'label' => '№',
+                            'contentOptions'   =>   ['class' => 'small_cell_id'],
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::a($data->id, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            },
                         ],
-                        [
+                        $organization->type_id == Organization::TYPE_RESTAURANT ? [
                             'attribute' => 'vendor.name',
                             'value' => 'vendor.name',
-                            'label' => Yii::t('message', 'frontend.views.client.index.vendor', ['ru' => 'Поставщик']),
+                            'contentOptions'   =>   ['class' => 'small_cell_supp'],
+                            'label' => Yii::t('message', 'frontend.views.order.vendor', ['ru'=>'Поставщик']),
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            },
+                        ] : [
+                            'attribute' => 'client.name',
+                            'value' => 'client.name',
+                            'label' => Yii::t('message', 'frontend.views.order.rest_two', ['ru'=>'Ресторан']),
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::a($data->client->name, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            },
                         ],
                         [
                             'attribute' => 'createdByProfile.full_name',
                             'value' => 'createdByProfile.full_name',
-                            'label' => Yii::t('message', 'frontend.views.client.index.created', ['ru' => 'Заказ создал']),
+                            'label' => Yii::t('message', 'frontend.views.order.order_created_by', ['ru'=>'Заказ создал']),
+                            'contentOptions'   =>   ['class' => 'small_cell_sozdal'],
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::a($data->createdByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            },
                         ],
                         [
                             'attribute' => 'acceptedByProfile.full_name',
                             'value' => 'acceptedByProfile.full_name',
-                            'label' => Yii::t('message', 'frontend.views.client.index.rec', ['ru' => 'Заказ принял']),
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::a($data->acceptedByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            },
+                            'label' => Yii::t('message', 'frontend.views.order.accepted_by', ['ru'=>'Заказ принял']),
+                            'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                         ],
                         [
                             'format' => 'raw',
                             'attribute' => 'total_price',
                             'value' => function($data) {
-                                return "<b>$data->total_price</b> " . $data->currency->symbol;
+                                return Html::a("<b>$data->total_price</b> " . $data->currency->symbol ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                             },
-                            'label' => Yii::t('message', 'frontend.views.client.index.sum', ['ru' => 'Сумма']),
+                            'label' => Yii::t('message', 'frontend.views.order.summ', ['ru'=>'Сумма']),
+                            'contentOptions'   =>   ['class' => 'small_cell_sum'],
                         ],
                         [
                             'format' => 'raw',
                             'attribute' => 'created_at',
                             'value' => function($data) {
                                 $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                                return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                                return Html::a('<i class="fa fa-fw fa-calendar""></i> ' . $date ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                             },
-                            'label' => Yii::t('message', 'frontend.views.client.index.created_at', ['ru' => 'Дата создания']),
+                            'label' => Yii::t('message', 'frontend.views.order.creating_date', ['ru'=>'Дата создания']),
+                            'contentOptions'   =>   ['style' => 'min-width:120px;'],
+
+                        ],
+                        [
+                            'format'=>'raw',
+                            'value' => function($data) {
+
+                                $fdate = $data->actual_delivery ? $data->actual_delivery :
+                                    ( $data->requested_delivery ? $data->requested_delivery :
+                                        $data->updated_at);
+
+                                $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
+                                return Html::a('<i class="fa fa-fw fa-calendar""></i> '. $fdate ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            },
+                            'label' => Yii::t('message', 'frontend.views.order.final_date', ['ru'=>'Дата финальная']),
                         ],
                         [
                             'format' => 'raw',
@@ -296,9 +342,10 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                         $statusClass = 'cancelled';
                                         break;
                                 }
-                                return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
+                                return Html::a('<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                             },
-                            'label' => Yii::t('message', 'frontend.views.client.index.status', ['ru' => 'Статус']),
+                            'label' => Yii::t('message', 'frontend.views.order.status_two', ['ru'=>'Статус']),
+                            'contentOptions'   =>   ['class' => 'small_cell_status'],
                         ],
                         [
                             'format' => 'raw',
@@ -354,9 +401,6 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                         'hover' => true,
                         'summary' => false,
                         'resizableColumns' => false,
-                        'rowOptions' => function ($model, $key, $index, $grid) {
-                            return ['data-url' => Url::to(['order/view', 'id' => $model->id])];
-                        },
                     ]);
                     ?> 
                     <?php Pjax::end(); ?>   

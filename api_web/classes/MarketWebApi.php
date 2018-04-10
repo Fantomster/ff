@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\DeliveryRegions;
 use common\models\CatalogBaseGoods;
 use common\models\RelationSuppRest;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -139,13 +140,22 @@ class MarketWebApi extends WebApi
     {
         $return = [];
         $categories = MpCategory::find()->where('parent is null')->all();
+        \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
             $all_child = $model->child;
             if (!empty($all_child)) {
                 foreach ($all_child as $child) {
+                    //Картинка категории
+                    $image = $this->getCategoryImage($child->id);
+                    //Если нет картинки, ставим картинку родителя
+                    if (strstr($image, 'product_placeholder') !== false) {
+                        $image = $this->getCategoryImage($model->id);
+                    }
+
                     $return[$model->name][] = [
                         'id' => $child->id,
-                        'name' => $child->name
+                        'name' => $child->name,
+                        'image' => $image
                     ];
                 }
             }
@@ -319,17 +329,19 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = $model->catalog->id;
+        $item['catalog_id'] = ((int)$model->catalog->id ?? null);
+        $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
         $item['rating'] = round($model->ratingStars, 1);
         $item['supplier'] = $model->vendor->name;
-        $item['supplier_id'] = $model->vendor->id;
+        $item['supplier_id'] = (int)$model->vendor->id;
         $item['brand'] = $model->brand ?? '';
         $item['article'] = $model->article;
         $item['ed'] = $model->ed;
-        $item['units'] = $model->units ?? 1;
+        $item['units'] = $model->units ?? 0;
         $item['currency'] = $model->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
         return $item;
@@ -348,18 +360,28 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['name'] = $model->name;
+        $item['legal_entity'] = $model->legal_entity;
+        $item['contact_name'] = $model->contact_name;
         $item['phone'] = $model->phone;
         $item['email'] = $model->email;
+        $item['site'] = $model->website;
         $item['address'] = $model->address;
         $item['image'] = $model->pictureUrl;
-        $item['type_id'] = $model->type_id;
+        $item['type_id'] = (int)$model->type_id;
         $item['type'] = $model->type->name;
         $item['rating'] = round($model->ratingStars, 1);
+        $item['house'] = ($model->street_number === 'undefined' ? null : $model->street_number);
+        $item['route'] = ($model->route === 'undefined' ? null : $model->route);
         $item['city'] = ($model->locality === 'undefined' ? null : $model->locality);
         $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? null : $model->administrative_area_level_1);
         $item['country'] = ($model->country === 'undefined' ? null : $model->country);
+        $item['place_id'] = ($model->place_id === 'undefined' ? null : $model->place_id);
         $item['about'] = $model->about;
-        //$item['delivery_regions'] = $model->deliveryRegionsAllow;
+
+        if ($model->type_id == Organization::TYPE_SUPPLIER) {
+            $item['allow_editing'] = $model->allow_editing;
+        }
+
         return $item;
     }
 
@@ -375,6 +397,20 @@ class MarketWebApi extends WebApi
             return \Yii::$app->params['web'] . preg_replace('#http(.+?)\/\/(.+?)\/(.+?)#', '$3', $url);
         } else {
             return $url;
+        }
+    }
+
+    /**
+     * Картинка категории
+     * @param $id
+     * @return string
+     */
+    private function getCategoryImage($id)
+    {
+        if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
+            return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);
+        } else {
+            return Url::to('@market_web/fmarket/images/product_placeholder.jpg', true);
         }
     }
 }

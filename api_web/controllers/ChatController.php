@@ -22,10 +22,7 @@ class ChatController extends WebApiController
      *         required=true,
      *         description="recipient_id = int or empty",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -90,10 +87,7 @@ class ChatController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -159,10 +153,7 @@ class ChatController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -222,10 +213,7 @@ class ChatController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",

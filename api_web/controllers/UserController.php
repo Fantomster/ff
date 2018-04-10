@@ -22,11 +22,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -69,11 +65,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -116,11 +108,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -164,10 +152,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object"
@@ -183,14 +168,18 @@ class UserController extends WebApiController
      *         "organization": {
      *           {
      *               "id": 1,
+     *               "name": "El postavshik",
+     *               "phone": "",
+     *               "email": "El-postavshik@El1postavshik.ru",
+     *               "address": "ул. Егорьевская, 1, Москва, Россия, 109387",
+     *               "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
      *               "type_id": 2,
-     *               "name": "ООО Рога и Копыта",
+     *               "type": "Поставщик",
+     *               "rating": 0,
      *               "city": "Москва",
-     *               "address": "ул. Госпитальный Вал, Москва, Россия",
-     *               "phone": "+79162225588",
-     *               "email": "test@test.ru",
-     *               "picture": "http://mixcart.ru/pic/pic1.jpeg",
-     *               "rating": 23
+     *               "administrative_area_level_1": null,
+     *               "country": "Россия",
+     *               "about": ""
      *           }
      *         }
      *   }
@@ -208,9 +197,7 @@ class UserController extends WebApiController
      */
     public function actionOrganization()
     {
-        $this->response = [
-            'organization' => $this->container->get('UserWebApi')->getAllOrganization()
-        ];
+        $this->response = $this->container->get('UserWebApi')->getAllOrganization();
     }
 
     /**
@@ -224,10 +211,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  ref="#/definitions/UserWebApiDefinition"
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -270,11 +254,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -313,11 +293,7 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={}
@@ -347,6 +323,49 @@ class UserController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/user/vendor-location-list",
+     *     tags={"User"},
+     *     summary="Список географического расположения поставщиков",
+     *     description="Список географического расположения поставщиков для фильтра",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {"title":"Россия, г. Москва", "value":"Россия:Москва"},
+     *                  {"title":"Россия, г. Казань", "value":"Россия:Казань"}
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionVendorLocationList()
+    {
+        $this->response = $this->container->get('UserWebApi')->getVendorLocationList();
+    }
+
+    /**
      * @SWG\Post(path="/user/vendors",
      *     tags={"User"},
      *     summary="Список поставщиков",
@@ -357,16 +376,12 @@ class UserController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
      *                               "search":{
-     *                                   "address":"Москва",
+     *                                   "location":"Россия:Москва",
      *                                   "status":1
      *                               },
      *                               "pagination":{
@@ -385,18 +400,31 @@ class UserController extends WebApiController
      *              default={
      *                               "headers":{
      *                                   {
-     *                                       "name": "Название",
-     *                                       "location": "Расположение"
+     *                                       "id": "ID",
+     *                                       "name": "Название организации",
+     *                                       "cat_id": "Каталог",
+     *                                       "email": "Email организации",
+     *                                       "phone": "Телефон",
+     *                                       "status": "Status",
+     *                                       "picture": "Аватар",
+     *                                       "address": "Адрес",
+     *                                       "rating": "Rating",
+     *                                       "allow_editing": "Allow Editing"
      *                                   }
      *                               }
      *                               ,
      *                               "vendors":{
      *                               {
-     *                                       "id": 3551,
-     *                                       "name": "PIXAR STUDIO",
-     *                                       "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.gif",
-     *                                       "location": "Ханты-Мансийск, улица Ленина",
-     *                                       "status":"Партнер"
+     *                                       "id": 3449,
+     *                                       "name": "testsellfknm4 - поставщик",
+     *                                       "cat_id": 0,
+     *                                       "email": "testsellfknm4@yandex.ru",
+     *                                       "phone": "+7 925 764-84-45",
+     *                                       "status": "Партнер. Каталог не назначен",
+     *                                       "picture": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
+     *                                       "address": "Россия, Москва, Волгоградский проспект",
+     *                                       "rating": 31,
+     *                                       "allow_editing": 1
      *                               }}
      *                               ,
      *                               "pagination":{
@@ -421,5 +449,47 @@ class UserController extends WebApiController
     public function actionVendors()
     {
         $this->response = $this->container->get('UserWebApi')->getVendors($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/user/remove-vendor",
+     *     tags={"User"},
+     *     summary="Открепить поставщика",
+     *     description="Удаляем связь между рестораном и поставщиком",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id":1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"result": true}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRemoveVendor()
+    {
+        $this->response = $this->container->get('UserWebApi')->removeVendor($this->request);
     }
 }

@@ -104,7 +104,7 @@ return [
         'urlManager' => [
             'class' => 'codemix\localeurls\UrlManager',
             //Список языков, какая тут очередность, так и будет выводиться в виджите
-            'languages' => ['en', 'ru', 'es'],
+            'languages' => ['en', 'ru', 'es', 'md'],
             //Определение языка по заголовкам
             'enableLanguageDetection' => false,
             //Выводить язык по умолчанию в URL

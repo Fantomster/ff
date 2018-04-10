@@ -1,0 +1,104 @@
+frontend.views.order.guides.can_manage|Вы можете управлять шаблоном в данном заказе|Voi puteți administra șablonul în această comandă
+frontend.views.client.suppliers.vendors_list|Список поставщиков|Lista furnizorilor
+frontend.views.client.suppliers.phone|Телефон|Telefon
+frontend.views.client.suppliers.add_goods|Добавить товары|Adaugă bunuri
+frontend.views.client.suppliers.need_apply|Ожидает<br>вашего подтверждения|Așteaptă<br>confirmarea dumneavoatră
+frontend.views.client.suppliers.supplier_apply|Сотрудничать!|Colaborează!
+frontend.views.order.final_date|Дата завершения|Data de încheiere
+common.models.done|Завершен|Terminat
+frontend.views.request.of_two|из|din
+frontend.views.request.created_three|Создан:|Creat:
+frontend.views.vendor.client|Клиент будет удален из Вашего списка клиентов|Clientul va fi șters din lista clienților dumneavoastră
+frontend.views.vendor.empl_two|Сотрудник|Angajat
+frontend.views.vendor.complete|Завершен|Terminat
+frontend.views.vendor.on|Вкл|Pornește
+frontend.views.vendor.created_at|Создан:|Creat:
+frontend.views.vendor.name_of_good_three|Название|Denumire
+frontend.views.vendor.add_goods_two|Добавить товары|Adaugă bunuri
+frontend.views.request.of|из|din
+frontend.views.request.created|Создана|Creată
+frontend.views.request.rouble_two|руб.|rub.
+frontend.views.vendor.var7|Скидка %|Reducere %
+common.models.done|Завершен|Terminat
+frontend.views.client.anal.employee|Сотрудник|Angajat
+frontend.views.order.final_date|Дата завершения|Data de încheiere
+frontend.views.client.suppliers.phone|Телефон|Telefon
+frontend.views.order.cancel_seven|Отменить|Anulează
+frontend.views.client.suppliers.add_goods|Добавить товары|Adaugă bunuri
+frontend.views.order.hint|Добавьте поставщика, чтобы сделать ваш первый заказ!|Adaugă furnizor, pentru a face prima comandă!
+frontend.views.request.product_two|Продукт|Produs
+frontend.views.request.created_two|Создана|Creat
+frontend.views.client.settings.address|Адрес|Adresa
+frontend.views.client.settings.phone|Телефон|Telefon
+frontend.views.client.anal.ready|Завершен|Terminat
+common.models.additional_email.working|В работе|În proces
+frontend.views.settings.cancel|Отменить|Anulează
+frontend.views.layouts.main.phone_three|Телефон|Telefon
+frontend.views.layout.main.blog|Блог|Blog
+frontend.views.site.no_payment|Нет. Все финансовые взаимоотношения происходят за пределами MixCart. Между поставщиков и рестораном.|Nu. Toate relațiile financiare au loc înafara MixCart. Între furnizor și restaurant.
+frontend.views.site.address_two|Адрес|Adresa
+frontend.views.site.phone|Телефон|Telefon
+frontend.views.user.default.enter_register|Войти / зарегистрироваться|Intră / Înregistreazăte
+frontend.views.user.default.phone|Телефон|Telefon
+frontend.views.client.index.var9|Вперед|Înainte
+frontend.views.client.index.order|Заказать|Comandă
+frontend.views.user.default.buyer_two| Закупщик|Agent de cumpărare
+frontend.views.user.default.vendor_two| Поставщик|Furnizor
+frontend.views.client.dashboard.address|Адрес|Adresa
+frontend.views.vendor.address|Адрес|Adresa
+common.mail.layouts.two_click|Закупка в 2 клика.|Cumpară în 2 click-uri.
+frontend.views.layouts.header.businesses|БИЗНЕСЫ|Bussiness-uri
+frontend.views.vendor.product_three|Продукт|Produs
+common.models.city|Город|Oraș
+frontend.views.vendor.city|Город|Oraș
+common.models.free_delivery|Cтоимость заказа для бесплатной доставки|Costul comenzii la livrare gratuită
+common.models.min_price|Минимальная стоимость заказа|Costul minim a comenzii
+frontend.views.settings.receive_employee_sms|Получать SMS, если запрос на сотрудничество направлен на почту не мне, а моему работнику|Primesc SMS, dacă cererea de colaborare a fost trimisă nu pe poșta mea, dar a angajatului meu
+common.models.additional_email.working|В работе|În proces
+common.models.forms.service_desk.message|Сообщение|Mesaj
+frontend.views.vendor.add|Адрес|Adresa
+frontend.views.vendor.phone|Телефон|Telefon
+franchise.views.site.user.default.pass|Восcтановить пароль|Restabilește parola
+franchise.views.site.search_two|Search|Caută
+franchise.views.site.vendors|Поставщиков:|Furnizori-lor
+franchise.views.organization.rest_name|Имя ресторана|Denumirea restaurant-ului
+frontend.views.client.index.orders_new|Общее количество заказов|Numărul total de comenzi
+franchise.views.organization.phone_three|Телефон|Telefon
+franchise.views.organization.vendors_name_three|Имя поставщика|Nume furnizor
+franchise.views.organization.phone_eight|Телефон|Telefon
+common.models.jur_name|Юридическое название|Numele juridic
+common.models.city_three|Город|Oraș
+common.models.address|Адрес|Adresa
+common.models.jur_address|Юридический адрес|Adresa juridică
+common.models.official_email|Официальный email|Email-ul oficial
+common.models.inn|ИНН|Cod Fiscal
+common.models.kpp|КПП|Cod motiv al afirmației
+common.models.ogrn|ОГРН|Nr. Înmatriculare
+common.models.bank|Банк|Banca
+common.models.bik|БИК|Codul indentificator bancar
+common.models.phone|Телефон|Telefon
+common.models.rs|р/с|Cont current
+common.models.ks|к/с|Cont corespondent
+common.models.field|Поле для заметок|Câmp pentru notițe
+franchise.views.site.request.deferred_payment|Отложенный платеж(дней):|Plată amânată(zile):
+franchise.views.site.request.created|Создана|Creată
+franchise.views.site.view.rouble|руб.|rub.
+franchise.views.organization.under_text|"Прайс-листы поставщика вы можете посмотреть и отредактировать, зайдя в личный кабинет клиента по кнопке ""Перейти в ЛК организации под своей учеткой"".
+<br/><br/>
+После ее нажатия откроется новая вкладка и вам надо будет ввести свой логин и пароль.
+<br/><br/>
+Далее откроется личный кабинет клиента. Если кнопка неактивна, значит клиент запретил доступ для франчайзи."|"Pentru a vedea și redacta lista prețurilor a furnizorului, intrați în cabinetul personal a clientului prin butonul ""Trece-ți în CP a organizației sub contul d-stră"".<br/><br/>După tastarea acesteia se deschide o fereastră nou unde trebuie să introduceți login și parola d-stră.<br/><br/>Mai departe se va deschide cabinetul personal a clientului. Dacă butonul nu este activ, atunci clientul a interzis acces-ul la franciză."
+franchise.views.organization.rest_name_three|Имя ресторана|Denumire restaurant
+franchise.views.organization.phone_seven|Телефон|Telefon
+franchise.models.profile.phone|Телефон|Telefon
+franchise.views.organization.vendors_list|Список поставщиков ресторана|Lista furnizorilor restaurant-ului
+franchise.views.organization.employees_list|Список сотрудников ресторана|Lista angajați-lor restaurant-ului
+franchise.views.organization.vendors_name|Имя поставщика|Nume furnizor
+franchise.views.organization.phone_five|Телефон|Telefon
+franchise.views.organization.vendors_list_two|Список поставщиков ресторана|Lista furnizorilor restaurant-ului
+franchise.views.anal.rouble|руб|rub.
+franchise.views.anal.turnover|Оборот за период|Cifra pe perioadă
+franchise.views.finance.total_income|Общий доход|Venitul total
+franchise.views.finance.vendors_name|Имя поставщика|Nume furnizor
+franchise.views.finance.total_income_two|Итого заработано|Cîștig total
+franchise.views.site.contracts|Договора|Contracte

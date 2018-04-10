@@ -6,6 +6,7 @@ use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 
 $this->title = Yii::t('message', 'frontend.views.order.guides.edit_templ', ['ru'=>"Редактирование шаблона"]);
+$guideUrl = Url::to(['order/edit-guide', 'id'=>$guide->id]);
 
 $this->registerJs('
     $(document).on("click", ".select-vendor", function() {
@@ -70,6 +71,20 @@ $this->registerJs('
                     .html(\'<i class="fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.guides.add_to_templ_two', ['ru'=>'Добавить в шаблон']) . ' \');
             }
         });
+    });
+    
+    $(document).on("change", "#baseproductsearch-sort", function() {
+        var sort = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: true,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    sort: sort,
+                   }
+   }).done(function() { console.log(222); });
     });
     
     $(document).on("click", ".btnSubmit", function() {
@@ -138,7 +153,7 @@ $this->registerJs('
                                 ?>
                                 <?= $this->render('_vendor-list', compact('vendorDataProvider', 'selectedVendor')) ?>
                                 <?php Pjax::end(); ?>
-                            </div>   
+                            </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
                             <div class="guid_table_block">
@@ -176,7 +191,9 @@ $this->registerJs('
                                             'placeholder' => Yii::t('message', 'frontend.views.order.guides.products_search', ['ru'=>'Поиск по продуктам выбранного поставщика'])])
                                         ->label(false)
                                 ?>
+
                                 <?php ActiveForm::end(); ?>
+
                                 <?php Pjax::begin(['formSelector' => '#searchProductForm', 'enablePushState' => false, 'id' => 'productList', 'timeout' => 30000]); ?>
                                 <?= $this->render('_product-list', compact('productDataProvider', 'guideProductList')) ?>
                                 <?php Pjax::end(); ?>
@@ -187,13 +204,12 @@ $this->registerJs('
                                 <div class="guid_table_block_title">
                                     <div class="guid_block_title_r pull-left"><?= Yii::t('message', 'frontend.views.order.guides.template', ['ru'=>'Шаблон:']) ?> <?= $guide->name ?></div>
                                     <div class="guid_block_title_l pull-right"><?= Yii::t('message', 'frontend.views.order.guides.step_three', ['ru'=>'ШАГ 3']) ?></div>
-                                </div> 
+                                </div>
                                 <?php
                                 $form = ActiveForm::begin([
                                             'options' => [
                                                 'id' => 'searchGuideProductForm',
                                                 'role' => 'search',
-                                                'style' => 'height:51px;'
                                             ],
                                 ]);
                                 ?>
@@ -218,10 +234,11 @@ $this->registerJs('
                                             'placeholder' => Yii::t('message', 'frontend.views.order.guides.templ_search', ['ru'=>'Поиск по набранному шаблону'])])
                                         ->label(false)
                                 ?>
-                                <?php ActiveForm::end(); ?>
-                                <?php Pjax::begin(['formSelector' => '#searchGuideProductForm', 'enablePushState' => false, 'id' => 'guideProductList', 'timeout' => 30000]); ?>
-                                <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList')) ?>
+
+                                <?php Pjax::begin(['formSelector' => '#searchGuideProductForm', 'enablePushState' => true, 'id' => 'guideProductList', 'timeout' => 30000]); ?>
+                                <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList', 'form', 'guideSearchModel', 'session', 'params')) ?>
                                 <?php Pjax::end(); ?>
+                                <?php ActiveForm::end(); ?>
                                 <div style="width:100%;">
                                     <div style="width:50%;float:left;padding-right:2px;">
                                         <?= Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.guides.save', ['ru'=>'Сохранить']), ['order/save-guide', 'id' => $guide->id], ['class' => 'btn btn-md btn-success guide-save']) ?>
@@ -230,11 +247,11 @@ $this->registerJs('
                                         <?= Html::a('<i class="fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.order.guides.cancel', ['ru'=>'Отменить']), ['order/reset-guide'], ['class' => 'btn btn-md btn-gray guide-cancel']) ?>
                                     </div>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>            
+            </div>
         </div>
     </div>
 </section>

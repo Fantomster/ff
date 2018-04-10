@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 
+use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use Yii;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -81,12 +83,27 @@ class SettingsController extends DefaultController {
     public function actionNotifications() {
         $emailNotification = $this->currentUser->emailNotification;
         $smsNotification = $this->currentUser->smsNotification;
+
+        $emailNotification = ($emailNotification->id == null ) ? new EmailNotification() : $emailNotification;
+        $smsNotification = ($smsNotification->id == null ) ? new SmsNotification() : $smsNotification;
+
         if($emailNotification && $smsNotification){
+            if($emailNotification->isNewRecord)
+                $emailNotification->loadDefaultValues();
+            if($smsNotification->isNewRecord)
+                $smsNotification->loadDefaultValues();
             if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post())) {
+
+                $emailNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;
+                $smsNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;
+                $emailNotification->user_id = $this->currentUser->id;
+                $smsNotification->user_id = $this->currentUser->id;
                 if ($emailNotification->validate() && $smsNotification->validate()) {
                     $emailNotification->save();
                     $smsNotification->save();
                 }
+                else
+                    {var_dump($emailNotification->errors);}
             }
         }
 

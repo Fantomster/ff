@@ -18,9 +18,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Franchisee', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <p>
+        Файл json для frontend-api <a href="https://fkeeper.s3.amazonaws.com/files/franchisee<?= (strpos(Yii::$app->request->hostName, 'test') || strpos(Yii::$app->request->hostName, 'ev') || strpos(Yii::$app->request->hostName, 'ackend')) ? '-dev' : '' ?>.json" target="_blank">https://fkeeper.s3.amazonaws.com/files/franchisee<?= (strpos(Yii::$app->request->hostName, 'test') || strpos(Yii::$app->request->hostName, 'ev') || strpos(Yii::$app->request->hostName, 'ackend')) ? '-dev' : '' ?>.json</a>
+    </p>
 <?php Pjax::begin(); ?>    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'options' => [ 'style' => 'table-layout:fixed;' ],
         'columns' => [
             'id',
             [
@@ -28,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => 'type.name',
                 'label' => 'Тип',
                 'filter' => common\models\FranchiseType::getList(),
+                'contentOptions' => ['style' => 'width:20px; white-space: normal;'],
             ],
             [
                 'format' => 'raw',
@@ -36,18 +41,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     if(\common\models\FranchiseeGeo::find()->where(['franchisee_id'=>$data['id']])->exists()){
                     return Html::a('Изменить', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-success']);
                     }else{
-                    return Html::a('Указать', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-danger']);   
+                    return Html::a('Указать', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-danger']);
                     }
                 },
             ],
-            'signed',         
+            'signed',
             [
                 'format' => 'raw',
                 'label' => 'Клиентов',
                 'value' => function($data) {
                        $c_all = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
                                'franchisee_id'=>$data->id])->count();
-                       
+
                        $c_client = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
                                'franchisee_id'=>$data->id,
                                'organization.type_id'=>1,
@@ -95,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'info:ntext',
             // 'created_at',
             // 'updated_at',
-            
+
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

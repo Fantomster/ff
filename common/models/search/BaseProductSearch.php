@@ -12,7 +12,8 @@ use yii\data\ActiveDataProvider;
  */
 class BaseProductSearch extends \common\models\CatalogBaseGoods {
     public $searchString;
-    
+    public $sort;
+
     /**
      * @inheritdoc
      */
@@ -33,26 +34,40 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
     public function search($params, $guideList) {
         $query = CatalogBaseGoods::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        $query->where([
-            'id' => $guideList,
-        ]);
-        
-        // grid filtering conditions
+        if(!$params['show_sorting']){
+            $query->where([
+                'id' => $guideList,
+            ]);
+
+        }else{
+            $sort = ['guide_product.id' => SORT_ASC];
+
+            if (isset($params['sort'])){
+                $arr = explode(' ', $params['sort']);
+                $sort = [str_replace('id', 'guide_product.id', $arr[0]) => (int)$arr[1]];
+            }
+
+            $query->leftJoin('guide_product', '`guide_product`.`cbg_id` = `catalog_base_goods`.`id`');
+
+            $query->where([
+                'catalog_base_goods.id' => $guideList,
+                'guide_product.guide_id' => $params['guide_id']
+            ]);
+
+            $query->orderBy($sort);
+
+        }
+
         $query->andFilterWhere(['like', 'product', $this->searchString]);
 
         return $dataProvider;

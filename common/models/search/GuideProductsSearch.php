@@ -16,6 +16,7 @@ class GuideProductsSearch extends \yii\base\Model {
     public $vendor_id;
     public $price_from;
     public $price_to;
+    public $sort;
 
     /**
      * @inheritdoc
@@ -35,7 +36,7 @@ class GuideProductsSearch extends \yii\base\Model {
      *
      * @return SqlDataProvider
      */
-    public function search($params, $guideId, $clientId) {
+    public function search(array $params, int $guideId, int $clientId) {
         $this->load($params);
         
         $searchString = "%$this->searchString%";
@@ -91,49 +92,21 @@ class GuideProductsSearch extends \yii\base\Model {
                 AND (cbg.deleted = 0))
                 ";
 
-//        $query1 = "
-//            SELECT COUNT(cbg.id)
-//            FROM guide_product AS gp
-//                    LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
-//                    LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-//                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
-//                            AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = 1)))
-//                JOIN currency curr ON cat.currency_id = curr.id 
-//            WHERE (gp.guide_id = 3)
-//                    AND (cbg.product LIKE :searchString) 
-//                AND (cbg.status = 1) 
-//                AND (cbg.deleted = 0) 
-//                ";
-//        $count1 = Yii::$app->db->createCommand($query1, [':searchString' => $searchString])->queryScalar();
-//        $query2 = "
-//            SELECT COUNT(cbg.id)
-//            FROM guide_product AS gp
-//                    LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
-//                    LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 
-//                            AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = 1)))
-//                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-//                LEFT JOIN catalog AS cat ON cg.cat_id = cat.id 
-//                JOIN currency curr ON cat.currency_id = curr.id 
-//            WHERE (gp.guide_id = 3)
-//                    AND (cbg.product LIKE :searchString) 
-//                AND (cbg.status = 1) 
-//                AND (cbg.deleted = 0)            
-//                ";
-//        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $searchString])->queryScalar();
+        $sort = [
+
+        ];
+        if(isset($params['sort'])){
+            $arr = explode(' ', $params['sort']);
+            $query.= " ORDER BY ";
+            $query.= str_replace('3', "ASC", str_replace('4', "DESC", $params['sort']));
+        }
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query,
             'params' => [':searchString' => $searchString],
             //'totalCount' => $count1 + $count2,
             'pagination' => false,
-            'sort' => [
-                'attributes' => [
-                    'product',
-                ],
-                'defaultOrder' => [
-                    'product' => SORT_ASC
-                    ]
-            ],
+            'sort' => $sort,
         ]);
         
         return $dataProvider;

@@ -138,4 +138,18 @@ class User extends BaseUser implements RateLimitInterface
         return $this->hasOne($profile::className(), ['user_id' => 'id']);
     }
 
+    public function generateEmail()
+    {
+        return "email+".time().'@test.test';
+    }
+
+    public function emptyInit()
+    {
+
+        $this->email = $this->generateEmail();
+        $this->password = "passwd".time();
+        $this->type = 1;
+        $this->status = 1;
+
+    }
 }

@@ -61,7 +61,6 @@ class UserSearch extends \common\models\User {
         $profile = $this->module->model("Profile");
         $role = $this->module->model("Role");
         $organization = $this->module->model("Organization");
-        $userTable = $user::tableName();
         $profileTable = $profile::tableName();
         $roleTable = $role::tableName();
         $organizationTable = $organization::tableName();
@@ -84,6 +83,7 @@ class UserSearch extends \common\models\User {
         // create data provider
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => false
         ]);
 
         // enable sorting for the related columns
@@ -99,15 +99,15 @@ class UserSearch extends \common\models\User {
             return $dataProvider;
         }
 
-        $query->orFilterWhere(['like', 'email', $this->searchString])
+        $query->orFilterWhere(['like', 'user.email', $this->searchString])
             ->orFilterWhere(['like', "profile.full_name", $this->searchString])
             ->orFilterWhere(['like', "profile.phone", $this->searchString])
-            ->orFilterWhere(['like', "role.name", $this->searchString])
-            ->orFilterWhere(['user.organization_id' => $this->organization_id])
-            ->orFilterWhere(['relationUserOrganization.organization_id' => $this->organization_id]);
+            ->orFilterWhere(['like', "role.name", $this->searchString]);
         $query->andFilterWhere([
+            'relationUserOrganization.organization_id' => $this->organization_id,
             'status' => $this->status,
         ]);
+
         return $dataProvider;
     }
 }

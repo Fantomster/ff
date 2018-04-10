@@ -10,7 +10,10 @@ namespace common\models;
 
 use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;
+use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use Yii;
+use yii\web\BadRequestHttpException;
 
 /**
  * User model
@@ -57,8 +60,8 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
-            [['organization_id'], 'integer'],
-            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
+            [['organization_id', 'type'], 'integer'],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 
         // add required for currentPassword on account page
@@ -78,6 +81,7 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
 
+
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert) {
@@ -88,6 +92,7 @@ class User extends \amnah\yii2\user\models\User {
              */
             $emailNotification = new notifications\EmailNotification();
             $emailNotification->user_id = $this->id;
+            $emailNotification->rel_user_org_id = $this->relationUserOrganization;
             $emailNotification->orders = true;
             $emailNotification->requests = true;
             $emailNotification->changes = true;
@@ -103,6 +108,7 @@ class User extends \amnah\yii2\user\models\User {
                 $smsNotification = new notifications\SmsNotification();
             }
             $smsNotification->user_id = $this->id;
+            $smsNotification->rel_user_org_id = $this->relationUserOrganization;
             $smsNotification->orders = true;
             $smsNotification->requests = true;
             $smsNotification->changes = true;
@@ -167,13 +173,13 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function setRole($roleId){
+    public function setRole(int $roleId){
         $this->role_id = $roleId;
         $this->save();
         return $this;
     }
 
-    public function setFranchisee($fr_id) {
+    public function setFranchisee(int $fr_id) {
         $franchisee = Franchisee::findOne(['id' => $fr_id]);
         if ($franchisee) {
             $franchiseeUser = new FranchiseeUser();
@@ -189,8 +195,29 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getOrganization() {
         $organization = $this->module->model("Organization");
+
         return $this->hasOne($organization::className(), ['id' => 'organization_id']);
     }
+
+    public function getOrganizations() {
+        $organization = $this->module->model("Organization");
+        return $this->hasMany($organization::className(), ['id' => 'organization_id'])
+            ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
+    }
+
+
+    public function getRelationUserOrganization(){
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id', 'organization_id'=>'organization_id']);
+    }
+
+
+    public function getRelationUserOrganizationRoleID(int $userID): int
+    {
+        $user = self::findIdentity(Yii::$app->user->id);
+        $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$user->organization_id]);
+        return $rel->role_id;
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -216,15 +243,26 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEmailNotification() {
-        return $this->hasOne(notifications\EmailNotification::className(), ['user_id' => 'id']);
+    public function getEmailNotification($org_id = null) {
+        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
+        if ($rel === null) {
+            return new EmailNotification();
+        }
+        $res = EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
+        return ($res != null) ? $res : new EmailNotification();
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSmsNotification() {
-        return $this->hasOne(notifications\SmsNotification::className(), ['user_id' => 'id']);
+    public function getSmsNotification($org_id = null) {
+        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
+        if ($rel === null)
+            return new SmsNotification();
+        $res = SmsNotification::findOne(['rel_user_org_id' => $rel->id]);
+        return ($res != null) ? $res : new SmsNotification();
     }
 
     /**
@@ -433,7 +471,8 @@ class User extends \amnah\yii2\user\models\User {
         return $result;
     }
 
-    public static function getAllowedRoles($role_id) {
+    public static function getAllowedRoles(int $role_id): array
+    {
         $clientRoles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE];
         $vendorRoles = [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE];
         $franchiseeRoles = [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
@@ -490,76 +529,221 @@ class User extends \amnah\yii2\user\models\User {
     }
 
 
-    public function getOrganizations() {
-        $organization = $this->module->model("Organization");
-        return $this->hasMany($organization::className(), ['id' => 'organization_id'])
-            ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
+    /**
+     * Creating user-organization relations
+     */
+    public function setRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
+    {
+        if(RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID])){
+            return false;
+        }
+        if(Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)){
+            $relations = RelationUserOrganization::findAll(['user_id'=>Yii::$app->user->id]);
+            foreach ($relations as $relation){
+                self::createRelationUserOrganization($userID, $relation->organization_id, $roleID);
+            }
+            return true;
+        }else{
+            return self::createRelationUserOrganization($userID, $organizationID, $roleID);
+        }
     }
 
 
-    public function getRelationUserOrganization(){
-        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id']);
-    }
-
-
-    public function setRelationUserOrganization($userId, $organizationId, $roleId){
-        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+    /**
+     * Creating single user-organization relation
+     */
+    public function createRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
+    {
+        $check = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
         if($check){
             return false;
         }
         $rel = new RelationUserOrganization();
-        $rel->user_id = $userId;
-        $rel->organization_id = $organizationId;
-        $rel->role_id = $roleId;
+        $rel->user_id = $userID;
+        $rel->organization_id = $organizationID;
+        $roleID = self::getRelationRole($roleID, $organizationID);
+        $rel->role_id = $roleID;
         $rel->save();
-        return $rel->id;
+        return true;
     }
 
 
-    public function updateRelationUserOrganization($userId, $organizationId, $roleId){
-        $rel = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
-        if($rel){
-            $rel->user_id = $userId;
-            $rel->organization_id = $organizationId;
-            $rel->role_id = $roleId;
-            $rel->save();
-            return $rel->id;
+    /**
+     * Deleting single user-organization relation
+     */
+    public function deleteRelationUserOrganization(int $userId, int $organizationId): bool
+    {
+        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
+        if($check){
+            $check->delete();
+        }
+        return true;
+    }
+
+
+    /**
+     * Deleting all user-organization relations
+     */
+    public function deleteUserFromOrganization(int $userID): bool
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $relationsOrg = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>Yii::$app->user->id])->all();
+            $deleteAll = false;
+            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>$userID])->all();
+
+            $orgArray = [];
+            foreach ($relationsOrg as $item){
+                $orgArray[] = $item->organization_id;
+            }
+            foreach ($relationsTwo as $one){
+                if(!in_array($one->organization_id, $orgArray)){
+                    $deleteAll = true;
+                }
+            }
+
+            if($deleteAll){
+                $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
+                foreach ($relations as $relation) {
+                    self::deleteRelationUserOrganization($userID, $relation->organization_id);
+                }
+
+            }else{
+                $user = User::findIdentity(Yii::$app->user->id);
+                self::deleteRelationUserOrganization($userID, $user->organization_id);
+            }
+
+            $check = RelationUserOrganization::findOne(['user_id'=>$userID]);
+
+            if($check!=null){
+                $existingUser = User::findOne(['id' => $userID]);
+                $existingUser->organization_id = $check->organization_id;
+                $existingUser->role_id = $check->role_id;
+                $existingUser->save();
+                $transaction->commit();
+                return true;
+            }else{
+                $result = self::deleteAllUserData($userID);
+                if($result){
+                    $transaction->commit();
+                }else{
+                    $transaction->rollBack();
+                }
+                return $result;
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Getting user role for relation
+     */
+    private function getRelationRole(int $roleID, int $organizationID): int
+    {
+        $children = (new \yii\db\Query())->select(['type_id'])->from('organization')->where(['id'=>$organizationID])->one();
+        if($children['type_id'] == Organization::TYPE_RESTAURANT){
+            if($roleID == Role::ROLE_SUPPLIER_MANAGER){
+                $roleID = Role::ROLE_RESTAURANT_MANAGER;
+            }
+            if($roleID == Role::ROLE_SUPPLIER_EMPLOYEE){
+                $roleID = Role::ROLE_RESTAURANT_EMPLOYEE;
+            }
+        }
+        if($children['type_id'] == Organization::TYPE_SUPPLIER){
+            if($roleID == Role::ROLE_RESTAURANT_MANAGER){
+                $roleID = Role::ROLE_SUPPLIER_MANAGER;
+            }
+            if($roleID == Role::ROLE_RESTAURANT_EMPLOYEE){
+                $roleID = Role::ROLE_SUPPLIER_EMPLOYEE;
+            }
+        }
+        return $roleID;
+    }
+
+
+    /**
+     * Deleting user completely
+     */
+    public function deleteAllUserData(int $userID): bool
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $user = User::findOne(['id' => $userID]);
+            if ($user->id == Yii::$app->user->id) {
+                return false;
+            }
+            if ($user) {
+                EmailNotification::deleteAll(['user_id' => $userID]);
+                SmsNotification::deleteAll(['user_id' => $userID]);
+                $user_token = UserToken::findOne(['user_id' => $userID]);
+                $profile = $user->profile;
+                if ($profile) {
+                    $profile->delete();
+                }
+
+                if ($user_token) {
+                    $user_token->delete();
+                }
+                if ($user->delete()) {
+                    $transaction->commit();
+                    return true;
+                }
+                $transaction->rollBack();
+                return false;
+            }
+            $transaction->rollBack();
+            return false;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
         }
         return false;
+    }
+
+
+    /**
+     * Updating user-organization relations
+     */
+    public function updateRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
+    {
+        $user = User::findIdentity(Yii::$app->user->id);
+        $currentUser = User::findIdentity($userId);
+        $relation = RelationUserOrganization::find()->where(['user_id'=>$userId, 'organization_id'=>$organizationId])->one();
+        $relation->role_id = $roleId;
+        $relation->save();
+        if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
+            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
+            foreach ($relations as $relation){
+                self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);
+            }
+            $currentUser->organization_id = $user->organization->id;
+            $currentUser->role_id = $roleId;
+            $currentUser->save();
+            return true;
+        }else{
+            $relations = RelationUserOrganization::find()->where(['user_id'=>$user->id])->andWhere(['<>','organization_id', $user->organization_id])->all();
+            foreach ($relations as $relation) {
+                self::deleteRelationUserOrganization($userId, $relation->organization_id);
+            }
+            $currentUser->organization_id = $user->organization->id;
+            $currentUser->role_id = $roleId;
+            $currentUser->save();
+            return true;
+        }
     }
 	
     /**
      * Список организаций доступных для пользователя
      * @return array
      */
-    public function getAllOrganization(){
-        $sql = <<<SQL
-        SELECT * FROM (
-            SELECT
-              *
-            FROM organization
-            WHERE
-              id = :oid OR parent_id = :oid
-            UNION DISTINCT
-            SELECT
-              *
-            FROM organization
-            WHERE
-              parent_id = :pid
-            UNION DISTINCT
-            SELECT
-              r.*
-            FROM `organization` o
-            INNER JOIN organization r ON r.id = o.parent_id
-            WHERE
-              o.id = :oid
-        ) t 
-        ORDER BY name 
-SQL;
-        return \Yii::$app->db->createCommand($sql)
-            ->bindValue(':oid',$this->organization_id)
-            ->bindValue(':pid',$this->organization->parent_id)
-            ->queryAll();
+    public function getAllOrganization(): array
+    {
+        return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
     }
 
     /**
@@ -567,7 +751,8 @@ SQL;
      * @param $organization_id
      * @return bool
      */
-    public function isAllowOrganization($organization_id){
+    public function isAllowOrganization(int $organization_id): bool
+    {
         $all = $this->getAllOrganization();
         foreach ($all as $item) {
             if($item['id'] == $organization_id){
@@ -576,4 +761,32 @@ SQL;
         }
         return false;
     }
+
+
+    /**
+     * Checking if email exists in DB
+     */
+    public static function checkInvitingUser(string $email): array
+    {
+        $result = [];
+        if (User::find()->select('email')->where(['email' => $email])->exists()) {
+            $vendor = User::find()->where(['email' => $email])->one();
+            $userProfileFullName = $vendor->profile->full_name;
+            $userProfilePhone = $vendor->profile->phone;
+            $userOrgId = $vendor->organization_id;
+            $userOrgName = $vendor->organization->name;
+
+            $result = [
+                'success' => true,
+                'eventType' => 6,
+                'message' => Yii::t('app', 'common.models.already_register', ['ru' => 'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>']),
+                'fio' => $userProfileFullName,
+                'phone' => $userProfilePhone,
+                'organization' => $userOrgName,
+                'org_id' => $userOrgId
+            ];
+        }
+        return $result;
+    }
+
 }

@@ -161,7 +161,7 @@ $this->registerJs(
                             'attribute' => 'role.name',
                             'label' => \Yii::t('app', 'frontend.views.client.emp.role', ['ru' => 'Роль']),
                             'value' => function($model) {
-                                return Yii::t('app', $model->role->name);
+                                return Yii::t('app', Role::getRoleName($model->getRelationUserOrganizationRoleID($model->id)));
                             },
                         ],
                         [

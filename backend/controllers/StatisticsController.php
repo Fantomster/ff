@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use backend\models\DynamicUsageSearch;
 use Yii;
 use common\models\User;
 use common\models\Role;
@@ -31,7 +32,7 @@ class StatisticsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -467,5 +468,18 @@ class StatisticsController extends Controller {
                     ));
         }
         
+    }
+
+    public function actionDynamics() {
+        $params = Yii::$app->request->getQueryParams();
+
+        $today = new \DateTime();
+        //var_dump(Yii::$app->request->post());
+        $start_date = !empty(Yii::$app->request->get("start_date")) ? Yii::$app->request->get("start_date") : $today->format('d.m.Y');
+        $SearchModel = new DynamicUsageSearch();
+        $DataProvider = $SearchModel->search($params);
+
+        return $this->render('dynamics', compact('SearchModel', 'DataProvider', 'start_date'));
+
     }
 }

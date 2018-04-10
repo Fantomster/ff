@@ -2,18 +2,18 @@
 
 namespace api_web\classes;
 
-use api_web\exceptions\ValidationException;
+use api_web\helpers\WebApiHelper;
 use Yii;
+use api_web\exceptions\ValidationException;
 use common\models\Profile;
 use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;
-use common\models\CatalogGoods;
 use common\models\Organization;
 use common\models\RelationSuppRest;
-use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
+use yii\web\UploadedFile;
 
 /**
  * Class VendorWebApi
@@ -136,18 +136,226 @@ class VendorWebApi extends \api_web\components\WebApi
                     Yii::$app->sms->send($text, $profile->phone);
                 }
                 $transaction->commit();
+
+                $result = [
+                    'success' => true,
+                    'organization_id' => $organization->id,
+                    'user_id' => $user->id
+                ];
+
                 if ($check['eventType'] == 5) {
-                    $result = ['success' => true, 'organization_id'=>$organization->id, 'user_id'=>$user->id, 'message' => Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) . $organization->name . Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email . ''];
-                    return $result;
+                    $result['message'] =
+                        Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                        $organization->name .
+                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
+                        $email;
                 } else {
-                    $result = ['success' => true, 'organization_id'=>$organization->id, 'user_id'=>$user->id, 'message' => Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . ''];
-                    return $result;
+                    $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
-            } catch (Exception $e) {
+                return $result;
+
+            } catch (\Exception $e) {
                 $transaction->rollback();
                 throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
             }
         }
     }
 
+    /**
+     * Поиск поставщика по емайл
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function search(array $post)
+    {
+        if (empty($post['email'])) {
+            throw new BadRequestHttpException('Empty search attribute email');
+        }
+
+        $email = $post['email'];
+
+        $model = Organization::find()->where(['email' => $email, 'type_id' => Organization::TYPE_SUPPLIER])->one();
+        if (!empty($model)) {
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        }
+
+        $user = User::find()->where(['email' => $email])->one();
+        if (!empty($user)) {
+            throw new BadRequestHttpException("Email $email является пользователем. Необходимо уточнить email адрес поставщика.");
+        }
+
+        return [];
+    }
+
+    /**
+     * Обновление поставщика
+     * @param array $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function update(array $post)
+    {
+        if (empty($post['id'])) {
+            throw new BadRequestHttpException('Empty attribute id');
+        }
+        //Поиск поставщика в системе
+        $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
+        if (empty($model)) {
+            throw new BadRequestHttpException('Vendor not found');
+        }
+
+        //Если запрос от ресторана
+        if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+            //Проверяем, работает ли ресторан с этим поставщиком
+            $vendor_ids = [];
+            $searchModel = new \common\models\search\VendorSearch();
+            $dataProvider = $searchModel->search([], $this->user->organization->id);
+            $dataProvider->pagination->setPage(0);
+            $dataProvider->pagination->pageSize = 1000;
+            $vendors = $dataProvider->getModels();
+            if (!empty($vendors)) {
+                foreach ($vendors as $vendor) {
+                    $vendor_ids[] = $vendor->supp_org_id;
+                }
+                if (!in_array($model->id, array_unique($vendor_ids))) {
+                    throw new BadRequestHttpException('You are not working with this supplier.');
+                }
+            } else {
+                throw new BadRequestHttpException('You need to add vendors.');
+            }
+
+            //Можно ли ресторану редактировать этого поставщика
+            if ($model->allow_editing == 0) {
+                throw new BadRequestHttpException('Vendor not allow editing.');
+            }
+        }
+
+        //Если запрос на изменение прилетел от поставщика
+        if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
+            //Разрешаем редактировать только свои данные
+            if ($model->id != $this->user->organization->id) {
+                throw new BadRequestHttpException('Вы можете редактировать только свои данные.');
+            }
+        }
+
+        //прошли все проверки, будем обновлять поставщика
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+
+            if (!empty($post['phone'])) {
+                $model->phone = $post['phone'];
+            }
+
+            if (!empty($post['site'])) {
+                $model->website = $post['site'];
+            }
+
+            if (!empty($post['email'])) {
+                $model->email = $post['email'];
+            }
+
+            if (!empty($post['name'])) {
+                $model->name = $post['name'];
+            }
+
+            if (!empty($post['address'])) {
+                if (!empty($post['address']['country'])) {
+                    $model->country = $post['address']['country'];
+                }
+                if (!empty($post['address']['region'])) {
+                    $model->administrative_area_level_1 = $post['address']['region'];
+                }
+                if (!empty($post['address']['locality'])) {
+                    $model->locality = $post['address']['locality'];
+                    $model->city = $post['address']['locality'];
+                }
+                if (!empty($post['address']['route'])) {
+                    $model->route = $post['address']['route'];
+                }
+                if (!empty($post['address']['house'])) {
+                    $model->street_number = $post['address']['house'];
+                }
+                if (!empty($post['address']['lat'])) {
+                    $model->lat = $post['address']['lat'];
+                }
+                if (!empty($post['address']['lng'])) {
+                    $model->lng = $post['address']['lng'];
+                }
+                if (!empty($post['address']['place_id'])) {
+                    $model->place_id = $post['address']['place_id'];
+                }
+                unset($post['address']['lat']);
+                unset($post['address']['lng']);
+                unset($post['address']['place_id']);
+                $model->address = implode(', ', $post['address']);
+                $model->formatted_address = $model->address;
+            }
+
+            if (!$model->validate()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+
+            $transaction->commit();
+            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+
+    }
+
+    /**
+     * Обновление логотипа поставщика
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function uploadLogo(array $post)
+    {
+        if (empty($post['vendor_id'])) {
+            throw new BadRequestHttpException('Empty attribute vendor_id');
+        }
+
+        $vendor = Organization::findOne($post['vendor_id']);
+        if (empty($vendor)) {
+            throw new BadRequestHttpException('Vendor not found');
+        }
+
+        if (empty($post['image_source'])) {
+            throw new BadRequestHttpException('Empty image_source');
+        }
+
+        if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
+            throw new BadRequestHttpException('The organization is not a vendor.');
+        }
+
+        //Можно ли ресторану редактировать этого поставщика
+        if ($vendor->allow_editing == 0) {
+            throw new BadRequestHttpException('Vendor not allow editing.');
+        }
+
+         /**
+         * Поехало обновление картинки
+         */
+        $vendor->scenario = "settings";
+        $vendor->picture = WebApiHelper::convertLogoFile($post['image_source']);
+
+        if (!$vendor->validate()) {
+            throw new ValidationException($vendor->getFirstErrors());
+        }
+
+        if (!$vendor->save()) {
+            throw new ValidationException($vendor->getFirstErrors());
+        }
+
+        return $this->container->get('MarketWebApi')->prepareOrganization($vendor);
+    }
 }

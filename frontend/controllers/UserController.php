@@ -153,6 +153,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
+                    $user->setRelationUserOrganization($user->id, $organization->id, $role::getManagerRole($organization->type_id));
                     $transaction->commit();
                 } catch (Exception $ex) {
                     $transaction->rollBack();
@@ -277,28 +278,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         if ($model->load($post) && $model->validate()) {
             $user = $model->getUser();
-            $sql = "
-            select count(*) from (
-            select distinct id as `id`,`name`,`type_id` from (
-            select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-            union all
-            select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
-            union all
-            select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
-            union all
-            select `parent_id`,
-            (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
-            (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
-            from `organization` o where id = " . $user->organization_id . "
-            )tb where id is not null)tb2";
+
             $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
             if(!empty($user->organization_id)){
-                if(count($rel) || (\Yii::$app->db->createCommand($sql)->queryScalar()>1 &&
-                      ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
-                       $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
+                if(count($rel) > 1 || (
+                      (
                        $user->role_id == Role::ROLE_ADMIN ||
                        $user->role_id == Role::ROLE_FKEEPER_MANAGER))){
-                   //Yii::$app->user->login($user, 1);
                    $returnUrl = $this->performLogin($user, 1);
                    return $this->redirect(['business']); 
                 }
@@ -308,16 +294,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             
         }
 
-//        if ($model->hasErrors()) {
-//            $test = $model->errors;
-//            $confirmError = "Учетная запись не активирована!";
-//            if (isset($test['email'][0]) && ($test['email'][0] !== $confirmError)) {
-//                $model->clearErrors();
-//                $model->addError('password', 'Вы указали неверную почту или пароль');
-//            }
-//        }
-        
-        
         $registerFirst = false;
         return $this->render('login', compact("model", "user", "profile", "organization", "registerFirst"));
     }
@@ -365,6 +341,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         // get user and set "reset" scenario
         $success = false;
+        /**
+         * @var $user User
+         */
         $user = $this->module->model("User");
         $user = $user::findOne($userToken->user_id);
         $user->setScenario("reset");
@@ -383,6 +362,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // delete userToken and set success = true
             $userToken->delete();
             $user->status = \common\models\User::STATUS_ACTIVE;
+            $user->organization->save();
             $user->save();
             $success = true;
             //\api\modules\v1\modules\mobile\components\NotificationHelper::actionForgot($user);
@@ -421,14 +401,17 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->renderAjax('_changeForm', compact('user','dataProvider','organization'));
     }
 
-    public function actionChange($id)
+
+    public function actionChange(int $id)
     {
         return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
-    
-    public function actionCreate(){
+
+
+    public function actionCreate(): void
+    {
         $user = User::findIdentity(Yii::$app->user->id);
-        $currentOrganziation = $user->organization;
+        $currentOrganization = $user->organization;
         
         $sql = "select distinct parent_id as `parent_id` from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
@@ -488,7 +471,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         }
                            
                     }
-                
+                $roleID = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
+                User::createRelationUserOrganization($user->id, $organization->id, $roleID);
+                $currentOrganizationID = $currentOrganization->id;
+                $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
+                foreach ($relations as $relation){
+                    User::createRelationUserOrganization($relation->user_id, $organization->id, $roleID);
+                }
             }
         }
     }
@@ -542,43 +531,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
     public function actionBusiness()
     {
-        //        select id,`name`,`type_id` from `organization` where `parent_id` = (select organization.`id` from `organization` left join `relation_user_organization` as ruo on ruo.organization_id = organization.id where organization.`id` = " . $user->organization_id . " and ruo.role_id IN(3, 5) and ruo.user_id = " . $user->id . ")
         $user = User::findIdentity(Yii::$app->user->id);
         $sql = "
-        select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
-        union all
-        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
-         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
-         where ruo.user_id=".$user->id ."
-        union all
-        select `parent_id`,
-        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
-        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
-        from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null order by `name`";
+        select org.id as `id`,org.`name` as `name`,org.`type_id` as `type_id` from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $user->id . " order by org.`name`";
+
         $sql2 = "
-        select count(*) from (
-        select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
-        union all
-        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
-        union all
-        select distinct org.`id` as `id`, org.`name` as `name`, org.`type_id` as `type_id` from organization as org
-         left join `relation_user_organization` as ruo on ruo.organization_id = org.id 
-         where ruo.user_id=".$user->id ."
-        union all
-        select `parent_id`,
-        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
-        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
-        from `organization` o where id = " . $user->organization_id . "
-        )tb where id is not null)tb2";
+        select count(*) from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $user->id;
+
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => \Yii::$app->db->createCommand($sql)->sql,
             'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),

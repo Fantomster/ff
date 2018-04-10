@@ -70,7 +70,16 @@ class MpCategoryController extends ActiveController {
         ));
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            $query->andWhere (['parent' => null]);
             return $dataProvider;
+        }
+
+        if($params->language != null) {
+            $query->select('mp_category.id, mp_category.parent, mp_category.slug, mp_category.title,
+            mp_category.text, mp_category.description, mp_category.keywords, 
+            IFNULL(`message`.`translation`, `mp_category`.`name`) as name ');
+            $query->innerJoin('source_message', "source_message.category = 'app' and source_message.message = mp_category.name");
+            $query->innerJoin('message', 'message.id = source_message.id and message.language = "'.$params->language.'"');
         }
 
         if($params->parent == 0)
@@ -92,12 +101,17 @@ class MpCategoryController extends ActiveController {
 
     public function actionIndex()
     {
-        $dataProvider = $this->prepareDataProvider();
+        $params = new MpCategory();
+        $params->load(Yii::$app->request->queryParams);
 
+        $dataProvider = $this->prepareDataProvider();
         $models = $dataProvider->getModels();
         $res = [];
-        foreach ($models as $model)
-            $res[] = ['id' => $model->id, 'parent' => $model->parent, 'name' => $model->name, 'count' => $model->getCountProducts()];
+        foreach ($models as $model) {
+            $count = $model->getCountProducts();
+            if($params->empty != null || $count > 0)
+                $res[] = ['id' => $model->id, 'parent' => $model->parent, 'name' => $model->name, 'count' => $count];
+        }
 
         return $res;
     }

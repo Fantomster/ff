@@ -430,7 +430,7 @@ class Order extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
-
+        //dd($this);
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
                 if($this->status != self::STATUS_FORMING)
@@ -460,20 +460,29 @@ class Order extends \yii\db\ActiveRecord {
             if (empty($user) || (!in_array($user->organization_id, [$this->client_id, $this->vendor_id]))) {
                 return '';
             }
-            switch ($user->status) {
-                case User::STATUS_UNCONFIRMED_EMAIL:
-                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                        "/order/view",
-                        "id" => $this->id,
-                        "token" => $user->access_token
-                    ]);
-                    break;
-                default:
-                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                        "/order/view",
-                        "id" => $this->id
-                    ]);
+
+            $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                "/order/view",
+                "id" => $this->id
+            ]);
+
+            if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view",
+                    "id" => $this->id,
+                    "token" => $user->access_token
+                ]);
             }
+
+            //Если получает заказчик, и он не работает в системе, добавляем токен
+            if ($user->organization_id == $this->vendor_id && $this->vendor->is_work == 0) {
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view",
+                    "id" => $this->id,
+                    "token" => $user->access_token
+                ]);
+            }
+
             return $url;
         }
 
@@ -501,4 +510,5 @@ class Order extends \yii\db\ActiveRecord {
     public function formatPrice() {
         return $this->total_price . " " . $this->currency->symbol;
     }
+
 }

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\search\OrderProductsSearch;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -55,7 +56,9 @@ class OrderController extends DefaultController {
                             'ajax-calculate-total',
                             'pdf',
                             'export-to-xls',
-                            'order-to-xls'
+                            'order-to-xls',
+                            'ajax-show-products',
+                            'ajax-add-to-order',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -159,11 +162,15 @@ class OrderController extends DefaultController {
             header('Cache-Control: max-age=0');
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
             $objWriter->save('php://output');
+            exit();
         }
     }
 
-    public function actionOrderToXls($id) {
+
+    public function actionOrderToXls(int $id): void
+    {
         $order = Order::findOne($id);
+        $orderCode = $order->order_code ?? $order->id;
         $styleArray = [
             'borders' => [
                 'allborders' => [
@@ -177,7 +184,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getProperties()->setCreator("MixCart")
                 ->setLastModifiedBy("MixCart")
-                ->setTitle("otchet_zakaz_" . date("d-m-Y-His"));
+                ->setTitle("order_" . $orderCode);
 
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
@@ -193,7 +200,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getActiveSheet()->mergeCells('A1:H1');
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
-                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
+                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $orderCode);
         $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
 
@@ -268,7 +275,6 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->setCellValue("G17", Yii::t('message', 'frontend.views.order.grid_price') . " " . $order->currency->iso_code);
         $objPHPExcel->getActiveSheet()->getStyle("G17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getStyle("G17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        ;
 
         $this->fillCellHeaderData($objPHPExcel, 'H', 'frontend.widgets.cart.views.sum_two');
 
@@ -279,7 +285,6 @@ class OrderController extends DefaultController {
         $i = 0;
         foreach ($goods as $good) {
             $i++;
-            //dd($good->quantity);
             $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
             $objPHPExcel->getActiveSheet()->setCellValue("A$row", ($row-17));
             $objPHPExcel->getActiveSheet()->getStyle("A$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -340,16 +345,10 @@ class OrderController extends DefaultController {
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Итого:'), " " . $order->getTotalPriceWithOutDiscount() . " " . $order->currency->iso_code);
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
 
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
-        //$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(1);
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
-        //$objPHPExcel->getActiveSheet()->freezePane("H$row");
 
         header('Content-Type: application/vnd.ms-excel');
-        $filename = "otchet_zakaz_" . date("d-m-Y-His") . ".xls";
+        $filename = "order_" . $orderCode . ".xls";
         header('Content-Disposition: attachment;filename=' . $filename . ' ');
         header('Cache-Control: max-age=0');
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
@@ -357,7 +356,9 @@ class OrderController extends DefaultController {
         exit;
     }
 
-    private function fillCellData($objPHPExcel, $row, $client_string, $vendor_string): void {
+
+    private function fillCellData(\PHPExcel $objPHPExcel, int $row, string $client_string, string $vendor_string): void
+    {
         $objPHPExcel->getActiveSheet()->mergeCells("A$row:D$row");
         $objPHPExcel->getActiveSheet()->setCellValue("A$row", $client_string);
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:H$row");
@@ -365,13 +366,17 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(20);
     }
 
-    private function fillCellHeaderData($objPHPExcel, $column, $data): void {
+
+    private function fillCellHeaderData(\PHPExcel $objPHPExcel, string $column, string $data): void
+    {
         $objPHPExcel->getActiveSheet()->setCellValue($column . "17", Yii::t('app', $data));
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
     }
 
-    private function fillCellBottomData($objPHPExcel, $row, $leftData, $rightData, $bold = false): int {
+
+    private function fillCellBottomData(\PHPExcel $objPHPExcel, int $row, string $leftData, string $rightData, bool $bold = false): int
+    {
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:G$row");
         $objPHPExcel->getActiveSheet()->setCellValue("E$row", $leftData);
         $objPHPExcel->getActiveSheet()->getStyle("E$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
@@ -386,6 +391,7 @@ class OrderController extends DefaultController {
         $row++;
         return $row;
     }
+
 
     public function actionCreate() {
         $session = Yii::$app->session;
@@ -490,9 +496,11 @@ class OrderController extends DefaultController {
         endif;
     }
 
-    public function actionEditGuide($id) {
+
+    public function actionEditGuide(int $id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $params['show_sorting'] = true;
 
         if (empty($guide)) {
             return $this->redirect(['order/guides']);
@@ -509,16 +517,30 @@ class OrderController extends DefaultController {
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
 
-        $test = $session['selectedVendor'];
-        $test2 = $session['guideProductList'];
-
-        $params = Yii::$app->request->getQueryParams();
+        if(!count($session['guideProductList']))$params['show_sorting'] = false;
+        if (is_iterable($session['guideProductList'])){
+            foreach ($session['guideProductList'] as $one){
+                if(gettype($one) == "integer"){
+                    $params['show_sorting'] = false;
+                    break;
+                }
+            }
+        }
 
         $vendorSearchModel = new VendorSearch();
         if (Yii::$app->request->post("VendorSearch")) {
             $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
         }
         $params['VendorSearch'] = $session['vendorSearchString'];
+        $params['guide_id'] = $id;
+
+        if (Yii::$app->request->get("sort")){
+            $params['sort'] = Yii::$app->request->get("sort");
+            if(isset($session['sort'])){
+                unset($session['sort']);
+            }
+            $session['sort'] = $params['sort'] = Yii::$app->request->get("sort");
+        }
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
 
@@ -528,7 +550,7 @@ class OrderController extends DefaultController {
         if (empty($selectedVendor)) {
             $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
         }
-        //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
@@ -549,15 +571,16 @@ class OrderController extends DefaultController {
 
         $pjax = Yii::$app->request->get("_pjax");
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
-            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
+            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor', 'session', 'params'));
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
-            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList', 'session', 'params'));
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
-            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
+            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params'));
         }
     }
+
 
     public function actionSaveGuide($id) {
         $client = $this->currentUser->organization;
@@ -1937,13 +1960,19 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if (isset($recipient->emailNotification->order_changed) && $recipient->emailNotification->order_changed) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_changed)
+                {
                 $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($recipient->profile->phone && $notification->order_changed)
+                {
                 $text = Yii::$app->sms->prepareText('sms.order_changed', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -1974,13 +2003,20 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_done) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_done)
+                {
                 $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
+
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if(!empty($recipient->profile->phone) && $notification->order_done)
+                {
                 $text = Yii::$app->sms->prepareText('sms.order_done', [
                     'name' => $order->vendor->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -1996,6 +2032,7 @@ class OrderController extends DefaultController {
      * @param Organization $sender
      * @param Order $order
      */
+
     private function sendOrderCreated($sender, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -2013,13 +2050,18 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_created) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+                if($notification->order_created)
+                {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($recipient->profile->phone && $notification->order_created)
+                {
                 $text = Yii::$app->sms->prepareText('sms.order_new', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -2049,13 +2091,19 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_processing) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_processing)
+                {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($recipient->profile->phone && $notification->order_processing)
+                {
                 $text = Yii::$app->sms->prepareText('sms.order_processing', [
                     'vendor_name' => $order->vendor->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -2085,13 +2133,19 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->order_canceled) {
+            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            if ($notification)
+                if($notification->order_canceled)
+                {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
+            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            if ($notification)
+                if($recipient->profile->phone && $notification->order_canceled)
+                {
                 $text = Yii::$app->sms->prepareText('sms.order_canceled', [
                     'name' => $senderOrg->name,
                     'url' => $order->getUrlForUser($recipient)
@@ -2128,4 +2182,101 @@ class OrderController extends DefaultController {
         return $order;
     }
 
+    public function actionAjaxShowProducts($order_id) {
+        $order = Order::findOne(['id' => $order_id]);
+
+        $params = Yii::$app->request->getQueryParams();
+
+        $productsSearchModel = new OrderProductsSearch();
+        $params['OrderProductsSearch'] = (Yii::$app->request->isPost)?Yii::$app->request->post("OrderProductsSearch"):Yii::$app->request->get("OrderProductsSearch");
+        $productsDataProvider = $productsSearchModel->search($params, $order);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('/order/add-position/_view', compact('productsSearchModel', 'productsDataProvider', 'order'));
+        } else {
+            return $this->renderAjax('/order/add-position/_view', compact('productsSearchModel', 'productsDataProvider', 'order'));
+        }
+    }
+
+    public function actionAjaxAddToOrder()
+    {
+        $post = Yii::$app->request->post();
+
+        if (OrderContent::findOne(['order_id' => $post['order_id'], 'product_id' => $post['product_id']]) != null)
+            throw new BadRequestHttpException('This product already exists');
+
+        $product = CatalogGoods::findOne(['base_goods_id' => $post['product_id'], 'cat_id' => $post['cat_id']]);
+
+        if ($product) {
+            $product_id = $product->baseProduct->id;
+            $price = $product->price;
+            $product_name = $product->baseProduct->product;
+            $vendor = $product->organization;
+            $units = $product->baseProduct->units;
+            $article = $product->baseProduct->article;
+        } else {
+            $product = CatalogBaseGoods::findOne(['id' => $post['product_id'], 'cat_id' => $post['cat_id']]);
+            if ($product == null) {
+                throw new BadRequestHttpException('This product not found');
+            }
+            $product_id = $product->id;
+            $product_name = $product->product;
+            $price = $product->price;
+            $units = $product->units;
+            $article = $product->article;
+        }
+
+            $position = new OrderContent();
+            $position->order_id = $post['order_id'];
+            $position->product_id = $product_id;
+            $position->quantity = $post['quantity'];
+            $position->price = $price;
+            $position->product_name = $product_name;
+            $position->units = $units;
+            $position->article = $article;
+
+        $order = $position->order;
+        if($order->status >= 3)
+            throw new BadRequestHttpException('Access denided');
+
+        if(!$position->save(false))
+            throw new BadRequestHttpException('SaveError');
+
+        $message = Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "<br/>добавил {prod} {quantity} {ed} по цене {productPrice} {currencySymbol}/{ed} ",
+            'prod' => $position->product_name, 'productPrice' => $position->price, 'currencySymbol' => $order->currency->symbol, 'ed' => $position->product->ed, 'quantity' => $position->quantity]);
+
+        $user = Yii::$app->user->getIdentity();
+        $organizationType = $user->organization->type_id;
+
+        if ($organizationType == Organization::TYPE_RESTAURANT) {
+           $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+            $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+            foreach ($order->recipientsList as $recipient) {
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                if (($recipient->organization_id == $order->vendor_id) && $profile->phone && $recipient->smsNotification->order_changed) {
+                    $text = $subject;
+                    $target = $profile->phone;
+                    Yii::$app->sms->send($text, $target);
+                }
+            }
+            $order->calculateTotalPrice();
+            $order->save();
+            $this->sendOrderChange($order->client, $order);
+        } elseif ($organizationType == Organization::TYPE_SUPPLIER) {
+            $order->calculateTotalPrice();
+            $order->save();
+            $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
+            $this->sendOrderChange($order->vendor, $order);
+            $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+            foreach ($order->client->users as $recipient) {
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+                if ($profile->phone && $recipient->smsNotification->order_changed) {
+                    $text = $subject;
+                    $target = $profile->phone;
+                    Yii::$app->sms->send($text, $target);
+                }
+            }
+        }
+        return true;
+    }
 }

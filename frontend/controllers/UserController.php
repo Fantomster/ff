@@ -362,7 +362,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // delete userToken and set success = true
             $userToken->delete();
             $user->status = \common\models\User::STATUS_ACTIVE;
-            $user->organization->is_work = 1;
             $user->organization->save();
             $user->save();
             $success = true;

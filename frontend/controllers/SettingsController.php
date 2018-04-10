@@ -84,8 +84,8 @@ class SettingsController extends DefaultController {
         $emailNotification = $this->currentUser->emailNotification;
         $smsNotification = $this->currentUser->smsNotification;
 
-        $emailNotification = ($emailNotification == null ) ? new EmailNotification() : $emailNotification;
-        $smsNotification = ($smsNotification == null ) ? new SmsNotification() : $smsNotification;
+        $emailNotification = ($emailNotification->id == null ) ? new EmailNotification() : $emailNotification;
+        $smsNotification = ($smsNotification->id == null ) ? new SmsNotification() : $smsNotification;
 
         if($emailNotification && $smsNotification){
             if($emailNotification->isNewRecord)

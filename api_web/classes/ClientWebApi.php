@@ -481,79 +481,68 @@ class ClientWebApi extends WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
+            //Ищем сотрудника среди всех, в этом ресторане
             $user = $this->employeeSearch($post);
+            //Если нашли бросаем исключение, что уже работает
             if (!empty($user)) {
-                $user_id = $user['id'];
-            } else {
-                if (empty($post['name'])) {
-                    throw new BadRequestHttpException('Empty name.');
-                }
-                if (empty($post['email'])) {
-                    throw new BadRequestHttpException('Empty email.');
-                }
-                if (empty($post['phone'])) {
-                    throw new BadRequestHttpException('Empty phone.');
-                }
-                if (empty($post['role_id'])) {
-                    throw new BadRequestHttpException('Empty role_id.');
-                }
-
-                $post['role_id'] = (int)$post['role_id'];
-
-                $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
-                if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                    throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
-                }
-
-                $request = [
-                    'user' => [
-                        'email' => $post['email'],
-                        'password' => substr(md5(time() . time()), 0, 8)
-                    ],
-                    'profile' => [
-                        'phone' => $post['phone'],
-                        'full_name' => $post['name']
-                    ]
-                ];
-
-                /**
-                 * @var $user_api UserWebApi
-                 */
-                $user_api = $this->container->get('UserWebApi');
-                //Создаем пользователя
-                $user = $user_api->createUser($request, (int)$post['role_id']);
-                //Устанавливаем текущую организацию
-                $user->setOrganization($this->user->organization, true);
-                //Создаем профиль пользователя
-                $user_api->createProfile($request, $user);
-                $user->refresh();
-                $user_id = $user->id;
-            }
-
-            if ($relation = RelationUserOrganization::findOne(['user_id' => $user_id, 'organization_id' => $this->user->organization->id])) {
+                $relation = RelationUserOrganization::findOne(['user_id' => $user['id'], 'organization_id' => $this->user->organization->id]);
                 throw new BadRequestHttpException('Этот сотрудник уже работает под ролью: ' . $relation->user->role->name);
             }
 
-            $relation = new RelationUserOrganization();
-            $relation->role_id = (int)$post['role_id'];
-            $relation->user_id = $user_id;
-            $relation->organization_id = $this->user->organization->id;
-
-            if (!$relation->validate()) {
-                throw new ValidationException($relation->getFirstErrors());
+            /**
+             * Проверка полей
+             */
+            if (empty($post['name'])) {
+                throw new BadRequestHttpException('Empty name.');
+            }
+            if (empty($post['email'])) {
+                throw new BadRequestHttpException('Empty email.');
+            }
+            if (empty($post['phone'])) {
+                throw new BadRequestHttpException('Empty phone.');
+            }
+            if (empty($post['role_id'])) {
+                throw new BadRequestHttpException('Empty role_id.');
             }
 
-            $relation->save();
-            $relation->refresh();
+            //Интуем роль
+            $post['role_id'] = (int)$post['role_id'];
+            //Проверка, можно ли проставить эту роль что прислали
+            $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
+            if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
+                throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
+            }
+
+            //готовим запрос на создание пользователя
+            $request = [
+                'user' => [
+                    'email' => $post['email'],
+                    'password' => substr(md5(time() . time()), 0, 8)
+                ],
+                'profile' => [
+                    'phone' => $post['phone'],
+                    'full_name' => $post['name']
+                ]
+            ];
+
+            /**
+             * @var $user_api UserWebApi
+             */
+            $user_api = $this->container->get('UserWebApi');
+            //Создаем пользователя
+            $user = $user_api->createUser($request, (int)$post['role_id']);
+            //Устанавливаем текущую организацию
+            $user->setOrganization($this->user->organization, true);
+            //Создаем профиль пользователя
+            $user_api->createProfile($request, $user);
+            $user->refresh();
+            //Создаем связь нового сотрудника с рестораном
+            $user->setRelationUserOrganization($user->id, $this->user->organization->id, (int)$post['role_id']);
+            //Все хорошо, применяем изменения в базе
             $transaction->commit();
-
             //Тут нужно отправить письмо для смены пароля пользователю
-            if ($user instanceof User) {
-                //$user->sendEmployeeConfirmation($user);
-            }
-
-            return $this->prepareEmployee($relation->user);
-
+            //$user->sendEmployeeConfirmation($user);
+            return $this->prepareEmployee($user);
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -586,6 +575,10 @@ class ClientWebApi extends WebApi
                 'organization_id' => $this->user->organization->id
             ]);
 
+            if (empty($relation)) {
+                throw new BadRequestHttpException('This user is not a member of your staff.');
+            }
+
             if (!empty($post['name'])) {
                 $user->profile->full_name = $post['name'];
             }
@@ -595,11 +588,9 @@ class ClientWebApi extends WebApi
             }
 
             if (!empty($post['email']) && $post['email'] != $user->email) {
-
                 if (User::find()->where(['email' => $post['email']])->exists()) {
                     throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
                 }
-
                 $user->email = $post['email'];
             }
 
@@ -671,7 +662,7 @@ class ClientWebApi extends WebApi
             }
 
             $transaction->commit();
-            return [];
+            return ['result' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -686,10 +677,6 @@ class ClientWebApi extends WebApi
     private function prepareEmployee(User $model)
     {
         $r = RelationUserOrganization::findOne(['user_id' => $model->id, 'organization_id' => $this->user->organization->id]);
-
-        if (empty($r)) {
-            throw new BadRequestHttpException('This user is not a member of your staff. #2');
-        }
 
         return [
             'id' => (int)$model->id,

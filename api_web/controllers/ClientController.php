@@ -435,7 +435,7 @@ class ClientController extends WebApiController
      *                  default={
      *                      "name": "Иван Иванович Иванов",
      *                      "email": "test@test.ru",
-     *                      "phone": "89271118899",
+     *                      "phone": "+79271118899",
      *                      "role_id": 2
      *                  }
      *              )

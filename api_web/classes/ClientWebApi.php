@@ -498,6 +498,8 @@ class ClientWebApi extends WebApi
                     throw new BadRequestHttpException('Empty role_id.');
                 }
 
+                $post['role_id'] = (int)$post['role_id'];
+
                 $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
                 if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
                     throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
@@ -533,7 +535,7 @@ class ClientWebApi extends WebApi
             }
 
             $relation = new RelationUserOrganization();
-            $relation->role_id = $post['role_id'];
+            $relation->role_id = (int)$post['role_id'];
             $relation->user_id = $user_id;
             $relation->organization_id = $this->user->organization->id;
 
@@ -542,6 +544,7 @@ class ClientWebApi extends WebApi
             }
 
             $relation->save();
+            $relation->refresh();
             $transaction->commit();
 
             //Тут нужно отправить письмо для смены пароля пользователю
@@ -678,16 +681,23 @@ class ClientWebApi extends WebApi
     /**
      * @param User $model
      * @return array
+     * @throws BadRequestHttpException
      */
     private function prepareEmployee(User $model)
     {
+        $r = RelationUserOrganization::findOne(['user_id' => $model->id, 'organization_id' => $this->user->organization->id]);
+
+        if (empty($r)) {
+            throw new BadRequestHttpException('This user is not a member of your staff. #2');
+        }
+
         return [
             'id' => (int)$model->id,
             'name' => $model->profile->full_name,
             'email' => $model->email ?? '',
             'phone' => $model->profile->phone ?? '',
-            'role' => $model->role->name,
-            'role_id' => (int)$model->role->id
+            'role' => Role::findOne($r->role_id)->name,
+            'role_id' => (int)$r->role_id
         ];
     }
 

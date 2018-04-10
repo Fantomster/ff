@@ -207,7 +207,7 @@ class User extends \amnah\yii2\user\models\User {
 
 
     public function getRelationUserOrganization(){
-        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id']);
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id', 'organization_id'=>'organization_id']);
     }
 
 

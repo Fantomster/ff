@@ -144,74 +144,93 @@ $gridColumnsCatalog = [
         'headerOptions' => ['style' => 'text-align:right'],
         'format' => 'raw',
         'value' => function ($data) {
-            $result = "";
 
             if ($data === null) {
-                return "<div class='btn-group'>" . $result . "</div>";
+                return "<div class='btn-group'></div>";
             }
 
+            $result = "";
+
+            /**
+             * Кнопка ЗАКАЗ
+             */
+            //Поставщик прислал приглашение, отображаем кнопку "сотрудничать"
             if ($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) {
-                //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
                 $result .= Html::button(
-                    '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru' => 'Сотрудничать']),
+                    '<i class="fa fa-shopping-cart m-r-xs"></i> ' .
+                    Yii::t('message', 'frontend.views.client.suppliers.supplier_apply', ['ru' => 'Сотрудничать']),
                     [
                         'class' => 'btn btn-success btn-sm apply',
-                        'data' => ['id' => $data["supp_org_id"]]
-                    ]);
-                $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                    'class' => 'btn btn-default btn-sm',
-                    'disabled' => 'disabled']);
-                $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                    'class' => 'btn btn-default btn-sm',
-                    'disabled' => 'disabled']);
-            } elseif (($data->invite == 0 ||
-                $data->cat_id == 0 ||
-                $data->catalog->status == 0)) {
-                //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
-                $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru' => 'Заказ']), [
-                    'class' => 'btn btn-success btn-sm',
-                    'disabled' => 'disabled']);
-                $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                    'class' => 'btn btn-default btn-sm',
-                    'disabled' => 'disabled']);
-                $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                    'class' => 'btn btn-default btn-sm',
-                    'disabled' => 'disabled']);
-            } else {
-                if (!$data->vendor->hasActiveUsers() && $data->vendor->allow_editing == 1) {
-                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_two', ['ru' => 'Заказ']) . ' ', ['order/create',
-                        'OrderCatalogSearch[searchString]' => "",
-                        'OrderCatalogSearch[selectedCategory]' => "",
-                        'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                    ], [
-                        'class' => 'btn btn-success btn-sm',
-                        'data-pjax' => 0,
-                    ]);
-
-                    $result .= Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-                        'class' => 'btn btn-default btn-sm',
-                        'style' => 'text-center',
-                        'data-pjax' => 0,
                         'data' => [
-                            'target' => '#edit-catalog',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',]
+                            'id' => $data["supp_org_id"]
+                        ]
                     ]);
-
-                    $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
-                        'id' => $data["supp_org_id"],
-                    ], [
-                        'class' => 'btn btn-default btn-sm resend-invite',
-                        'data-pjax' => 0,]);
-                } else {
-                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_three', ['ru' => 'Заказ']), ['order/create',
+            } else if ($data->cat_id != 0) {
+                $result .= Html::a(
+                    '<i class="fa fa-shopping-cart m-r-xs"></i> ' .
+                    Yii::t('message', 'frontend.views.client.suppliers.order_two', ['ru' => 'Заказ']) . ' ',
+                    [
+                        'order/create',
                         'OrderCatalogSearch[searchString]' => "",
                         'OrderCatalogSearch[selectedCategory]' => "",
                         'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                    ], [
+                    ],
+                    [
                         'class' => 'btn btn-success btn-sm',
                         'data-pjax' => 0,
-                    ]);
+                    ]
+                );
+            } else {
+                $result .= Html::a(
+                    '<i class="fa fa-shopping-cart m-r-xs"></i> ' .
+                    Yii::t('message', 'frontend.views.client.suppliers.order_two', ['ru' => 'Заказ']) . ' ',
+                    '#',
+                    [
+                        'class' => 'btn btn-success btn-sm',
+                        'data-pjax' => 0,
+                        'disabled' => 'disabled'
+                    ]
+                );
+            }
+
+            /**
+             * Кнопка каталога
+             */
+            //Поставщик не работает в системе
+            if ($data->vendor->is_work == 0) {
+                if ($data->cat_id != 0) {
+                    //Редактирование каталога
+                    $result .= Html::a(
+                        '<i class="fa fa-pencil"></i>',
+                        [
+                            'client/edit-catalog',
+                            'id' => $data["cat_id"]
+                        ],
+                        [
+                            'class' => 'btn btn-default btn-sm',
+                            'style' => 'text-center',
+                            'data-pjax' => 0,
+                            'data' => [
+                                'target' => '#edit-catalog',
+                                'toggle' => 'modal',
+                                'backdrop' => 'static'
+                            ]
+                        ]
+                    );
+                } else {
+                    //Редактирование каталога запрещенно
+                    $result .= Html::a(
+                        '<i class="fa fa-pencil"></i>', '#',
+                        [
+                            'class' => 'btn btn-default btn-sm',
+                            'style' => 'text-center',
+                            'disabled' => 'disabled'
+                        ]
+                    );
+                }
+            } else {
+                if ($data->cat_id != 0) {
+                    //Просмотр каталога
                     $result .= Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
                         'class' => 'btn btn-default btn-sm',
                         'style' => 'text-center',
@@ -222,16 +241,47 @@ $gridColumnsCatalog = [
                             'backdrop' => 'static',
                         ],
                     ]);
-                    $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
+                } else {
+                    $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>',
+                        [
+                            'class' => 'btn btn-default btn-sm',
+                            'disabled' => 'disabled'
+                        ]
+                    );
                 }
             }
 
+            /**
+             *  Кнопка INVITE
+             */
+            if ($data->invite == 0) {
+                $result .= Html::a(
+                    '<i class="fa fa-envelope m-r-xs"></i>',
+                    [
+                        'client/re-send-email-invite',
+                        'id' => $data["supp_org_id"]
+                    ],
+                    [
+                        'class' => 'btn btn-default btn-sm resend-invite',
+                        'data-pjax' => 0
+                    ]
+                );
+            } else {
+                $result .= Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>',
+                    [
+                        'class' => 'btn btn-default btn-sm',
+                        'disabled' => 'disabled'
+                    ]
+                );
+            }
+
+
+            //Кнопка удаления
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                 'class' => 'btn btn-danger btn-sm del',
                 'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
             ]);
+
             return "<div class='btn-group'>" . $result . "</div>";
         }
     ]

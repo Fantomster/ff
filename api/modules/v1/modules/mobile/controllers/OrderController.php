@@ -48,12 +48,12 @@ class OrderController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'findModel' => [$this, 'findModel']
             ],
-            'update' => [
+            /*'update' => [
                 'class' => 'yii\rest\UpdateAction',
                 'modelClass' => 'common\models\Order',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
-            ],
+            ],*/
             'delete' => [
                 'class' => 'yii\rest\DeleteAction',
                 'modelClass' => 'common\models\Order',
@@ -220,6 +220,30 @@ class OrderController extends ActiveController {
         return compact('Order', 'OrderContents', 'GoodsNotes');
     }
 
+    public function actionUpdate($id)
+    {
+        $model = Order::findOne(['id'=>$id]);
+
+        $this->checkAccess ($model->id, $model);
+
+        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+        if ($model->save() === false && !$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        }
+
+        if(($model->oldAttributes['status'] <> $model->status) && ($model->status == Order::STATUS_DONE)) {
+            $currentUser = Yii::$app->user->getIdentity();
+            $systemMessage = $model->client->name . ' получил заказ!';
+            $model->actual_delivery = gmdate("Y-m-d H:i:s");
+            $this->sendOrderDone($model->createdBy, $model);
+            if ($model->save()) {
+                $this->sendSystemMessage($currentUser, $model->id, $systemMessage, false);
+                return ["title" => $systemMessage, "type" => "success"];
+            }
+        }
+        return compact('model');
+    }
+
     public function actionCancelOrder() {
 
         $user = Yii::$app->user->getIdentity();
@@ -266,7 +290,7 @@ class OrderController extends ActiveController {
             $danger = false;
             $edit = false;
             $systemMessage = '';
-            if ($order->isObsolete) {
+            /*if ($order->isObsolete) {
                 $systemMessage = $order->client->name . ' получил заказ!';
                 $order->status = Order::STATUS_DONE;
                 $order->actual_delivery = gmdate("Y-m-d H:i:s");
@@ -282,7 +306,9 @@ class OrderController extends ActiveController {
                 $order->status = Order::STATUS_PROCESSING;
                 $edit = true;
                 $this->sendOrderProcessing($order->vendor, $order);
-            } elseif (($organizationType == Organization::TYPE_RESTAURANT)) {
+            } elseif (*/
+
+            if ($organizationType == Organization::TYPE_RESTAURANT && $order->status < 3) {
                 $systemMessage = $order->client->name . ' получил заказ!';
                 $order->status = Order::STATUS_DONE;
                 $order->actual_delivery = gmdate("Y-m-d H:i:s");
@@ -518,7 +544,7 @@ class OrderController extends ActiveController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-        /* foreach ($clientUsers as $clientUser) {
+         foreach ($clientUsers as $clientUser) {
           $channel = 'user' . $clientUser->id;
           Yii::$app->redis->executeCommand('PUBLISH', [
           'channel' => 'chat',
@@ -541,7 +567,7 @@ class OrderController extends ActiveController {
           'order_id' => $order_id,
           ])
           ]);
-          } */
+          }
 
         return true;
     }

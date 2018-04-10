@@ -595,7 +595,7 @@ class ClientController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              default= {}
+     *              default= {"result":true}
      *          ),
      *     ),
      *     @SWG\Response(

@@ -432,7 +432,7 @@ class Order extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
-
+        //dd($this);
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
                 if($this->status != self::STATUS_FORMING)
@@ -440,6 +440,15 @@ class Order extends \yii\db\ActiveRecord {
             else
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
 
+        }
+        if($this->status != self::STATUS_FORMING){
+            if($this->order_code < 1){
+                $orderSequence = new OrderSequence();
+                $orderSequence->order_id = $this->id;
+                $orderSequence->save();
+                $this->order_code = $orderSequence->id;
+                $this->save();
+            }
         }
     }
 
@@ -513,15 +522,6 @@ class Order extends \yii\db\ActiveRecord {
         return $this->total_price . " " . $this->currency->symbol;
     }
 
-
-    public function setOrderCode(): void
-    {
-        $orderSequence = new OrderSequence();
-        $orderSequence->order_id = $this->id;
-        $orderSequence->save();
-        $this->order_code = $orderSequence->id;
-        $this->save();
-    }
 
     /**
      * @return \yii\db\ActiveQuery

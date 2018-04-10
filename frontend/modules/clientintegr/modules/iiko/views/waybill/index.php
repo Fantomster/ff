@@ -43,7 +43,12 @@ $this->title = 'Интеграция с iiko Office';
                             'pjax' => true,
                             'filterPosition' => false,
                             'columns' => [
-                                'id',
+                                [
+                                    'order_code',
+                                    'value' => function($data){
+                                        return $data->order_code ?? $data->id;
+                                    }
+                                ],
                                 [
                                     'attribute' => 'vendor.name',
                                     'value' => 'vendor.name',

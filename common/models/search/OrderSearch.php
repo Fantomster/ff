@@ -191,7 +191,7 @@ class OrderSearch extends Order {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['order_code' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;

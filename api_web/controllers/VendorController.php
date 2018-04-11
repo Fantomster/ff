@@ -272,4 +272,136 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('VendorWebApi')->uploadLogo($this->request);
     }
+    
+    /**
+     * @SWG\Post(path="/vendor/upload-main-catalog",
+     *     tags={"Vendor"},
+     *     summary="Загрузка основного каталога",
+     *     description="Загрузка основного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 4,
+     *                      "data": "base64shit"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "cat_id": 4,
+     *                  "uploaded_name": "dfg5fhbdhb",
+     *                  "sample_rows: {
+     *                      "1" : {
+     *                          "1": "data-1-1",
+     *                          "2": "data-1-2",
+     *                          "3": "data-1-3",
+     *                      },
+     *                      "2" : {
+     *                          "1": "data-2-1",
+     *                          "2": "data-2-2",
+     *                          "3": "data-2-3",
+     *                      },
+     *                      "3" : {
+     *                          "1": "data-3-1",
+     *                          "2": "data-3-2",
+     *                          "3": "data-3-3",
+     *                      }
+     *                  }
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUploadMainCatalog() {
+        $this->response = $this->container->get('VendorWebApi')->uploadMainCatalog($this->request);
+    }
+    
+    /**
+     * @SWG\Post(path="/vendor/upload-main-catalog",
+     *     tags={"Vendor"},
+     *     summary="Маппинг, валидация и импорт основного каталога",
+     *     description="Маппинг, валидация и импорт основного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 4,
+     *                      "uploaded_name": "dfg5fhbdhb",
+     *                      "index_field": "ssid",
+     *                      "mapping": {
+     *                          "ssid": 1,
+     *                          "article": 3,
+     *                          "product_name": 2,
+     *                          "unit": 4,
+     *                          "price": 6,
+     *                          "multiplicity": 7
+     *                      }     
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "cat_id": 4,
+     *                  "uploaded_name": "dfg5fhbdhb"
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionImportMainCatalog() {
+        $this->response = $this->container->get('VendorWebApi')->importMainCatalog($this->request);
+    }
+    
+    public function actionUploadCustomCatalog() {
+        $this->response = $this->container->get('VendorWebApi')->uploadCustomCatalog($this->request);
+    }
+    
+    public function actionImportCustomCatalog() {
+        $this->response = $this->container->get('VendorWebApi')->importCustomCatalog($this->request);
+    }
 }

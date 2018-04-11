@@ -72,7 +72,8 @@
         "golovchanskiy/parse-torg12": "dev-master",
         "bower-asset/bootstrap": "^3.3",
         "npm-asset/jquery": "^2.2",
-        "oomphinc/composer-installers-extender": "^1.1"
+        "oomphinc/composer-installers-extender": "^1.1",
+        "2amigos/yii2-file-upload-widget": "~1.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

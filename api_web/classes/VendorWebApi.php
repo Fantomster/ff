@@ -365,4 +365,55 @@ class VendorWebApi extends \api_web\components\WebApi {
 
         return $this->container->get('MarketWebApi')->prepareOrganization($vendor);
     }
+    
+    /**
+     * Загрузка основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function uploadMainCatalog(array $request) {
+        $catalog = Catalog::findOne($request['post']['cat_id']);
+        $userOrgRelation = RelationUserOrganization::find()->where([])->one;
+        //сохранение и загрузка на s3
+        
+    }
+    
+    /**
+     * Валидация и импорт уже загруженного основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function importMainCatalog(array $request) {
+        //сохранение файла с s3 на локальный диск
+        //валидация
+        //удаление локального файла
+        //сохранение
+        //удаление файла на s3
+    }
+    
+    /**
+     * Загрузка индивидуального каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function uploadCustomCatalog(array $request) {
+        //
+    }
+    
+    /**
+     * Валидация и импорт уже загруженного основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function importCustomCatalog(array $request) {
+        //
+    }
 }

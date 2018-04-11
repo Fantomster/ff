@@ -9,18 +9,23 @@ namespace api_web\components;
 class WebApi
 {
     /**
-     * @var \yii\di\Container $container
+     * @var \yii\di\Container
      */
     public $container;
     /**
-     * @var $user \common\models\User
+     * @var \common\models\User
      */
     public $user;
-
+    /**
+     * @var \dosamigos\resourcemanager\ResourceManagerInterface 
+     */
+    public $resourceManager;
+    
     function __construct()
     {
         $this->getContainerClasses();
         $this->getUser();
+        $this->resourceManager = \Yii::$app->get('resourceManager');
     }
 
     /**
@@ -33,7 +38,7 @@ class WebApi
         }
         return $this->user;
     }
-
+    
     /**
      * @return mixed|\yii\di\Container
      */

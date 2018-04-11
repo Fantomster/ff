@@ -174,6 +174,14 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],
+        'urlManagerWebApi' => [
+            'class' => \codemix\localeurls\UrlManager::className(),
+            'baseUrl' => '//api-web.mixcart.ru',
+            'enableLocaleUrls' => false,
+            'showScriptName' => false,
+            'enablePrettyUrl' => true,
+            'enableLanguageDetection' => true
+        ],
         'assetManager' => [
             'bundles' => [
                 'dosamigos\google\maps\MapAsset' => [

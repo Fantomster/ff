@@ -3,7 +3,7 @@ $canRepeatOrder = false;
 ?>
 <div class="box box-info">
     <div class="box-header with-border">
-        <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_no', ['ru'=>'Заказ №']) ?><?= $order->order_code ?? $order->id ?></h4><hr>
+        <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_no', ['ru'=>'Заказ №']) ?><?= $order->id ?></h4><hr>
         <div class="row" style="line-height: 1.8; font-size: 10px !important">
             <table width="100%">
                 <tr><td width="50%">

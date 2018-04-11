@@ -170,7 +170,6 @@ class OrderController extends DefaultController {
     public function actionOrderToXls(int $id): void
     {
         $order = Order::findOne($id);
-        $orderCode = $order->order_code ?? $order->id;
         $styleArray = [
             'borders' => [
                 'allborders' => [
@@ -184,7 +183,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getProperties()->setCreator("MixCart")
                 ->setLastModifiedBy("MixCart")
-                ->setTitle("order_" . $orderCode);
+                ->setTitle("order_" . $id);
 
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
@@ -200,7 +199,7 @@ class OrderController extends DefaultController {
 
         $objPHPExcel->getActiveSheet()->mergeCells('A1:H1');
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
-                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $orderCode);
+                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
         $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
 
@@ -348,7 +347,7 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
 
         header('Content-Type: application/vnd.ms-excel');
-        $filename = "order_" . $orderCode . ".xls";
+        $filename = "order_" . $id . ".xls";
         header('Content-Disposition: attachment;filename=' . $filename . ' ');
         header('Cache-Control: max-age=0');
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');

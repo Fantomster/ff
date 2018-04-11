@@ -6,8 +6,7 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
-$orderCode = $order->order_code ?? $order->id;
-$this->title = Yii::t('message', 'frontend.views.order.order', ['ru' => 'Заказ №']) . $orderCode;
+$this->title = Yii::t('message', 'frontend.views.order.order', ['ru' => 'Заказ №']) . $order->id;
 
 if (!empty($order->invoice)) {
     $title = $this->title . ' ' . Yii::t('message', 'frontend.views.order.order_invoice_create', ['ru' => 'создан на основании накладной 1С']);
@@ -250,7 +249,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                 'label' => Yii::t('message', 'frontend.views.order.history', ['ru' => 'История заказов']),
                 'url' => ['order/index'],
             ],
-            Yii::t('message', 'frontend.views.order.order_three', ['ru' => 'Заказ №']) . $orderCode,
+            Yii::t('message', 'frontend.views.order.order_three', ['ru' => 'Заказ №']) . $order->id,
         ],
     ]);
     ?>

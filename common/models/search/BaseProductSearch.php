@@ -54,7 +54,9 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
 
             if (isset($params['sort'])){
                 $arr = explode(' ', $params['sort']);
-                $sort = [str_replace('id', 'guide_product.id', $arr[0]) => (int)$arr[1]];
+                if(isset($arr[1])){
+                    $sort = [str_replace('id', 'guide_product.id', $arr[0]) => (int)$arr[1]];
+                }
             }
 
             $query->leftJoin('guide_product', '`guide_product`.`cbg_id` = `catalog_base_goods`.`id`');

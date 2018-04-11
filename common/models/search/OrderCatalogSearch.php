@@ -97,7 +97,7 @@ class OrderCatalogSearch extends \yii\base\Model {
         }
 
         $sql = "
-        SELECT * FROM (
+        SELECT DISTINCT * FROM (
            SELECT 
               " . implode(',', $fieldsCBG) . "
            FROM `catalog_base_goods` `cbg`

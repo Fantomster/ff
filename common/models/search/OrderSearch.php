@@ -15,9 +15,11 @@ use yii\helpers\ArrayHelper;
 /**
  * OrderSearch represents the model behind the search form about `common\models\Order`.
  */
-class OrderSearch extends Order {
+class OrderSearch extends Order
+{
 
     public $vendor_search_id = null;
+    public $vendor_array;
     public $client_search_id = null;
     public $manager_id = null;
     public $status_array;
@@ -30,7 +32,8 @@ class OrderSearch extends Order {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id'], 'integer'],
             [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus'], 'safe'],
@@ -47,14 +50,16 @@ class OrderSearch extends Order {
     /**
      * @inheritdoc
      */
-    public function attributes() {
+    public function attributes()
+    {
         return array_merge(parent::attributes(), ['acceptedByProfile.full_name', 'vendor.name', 'client.name', 'createdByProfile.full_name']);
     }
 
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -66,7 +71,8 @@ class OrderSearch extends Order {
      *
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params)
+    {
         $query = Order::find();
         $this->load($params);
 
@@ -84,14 +90,14 @@ class OrderSearch extends Order {
         /**
          * Дата завершения заказа
          */
-        if(!empty($this->completion_date_from)) {
+        if (!empty($this->completion_date_from)) {
             $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->completion_date_from . " 00:00:00");
             if ($from) {
                 $completion_date_from = $from->format('Y-m-d H:i:s');
             }
         }
 
-        if(!empty($this->completion_date_to)) {
+        if (!empty($this->completion_date_to)) {
             $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->completion_date_to . " 00:00:00");
             if ($to) {
                 $to->add(new \DateInterval('P1D'));
@@ -131,16 +137,16 @@ class OrderSearch extends Order {
             ]);
         }
         $query->joinWith([
-            'createdByProfile' => function($query) {
-                $query->from(Profile::tableName(). ' createdByProfile');
+            'createdByProfile' => function ($query) {
+                $query->from(Profile::tableName() . ' createdByProfile');
             },
-                ], true);
+        ], true);
 
         $query->joinWith([
-            'acceptedByProfile' => function($query) {
-                $query->from(Profile::tableName(). ' acceptedByProfile');
+            'acceptedByProfile' => function ($query) {
+                $query->from(Profile::tableName() . ' acceptedByProfile');
             },
-                ], true);
+        ], true);
         if ($this->manager_id) {
             $maTable = \common\models\ManagerAssociate::tableName();
             $orderTable = Order::tableName();
@@ -186,12 +192,11 @@ class OrderSearch extends Order {
             $query->andFilterWhere(['<=', Order::tableName() . '.completion_date', $completion_date_to]);
         }
 
-        if(is_array($this->vendor_id)) {
-            $query->andFilterWhere(['in', 'vendor_id', $this->vendor_id]);
+        if (!empty($this->vendor_array)) {
+            $query->andFilterWhere(['in', 'vendor_id', $this->vendor_array]);
         } else {
             $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         }
-
         $query->andFilterWhere(['client_id' => $this->client_id]);
 
         $dataProvider = new ActiveDataProvider([
@@ -210,7 +215,8 @@ class OrderSearch extends Order {
      *
      * @return ActiveDataProvider
      */
-    public function searchWaybill($params) {
+    public function searchWaybill($params)
+    {
         //$query = Order::find();
 
         $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
@@ -259,58 +265,57 @@ class OrderSearch extends Order {
                 },
             ]);
         }
-/*
-        $nacl = RkWaybill::findOne(['order_id' => $data->id]);
+        /*
+                $nacl = RkWaybill::findOne(['order_id' => $data->id]);
 
-        //    var_dump($nacl->id);
-        if (isset($nacl->status)) {
-            return $nacl->status->denom;
-        }  else {
-            return 'Не сформирована';
-        }
+                //    var_dump($nacl->id);
+                if (isset($nacl->status)) {
+                    return $nacl->status->denom;
+                }  else {
+                    return 'Не сформирована';
+                }
 
-*/
+        */
         // $query ->innerJoin('rk_waybill', 'rk_waybill.order_id = order.id');
 
-    $nacl = null;
-    $naclInternal = array();
+        $nacl = null;
+        $naclInternal = array();
 
         switch ($this->docStatus) {
             case 1: //new
                 $nacl = \api\common\models\RkWaybill::find()->select('order_id')->asArray()->all();
                 foreach ($nacl as $value) {
-                    foreach($value as $idd) {
+                    foreach ($value as $idd) {
                         $naclInternal[] = $idd;
                     }
                 }
-                $query->andWhere([  'NOT IN', 'order.id', $naclInternal ]);
+                $query->andWhere(['NOT IN', 'order.id', $naclInternal]);
 
                 break;
             case 2: //ready
                 $nacl = \api\common\models\RkWaybill::find()->select('order_id')->andWhere('status_id = 1')->asArray()->all();
                 foreach ($nacl as $value) {
-                    foreach($value as $idd) {
+                    foreach ($value as $idd) {
                         $naclInternal[] = $idd;
                     }
                 }
-                $query->andWhere([  'IN', 'order.id', $naclInternal ]);
+                $query->andWhere(['IN', 'order.id', $naclInternal]);
                 break;
             case 3: //done
                 $nacl = \api\common\models\RkWaybill::find()->select('order_id')->andWhere('status_id = 2')->asArray()->all();
                 foreach ($nacl as $value) {
-                    foreach($value as $idd) {
+                    foreach ($value as $idd) {
                         $naclInternal[] = $idd;
                     }
                 }
-                $query->andWhere([  'IN', 'order.id', $naclInternal ]);
+                $query->andWhere(['IN', 'order.id', $naclInternal]);
                 break;
 
         }
 
 
-
-      // var_dump($nacl);
-      // die();
+        // var_dump($nacl);
+        // die();
 
         /*
         $query->joinWith([
@@ -382,24 +387,24 @@ class OrderSearch extends Order {
      *
      * @return ActiveDataProvider
      */
-     /*
-    public function searchWaybill($params) {
-       
-        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
-                ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id]);
-        
-        $this->load($params);
-        
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
-        ]);
+    /*
+   public function searchWaybill($params) {
 
-        var_dump('Bugaga', $params);
-       // die();
+       $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+               ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id]);
 
-        return $dataProvider;
+       $this->load($params);
 
-    }*/
+       $dataProvider = new ActiveDataProvider([
+           'query' => $query,
+           'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+       ]);
+
+       var_dump('Bugaga', $params);
+      // die();
+
+       return $dataProvider;
+
+   }*/
 
 }

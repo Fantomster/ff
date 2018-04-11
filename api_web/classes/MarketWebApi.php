@@ -359,24 +359,24 @@ class MarketWebApi extends WebApi
         }
 
         $item['id'] = (int)$model->id;
-        $item['name'] = $model->name;
-        $item['legal_entity'] = $model->legal_entity;
-        $item['contact_name'] = $model->contact_name;
-        $item['phone'] = $model->phone;
-        $item['email'] = $model->email;
-        $item['site'] = $model->website;
-        $item['address'] = $model->address;
+        $item['name'] = $model->name ?? "";
+        $item['legal_entity'] = $model->legal_entity ?? "";
+        $item['contact_name'] = $model->contact_name ?? "";
+        $item['phone'] = $model->phone ?? "";
+        $item['email'] = $model->email ?? "";
+        $item['site'] = $model->website ?? "";
+        $item['address'] = $model->address ?? "";
         $item['image'] = $model->pictureUrl;
         $item['type_id'] = (int)$model->type_id;
-        $item['type'] = $model->type->name;
+        $item['type'] = $model->type->name  ?? "";
         $item['rating'] = round($model->ratingStars, 1);
-        $item['house'] = ($model->street_number === 'undefined' ? null : $model->street_number);
-        $item['route'] = ($model->route === 'undefined' ? null : $model->route);
-        $item['city'] = ($model->locality === 'undefined' ? null : $model->locality);
-        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? null : $model->administrative_area_level_1);
-        $item['country'] = ($model->country === 'undefined' ? null : $model->country);
-        $item['place_id'] = ($model->place_id === 'undefined' ? null : $model->place_id);
-        $item['about'] = $model->about;
+        $item['house'] = ($model->street_number === 'undefined' ? "" : $model->street_number ?? "");
+        $item['route'] = ($model->route === 'undefined' ? "" : $model->route ?? "");
+        $item['city'] = ($model->locality === 'undefined' ? "" : $model->locality ?? "");
+        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? "" : $model->administrative_area_level_1 ?? "");
+        $item['country'] = ($model->country === 'undefined' ? "" : $model->country ?? "");
+        $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
+        $item['about'] = $model->about  ?? "";
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['allow_editing'] = $model->allow_editing;

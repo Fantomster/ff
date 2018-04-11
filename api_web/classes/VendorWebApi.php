@@ -374,10 +374,15 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws ValidationException
      */
     public function uploadMainCatalog(array $request) {
-        $catalog = Catalog::findOne($request['post']['cat_id']);
-        $userOrgRelation = RelationUserOrganization::find()->where([])->one;
+        $catalog = Catalog::findOne($request['cat_id']);
+        //$userOrgRelation = \common\models\RelationUserOrganization::find()->where([])->one;
         //сохранение и загрузка на s3
-        
+        $base64 = $request['data'];
+        if (strpos($base64, 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,') !== false) {
+            return ["is_xlsx" => true];
+        } else {
+            return ["is_xlsx" => false];
+        }
     }
     
     /**

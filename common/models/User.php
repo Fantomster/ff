@@ -538,9 +538,18 @@ class User extends \amnah\yii2\user\models\User {
             return false;
         }
         if(Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)){
-            $relations = RelationUserOrganization::findAll(['user_id'=>Yii::$app->user->id]);
-            foreach ($relations as $relation){
-                self::createRelationUserOrganization($userID, $relation->organization_id, $roleID);
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $organization = Organization::findOne(['id'=>$currentUser->organization_id]);
+
+            self::createRelationUserOrganization($userID, $organizationID, $roleID);
+            if($organization->parent_id){
+                $children = Organization::findAll(['parent_id'=>$organization->parent_id]);
+            }else{
+                $children = Organization::findAll(['parent_id'=>$organization->id]);
+            }
+
+            foreach ($children as $child){
+                self::createRelationUserOrganization($userID, $child->id, $roleID);
             }
             return true;
         }else{

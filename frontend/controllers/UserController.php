@@ -473,7 +473,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     }
                 $roleID = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
                 User::createRelationUserOrganization($user->id, $organization->id, $roleID);
-                $relations = RelationUserOrganization::findAll(['organization_id' => $parent_id, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
+                $currentOrganizationID = $currentOrganization->id;
+                $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
                 foreach ($relations as $relation){
                     User::createRelationUserOrganization($relation->user_id, $organization->id, $roleID);
                 }

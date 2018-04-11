@@ -186,7 +186,12 @@ class OrderSearch extends Order {
             $query->andFilterWhere(['<=', Order::tableName() . '.completion_date', $completion_date_to]);
         }
 
-        $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
+        if(is_array($this->vendor_id)) {
+            $query->andFilterWhere(['in', 'vendor_id', $this->vendor_id]);
+        } else {
+            $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
+        }
+
         $query->andFilterWhere(['client_id' => $this->client_id]);
 
         $dataProvider = new ActiveDataProvider([

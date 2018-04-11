@@ -255,7 +255,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         if (isset($post['search'])) {
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
-                $search->vendor_id = (int)$post['search']['vendor'];
+                $search->vendor_id = $post['search']['vendor'];
             }
 
             /**

@@ -211,6 +211,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['currency_id'] = $order->currency->id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
+        $result['status_id'] = $order->status;
         $result['status_text'] = $order->statusText;
         $result['position_count'] = (int)$order->positionCount;
         $result['delivery_price'] = round($order->calculateDelivery(), 2);
@@ -614,14 +615,16 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     private function prepareProduct(OrderContent $model)
     {
+        $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
+
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
         $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
         $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
         $item['price'] = round($model->price, 2);
-        $item['quantity'] = !empty($model->quantity) ? $model->quantity : $model->product->units;
-        $item['comment'] = $model->comment;
+        $item['quantity'] = $quantity;
+        $item['comment'] = $model->comment ?? '';
         $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);
         $item['brand'] = ($model->product->brand ? $model->product->brand : '');

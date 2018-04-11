@@ -99,6 +99,8 @@ class GuideProductsSearch extends \yii\base\Model {
             $arr = explode(' ', $params['sort']);
             $query.= " ORDER BY ";
             $query.= str_replace('3', "ASC", str_replace('4', "DESC", $params['sort']));
+        }else{
+            $query.= " ORDER BY product ASC";
         }
 
         $dataProvider = new SqlDataProvider([

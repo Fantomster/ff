@@ -50,7 +50,7 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
             ]);
 
         }else{
-            $sort = ['guide_product.id' => SORT_ASC];
+            $sort = ['product' => SORT_ASC];
 
             if (isset($params['sort'])){
                 $arr = explode(' ', $params['sort']);

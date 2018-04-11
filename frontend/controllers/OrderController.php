@@ -534,13 +534,8 @@ class OrderController extends DefaultController {
         $params['VendorSearch'] = $session['vendorSearchString'];
         $params['guide_id'] = $id;
 
-        if (Yii::$app->request->get("sort")){
-            $params['sort'] = Yii::$app->request->get("sort");
-            if(isset($session['sort'])){
-                unset($session['sort']);
-            }
-            $session['sort'] = $params['sort'] = Yii::$app->request->get("sort");
-        }
+        $session['sort'] = $params['sort'] = Yii::$app->request->get("sort") ?? $session['sort'] ?? '';
+
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
 
@@ -631,6 +626,8 @@ class OrderController extends DefaultController {
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
         $params = Yii::$app->request->getQueryParams();
+        $session = Yii::$app->session;
+        $session['sort'] = $params['sort'] =  Yii::$app->request->get("sort") ?? $session['sort'] ?? '';
 
         $guideSearchModel = new GuideProductsSearch();
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
@@ -638,9 +635,9 @@ class OrderController extends DefaultController {
         $guideDataProvider->pagination = false; //['pageSize' => 8];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params'));
         } else {
-            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params'));
         }
     }
 

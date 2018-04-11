@@ -247,9 +247,9 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistory(array $post)
     {
-        $sort_field = (isset($post['sort']) ? $post['sort'] : null);
-        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
-        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $sort_field = (!empty($post['sort']) ? $post['sort'] : null);
+        $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
         $search = new OrderSearch();
 
@@ -303,7 +303,7 @@ class OrderWebApi extends \api_web\components\WebApi
         /**
          * Сортировка по полям
          */
-        if (isset($post['sort'])) {
+        if (!empty($post['sort'])) {
 
             $field = $post['sort'];
             $sort = SORT_ASC;

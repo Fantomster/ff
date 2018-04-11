@@ -73,10 +73,10 @@ $this->registerJs('
         ])
             ->dropDownList([
                 '1' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru' => 'Сортировка по']),
-                'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru' => 'Наименованию по возрастанию']),
-                'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru' => 'Наименованию по убыванию']),
-                'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru' => 'Порядку добавления по возрастанию']),
-                'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru' => 'Порядку добавления по убыванию']),
+                'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru' => 'Наименованию по возрастанию']),
+                'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru' => 'Наименованию по убыванию']),
+                'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru' => 'Порядку добавления по возрастанию']),
+                'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru' => 'Порядку добавления по убыванию']),
             ], [
                 'options' => [$params['sort'] ?? 1 => ['selected' => true], '1' => ['disabled' => true]]])
             ->label(false)

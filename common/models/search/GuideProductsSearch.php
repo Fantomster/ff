@@ -101,7 +101,7 @@ class GuideProductsSearch extends \yii\base\Model {
             if($params['sort'] == ''){
                 $query.= " product ASC";
             }else{
-                $query.= str_replace('3', "ASC", str_replace('4', "DESC", $params['sort']));
+                $query.= str_replace('4', "ASC", str_replace('3', "DESC", $params['sort']));
             }
         }else{
             $query.= " ORDER BY product ASC";

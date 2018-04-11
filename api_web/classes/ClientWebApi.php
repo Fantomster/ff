@@ -501,7 +501,7 @@ class ClientWebApi extends WebApi
             if (empty($post['phone'])) {
                 throw new BadRequestHttpException('Empty phone.');
             }
-            if (empty($post['role_id'])) {
+            if (empty($post['role_id']) or !isset($post['role_id'])) {
                 throw new BadRequestHttpException('Empty role_id.');
             }
 
@@ -683,7 +683,7 @@ class ClientWebApi extends WebApi
             'name' => $model->profile->full_name,
             'email' => $model->email ?? '',
             'phone' => $model->profile->phone ?? '',
-            'role' => Role::findOne($r->role_id)->name,
+            'role' => Role::getRoleName($r->role_id ?? 0),
             'role_id' => (int)$r->role_id
         ];
     }

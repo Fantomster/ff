@@ -254,19 +254,26 @@ class OrderWebApi extends \api_web\components\WebApi
         $search = new OrderSearch();
 
         if (isset($post['search'])) {
-            if (isset($post['search']['vendor'])) {
+            if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
                 $search->vendor_id = (int)$post['search']['vendor'];
+            }
+
+            /**
+             * Статусы
+             */
+            if (isset($post['search']['status']) && !empty($post['search']['status'])) {
+                $search->status_array = (array)$post['search']['status'];
             }
 
             /**
              * Фильтр по дате создания
              */
-            if (isset($post['search']['create_date'])) {
-                if (isset($post['search']['create_date']['start'])) {
+            if (isset($post['search']['create_date']) && !empty($post['search']['create_date'])) {
+                if (isset($post['search']['create_date']['start']) && !empty($post['search']['create_date']['start'])) {
                     $search->date_from = $post['search']['create_date']['start'];
                 }
 
-                if (isset($post['search']['create_date']['end'])) {
+                if (isset($post['search']['create_date']['end']) && !empty($post['search']['create_date']['end'])) {
                     $search->date_to = $post['search']['create_date']['end'];
                 }
             }
@@ -274,12 +281,12 @@ class OrderWebApi extends \api_web\components\WebApi
             /**
              * Фильтр по дате завершения
              */
-            if (isset($post['search']['completion_date'])) {
-                if (isset($post['search']['completion_date']['start'])) {
+            if (isset($post['search']['completion_date']) && !empty($post['search']['completion_date'])) {
+                if (isset($post['search']['completion_date']['start']) && !empty($post['search']['completion_date']['start'])) {
                     $search->completion_date_from = $post['search']['completion_date']['start'];
                 }
 
-                if (isset($post['search']['completion_date']['end'])) {
+                if (isset($post['search']['completion_date']['end']) && !empty($post['search']['completion_date']['end'])) {
                     $search->completion_date_to = $post['search']['completion_date']['end'];
                 }
             }
@@ -323,8 +330,8 @@ class OrderWebApi extends \api_web\components\WebApi
          */
         $orders = [];
         $headers = [];
-        if (!empty($search->search(null)->models)) {
-            $models = $dataProvider->models;
+        $models = $dataProvider->models;
+        if (!empty($models)) {
             /**
              * @var $model Order
              */

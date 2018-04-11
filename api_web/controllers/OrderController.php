@@ -187,6 +187,7 @@ class OrderController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "vendor": 1,
+     *                                   "status": {1,2,3},
      *                                   "create_date": {
      *                                      "start":"d.m.Y",
      *                                      "end":"d.m.Y"

@@ -20,7 +20,7 @@ class OrderSearch extends Order {
     public $vendor_search_id = null;
     public $client_search_id = null;
     public $manager_id = null;
-    private $status_array;
+    public $status_array;
     public $date_from;
     public $completion_date_from;
     public $date_to;

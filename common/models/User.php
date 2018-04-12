@@ -548,7 +548,6 @@ class User extends \amnah\yii2\user\models\User {
             }else{
                 $children = Organization::findAll(['parent_id'=>$organization->id]);
             }
-
             foreach ($children as $child){
                 self::createRelationUserOrganization($userID, $child->id, $roleID);
             }

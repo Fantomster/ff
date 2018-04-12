@@ -14,6 +14,7 @@ use common\models\Organization;
 use api_web\components\Notice;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -594,6 +595,7 @@ class OrderWebApi extends \api_web\components\WebApi
         try {
             $order->status = Order::STATUS_DONE;
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
+            $order->completion_date = new Expression('NOW()');
             if ($order->validate() && $order->save()) {
                 Notice::init('Order')->doneOrder($order, $this->user);
             } else {

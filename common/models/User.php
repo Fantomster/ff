@@ -544,6 +544,7 @@ class User extends \amnah\yii2\user\models\User {
             self::createRelationUserOrganization($userID, $organizationID, $roleID);
             if($organization->parent_id){
                 $children = Organization::findAll(['parent_id'=>$organization->parent_id]);
+                $children = array_merge($children, Organization::findAll(['id'=>$organization->parent_id]));
             }else{
                 $children = Organization::findAll(['parent_id'=>$organization->id]);
             }

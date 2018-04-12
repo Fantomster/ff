@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\exceptions\ValidationException;
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
 use common\models\guides\Guide;
 use common\models\guides\GuideProduct;
 use common\models\Organization;
@@ -11,6 +12,7 @@ use common\models\search\GuideProductsSearch;
 use common\models\search\GuideSearch;
 use yii\data\Pagination;
 use yii\data\Sort;
+use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -26,6 +28,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function getList(array $post)
     {
+        $sort = (isset($post['sort']) ? $post['sort'] : 'created_at');
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
         $product_list = (isset($post['product_list']) ? $post['product_list'] : false);
@@ -52,6 +55,20 @@ class GuideWebApi extends \api_web\components\WebApi
                     $search->date_to = $post['search']['create_date']['end'];
                 }
             }
+
+            /**
+             * Фильтр по дате обновления
+             */
+            if (isset($post['search']['updated_date'])) {
+                if (isset($post['search']['updated_date']['start'])) {
+                    $search->updated_date_from = $post['search']['updated_date']['start'];
+                }
+
+                if (isset($post['search']['updated_date']['end'])) {
+                    $search->updated_date_from = $post['search']['updated_date']['end'];
+                }
+            }
+
             /**
              * Фильтр по цвету
              */
@@ -62,10 +79,19 @@ class GuideWebApi extends \api_web\components\WebApi
 
         $dataProvider = $search->search(null, $client->id);
 
+        //Пагинация
         $pagination = new Pagination();
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
+
+        //Сотрировка
+        if (!empty($sort)) {
+            $sort = str_replace('updated_date', 'updated_at', trim($sort));
+            $s = new Sort(['attributes' => ['id', 'name', 'updated_at']]);
+            $s->params = ['sort' => $sort];
+            $dataProvider->setSort($s);
+        }
 
         $result = [];
         if (!empty($dataProvider->models)) {
@@ -126,28 +152,28 @@ class GuideWebApi extends \api_web\components\WebApi
         $client = $this->user->organization;
 
         $search = new GuideProductsSearch();
-        if (isset($post['search'])) {
+        if (!empty($post['search'])) {
             /**
              * Поиск по наименованию
              */
-            if (isset($post['search']['product'])) {
+            if (!empty($post['search']['product'])) {
                 $search->searchString = $post['search']['product'];
             }
             /**
              * Фильтр по поставщику
              */
-            if (isset($post['search']['vendor_id'])) {
+            if (!empty($post['search']['vendor_id'])) {
                 $search->vendor_id = (int)$post['search']['vendor_id'];
             }
             /**
              * Фильтр по цене
              */
-            if (isset($post['search']['price'])) {
-                if (isset($post['search']['price']['start'])) {
+            if (!empty($post['search']['price'])) {
+                if (!empty($post['search']['price']['start'])) {
                     $search->price_from = $post['search']['price']['start'];
                 }
 
-                if (isset($post['search']['price']['end'])) {
+                if (!empty($post['search']['price']['end'])) {
                     $search->price_to = $post['search']['price']['end'];
                 }
             }
@@ -155,38 +181,25 @@ class GuideWebApi extends \api_web\components\WebApi
 
         $dataProvider = $search->search([], $post['guide_id'], $client->id);
 
+        //Пагинация
         $pagination = new Pagination();
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
 
+        //Сотрировка
         if ($sort) {
-            $direction = (strstr($sort, '-') === false ? SORT_ASC : SORT_DESC);
-            $field = str_replace('-', '', $sort);
-            if ($field === 'vendor') {
-                $field = 'name';
-                $direction = SORT_ASC;
-            }
-
-            $sorter = new Sort([
-                'attributes' => [
-                    'price',
-                    'product',
-                    'name'
-                ],
-                'defaultOrder' => [
-                    $field => $direction
-                ]
-            ]);
-            $dataProvider->setSort($sorter);
+            $sort = str_replace('vendor', 'name', trim($sort));
+            $s = new Sort(['attributes' => ['price', 'product', 'name', 'updated_at']]);
+            $s->params = ['sort' => $sort];
+            $dataProvider->setSort($s);
         }
 
         $result = [];
         if (!empty($dataProvider->models)) {
             $models = $dataProvider->models;
             foreach ($models as $model) {
-                $baseModel = CatalogBaseGoods::findOne($model['cbg_id']);
-                $result[] = $this->prepareProduct($baseModel);
+                $result[] = $this->prepareProduct($model);
             }
         }
         $return = [
@@ -255,9 +268,7 @@ class GuideWebApi extends \api_web\components\WebApi
         if (empty($params['guide_id'])) {
             throw new BadRequestHttpException("ERROR: Empty guide_id");
         }
-
         $this->isMyGuide($params['guide_id']);
-
         $model = Guide::findOne($params['guide_id']);
         if ($model) {
             $model->delete();
@@ -342,6 +353,9 @@ class GuideWebApi extends \api_web\components\WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $this->addProduct($params['guide_id'], $params['product_id']);
+            $guide = Guide::findOne($params['guide_id']);
+            $guide->updated_at = new Expression('NOW()');
+            $guide->save();
             $transaction->commit();
             return $this->prepareGuide($params['guide_id']);
         } catch (\Exception $e) {
@@ -373,6 +387,8 @@ class GuideWebApi extends \api_web\components\WebApi
             $product = $model->getGuideProducts()->where(['cbg_id' => $params['product_id']])->one();
             if ($product) {
                 $product->delete();
+                $model->updated_at = new Expression('NOW()');
+                $model->save();
             }
             return $this->prepareGuide($model->id);
         }
@@ -433,13 +449,15 @@ class GuideWebApi extends \api_web\components\WebApi
                 'name' => $model->name,
                 'color' => $model->color,
                 'created_at' => \Yii::$app->formatter->asDate($model->created_at),
+                'updated_at' => \Yii::$app->formatter->asDate($model->updated_at),
                 'product_count' => (int)$model->productCount,
             ];
 
             if ($product_list === true) {
                 $products = [];
-                foreach ($model->guideProducts as $product) {
-                    $products[] = $this->prepareProduct($product->baseProduct);
+                $dataProvider = (new GuideProductsSearch())->search([], $model->id, $this->user->organization->id);
+                foreach ($dataProvider->models as $row) {
+                    $products[] = $this->prepareProduct($row);
                 }
                 $return['products'] = $products;
             }
@@ -449,12 +467,35 @@ class GuideWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param CatalogBaseGoods $baseProductModel
+     * @param $row
      * @return mixed
      */
-    private function prepareProduct(CatalogBaseGoods $baseProductModel)
+    private function prepareProduct($row)
     {
-        return $this->container->get('MarketWebApi')->prepareProduct($baseProductModel);
+        $model = CatalogGoods::find()->where(['base_goods_id' => $row['cbg_id'], 'cat_id' => $row['cat_id']])->one();
+        if (empty($model)) {
+            $model = CatalogBaseGoods::find()->where(['id' => $row['cbg_id'], 'cat_id' => $row['cat_id']])->one();
+        }
+
+        $item['id'] = (int)$model->id;
+        $item['product'] = $model->baseProduct->product;
+        $item['catalog_id'] = ((int)$model->cat_id ?? null);
+        $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);
+        $item['price'] = round($row['price'] ?? 0, 2);
+        $item['discount_price'] = round($model->discount ?? 0, 2);
+        $item['rating'] = round($model->baseProduct->ratingStars ?? 0, 1);
+        $item['supplier'] = $model->baseProduct->vendor->name;
+        $item['supplier_id'] = (int)$model->baseProduct->vendor->id;
+        $item['brand'] = $model->brand ?? '';
+        $item['article'] = $model->baseProduct->article;
+        $item['ed'] = $model->baseProduct->ed;
+        $item['units'] = $model->baseProduct->units ?? 0;
+        $item['currency'] = $model->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->catalog->currency->id;
+        $item['updated_at'] = $row['updated_at'] ?? null;
+        $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->baseProduct);
+        $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
+        return $item;
     }
 
     /**
@@ -500,6 +541,8 @@ class GuideWebApi extends \api_web\components\WebApi
                     $newProduct = new GuideProduct();
                     $newProduct->guide_id = $guide_id;
                     $newProduct->cbg_id = $id;
+                    $newProduct->created_at = new Expression('NOW()');
+                    $newProduct->updated_at = new Expression('NOW()');
                     $newProduct->save();
                 }
             } else {

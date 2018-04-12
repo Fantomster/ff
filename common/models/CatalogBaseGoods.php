@@ -310,4 +310,11 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function getCatalog() {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBaseProduct() {
+        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'id']);
+    }
 }

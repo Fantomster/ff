@@ -14,6 +14,7 @@ use common\models\Organization;
 use api_web\components\Notice;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -211,6 +212,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['currency_id'] = $order->currency->id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
+        $result['status_id'] = $order->status;
         $result['status_text'] = $order->statusText;
         $result['position_count'] = (int)$order->positionCount;
         $result['delivery_price'] = round($order->calculateDelivery(), 2);
@@ -247,26 +249,33 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistory(array $post)
     {
-        $sort_field = (isset($post['sort']) ? $post['sort'] : null);
-        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
-        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $sort_field = (!empty($post['sort']) ? $post['sort'] : null);
+        $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
         $search = new OrderSearch();
 
         if (isset($post['search'])) {
-            if (isset($post['search']['vendor'])) {
-                $search->vendor_id = (int)$post['search']['vendor'];
+            if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
+                $search->vendor_array = $post['search']['vendor'];
+            }
+
+            /**
+             * Статусы
+             */
+            if (isset($post['search']['status']) && !empty($post['search']['status'])) {
+                $search->status_array = (array)$post['search']['status'];
             }
 
             /**
              * Фильтр по дате создания
              */
-            if (isset($post['search']['create_date'])) {
-                if (isset($post['search']['create_date']['start'])) {
+            if (isset($post['search']['create_date']) && !empty($post['search']['create_date'])) {
+                if (isset($post['search']['create_date']['start']) && !empty($post['search']['create_date']['start'])) {
                     $search->date_from = $post['search']['create_date']['start'];
                 }
 
-                if (isset($post['search']['create_date']['end'])) {
+                if (isset($post['search']['create_date']['end']) && !empty($post['search']['create_date']['end'])) {
                     $search->date_to = $post['search']['create_date']['end'];
                 }
             }
@@ -274,12 +283,12 @@ class OrderWebApi extends \api_web\components\WebApi
             /**
              * Фильтр по дате завершения
              */
-            if (isset($post['search']['completion_date'])) {
-                if (isset($post['search']['completion_date']['start'])) {
+            if (isset($post['search']['completion_date']) && !empty($post['search']['completion_date'])) {
+                if (isset($post['search']['completion_date']['start']) && !empty($post['search']['completion_date']['start'])) {
                     $search->completion_date_from = $post['search']['completion_date']['start'];
                 }
 
-                if (isset($post['search']['completion_date']['end'])) {
+                if (isset($post['search']['completion_date']['end']) && !empty($post['search']['completion_date']['end'])) {
                     $search->completion_date_to = $post['search']['completion_date']['end'];
                 }
             }
@@ -296,7 +305,7 @@ class OrderWebApi extends \api_web\components\WebApi
         /**
          * Сортировка по полям
          */
-        if (isset($post['sort'])) {
+        if (!empty($post['sort'])) {
 
             $field = $post['sort'];
             $sort = SORT_ASC;
@@ -323,8 +332,8 @@ class OrderWebApi extends \api_web\components\WebApi
          */
         $orders = [];
         $headers = [];
-        if (!empty($search->search(null)->models)) {
-            $models = $dataProvider->models;
+        $models = $dataProvider->models;
+        if (!empty($models)) {
             /**
              * @var $model Order
              */
@@ -586,6 +595,7 @@ class OrderWebApi extends \api_web\components\WebApi
         try {
             $order->status = Order::STATUS_DONE;
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
+            $order->completion_date = new Expression('NOW()');
             if ($order->validate() && $order->save()) {
                 Notice::init('Order')->doneOrder($order, $this->user);
             } else {
@@ -607,14 +617,16 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     private function prepareProduct(OrderContent $model)
     {
+        $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
+
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
         $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
         $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
         $item['price'] = round($model->price, 2);
-        $item['quantity'] = !empty($model->quantity) ? $model->quantity : $model->product->units;
-        $item['comment'] = $model->comment;
+        $item['quantity'] = $quantity;
+        $item['comment'] = $model->comment ?? '';
         $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);
         $item['brand'] = ($model->product->brand ? $model->product->brand : '');

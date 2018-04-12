@@ -17,6 +17,7 @@ use yii\helpers\Url;
  * @property string $total_price
  * @property string $created_at
  * @property string $updated_at
+ * @property string $completion_date
  * @property string $requested_delivery
  * @property string $actual_delivery
  * @property string $comment
@@ -85,7 +86,7 @@ class Order extends \yii\db\ActiveRecord {
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment'], 'safe'],
+            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],

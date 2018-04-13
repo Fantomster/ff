@@ -138,7 +138,7 @@ class BuisinessInfoController extends Controller {
                 $new->legal_email = $org->email;
                 $new->phone = $org->phone;
                 $new->save();
-                $org->es_status = Organization::ES_ACTIVE;
+                $org->es_status = !Organization::ES_INACTIVE;
                 $org->white_list = true;
                 $org->save();
                 $transaction->commit();

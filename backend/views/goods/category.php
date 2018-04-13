@@ -158,7 +158,7 @@ $dataProviderEmpty->sort->sortParam = 'empty-sort';
         <?php
         echo kartik\select2\Select2::widget([
             'name' => 'sub1',
-            'value' => $category,
+            'value' => $category->id,
             'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
             'options' => ['placeholder' => 'Выберите...', 'id' => 'parentCategory'],
             'theme' => "default",

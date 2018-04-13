@@ -127,7 +127,7 @@ $this->registerJs('
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['updated_at'], "dd-MM-YY").'">'.
+                            return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['price_updated_at'], "dd-MM-YY").'">'.
                                 $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"].'</span>';
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],

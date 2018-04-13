@@ -66,7 +66,7 @@ class GuideProductsSearch extends \yii\base\Model {
         }
 
         $query = "
-            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at
+            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cbg.updated_at as price_updated_at
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
@@ -78,7 +78,7 @@ class GuideProductsSearch extends \yii\base\Model {
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
             UNION ALL
-            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at
+            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cg.updated_at as price_updated_at
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 

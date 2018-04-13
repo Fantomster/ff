@@ -394,6 +394,20 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
     /**
+     * @return array|CartContent[]|mixed
+     */
+    public function _getCart() {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return [];
+        }
+        $cart = Cart::find()->where(['organization_id' => $this->id])->one();
+        if (empty($cart)) {
+            return [];
+        }
+        return $cart->cartContents;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getCart() {

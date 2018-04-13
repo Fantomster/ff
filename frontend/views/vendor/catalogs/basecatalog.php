@@ -90,7 +90,6 @@ $exportColumns = [
     ],
     [
         'label' => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']),
-//        'value' => 'product',
         'value' => function ($data) {
             return Html::decode(Html::decode($data['product']));
         },

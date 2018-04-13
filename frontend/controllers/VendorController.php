@@ -551,9 +551,10 @@ class VendorController extends DefaultController
         }
     }
 
+
     public function actionBasecatalog()
     {
-        $sort = \Yii::$app->request->get('sort');
+        $sort = \Yii::$app->request->get('sort') ?? '';
 
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";
@@ -563,71 +564,15 @@ class VendorController extends DefaultController
         }
         $currentCatalog = $baseCatalog;
 
-        $q = CatalogBaseGoods::find()
-            ->select([
-                '*',
-                "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
-                "`article` REGEXP '^-?[0-9]+$' as i",
-                "(`article` + 0) AS c_article_1",
-                "`article` AS c_article",
-                "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
-            ])
-            ->where(['deleted' => 0]);
-
-        $q->andWhere(['cat_id' => $baseCatalog->id]);
-
-        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = trim(\Yii::$app->request->get('searchString'));
-            $q->andWhere('product LIKE :p OR article LIKE :a');
-            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" . $searchString . "%"]);
-        }
-
-        if ($sort == 'product') {
-            $q->orderBy('`alf_cyr` DESC, `product` ASC');
-        } else if ($sort == '-product') {
-            $q->orderBy('`alf_cyr` ASC, `product` DESC');
-        }
-
-        if ($sort == 'article') {
-            $q->orderBy('len DESC, i DESC, (article + 0), article');
-        } else if ($sort == '-article') {
-            $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
-        }
-
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => $q,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'product',
-                    'price',
-                    'article',
-                    'units',
-                    'status',
-                    'category_id',
-                    'ed',
-                    'market_place',
-                    'c_article_1',
-                    'c_article',
-                    'i',
-                    'len'
-                ],
-                'defaultOrder' => [
-                    'len' => SORT_DESC,
-                    'i' => SORT_DESC,
-                    'c_article_1' => SORT_ASC,
-                    'c_article' => SORT_ASC
-                ]
-            ],
-        ]);
+        $dataProvider = CatalogBaseGoods::getDataForExcelExport($baseCatalog, $sort);
 
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         $cat_id = $baseCatalog->id;
+
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id'));
     }
+
 
     public function actionImport($id)
     {
@@ -1675,6 +1620,7 @@ class VendorController extends DefaultController
         return $this->render('newcatalog/step-2', compact('dataProvider', 'cat_id', 'baseCurrencySymbol'));
     }
 
+
     public function actionStep3Copy($id)
     {
         $cat_id = $id;
@@ -1686,7 +1632,8 @@ class VendorController extends DefaultController
         if (empty($model)) {
             throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_four', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (Yii::$app->request->isPost) {
+        $export = Yii::$app->request->post('export_type') ?? null;
+        if (Yii::$app->request->isPost && !$export) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
@@ -1783,8 +1730,15 @@ class VendorController extends DefaultController
             }
         }
 
+        $sort = \Yii::$app->request->get('sort') ?? '';
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($baseCatalog)) {
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
+        }
 
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
+        $dataProvider = CatalogBaseGoods::getDataForExcelExport($baseCatalog, $sort);
+
+        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol', 'dataProvider'));
     }
 
     public function actionStep3UpdateProduct($id)

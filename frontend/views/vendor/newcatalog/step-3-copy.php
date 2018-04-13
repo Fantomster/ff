@@ -8,6 +8,7 @@ use yii\helpers\Url;
 use yii\web\View;
 use common\models\Currency;
 use yii\helpers\Json;
+use kartik\export\ExportMenu;
 
 \frontend\assets\HandsOnTableAsset::register($this);
 
@@ -21,6 +22,43 @@ $this->title = Yii::t('message', 'frontend.views.vendor.edit_goods', ['ru'=>'Р�
 $currencyList = Json::encode(Currency::getList());
 $currencySymbolList = Json::encode(Currency::getSymbolList());
 ?>
+
+<?php
+$exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
+$exportColumns = [
+    [
+        'label' => Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул']),
+        'value' => 'article',
+    ],
+    [
+        'label' => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']),
+        'value' => function ($data) {
+            return Html::decode(Html::decode($data['product']));
+        },
+    ],
+    [
+        'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_three', ['ru' => 'Кратность']),
+        'value' => 'units',
+    ],
+    [
+        'label' => Yii::t('message', 'frontend.views.vendor.price_four', ['ru' => 'Цена']),
+        'value' => 'price',
+    ],
+    [
+        'label' => Yii::t('message', 'frontend.views.vendor.measure_two', ['ru' => 'Единица измерения']),
+        'value' => function ($data) {
+            return Yii::t('app', $data['ed']);
+        },
+    ],
+    [
+        'label' => Yii::t('message', 'frontend.views.vendor.comment', ['ru' => 'Комментарий']),
+        'value' => function ($data) {
+            return $data['note'] ? $data['note'] : '';
+        },
+    ]
+];
+?>
+
 <section class="content-header">
     <h1 class="margin-right-350">
         <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.edit_cat_six', ['ru'=>'Редактирование каталога']) ?> <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
@@ -92,6 +130,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                         </div>
                     </div>
                     <div class="col-sm-8">
+
                         <?=
                         Modal::widget([
                             'id' => 'importToXls',
@@ -114,6 +153,62 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             'style' => 'margin-right: 5px;',
                         ])
                         ?>
+
+                        <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
+                            <?=
+                            ExportMenu::widget([
+                                'dataProvider' => $dataProvider,
+                                'columns' => $exportColumns,
+                                'fontAwesome' => true,
+                                'filename' => Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru' => 'Главный каталог - ']) . date('Y-m-d'),
+                                'encoding' => 'UTF-8',
+                                'target' => ExportMenu::TARGET_SELF,
+                                'showConfirmAlert' => false,
+                                'showColumnSelector' => false,
+                                'batchSize' => 200,
+                                'timeout' => 0,
+                                'dropdownOptions' => [
+                                    'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru' => 'Главный каталог - ']) . Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . '</span>',
+                                    'class' => ['btn btn-outline-default btn-sm']
+                                ],
+                                'exportConfig' => [
+                                    ExportMenu::FORMAT_HTML => false,
+                                    ExportMenu::FORMAT_TEXT => false,
+                                    ExportMenu::FORMAT_EXCEL => false,
+                                    ExportMenu::FORMAT_PDF => false,
+                                    ExportMenu::FORMAT_CSV => false,
+                                    ExportMenu::FORMAT_EXCEL_X => [
+                                        'label' => Yii::t('kvexport', 'Excel'),
+                                        'icon' => 'file-excel-o',
+                                        'iconOptions' => ['class' => 'text-success'],
+                                        'linkOptions' => [],
+                                        'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                        'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                        'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'extension' => 'xlsx',
+                                        //'writer' => 'Excel2007',
+                                        'styleOptions' => [
+                                            'font' => [
+                                                'bold' => true,
+                                                'color' => [
+                                                    'argb' => 'FFFFFFFF',
+                                                ],
+                                            ],
+                                            'fill' => [
+                                                'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                                'startcolor' => [
+                                                    'argb' => 'FFFFFFFF',
+                                                ],
+                                                'endcolor' => [
+                                                    'argb' => 'FFFFFFFF',
+                                                ],
+                                            ],
+                                        ]
+                                    ],
+                                ],
+                            ]);
+                            ?>
+                        </div>
 
                     </div>
                 </div>

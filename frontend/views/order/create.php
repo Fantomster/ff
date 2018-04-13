@@ -265,7 +265,7 @@ $this->registerJs(
                                     'attribute' => 'price',
                                     'value' => function ($data) {
                                         $unit = empty($data['ed']) ? '' : " / " . Yii::t('app', $data['ed']);
-                                        return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['updated_at'], "dd-mm-YY").'"><b>'
+                                        return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['updated_at'], "dd-MM-YY").'"><b>'
                                         . $data['price'] . '</b> ' . $data['symbol'] . $unit.'</span>';
                                     },
                                     'label' => Yii::t('message', 'frontend.views.order.price', ['ru'=>'Цена']),

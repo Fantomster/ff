@@ -1956,7 +1956,7 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_changed)
                 {
@@ -1965,7 +1965,7 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($recipient->profile->phone && $notification->order_changed)
                 {
@@ -1999,7 +1999,7 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_done)
                 {
@@ -2009,7 +2009,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if(!empty($recipient->profile->phone) && $notification->order_done)
                 {
@@ -2087,7 +2087,7 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_processing)
                 {
@@ -2096,7 +2096,7 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($recipient->profile->phone && $notification->order_processing)
                 {
@@ -2129,7 +2129,7 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
+            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
             if ($notification)
                 if($notification->order_canceled)
                 {
@@ -2138,7 +2138,7 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
+            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
             if ($notification)
                 if($recipient->profile->phone && $notification->order_canceled)
                 {

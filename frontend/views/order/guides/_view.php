@@ -7,6 +7,14 @@ use kartik\grid\GridView;
 use kartik\touchspin\TouchSpin;
 use kartik\form\ActiveForm;
 
+$js = <<<SCRIPT
+/* To initialize BS3 tooltips set this below */
+$(function () { 
+    $("[data-toggle='tooltip']").tooltip(); 
+});;
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js);
 
 $guideUrl = Url::to(['order/ajax-show-guide', 'id'=>$guide->id]);
 
@@ -119,7 +127,8 @@ $this->registerJs('
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
+                            return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['updated_at'], "dd-mm-YY").'">'.
+                                $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"].'</span>';
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],

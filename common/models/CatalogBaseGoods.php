@@ -317,31 +317,4 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function getBaseProduct() {
         return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'id']);
     }
-
-    public function getActualFormatPrice ()
-    {
-        $user = Yii::$app->user->getIdentity();
-        $organization = $user->organization;
-
-        if($organization->type_id != Organization::TYPE_RESTAURANT)
-            return $this->formatPrice();
-
-        $catalogs = RelationSuppRest::find()
-            ->select(['relation_supp_rest.cat_id as cat_id'])
-            ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-            ->where(['relation_supp_rest.rest_org_id' => $organization->id, 'relation_supp_rest.deleted' => false])
-            ->andWhere(['catalog.status' => Catalog::STATUS_ON])
-            ->andFilterWhere(['relation_supp_rest.supp_org_id' => $this->supp_org_id])->all();
-
-        foreach ($catalogs as $catalog)
-        {
-            if($catalog->ctalog != null)
-                if($catalog->catalog->type_id == Catalog::CATALOG) {
-                    $goods = CatalogGoods::findOne(['id' => $catalog->cat_id]);
-                    return $goods->formatPrice();
-                }
-        }
-
-        return $this->formatPrice();
-    }
 }

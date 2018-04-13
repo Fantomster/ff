@@ -54,6 +54,12 @@ return [
             'secret' => '5R6cvdzzWSCsNL8s3pi1/6jW+oWElzTOjhvZpJeN',
             'bucket' => 'fkeeper',
         ],
+        'resourceManagerStatic' => [
+            'class' => 'dosamigos\resourcemanager\AmazonS3ResourceManager',
+            'key' => 'AKIAJZH26ZXTQSLVFT6A',
+            'secret' => '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',
+            'bucket' => 'static.mixcart.ru',
+        ],
         'i18n' => [
             'translations' => [
                 'kvexport' => [

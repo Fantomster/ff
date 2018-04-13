@@ -548,7 +548,6 @@ class User extends \amnah\yii2\user\models\User {
             }else{
                 $children = Organization::findAll(['parent_id'=>$organization->id]);
             }
-
             foreach ($children as $child){
                 self::createRelationUserOrganization($userID, $child->id, $roleID);
             }
@@ -719,32 +718,34 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Updating user-organization relations
      */
-    public function updateRelationUserOrganization(int $userId, int $organizationId, int $roleId): bool
+    public function updateRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
     {
-        $user = User::findIdentity(Yii::$app->user->id);
-        $currentUser = User::findIdentity($userId);
-        $relation = RelationUserOrganization::find()->where(['user_id'=>$userId, 'organization_id'=>$organizationId])->one();
-        $relation->role_id = $roleId;
+        $user = User::findIdentity($userID);
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $relation = RelationUserOrganization::find()->where(['user_id'=>$userID, 'organization_id'=>$organizationID])->one();
+        $relation->role_id = $roleID;
         $relation->save();
-        if(Yii::$app->user->id && ($roleId == Role::ROLE_SUPPLIER_MANAGER || $roleId == Role::ROLE_RESTAURANT_MANAGER)){
-            $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
-            foreach ($relations as $relation){
-                self::createRelationUserOrganization($userId, $relation->organization_id, $roleId);
-            }
-            $currentUser->organization_id = $user->organization->id;
-            $currentUser->role_id = $roleId;
-            $currentUser->save();
-            return true;
+        $organization = Organization::findOne(['id'=>$currentUser->organization_id]);
+        if($organization->parent_id){
+            $children = Organization::findAll(['parent_id'=>$organization->parent_id]);
+            $children = array_merge($children, Organization::findAll(['id'=>$organization->parent_id]));
         }else{
-            $relations = RelationUserOrganization::find()->where(['user_id'=>$user->id])->andWhere(['<>','organization_id', $user->organization_id])->all();
-            foreach ($relations as $relation) {
-                self::deleteRelationUserOrganization($userId, $relation->organization_id);
-            }
-            $currentUser->organization_id = $user->organization->id;
-            $currentUser->role_id = $roleId;
-            $currentUser->save();
-            return true;
+            $children = Organization::findAll(['parent_id'=>$organization->id]);
         }
+        if(Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)){
+            foreach ($children as $child){
+                self::createRelationUserOrganization($userID, $child->id, $roleID);
+            }
+        }else{
+            foreach ($children as $child) {
+                self::deleteRelationUserOrganization($userID, $child->id);
+            }
+            $user->organization_id = $currentUser->organization->id;
+            $user->role_id = $roleID;
+            $user->save();
+        }
+        self::createRelationUserOrganization($userID, $organizationID, $roleID);
+        return true;
     }
 	
     /**

@@ -209,6 +209,9 @@ class Order extends \yii\db\ActiveRecord {
         if (in_array($this->status, [self::STATUS_DONE, self::STATUS_REJECTED, self::STATUS_CANCELLED, self::STATUS_FORMING])) {
             return false;
         }
+        if (Yii::$app->user->identity->organization->type_id == Organization::TYPE_RESTAURANT)
+            return true;
+        
         $today = time();
         if (empty($this->requested_delivery)) {
             $updatedAt = strtotime($this->updated_at);

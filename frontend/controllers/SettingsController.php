@@ -84,14 +84,14 @@ class SettingsController extends DefaultController {
         $emailNotification = $this->currentUser->emailNotification;
         $smsNotification = $this->currentUser->smsNotification;
 
-        $emailNotification = ($emailNotification->id == null ) ? new EmailNotification() : $emailNotification;
+        /*$emailNotification = ($emailNotification->id == null ) ? new EmailNotification() : $emailNotification;
         $smsNotification = ($smsNotification->id == null ) ? new SmsNotification() : $smsNotification;
 
         if($emailNotification && $smsNotification){
             if($emailNotification->isNewRecord)
                 $emailNotification->loadDefaultValues();
             if($smsNotification->isNewRecord)
-                $smsNotification->loadDefaultValues();
+                $smsNotification->loadDefaultValues();*/
             if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post())) {
 
                 $emailNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;
@@ -105,7 +105,7 @@ class SettingsController extends DefaultController {
                 else
                     {var_dump($emailNotification->errors);}
             }
-        }
+        //}
 
         //Получаем список дополнительных емайлов
         $additional_email = new ArrayDataProvider([

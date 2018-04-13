@@ -87,7 +87,7 @@ $this->registerCss(
     <div class="auth-sidebar h-fx_center auth">
         <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
         <div class="auth-sidebar__content">
-            <div class="auth-sidebar__logo"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home']; ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
+            <div class="auth-sidebar__logo"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home']; ?>"><img src="<?= Yii::$app->urlManagerFrontend->baseUrl ?>/images/tmp_file/logo.png" alt=""></a></div>
             <div class="auth-sidebar__annotation"><?= Yii::t('message', 'frontend.views.user.default.fill_fields', ['ru'=>'Заполните поля<br>для входа в систему']) ?></div>
             <div class="form-slider">
                 <?= $registerFirst ? $this->render('_register-form', compact('user', 'profile', 'organization')) : $this->render('_login-form', compact('model')) ?>
@@ -103,7 +103,7 @@ $this->registerCss(
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
         <h1><?= Yii::t('message', 'frontend.views.user.default.online_service_two', ['ru'=>'Онлайн-сервис для автоматизации закупок']) ?></h1>
         <div class="present__media clearfix">
-            <div class="present__image"><img src="/images/tmp_file/flowers.png" alt=""></div>
+            <div class="present__image"><img src="<?= Yii::$app->urlManagerFrontend->baseUrl ?>/images/tmp_file/flowers.png" alt=""></div>
             <!--<a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->
         </div>
     </div>

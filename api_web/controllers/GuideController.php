@@ -93,11 +93,16 @@ class GuideController extends WebApiController
      *                                      "start":"d.m.Y",
      *                                      "end":"d.m.Y"
      *                                   },
+     *                                   "updated_date": {
+     *                                      "start":"d.m.Y",
+     *                                      "end":"d.m.Y"
+     *                                   },
      *                               },
      *                               "pagination":{
      *                                   "page":1,
      *                                   "page_size":12
-     *                               }
+     *                               },
+     *                               "sort":"id, name, updated_date"
      *                           }
      *              )
      *         )
@@ -386,7 +391,10 @@ class GuideController extends WebApiController
      * -price
      * product
      * -product
-     * vendor",
+     * updated_at
+     * -updated_at
+     * vendor
+     * -vendor",
      *         @SWG\Schema (
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(

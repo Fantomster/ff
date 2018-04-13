@@ -16,7 +16,9 @@ class GuideSearch extends Guide
 {
 
     public $date_from;
+    public $updated_date_from;
     public $color;
+    public $updated_date_to;
     public $date_to;
     public $vendor_id;
     public $searchString;
@@ -52,6 +54,16 @@ class GuideSearch extends Guide
             $t2_f = $to->format('Y-m-d H:i:s');
         }
 
+        $updated_from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->updated_date_from . " 00:00:00");
+        if ($updated_from) {
+            $updated_t1_f = $from->format('Y-m-d H:i:s');
+        }
+
+        $updated_to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->updated_date_to . " 00:00:00");
+        if ($updated_to) {
+            $updated_t2_f = $from->format('Y-m-d H:i:s');
+        }
+
         $query = Guide::find()->distinct()->joinWith('guideProducts.baseProduct.vendor');
         // add conditions that should always apply here
 
@@ -78,6 +90,13 @@ class GuideSearch extends Guide
         }
         if (isset($t2_f)) {
             $query->andFilterWhere(['<=', Guide::tableName() . '.created_at', $t2_f]);
+        }
+
+        if (isset($updated_t1_f)) {
+            $query->andFilterWhere(['>=', Guide::tableName() . '.updated_at', $updated_t1_f]);
+        }
+        if (isset($updated_t2_f)) {
+            $query->andFilterWhere(['<=', Guide::tableName() . '.updated_at', $updated_t2_f]);
         }
 
         // grid filtering conditions

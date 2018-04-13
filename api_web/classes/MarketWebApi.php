@@ -322,6 +322,7 @@ class MarketWebApi extends WebApi
 
         $price = (isset($catalogGoodsModel->price) ? $catalogGoodsModel->price : $model->price);
         $discount_price = (isset($catalogGoodsModel->discountPrice) ? $catalogGoodsModel->discountPrice : $model->price);
+        $catalog_id = (isset($catalogGoodsModel->catalog) ? $catalogGoodsModel->catalog->id : $model->catalog->id);
 
         if ($price == $discount_price) {
             $discount_price = 0;
@@ -329,7 +330,7 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = ((int)$model->catalog->id ?? null);
+        $item['catalog_id'] = ((int)$catalog_id ?? null);
         $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);

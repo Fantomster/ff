@@ -18,8 +18,7 @@ use yii\data\ActiveDataProvider;
  * @property string $created_at
  * @property string $updated_at
  *
- * @property CatalogBaseGoods $baseProduct  
- * @property GoodsNotes $notes
+ * @property CatalogBaseGoods $baseProduct
  * @property Organization $organization
  * @property Catalog $catalog
  */

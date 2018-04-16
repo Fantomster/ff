@@ -168,7 +168,7 @@ $exportColumns = [
                                 'batchSize' => 200,
                                 'timeout' => 0,
                                 'dropdownOptions' => [
-                                    'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru' => 'Главный каталог - ']) . Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . '</span>',
+                                    'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . '</span>',
                                     'class' => ['btn btn-outline-default btn-sm']
                                 ],
                                 'exportConfig' => [
@@ -186,7 +186,6 @@ $exportColumns = [
                                         'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
                                         'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                                         'extension' => 'xlsx',
-                                        //'writer' => 'Excel2007',
                                         'styleOptions' => [
                                             'font' => [
                                                 'bold' => true,

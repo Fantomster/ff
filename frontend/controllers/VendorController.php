@@ -564,7 +564,7 @@ class VendorController extends DefaultController
         }
         $currentCatalog = $baseCatalog;
 
-        $dataProvider = CatalogBaseGoods::getDataForExcelExport($baseCatalog, $sort);
+        $dataProvider = CatalogBaseGoods::getDataForExcelExport($baseCatalog, $sort, true);
 
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
@@ -1736,7 +1736,7 @@ class VendorController extends DefaultController
             throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
 
-        $dataProvider = CatalogBaseGoods::getDataForExcelExport($baseCatalog, $sort);
+        $dataProvider = CatalogBaseGoods::getDataForExcelExport($model, $sort);
 
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol', 'dataProvider'));
     }

@@ -319,7 +319,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
 
 
-    public function getDataForExcelExport($baseCatalog, $sort)
+    public function getDataForExcelExport(Catalog $catalog, string $sort, bool $isBase = false): ActiveDataProvider
     {
         $q = self::find()
             ->select([
@@ -331,8 +331,14 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
             ])
             ->where(['deleted' => 0]);
+        if($isBase){
+            $q->andWhere(['cat_id' => $catalog->id]);
+        }else{
+            $q->leftJoin('catalog_goods', 'catalog_goods.base_goods_id = catalog_base_goods.id');
 
-        $q->andWhere(['cat_id' => $baseCatalog->id]);
+            $q->andWhere(['catalog_goods.cat_id' => $catalog->id]);
+        }
+
 
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = trim(\Yii::$app->request->get('searchString'));

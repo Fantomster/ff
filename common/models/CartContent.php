@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "cart_content".
@@ -71,6 +72,14 @@ class CartContent extends \yii\db\ActiveRecord
         ];
     }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        $this->cart->updated_at = new Expression('NOW()');
+        $this->cart->save();
+
+        parent::afterSave($insert, $changedAttributes);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -84,22 +93,7 @@ class CartContent extends \yii\db\ActiveRecord
      */
     public function getProduct()
     {
-        $relation = RelationSuppRest::findOne(['rest_org_id' => $this->cart->organization_id, 'supp_org_id' => $this->vendor_id]);
-
-        if (empty($relation) || $relation->cat_id == 0) {
-            return [];
-        }
-
-        $product = CatalogBaseGoods::findOne(['id' => $this->product_id])->getAttributes();
-
-        if ($product_options = CatalogGoods::find()->where(['cat_id' => $relation->cat_id, 'base_goods_id' => $this->product_id])->one()) {
-            $product['price'] = $product_options->price;
-            $product['discount'] = $product_options->discount;
-            $product['discount_percent'] = $product_options->discount_percent;
-            $product['discount_fixed'] = $product_options->discount_fixed;
-            $product['cat_id'] = $product_options->cat_id;
-        }
-        return $product;
+        return (new \api_web\helpers\Product())->findFromVendor($this->product_id, $this->vendor_id, $this->cart->organization_id);
     }
 
     /**

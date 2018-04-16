@@ -2,6 +2,7 @@
 
 namespace api_web\helpers;
 
+use common\models\Organization;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -50,5 +51,43 @@ class WebApiHelper
             }
             throw new BadRequestHttpException('Вы уверены, что вы прислали картинку? проверьте!');
         }
+    }
+
+    /**
+     * Собираем массив для отдачи, из модели
+     * @param Organization $model
+     * @return mixed
+     */
+    public static function prepareOrganization($model)
+    {
+        if (empty($model)) {
+            return null;
+        }
+
+        $item['id'] = (int)$model->id;
+        $item['name'] = $model->name ?? "";
+        $item['legal_entity'] = $model->legal_entity ?? "";
+        $item['contact_name'] = $model->contact_name ?? "";
+        $item['phone'] = $model->phone ?? "";
+        $item['email'] = $model->email ?? "";
+        $item['site'] = $model->website ?? "";
+        $item['address'] = $model->address ?? "";
+        $item['image'] = $model->pictureUrl;
+        $item['type_id'] = (int)$model->type_id;
+        $item['type'] = $model->type->name  ?? "";
+        $item['rating'] = round($model->ratingStars, 1);
+        $item['house'] = ($model->street_number === 'undefined' ? "" : $model->street_number ?? "");
+        $item['route'] = ($model->route === 'undefined' ? "" : $model->route ?? "");
+        $item['city'] = ($model->locality === 'undefined' ? "" : $model->locality ?? "");
+        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? "" : $model->administrative_area_level_1 ?? "");
+        $item['country'] = ($model->country === 'undefined' ? "" : $model->country ?? "");
+        $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
+        $item['about'] = $model->about  ?? "";
+
+        if ($model->type_id == Organization::TYPE_SUPPLIER) {
+            $item['allow_editing'] = $model->allow_editing;
+        }
+
+        return $item;
     }
 }

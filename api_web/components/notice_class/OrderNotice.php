@@ -82,7 +82,7 @@ class OrderNotice
                     }
                 $notification = $recipient->getSmsNotification($org);
                 if ($notification)
-                    if ($recipient->profile->phone && $notification->order_created) {
+                    if (!empty($recipient->profile->phone) && $notification->order_created) {
                         $text = Yii::$app->sms->prepareText('sms.order_new', [
                             'name' => $senderOrg->name,
                             'url' => $order->getUrlForUser($recipient)

@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\WebApiHelper;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -237,7 +238,7 @@ class UserWebApi extends \api_web\components\WebApi
         $result = [];
         foreach ($list_organisation as $item) {
             $model = Organization::findOne($item['id']);
-            $result[] = (new MarketWebApi())->prepareOrganization($model);
+            $result[] = WebApiHelper::prepareOrganization($model);
         }
 
         return $result;

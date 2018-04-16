@@ -177,7 +177,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
         $model = Organization::find()->where(['email' => $email, 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (!empty($model)) {
-            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+            return WebApiHelper::prepareOrganization($model);
         }
 
         $user = User::find()->where(['email' => $email])->one();
@@ -302,7 +302,7 @@ class VendorWebApi extends \api_web\components\WebApi
             }
 
             $transaction->commit();
-            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+            return WebApiHelper::prepareOrganization($model);
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -356,6 +356,6 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new ValidationException($vendor->getFirstErrors());
         }
 
-        return $this->container->get('MarketWebApi')->prepareOrganization($vendor);
+        return WebApiHelper::prepareOrganization($vendor);
     }
 }

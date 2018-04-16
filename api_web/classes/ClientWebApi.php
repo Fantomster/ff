@@ -33,7 +33,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('This method is forbidden for the vendor.');
         }
 
-        return $this->container->get('MarketWebApi')->prepareOrganization($this->user->organization);
+        return WebApiHelper::prepareOrganization($this->user->organization);
     }
 
     /**
@@ -120,7 +120,7 @@ class ClientWebApi extends WebApi
             }
 
             $transaction->commit();
-            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+            return WebApiHelper::prepareOrganization($model);
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -164,7 +164,7 @@ class ClientWebApi extends WebApi
 
             $transaction->commit();
             $model->refresh();
-            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+            return WebApiHelper::prepareOrganization($model);
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;

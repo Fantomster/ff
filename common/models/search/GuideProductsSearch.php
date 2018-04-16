@@ -38,7 +38,10 @@ class GuideProductsSearch extends \yii\base\Model {
      */
     public function search(array $params, int $guideId, int $clientId) {
         $this->load($params);
-        
+        if(empty($this->searchString) || $this->searchString == ''){
+            $this->searchString = $params['search_string'] ?? '';
+        }
+
         $searchString = "%$this->searchString%";
 
         $where = [];
@@ -106,7 +109,7 @@ class GuideProductsSearch extends \yii\base\Model {
             'params' => [':searchString' => $searchString],
             'pagination' => false
         ]);
-        
+
         return $dataProvider;
     }
 }

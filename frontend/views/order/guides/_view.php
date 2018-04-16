@@ -32,6 +32,20 @@ $this->registerJs('
                    }
    }).done(function() { console.log(222); });
     });
+    
+    $(document).on("change", "#searchString", function() {
+        var search = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: false,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    search_string: search,
+                   }
+   }).done(function() { console.log(222); });
+    });
     ', \yii\web\View::POS_READY);
 ?>
 

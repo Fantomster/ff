@@ -620,7 +620,8 @@ class OrderController extends DefaultController {
         return $this->redirect(['order/guides']);
     }
 
-    public function actionAjaxShowGuide($id) {
+    public function actionAjaxShowGuide(int $id): string
+    {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 

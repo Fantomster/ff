@@ -160,7 +160,7 @@ $exportColumns = [
                                 'dataProvider' => $dataProvider,
                                 'columns' => $exportColumns,
                                 'fontAwesome' => true,
-                                'filename' => Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru' => 'Главный каталог - ']) . date('Y-m-d'),
+                                'filename' => Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . "_" . date('Y-m-d'),
                                 'encoding' => 'UTF-8',
                                 'target' => ExportMenu::TARGET_SELF,
                                 'showConfirmAlert' => false,

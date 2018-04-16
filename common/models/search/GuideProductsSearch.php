@@ -21,7 +21,8 @@ class GuideProductsSearch extends \yii\base\Model {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules(): array
+    {
         return [
             [['searchString', 'guide_id', 'cbg_id'], 'safe'],
         ];
@@ -36,7 +37,8 @@ class GuideProductsSearch extends \yii\base\Model {
      *
      * @return SqlDataProvider
      */
-    public function search(array $params, int $guideId, int $clientId) {
+    public function search(array $params, int $guideId, int $clientId): SqlDataProvider
+    {
         $this->load($params);
         if(empty($this->searchString) || $this->searchString == ''){
             $this->searchString = $params['search_string'] ?? '';

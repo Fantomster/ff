@@ -436,7 +436,9 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionGuides() {
+
+    public function actionGuides(): string
+    {
         $client = $this->currentUser->organization;
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -451,7 +453,9 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxDeleteGuide($id) {
+
+    public function actionAjaxDeleteGuide(int $id): array
+    {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
         if (isset($guide)) {
@@ -460,6 +464,7 @@ class OrderController extends DefaultController {
         }
         return false;
     }
+
 
     public function actionAjaxCreateGuide($name) {
         $client = $this->currentUser->organization;

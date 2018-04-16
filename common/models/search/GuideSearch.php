@@ -40,7 +40,7 @@ class GuideSearch extends Guide
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $client_id)
+    public function search(array $params, int $client_id): ActiveDataProvider
     {
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
@@ -100,12 +100,13 @@ class GuideSearch extends Guide
         }
 
         // grid filtering conditions
-        $query->andFilterWhere(['like', 'name', $this->searchString]);
+        $query->andFilterWhere(['like', 'guide.name', $this->searchString]);
         $query->andFilterWhere(['like', 'color', $this->color]);
 
         if (isset($this->vendor_id)) {
             $query->andWhere(['=', CatalogBaseGoods::tableName() . '.supp_org_id', $this->vendor_id]);
         }
+        //dd($query);
 
         return $dataProvider;
     }

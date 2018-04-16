@@ -413,28 +413,30 @@ class OrderContentController extends ActiveController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)->id) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
-            if ($notification)
-                if($notification->order_canceled)
-                {
-                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
-            }
-            
-            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+            foreach ($orgs as $org) {
+                $notification = $recipient->getEmailNotification($org);
+                if ($notification)
+                    if ($notification->order_canceled) {
+                        $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)->id) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
-            if ($notification)
-                if($profile->phone && $notification->order_canceled)
-                {
-                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
-                $target = $profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification)
+                    if ($profile->phone && $notification->order_canceled) {
+                        $text = $senderOrg->name . " отменил заказ " . Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
+                        $target = $profile->phone;
+                        Yii::$app->sms->send($text, $target);
+                    }
             }
         }
     }

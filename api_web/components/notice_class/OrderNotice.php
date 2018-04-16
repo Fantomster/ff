@@ -66,25 +66,30 @@ class OrderNotice
         $subject = Yii::t('message', 'frontend.controllers.order.new_order') . $order->id . "!";
         $dataProvider = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
         $order->recipientsList;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
+
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
-            if ($notification)
-                if ($notification->order_created) {
-                    $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
-                }
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
-            if ($notification)
-                if ($recipient->profile->phone && $notification->order_created) {
-                    $text = Yii::$app->sms->prepareText('sms.order_new', [
-                        'name' => $senderOrg->name,
-                        'url' => $order->getUrlForUser($recipient)
-                    ]);
-                    Yii::$app->sms->send($text, $recipient->profile->phone);
-                }
+            foreach ($orgs as $org) {
+                $notification = $recipient->getEmailNotification($org);
+                if ($notification)
+                    if ($notification->order_created) {
+                        $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification)
+                    if ($recipient->profile->phone && $notification->order_created) {
+                        $text = Yii::$app->sms->prepareText('sms.order_new', [
+                            'name' => $senderOrg->name,
+                            'url' => $order->getUrlForUser($recipient)
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                    }
+            }
         }
     }
 
@@ -108,30 +113,35 @@ class OrderNotice
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
+
         /**
          * @var $notification EmailNotification|SmsNotification
          */
         foreach ($order->recipientsList as $recipient) {
             //Отправляем Email об отмене заказа
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
-            if ($notification) {
-                if ($notification->order_canceled) {
-                    $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+            foreach ($orgs as $org) {
+                $notification = $recipient->getEmailNotification($org);
+                if ($notification) {
+                    if ($notification->order_canceled) {
+                        $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
                 }
-            }
-            //Отправляем СМС
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
-            if ($notification) {
-                if (!empty($recipient->profile->phone) && $notification->order_canceled) {
-                    $text = Yii::$app->sms->prepareText('sms.order_canceled', [
-                        'name' => $senderOrg->name,
-                        'url' => $order->getUrlForUser($recipient)
-                    ]);
-                    Yii::$app->sms->send($text, $recipient->profile->phone);
+                //Отправляем СМС
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification) {
+                    if (!empty($recipient->profile->phone) && $notification->order_canceled) {
+                        $text = Yii::$app->sms->prepareText('sms.order_canceled', [
+                            'name' => $senderOrg->name,
+                            'url' => $order->getUrlForUser($recipient)
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                    }
                 }
             }
         }
@@ -158,30 +168,33 @@ class OrderNotice
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
-            if ($notification) {
-                if ($notification->order_done) {
-                    $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+            foreach ($orgs as $org ) {
+                $notification = $recipient->getEmailNotification($org);
+                if ($notification) {
+                    if ($notification->order_done) {
+                        $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
+                }
+
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification) {
+                    if (!empty($recipient->profile->phone) && $notification->order_done) {
+                        $text = Yii::$app->sms->prepareText('sms.order_done', [
+                            'name' => $order->vendor->name,
+                            'url' => $order->getUrlForUser($recipient)
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                    }
                 }
             }
-
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
-            if ($notification) {
-                if (!empty($recipient->profile->phone) && $notification->order_done) {
-                    $text = Yii::$app->sms->prepareText('sms.order_done', [
-                        'name' => $order->vendor->name,
-                        'url' => $order->getUrlForUser($recipient)
-                    ]);
-                    Yii::$app->sms->send($text, $recipient->profile->phone);
-                }
-            }
-
         }
 
         $systemMessage = $order->client->name . \Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru' => ' получил заказ!']);

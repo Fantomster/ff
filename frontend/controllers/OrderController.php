@@ -442,7 +442,7 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
-        $params['GuideSearch'] = Yii::$app->request->post("GuideSearch");
+        $params['GuideSearch'] = Yii::$app->request->get("GuideSearch");
 
         $dataProvider = $searchModel->search($params, $client->id);
 

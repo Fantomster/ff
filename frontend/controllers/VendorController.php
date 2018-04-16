@@ -1621,12 +1621,12 @@ class VendorController extends DefaultController
     }
 
 
-    public function actionStep3Copy($id)
+    public function actionStep3Copy($id): string
     {
+        ini_set('memory_limit','256M');
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        $baseCurrencySymbol = ' (' . $baseCatalog->currency->iso_code . ')';
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {
@@ -1652,8 +1652,6 @@ class VendorController extends DefaultController
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_thirteen', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'Неверный товар')]];
                     return $result;
                 }
-
-//                $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_thirteen', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_price_two', ['ru' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
@@ -1738,7 +1736,7 @@ class VendorController extends DefaultController
 
         $dataProvider = CatalogBaseGoods::getDataForExcelExport($model, $sort);
 
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol', 'dataProvider'));
+        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'dataProvider'));
     }
 
     public function actionStep3UpdateProduct($id)

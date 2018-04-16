@@ -340,6 +340,7 @@ $this->registerJs('
                                             'id' => 'searchForm',
                                             'class' => "navbar-form no-padding no-margin",
                                             'role' => 'search',
+                                            'method' => 'get'
                                         ],
                             ]);
                             ?>

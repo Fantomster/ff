@@ -144,7 +144,8 @@ class ClientController extends DefaultController {
      *  user list page
      */
 
-    public function actionEmployees() {
+    public function actionEmployees(): string
+    {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");

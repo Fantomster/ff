@@ -50,7 +50,7 @@ class UserSearch extends \common\models\User {
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search(array $params): ActiveDataProvider
     {
         /** @var \common\models\User $user */
         /** @var \common\models\Profile $profile */

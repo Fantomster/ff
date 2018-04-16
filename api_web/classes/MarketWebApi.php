@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use common\models\CatalogGoods;
 use common\models\Category;
 use common\models\MpCategory;
@@ -298,7 +299,7 @@ class MarketWebApi extends WebApi
         //Результат
         $result = $result->all();
         foreach ($result as $model) {
-            $return['organizations'][] = $this->prepareOrganization($model);
+            $return['organizations'][] = WebApiHelper::prepareOrganization($model);
         }
         /**
          * @var CatalogBaseGoods $model
@@ -345,44 +346,6 @@ class MarketWebApi extends WebApi
         $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
-        return $item;
-    }
-
-    /**
-     * Собираем массив для отдачи, из модели
-     * @param Organization $model
-     * @return mixed
-     */
-    public function prepareOrganization($model)
-    {
-        if (empty($model)) {
-            return null;
-        }
-
-        $item['id'] = (int)$model->id;
-        $item['name'] = $model->name ?? "";
-        $item['legal_entity'] = $model->legal_entity ?? "";
-        $item['contact_name'] = $model->contact_name ?? "";
-        $item['phone'] = $model->phone ?? "";
-        $item['email'] = $model->email ?? "";
-        $item['site'] = $model->website ?? "";
-        $item['address'] = $model->address ?? "";
-        $item['image'] = $model->pictureUrl;
-        $item['type_id'] = (int)$model->type_id;
-        $item['type'] = $model->type->name  ?? "";
-        $item['rating'] = round($model->ratingStars, 1);
-        $item['house'] = ($model->street_number === 'undefined' ? "" : $model->street_number ?? "");
-        $item['route'] = ($model->route === 'undefined' ? "" : $model->route ?? "");
-        $item['city'] = ($model->locality === 'undefined' ? "" : $model->locality ?? "");
-        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? "" : $model->administrative_area_level_1 ?? "");
-        $item['country'] = ($model->country === 'undefined' ? "" : $model->country ?? "");
-        $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
-        $item['about'] = $model->about  ?? "";
-
-        if ($model->type_id == Organization::TYPE_SUPPLIER) {
-            $item['allow_editing'] = $model->allow_editing;
-        }
-
         return $item;
     }
 

@@ -24,7 +24,7 @@ class CartController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={{"catalog_id":1, "product_id":1, "quantity":10}}
+     *                  default={{"product_id":1, "quantity":10}}
      *              )
      *         )
      *     ),
@@ -101,7 +101,7 @@ class CartController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default= {"order_id":"1"}
+     *                  default= {"vendor_id": 3803}
      *              )
      *         )
      *     ),
@@ -125,5 +125,44 @@ class CartController extends WebApiController
     public function actionClear()
     {
         $this->response = $this->container->get('CartWebApi')->clear($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/cart/registration",
+     *     tags={"Cart"},
+     *     summary="Зарегистрировать заказ из корзины",
+     *     description="Зарегистрировать заказ из корзины",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default= {"id": {1,2}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={3301, 3302}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRegistration()
+    {
+        $this->response = $this->container->get('CartWebApi')->register($this->request);
     }
 }

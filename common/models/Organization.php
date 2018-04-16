@@ -394,17 +394,38 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
     /**
+     * Метод возвращает корзину организации//пользователя
      * @return array|CartContent[]|mixed
      */
-    public function _getCart() {
+    public function _getCart()
+    {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        $cart = Cart::find()->where(['organization_id' => $this->id])->one();
-        if (empty($cart)) {
+        //Запрос
+        $query = Cart::find()->where(['organization_id' => $this->id]);
+        /**
+         * Если включат индивидуальные настройки корзины
+         * Сейчас тупо заглушка, если будет настрйка, нужно будет вписать
+         */
+        if (isset($individual_cart_enable)) {
+            $query->andWhere(['user_id' => Yii::$app->user->id]);
+        }
+
+        //Получаем все корзины
+        $carts = $query->all();
+
+        if (empty($carts)) {
             return [];
         }
-        return $cart->cartContents;
+
+        //Собираем результаты, все строки с позициями
+        $result = [];
+        foreach ($carts as $cart) {
+            $result = ArrayHelper::merge($result, $cart->cartContents);
+        }
+
+        return $result;
     }
 
     /**

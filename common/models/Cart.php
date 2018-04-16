@@ -74,6 +74,19 @@ class Cart extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function getVendors()
+    {
+        $vendors = $this->getCartContents()->select('vendor_id as id')->distinct()->all();
+        $result = [];
+        foreach($vendors as $vendor) {
+            $result[] = Organization::findOne($vendor['id']);
+        }
+        return $result;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getCartContents()

@@ -840,8 +840,8 @@ class Organization extends \yii\db\ActiveRecord {
 
         return User::find()
                         ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
-                        ->leftJoin($relationTable, "$relationTable.organization_id = $vendor_id and $relationTable.user_id = $assocTable.manager_id")
-                        ->where(["$assocTable.organization_id" => $this->id])
+                        ->leftJoin($relationTable,  "$relationTable.user_id = $assocTable.manager_id")
+                        ->where(["$assocTable.organization_id" => $this->id, "$relationTable.organization_id" => $vendor_id])
                         ->all();
     }
 

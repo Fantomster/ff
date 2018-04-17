@@ -387,18 +387,24 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return ['success' => false];
     }
 
-    public function actionChangeForm()
+    public function actionChangeForm(): string
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = new Organization();
-        $dataProvider = new \yii\data\ArrayDataProvider([
-            'allModels' => (new UserWebApi())->getAllOrganization(),
-            'pagination' => [
-                'pageSize' => 4,
-            ],
-        ]);
+        $dataProvider = User::getAllOrganizationsDataProvider();
 
         return $this->renderAjax('_changeForm', compact('user','dataProvider','organization'));
+    }
+
+
+    public function actionBusiness(): string
+    {
+        $user = User::findIdentity(Yii::$app->user->id);
+        $dataProvider = User::getAllOrganizationsDataProvider();
+
+        $loginRedirect = $this->module->loginRedirect;
+        $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
+        return $this->render('business', compact('user','dataProvider', 'returnUrl'));
     }
 
 
@@ -441,7 +447,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
                  $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                  $user->role_id == Role::ROLE_ADMIN ||
-                 $user->role_id == Role::ROLE_FKEEPER_MANAGER))
+                 $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR))
         {
             $post = Yii::$app->request->post();
             if ($organization->load($post)) {
@@ -472,7 +478,14 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                            
                     }
                 $roleID = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
-                User::createRelationUserOrganization($user->id, $organization->id, $roleID);
+                if($user->role_id == Role::ROLE_ADMIN || $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
+                    $rel = RelationUserOrganization::findOne(['organization_id'=>$user->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]) ?? RelationUserOrganization::findOne(['organization_id'=>$this->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_EMPLOYEE]]);
+                    $userID = $rel->user_id;
+                }else{
+                    $userID = $user->id;
+                }
+
+                User::createRelationUserOrganization($userID, $organization->id, $roleID);
                 $currentOrganizationID = $currentOrganization->id;
                 $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
                 foreach ($relations as $relation){
@@ -527,28 +540,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $transaction->rollback();
             return false;
         }
-    }
-
-    public function actionBusiness()
-    {
-        $user = User::findIdentity(Yii::$app->user->id);
-        $sql = "
-        select org.id as `id`,org.`name` as `name`,org.`type_id` as `type_id` from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $user->id . " order by org.`name`";
-
-        $sql2 = "
-        select count(*) from `organization` as org left join `relation_user_organization` as rio on rio.organization_id = org.id where rio.user_id =" . $user->id;
-
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => \Yii::$app->db->createCommand($sql)->sql,
-            'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),
-            'pagination' => [
-                'pageSize' => 4,
-            ],
-        ]);
-
-        $loginRedirect = $this->module->loginRedirect;
-        $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
-        return $this->render('business', compact('user','dataProvider', 'returnUrl'));
     }
 
 }

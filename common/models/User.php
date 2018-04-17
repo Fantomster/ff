@@ -8,11 +8,13 @@
 
 namespace common\models;
 
+use api_web\classes\UserWebApi;
 use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
+use yii\data\ArrayDataProvider;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -754,8 +756,27 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getAllOrganization(): array
     {
-        return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
+        if($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
+            $rel = RelationUserOrganization::findOne(['organization_id'=>$this->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]) ?? RelationUserOrganization::findOne(['organization_id'=>$this->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_EMPLOYEE]]);
+            $userID = $rel->user_id;
+        }else{
+            $userID = $this->id;
+        }
+        return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID])->orderBy('organization.name')->all();
     }
+
+
+    public function getAllOrganizationsDataProvider(): ArrayDataProvider
+    {
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => (new UserWebApi())->getAllOrganization(),
+            'pagination' => [
+                'pageSize' => 4,
+            ],
+        ]);
+        return $dataProvider;
+    }
+
 
     /**
      * Проверка, можно ли переключиться на организацию

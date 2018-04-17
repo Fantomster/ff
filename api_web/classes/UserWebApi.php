@@ -12,6 +12,7 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
+use yii\data\ArrayDataProvider;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -228,7 +229,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function getAllOrganization()
+    public function getAllOrganization(): array
     {
         $list_organisation = $this->user->getAllOrganization();
         if (empty($list_organisation)) {
@@ -243,6 +244,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         return $result;
     }
+
 
     /**
      * Список поставщиков пользователя

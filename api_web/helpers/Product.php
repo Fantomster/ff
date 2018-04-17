@@ -46,10 +46,10 @@ class Product extends WebApi
         $model = CatalogBaseGoods::findOne(['id' => $id]);
 
         $relation = RelationSuppRest::findOne(['rest_org_id' => $client_id, 'supp_org_id' => $vendor_id]);
-        if (empty($relation) || $relation->cat_id == 0) {
+        if (!empty($relation) && $relation->cat_id != 0) {
             $individualModel = CatalogGoods::find()->where(['cat_id' => $relation->cat_id, 'base_goods_id' => $id])->one();
         }
-       
+
         return $this->prepareProduct($model, $individualModel ?? null);
     }
 

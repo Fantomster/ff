@@ -550,9 +550,8 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             //Добавляем товары для заказа в корзину
             $this->container->get('CartWebApi')->add($request);
-            $result = $this->container->get('CartWebApi')->register(['id' => [$order->vendor_id]]);
             $t->commit();
-            return $this->getInfo(['order_id' => array_pop($result)]);
+            return $this->container->get('CartWebApi')->items();
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;

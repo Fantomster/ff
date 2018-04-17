@@ -42,6 +42,7 @@ class GuideSearch extends Guide
      */
     public function search(array $params, int $client_id): ActiveDataProvider
     {
+        $this->load($params);
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
@@ -56,12 +57,12 @@ class GuideSearch extends Guide
 
         $updated_from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->updated_date_from . " 00:00:00");
         if ($updated_from) {
-            $updated_t1_f = $from->format('Y-m-d H:i:s');
+            $updated_t1_f = $updated_from->format('Y-m-d H:i:s');
         }
 
         $updated_to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->updated_date_to . " 00:00:00");
         if ($updated_to) {
-            $updated_t2_f = $from->format('Y-m-d H:i:s');
+            $updated_t2_f = $updated_to->format('Y-m-d H:i:s');
         }
 
         $query = Guide::find()->distinct()->joinWith('guideProducts.baseProduct.vendor');
@@ -71,8 +72,6 @@ class GuideSearch extends Guide
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
-
-        $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails

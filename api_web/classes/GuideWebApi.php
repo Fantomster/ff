@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\exceptions\ValidationException;
+use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
 use common\models\guides\Guide;
@@ -37,6 +38,10 @@ class GuideWebApi extends \api_web\components\WebApi
         $search = new GuideSearch();
 
         if (isset($post['search'])) {
+            /**
+             * Чистим от кривых входящих параметров
+             */
+            WebApiHelper::clearRequest($post['search']);
             /**
              * Фильтр по поставщику
              */
@@ -77,7 +82,7 @@ class GuideWebApi extends \api_web\components\WebApi
             }
         }
 
-        $dataProvider = $search->search(null, $client->id);
+        $dataProvider = $search->search([], $client->id);
 
         //Пагинация
         $pagination = new Pagination();

@@ -74,7 +74,7 @@ class WebApiHelper
         $item['address'] = $model->address ?? "";
         $item['image'] = $model->pictureUrl;
         $item['type_id'] = (int)$model->type_id;
-        $item['type'] = $model->type->name  ?? "";
+        $item['type'] = $model->type->name ?? "";
         $item['rating'] = round($model->ratingStars, 1);
         $item['house'] = ($model->street_number === 'undefined' ? "" : $model->street_number ?? "");
         $item['route'] = ($model->route === 'undefined' ? "" : $model->route ?? "");
@@ -82,12 +82,33 @@ class WebApiHelper
         $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? "" : $model->administrative_area_level_1 ?? "");
         $item['country'] = ($model->country === 'undefined' ? "" : $model->country ?? "");
         $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
-        $item['about'] = $model->about  ?? "";
+        $item['about'] = $model->about ?? "";
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['allow_editing'] = $model->allow_editing;
         }
 
         return $item;
+    }
+
+    public static $clearValue = ['d.m.Y', ''];
+
+    public static function clearRequest(&$post)
+    {
+        if (is_array($post)) {
+            foreach ($post as $key => &$value) {
+                if (is_array($value)) {
+                    self::clearRequest($value);
+                } else {
+                    if (in_array($value, self::$clearValue) || empty($value)) {
+                        unset($post[$key]);
+                    }
+                }
+            }
+        } else {
+            if (in_array($post, self::$clearValue) || empty($post)) {
+                $post = null;
+            }
+        }
     }
 }

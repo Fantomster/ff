@@ -101,6 +101,7 @@ class CartWebApi extends \api_web\components\WebApi
             if (!isset($return[$row->vendor->id])) {
                 $return[$row->vendor->id] = [
                     'id' => $row->vendor->id,
+                    'delivery_cost' => $this->getCart()->calculateDelivery($row->vendor_id),
                     'vendor' => WebApiHelper::prepareOrganization($row->vendor),
                     'items' => $items[$row->vendor->id]
                 ];

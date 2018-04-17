@@ -36,7 +36,6 @@ class Cart extends \yii\db\ActiveRecord
             [['organization_id', 'user_id'], 'required'],
             [['organization_id', 'user_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['user_id'], 'unique'],
             [['organization_id', 'user_id'], 'unique', 'targetAttribute' => ['organization_id', 'user_id']],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],

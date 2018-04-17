@@ -97,7 +97,7 @@ class CartWebApi extends \api_web\components\WebApi
          * @var CartContent $row
          */
         foreach ($content as $row) {
-            $items[$row->vendor->id][] = $this->prepareProduct($row->product);
+            $items[$row->vendor->id][] = $this->prepareProduct($row);
             if (!isset($return[$row->vendor->id])) {
                 $return[$row->vendor->id] = [
                     'id' => $row->vendor->id,
@@ -148,17 +148,32 @@ class CartWebApi extends \api_web\components\WebApi
     public function register(array $post)
     {
         $cart = $this->getCart();
-        return $this->createOrder($cart, $post['id'] ?? []);
+        return $this->createOrder($cart, $post ?? []);
     }
 
     /**
      * @param Cart $cart
-     * @param $vendors
+     * @param $post
      * @return array
      * @throws \Exception
      */
-    private function createOrder(Cart $cart, $vendors)
+    private function createOrder(Cart $cart, $post)
     {
+        WebApiHelper::clearRequest($post);
+
+        $vendors = [];
+        if (!empty($post)) {
+            foreach ($post as $row) {
+                if (empty($row['id'])) {
+                    throw new BadRequestHttpException("ERROR: Empty id");
+                }
+                $vendors[$row['id']] = [
+                    'delivery_date' => $row['delivery_date'] ?? null,
+                    'comment' => $row['comment'] ?? null,
+                ];
+            }
+        }
+
         $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -168,9 +183,6 @@ class CartWebApi extends \api_web\components\WebApi
              */
             //Бежим по поставщикам в корзине
             foreach ($cart->getVendors() as $vendor) {
-                if (!empty($vendors) && !in_array($vendor->id, $vendors)) {
-                    continue;
-                }
                 //Создаем заказ
                 $order = new Order();
                 $order->client_id = $client->id;
@@ -179,6 +191,21 @@ class CartWebApi extends \api_web\components\WebApi
                 $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $order->currency_id = $vendor->baseCatalog->currency_id;
                 $order->created_at = gmdate("Y-m-d H:i:s");
+
+                if (!empty($vendors)) {
+                    if (!isset($vendors[$vendor->id])) {
+                        continue;
+                    } else {
+                        if (!empty($vendors[$vendor->id]['delivery_date'])) {
+                            $d = str_replace('.', '-', $vendors[$vendor->id]['delivery_date']);
+                            $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
+                        }
+                        if (!empty($vendors[$vendor->id]['comment'])) {
+                            $order->comment = $vendors[$vendor->id]['comment'];
+                        }
+                    }
+                }
+
                 if (!$order->validate() || !$order->save()) {
                     throw new ValidationException($order->getFirstErrors());
                 }
@@ -246,6 +273,43 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         return $return;
+    }
+
+    /**
+     * Добавить комментарий к товару
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function productComment(array $post)
+    {
+        if (empty($post['product_id'])) {
+            throw new BadRequestHttpException("ERROR: Empty product_id");
+        }
+
+        if (empty($post['comment'])) {
+            throw new BadRequestHttpException("ERROR: Empty comment");
+        }
+
+        /**
+         * @var $model CartContent
+         */
+        $model = $this->getCart()->getCartContents()->andWhere(['product_id' => $post['product_id']])->one();
+
+        if (empty($model)) {
+            throw new BadRequestHttpException("Нет такого товара в корзине");
+        }
+
+        $model->comment = $post['comment'];
+
+        if (!$model->validate()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+
+        $model->save();
+
+        return $this->items();
     }
 
     /**
@@ -338,11 +402,13 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Продукт. Собираем необходимые данные из модели
-     * @param $model
+     * @param $row CartContent
      * @return mixed
      */
-    private function prepareProduct($model)
+    private function prepareProduct($row)
     {
+        $model = $row->product;
+
         $item['id'] = (int)$model['id'];
         $item['product'] = $model['product'];
         $item['catalog_id'] = (int)$model['cat_id'];
@@ -358,6 +424,7 @@ class CartWebApi extends \api_web\components\WebApi
         $item['currency_id'] = $model['model']->catalog->currency->id;
         $item['image'] = (new MarketWebApi())->getProductImage($model['model']);
         $item['in_basket'] = $this->countProductInCart($model['id']);
+        $item['comment'] = $row->comment;
         return $item;
     }
 }

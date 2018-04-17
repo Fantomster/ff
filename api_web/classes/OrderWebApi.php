@@ -352,7 +352,6 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user' => $model->createdByProfile->full_name ?? ''
                 ];
             }
-
             if (isset($orders[0])) {
                 foreach (array_keys($orders[0]) as $key) {
                     $headers[$key] = (new Order())->getAttributeLabel($key);

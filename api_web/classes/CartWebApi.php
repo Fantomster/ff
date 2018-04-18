@@ -368,6 +368,7 @@ class CartWebApi extends \api_web\components\WebApi
             $position->product_name = $product['product'];
             $position->units = $product['units'];
             $position->vendor_id = $product['vendor_id'];
+            $position->currency_id = $product['currency_id'];
             if (!$position->validate()) {
                 throw new ValidationException($position->getFirstErrors());
             }
@@ -395,9 +396,12 @@ class CartWebApi extends \api_web\components\WebApi
         if ($quantity < $units) {
             $quantity = $units;
         } else {
-            $quantity = round($quantity / $units, 3) * $units;
+            if (strstr($units, '.') !== false || strstr($units, ',') !== false) {
+                $quantity = round(round($quantity / $units) * $units, 3);
+            } else {
+                $quantity = round($quantity / $units, 0) * $units;
+            }
         }
-
         return $quantity;
     }
 

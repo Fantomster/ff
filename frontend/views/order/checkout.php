@@ -353,7 +353,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     Html::a('<i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> ' . Yii::t('message', 'frontend.views.order.basket_empty_two', ['ru' => 'Очистить корзину']) . ' </span>', '#', [
                         'class' => 'btn btn-danger pull-right deleteAll',
                         'style' => 'margin-right: 10px; margin-left: 3px;',
-                        'data-url' => Url::to(['/order/ajax-delete-order', 'all' => true]),
+                        'data-url' => Url::to(['/order/ajax-delete-order']),
                     ]);
                     ?>
                     <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> <?= Yii::t('app', 'Сохранить') ?></span></button>
@@ -378,14 +378,14 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     if ($cart['for_min_order_rice']):
                         ?><style>#createAll{display: none;}</style>
                     <?php endif; ?>
-                    <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
+                    <div class="block_wrap_bask_tover" id="cartOrder<?= $cart['id'] ?>">
                         <div class="block_left">
                             <div class="block_left_top">
 
                                 <?=
-                                Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">', '#', [
+                                Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">del', '#', [
                                     'class' => 'delete',
-                                    'data-url' => Url::to(['/order/ajax-delete-order', 'all' => false, 'order_id' => $cart['id']]),
+                                    'data-url' => Url::to(['/order/ajax-delete-order', 'vendor_id' => $cart['id']]),
                                 ]);
                                 ?>
                                 <div class="block_wrap_activess">
@@ -435,7 +435,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             </div>
                             <?= $this->render('_checkout-content', ['cart' => $cart]) ?>
                         </div>
-                        <div class="block_right" data-url="<?= Url::to(['order/ajax-calculate-total', 'id' => $cart->id]) ?>">
+                        <div class="block_right" data-url="<?= Url::to(['order/ajax-calculate-total', 'id' => $cart['id']]) ?>">
                             <?= $this->render("_checkout-total", compact('cart')); ?>
                         </div>
                     </div>

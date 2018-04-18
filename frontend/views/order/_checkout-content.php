@@ -22,7 +22,7 @@ foreach ($content as $position) {
                 'class' => 'add-note but_com',
                 'data' => [
                     'id' => $position['id'],
-                    'url' => Url::to(['order/ajax-set-note', 'order_content_id' => $position['id']]),
+                    'url' => Url::to(['order/ajax-set-note', 'product_id' => $position['id']]),
                     'toggle' => "tooltip",
                     'placement' => "bottom",
                     'original-title' => isset($position['comment']) ? $position['comment'] : '',
@@ -34,7 +34,7 @@ foreach ($content as $position) {
         <div class="block_chek_kolvo">
             <?=
             TouchSpin::widget([
-                'name' => "OrderContent[" . $position['id']. "][in_basket]",
+                'name' => "CartContent[" . $position['id']. "][in_basket]",
                 'pluginOptions' => [
                     'initval' => $position['in_basket'],
                     'min' => (isset($position['units']) && ($position['units'])) ? $position['units'] : 0.001,
@@ -48,7 +48,7 @@ foreach ($content as $position) {
                     'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                 ],
                 'options' => ['class' => 'quantity form-control '],
-            ]) . Html::hiddenInput("OrderContent[".$position['id']."[id]", $position['id'])
+            ]) . Html::hiddenInput("CartContent[".$position['id']."[id]", $position['id'])
             ?>
         </div>
         <div class="block_cena" id="position_<?= $position['id'] ?>">

@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use api_web\classes\CartWebApi;
+use common\models\Cart;
 use common\models\search\OrderProductsSearch;
 use Yii;
 use yii\helpers\Json;
@@ -815,24 +816,12 @@ class OrderController extends DefaultController {
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
 
-    public function actionAjaxRemovePosition($vendor_id, $product_id) {
+    public function actionAjaxRemovePosition($product_id) {
 
         $client = $this->currentUser->organization;
-
-        $orderDeleted = false;
-        $order = Order::find()->where(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
-        foreach ($order->orderContent as $position) {
-            if ($position->product_id == $product_id) {
-                $position->delete();
-            }
-            if (!($order->positionCount)) {
-                $orderDeleted = $order->delete();
-            }
-        }
-        if (!$orderDeleted) {
-            $order->calculateTotalPrice();
-        }
-        $cartCount = $client->getCartCount();
+        $data = ['product_id' => $product_id, 'quantity' => 0];
+        $items = (new CartWebApi())->add($data);
+        $cartCount = count($items);
         $this->sendCartChange($client, $cartCount);
 
         return $product_id;
@@ -922,48 +911,21 @@ class OrderController extends DefaultController {
         }
     }
 
-    /* public function actionAjaxSetNote($product_id) {
-
-      $client = $this->currentUser->organization;
-
-      if (Yii::$app->request->post()) {
-      $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
-      if (!$note) {
-      $note = new GoodsNotes();
-      $note->rest_org_id = $client->id;
-      $note->catalog_base_goods_id = $product_id;
-      }
-      $note->note = Yii::$app->request->post("comment");
-      $note->save();
-      Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-      $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru'=>"Комментарий к товару добавлен"]), "comment" => $note->note, "type" => "success"];
-      return $result;
-      }
-
-      return false;
-      } */
-
-    public function actionAjaxSetNote($order_content_id) {
-
-        $client = $this->currentUser->organization;
+    public function actionAjaxSetNote($product_id) {
 
         if (Yii::$app->request->post()) {
-            $orderContent = OrderContent::find()->where(['id' => $order_content_id])->one();
-            if ($orderContent) {
-                $order = $orderContent->order;
-
-                if ($order && $order->client_id == $client->id && $order->status == Order::STATUS_FORMING) {
-                    $orderContent->comment = Yii::$app->request->post('comment');
-                    $orderContent->save();
-                    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                    $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru' => "Комментарий к товару добавлен"]), "comment" => $orderContent->comment, "type" => "success"];
-                    return $result;
+                   $data['product_id'] = $product_id;
+                   $data['comment'] = Yii::$app->request->post('comment');
+                   try {
+                       (new CartWebApi())->productComment($data);
+                       Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                       $result = ["title" => Yii::t('message', 'frontend.controllers.order.comment', ['ru' => "Комментарий к товару добавлен"]), "comment" => $data['comment'], "type" => "success"];
+                       return $result;
+                   }catch (\Exception $e) {
+                       return false;
+                   }
                 }
-            }
             return false;
-        }
-
-        return false;
     }
 
     public function actionAjaxMakeOrder() {
@@ -1001,53 +963,50 @@ class OrderController extends DefaultController {
 
     public function actionAjaxCalculateTotal($id) {
         if (Yii::$app->request->post()) {
-            $content = Yii::$app->request->post('OrderContent');
-            $order = Order::findOne(['id' => $id, 'client_id' => $this->currentUser->organization_id, 'status' => Order::STATUS_FORMING]);
-            $currencySymbol = $order->currency->symbol;
+            $content = Yii::$app->request->post('CartContent');
+            $carts = (new CartWebApi())->items();
+
+            foreach ($carts as $item)
+                if($item['id'] == $id) {
+                    $cart = $item;
+                    break;
+                }
+
             $rawPrice = 0;
-            $vendor_id = $order->vendor_id;
+            $vendor_id = $id;
             $expectedPositions = [];
-            foreach ($order->orderContent as $key => $item) {
-                if (isset($content[$item->id])) {
-                    $rawPrice += $order->orderContent[$key]->price * $content[$item->id]["quantity"];
-                    $position = $order->orderContent[$key];
-                    $position->quantity = $content[$item->id]["quantity"];
+            $currencySymbol = $cart['currency'];
+
+            foreach ($cart['items'] as $item) {
+                if (isset($content[$item['id']])) {
+                    $rawPrice += $item['price'] * $content[$item['id']]["in_basket"];
+                    $position = $item;
+                    $position['in_basket'] = $content[$item['id']]["in_basket"];
                     $expectedPositions[] = [
-                        "id" => $position->id,
+                        "id" => $position['id'],
                         "price" => $this->renderPartial("_checkout-position-price", compact("position", "currencySymbol", "vendor_id")),
                     ];
                 }
             }
-            $forMinOrderPrice = $order->forMinOrderPrice($rawPrice);
-            $forFreeDelivery = $order->forFreeDelivery($rawPrice);
-            $order->calculateTotalPrice(false, $rawPrice);
+            $cartModel = new Cart();
+            $forMinCartPrice = $cartModel->forMinCartPrice($vendor_id, $rawPrice);
+            $forFreeDelivery = $cartModel->forFreeDelivery($vendor_id, $rawPrice);
+            $cart['total_price'] = $cartModel->calculateTotalPrice($vendor_id, $rawPrice);
             $result = [
-                "total" => $this->renderPartial("_checkout-total", compact('order', 'currencySymbol', 'forMinOrderPrice', 'forFreeDelivery')),
+                "total" => $this->renderPartial("_checkout-total", compact('cart', 'currencySymbol', 'forMinCartPrice', 'forFreeDelivery')),
                 "expectedPositions" => $expectedPositions,
-                "button" => $this->renderPartial("_checkout-position-button", compact("order", "currencySymbol", "forMinOrderPrice")),
+                "button" => $this->renderPartial("_checkout-position-button", compact("cart", "currencySymbol", "forMinCartPrice")),
             ];
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return $result;
         }
     }
 
-    public function actionAjaxDeleteOrder($all, $order_id = null) {
+    public function actionAjaxDeleteOrder($vendor_id = null) {
         $client = $this->currentUser->organization;
-
-        if (!$all) {
-            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-            if ($order) {
-                OrderContent::deleteAll(['order_id' => $order->id]);
-                $order->delete();
-            }
-        } else {
-            $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-            foreach ($orders as $order) {
-                OrderContent::deleteAll(['order_id' => $order->id]);
-                $order->delete();
-            }
-        }
-        $cartCount = $client->getCartCount();
+        $data = ['vendor_id' => $vendor_id];
+        $items = (new CartWebApi())->clear($data);
+        $cartCount = count($items);
         $this->sendCartChange($client, $cartCount);
         return true;
     }

@@ -4,7 +4,7 @@ use yii\helpers\Html;
 ?>
 
 <div class="block_right_wrap">
-    <p><?= Yii::t('app', 'Итого:') ?> <span id="orderTotal<?= $order->id ?>"><?= $cart['total_price'] ?></span> <?= $currencySymbol ?></p>
+    <p><?= Yii::t('app', 'Итого:') ?> <span id="orderTotal<?= $cart['id'] ?>"><?= $cart['total_price'] ?></span> <?= $currencySymbol ?></p>
 </div>
 <div class="block_right_wrap_1">
     <?php if ($cart['for_min_order_price']) { ?>

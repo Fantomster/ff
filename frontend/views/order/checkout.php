@@ -383,7 +383,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             <div class="block_left_top">
 
                                 <?=
-                                Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">del', '#', [
+                                Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">', '#', [
                                     'class' => 'delete',
                                     'data-url' => Url::to(['/order/ajax-delete-order', 'vendor_id' => $cart['id']]),
                                 ]);

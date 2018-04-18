@@ -119,7 +119,7 @@ class Cart extends \yii\db\ActiveRecord
             return -1;
         }
         if (isset($vendor->delivery)) {
-            $diff = $vendor->delivery->min_free_delivery_charge - (!isset($rawPrice) ? $this->rawPrice : $rawPrice);
+            $diff = $vendor->delivery->min_free_delivery_charge - (!isset($rawPrice) ? $this->getRawPrice($vendor_id) : $rawPrice);
         } else {
             $diff = 0;
         }
@@ -137,7 +137,7 @@ class Cart extends \yii\db\ActiveRecord
     }
 
     public function getRawPrice($vendor_id) {
-        if(isset($this->id))
+        if($this->id != null)
             return CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor_id])->scalar();
         return CartContent::find()->select('SUM(quantity*price)')->where(['vendor_id' => $vendor_id])->scalar();
     }

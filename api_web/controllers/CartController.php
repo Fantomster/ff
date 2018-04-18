@@ -140,7 +140,7 @@ class CartController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default= {"id": {1,2}}
+     *                  default= {{"id":1, "delivery_date":"d.m.Y", "comment":"comment order"}}
      *              )
      *         )
      *     ),
@@ -164,5 +164,44 @@ class CartController extends WebApiController
     public function actionRegistration()
     {
         $this->response = $this->container->get('CartWebApi')->register($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/cart/product-comment",
+     *     tags={"Cart"},
+     *     summary="Добавить комментарий к позиции",
+     *     description="Добавить комментарий к позиции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default= {"product_id": 1, "comment":"New comment!"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionProductComment()
+    {
+        $this->response = $this->container->get('CartWebApi')->productComment($this->request);
     }
 }

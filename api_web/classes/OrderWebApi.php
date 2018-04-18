@@ -348,10 +348,10 @@ class OrderWebApi extends \api_web\components\WebApi
                     'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,
-                    'create_user' => $model->createdByProfile->full_name
+                    'currency_id' => $model->currency_id,
+                    'create_user' => $model->createdByProfile->full_name ?? ''
                 ];
             }
-
             if (isset($orders[0])) {
                 foreach (array_keys($orders[0]) as $key) {
                     $headers[$key] = (new Order())->getAttributeLabel($key);

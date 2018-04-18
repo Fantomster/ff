@@ -21,6 +21,12 @@ class CartItem
     public $id;
 
     /**
+     * @SWG\Property(@SWG\Xml(name="delivery_cost"), example=0)
+     * @var float
+     */
+    public $delivery_cost;
+
+    /**
      * @SWG\Property(@SWG\Xml(name="vendor"), ref="#/definitions/Vendor")
      */
     public $vendor;

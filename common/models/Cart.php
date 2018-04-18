@@ -79,7 +79,7 @@ class Cart extends \yii\db\ActiveRecord
     {
         $vendors = $this->getCartContents()->select('vendor_id as id')->distinct()->all();
         $result = [];
-        foreach($vendors as $vendor) {
+        foreach ($vendors as $vendor) {
             $result[] = Organization::findOne($vendor['id']);
         }
         return $result;
@@ -91,5 +91,25 @@ class Cart extends \yii\db\ActiveRecord
     public function getCartContents()
     {
         return $this->hasMany(CartContent::className(), ['cart_id' => 'id']);
+    }
+
+    /**
+     * Стоимость доставки от конкретного вендора из корзины
+     * @param $vendor_id
+     * @return int
+     */
+    public function calculateDelivery($vendor_id)
+    {
+        $vendor = Organization::findOne($vendor_id);
+        $total_price = CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor->id])->scalar();
+        if (isset($vendor->delivery)) {
+            $free_delivery = $vendor->delivery->min_free_delivery_charge;
+        } else {
+            $free_delivery = 0;
+        }
+        if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
+            return round($vendor->delivery->delivery_charge, 2);
+        }
+        return 0;
     }
 }

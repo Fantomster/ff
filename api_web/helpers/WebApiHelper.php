@@ -86,6 +86,8 @@ class WebApiHelper
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['allow_editing'] = $model->allow_editing;
+            $item['min_order_price'] = round($model->delivery->min_order_price, 2);
+            $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge, 2);
         }
 
         return $item;

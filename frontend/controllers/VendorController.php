@@ -1621,7 +1621,7 @@ class VendorController extends DefaultController
     }
 
 
-    public function actionStep3Copy($id): string
+    public function actionStep3Copy($id)
     {
         ini_set('memory_limit','256M');
         $cat_id = $id;
@@ -1738,6 +1738,7 @@ class VendorController extends DefaultController
 
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'dataProvider'));
     }
+
 
     public function actionStep3UpdateProduct($id)
     {

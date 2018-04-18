@@ -168,11 +168,11 @@ class VendorController extends DefaultController
         }
     }
 
-    public function actionEmployees()
+
+    public function actionEmployees(): string
     {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        //$params = Yii::$app->request->getQueryParams();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
@@ -184,6 +184,7 @@ class VendorController extends DefaultController
             return $this->render('employees', compact('searchModel', 'dataProvider'));
         }
     }
+
 
     public function actionDelivery()
     {
@@ -1626,7 +1627,6 @@ class VendorController extends DefaultController
         ini_set('memory_limit','256M');
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {
@@ -1635,7 +1635,6 @@ class VendorController extends DefaultController
         $export = Yii::$app->request->post('export_type') ?? null;
         if (Yii::$app->request->isPost && !$export) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $post = Yii::$app->request->post();
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             $catalogGoods = CatalogGoods::find()

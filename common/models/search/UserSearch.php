@@ -42,7 +42,7 @@ class UserSearch extends \common\models\User {
      */
     public function attributes()
     {
-        return array_merge(parent::attributes(), ['organization_id', 'profile.full_name', 'role.name']);
+        return array_merge(parent::attributes(), ['relationUserOrganization.organization_id', 'profile.full_name', 'role.name']);
     }
     
     /**
@@ -64,7 +64,6 @@ class UserSearch extends \common\models\User {
         $profileTable = $profile::tableName();
         $roleTable = $role::tableName();
         $organizationTable = $organization::tableName();
-        $relationUserOrganizationTable = RelationUserOrganization::tableName();
 
         $query = $user::find();
         $query->joinWith(['profile' => function ($query) use ($profileTable) {
@@ -76,9 +75,7 @@ class UserSearch extends \common\models\User {
         $query->joinWith(['organization' => function ($query) use ($organizationTable) {
             $query->from(['organization' => $organizationTable]);
         }]);
-        $query->joinWith(['relationUserOrganization' => function ($query) use ($relationUserOrganizationTable) {
-            $query->from(['relationUserOrganization' => $relationUserOrganizationTable]);
-        }]);
+        $query->leftJoin('relation_user_organization', 'relation_user_organization.user_id=user.id');
 
         // create data provider
         $dataProvider = new ActiveDataProvider([
@@ -104,8 +101,7 @@ class UserSearch extends \common\models\User {
             ->orFilterWhere(['like', "profile.phone", $this->searchString])
             ->orFilterWhere(['like', "role.name", $this->searchString]);
         $query->andFilterWhere([
-            'relationUserOrganization.organization_id' => $this->organization_id,
-            'status' => $this->status,
+            'relation_user_organization.organization_id' => $this->organization_id,
         ]);
 
         return $dataProvider;

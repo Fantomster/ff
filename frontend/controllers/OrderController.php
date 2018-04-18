@@ -765,9 +765,8 @@ class OrderController extends DefaultController {
 
     public function actionPjaxCart() {
         if (Yii::$app->request->isPjax) {
-            $client = $this->currentUser->organization;
-            $orders = $client->getCart();
-            return $this->renderPartial('_pjax-cart', compact('orders'));
+            $carts = (new CartWebApi())->items();
+            return $this->renderPartial('_pjax-cart', compact('carts'));
         } else {
             return $this->redirect('/order/checkout');
         }
@@ -1466,12 +1465,21 @@ class OrderController extends DefaultController {
     }
 
     public function actionCheckout() {
-        $client = $this->currentUser->organization;
+        //$client = $this->currentUser->organization;
         $totalCart = 0;
 
         if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {
-            $content = Yii::$app->request->post('OrderContent');
-            $this->saveCartChanges($content);
+            $content = Yii::$app->request->post('CartContent');
+            $data = [];
+            foreach ($content as $key=>$row)
+                if(is_array(($row)))
+                    $data[] = ['product_id' => $key, 'quantity' => $row['in_basket']];
+
+            try {
+                (new CartWebApi())->add($data);
+            }catch (\Exception $e) {
+                return false;
+            }
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => Yii::t('message', 'frontend.controllers.order.changes_saved', ['ru' => "Изменения сохранены!"]), "type" => "success"];
         }

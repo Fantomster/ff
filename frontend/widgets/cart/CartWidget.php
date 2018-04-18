@@ -11,7 +11,7 @@ use yii\base\Widget;
  */
 class CartWidget extends Widget {
 
-    public $orders;
+    public $carts;
 
     public function init() {
         parent::init();
@@ -53,7 +53,7 @@ class CartWidget extends Widget {
     public function run() {
         $asset = CartWidgetAsset::register($this->getView());
         $baseUrl = $asset->baseUrl;
-        return $this->render('_cart', ['orders' => $this->orders, 'baseUrl' => $baseUrl]);
+        return $this->render('_cart', ['carts' => $this->carts, 'baseUrl' => $baseUrl]);
     }
 
 }

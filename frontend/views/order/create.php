@@ -225,10 +225,10 @@ $this->registerJs(
                             'summary' => '',
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
-                            'rowOptions'=>function($model) use ($orders){
-                                foreach ($orders as $order){
-                                    foreach($order->orderContent as $product){
-                                        if($model['id'] == $product->product_id){
+                            'rowOptions'=>function($model) use ($cart){
+                                foreach ($cart as $vendor) {
+                                    foreach ($vendor['items'] as $item) {
+                                        if ($model['id'] == $item['id']) {
                                             return ['class' => 'success'];
                                         }
                                     }

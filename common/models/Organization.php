@@ -467,7 +467,10 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        return Order::find()->where(['client_id' => $this->id, 'status' => Order::STATUS_FORMING])->count();
+        return (new Query())->from('cart as c')
+            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+            ->andWhere(['c.organization_id' => $this->id])
+            ->count();
     }
 
     /*

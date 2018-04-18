@@ -374,11 +374,8 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                 ]);
                 ?>
                 <?php
-                foreach ($orders as $order) {
-                    $currencySymbol = $order->currency->symbol;
-                    $forMinOrderPrice = $order->forMinOrderPrice();
-                    $forFreeDelivery = $order->forFreeDelivery();
-                    if ($forMinOrderPrice):
+                foreach ($carts as $cart) {
+                    if ($cart['for_min_order_rice']):
                         ?><style>#createAll{display: none;}</style>
                     <?php endif; ?>
                     <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
@@ -388,26 +385,27 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                 <?=
                                 Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">', '#', [
                                     'class' => 'delete',
-                                    'data-url' => Url::to(['/order/ajax-delete-order', 'all' => false, 'order_id' => $order->id]),
+                                    'data-url' => Url::to(['/order/ajax-delete-order', 'all' => false, 'order_id' => $cart['id']]),
                                 ]);
                                 ?>
                                 <div class="block_wrap_activess">
-                                    <p class = "basket_tovar_postav_name"><?= Yii::t('message', 'frontend.views.order.vendors_order', ['ru' => 'Заказ у поставщика']) ?> <span><?= $order->vendor->name ?> </span>
+                                    <p class = "basket_tovar_postav_name"><?= Yii::t('message', 'frontend.views.order.vendors_order', ['ru' => 'Заказ у поставщика']) ?> <span><?= $cart['vendor']['name'] ?> </span>
                                         <img class = "" src="/img/bot_ar.png" alt="">
                                     </p>
                                 </div>
                                 <div class="checkout_buttons">
                                     <span class="checkout-button">
-                                    <?= $this->render("_checkout-position-button", compact("order", "forMinOrderPrice", "currencySymbol")) ?>
+                                    <?= $this->render("_checkout-position-button", compact("cart")) ?>
                                     </span>
+                                    <?php /*
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
                                         'class' => 'but_comments comment pull-right',
                                         'data' => [
-                                            'url' => Url::to(['order/ajax-set-comment', 'order_id' => $order->id]),
+                                            'url' => Url::to(['order/ajax-set-comment', 'cart_id' => $cart['id']]),
                                             'toggle' => "tooltip",
                                             'placement' => "bottom",
-                                            "original-title" => $order->comment,
+                                            "original-title" => $ordercomment,
                                         ]
                                     ]);
                                     ?>
@@ -431,13 +429,14 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                             'todayHighlight' => true,
                                         ]
                                     ])
+                                    */
                                     ?>
                                 </div>
                             </div>
-                            <?= $this->render('_checkout-content', ['order' => $order]) ?>
+                            <?= $this->render('_checkout-content', ['cart' => $cart]) ?>
                         </div>
-                        <div class="block_right" data-url="<?= Url::to(['order/ajax-calculate-total', 'id' => $order->id]) ?>">
-                            <?= $this->render("_checkout-total", compact('order', 'currencySymbol', 'forMinOrderPrice', 'forFreeDelivery')); ?>
+                        <div class="block_right" data-url="<?= Url::to(['order/ajax-calculate-total', 'id' => $cart->id]) ?>">
+                            <?= $this->render("_checkout-total", compact('cart')); ?>
                         </div>
                     </div>
                 <?php } ?>

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use api_web\classes\CartWebApi;
 use common\models\search\OrderProductsSearch;
 use Yii;
 use yii\helpers\Json;
@@ -424,15 +425,15 @@ class OrderController extends DefaultController {
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
-        $orders = $client->getCart();
+        $cart = (new CartWebApi())->items();//$client->getCart();
 
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors', 'selectedVendor'));
+            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'cart', 'client', 'vendors', 'selectedVendor'));
         } else {
-            return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors', 'selectedVendor'));
+            return $this->render('create', compact('dataProvider', 'searchModel', 'cart', 'client', 'vendors', 'selectedVendor'));
         }
     }
 
@@ -777,72 +778,20 @@ class OrderController extends DefaultController {
         if ($quantity <= 0) {
             return false;
         }
+
+        $product = ['product_id' => $post['id'], 'quantity' => $quantity];
+
+        try {
+            (new CartWebApi())->add($product);
+        }catch (\Exception $e) {
+            return false;
+        }
+
         $client = $this->currentUser->organization;
-        $orders = $client->getCart();
-
-        $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
-
-        if ($product) {
-            $product_id = $product->baseProduct->id;
-            $price = $product->price;
-            $product_name = $product->baseProduct->product;
-            $vendor = $product->organization;
-            $units = $product->baseProduct->units;
-            $article = $product->baseProduct->article;
-        } else {
-            $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
-            if (!$product) {
-                return true; //$this->renderAjax('_orders', compact('orders'));
-            }
-            $product_id = $product->id;
-            $product_name = $product->product;
-            $price = $product->price;
-            $vendor = $product->vendor;
-            $units = $product->units;
-            $article = $product->article;
-        }
-        $isNewOrder = true;
-
-        foreach ($orders as $order) {
-            if ($order->vendor_id == $vendor->id) {
-                $isNewOrder = false;
-                $alteringOrder = $order;
-            }
-        }
-        if ($isNewOrder) {
-            $newOrder = new Order();
-            $newOrder->client_id = $client->id;
-            $newOrder->vendor_id = $vendor->id;
-            $newOrder->status = Order::STATUS_FORMING;
-            $newOrder->currency_id = $product->catalog->currency_id;
-            $newOrder->save();
-            $alteringOrder = $newOrder;
-        }
-
-        $isNewPosition = true;
-        foreach ($alteringOrder->orderContent as $position) {
-            if ($position->product_id == $product_id) {
-                $position->quantity += $quantity;
-                $position->save();
-                $isNewPosition = false;
-            }
-        }
-        if ($isNewPosition) {
-            $position = new OrderContent();
-            $position->order_id = $alteringOrder->id;
-            $position->product_id = $product_id;
-            $position->quantity = $quantity;
-            $position->price = $price;
-            $position->product_name = $product_name;
-            $position->units = $units;
-            $position->article = $article;
-            $position->save();
-        }
-        $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
 
-        return $post['id']; //$this->renderPartial('_orders', compact('orders'));
+        return $post['id'];
     }
 
     public function actionAjaxShowDetails() {
@@ -1568,16 +1517,15 @@ class OrderController extends DefaultController {
             return ["title" => Yii::t('message', 'frontend.controllers.order.changes_saved', ['ru' => "Изменения сохранены!"]), "type" => "success"];
         }
 
-        $orders = $client->getCart();
-        foreach ($orders as $order) {
-            $order->calculateTotalPrice();
-            $totalCart += $order->total_price;
+        $carts = (new CartWebApi())->items();
+        foreach ($carts as $cart) {
+            $totalCart += $cart['total_price'];
         }
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('checkout', compact('orders', 'totalCart'));
+            return $this->renderPartial('checkout', compact('carts', 'totalCart'));
         } else {
-            return $this->render('checkout', compact('orders', 'totalCart'));
+            return $this->render('checkout', compact('carts', 'totalCart'));
         }
     }
 

@@ -9,7 +9,7 @@ $content = $cart['items'];
 $vendor_id = $cart['vendor']['id'];
 
 foreach ($content as $position) {
-    $note = $iyem['comment'];
+    $note = $position['comment'];
     ?>
     <div class="block_left_bot">
         <div class="block_left_bot_left">

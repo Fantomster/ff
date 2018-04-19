@@ -322,7 +322,7 @@ class Organization extends \yii\db\ActiveRecord
             ->all(), 'id', 'name');
 
         if ($all) {
-            $clients[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $clients[''] = Yii::t('message', 'market.views.site.rest.all', ['ru' => 'Все рестораны']);
         }
         ksort($clients);
         return $clients;

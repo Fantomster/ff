@@ -859,21 +859,18 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetComment($order_id) {
-
-        $client = $this->currentUser->organization;
-
+    public function actionAjaxSetComment($vendor_id) {
         if (Yii::$app->request->post()) {
-//            $order_id = Yii::$app->request->post('order_id');
-            $order = Order::find()->where(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
-            if ($order) {
-                $order->comment = Yii::$app->request->post('comment');
-                $order->save();
+            $comment = Yii::$app->request->post('comment');
+            Yii::$app->response->cookies->add(new \yii\web\Cookie([
+                'name' => 'order_comment_'.$vendor_id,
+                'value' => $comment,
+                'expire' => time() + (60*60),
+            ]));
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return ["title" => Yii::t('message', 'frontend.controllers.order.comment_added', ['ru' => "Комментарий добавлен"]), "comment" => $order->comment, "type" => "success"]; //$this->successNotify("Комментарий добавлен");
+                return ["title" => Yii::t('message', 'frontend.controllers.order.comment_added', ['ru' => "Комментарий добавлен"]), "comment" => $comment, "type" => "success"];
             }
             return false;
-        }
     }
 
     public function actionAjaxCancelOrder($order_id = null) {
@@ -929,34 +926,49 @@ class OrderController extends DefaultController {
 
     public function actionAjaxMakeOrder() {
         $client = $this->currentUser->organization;
-        $cartCount = $client->getCartCount();
+        $cart = (new CartWebApi())->items();
+        $cartCount = count($cart);
 
         if (!$cartCount) {
             return false;
         }
 
         if (Yii::$app->request->post()) {
-            $content = Yii::$app->request->post('OrderContent');
+            $content = Yii::$app->request->post('CartContent');
             $this->saveCartChanges($content);
-            if (!Yii::$app->request->post('all')) {
-                $order_id = Yii::$app->request->post('id');
-                $orders[] = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-            } else {
-                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-            }
-            foreach ($orders as $order) {
-                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $order->created_by_id = $this->currentUser->id;
-                $order->created_at = gmdate("Y-m-d H:i:s");
-                $order->calculateTotalPrice(); //also saves order
-                $this->sendNewOrder($order->vendor);
-                $this->sendOrderCreated($this->currentUser, $order);
-            }
-            $cartCount = $client->getCartCount();
-            $this->sendCartChange($client, $cartCount);
-            return true;
-        }
 
+            if (Yii::$app->request->post('all')) {
+                $data = [];
+                foreach ($cart as $item)
+                {
+                    $vendor_id = $item['id'];
+                    $delivery_date =  Yii::$app->request->cookies->getValue('requested_delivery_'.$vendor_id, null);
+                    if($delivery_date != null)
+                    $data[] = ['id' => $vendor_id,
+                        'delivery_date'=> isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
+                        'comment' => Yii::$app->request->cookies->getValue('order_comment_'.$vendor_id, null)];
+                }
+            } else {
+                $vendor_id = Yii::$app->request->post('id');
+                $delivery_date =  Yii::$app->request->cookies->getValue('requested_delivery_'.$vendor_id, null);
+                if($delivery_date != null)
+                $data[] = ['id' => $vendor_id,
+                    'delivery_date'=> isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
+                    'comment' => Yii::$app->request->cookies->getValue('order_comment_'.$vendor_id, null)];
+            }
+
+            $res = (new CartWebApi())->registration($data);
+
+            $title = Yii::t('message', 'frontend.views.order.all_orders_complete', ['ru' => 'Заказы оформлены!']);
+            $description = Yii::t('message', 'frontend.views.order.orders_complete_count_success',
+                    ['ru' => '{success} из {count} заказов оформлены', 'success' => $res['success'], 'count' => $cartCount]);
+            $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
+
+            //$cartCount = count((new CartWebApi())->items());
+            //$this->sendCartChange($client, $cartCount);
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ["title" => $title, "description" => $description, "type" => $type];
+        }
         return false;
     }
 
@@ -1013,21 +1025,21 @@ class OrderController extends DefaultController {
     public function actionAjaxSetDelivery() {
         if (Yii::$app->request->post()) {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $client = $this->currentUser->organization;
-            $order_id = Yii::$app->request->post('order_id');
+            $vendor_id = Yii::$app->request->post('vendor_id');
             $delivery_date = Yii::$app->request->post('delivery_date');
-            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-            $oldDateSet = isset($order->requested_delivery);
-            if ($order && !empty($delivery_date)) {
-
+            $oldDateSet = Yii::$app->request->cookies->getValue('requested_delivery_'.$vendor_id, null);
+            if (!empty($delivery_date)) {
                 $nowTS = time();
                 $requestedTS = strtotime($delivery_date . ' 19:00:00');
 
                 $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
                 if ($nowTS < $requestedTS) {
-                    $order->requested_delivery = $timestamp;
-                    $order->save();
+                    Yii::$app->response->cookies->add(new \yii\web\Cookie([
+                        'name' => 'requested_delivery_'.$vendor_id,
+                        'value' => $timestamp,
+                        'expire' => time() + (60*60),
+                    ]));
                 } else {
                     $result = ["title" => Yii::t('message', 'frontend.controllers.order.uncorrect_date', ['ru' => "Некорректная дата"]), "type" => "error"];
                     return $result;
@@ -1042,8 +1054,7 @@ class OrderController extends DefaultController {
                 return $result;
             }
             if (empty($delivery_date)) {
-                $order->requested_delivery = null;
-                $order->save();
+                Yii::$app->response->cookies->remove('requested_delivery_'.$vendor_id, true);
                 $result = ["title" => Yii::t('message', 'frontend.controllers.order.seted_date', ['ru' => "Дата доставки удалена"]), "type" => "success"];
                 return $result;
             }
@@ -1470,16 +1481,7 @@ class OrderController extends DefaultController {
 
         if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {
             $content = Yii::$app->request->post('CartContent');
-            $data = [];
-            foreach ($content as $key=>$row)
-                if(is_array(($row)))
-                    $data[] = ['product_id' => $key, 'quantity' => $row['in_basket']];
-
-            try {
-                (new CartWebApi())->add($data);
-            }catch (\Exception $e) {
-                return false;
-            }
+            $this->saveCartChanges($content);
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => Yii::t('message', 'frontend.controllers.order.changes_saved', ['ru' => "Изменения сохранены!"]), "type" => "success"];
         }
@@ -2082,14 +2084,15 @@ class OrderController extends DefaultController {
     }
 
     private function saveCartChanges($content) {
-        foreach ($content as $position) {
-            $product = OrderContent::findOne(['id' => $position['id']]);
-            if ($product->quantity == 0) {
-                $product->delete();
-            } else {
-                $product->quantity = $position['quantity'];
-                $product->save();
-            }
+        $data = [];
+        foreach ($content as $key=>$row)
+            if(is_array(($row)))
+                $data[] = ['product_id' => $key, 'quantity' => $row['in_basket']];
+
+        try {
+            (new CartWebApi())->add($data);
+        }catch (\Exception $e) {
+            return false;
         }
     }
 

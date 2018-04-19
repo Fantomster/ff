@@ -9,7 +9,6 @@
 namespace common\models\search;
 
 use yii\data\ActiveDataProvider;
-use common\models\RelationUserOrganization;
 
 /**
  *  Model for user search form

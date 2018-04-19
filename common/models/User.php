@@ -756,13 +756,18 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getAllOrganization(): array
     {
+        $userID = $this->id;
         if($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
-            $rel = RelationUserOrganization::findOne(['organization_id'=>$this->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]) ?? RelationUserOrganization::findOne(['organization_id'=>$this->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_EMPLOYEE]]);
-            $userID = $rel->user_id;
+            $org = Organization::findOne(['id'=>$this->organization_id]);
+            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id])->orWhere(['organization.parent_id'=>$this->organization_id]);
+            if($org && $org->parent_id != null){
+                $orgArray = $orgArray->orWhere(['organization.id'=>$org->parent_id])->orWhere(['organization.parent_id'=>$org->parent_id]);
+            }
+            return $orgArray->orderBy('organization.name')->all();
         }else{
-            $userID = $this->id;
+            return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID])->orderBy('organization.name')->all();
         }
-        return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID])->orderBy('organization.name')->all();
+
     }
 
 

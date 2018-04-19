@@ -437,7 +437,7 @@ class OrderController extends DefaultController {
     }
 
 
-    public function actionGuides(): string
+    public function actionGuides(): String
     {
         $client = $this->currentUser->organization;
         $searchModel = new GuideSearch();
@@ -625,7 +625,7 @@ class OrderController extends DefaultController {
         return $this->redirect(['order/guides']);
     }
 
-    public function actionAjaxShowGuide(int $id): string
+    public function actionAjaxShowGuide(int $id): String
     {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);

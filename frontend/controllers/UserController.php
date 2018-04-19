@@ -387,7 +387,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return ['success' => false];
     }
 
-    public function actionChangeForm(): string
+    public function actionChangeForm(): String
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = new Organization();
@@ -397,7 +397,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     }
 
 
-    public function actionBusiness(): string
+    public function actionBusiness(): String
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $dataProvider = User::getAllOrganizationsDataProvider();

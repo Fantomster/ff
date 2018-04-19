@@ -169,7 +169,7 @@ class VendorController extends DefaultController
     }
 
 
-    public function actionEmployees(): string
+    public function actionEmployees(): String
     {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
@@ -218,7 +218,7 @@ class VendorController extends DefaultController
         }
     }
 
-    public function actionRemoveDeliveryRegion($id)
+    public function actionRemoveDeliveryRegion(int $id): void
     {
         $organization = $this->currentUser->organization;
         $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
@@ -306,7 +306,7 @@ class VendorController extends DefaultController
      *  User update
      */
 
-    public function actionAjaxUpdateUser($id)
+    public function actionAjaxUpdateUser(int $id): String
     {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
@@ -343,6 +343,7 @@ class VendorController extends DefaultController
 
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
+
 
     public function actionCatalogs()
     {

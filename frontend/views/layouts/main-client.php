@@ -33,9 +33,9 @@ $directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed201
             )
             ?>
             <?php
-                if(empty($this->params['orders']))
+                if(empty($this->params['carts']))
                 {
-                    $this->params['orders'] = [];
+                    $this->params['carts'] = [];
                 }
             ?>
             <?= \frontend\widgets\cart\CartWidget::widget(['carts' => $this->params['carts']]) ?>

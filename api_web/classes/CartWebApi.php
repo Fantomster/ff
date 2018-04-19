@@ -102,7 +102,11 @@ class CartWebApi extends \api_web\components\WebApi
                 $return[$row->vendor->id] = [
                     'id' => $row->vendor->id,
                     'delivery_price' => $this->getCart()->calculateDelivery($row->vendor_id),
+                    'for_min_cart_price' => $this->getCart()->forMinCartPrice($row->vendor_id),
+                    'for_fvree_delivery' => $this->getCart()->forFreeDelivery($row->vendor_id),
+                    'total_price' => $this->getCart()->calculateTotalPrice($row->vendor_id),
                     'vendor' => WebApiHelper::prepareOrganization($row->vendor),
+                    'currency' => $items[$row->vendor->id][0]['currency'],
                     'items' => $items[$row->vendor->id]
                 ];
             } else {
@@ -159,8 +163,8 @@ class CartWebApi extends \api_web\components\WebApi
             'error' => 0
         ];
 
-        $orders = [];
         if (!empty($post)) {
+            $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {
                     throw new BadRequestHttpException("ERROR: Empty id");
@@ -174,7 +178,7 @@ class CartWebApi extends \api_web\components\WebApi
 
         try {
             foreach ($cart->getVendors() as $vendor) {
-                if (empty($orders[$vendor->id])) {
+                if (isset($orders) && empty($orders[$vendor->id])) {
                     continue;
                 }
                 if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {

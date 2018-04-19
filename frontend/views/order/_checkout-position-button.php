@@ -3,7 +3,7 @@
 use yii\helpers\Url;
 use yii\helpers\Html;
 
-echo (!$cart['for_min_order_price']) ? Html::button(Yii::t('message', 'frontend.views.order.make_order', ['ru' => 'Оформить заказ']), [
+echo (!$cart['for_min_cart_price']) ? Html::button(Yii::t('message', 'frontend.views.order.make_order', ['ru' => 'Оформить заказ']), [
             'class' => 'but_go_zakaz create pull-right',
             'data' => [
                 'url' => Url::to(['/order/ajax-make-order']),

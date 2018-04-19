@@ -373,7 +373,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                 ?>
                 <?php
                 foreach ($carts as $cart) {
-                    if ($cart['for_min_order_price']):
+                    if ($cart['for_min_cart_price']):
                         ?><style>#createAll{display: none;}</style>
                     <?php endif; ?>
                     <div class="block_wrap_bask_tover" id="cartOrder<?= $cart['id'] ?>">

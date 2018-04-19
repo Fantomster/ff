@@ -39,7 +39,7 @@ $count = count($carts);
                         ?>
                     </div>
                 <?php } 
-                    $forMinOrderPrice = $cart['for_min_order_price'];
+                    $forMinOrderPrice = $cart['for_min_cart_price'];
                     $forFreeDelivery = $cart['for_free_delivery'];
                     $test = 1;
                 ?>

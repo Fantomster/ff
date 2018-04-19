@@ -964,8 +964,6 @@ class OrderController extends DefaultController {
                     ['ru' => '{success} из {count} заказов оформлены', 'success' => $res['success'], 'count' => $cartCount]);
             $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
 
-            //$cartCount = count((new CartWebApi())->items());
-            //$this->sendCartChange($client, $cartCount);
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => $title, "description" => $description, "type" => $type];
         }

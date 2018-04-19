@@ -38,7 +38,7 @@ $directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed201
                     $this->params['orders'] = [];
                 }
             ?>
-            <?= \frontend\widgets\cart\CartWidget::widget(['orders' => $this->params['orders']]) ?>
+            <?= \frontend\widgets\cart\CartWidget::widget(['carts' => $this->params['carts']]) ?>
             <?=
             !Yii::$app->user->isGuest ? $this->render(
                             'client/left', ['directoryAsset' => $directoryAsset]

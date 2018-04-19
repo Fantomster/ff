@@ -101,7 +101,7 @@ class Cart extends \yii\db\ActiveRecord
     public function calculateDelivery($vendor_id)
     {
         $vendor = Organization::findOne($vendor_id);
-        $total_price = CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor->id])->scalar();
+        $total_price = $this->getRawPrice($vendor->id); //CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor->id])->scalar();
         if (isset($vendor->delivery)) {
             $free_delivery = $vendor->delivery->min_free_delivery_charge;
         } else {
@@ -111,5 +111,40 @@ class Cart extends \yii\db\ActiveRecord
             return round($vendor->delivery->delivery_charge, 2);
         }
         return 0;
+    }
+
+    public function forFreeDelivery($vendor_id, $rawPrice = null) {
+        $vendor = Organization::findOne($vendor_id);
+        if ($vendor->delivery->min_free_delivery_charge == 0) {
+            return -1;
+        }
+        if (isset($vendor->delivery)) {
+            $diff = $vendor->delivery->min_free_delivery_charge - (!isset($rawPrice) ? $this->getRawPrice($vendor_id) : $rawPrice);
+        } else {
+            $diff = 0;
+        }
+        return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
+    }
+
+    public function forMinCartPrice($vendor_id, $rawPrice = null) {
+        $vendor = Organization::findOne($vendor_id);
+        if (isset($vendor->delivery)) {
+            $diff = $vendor->delivery->min_order_price - (!isset($rawPrice) ? $this->getRawPrice($vendor_id) : $rawPrice);
+        } else {
+            $diff = 0;
+        }
+        return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
+    }
+
+    public function getRawPrice($vendor_id) {
+        if($this->id != null)
+            return CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor_id])->scalar();
+        return CartContent::find()->select('SUM(quantity*price)')->where(['vendor_id' => $vendor_id])->scalar();
+    }
+
+    public function calculateTotalPrice($vendor_id, $rawPrice = null) {
+        $total_price = !isset($rawPrice) ? $this->getRawPrice($vendor_id) : $rawPrice;
+        $total_price += $this->calculateDelivery($vendor_id);
+        return number_format($total_price, 2, '.', '');
     }
 }

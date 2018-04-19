@@ -7,7 +7,7 @@ echo (!$forMinOrderPrice) ? Html::button(Yii::t('message', 'frontend.views.order
             'class' => 'but_go_zakaz create pull-right',
             'data' => [
                 'url' => Url::to(['/order/ajax-make-order']),
-                'id' => $order->id,
+                'id' => $cart[id],
                 'all' => false,
             ]
         ]) : ('<div class="but_go_zakaz create pull-right alRightBlock"><button type="button" class="btn btn-default" disabled="disabled">' . Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']) . '</button><br><p>' . Yii::t('message', 'frontend.views.order.until_min', ['ru' => 'до минимального заказа']) . ' ' . $forMinOrderPrice . ' ' . $currencySymbol . '</p></div>');

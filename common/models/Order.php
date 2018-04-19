@@ -67,7 +67,8 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors(): array
+    {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -81,7 +82,8 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules(): array
+    {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
@@ -99,7 +101,8 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels(): array
+    {
         return [
             'id' => Yii::t('app', 'Номер заказа'),
             'client_id' => 'Client ID',
@@ -113,6 +116,7 @@ class Order extends \yii\db\ActiveRecord {
             'updated_at' => 'Updated At',
             'vendor' => Yii::t('app', 'Поставщик'),
             'create_user' => Yii::t('app', 'Заказ создал'),
+            'plan_price' => Yii::t('app', 'План'),
         ];
     }
 
@@ -434,7 +438,6 @@ class Order extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
-        //dd($this);
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
                 if($this->status != self::STATUS_FORMING)

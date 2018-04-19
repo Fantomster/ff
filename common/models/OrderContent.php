@@ -40,9 +40,9 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
-            [['order_id', 'product_id'], 'integer'],
-            [['price', 'quantity', 'initial_quantity', 'units'], 'number'],
-            [['comment', 'article'], 'safe'],
+            [['order_id', 'product_id', 'updated_user_id'], 'integer'],
+            [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['comment', 'article', 'updated_user_id'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
@@ -177,8 +177,25 @@ class OrderContent extends \yii\db\ActiveRecord
     public function formatPrice() {
         return $this->price . " " . $this->order->currency->symbol;
     }
-    
-    public function afterSave($insert, $changedAttributes) {
+
+
+
+    public function beforeSave($insert) {
+        $result = parent::beforeSave($insert);
+        if(!$insert){
+            if($this->plan_quantity == 0.000){
+                $this->plan_quantity = $this->quantity;
+            }
+            if($this->plan_price == 0.00){
+                $this->plan_price = $this->price;
+            }
+        }
+        return $result;
+    }
+
+
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
         
         $product = $this->productFromCatalog;
@@ -198,7 +215,9 @@ class OrderContent extends \yii\db\ActiveRecord
             if($this->order->status == Order::STATUS_FORMING)
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContent($this->id);
         }
+
     }
+
 
     public function getCurrency() {
          return Currency::findOne($this->order->currency_id);

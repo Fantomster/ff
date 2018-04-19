@@ -344,6 +344,9 @@ class VendorController extends DefaultController
 
         if (!Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             $step = $currentUser->organization->step;
+            $newBaseCatalog = new Catalog();
+            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+            $newBaseCatalog->
             return $this->render("catalogs/firstCatalog", compact("Catalog", "step"));
         } else {
             $currentOrganization = $currentUser->organization;

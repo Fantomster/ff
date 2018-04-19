@@ -21,6 +21,12 @@ use yii\web\UploadedFile;
 class VendorWebApi extends \api_web\components\WebApi {
 
     /**
+     *
+     * Папка в бакете s3 для временного хранения загружаемых каталогов
+     */
+    public $excelTempFolder = "excelTemp";
+
+    /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
      * @param array $post
      * @return array
@@ -150,7 +156,6 @@ class VendorWebApi extends \api_web\components\WebApi {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
                 return $result;
-
             } catch (\Exception $e) {
                 $transaction->rollback();
                 throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
@@ -164,8 +169,7 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @return array
      * @throws BadRequestHttpException
      */
-    public function search(array $post)
-    {
+    public function search(array $post) {
         if (empty($post['email'])) {
             throw new BadRequestHttpException('Empty search attribute email');
         }
@@ -192,8 +196,7 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function update(array $post)
-    {
+    public function update(array $post) {
         if (empty($post['id'])) {
             throw new BadRequestHttpException('Empty attribute id');
         }
@@ -303,8 +306,6 @@ class VendorWebApi extends \api_web\components\WebApi {
             $transaction->rollBack();
             throw $e;
         }
-
-
     }
 
     /**
@@ -314,8 +315,7 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadLogo(array $request)
-    {
+    public function uploadLogo(array $request) {
         if (empty($request['post']['vendor_id'])) {
             throw new BadRequestHttpException('Empty attribute vendor_id');
         }
@@ -365,7 +365,7 @@ class VendorWebApi extends \api_web\components\WebApi {
 
         return $this->container->get('MarketWebApi')->prepareOrganization($vendor);
     }
-    
+
     /**
      * Загрузка основного каталога
      * @param array $request
@@ -374,17 +374,26 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws ValidationException
      */
     public function uploadMainCatalog(array $request) {
-        $catalog = Catalog::findOne($request['cat_id']);
-        //$userOrgRelation = \common\models\RelationUserOrganization::find()->where([])->one;
+        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('Catalog not found');
+        }
         //сохранение и загрузка на s3
         $base64 = $request['data'];
-        if (strpos($base64, 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,') !== false) {
-            return ["is_xlsx" => true];
-        } else {
-            return ["is_xlsx" => false];
+        $type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
+        $is_xlsx = (strpos($base64, $type) !== false);
+        if ($is_xlsx) {
+            try {
+                $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
+                Yii::$app->get('resourceManager')->save($file, $this->excelTempFolder . "/" . $file->name);
+                return ['result' => true, 'file' => $file->name];
+            } catch (\yii\base\Exception $e) {
+                throw $e;
+            }
+            return ['result' => false];
         }
     }
-    
+
     /**
      * Валидация и импорт уже загруженного основного каталога
      * @param array $request
@@ -399,7 +408,7 @@ class VendorWebApi extends \api_web\components\WebApi {
         //сохранение
         //удаление файла на s3
     }
-    
+
     /**
      * Загрузка индивидуального каталога
      * @param array $request
@@ -410,7 +419,7 @@ class VendorWebApi extends \api_web\components\WebApi {
     public function uploadCustomCatalog(array $request) {
         //
     }
-    
+
     /**
      * Валидация и импорт уже загруженного основного каталога
      * @param array $request
@@ -421,4 +430,5 @@ class VendorWebApi extends \api_web\components\WebApi {
     public function importCustomCatalog(array $request) {
         //
     }
+
 }

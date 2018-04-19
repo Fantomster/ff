@@ -7,7 +7,7 @@ use yii\helpers\Html;
     <p><?= Yii::t('app', 'Итого:') ?> <span id="orderTotal<?= $cart['id'] ?>"><?= $cart['total_price'] ?></span> <?= $cart['currency'] ?></p>
 </div>
 <div class="block_right_wrap_1">
-    <?php if ($cart['for_min_order_price']) { ?>
+    <?php if ($cart['for_min_cart_price']) { ?>
         <button type="button" class="btn btn-default alButton" disabled="disabled"><?= Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']) ?></button>
         <p class="alP"><?= Yii::t('message', 'frontend.views.order.until_min', ['ru' => 'до минимального заказа']) ?></p><p><?= $cart['for_min_cart_price'] ?> <?= $cart['currency'] ?></p>
         <?php } elseif ($cart['for_free_delivery'] > 0) { ?>

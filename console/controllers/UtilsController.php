@@ -217,7 +217,7 @@ class UtilsController extends Controller {
                 echo "Migrate " . $i . " of " . $count . PHP_EOL;
                 $cart = \common\models\Cart::findOne(['user_id' => $order->created_by_id, 'organization_id' => $order->client_id]);
                 if($cart == null) {
-                    $cart = new Cart();
+                    $cart = new \common\models\Cart();
                     $cart->user_id = $order->created_by_id;
                     $cart->organization_id = $order->client_id;
                     if(!$cart->save())

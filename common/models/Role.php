@@ -114,7 +114,7 @@ class Role extends \amnah\yii2\user\models\Role {
     }
 
 
-    public static function getRoleName(int $roleId): string
+    public static function getRoleName(int $roleId): String
     {
         $role = static::findOne(['id'=>$roleId]);
         return $role->name ?? '';

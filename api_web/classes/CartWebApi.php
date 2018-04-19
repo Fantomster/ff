@@ -147,107 +147,116 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Создание заказа из корзины
+     * https://api-dev.mixcart.ru/site/doc#!/Cart/post_cart_registration
      * @param array $post
      * @return array
+     * @throws BadRequestHttpException
      */
-    public function register(array $post)
-    {
-        $cart = $this->getCart();
-        return $this->createOrder($cart, $post ?? []);
-    }
-
-    /**
-     * @param Cart $cart
-     * @param $post
-     * @return array
-     * @throws \Exception
-     */
-    private function createOrder(Cart $cart, $post)
+    public function registration(array $post)
     {
         WebApiHelper::clearRequest($post);
+        $cart = $this->getCart();
 
-        $vendors = [];
+        //Результат для ответа
+        $result = [
+            'success' => 0,
+            'error' => 0
+        ];
+
+        $orders = [];
         if (!empty($post)) {
             foreach ($post as $row) {
                 if (empty($row['id'])) {
                     throw new BadRequestHttpException("ERROR: Empty id");
                 }
-                $vendors[$row['id']] = [
+                $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
                     'comment' => $row['comment'] ?? null,
                 ];
             }
         }
 
+        try {
+            foreach ($cart->getVendors() as $vendor) {
+                if (empty($orders[$vendor->id])) {
+                    continue;
+                }
+                if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
+                    $result['success'] += 1;
+                }
+            }
+        } catch (\Exception $e) {
+            $result['error'] += 1;
+        }
+        return $result;
+    }
+
+    /**
+     * Создание заказа
+     * @param Cart $cart
+     * @param $vendor
+     * @param array $post ['id', 'delivery_date', 'comment']
+     * @return bool
+     * @throws \Exception
+     */
+    private function createOrder(Cart $cart, Organization $vendor, array $post)
+    {
         $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $result = [];
-            /**
-             * @var $vendor Organization
-             */
-            //Бежим по поставщикам в корзине
-            foreach ($cart->getVendors() as $vendor) {
-                //Создаем заказ
-                $order = new Order();
-                $order->client_id = $client->id;
-                $order->created_by_id = $this->user->id;
-                $order->vendor_id = $vendor->id;
-                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $order->currency_id = $vendor->baseCatalog->currency_id;
-                $order->created_at = gmdate("Y-m-d H:i:s");
+            //Создаем заказ
+            $order = new Order();
+            $order->client_id = $client->id;
+            $order->created_by_id = $this->user->id;
+            $order->vendor_id = $vendor->id;
+            $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $order->currency_id = $vendor->baseCatalog->currency_id;
+            $order->created_at = gmdate("Y-m-d H:i:s");
 
-                if (!empty($vendors)) {
-                    if (!isset($vendors[$vendor->id])) {
-                        continue;
-                    } else {
-                        if (!empty($vendors[$vendor->id]['delivery_date'])) {
-                            $d = str_replace('.', '-', $vendors[$vendor->id]['delivery_date']);
-                            $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
-                        }
-                        if (!empty($vendors[$vendor->id]['comment'])) {
-                            $order->comment = $vendors[$vendor->id]['comment'];
-                        }
-                    }
-                }
-
-                if (!$order->validate() || !$order->save()) {
-                    throw new ValidationException($order->getFirstErrors());
-                }
-                /**
-                 * @var $cartContent CartContent
-                 */
-                //Получаем записи только нужного нам поставщика
-                $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
-                foreach ($contents as $cartContent) {
-                    $orderContent = new OrderContent();
-                    $orderContent->order_id = $order->id;
-                    $orderContent->product_id = $cartContent->product_id;
-                    $orderContent->quantity = $cartContent->quantity;
-                    $orderContent->initial_quantity = $cartContent->quantity;
-                    $orderContent->price = $cartContent->price;
-                    $orderContent->product_name = $cartContent->product_name;
-                    $orderContent->units = $cartContent->units;
-                    $orderContent->comment = $cartContent->comment;
-                    if ($orderContent->validate() && $orderContent->save()) {
-                        $cartContent->delete();
-                    } else {
-                        throw new ValidationException($orderContent->getFirstErrors());
-                    }
-                }
-                $order->calculateTotalPrice();
-                //Сообщение в очередь поставщику, что есть новый заказ
-                Notice::init('Order')->sendOrderToTurnVendor($vendor);
-                //Емайл и смс о новом заказе
-                Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
-                $result[] = $order->id;
+            if (!empty($post['delivery_date'])) {
+                $d = str_replace('.', '-', $post['delivery_date']);
+                $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
             }
-            //Сообщение в очередь, Изменение количества товара в корзине
-            Notice::init('Order')->sendOrderToTurnClient($client);
+
+            if (!empty($post['comment'])) {
+                $order->comment = $post['comment'];
+            }
+
+            if (!$order->validate() || !$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            /**
+             * @var $cartContent CartContent
+             */
+            //Получаем записи только нужного нам поставщика
+            $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
+            foreach ($contents as $cartContent) {
+                $orderContent = new OrderContent();
+                $orderContent->order_id = $order->id;
+                $orderContent->product_id = $cartContent->product_id;
+                $orderContent->quantity = $cartContent->quantity;
+                $orderContent->initial_quantity = $cartContent->quantity;
+                $orderContent->price = $cartContent->price;
+                $orderContent->product_name = $cartContent->product_name;
+                $orderContent->units = $cartContent->units;
+                $orderContent->comment = $cartContent->comment;
+                if ($orderContent->validate() && $orderContent->save()) {
+                    $cartContent->delete();
+                } else {
+                    throw new ValidationException($orderContent->getFirstErrors());
+                }
+            }
+            $order->calculateTotalPrice();
             $cart->updated_at = new Expression('NOW()');
             $cart->save();
+            //Сообщение в очередь поставщику, что есть новый заказ
+            Notice::init('Order')->sendOrderToTurnVendor($vendor);
+            //Емайл и смс о новом заказе
+            Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
+            //Сообщение в очередь, Изменение количества товара в корзине
+            Notice::init('Order')->sendOrderToTurnClient($client);
             $transaction->commit();
-            return $result;
+            return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;

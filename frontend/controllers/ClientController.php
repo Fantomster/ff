@@ -144,7 +144,7 @@ class ClientController extends DefaultController {
      *  user list page
      */
 
-    public function actionEmployees(): string
+    public function actionEmployees(): String
     {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();

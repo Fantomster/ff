@@ -58,7 +58,7 @@ $count = count($carts);
                         <?= Yii::t('app', 'frontend.widgets.cart.views.free_delivery', ['ru'=>'бесплатная доставка!']) ?><br><span>&nbsp;</span>
                         <?php } ?>
                         </div>
-                        <div class="col-md-6 col-xs-6 dost_min"><?= Yii::t('app', 'frontend.widgets.cart.views.incl_delivery', ['ru'=>'включая доставку']) ?><br><span><?= $cart['delivery_price'] ?> <?= $cRT['currency'] ?></span></div>
+                        <div class="col-md-6 col-xs-6 dost_min"><?= Yii::t('app', 'frontend.widgets.cart.views.incl_delivery', ['ru'=>'включая доставку']) ?><br><span><?= $cart['delivery_price'] ?> <?= $cart['currency'] ?></span></div>
                     </div>
                 </div>
             <?php } ?>

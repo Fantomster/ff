@@ -18,7 +18,7 @@ class Product extends WebApi
      */
     public function findFromCatalogs($id, $catalogs = [])
     {
-        if(empty($catalogs)) {
+        if (empty($catalogs)) {
             $catalogs = explode(',', $this->user->organization->getCatalogs());
         }
 
@@ -61,6 +61,8 @@ class Product extends WebApi
     private function prepareProduct(CatalogBaseGoods $baseModel, CatalogGoods $individualModel = null)
     {
         $product = $baseModel->getAttributes();
+        $product['currency_id'] = $baseModel->catalog->currency_id;
+        $product['currency'] = $baseModel->catalog->currency->symbol;
 
         if (!empty($individualModel)) {
             $product['price'] = $individualModel->price;
@@ -68,6 +70,8 @@ class Product extends WebApi
             $product['discount_percent'] = $individualModel->discount_percent;
             $product['discount_fixed'] = $individualModel->discount_fixed;
             $product['cat_id'] = $individualModel->cat_id;
+            $product['currency_id'] = $individualModel->catalog->currency_id;
+            $product['currency'] = $individualModel->catalog->currency->symbol;
         }
 
         $product['vendor_id'] = Catalog::findOne($product['cat_id'])->supp_org_id;

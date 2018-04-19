@@ -148,22 +148,14 @@ class CartController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              default={3301, 3302}
+     *              default={"success":1, "error":0}
      *          ),
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
      *     )
      * )
      */
     public function actionRegistration()
     {
-        $this->response = $this->container->get('CartWebApi')->register($this->request);
+        $this->response = $this->container->get('CartWebApi')->registration($this->request);
     }
 
     /**

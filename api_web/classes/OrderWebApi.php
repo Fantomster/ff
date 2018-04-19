@@ -251,6 +251,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $search = new OrderSearch();
 
+        WebApiHelper::clearRequest($post);
+
         if (isset($post['search'])) {
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
                 $search->vendor_array = $post['search']['vendor'];

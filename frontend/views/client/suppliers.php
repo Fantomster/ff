@@ -893,7 +893,7 @@ $("#organization-name").keyup(function() {
         })        
     });        
 JS;
-$this->registerJs($customJs, View::POS_HEAD);
+$this->registerJs($customJs, View::POS_READY);
 if ($currentOrganization->isEmpty()) {
     $infoUrl = Url::to(['/site/ajax-set-info']);
     $customJs = <<< JS2

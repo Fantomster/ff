@@ -18,7 +18,7 @@ use yii\helpers\Html;
         <p><?= Yii::t('app', 'включая доставку') ?></p><p><?= $cart['delivery_price'] ?> <?= $cart['currency'] ?></p>
     <?php } ?>
     <?=
-    (!$cart['for_min_order_price']) ? Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']), [
+    (!$cart['for_min_cart_price']) ? Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']), [
                 'class' => 'create',
                 'data' => [
                     'url' => Url::to(['/order/ajax-make-order']),

@@ -2,6 +2,7 @@
 
 namespace api_web\components\notice_class;
 
+use Yii;
 use api_web\models\ForgotForm;
 use api_web\models\User;
 use yii\web\BadRequestHttpException;
@@ -52,5 +53,25 @@ class UserNotice
         $model = new ForgotForm();
         $model->email = $email;
         return $model->sendForgotEmail();
+    }
+
+    /**
+     * Отправка Email через неделю после регистрации
+     * @param $user User
+     */
+    public function sendEmailWeekend($user)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.weekend.subject', ['ru' => 'Вы с нами уже неделю!']);
+
+        if(!empty($user->email)) {
+            $mailer->compose('weekend', compact("user"))
+                ->setTo($user->email)
+                ->setSubject($subject)
+                ->send();
+        }
     }
 }

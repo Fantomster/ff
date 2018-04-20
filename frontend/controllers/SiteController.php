@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use api_web\components\Notice;
 use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -12,7 +13,6 @@ use common\models\Organization;
 use common\models\Role;
 use common\components\AccessRule;
 use yii\web\HttpException;
-use yii\helpers\Url;
 use yii\web\Response;
 
 /**

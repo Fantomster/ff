@@ -8,6 +8,7 @@
 
 namespace common\models;
 
+use common\components\Mailer;
 use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
@@ -21,7 +22,8 @@ use yii\web\BadRequestHttpException;
  * @inheritdoc
  *
  * @property integer $organization_id
- * 
+ * @property integer $subscribe
+ *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
  * @property ManagerAssociate $associated
@@ -37,6 +39,7 @@ class User extends \amnah\yii2\user\models\User {
         $rules = [
             // general email and username rules
             [['email', 'username'], 'string', 'max' => 255],
+            [['subscribe'], 'integer'],
             [['email', 'username'], 'unique', 'on' => ['register', 'admin', 'manage', 'manageNew']],
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
@@ -85,7 +88,6 @@ class User extends \amnah\yii2\user\models\User {
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert) {
-
             $organization = $this->organization;
             /**
              * Уведомления по Email
@@ -388,14 +390,16 @@ class User extends \amnah\yii2\user\models\User {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
+        Yii::$app->mailer->htmlLayout = 'layouts/mail';
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
         // send email
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
+        $user = $this;
         $subject = Yii::t('app', 'common.models.welcome', ['ru'=>"Добро пожаловать на  MixCart"]);
-        $result = $mailer->compose('welcome', compact("subject", "type", "name"))
+        $result = $mailer->compose('welcome', compact("subject", "type", "name", "user"))
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();

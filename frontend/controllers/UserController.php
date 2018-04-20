@@ -165,6 +165,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                     TestVendors::setGuides($organization);
                 }
+
+                Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
                 $this->afterRegister($user);
 
                 return $this->render("registerSuccess", compact("user"));

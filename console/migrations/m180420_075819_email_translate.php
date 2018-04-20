@@ -8,7 +8,7 @@ use yii\db\Migration;
 class m180420_075819_email_translate extends Migration
 {
     public $ru = [
-        ['common.mail.layouts.unsubscribe', 'Отписатьтся'],
+        ['common.mail.layouts.unsubscribe', 'Отписаться'],
         ['common.mail.layouts.from_this_mailing', 'от этой рассылки'],
         ['common.mail.confirm_email.full_text', 'Благодарим Вас за регистрацию в MixCart! Перед началом работы необходимо подтвердить этот адрес электронной почты. Для этого пройдите по ссылке:'],
         ['common.mail.confirm_email.hello', 'Здравствуйте!'],

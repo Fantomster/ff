@@ -686,10 +686,8 @@ class OrderController extends DefaultController {
 
     public function actionAjaxAddGuideToCart($id) {
         $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-
         $guideProducts = Yii::$app->request->post("GuideProduct");
-
+        $data = [];
         foreach ($guideProducts as $productId => $quantity) {
 
             if ($quantity <= 0) {
@@ -697,54 +695,15 @@ class OrderController extends DefaultController {
             }
 
             $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
-
-            $orders = $client->getCart();
-
-            $product_id = $guideProduct->cbg_id;
-            $price = $guideProduct->price;
-            $product_name = $guideProduct->baseProduct->product;
-            $vendor = $guideProduct->baseProduct->vendor;
-            $units = $guideProduct->baseProduct->units;
-            $article = $guideProduct->baseProduct->article;
-            //$quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
-            $isNewOrder = true;
-
-            foreach ($orders as $order) {
-                if ($order->vendor_id == $vendor->id) {
-                    $isNewOrder = false;
-                    $alteringOrder = $order;
-                }
-            }
-            if ($isNewOrder) {
-                $newOrder = new Order();
-                $newOrder->client_id = $client->id;
-                $newOrder->vendor_id = $vendor->id;
-                $newOrder->status = Order::STATUS_FORMING;
-                $newOrder->save();
-                $alteringOrder = $newOrder;
-            }
-
-            $isNewPosition = true;
-            foreach ($alteringOrder->orderContent as $position) {
-                if ($position->product_id == $product_id) {
-                    $position->quantity += $quantity;
-                    $position->save();
-                    $isNewPosition = false;
-                }
-            }
-            if ($isNewPosition) {
-                $position = new OrderContent();
-                $position->order_id = $alteringOrder->id;
-                $position->product_id = $product_id;
-                $position->quantity = $quantity;
-                $position->price = $price;
-                $position->product_name = $product_name;
-                $position->units = $units;
-                $position->article = $article;
-                $position->save();
-            }
-            $alteringOrder->calculateTotalPrice();
+            $data[] = ['product_id' => $guideProduct->cbg_id, 'quantity' => $quantity];
         }
+
+        try {
+            (new CartWebApi())->add($data);
+        }catch (\Exception $e) {
+            return false;
+        }
+
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
 
@@ -957,12 +916,21 @@ class OrderController extends DefaultController {
                     'comment' => Yii::$app->request->cookies->getValue('order_comment_'.$vendor_id, null)];
             }
 
-            $res = (new CartWebApi())->registration($data);
 
+            $res = [
+                'success' => 0,
+                'error' => 0
+            ];
+
+            if (!empty($data))
+                $res = (new CartWebApi())->registration($data);
+            else
+                $res['error'] = 1;
+            
             $title = Yii::t('message', 'frontend.views.order.all_orders_complete', ['ru' => 'Заказы оформлены!']);
             $description = Yii::t('message', 'frontend.views.order.orders_complete_count_success',
                     ['ru' => '{success} из {count} заказов оформлены', 'success' => $res['success'], 'count' => $cartCount]);
-            $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
+            $type = ($res['error'] > 0) ? $type = "success" : $type = "error";
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => $title, "description" => $description, "type" => $type];

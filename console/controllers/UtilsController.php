@@ -207,23 +207,22 @@ class UtilsController extends Controller {
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try{
-            $transaction->commit();
             echo "Find order in cart...".PHP_EOL;
             $orders = \common\models\Order::findAll(['status' => 7]);
             $count = count($orders);
             echo "Find ".$count." orders";
-            $i=0;
+            $i=1;
             foreach ($orders as $order) {
                 echo "Migrate " . $i . " of " . $count . PHP_EOL;
                 $cart = \common\models\Cart::findOne(['user_id' => $order->created_by_id, 'organization_id' => $order->client_id]);
                 if($cart == null) {
-                    $cart = new Cart();
+                    $cart = new \common\models\Cart();
                     $cart->user_id = $order->created_by_id;
                     $cart->organization_id = $order->client_id;
                     if(!$cart->save())
                         throw new \Exception ("Error create cart from order ID".$order->id.PHP_EOL);
                 }
-                foreach ($order->crderContent as $position)
+                foreach ($order->orderContent as $position)
                 {
                     $cartContent = new \common\models\CartContent();
                     $cartContent->cart_id = $cart->id;
@@ -241,6 +240,7 @@ class UtilsController extends Controller {
                         throw new \Exception ("Error add to cart position from order_content ID".$position->id.PHP_EOL);
                     }
                 }
+                $i++;
             }
             $transaction->commit();
         }catch (\Exception $e)

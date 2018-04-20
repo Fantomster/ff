@@ -26,6 +26,43 @@ class UtilsController extends Controller
         }
     }
 
+    /**
+     * Отправка Емайлов пользователем, через час после логина
+     */
+    public function actionSendMessageManager()
+    {
+        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0])
+            ->andWhere('first_logged_at is not null')
+            ->andWhere('TIMESTAMPDIFF(HOUR, NOW(), first_logged_at) = 1')
+            ->all();
+
+        if (!empty($users)) {
+            \Yii::$app->language = 'ru';
+            foreach ($users as $user) {
+                Notice::init('User')->sendEmailManagerMessage($user);
+                $user->send_manager_message = 1;
+                $user->save();
+            }
+        }
+    }
+
+    /**
+     * Отправка Емайлов пользователем, через 2 дня после создания
+     */
+    public function actionSendDemonstration()
+    {
+        $users = User::find()->where(['status' => 1, 'subscribe' => 1])
+            ->andWhere('DATEDIFF(NOW(), created_at) = 2')
+            ->all();
+
+        if (!empty($users)) {
+            \Yii::$app->language = 'ru';
+            foreach ($users as $user) {
+                Notice::init('User')->sendEmailDemonstration($user);
+            }
+        }
+    }
+
     public function actionAddDeliveries()
     {
         $vendors = \common\models\Organization::find()

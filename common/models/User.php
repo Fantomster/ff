@@ -14,6 +14,7 @@ use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
+use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -23,6 +24,8 @@ use yii\web\BadRequestHttpException;
  *
  * @property integer $organization_id
  * @property integer $subscribe
+ * @property integer $send_manager_message
+ * @property string $first_logged_at
  *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
@@ -84,9 +87,16 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
 
-
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
+        if(!$insert && $changedAttributes['status'] == self::STATUS_ACTIVE && $this->first_logged_at == null) {
+            $this->first_logged_at = new Expression('NOW()');
+        }
+
         if ($insert) {
             $organization = $this->organization;
             /**

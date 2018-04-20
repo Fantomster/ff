@@ -74,4 +74,45 @@ class UserNotice
                 ->send();
         }
     }
+
+    /**
+     * Отправка Email через 2 дня после регистрации
+     * @param $user User
+     */
+    public function sendEmailDemonstration($user)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/empty';
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.demonstration.subject', ['ru' => 'Как управлять закупками с MixCart']);
+
+        if(!empty($user->email)) {
+            $mailer->compose('@common/mail/demonstration')
+                ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
+                ->setTo($user->email)
+                ->setSubject($subject)
+                ->send();
+        }
+    }
+
+    /**
+     * Отправка Email через 1 час после логина
+     * @param $user User
+     */
+    public function sendEmailManagerMessage($user)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/empty';
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.manager_message.subject', ['ru' => 'Ольга от MixCart']);
+        if(!empty($user->email)) {
+            $mailer->compose('@common/mail/manager-message')
+                ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
+                ->setTo($user->email)
+                ->setSubject($subject)
+                ->send();
+        }
+    }
 }

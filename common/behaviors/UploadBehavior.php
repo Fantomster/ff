@@ -237,7 +237,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
     public function getUploadUrl($attribute) {
         $url = $this->getUploadPath($attribute);
         $resourceName = $this->getResourceName($url);
-        return $url ? $this->resourceManager->getUrl($resourceName) : null;
+        $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
+        return str_replace("fkeeper.s3.amazonaws.com", "upload.mixcart.ru", $resultUrl); //wtf hardcode, to be fixed
     }
 
     private $_resourceNames = [];    

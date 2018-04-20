@@ -455,8 +455,7 @@ class OrderController extends DefaultController {
         }
     }
 
-
-    public function actionAjaxDeleteGuide(int $id): array
+    public function actionAjaxDeleteGuide(int $id)
     {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);

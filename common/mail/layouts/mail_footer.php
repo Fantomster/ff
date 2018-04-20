@@ -86,7 +86,7 @@
         <td align="center" valign="top">
             <table cellpadding="0" cellspacing="0" border="0" width="500"
                    style="max-width: 500px; min-width: 320px; background: #ffffff;">
-                <?php if (!empty($user)): ?>
+                <?php if (!empty($user) && $user->subscribe == 1): ?>
                     <tr>
                         <td align="center" valign="middle" height="20"
                             style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">

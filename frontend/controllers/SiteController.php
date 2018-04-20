@@ -18,12 +18,14 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class SiteController extends Controller {
+class SiteController extends Controller
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -54,7 +56,7 @@ class SiteController extends Controller {
                             Role::ROLE_ADMIN,
                             Role::getFranchiseeEditorRoles(),
                         ],
-                        'denyCallback' => function($rule, $action) {
+                        'denyCallback' => function ($rule, $action) {
                             $user = Yii::$app->user->identity;
                             if (empty($user->organization)) {
                                 throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
@@ -81,7 +83,8 @@ class SiteController extends Controller {
     /**
      * @inheritdoc
      */
-    public function actions() {
+    public function actions()
+    {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -89,12 +92,25 @@ class SiteController extends Controller {
         ];
     }
 
+
+    public function actionUnsubscribe($token)
+    {
+        $user = User::findOne(['access_token' => $token]);
+        if ($user) {
+            $user->subscribe = 0;
+            $user->save();
+            return $this->renderPartial('unsubscribe', compact('user'));
+        }
+        $this->redirect('/');
+    }
+
     /**
      * Displays homepage.
      *
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -111,24 +127,29 @@ class SiteController extends Controller {
      *
      * @return mixed
      */
-    public function actionAbout() {
+    public function actionAbout()
+    {
         return $this->render('about');
     }
 
-    public function actionPayment() {
+    public function actionPayment()
+    {
         throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         //return $this->render('payment');
     }
 
-    public function actionContacts() {
+    public function actionContacts()
+    {
         return $this->render('contacts');
     }
 
-    public function actionFaq() {
+    public function actionFaq()
+    {
         return $this->render('faq');
     }
 
-    public function actionRestaurant() {
+    public function actionRestaurant()
+    {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -138,7 +159,8 @@ class SiteController extends Controller {
         return $this->render('restaurant', compact("user", "profile", "organization"));
     }
 
-    public function actionSupplier() {
+    public function actionSupplier()
+    {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -148,7 +170,8 @@ class SiteController extends Controller {
         return $this->render('supplier', compact("user", "profile", "organization"));
     }
 
-    public function actionCompleteRegistration() {
+    public function actionCompleteRegistration()
+    {
         $this->layout = "main-user";
         $user = Yii::$app->user->identity;
 //        $profile = $user->profile;
@@ -173,7 +196,8 @@ class SiteController extends Controller {
         return $this->render("complete-registration", compact("organization"));
     }
 
-    public function actionAjaxCompleteRegistration() {
+    public function actionAjaxCompleteRegistration()
+    {
         $user = Yii::$app->user->identity;
         $profile = new Profile();
         $profile = $user->profile;
@@ -205,7 +229,8 @@ class SiteController extends Controller {
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
 
-    public function actionAjaxWizardOff() {
+    public function actionAjaxWizardOff()
+    {
         $user = Yii::$app->user->identity;
         $organization = $user->organization;
         if (Yii::$app->request->isAjax) {
@@ -222,7 +247,8 @@ class SiteController extends Controller {
         return false;
     }
 
-    public function actionAjaxTutorialOff() {
+    public function actionAjaxTutorialOff()
+    {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
             $organization = $user->organization;
@@ -232,7 +258,8 @@ class SiteController extends Controller {
         return false;
     }
 
-    public function actionAjaxTutorialOn() {
+    public function actionAjaxTutorialOn()
+    {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
             $organization = $user->organization;
@@ -242,11 +269,13 @@ class SiteController extends Controller {
         return false;
     }
 
-    private function isRegistrationComplete($organization) {
+    private function isRegistrationComplete($organization)
+    {
         return ($organization->step != Organization::STEP_SET_INFO);
     }
 
-    private function redirectOrganizationIndex($organization) {
+    private function redirectOrganizationIndex($organization)
+    {
         if ($organization->type_id === Organization::TYPE_RESTAURANT) {
             $this->redirect(['/client/index']);
         }

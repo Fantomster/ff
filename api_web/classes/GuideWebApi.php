@@ -70,7 +70,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 }
 
                 if (isset($post['search']['updated_date']['end'])) {
-                    $search->updated_date_from = $post['search']['updated_date']['end'];
+                    $search->updated_date_to = $post['search']['updated_date']['end'];
                 }
             }
 
@@ -152,7 +152,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
         $sort = (isset($post['sort']) ? $post['sort'] : 'product');
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
-        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 1000);
 
         $client = $this->user->organization;
 
@@ -437,6 +437,52 @@ class GuideWebApi extends \api_web\components\WebApi
         $cart = $this->container->get('CartWebApi');
         $cart->add($products);
         return $cart->items();
+    }
+
+    /**
+     * WIP
+     *
+     *
+     *
+     * Операции с продуктами в шаблоне
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function productOperation(array $post) {
+
+        if (empty($post['guide_id'])) {
+            throw new BadRequestHttpException("ERROR: Empty guide_id");
+        }
+
+        if (empty($post['products'])) {
+            throw new BadRequestHttpException("ERROR: Empty products");
+        }
+
+        $guid_id = (int) $post['guide_id'];
+        $products = $post['products'];
+        $result = [
+            'success' => 0,
+            'error' => 0
+        ];
+        try {
+            foreach($products as $product) {
+                $operation = trim($product['operation']);
+                if(!in_array($operation, ['add', 'del'])) {
+                    throw new BadRequestHttpException("Operation not found " . $operation);
+                }
+
+                if ($operation == 'add') {
+
+                }
+
+                $result['success'] += 1;
+            }
+        } catch(\Exception $e) {
+            $result['error'] += 1;
+        }
+
+        return $result;
     }
 
     /**

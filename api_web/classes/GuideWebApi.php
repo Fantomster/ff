@@ -70,7 +70,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 }
 
                 if (isset($post['search']['updated_date']['end'])) {
-                    $search->updated_date_from = $post['search']['updated_date']['end'];
+                    $search->updated_date_to = $post['search']['updated_date']['end'];
                 }
             }
 

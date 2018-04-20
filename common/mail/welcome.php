@@ -1,24 +1,116 @@
-<?php
-use yii\helpers\Url;
-$organizationType = "client";
-if ($type == common\models\Organization::TYPE_SUPPLIER) {
-    $organizationType = "vendor";
-}
-?>
-<p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><img src="https://app.mixcart.ru/img/immotion1.jpg" style="max-width: 100%; margin: 0; padding: 0;" alt="" /></p>
-<h3 style="line-height: 1.1; color: #3f3e3e; font-weight: 500; font-size: 27px; margin: 0 0 15px; padding: 0;">
-    <?= Yii::t('app', 'common.mail.welcome.hello', ['ru'=>'Приветствую']) ?>, <small style="font-size: 60%; color: #787878; line-height: 0; text-transform: none; margin: 0; padding: 0;"><?= $name ?></small>
-</h3>
-<p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
-    <?= Yii::t('app', 'common.mail.welcome.arthur', ['ru'=>'Меня зовут Шамалов Артур, я являюсь сооснователем сервиса MixCart']) ?>.<br>
-    <?= Yii::t('app', 'common.mail.welcome.thanks', ['ru'=>'Благодарю за подтверждение Вашей учетной записи']) ?>.<br>
-    ---<br>
-    <?= Yii::t('app', 'common.mail.welcome.driver', ['ru'=>'Технологии стали драйвером развития бизнеса во всех сферах в большинстве стран мира. Нам уже сейчас становится очевидно то, что компании, игнорирующие технологии или скептически к ним настроенные, уйдут с рынка в ближайшие годы, либо им придется адаптироваться под новые реалии']) ?>.<br>
-    <?= Yii::t('app', 'common.mail.welcome.i_know', ['ru'=>'Да, я знаю, сначала кажется сложным внедрение новых инструментов, но, поверьте, все намного проще, чем может показаться, и результат того стоит']) ?>.<br>
-    <?= Yii::t('app', 'common.mail.welcome.we', ['ru'=>'Мы разработали систему MixCart для того, чтобы Вы могли зарабатывать больше денег, тратя свое время на развитие и на важные процессы, оставив рутину нам']) ?>.
-   <br> ---<br>
-    <?= Yii::t('app', 'common.mail.welcome.i_glad', ['ru'=>'Я искренне рад видеть Вас в числе наших клиентов и обещаю - мы сделаем все, чтобы превысить Ваши ожидания от работы с нашим сервисом']) ?>.<br>
-</p>
-<br/><br/>
- <?= Yii::t('app', 'common.mail.welcome.good_luck', ['ru'=>'Желаю Вам успехов в бизнесе']) ?>.
- <br/><br/>
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background: #ffffff; min-width: 340px; font-size: 1px; line-height: normal;">
+    <tbody>
+    <tr>
+        <td align="center" valign="top">
+            <table cellpadding="0" cellspacing="0" border="0" width="680"
+                   style="max-width: 680px; min-width: 320px; background: #ffffff;">
+                <tr>
+                    <td align="center" valign="middle" height="320"
+                        style="width: 100%;background-image: url('https://preview.ibb.co/bRS9nH/banner_fruits.png');background-repeat: no-repeat;background-position: 0 -15px;background-size: cover;">
+                        <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;font-weight: bold;text-transform: uppercase;">
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;line-height: normal;">
+                                <?= Yii::t('app', 'common.mail.welcome.head_good', ['ru' => 'Здорово,']) ?>
+                            </span>
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;line-height: normal;display: block;width: 100%;">
+                                <?= Yii::t('app', 'common.mail.welcome.head_good_1', ['ru' => 'Что вы с нами']) ?>
+                            </span>
+                        </font>
+                        <span style="height: 115px;display: block;width: 100%;"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="20"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background: #ffffff; min-width: 340px; font-size: 1px; line-height: normal;">
+    <tr>
+        <td align="center" valign="top">
+            <table cellpadding="0" cellspacing="0" border="0" width="580"
+                   style="max-width: 580px; min-width: 320px; background: #ffffff;">
+                <tr>
+                    <td valign="middle" height="70"
+                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+                        <font face="'Open Sans', Arial, sans-serif"
+                              style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;font-weight: 600;">
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;color: #2a2c2e;display: block;">
+                                <?= Yii::t('app', 'common.mail.welcome.hello', ['ru' => 'Здравствуйте!']) ?>
+                            </span>
+                        </font>
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="bottom"
+                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+                        <?= Yii::t('app', 'common.mail.welcome.full_text', ['ru' => '<p style="font-family: \'Open Sans\', Arial, sans-serif;font-size: 16px;margin: 0;">Меня зовут
+                            Ильдар Хасанов, я являюсь сооснователем сервиса MixCart. Я искренне рад видеть Вас в числе
+                            наших клиентов!</p>
+                        <p style="font-family: \'Open Sans\', Arial, sans-serif;font-size: 16px;">Технологии уже давно
+                            стали драйвером развития бизнеса во всех сферах. С MixCart рестораны и поставщики управляют
+                            закупками и делают это быстрее, удобнее, и с большей обоюдной выгодой для бизнеса.</p>
+                        <p style="font-family: \'Open Sans\', Arial, sans-serif;font-size: 16px;">Да, я знаю, сначала
+                            внедрение новых инструментов кажется сложным, но, поверьте, все намного проще, чем может
+                            показаться, и результат того стоит!</p>']) ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="10"></td>
+                </tr>
+                <tr>
+                <tr>
+                    <td align="center" valign="top" height="90" class="btn-wrapper"
+                        style="color: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;">
+                        <a href="https://mixcart.ru/" target="_blank"
+                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;text-decoration: none;color: #ffffff;display: block;width: 280px;background-image: url('https://image.ibb.co/eydtxH/btn_hover.png');background-position: -3px -12px;background-repeat: no-repeat;height: 83px;">
+                            <font face="'Open Sans', Arial, sans-serif"
+                                  style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;color: #ffffff;">
+                                <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;line-height: 60px;color: #ffffff;">
+                                    <?= Yii::t('app', 'common.mail.welcome.start', ['ru' => 'Начнем']) ?>
+                                </span>
+                            </font>
+                        </a>
+                    </td>
+                </tr>
+                </tr>
+                <tr>
+                    <td height="10"></td>
+                </tr>
+                <tr>
+                    <td valign="bottom"
+                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+                        <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
+                            <?= Yii::t('app', 'common.mail.welcome.read_instruction', ['ru' => 'Ознакомьтесь, пожалуйста, с инструкцией по работе с MixCart:']) ?>
+                        </p>
+                        <ul>
+                            <li>
+                                <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
+                                    <?= Yii::t('app', 'common.mail.welcome.instruction_restaurant', ['ru' => 'для ресторанов']) ?>
+                                    <a href="https://mixcart.ru/restaurant-help.html" target="_blank"
+                                       style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff;">https://mixcart.ru/restaurant-help.html</a>
+                                </p></li>
+                            <li>
+                                <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
+                                    <?= Yii::t('app', 'common.mail.welcome.instruction_supplier', ['ru' => 'для поставщиков']) ?>
+                                    <a href="https://mixcart.ru/supplier-help.html" target="_blank"
+                                       style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff">https://mixcart.ru/supplier-help.html</a>
+                                </p></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="middle" height="170">
+                        <img src="https://image.ibb.co/m6Gd7S/image008.jpg" alt="Ильдар Хасанов" border="0"/>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<?=$this->renderAjax('layouts/mail_footer', ['user' => $user ?? null])?>

@@ -130,6 +130,7 @@ return [
                 'forgot' => 'user/forgot',
                 'resend' => 'user/resend',
                 'reset' => 'user/reset',
+                'unsubscribe/<token:.+?>' => 'site/unsubscribe',
                 'orders' => 'order/index',
                 'product/<id:\d+>' => 'site/product',
                 'restaurant/<id:\d+>' => 'site/restaurant',

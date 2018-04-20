@@ -926,11 +926,11 @@ class OrderController extends DefaultController {
                 $res = (new CartWebApi())->registration($data);
             else
                 $res['error'] = 1;
-            
+
             $title = Yii::t('message', 'frontend.views.order.all_orders_complete', ['ru' => 'Заказы оформлены!']);
             $description = Yii::t('message', 'frontend.views.order.orders_complete_count_success',
                     ['ru' => '{success} из {count} заказов оформлены', 'success' => $res['success'], 'count' => $cartCount]);
-            $type = ($res['error'] > 0) ? $type = "success" : $type = "error";
+            $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => $title, "description" => $description, "type" => $type];
@@ -961,7 +961,7 @@ class OrderController extends DefaultController {
                     $position['in_basket'] = $content[$item['id']]["in_basket"];
                     $expectedPositions[] = [
                         "id" => $position['id'],
-                        "price" => $this->renderPartial("_checkout-position-price", compact("position", "currencySymbol", "vendor_id")),
+                        "price" => $this->renderPartial("_checkout-position-price", compact("position")),
                     ];
                 }
             }
@@ -969,10 +969,12 @@ class OrderController extends DefaultController {
             $forMinCartPrice = $cartModel->forMinCartPrice($vendor_id, $rawPrice);
             $forFreeDelivery = $cartModel->forFreeDelivery($vendor_id, $rawPrice);
             $cart['total_price'] = $cartModel->calculateTotalPrice($vendor_id, $rawPrice);
+            $cart['for_min_cart_price'] = $forMinCartPrice;
+            $cart['for_free_delivery'] = $forFreeDelivery;
             $result = [
-                "total" => $this->renderPartial("_checkout-total", compact('cart', 'currencySymbol', 'forMinCartPrice', 'forFreeDelivery')),
+                "total" => $this->renderPartial("_checkout-total", compact('cart')),
                 "expectedPositions" => $expectedPositions,
-                "button" => $this->renderPartial("_checkout-position-button", compact("cart", "currencySymbol", "forMinCartPrice")),
+                "button" => $this->renderPartial("_checkout-position-button", compact("cart")),
             ];
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return $result;

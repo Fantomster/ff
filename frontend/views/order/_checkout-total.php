@@ -11,7 +11,7 @@ use yii\helpers\Html;
         <button type="button" class="btn btn-default alButton" disabled="disabled"><?= Yii::t('message', 'frontend.views.order.make_order_two', ['ru' => 'Оформить заказ']) ?></button>
         <p class="alP"><?= Yii::t('message', 'frontend.views.order.until_min', ['ru' => 'до минимального заказа']) ?></p><p><?= $cart['for_min_cart_price'] ?> <?= $cart['currency'] ?></p>
         <?php } elseif ($cart['for_free_delivery'] > 0) { ?>
-        <p><?= Yii::t('message', 'frontend.views.order.until_free', ['ru' => 'до бесплатной доставки']) ?> </p><p> <?= $cart['currency'] ?></p>
+        <p><?= Yii::t('message', 'frontend.views.order.until_free', ['ru' => 'до бесплатной доставки']) ?> </p><p><?= $cart['for_free_delivery']?> <?= $cart['currency'] ?></p>
     <?php } elseif ($cart['for_free_delivery'] == 0) { ?>
         <p><?= Yii::t('message', 'frontend.views.order.free_delivery', ['ru' => 'бесплатная доставка!']) ?></p>
     <?php } else { ?>

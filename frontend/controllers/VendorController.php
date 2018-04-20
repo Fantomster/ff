@@ -218,6 +218,7 @@ class VendorController extends DefaultController
         }
     }
 
+
     public function actionRemoveDeliveryRegion(int $id): void
     {
         $organization = $this->currentUser->organization;
@@ -331,7 +332,7 @@ class VendorController extends DefaultController
 
                     $user->save();
                     $profile->save();
-                    User::updateRelationUserOrganization($user->id, $user->organization_id, $post['User']['role_id']);
+                    User::updateRelationUserOrganization($user->id, $currentUserOrganizationID, $post['User']['role_id']);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);

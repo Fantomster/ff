@@ -44,7 +44,6 @@ class User extends \amnah\yii2\user\models\User {
         $rules = [
             // general email and username rules
             [['email', 'username'], 'string', 'max' => 255],
-            [['subscribe'], 'integer'],
             [['email', 'username'], 'unique', 'on' => ['register', 'admin', 'manage', 'manageNew']],
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
@@ -68,7 +67,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
-            [['organization_id', 'type'], 'integer'],
+            [['organization_id', 'type', 'subscribe'], 'integer'],
             [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 
@@ -95,7 +94,7 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function afterSave($insert, $changedAttributes)
     {
-        if(!$insert && $changedAttributes['status'] == self::STATUS_ACTIVE && $this->first_logged_at == null) {
+        if(!$insert && isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_ACTIVE) && ($this->first_logged_at == null)) {
             $this->first_logged_at = new Expression('NOW()');
         }
 

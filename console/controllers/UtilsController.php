@@ -15,7 +15,7 @@ class UtilsController extends Controller
     public function actionSendEmailWeekend()
     {
         $users = User::find()->where(['status' => 1, 'subscribe' => 1])
-            ->andWhere('DATEDIFF(NOW(), created_at) = 7')
+            ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)')
             ->all();
 
         if (!empty($users)) {
@@ -33,8 +33,9 @@ class UtilsController extends Controller
     {
         $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0])
             ->andWhere('first_logged_in_at is not null')
-            ->andWhere('TIMESTAMPDIFF(HOUR, NOW(), first_logged_in_at) = 1')
-            ->all();
+            ->andWhere('first_logged_in_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)')
+            ->all()
+            ->limit(10);
 
         if (!empty($users)) {
             \Yii::$app->language = 'ru';
@@ -52,7 +53,7 @@ class UtilsController extends Controller
     public function actionSendDemonstration()
     {
         $users = User::find()->where(['status' => 1, 'subscribe' => 1])
-            ->andWhere('DATEDIFF(NOW(), created_at) = 2')
+            ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 2 DAY)')
             ->all();
 
         if (!empty($users)) {

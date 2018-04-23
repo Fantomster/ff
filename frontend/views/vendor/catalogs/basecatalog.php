@@ -207,9 +207,8 @@ Modal::end();
                     ?>
                     <?=
                     Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']), [
-                        'class' => 'btn btn-outline-default btn-sm pull-right',
+                        'class' => 'btn btn-outline-default btn-sm pull-right delete-all-products',
                         'style' => ['margin-right' => '10px;'],
-                        'id' => 'deleteAll',
                     ])
                     ?>
                     <div class="btn-group pull-right" placement="left" style="margin-right: 10px">

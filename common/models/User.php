@@ -88,10 +88,6 @@ class User extends \amnah\yii2\user\models\User {
 
     public function beforeSave($insert) {
         $result = parent::beforeSave($insert);
-        $test1 = !$insert;
-        $test2 = ($this->status == self::STATUS_ACTIVE);
-        $test3 = empty($this->first_logged_in_at);
-        $test4 = isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status);
         if (!$insert && isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status) && ($this->status == self::STATUS_ACTIVE) && empty($this->first_logged_in_at)) {
             $this->first_logged_in_at = new Expression('NOW()');
         }

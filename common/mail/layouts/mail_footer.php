@@ -21,7 +21,7 @@
                         <a href="tel:84994041018" target="_blank"
                            style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
                             <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><span
-                                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">8-499-404-10-18</span></font>
+                                style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">8-499-404-10-18</span></font>
                         </a>
                     </td>
                     <td align="center" valign="middle" width="33">
@@ -35,7 +35,7 @@
                         <a href="mailto:info@mixcart.ru" target="_blank"
                            style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
                             <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><span
-                                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">info@mixcart.ru</span></font>
+                                style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">info@mixcart.ru</span></font>
                         </a>
                     </td>
                     <td align="center" valign="middle" width="30">
@@ -49,7 +49,7 @@
                         <a href="https://mixcart.ru/" target="_blank"
                            style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
                             <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><span
-                                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">www.mixcart.ru</span></font>
+                                style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">www.mixcart.ru</span></font>
                         </a>
                     </td>
                 </tr>
@@ -66,14 +66,14 @@
                 <tr>
                     <td align="center" valign="middle" height="70">
                         <a href="https://www.facebook.com/mixcartru/"><img
-                                    src="https://preview.ibb.co/b0fgKx/fb_logo.png" alt="Facebook Logo" width="30"
-                                    height="30" style="border:0; outline:none; text-decoration:none;"></a>
+                                src="https://preview.ibb.co/b0fgKx/fb_logo.png" alt="Facebook Logo" width="30"
+                                height="30" style="border:0; outline:none; text-decoration:none;"></a>
                     </td>
                     <td align="center" valign="middle" height="70">
                         <a href="https://www.instagram.com/mixcart_ru/?hl=ru"><img
-                                    src="https://preview.ibb.co/h2tXsH/instagram_logo.png" alt="Facebook Logo"
-                                    width="25" height="25"
-                                    style="border:0; outline:none; text-decoration:none;"></a>
+                                src="https://preview.ibb.co/h2tXsH/instagram_logo.png" alt="Facebook Logo"
+                                width="25" height="25"
+                                style="border:0; outline:none; text-decoration:none;"></a>
                     </td>
                 </tr>
             </table>
@@ -86,14 +86,14 @@
         <td align="center" valign="top">
             <table cellpadding="0" cellspacing="0" border="0" width="500"
                    style="max-width: 500px; min-width: 320px; background: #ffffff;">
-                <?php if (!empty($user) && $user->subscribe == 1): ?>
+                       <?php if (!empty($user) && $user->subscribe == 1): ?>
                     <tr>
                         <td align="center" valign="middle" height="20"
                             style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
                             <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;margin: 0;">
-                                <a href="https://mixcart.ru/unsubscribe/<?= $user->access_token ?? null ?>"
-                                   target="_blank"
-                                   style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.unsubscribe', ['ru' => 'Отписатьтся']) ?></a> <?= Yii::t('app', 'common.mail.layouts.from_this_mailing', ['ru' => 'от этой рассылки']) ?>
+                                <a href="<?= \yii\helpers\Url::toRoute(["/site/unsubscribe", "token" => $user->access_token], true) ?>"
+                                    target="_blank"
+                                    style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.unsubscribe', ['ru' => 'Отписатьтся']) ?></a> <?= Yii::t('app', 'common.mail.layouts.from_this_mailing', ['ru' => 'от этой рассылки']) ?>
                             </p>
                         </td>
                     </tr>
@@ -102,9 +102,9 @@
                     <td align="center" valign="middle" height="70"
                         style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
                         <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
-                                <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
-                                    &copy; <?= date('Y') ?> MixCart — ООО «Онлайн Маркет»
-                                </span>
+                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
+                            &copy; <?= date('Y') ?> MixCart — ООО «Онлайн Маркет»
+                        </span>
                         </font>
                     </td>
                 </tr>

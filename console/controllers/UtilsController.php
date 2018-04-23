@@ -32,8 +32,8 @@ class UtilsController extends Controller
     public function actionSendMessageManager()
     {
         $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0])
-            ->andWhere('first_logged_at is not null')
-            ->andWhere('TIMESTAMPDIFF(HOUR, NOW(), first_logged_at) = 1')
+            ->andWhere('first_logged_in_at is not null')
+            ->andWhere('TIMESTAMPDIFF(HOUR, NOW(), first_logged_in_at) = 1')
             ->all();
 
         if (!empty($users)) {

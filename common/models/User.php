@@ -86,15 +86,53 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
 
+    public function beforeSave($insert) {
+        $result = parent::beforeSave($insert);
+        $test1 = !$insert;
+        $test2 = ($this->status == self::STATUS_ACTIVE);
+        $test3 = empty($this->first_logged_in_at);
+        $test4 = isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status);
+        if (!$insert && isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status) && ($this->status == self::STATUS_ACTIVE) && empty($this->first_logged_in_at)) {
+            $this->first_logged_in_at = new Expression('NOW()');
+        }
+        return $result;
+    }
+    
+    /**
+     * Confirm user email
+     * @param string $newEmail
+     * @return bool
+     */
+    public function confirm($newEmail)
+    {
+        // update status
+        $this->status = static::STATUS_ACTIVE;
+
+        // process $newEmail from a userToken
+        //   check if another user already has that email
+        $success = true;
+        if ($newEmail) {
+            $checkUser = static::findOne(["email" => $newEmail]);
+            if ($checkUser) {
+                $success = false;
+            } else {
+                $this->email = $newEmail;
+            }
+        }
+
+        $this->save(false, ["email", "status", "first_logged_in_at"]);
+        return $success;
+    }
+    
     /**
      * @param bool $insert
      * @param array $changedAttributes
      */
     public function afterSave($insert, $changedAttributes)
     {
-        if(!$insert && isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_ACTIVE) && ($this->first_logged_in_at == null)) {
-            $this->first_logged_in_at = new Expression('NOW()');
-        }
+//        if(!$insert && isset($changedAttributes['status']) && ($this->status == self::STATUS_ACTIVE) && ($this->first_logged_in_at == null)) {
+//            $this->first_logged_in_at = new Expression('NOW()');
+//        }
 
         if ($insert) {
             $organization = $this->organization;

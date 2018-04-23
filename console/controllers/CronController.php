@@ -26,6 +26,8 @@ class CronController extends Controller {
             \Yii::$app->language = 'ru';
             foreach ($users as $user) {
                 Notice::init('User')->sendEmailWeekend($user);
+                $user->send_week_message = 1;
+                $user->save();
             }
         }
     }
@@ -62,6 +64,8 @@ class CronController extends Controller {
             \Yii::$app->language = 'ru';
             foreach ($users as $user) {
                 Notice::init('User')->sendEmailDemonstration($user);
+                $user->send_demo_message = 1;
+                $user->save();
             }
         }
     }

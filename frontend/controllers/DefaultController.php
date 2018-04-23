@@ -5,9 +5,8 @@ namespace frontend\controllers;
 use Yii;
 use yii\web\Controller;
 use common\models\Organization;
-use common\models\RelationSuppRest;
-use common\models\Catalog;
 use common\models\Role;
+use common\models\User;
 
 /**
  * Description of DefaultController
@@ -15,6 +14,9 @@ use common\models\Role;
  */
 class DefaultController extends Controller {
 
+    /**
+     * @var User
+     */
     protected $currentUser;
 
     /*

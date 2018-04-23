@@ -30,6 +30,9 @@ class Catalog extends \yii\db\ActiveRecord
     const CATALOG_BASE_NAME = 'Главный каталог';
     const STATUS_ON = 1;
     const STATUS_OFF = 0;
+    
+    const BASE_INDEX_FIELDS = [1 => 'product', 2 => 'article'];
+    
     /**
      * @inheritdoc
      */
@@ -267,5 +270,9 @@ class Catalog extends \yii\db\ActiveRecord
             $newGoods->refresh();
         }
         return $lastInsert_cat_id;
+    }
+    
+    public static function getBaseIndexTitleList() {
+        return [1 => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']), 2 => Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул'])];
     }
 }

@@ -205,6 +205,13 @@ Modal::end();
                         ],
                     ])
                     ?>
+                    <?=
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']), [
+                        'class' => 'btn btn-outline-default btn-sm pull-right',
+                        'style' => ['margin-right' => '10px;'],
+                        'id' => 'deleteAll',
+                    ])
+                    ?>
                     <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                         <?=
                         ExportMenu::widget([
@@ -274,6 +281,13 @@ Modal::end();
                             'href' => Url::to(['/vendor/import', 'id' => $cat_id]),
                             'style' => 'margin-right:10px;',
                         ],
+                    ])
+                    ?>
+                    <?=
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']) . ' </span> <span class="base_index">' . \common\models\Catalog::getBaseIndexTitleList()[$currentCatalog->index_column] . '</span>', [
+                        'class' => 'btn btn-outline-default btn-sm pull-right',
+                        'style' => ['margin-right' => '10px;'],
+                        'id' => 'changeBaseIndex',
                     ])
                     ?>
                     <?=

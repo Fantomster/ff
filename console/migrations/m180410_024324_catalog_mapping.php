@@ -13,7 +13,7 @@ class m180410_024324_catalog_mapping extends Migration
     public function safeUp()
     {
         $this->addColumn('{{%catalog}}', 'mapping', $this->string(255)->null()->defaultValue(null));
-        $this->addColumn('{{%catalog}}', 'index_column', $this->string(255)->notNull()->defaultValue(''));
+        $this->addColumn('{{%catalog}}', 'index_column', $this->integer()->notNull()->defaultValue(1));
     }
 
     /**

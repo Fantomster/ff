@@ -34,8 +34,8 @@ class UtilsController extends Controller
         $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0])
             ->andWhere('first_logged_in_at is not null')
             ->andWhere('first_logged_in_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)')
-            ->all()
-            ->limit(10);
+            ->limit(10)
+            ->all();
 
         if (!empty($users)) {
             \Yii::$app->language = 'ru';

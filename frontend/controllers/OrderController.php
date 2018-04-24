@@ -921,14 +921,19 @@ class OrderController extends DefaultController {
                 'error' => 0
             ];
 
+            $error_description = "";
+
             if (!empty($data))
                 $res = (new CartWebApi())->registration($data);
-            else
+            else {
                 $res['error'] = 1;
+                $error_description = Yii::t('message', 'frontend.views.order.orders_registration_delivery_date_error',
+                    ['ru' => 'Не указана дата доставки!']);
+            }
 
             $title = Yii::t('message', 'frontend.views.order.all_orders_complete', ['ru' => 'Заказы оформлены!']);
             $description = Yii::t('message', 'frontend.views.order.orders_complete_count_success',
-                    ['ru' => '{success} из {count} заказов оформлены', 'success' => $res['success'], 'count' => $cartCount]);
+                    ['ru' => '{success} из {count} заказов оформлены', 'success' => $res['success'], 'count' => $cartCount])."</br>".$error_description;
             $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;

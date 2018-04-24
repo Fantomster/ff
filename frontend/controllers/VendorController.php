@@ -1414,7 +1414,7 @@ class VendorController extends DefaultController
                         }
                     }
 
-                    $isExists = User::deleteUserFromOrganization($post['id']);
+                    $isExists = User::deleteUserFromOrganization($post['id'], $this->currentUser->organization_id);
                     if($isExists && $user->id != $this->currentUser->id){
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);

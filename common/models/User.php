@@ -595,7 +595,7 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Deleting all user-organization relations
      */
-    public function deleteUserFromOrganization(int $userID): bool
+    public function deleteUserFromOrganization(int $userID, int $organizationID): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -616,12 +616,12 @@ class User extends \amnah\yii2\user\models\User {
             if($deleteAll){
                 $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
                 foreach ($relations as $relation) {
-                    self::deleteRelationUserOrganization($userID, $relation->organization_id);
+                    self::deleteRelationUserOrganization($userID, $organizationID);
                 }
 
             }else{
                 $user = User::findIdentity(Yii::$app->user->id);
-                self::deleteRelationUserOrganization($userID, $user->organization_id);
+                self::deleteRelationUserOrganization($userID, $organizationID);
             }
 
             $check = RelationUserOrganization::findOne(['user_id'=>$userID]);

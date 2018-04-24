@@ -85,8 +85,18 @@ class MarketWebApi extends WebApi
 
                 if ($key == 'supplier_id') {
                     $key = 'supp_org_id';
-                }
-
+                    if(!empty($value)) {
+                        if(is_array($value)) {
+                            foreach ($value as $key => $supp_org_id) {
+                                $value[$key] = (int) $supp_org_id;
+                            }
+                            $value = implode(', ', $value);
+                        } else {
+                            $value = (int) $value;
+                        }
+                        $result->andWhere("$key IN ($value)");
+                    }
+                }else
                 if (is_numeric($value) OR is_int($value)) {
                     $result->andFilterWhere([$key => $value]);
                 } else {

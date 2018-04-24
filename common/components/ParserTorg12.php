@@ -585,7 +585,7 @@ class ParserTorg12
 
             // количество
             if (isset($this->columnList['cnt'])) {
-                $invoiceRow->cnt = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
+                $invoiceRow->cnt = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
             }
 
             // еденицы измерения

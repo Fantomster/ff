@@ -19,7 +19,7 @@
                     <table cellpadding="0" cellspacing="0" border="0" width="680" style="max-width: 580px; min-width: 320px; background: #ffffff;">
                         <tr>
                             <td style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                                <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;"><?= Yii::t('app', 'common.mail.demo.greetings', ['ru' => 'Здравствуйте!']) ?>Здравствуйте!</p>
+                                <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;"><?= Yii::t('app', 'common.mail.demo.greetings', ['ru' => 'Здравствуйте!']) ?></p>
                                 <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;"><?= Yii::t('app', 'common.mail.demo.paragraph1', ['ru' => 'Я уверена, что наш способ управлять закупками — самый удобный и простой. Но не верьте словам, лучше попробуйте сами или посмотрите!']) ?></p>
                                 <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;"><?= Yii::t('app', 'common.mail.demo.paragraph2', ['ru' => 'Я предлагаю провести бесплатную демонстрацию решения на вашей территории - займет 10-15 минут и рассказать, как MixCart будет полезен в Вашем конкретном случае.']) ?></p>
                                 <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;"><?= Yii::t('app', 'common.mail.demo.paragraph3', ['ru' => 'Сообщите, в какое время с Вами можно связаться и обговорить детали.']) ?></p>

@@ -185,7 +185,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => Yii::t('message', 'frontend.views.settings.info_mail', ['ru'=>'Информационные рассылки по email']),
+                            'label' => Yii::t('app', 'frontend.views.settings.info_mail', ['ru'=>'Информационные рассылки по email']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]

@@ -34,6 +34,7 @@ class m180424_141100_yet_another_email_translation extends Migration
         ['common.mail.manager_message.paragraph1', 'Меня зовут Оля, я менеджер по развитию в MixCart. Недавно Вы зарегистрировались на нашей платформе, и я хочу помочь Вам разобраться во всех её возможностях.'],
         ['common.mail.manager_message.greetings', 'Здравствуйте!'],
         ['common.mail.manager_message.subject', 'Ольга от MixCart'],
+        ['frontend.views.settings.info_mail', 'Информационные рассылки по email'],
     ];
     
     /**

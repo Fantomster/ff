@@ -88,7 +88,7 @@ class UserNotice
         $subject = Yii::t('app', 'common.mail.demonstration.subject', ['ru' => 'Как управлять закупками с MixCart']);
 
         if(!empty($user->email)) {
-            $mailer->compose('@common/mail/demonstration')
+            $mailer->compose('@common/mail/demonstration', compact("user"))
                 ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
                 ->setTo($user->email)
                 ->setSubject($subject)

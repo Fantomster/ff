@@ -26,6 +26,7 @@ use yii\web\BadRequestHttpException;
  * @property integer $subscribe
  * @property integer $send_manager_message
  * @property string $first_logged_at
+ * @property string $language
  *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
@@ -41,7 +42,7 @@ class User extends \amnah\yii2\user\models\User {
     public function rules() {
         $rules = [
             // general email and username rules
-            [['email', 'username'], 'string', 'max' => 255],
+            [['email', 'username', 'language'], 'string', 'max' => 255],
             [['email', 'username'], 'unique', 'on' => ['register', 'admin', 'manage', 'manageNew']],
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
@@ -91,6 +92,7 @@ class User extends \amnah\yii2\user\models\User {
         if (!$insert && isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status) && ($this->status == self::STATUS_ACTIVE) && empty($this->first_logged_in_at)) {
             $this->first_logged_in_at = new Expression('NOW()');
         }
+        $this->language = Yii::$app->language;
         return $result;
     }
     

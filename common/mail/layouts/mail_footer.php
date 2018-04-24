@@ -92,6 +92,7 @@
                             style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
                             <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;margin: 0;">
                                 <a href="<?= \yii\helpers\Url::toRoute(["/site/unsubscribe", "token" => $user->access_token], true) ?>"
+                                    data-url ="<?= \yii\helpers\Url::toRoute(["/site/unsubscribe", "token" => $user->access_token], true) ?>"
                                     target="_blank"
                                     style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.unsubscribe', ['ru' => 'Отписатьтся']) ?></a> <?= Yii::t('app', 'common.mail.layouts.from_this_mailing', ['ru' => 'от этой рассылки']) ?>
                             </p>

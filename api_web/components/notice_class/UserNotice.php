@@ -27,17 +27,17 @@ class UserNotice
 
     /**
      * Отправляем приветственный емайл
-     * @param \common\models\User $user
+     * @param User $user
      * @return int
      */
-    public function sendEmailWelcome(\common\models\User $user)
+    public function sendEmailWelcome(User $user)
     {
         return $user->sendWelcome();
     }
 
     /**
      * Отправляем письмо с востановлением пароля
-     * @param $email
+     * @param string $email
      * @return int
      * @throws BadRequestHttpException
      */
@@ -57,7 +57,7 @@ class UserNotice
 
     /**
      * Отправка Email через неделю после регистрации
-     * @param $user User
+     * @param User $user
      */
     public function sendEmailWeekend($user)
     {
@@ -77,7 +77,7 @@ class UserNotice
 
     /**
      * Отправка Email через 2 дня после регистрации
-     * @param $user User
+     * @param User $user
      */
     public function sendEmailDemonstration($user)
     {
@@ -98,7 +98,7 @@ class UserNotice
 
     /**
      * Отправка Email через 1 час после логина
-     * @param $user User
+     * @param User $user
      */
     public function sendEmailManagerMessage($user)
     {
@@ -108,7 +108,8 @@ class UserNotice
         $mailer = Yii::$app->mailer;
         $subject = Yii::t('app', 'common.mail.manager_message.subject', ['ru' => 'Ольга от MixCart']);
         if(!empty($user->email)) {
-            $mailer->compose('@common/mail/manager-message', compact($user))
+            //var_dump($user);
+            $mailer->compose('@common/mail/manager-message', ['user' => $user])
                 ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
                 ->setTo($user->email)
                 ->setSubject($subject)

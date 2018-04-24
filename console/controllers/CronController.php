@@ -18,7 +18,7 @@ class CronController extends Controller {
      * Отправка Емайлов пользователем, кто у нас ровно неделю
      */
     public function actionSendEmailWeekend() {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_week_message' => 0])
+        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_week_message' => 0, 'language' => 'ru'])
                 ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)')
                 ->all();
 
@@ -36,7 +36,7 @@ class CronController extends Controller {
      * Отправка Емайлов пользователем, через час после логина
      */
     public function actionSendMessageManager() {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0])
+        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0, 'language' => 'ru'])
                 ->andWhere('first_logged_in_at is not null')
                 ->andWhere('first_logged_in_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)')
                 ->limit(10)
@@ -56,7 +56,7 @@ class CronController extends Controller {
      * Отправка Емайлов пользователем, через 2 дня после создания
      */
     public function actionSendDemonstration() {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_demo_message' => 0])
+        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_demo_message' => 0, 'language' => 'ru'])
                 ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 2 DAY)')
                 ->all();
 

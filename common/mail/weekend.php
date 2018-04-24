@@ -8,7 +8,7 @@
                     <td align="center" valign="top">
                         <tr>
                             <td align="center" valign="top" height="450"
-                                style="background-image: url('https://preview.ibb.co/cHCLBc/banner_img.png');background-repeat: no-repeat;background-position: 0 0;background-size: cover;font-family: 'Open Sans', Arial, sans-serif;">
+                                style="background-image: url('https://static.mixcart.ru/banner_img.png');background-repeat: no-repeat;background-position: 0 0;background-size: cover;font-family: 'Open Sans', Arial, sans-serif;">
                                 <span style="height: 22px;display: block;width: 100%;"></span>
                                 <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;font-weight: bold;text-transform: uppercase;color: #2a2c2e;">
                                     <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;font-weight: bold;text-transform: uppercase;color: #2a2c2e;">
@@ -80,7 +80,7 @@
                             <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-style: italic;color: #666769;">
                                 <?= Yii::t('app', 'common.mail.weekend.team', ['ru' => 'Команда']) ?> MixCart
                             </span>
-                            <img src="https://image.ibb.co/kjfX7H/icon_heart.png" alt="heart" width="20" height="17" border="0" style="border:0; outline:none; text-decoration:none;padding-left: 5px;">
+                            <img src="https://static.mixcart.ru/icon_heart.png" alt="heart" width="20" height="17" border="0" style="border:0; outline:none; text-decoration:none;padding-left: 5px;">
                         </font>
                     </td>
                 </tr>

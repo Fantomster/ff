@@ -9,7 +9,6 @@ use yii\i18n\MissingTranslationEvent;
 /**
  * Description of Messages
  *
- * @author sharaf
  */
 class TranslationEventHandler {
 

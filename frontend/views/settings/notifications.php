@@ -173,6 +173,24 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         ])->label(false);
                     }
                     ?>
+                    <?=
+                    $form->field($user, 'subscribe')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $user,
+                        'attribute' => 'subscribe',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => Yii::t('app', 'frontend.views.settings.info_mail', ['ru'=>'Информационные рассылки по email']),
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
 
                     <?= ''
 //                    $form->field($emailNotification, 'requests')->widget(CheckboxX::classname(), [

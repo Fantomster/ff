@@ -2,74 +2,16 @@
 
 namespace console\controllers;
 
-use api_web\components\Notice;
-use common\models\User;
 use yii\console\Controller;
 
-class UtilsController extends Controller
-{
+class UtilsController extends Controller {
 
-    /**
-     * Отправка Емайлов пользователем, кто у нас ровно неделю
-     */
-    public function actionSendEmailWeekend()
-    {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1])
-            ->andWhere('DATEDIFF(NOW(), created_at) = 7')
-            ->all();
-
-        if (!empty($users)) {
-            \Yii::$app->language = 'ru';
-            foreach ($users as $user) {
-                Notice::init('User')->sendEmailWeekend($user);
-            }
-        }
-    }
-
-    /**
-     * Отправка Емайлов пользователем, через час после логина
-     */
-    public function actionSendMessageManager()
-    {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0])
-            ->andWhere('first_logged_at is not null')
-            ->andWhere('TIMESTAMPDIFF(HOUR, NOW(), first_logged_at) = 1')
-            ->all();
-
-        if (!empty($users)) {
-            \Yii::$app->language = 'ru';
-            foreach ($users as $user) {
-                Notice::init('User')->sendEmailManagerMessage($user);
-                $user->send_manager_message = 1;
-                $user->save();
-            }
-        }
-    }
-
-    /**
-     * Отправка Емайлов пользователем, через 2 дня после создания
-     */
-    public function actionSendDemonstration()
-    {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1])
-            ->andWhere('DATEDIFF(NOW(), created_at) = 2')
-            ->all();
-
-        if (!empty($users)) {
-            \Yii::$app->language = 'ru';
-            foreach ($users as $user) {
-                Notice::init('User')->sendEmailDemonstration($user);
-            }
-        }
-    }
-
-    public function actionAddDeliveries()
-    {
+    public function actionAddDeliveries() {
         $vendors = \common\models\Organization::find()
-            ->leftJoin('delivery', 'organization.id = delivery.vendor_id')
-            ->where(['type_id' => \common\models\Organization::TYPE_SUPPLIER])
-            ->andWhere('delivery.vendor_id IS NULL')
-            ->all();
+                ->leftJoin('delivery', 'organization.id = delivery.vendor_id')
+                ->where(['type_id' => \common\models\Organization::TYPE_SUPPLIER])
+                ->andWhere('delivery.vendor_id IS NULL')
+                ->all();
         foreach ($vendors as $vendor) {
             $delivery = new \common\models\Delivery();
             $delivery->vendor_id = $vendor->id;
@@ -78,15 +20,14 @@ class UtilsController extends Controller
         }
     }
 
-    public function actionAddNotifications()
-    {
+    public function actionAddNotifications() {
         $users = \common\models\User::find()
-            ->leftJoin('email_notification', 'user.id = email_notification.user_id')
-            ->leftJoin('sms_notification', 'user.id = sms_notification.user_id')
-            ->where('email_notification.id IS NULL')
-            ->orWhere('sms_notification.id IS NULL')
-            ->limit(300)
-            ->all();
+                ->leftJoin('email_notification', 'user.id = email_notification.user_id')
+                ->leftJoin('sms_notification', 'user.id = sms_notification.user_id')
+                ->where('email_notification.id IS NULL')
+                ->orWhere('sms_notification.id IS NULL')
+                ->limit(300)
+                ->all();
         foreach ($users as $user) {
             if (empty($user->emailNotification)) {
                 $emailNotification = new \common\models\notifications\EmailNotification();
@@ -109,11 +50,10 @@ class UtilsController extends Controller
         }
     }
 
-    public function actionFillChatRecipient()
-    {
+    public function actionFillChatRecipient() {
         $emptyRecipientMessages = \common\models\OrderChat::find()
-            ->where(['recipient_id' => 0])
-            ->all();
+                ->where(['recipient_id' => 0])
+                ->all();
         foreach ($emptyRecipientMessages as $message) {
             $order = $message->order;
             $senderId = $message->sentBy->organization_id;
@@ -128,13 +68,11 @@ class UtilsController extends Controller
         }
     }
 
-    public function actionCreateNotifications()
-    {
-
+    public function actionCreateNotifications() {
+        
     }
 
-    public function actionCheckProductPictures()
-    {
+    public function actionCheckProductPictures() {
         $products = \common\models\CatalogBaseGoods::find()->where("image is not null")->andWhere("deleted = 0")->all();
         foreach ($products as $product) {
             if ($product->image) {
@@ -149,8 +87,7 @@ class UtilsController extends Controller
         }
     }
 
-    public function actionCheckOrganizationPictures()
-    {
+    public function actionCheckOrganizationPictures() {
         $organizations = \common\models\Organization::find()->where("picture is not null")->all();
         foreach ($organizations as $organization) {
             if ($organization->picture) {
@@ -165,24 +102,21 @@ class UtilsController extends Controller
         }
     }
 
-    public function actionTestRedis()
-    {
+    public function actionTestRedis() {
         \Yii::$app->redis->executeCommand('PUBLISH', [
             'channel' => 'test',
             'message' => 'ololo!'
         ]);
     }
 
-    public function actionUpdateMpCategories()
-    {
+    public function actionUpdateMpCategories() {
         $categories = \common\models\MpCategory::find()->all();
         foreach ($categories as $category) {
             $category->update();
         }
     }
 
-    public function actionEraseOrganization($orgId)
-    {
+    public function actionEraseOrganization($orgId) {
         $organization = \common\models\Organization::findOne(['id' => $orgId]);
         if (empty($organization)) {
             return;
@@ -216,9 +150,9 @@ class UtilsController extends Controller
                 \common\models\CatalogGoods::deleteAll(['cat_id' => $catalog->id]);
             }
             $goodsNotes = \common\models\GoodsNotes::find()
-                ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = goods_notes.catalog_base_goods_id')
-                ->where(['catalog_base_goods.supp_org_id' => $orgId])
-                ->all();
+                    ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = goods_notes.catalog_base_goods_id')
+                    ->where(['catalog_base_goods.supp_org_id' => $orgId])
+                    ->all();
             foreach ($goodsNotes as $note) {
                 $note->delete();
             }
@@ -250,16 +184,14 @@ class UtilsController extends Controller
         }
     }
 
-    public function actionMassErase()
-    {
+    public function actionMassErase() {
         $organizationsIds = [];
         foreach ($organizationsIds as $organizationId) {
             $this->actionEraseOrganization($organizationId);
         }
     }
 
-    public function actionMassDecode()
-    {
+    public function actionMassDecode() {
         set_time_limit(180);
         do {
             $products = \common\models\CatalogBaseGoods::find()->where("product like '%&#039;%' ")->limit(100)->all();

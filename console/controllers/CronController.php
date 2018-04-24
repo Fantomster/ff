@@ -18,14 +18,16 @@ class CronController extends Controller {
      * Отправка Емайлов пользователем, кто у нас ровно неделю
      */
     public function actionSendEmailWeekend() {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_week_message' => 0, 'language' => 'ru'])
+        $users = User::find()->where(['status' => 1, 'send_week_message' => 0, 'language' => 'ru'])
                 ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)')
                 ->all();
 
         if (!empty($users)) {
             \Yii::$app->language = 'ru';
             foreach ($users as $user) {
-                Notice::init('User')->sendEmailWeekend($user);
+                if ($user->subscribe) {
+                    Notice::init('User')->sendEmailWeekend($user);
+                }
                 $user->send_week_message = 1;
                 $user->save();
             }
@@ -36,7 +38,7 @@ class CronController extends Controller {
      * Отправка Емайлов пользователем, через час после логина
      */
     public function actionSendMessageManager() {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_manager_message' => 0, 'language' => 'ru'])
+        $users = User::find()->where(['status' => 1, 'send_manager_message' => 0, 'language' => 'ru'])
                 ->andWhere('first_logged_in_at is not null')
                 ->andWhere('first_logged_in_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)')
                 ->limit(10)
@@ -45,7 +47,9 @@ class CronController extends Controller {
         if (!empty($users)) {
             \Yii::$app->language = 'ru';
             foreach ($users as $user) {
-                Notice::init('User')->sendEmailManagerMessage($user);
+                if ($user->subscribe) {
+                    Notice::init('User')->sendEmailManagerMessage($user);
+                }
                 $user->send_manager_message = 1;
                 $user->save();
             }
@@ -56,14 +60,16 @@ class CronController extends Controller {
      * Отправка Емайлов пользователем, через 2 дня после создания
      */
     public function actionSendDemonstration() {
-        $users = User::find()->where(['status' => 1, 'subscribe' => 1, 'send_demo_message' => 0, 'language' => 'ru'])
+        $users = User::find()->where(['status' => 1, 'send_demo_message' => 0, 'language' => 'ru'])
                 ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 2 DAY)')
                 ->all();
 
         if (!empty($users)) {
             \Yii::$app->language = 'ru';
             foreach ($users as $user) {
-                Notice::init('User')->sendEmailDemonstration($user);
+                if ($user->subscribe) {
+                    Notice::init('User')->sendEmailDemonstration($user);
+                }
                 $user->send_demo_message = 1;
                 $user->save();
             }

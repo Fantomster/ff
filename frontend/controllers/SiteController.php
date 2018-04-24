@@ -32,15 +32,15 @@ class SiteController extends Controller
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier'],
+                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier', 'unsubscribe'],
                 'rules' => [
                     [
-                        'actions' => ['signup', 'index', 'about', 'faq', 'restaurant', 'supplier'],
+                        'actions' => ['signup', 'index', 'about', 'faq', 'restaurant', 'supplier', 'unsubscribe'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'ajax-complete-registration', 'ajax-wizard-off'],
+                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'ajax-complete-registration', 'ajax-wizard-off', 'unsubscribe'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -97,11 +97,13 @@ class SiteController extends Controller
     {
         $user = User::findOne(['access_token' => $token]);
         if ($user) {
-            $user->subscribe = 0;
-            $user->save();
-            return $this->renderPartial('unsubscribe', compact('user'));
+//            $user->subscribe = 0;
+//            $user->save();
+            Yii::$app->user->login($user, 3600);
+            $this->redirect(['settings/notifications']);
+        } else {
+            throw new HttpException(404, 'Page not found');
         }
-        $this->redirect('/');
     }
 
     /**
@@ -222,6 +224,7 @@ class SiteController extends Controller
                 if ($amoFields) {
                     Yii::$app->amo->send($amoFields->pipeline_id, $amoFields->responsible_user_id, 'Регистрация', $contact);
                 }
+                $user->sendWelcome();
             }
         }
 
@@ -236,7 +239,7 @@ class SiteController extends Controller
         if (Yii::$app->request->isAjax) {
             $organization->step = Organization::STEP_OK;
             $organization->save();
-            $user->sendWelcome();
+            //$user->sendWelcome();
             $result = true;
             if ($organization->locality == 'Москва') {
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;

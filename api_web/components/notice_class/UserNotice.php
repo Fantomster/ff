@@ -108,7 +108,7 @@ class UserNotice
         $mailer = Yii::$app->mailer;
         $subject = Yii::t('app', 'common.mail.manager_message.subject', ['ru' => 'Ольга от MixCart']);
         if(!empty($user->email)) {
-            $mailer->compose('@common/mail/manager-message')
+            $mailer->compose('@common/mail/manager-message', compact($user))
                 ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
                 ->setTo($user->email)
                 ->setSubject($subject)

@@ -59,6 +59,7 @@ class MarketWebApi extends WebApi
             }
         }
 
+
         if (!empty(\Yii::$app->session->get('city')) || !empty(\Yii::$app->session->get('region'))) {
             $supplierRegion = DeliveryRegions::getSuppRegion(\Yii::$app->session->get('city'), \Yii::$app->session->get('region'));
             if (!empty($supplierRegion)) {
@@ -75,6 +76,7 @@ class MarketWebApi extends WebApi
             }
         }
 
+
         //Условия поиска
         if (isset($post['search'])) {
             foreach ($post['search'] as $key => $value) {
@@ -87,10 +89,10 @@ class MarketWebApi extends WebApi
                     $key = 'supp_org_id';
                     if(!empty($value)) {
                         if(is_array($value)) {
-                            foreach ($value as $key => $supp_org_id) {
-                                $value[$key] = (int) $supp_org_id;
+                            foreach ($value as $supp_org_id) {
+                                $supp_orgs[] = (int) $supp_org_id;
                             }
-                            $value = implode(', ', $value);
+                            $value = implode(', ', $supp_orgs);
                         } else {
                             $value = (int) $value;
                         }

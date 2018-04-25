@@ -18,11 +18,9 @@ echo \yii\helpers\Html::input('hidden', 'invoice_id', $model->id);
         'title',
         'quantity',
         'ed',
-        ['attribute' => 'price_without_nds', 'pageSummary' => true],
+        'price_without_nds',
         'percent_nds',
-        ['attribute' => 'price_without_nds', 'pageSummary' => true],
-
-      //  ['attribute' => 'totalPrice', 'pageSummary' => true],
+        ['attribute' => 'sum_without_nds', 'pageSummary' => true],
 
         ['attribute' => 'price_nds', 'pageSummary' => true],
 

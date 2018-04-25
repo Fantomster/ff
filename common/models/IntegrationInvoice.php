@@ -174,7 +174,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'percent_nds' => ceil($row['tax_rate']),
                     'price_nds' => round($row['price_with_tax'], 2),
                     'price_without_nds' => round($row['price_without_tax'], 2),
-                    'quantity' => ceil($row['cnt'])
+                    'quantity' => $row['cnt']
+                    // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -213,7 +214,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                 $model->supp_org_id = $vendor->id;
                 $model->ed = $row->ed;
                 $model->units = 1;
-                $model->price = $row->price_without_nds;
+                $model->price = $row->price_nds;  // Hotfix 1.5.12
+                // $model->price = $row->price_without_nds;
                 if ($model->validate()) {
                     $model->save();
                 } else {
@@ -223,7 +225,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             $models[] = [
                 'id' => $model->id,
                 'quantity' => $row->quantity,
-                'price' => $row->price_without_nds,
+                'price' => $row->price_nds, // Hotfix 1.5.12
+                // 'price' => $row->price_without_nds,
                 'units' => 1,
                 'product_name' => $model->product,
                 'article' => $model->article

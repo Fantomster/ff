@@ -21,6 +21,15 @@ $gridColumns = [
             return Html::a( $data['id'], ['order/view', 'id' => $data['id']]);
         },
     ],
+
+    [
+        'format' => 'raw',
+        'label' => 'Город ресторана',
+        'attribute' => 'client_city',
+        'value' => function($data) {
+            return $data['client']['city'];
+        },
+    ],
     [
         'format' => 'raw',
         'attribute' => 'client_name',

@@ -19,6 +19,7 @@ kartik\select2\Select2Asset::register($this);
 
 $currencyList = Json::encode(Currency::getList());
 $currencySymbolList = Json::encode(Currency::getSymbolList());
+$indexesList = Json::encode(\common\models\Catalog::getBaseIndexTitleList());
 
 $changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
 $calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
@@ -551,6 +552,8 @@ $var10 = Yii::t('message', 'frontend.views.vendor.curr_changed', ['ru' => 'Ва�
 $var11 = Yii::t('message', 'frontend.views.vendor.set_prices', ['ru' => 'Пересчитать цены в каталоге?']);
 $var12 = Yii::t('message', 'frontend.views.vendor.prices_changed', ['ru' => 'Цены успешно изменены!']);
 $var13 = Yii::t('message', 'frontend.views.vendor.farther', ['ru' => 'Далее']);
+$titleChangeIndex = Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']);
+$indexReject = Yii::t('message', 'frontend.views.vendor.index_reject', ['ru' => 'Этот индекс уже используется']);
 
 $customJs = <<< JS
 var timer;
@@ -825,7 +828,43 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             }
         })        
     });
+
+    var indexes = $indexesList;
+    
+    var currentIndex = {$currentCatalog->index_column};
         
+    $(document).on("click", "#changeBaseIndex", function() {
+        swal({
+            title: '$titleChangeIndex',
+            input: 'select',
+            inputOptions: $indexesList,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            confirmButtonText: '$var13',
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (value != currentIndex) {
+                        newCurrency = value;
+                        resolve();
+                    } else {
+                        swal({
+                            type: "error",
+                            title: "$indexReject"
+                        });
+                    }
+                })
+            },
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    resolve();
+                })
+            },
+        }).then(function (result) {
+            //
+        })        
+    });
+   
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

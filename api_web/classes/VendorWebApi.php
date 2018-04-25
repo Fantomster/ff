@@ -431,4 +431,16 @@ class VendorWebApi extends \api_web\components\WebApi {
         //
     }
 
+    /**
+     * Удаление основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function deleteMainCatalog(array $request) {
+        //
+        return ['result' => true];
+    }
+
 }

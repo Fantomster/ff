@@ -17,6 +17,8 @@ use yii\web\BadRequestHttpException;
  * @property string $created_at
  * @property string $updated_at
  * @property integer $currency_id
+ * @property string $mapping
+ * @property string $index_column
  * 
  * @property Vendor $vendor
  * @property Currency $currency
@@ -40,6 +42,7 @@ class Catalog extends \yii\db\ActiveRecord
     {
         return 'catalog';
     }
+    
     //auto created_at && updated_at 
     public function behaviors()
     {
@@ -54,6 +57,7 @@ class Catalog extends \yii\db\ActiveRecord
             ],
         ];
     }
+    
     /**
      * @inheritdoc
      */
@@ -62,7 +66,7 @@ class Catalog extends \yii\db\ActiveRecord
         return [
             [['name', 'supp_org_id', 'type'], 'required'],
             [['supp_org_id', 'type', 'status'], 'integer'],
-            [['created_at'], 'safe'],
+            [['created_at', 'mapping', 'index_column'], 'safe'],
             [['name'], 'string', 'max' => 255],
             //['type', 'uniqueBaseCatalog'],
         ];
@@ -274,5 +278,13 @@ class Catalog extends \yii\db\ActiveRecord
     
     public static function getBaseIndexTitleList() {
         return [1 => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']), 2 => Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул'])];
+    }
+    
+    public function makeSnapshot() {
+        //
+    }
+    
+    public function deleteAllProducts() {
+        //
     }
 }

@@ -404,4 +404,8 @@ class VendorController extends WebApiController
     public function actionImportCustomCatalog() {
         $this->response = $this->container->get('VendorWebApi')->importCustomCatalog($this->request);
     }
+    
+    public function actionDeleteMainCatalog() {
+        $this->response = $this->container->get('VendorWebApi')->importDeleteMainCatalog($this->request);
+    }
 }

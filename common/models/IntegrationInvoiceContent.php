@@ -19,6 +19,7 @@ use Yii;
  * @property int $quantity
  * @property string $created_at
  * @property string $updated_at
+ * @property double $sum_without_nds
  *
  * @property IntegrationInvoice $invoice
  */
@@ -54,7 +55,7 @@ class IntegrationInvoiceContent extends \yii\db\ActiveRecord
         return [
             [['invoice_id'], 'required'],
             [['invoice_id', 'row_number', 'percent_nds'], 'integer'],
-            [['price_nds', 'price_without_nds','quantity'], 'double'],
+            [['price_nds', 'price_without_nds','quantity','sum_without_nds'], 'double'],
             [['created_at', 'updated_at'], 'safe'],
             [['article', 'title', 'ed'], 'string', 'max' => 255],
             [['invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoice::className(), 'targetAttribute' => ['invoice_id' => 'id']],
@@ -74,12 +75,13 @@ class IntegrationInvoiceContent extends \yii\db\ActiveRecord
             'title' => 'Наименование',
             'ed' => 'Ед. измерения',
             'percent_nds' => 'НДС',
-            'price_nds' => 'Цена',
+            'price_nds' => 'Сумма с НДС',
             'price_without_nds' => 'Цена без НДС',
-            'totalPrice' => 'Цена без НДС',
+            'totalPrice' => 'Общая сумма без НДС',
             'quantity' => 'Кол-во',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'sum_without_nds' => 'Сумма без НДС',
         ];
     }
 

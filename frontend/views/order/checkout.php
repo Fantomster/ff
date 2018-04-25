@@ -67,10 +67,20 @@ $this->registerJs(
                 if (!$(".block_wrap_bask_tover").length) {
                     return false;
                 }
+                
                 var clicked = $(this);
                 var form = $("#cartForm");
                 var extData = "&all=" + clicked.data("all") + "&id=" + clicked.data("id"); 
+                
                 if (clicked.hasClass("create")) {
+                    var vendor_id = clicked.data("id")
+                    if($("input[data-vendor_id=\'" + vendor_id +"\']").val() == "")
+                    {
+                        swal({title: "'.Yii::t('message', 'frontend.views.order.order_create_one', ['ru' => 'Заказ не оформлен']).'",
+                         text: "'.Yii::t('message', 'frontend.views.order.order_create_one_get_delivery_date', ['ru' => 'Укажите дату доставки']).'", type: "error"});
+                        return false;
+                    }
+                
                     title = "' . Yii::t('message', 'frontend.views.order.order_create_two', ['ru' => 'Создание заказа']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.will_be_send', ['ru' => 'Заказ будет оформлен и направлен поставщику. Продолжить?']) . ' ";
                 } else if (clicked.hasClass("createAll")){

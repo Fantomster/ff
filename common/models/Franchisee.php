@@ -232,6 +232,7 @@ class Franchisee extends \yii\db\ActiveRecord {
         return $dropdown;
     }
 
+
     public function afterSave($insert, $changedAttributes)
     {
         $data = $this->find()->with('franchiseeGeo')->all();
@@ -245,12 +246,15 @@ class Franchisee extends \yii\db\ActiveRecord {
             $arr[$i]['franchisee_email'] = $one->legal_email;
             $arr[$i]['phone'] = $one->phone;
             $j = 0;
-            foreach ($one->franchiseeGeo as $geo){
-                if($geo->exception)continue;
-                $arr[$i]['location'][$j]['country'] = $geo->country;
-                $arr[$i]['location'][$j]['locality'] = $geo->locality;
-                $arr[$i]['location'][$j]['region'] = $geo->administrative_area_level_1;
-                $j++;
+            $franchiseGeo = $one->franchiseeGeo;
+            if(count($franchiseGeo)){
+                foreach ($franchiseGeo as $geo){
+                    if($geo->exception)continue;
+                    $arr[$i]['location'][$j]['country'] = $geo->country;
+                    $arr[$i]['location'][$j]['locality'] = $geo->locality;
+                    $arr[$i]['location'][$j]['region'] = $geo->administrative_area_level_1;
+                    $j++;
+                }
             }
             $i++;
         }

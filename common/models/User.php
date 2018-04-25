@@ -27,7 +27,10 @@ use yii\web\BadRequestHttpException;
  * @property integer $organization_id
  * @property integer $subscribe
  * @property integer $send_manager_message
+ * @property integer $send_week_message
+ * @property integer $send_demo_message
  * @property string $first_logged_at
+ * @property string $language
  *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
@@ -43,7 +46,7 @@ class User extends \amnah\yii2\user\models\User {
     public function rules() {
         $rules = [
             // general email and username rules
-            [['email', 'username'], 'string', 'max' => 255],
+            [['email', 'username', 'language'], 'string', 'max' => 255],
             [['email', 'username'], 'unique', 'on' => ['register', 'admin', 'manage', 'manageNew']],
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
@@ -67,7 +70,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
-            [['organization_id', 'type', 'subscribe'], 'integer'],
+            [['organization_id', 'type', 'subscribe', 'send_manager_message', 'send_week_message', 'send_demo_message'], 'integer'],
             [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 
@@ -88,15 +91,50 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
 
+    public function beforeSave($insert) {
+        $result = parent::beforeSave($insert);
+        if (!$insert && isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status) && ($this->status == self::STATUS_ACTIVE) && empty($this->first_logged_in_at)) {
+            $this->first_logged_in_at = new Expression('NOW()');
+        }
+        $this->language = Yii::$app->language;
+        return $result;
+    }
+    
+    /**
+     * Confirm user email
+     * @param string $newEmail
+     * @return bool
+     */
+    public function confirm($newEmail)
+    {
+        // update status
+        $this->status = static::STATUS_ACTIVE;
+
+        // process $newEmail from a userToken
+        //   check if another user already has that email
+        $success = true;
+        if ($newEmail) {
+            $checkUser = static::findOne(["email" => $newEmail]);
+            if ($checkUser) {
+                $success = false;
+            } else {
+                $this->email = $newEmail;
+            }
+        }
+
+        $this->save(false, ["email", "status", "first_logged_in_at"]);
+        return $success;
+    }
+    
     /**
      * @param bool $insert
      * @param array $changedAttributes
      */
     public function afterSave($insert, $changedAttributes)
     {
-        if(!$insert && isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_ACTIVE) && ($this->first_logged_in_at == null)) {
-            $this->first_logged_in_at = new Expression('NOW()');
-        }
+//        if(!$insert && isset($changedAttributes['status']) && ($this->status == self::STATUS_ACTIVE) && ($this->first_logged_in_at == null)) {
+//            $this->first_logged_in_at = new Expression('NOW()');
+//        }
 
         if ($insert) {
             $organization = $this->organization;

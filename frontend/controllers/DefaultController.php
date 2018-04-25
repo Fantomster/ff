@@ -15,6 +15,10 @@ use common\models\Role;
  */
 class DefaultController extends Controller {
 
+    /**
+     *
+     * @var \common\models\User
+     */
     protected $currentUser;
 
     /*
@@ -39,6 +43,7 @@ class DefaultController extends Controller {
     public function beforeAction($action) {
         if (!Yii::$app->user->isGuest) {
             $this->loadCurrentUser();
+            $this->currentUser->update();
             $organization = $this->currentUser->organization;
             if(!$organization){
                 throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied', ['ru'=>'Доступ запрещен']));

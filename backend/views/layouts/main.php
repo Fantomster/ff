@@ -15,13 +15,15 @@ $this->registerCss('#loader-show {position:absolute;width:100%;display:none;}');
 
 AppAsset::register($this);
 
+$url = \yii\helpers\Url::to(['/sms/ajax-balance']);
+
 $customJs = <<< JS
 $('#loader-show').css('height',$(window).height());
 $(window).on('resize',function() {
     $('#loader-show').css('height',$(window).height());
 });
 
-$.post('/sms/ajax-balance',function(data){
+$.post('$url',function(data){
     $('#sms-info').html(data);
 });
 

@@ -79,7 +79,7 @@ $this->registerJs(
                 }
                 swal({
                     title: title,
-                    text: text,
+                    html:text,
                     type: "warning",
                     showCancelButton: true,
                     confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep_two', ['ru' => 'Да']) . ' ",
@@ -104,7 +104,7 @@ $this->registerJs(
                     if (result.dismiss === "cancel") {
                         swal.close();
                     } else {
-                        swal({title: result.value.title, text: result.value.description, type: result.value.type});
+                        swal({title: result.value.title, html: result.value.description, type: result.value.type});
                     }
                 });
             });

@@ -53,8 +53,8 @@ class IntegrationInvoiceContent extends \yii\db\ActiveRecord
     {
         return [
             [['invoice_id'], 'required'],
-            [['invoice_id', 'row_number', 'percent_nds', 'quantity'], 'integer'],
-            [['price_nds', 'price_without_nds'], 'double'],
+            [['invoice_id', 'row_number', 'percent_nds'], 'integer'],
+            [['price_nds', 'price_without_nds','quantity'], 'double'],
             [['created_at', 'updated_at'], 'safe'],
             [['article', 'title', 'ed'], 'string', 'max' => 255],
             [['invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoice::className(), 'targetAttribute' => ['invoice_id' => 'id']],

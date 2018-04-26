@@ -916,36 +916,40 @@ class OrderController extends DefaultController
         if (Yii::$app->request->post()) {
             $content = Yii::$app->request->post('CartContent');
             $this->saveCartChanges($content);
-
+            $err = 0;
             if (Yii::$app->request->post('all')) {
                 $data = [];
                 foreach ($cart as $item) {
                     $vendor_id = $item['id'];
                     $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, null);
-                    if ($delivery_date != null)
+                    if ($delivery_date != null) {
                         $data[] = ['id' => $vendor_id,
                             'delivery_date' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
                             'comment' => Yii::$app->request->cookies->getValue('order_comment_' . $vendor_id, null)];
+                    } else
+                        $err++;
                 }
             } else {
                 $vendor_id = Yii::$app->request->post('id');
                 $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, null);
-                if ($delivery_date != null)
+                if ($delivery_date != null) {
                     $data[] = ['id' => $vendor_id,
                         'delivery_date' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
                         'comment' => Yii::$app->request->cookies->getValue('order_comment_' . $vendor_id, null)];
+                }else
+                    $err++;
             }
-
 
             $res = [
                 'success' => 0,
                 'error' => 0
             ];
 
-            if (!empty($data))
+            if(!empty($data))
                 $res = (new CartWebApi())->registration($data);
-            else
-                $res['error'] = 1;
+
+
+            $res['error'] += $err;
 
             $title = Yii::t('message', 'frontend.views.order.orders_complete_count_success',
                         ['ru' => 'Заказы {success} из {count} успешно оформлены.', 'success' => $res['success'], 'count' => $cartCount]) . "</br>";

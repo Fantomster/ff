@@ -465,7 +465,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getCartCount()
     {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
-            return [];
+            return 0;
         }
         return (new Query())->from('cart as c')
             ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')

@@ -1,30 +1,34 @@
 <?php
+
 namespace mxct\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
+use yii\filters\AccessRule;
 
 /**
  * Site controller
  */
-class SiteController extends Controller
-{
+class SiteController extends Controller {
+
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'access' => [
                 'class' => AccessControl::className(),
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
                 'rules' => [
                     [
-                        'actions' => ['index'],
+                        'actions' => [
+                            'index',
+                            'error',
+                        ],
                         'allow' => true,
-                        'roles' => ['*'],
                     ],
                 ],
             ],
@@ -34,8 +38,7 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function actions()
-    {
+    public function actions() {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -48,8 +51,24 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
-    {
-        return $this->render('index');
+    public function actionIndex($token =  null) {
+        $shortenedUrl = "https://goo.gl/" . $token;
+        $expandedUrl = Yii::$app->google->expandUrl($shortenedUrl);
+        $parseUrl = parse_url($expandedUrl);
+        $host = isset($parseUrl['host']) ? $parseUrl['host'] : '';
+        if ($this->endsWith($host, "mixcart.ru") || $this->endsWith($host, "mix-cart.com")) {
+            return $this->redirect($expandedUrl);
+        } else {
+            return $this->redirect(Yii::$app->params['staticUrl'][Yii::$app->language]['home']);
+        }
     }
+
+    private function endsWith($string, $test) {
+        $strlen = strlen($string);
+        $testlen = strlen($test);
+        if ($testlen > $strlen)
+            return false;
+        return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
+    }
+
 }

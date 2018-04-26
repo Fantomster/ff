@@ -43,7 +43,7 @@ return [
             'enableLanguageDetection' => true,
             'baseUrl' => 'https://mxct.ru',
             'rules' => [
-                '/<token:[a-z0-9_-]+>' => 'site/index',
+                '/<token:[a-zA-Z0-9_-]+>' => 'site/index',
             ],
         ],
     ],

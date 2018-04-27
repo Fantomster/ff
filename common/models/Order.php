@@ -397,7 +397,7 @@ class Order extends \yii\db\ActiveRecord {
         $result = [];
         foreach ($recipients as $recipient)
         {
-            if($result[$recipient->email] == null)
+            if(!array_key_exists($recipient->email, $result))
                 $result[$recipient->email] = $recipient;
         }
 

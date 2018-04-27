@@ -942,7 +942,8 @@ class OrderController extends DefaultController
 
             $res = [
                 'success' => 0,
-                'error' => 0
+                'error' => 0,
+                'message' => '',
             ];
 
             if(!empty($data))
@@ -954,7 +955,7 @@ class OrderController extends DefaultController
             $title = Yii::t('message', 'frontend.views.order.orders_complete_count_success',
                         ['ru' => 'Заказы {success} из {count} успешно оформлены.', 'success' => $res['success'], 'count' => $cartCount]) . "</br>";
             $description =($res['error'] != 0) ? $description = Yii::t('message', 'frontend.views.order.orders_registration_delivery_date_error',
-                    ['ru' => 'Не указана дата доставки!']) : "";
+                    ['ru' => 'Не указана дата доставки!'])."</br>".$res['message'] : "";
 
             $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
 

@@ -465,7 +465,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getCartCount()
     {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
-            return [];
+            return 0;
         }
         return (new Query())->from('cart as c')
             ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
@@ -709,17 +709,17 @@ class Organization extends \yii\db\ActiveRecord
             $delivery->save();
 
             //Если нет главного каталога, создаем
-            if (!Catalog::find()->where(['supp_org_id' => $this->id, 'type' => 1])->exists()) {
-                $catalog = new Catalog([
-                    'type' => 1,
-                    'supp_org_id' => $this->id,
-                    'status' => 1,
-                    'created_at' => new \yii\db\Expression('NOW()'),
-                    'updated_at' => new \yii\db\Expression('NOW()'),
-                    'name' => 'Главный каталог'
-                ]);
-                $catalog->save();
-            }
+//            if (!Catalog::find()->where(['supp_org_id' => $this->id, 'type' => 1])->exists()) {
+//                $catalog = new Catalog([
+//                    'type' => 1,
+//                    'supp_org_id' => $this->id,
+//                    'status' => 1,
+//                    'created_at' => new \yii\db\Expression('NOW()'),
+//                    'updated_at' => new \yii\db\Expression('NOW()'),
+//                    'name' => Yii::t('app', 'Главный каталог'),
+//                ]);
+//                $catalog->save();
+//            }
         }
 
         parent::afterSave($insert, $changedAttributes);

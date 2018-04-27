@@ -278,7 +278,7 @@ class SiteController extends Controller
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
                 ->where(['in', 'product_supp_id', $where])
-                ->orderBy(['product_rating' => SORT_DESC])->limit(12)->all();
+                ->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
             throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));

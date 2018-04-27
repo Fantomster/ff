@@ -187,6 +187,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
         } catch (\Exception $e) {
             $result['error'] += 1;
+            $result['message'] = $e->getMessage();
         }
         return $result;
     }

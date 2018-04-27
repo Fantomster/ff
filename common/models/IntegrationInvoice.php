@@ -174,7 +174,9 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'percent_nds' => ceil($row['tax_rate']),
                     'price_nds' => round($row['price_with_tax'], 2),
                     'price_without_nds' => round($row['price_without_tax'], 2),
-                    'quantity' => $row['cnt']
+                    'quantity' => $row['cnt'],
+                    'sum_without_nds' => $row['sum_without_tax'],
+
                     // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {

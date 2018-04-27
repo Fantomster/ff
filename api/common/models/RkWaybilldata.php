@@ -149,6 +149,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
 
                     $this->koef = round($this->quant / $this->defquant, 10);
                 }
+
+                $this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
             } else { // Создание
                // $this->koef = 1;
             }

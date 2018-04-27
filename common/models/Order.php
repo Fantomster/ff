@@ -394,7 +394,14 @@ class Order extends \yii\db\ActiveRecord {
         //Для поставщика
         $recipients = array_merge($recipients, $this->vendor->additionalEmail);
 
-        return $recipients;
+        $result = [];
+        foreach ($recipients as $recipient)
+        {
+            if($result[$recipient->email] == null)
+                $result[$recipient->email] = $recipient;
+        }
+
+        return $result;
     }
 
     public function getOrdersExportColumns() {
@@ -464,9 +471,6 @@ class Order extends \yii\db\ActiveRecord {
     public function getUrlForUser($user)
     {
         if ($user instanceof User) {
-            if (empty($user) || (!in_array($user->organization_id, [$this->client_id, $this->vendor_id]))) {
-                return '';
-            }
 
             $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                 "/order/view",

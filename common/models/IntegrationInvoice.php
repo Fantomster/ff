@@ -228,7 +228,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                 'id' => $model->id,
                 'quantity' => $row->quantity,
                 // 'price' => $row->price_nds, // Hotfix 1.5.14
-                'price' => round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2);
+                'price' => round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2),
                 'units' => 1,
                 'product_name' => $model->product,
                 'article' => $model->article

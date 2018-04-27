@@ -150,7 +150,7 @@ class OrderCatalogSearch extends \yii\base\Model {
                     'i'
                 ],
                 'defaultOrder' => [
-                    'i' => SORT_DESC,
+                    'product' => SORT_ASC,
                     'c_article_1' => SORT_ASC,
                     'c_article' => SORT_ASC
                 ]

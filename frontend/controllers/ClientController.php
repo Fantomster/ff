@@ -494,17 +494,18 @@ class ClientController extends DefaultController {
                          *
                          * */
                         if ($check['eventType'] == 5) {
-                            $newBaseCatalog = new Catalog();
-                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
-                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
-                            $newBaseCatalog->status = Catalog::STATUS_ON;
-                            if (isset($currency)) {
-                                $newBaseCatalog->currency_id = $currency->id;
-                            }
-                            $newBaseCatalog->save();
-                            $newBaseCatalog->refresh();
-                            $lastInsert_base_cat_id = $newBaseCatalog->id;
+//                            $newBaseCatalog = new Catalog();
+//                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+//                            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
+//                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+//                            $newBaseCatalog->status = Catalog::STATUS_ON;
+//                            if (isset($currency)) {
+//                                $newBaseCatalog->currency_id = $currency->id;
+//                            }
+//                            $newBaseCatalog->save();
+//                            $newBaseCatalog->refresh();
+                            //$lastInsert_base_cat_id = $newBaseCatalog->id;
+                            $lastInsert_base_cat_id = $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
                         } else {
                             //Поставщик зарегистрирован, но не авторизован
                             //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
@@ -698,17 +699,18 @@ class ClientController extends DefaultController {
                          *
                          * */
                         if ($check['eventType'] == 5) {
-                            $newBaseCatalog = new Catalog();
-                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                            $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat_two', ['ru' => 'Главный каталог']);
-                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
-                            $newBaseCatalog->status = Catalog::STATUS_ON;
-                            if (isset($currency)) {
-                                $newBaseCatalog->currency_id = $currency->id;
-                            }
-                            $newBaseCatalog->save();
-                            $newBaseCatalog->refresh();
-                            $lastInsert_base_cat_id = $newBaseCatalog->id;
+//                            $newBaseCatalog = new Catalog();
+//                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+//                            $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat_two', ['ru' => 'Главный каталог']);
+//                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+//                            $newBaseCatalog->status = Catalog::STATUS_ON;
+//                            if (isset($currency)) {
+//                                $newBaseCatalog->currency_id = $currency->id;
+//                            }
+//                            $newBaseCatalog->save();
+//                            $newBaseCatalog->refresh();
+//                            $lastInsert_base_cat_id = $newBaseCatalog->id;
+                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
                         } else {
                             //Поставщик зарегистрирован, но не авторизован
                             //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог

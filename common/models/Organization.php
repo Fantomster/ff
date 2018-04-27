@@ -716,7 +716,7 @@ class Organization extends \yii\db\ActiveRecord
                     'status' => 1,
                     'created_at' => new \yii\db\Expression('NOW()'),
                     'updated_at' => new \yii\db\Expression('NOW()'),
-                    'name' => 'Главный каталог'
+                    'name' => Yii::t('app', 'Главный каталог'),
                 ]);
                 $catalog->save();
             }

@@ -71,8 +71,8 @@ class ParserTorg12
         'not_cnt' => ['в одном месте'],
         'price_without_tax' => ['Цена', 'цена', 'цена без ндс', 'цена без ндс, руб.', 'цена без ндс руб.', 'цена без учета ндс', 'цена без учета ндс, руб.', 'цена без учета ндс руб.', 'цена, руб. коп.', 'цена руб. коп.'],
         'price_with_tax' => ['цена с ндс, руб.', 'цена с ндс руб.', 'цена, руб.', 'цена руб.', 'сумма с учетом ндс, руб. коп.'],
-        'sum_with_tax' => 'сумма.*с.*ндс.*', // regexp
-        'sum_without_tax' => 'сумма.*без.*ндс.*', // regexp
+        'sum_with_tax' => ['сумма.*с.*ндс.*','стоимость.*товаров.*с налогом.*всего'], // regexp
+        'sum_without_tax' => ['сумма.*без.*ндс.*','стоимость.*товаров.*без налога.*всего'], // regexp
         'tax_rate' => ['ндс, %', 'ндс %', 'ставка ндс, %', 'ставка ндс %', 'ставка ндс', 'ставка, %', 'ставка %', 'ндс'],
         'total' => ['всего по накладной'],
     ];
@@ -542,6 +542,9 @@ class ParserTorg12
             return false;
         }
         */
+       if (empty($row[1])) {
+           return false;
+       }
 
         if($row[1] == 'А' and $row[2] == 'Б') {
             return false;
@@ -667,6 +670,12 @@ class ParserTorg12
                 $this->invoice->errors['diff_price_with_tax'] = 'В накладной присутсвует товар, по которому указана некорректная цена или ставка НДС';
             }
 */
+            // Проверка на корректность расчета цены единицы
+
+            if ($invoiceRow->price_without_tax == $invoiceRow->sum_without_tax) {
+                $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
+            }
+
             // добавляем обработанную строку в накладную
             $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
         }

@@ -75,14 +75,14 @@ class GoogleShortUrl extends Component {
      * @return mixed
      * @throws HttpException on missing apiKey
      */
-    public function shortUrl($longUrl) {
+    public function shortUrlOld($longUrl) {
         $apiParams = json_encode(['longUrl' => $longUrl]);
         $result = $this->request($apiParams, 1);
 
         return (!empty($result['id']) ? $result['id'] : false);
     }
 
-    public function shortUrlNew($longUrl) {
+    public function shortUrl($longUrl) {
         $apiParams = json_encode(['longUrl' => $longUrl]);
         $result = $this->request($apiParams, 1);
 

@@ -14,6 +14,35 @@ use common\models\RelationSuppRestPotential;
 
 kartik\select2\Select2Asset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
+
+$style = "
+    .glyphicon-refresh-animate {
+        -animation: spin .7s infinite linear;
+        -ms-animation: spin .7s infinite linear;
+        -webkit-animation: spinw .7s infinite linear;
+        -moz-animation: spinm .7s infinite linear;
+    }
+    
+    @keyframes spin {
+        from { transform: scale(1) rotate(0deg);}
+        to { transform: scale(1) rotate(360deg);}
+    }
+      
+    @-webkit-keyframes spinw {
+        from { -webkit-transform: rotate(0deg);}
+        to { -webkit-transform: rotate(360deg);}
+    }
+    
+    @-moz-keyframes spinm {
+        from { -moz-transform: rotate(0deg);}
+        to { -moz-transform: rotate(360deg);}
+    }
+";
+
+/**
+ * @var $this View
+ */
+$this->registerCss($style);
 ?>
 <?=
 Modal::widget([
@@ -201,14 +230,15 @@ $gridColumnsCatalog = [
                 if ($data->cat_id != 0) {
                     //Редактирование каталога
                     $result .= Html::a(
-                        '<i class="fa fa-pencil"></i>',
+                        '<i class="fa fa-sun-o glyphicon-refresh-animate"></i>',
                         [
                             'client/edit-catalog',
                             'id' => $data["cat_id"]
                         ],
                         [
-                            'class' => 'btn btn-default btn-sm',
-                            'style' => 'text-center',
+                            'class' => 'btn btn-default btn-sm editCatalogButtons',
+                            'style' => 'display:block;',
+                            'disabled' => 'disabled',
                             'data-pjax' => 0,
                             'data' => [
                                 'target' => '#edit-catalog',
@@ -913,4 +943,9 @@ JS2;
         'selector' => '#data-modal-wizard',
     ]);
 }
+
+$customJs = <<< JS3
+    $('.editCatalogButtons').removeAttr('disabled').html('<i class="fa fa-pencil"></i>');
+JS3;
+$this->registerJs($customJs, View::POS_LOAD);
 ?>

@@ -2,13 +2,16 @@
 
 namespace api_web\classes;
 
-use yii\db\Query;
+use api_web\components\Notice;
+use api_web\helpers\Product;
+use api_web\helpers\WebApiHelper;
+use common\models\Cart;
+use common\models\CartContent;
 use common\models\Order;
-use yii\web\HttpException;
-use common\models\CatalogGoods;
 use common\models\OrderContent;
+use yii\db\Expression;
+use yii\db\Query;
 use common\models\Organization;
-use common\models\RelationSuppRest;
 use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -54,25 +57,20 @@ class CartWebApi extends \api_web\components\WebApi
         if (empty($post['product_id'])) {
             throw new BadRequestHttpException("ERROR: Empty product_id");
         }
-        if (empty($post['catalog_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty catalog_id");
-        }
-
+        /**
+         * @var Organization $client
+         */
+        $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $product = $this->findProduct($post['product_id'], $post['catalog_id']);
-            /**
-             * @var Organization $client
-             * @var CatalogBaseGoods $product
-             */
-            $client = $this->user->organization;
+            $cart = $this->getCart();
+            $product = (new Product())->findFromCatalogs($post['product_id']);
             $catalogs = explode(',', $client->getCatalogs());
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
-            if (!in_array($post['catalog_id'], $catalogs) && $product->model->market_place !== CatalogBaseGoods::MARKETPLACE_ON) {
-                throw new BadRequestHttpException("Каталог {$post['catalog_id']} недоступен для вас.");
+            if (!in_array($product['cat_id'], $catalogs) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
+                throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
             }
-            $order = $this->getOrder($product);
-            $this->setPosition($order, $product, $post['quantity']);
+            $this->setPosition($cart, $product, $post['quantity']);
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -81,76 +79,188 @@ class CartWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Содержимое корзины
      * @return array
      */
     public function items()
     {
         $client = $this->user->organization;
         //Корзина теущего клиента
+        $content = $client->_getCart();
+
+        if (empty($content)) {
+            return [];
+        }
         $return = [];
-        $orders = $client->getCart();
-
-        if (empty($orders)) {
-            return $return;
-        }
+        $items = [];
         /**
-         * @var Order $order
+         * @var CartContent $row
          */
-        foreach ($orders as $order) {
-            $catalog = RelationSuppRest::find()->
-            where([
-                'rest_org_id' => $client->id,
-                'supp_org_id' => $order->vendor_id,
-                'status' => RelationSuppRest::CATALOG_STATUS_ON
-            ])->orderBy("updated_at DESC")->one();
-
-            if (empty($catalog)) {
-                $cat_id = null;
+        foreach ($content as $row) {
+            $items[$row->vendor->id][] = $this->prepareProduct($row);
+            if (!isset($return[$row->vendor->id])) {
+                $return[$row->vendor->id] = [
+                    'id' => $row->vendor->id,
+                    'delivery_price' => $this->getCart()->calculateDelivery($row->vendor_id),
+                    'for_min_cart_price' => $this->getCart()->forMinCartPrice($row->vendor_id),
+                    'for_free_delivery' => $this->getCart()->forFreeDelivery($row->vendor_id),
+                    'total_price' => $this->getCart()->calculateTotalPrice($row->vendor_id),
+                    'vendor' => WebApiHelper::prepareOrganization($row->vendor),
+                    'currency' => $items[$row->vendor->id][0]['currency'],
+                    'items' => $items[$row->vendor->id]
+                ];
             } else {
-                $cat_id = $catalog->cat_id;
+                $return[$row->vendor->id]['items'] = $items[$row->vendor->id];
             }
-
-            $items = [];
-            if (!empty($order->orderContent)) {
-                foreach ($order->orderContent as $content) {
-                    $product = $this->findProduct($content->product_id, $cat_id);
-                    $items[] = $this->prepareProduct($product);
-                }
-            }
-
-            $return[] = [
-                'order' => $this->prepareOrderInfo($order),
-                'organization' => (new MarketWebApi())->prepareOrganization($order->vendor),
-                'items' => $items
-            ];
         }
 
-        return $return;
+        return array_values($return);
     }
 
     /**
+     * Очистка корзины, полная или частичная
      * @param array $post
      * @return array
      */
     public function clear(array $post)
     {
         $client = $this->user->organization;
-        $query = Order::find()->where(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-
-        if (isset($post['order_id'])) {
-            $query->andWhere(['id' => $post['order_id']]);
-        }
-
-        $orders = $query->all();
-        foreach ($orders as $order) {
-            foreach ($order->orderContent as $position) {
-                $position->delete();
-                if (!($order->positionCount)) {
-                    $order->delete();
+        $query = Cart::find()->where(['organization_id' => $client->id]);
+        /**
+         * @var $cart Cart
+         * @var $position CartContent
+         */
+        $carts = $query->all();
+        foreach ($carts as $cart) {
+            foreach ($cart->cartContents as $position) {
+                if (isset($post['vendor_id'])) {
+                    if ($position->vendor_id == $post['vendor_id']) {
+                        $position->delete();
+                    }
+                } else {
+                    $position->delete();
                 }
             }
         }
         return $this->items();
+    }
+
+    /**
+     * Создание заказа из корзины
+     * https://api-dev.mixcart.ru/site/doc#!/Cart/post_cart_registration
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function registration(array $post)
+    {
+        WebApiHelper::clearRequest($post);
+        $cart = $this->getCart();
+
+        //Результат для ответа
+        $result = [
+            'success' => 0,
+            'error' => 0
+        ];
+
+        if (!empty($post)) {
+            $orders = [];
+            foreach ($post as $row) {
+                if (empty($row['id'])) {
+                    throw new BadRequestHttpException("ERROR: Empty id");
+                }
+                $orders[$row['id']] = [
+                    'delivery_date' => $row['delivery_date'] ?? null,
+                    'comment' => $row['comment'] ?? null,
+                ];
+            }
+        }
+
+        try {
+            foreach ($cart->getVendors() as $vendor) {
+                if (isset($orders) && empty($orders[$vendor->id])) {
+                    continue;
+                }
+                if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
+                    $result['success'] += 1;
+                }
+            }
+        } catch (\Exception $e) {
+            $result['error'] += 1;
+        }
+        return $result;
+    }
+
+    /**
+     * Создание заказа
+     * @param Cart $cart
+     * @param $vendor
+     * @param array $post ['id', 'delivery_date', 'comment']
+     * @return bool
+     * @throws \Exception
+     */
+    private function createOrder(Cart $cart, Organization $vendor, array $post)
+    {
+        $client = $this->user->organization;
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            //Создаем заказ
+            $order = new Order();
+            $order->client_id = $client->id;
+            $order->created_by_id = $this->user->id;
+            $order->vendor_id = $vendor->id;
+            $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $order->currency_id = $vendor->baseCatalog->currency_id;
+            $order->created_at = gmdate("Y-m-d H:i:s");
+
+            if (!empty($post['delivery_date'])) {
+                $d = str_replace('.', '-', $post['delivery_date']);
+                $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
+            }
+
+            if (!empty($post['comment'])) {
+                $order->comment = $post['comment'];
+            }
+
+            if (!$order->validate() || !$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            /**
+             * @var $cartContent CartContent
+             */
+            //Получаем записи только нужного нам поставщика
+            $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
+            foreach ($contents as $cartContent) {
+                $orderContent = new OrderContent();
+                $orderContent->order_id = $order->id;
+                $orderContent->product_id = $cartContent->product_id;
+                $orderContent->quantity = $cartContent->quantity;
+                $orderContent->initial_quantity = $cartContent->quantity;
+                $orderContent->price = $cartContent->price;
+                $orderContent->product_name = $cartContent->product_name;
+                $orderContent->units = $cartContent->units;
+                $orderContent->comment = $cartContent->comment;
+                if ($orderContent->validate() && $orderContent->save()) {
+                    $cartContent->delete();
+                } else {
+                    throw new ValidationException($orderContent->getFirstErrors());
+                }
+            }
+            $order->calculateTotalPrice();
+            $cart->updated_at = new Expression('NOW()');
+            $cart->save();
+            //Сообщение в очередь поставщику, что есть новый заказ
+            Notice::init('Order')->sendOrderToTurnVendor($vendor);
+            //Емайл и смс о новом заказе
+            Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
+            //Сообщение в очередь, Изменение количества товара в корзине
+            Notice::init('Order')->sendOrderToTurnClient($client);
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -166,11 +276,10 @@ class CartWebApi extends \api_web\components\WebApi
             return $return;
         }
 
-        $result = (new Query())->from('order as o')
-            ->innerJoin('order_content as oc', 'o.id = oc.order_id')
-            ->andWhere(['o.client_id' => $this->user->organization->id])
-            ->andWhere(['o.status' => Order::STATUS_FORMING])
-            ->andWhere(['oc.product_id' => $id])
+        $result = (new Query())->from('cart as c')
+            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+            ->andWhere(['c.organization_id' => $this->user->organization->id])
+            ->andWhere(['cc.product_id' => $id])
             ->one();
 
         if (!empty($result['quantity'])) {
@@ -181,28 +290,82 @@ class CartWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Записываем позицию в заказ
-     * @param Order $order
-     * @param \stdClass $product
+     * Добавить комментарий к товару
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function productComment(array $post)
+    {
+        if (empty($post['product_id'])) {
+            throw new BadRequestHttpException("ERROR: Empty product_id");
+        }
+
+        if (empty($post['comment'])) {
+            throw new BadRequestHttpException("ERROR: Empty comment");
+        }
+
+        /**
+         * @var $model CartContent
+         */
+        $model = $this->getCart()->getCartContents()->andWhere(['product_id' => $post['product_id']])->one();
+
+        if (empty($model)) {
+            throw new BadRequestHttpException("Нет такого товара в корзине");
+        }
+
+        $model->comment = $post['comment'];
+
+        if (!$model->validate()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+
+        $model->save();
+
+        return $this->items();
+    }
+
+    /**
+     * Получить объект Cart текушего пользователя
+     * @return Cart|null|static
+     * @throws ValidationException
+     */
+    private function getCart()
+    {
+        $cart = Cart::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+        if (empty($cart)) {
+            $cart = new Cart([
+                'organization_id' => $this->user->organization->id,
+                'user_id' => $this->user->id,
+            ]);
+
+            if (!$cart->save()) {
+                throw new ValidationException($cart->getFirstErrors());
+            }
+        }
+        return $cart;
+    }
+
+    /**
+     * Записываем позицию в корзину
+     * @param Cart $cart
+     * @param array $product
      * @param $quantity
      * @return bool
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    private function setPosition(Order &$order, \stdClass &$product, $quantity)
+    private function setPosition(Cart &$cart, array &$product, $quantity)
     {
-        foreach ($order->orderContent as $position) {
-            if ($position->product_id == $product->model->id) {
+        foreach ($cart->cartContents as $position) {
+            if ($position->product_id == $product['id']) {
                 if ($quantity <= 0) {
                     $position->delete();
-                    $order->refresh();
-                    if (count($order->orderContent) == 0) {
-                        $order->delete();
-                        $order = null;
-                    }
                     return true;
                 } else {
                     $position->quantity = $this->recalculationQuantity($product, $quantity);
+                    $position->updated_at = new Expression('NOW()');
                     $position->save();
                     return true;
                 }
@@ -210,14 +373,15 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         if ($quantity > 0) {
-            $position = new OrderContent();
-            $position->order_id = $order->id;
-            $position->product_id = $product->model->id;
+            $position = new CartContent();
+            $position->cart_id = $cart->id;
+            $position->product_id = $product['id'];
             $position->quantity = $this->recalculationQuantity($product, $quantity);
-            $position->price = $product->price;
-            $position->product_name = $product->model->product;
-            $position->units = $product->model->units;
-            $position->article = $product->model->article;
+            $position->price = $product['price'];
+            $position->product_name = $product['product'];
+            $position->units = $product['units'];
+            $position->vendor_id = $product['vendor_id'];
+            $position->currency_id = $product['currency_id'];
             if (!$position->validate()) {
                 throw new ValidationException($position->getFirstErrors());
             }
@@ -236,7 +400,7 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function recalculationQuantity($product, $quantity)
     {
-        $units = $product->model->units;
+        $units = $product['units'];
 
         if ($units == 0) {
             return round($quantity, 3);
@@ -245,147 +409,40 @@ class CartWebApi extends \api_web\components\WebApi
         if ($quantity < $units) {
             $quantity = $units;
         } else {
-            $quantity = round($quantity / $units, 3) * $units;
+            if (strstr($units, '.') !== false || strstr($units, ',') !== false) {
+                $quantity = round(round($quantity / $units) * $units, 3);
+            } else {
+                $quantity = round($quantity / $units, 0) * $units;
+            }
         }
-
         return $quantity;
     }
 
     /**
-     * Получаем существующий заказ, или создаем новый
-     * @param \stdClass $product
-     * @return Order
-     * @throws HttpException
-     * @throws ValidationException
-     */
-    private function getOrder(\stdClass $product)
-    {
-        $client = $this->user->organization;
-        //Корзина теущего клиента
-        $orders = $client->getCart();
-
-        foreach ($orders as $order) {
-            if ($order->vendor_id == $product->model->vendor->id) {
-                return $order;
-            }
-        }
-
-        if (empty($product->model->catalog->currency_id)) {
-            throw new HttpException(401, "В каталоге поставщика не установлена валюта.", 401);
-        }
-
-        $order = new Order();
-        $order->client_id = $client->id;
-        $order->vendor_id = $product->model->vendor->id;
-        $order->status = Order::STATUS_FORMING;
-        $order->currency_id = $product->model->catalog->currency_id;
-
-        if (!$order->validate()) {
-            throw new ValidationException($order->getFirstErrors());
-        }
-
-        $order->save();
-
-        return $order;
-    }
-
-    /**
-     * Составной объект продукта
-     * @param $id
-     * @param $cat_id
-     * @return \stdClass
-     * @throws BadRequestHttpException
-     */
-    private function findProduct($id, $cat_id)
-    {
-        $product = new \stdClass();
-
-        $model = CatalogGoods::findOne(['base_goods_id' => $id, 'cat_id' => $cat_id]);
-        if (empty($model)) {
-            $model = $baseModel = CatalogBaseGoods::findOne(['id' => $id]);
-        } else {
-            $baseModel = $model->baseProduct;
-        }
-
-        if (empty($model)) {
-            throw new BadRequestHttpException("Продукт не найден.");
-        }
-
-        /**
-         * Есть ли в наличии
-         */
-        if ($baseModel->status == CatalogBaseGoods::STATUS_OFF) {
-            throw new BadRequestHttpException("Продукта (" . $baseModel->product . ") нет в наличии.");
-        }
-
-        /**
-         * Если не установлена кратность, считаем кратность 0
-         */
-        if (empty($baseModel->units)) {
-            $baseModel->units = 0;
-        }
-
-        if ($model instanceof CatalogGoods) {
-            $product->discount_price = $model->getDiscountPrice();
-            $product->cat_id = $model->cat_id;
-        } else {
-            $product->discount_price = 0;
-            $product->cat_id = $baseModel->cat_id;
-        }
-
-        $product->price = $model->price;
-        $product->model = $baseModel;
-
-        return $product;
-    }
-
-    /**
      * Продукт. Собираем необходимые данные из модели
-     * @param $model \stdClass result function $this->findProduct()
+     * @param $row CartContent
      * @return mixed
      */
-    private function prepareProduct($model)
+    private function prepareProduct($row)
     {
-        $item['id'] = (int)$model->model->id;
-        $item['product'] = $model->model->product;
-        $item['catalog_id'] = (int)$model->cat_id;
-        $item['category_id'] = isset($model->model->category) ? (int)$model->model->category->id : 0;
-        $item['price'] = round($model->price, 2);
-        $item['rating'] = round($model->model->ratingStars, 1);
-        $item['supplier'] = $model->model->vendor->name;
-        $item['brand'] = ($model->model->brand ? $model->model->brand : '');
-        $item['article'] = $model->model->article;
-        $item['ed'] = $model->model->ed;
-        $item['units'] = round(($model->model->units ?? 0), 3);
-        $item['currency'] = $model->model->catalog->currency->symbol;
-        $item['image'] = (new MarketWebApi())->getProductImage($model->model);
-        $item['in_basket'] = $this->countProductInCart($model->model->id);
+        $model = $row->product;
+
+        $item['id'] = (int)$model['id'];
+        $item['product'] = $model['product'];
+        $item['catalog_id'] = (int)$model['cat_id'];
+        $item['category_id'] = isset($model['model']->category) ? (int)$model['model']->category->id : 0;
+        $item['price'] = round($model['price'], 2);
+        $item['rating'] = round($model['model']->ratingStars, 1);
+        $item['supplier'] = Organization::findOne($model['vendor_id'])->name;
+        $item['brand'] = ($model['model']->brand ? $model['model']->brand : '');
+        $item['article'] = $model['model']->article;
+        $item['ed'] = $model['model']->ed;
+        $item['units'] = round(($model['units'] ?? 0), 3);
+        $item['currency'] = $model['model']->catalog->currency->symbol;
+        $item['currency_id'] = $model['model']->catalog->currency->id;
+        $item['image'] = (new MarketWebApi())->getProductImage($model['model']);
+        $item['in_basket'] = $this->countProductInCart($model['id']);
+        $item['comment'] = $row->comment;
         return $item;
-    }
-
-    /**
-     * @param Order $order
-     * @return array
-     */
-    private function prepareOrderInfo(Order $order)
-    {
-
-        if (empty($order->id)) {
-            return null;
-        }
-
-        $order->calculateTotalPrice();
-
-        $order_r = $order->attributes;
-        $order_r['status_text'] = $order->statusText;
-        $order_r['currency'] = $order->currency->symbol;
-        $order_r['currency_id'] = $order->currency->id;
-        $order_r['total_price'] = round($order->calculateTotalPrice(), 2);
-        $order_r['min_order_price'] = round($order->forMinOrderPrice(), 2);
-        $order_r['delivery_price'] = round($order->calculateDelivery(), 2);
-        $order_r['position_count'] = (int)$order->positionCount;
-        $order_r['total_price_without_discount'] = round($order->getTotalPriceWithOutDiscount(), 2);
-
-        return $order_r;
     }
 }

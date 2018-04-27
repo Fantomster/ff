@@ -8,12 +8,14 @@
 
 namespace common\models;
 
+use api_web\classes\UserWebApi;
 use common\components\Mailer;
 use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
@@ -644,7 +646,7 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Deleting all user-organization relations
      */
-    public function deleteUserFromOrganization(int $userID): bool
+    public function deleteUserFromOrganization(int $userID, int $organizationID): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -665,12 +667,12 @@ class User extends \amnah\yii2\user\models\User {
             if($deleteAll){
                 $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
                 foreach ($relations as $relation) {
-                    self::deleteRelationUserOrganization($userID, $relation->organization_id);
+                    self::deleteRelationUserOrganization($userID, $organizationID);
                 }
 
             }else{
                 $user = User::findIdentity(Yii::$app->user->id);
-                self::deleteRelationUserOrganization($userID, $user->organization_id);
+                self::deleteRelationUserOrganization($userID, $organizationID);
             }
 
             $check = RelationUserOrganization::findOne(['user_id'=>$userID]);
@@ -805,8 +807,32 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getAllOrganization(): array
     {
-        return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$this->id])->orderBy('organization.name')->all();
+        $userID = $this->id;
+        if($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
+            $org = Organization::findOne(['id'=>$this->organization_id]);
+            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id])->orWhere(['organization.parent_id'=>$this->organization_id]);
+            if($org && $org->parent_id != null){
+                $orgArray = $orgArray->orWhere(['organization.id'=>$org->parent_id])->orWhere(['organization.parent_id'=>$org->parent_id]);
+            }
+            return $orgArray->orderBy('organization.name')->all();
+        }else{
+            return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID])->orderBy('organization.name')->all();
+        }
+
     }
+
+
+    public function getAllOrganizationsDataProvider(): ArrayDataProvider
+    {
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => (new UserWebApi())->getAllOrganization(),
+            'pagination' => [
+                'pageSize' => 4,
+            ],
+        ]);
+        return $dataProvider;
+    }
+
 
     /**
      * Проверка, можно ли переключиться на организацию

@@ -1,1 +1,1 @@
-<?= \frontend\widgets\cart\CartWidget::widget(['orders' => $this->params['orders']])?>
+<?= \frontend\widgets\cart\CartWidget::widget(['carts' => $carts])?>

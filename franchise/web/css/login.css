@@ -65,7 +65,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#368cbf', end
 .login__inside img {
     display: block;
     margin: 0 auto 30px;
-    width: 196px;
+    width: 120px;
     height: 56px;
 }
 .regist {

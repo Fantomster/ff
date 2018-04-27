@@ -47,8 +47,9 @@ $this->registerJs('
                     'options' => [
                         'id' => 'searchProductForm',
                         'role' => 'search',
-                        'action' => ['order/ajax-show-products', 'order_id' => $order->id]
+                        //'action' => ['order/ajax-show-products', 'order_id' => $order->id]
                     ],
+                    'method' => 'GET',
         ]);
         ?>
 

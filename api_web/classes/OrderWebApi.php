@@ -2,13 +2,13 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use common\models\Role;
 use common\models\search\OrderCatalogSearch;
 use common\models\search\OrderContentSearch;
 use common\models\search\OrderSearch;
-use common\models\User;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
@@ -30,14 +30,9 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $orders
      * @return array
      * @throws \Exception
-     */
+     *
     public function registration(array $orders)
     {
-        /**
-         * @var $user User
-         * @var $client Organization
-         */
-
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->user;
@@ -94,6 +89,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw $e;
         }
     }
+    */
 
     /**
      * Оставляем комментарий к заказу
@@ -236,8 +232,8 @@ class OrderWebApi extends \api_web\components\WebApi
             }
         }
 
-        $result['client'] = $this->container->get('MarketWebApi')->prepareOrganization($order->client);
-        $result['vendor'] = $this->container->get('MarketWebApi')->prepareOrganization($order->vendor);
+        $result['client'] = WebApiHelper::prepareOrganization($order->client);
+        $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
         return $result;
     }
@@ -254,6 +250,8 @@ class OrderWebApi extends \api_web\components\WebApi
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
         $search = new OrderSearch();
+
+        WebApiHelper::clearRequest($post);
 
         if (isset($post['search'])) {
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
@@ -352,10 +350,10 @@ class OrderWebApi extends \api_web\components\WebApi
                     'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,
-                    'create_user' => $model->createdByProfile->full_name
+                    'currency_id' => $model->currency_id,
+                    'create_user' => $model->createdByProfile->full_name ?? ''
                 ];
             }
-
             if (isset($orders[0])) {
                 foreach (array_keys($orders[0]) as $key) {
                     $headers[$key] = (new Order())->getAttributeLabel($key);
@@ -514,7 +512,7 @@ class OrderWebApi extends \api_web\components\WebApi
             Notice::init('Order')->cancelOrder($this->user, $organization, $order);
 
             $t->commit();
-            return ['result' => true];
+            return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;
@@ -553,9 +551,9 @@ class OrderWebApi extends \api_web\components\WebApi
                 $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину
-            $result = $this->container->get('CartWebApi')->add($request);
+            $this->container->get('CartWebApi')->add($request);
             $t->commit();
-            return $result;
+            return $this->container->get('CartWebApi')->items();
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;

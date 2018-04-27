@@ -7,6 +7,14 @@ use kartik\grid\GridView;
 use kartik\touchspin\TouchSpin;
 use kartik\form\ActiveForm;
 
+$js = <<<SCRIPT
+/* To initialize BS3 tooltips set this below */
+$(function () { 
+    $("[data-toggle='tooltip']").tooltip(); 
+});;
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js);
 
 $guideUrl = Url::to(['order/ajax-show-guide', 'id'=>$guide->id]);
 
@@ -21,6 +29,20 @@ $this->registerJs('
              container: "#guideProductList",
              data: {
                     sort: sort,
+                   }
+   }).done(function() { console.log(222); });
+    });
+    
+    $(document).on("change", "#searchString", function() {
+        var search = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: false,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    search_string: search,
                    }
    }).done(function() { console.log(222); });
     });
@@ -119,7 +141,8 @@ $this->registerJs('
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
+                            return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['price_updated_at'], "dd-MM-YY").'">'.
+                                $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"].'</span>';
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],

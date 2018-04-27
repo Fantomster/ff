@@ -21,7 +21,8 @@ class GuideProductsSearch extends \yii\base\Model {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules(): array
+    {
         return [
             [['searchString', 'guide_id', 'cbg_id'], 'safe'],
         ];
@@ -36,9 +37,13 @@ class GuideProductsSearch extends \yii\base\Model {
      *
      * @return SqlDataProvider
      */
-    public function search(array $params, int $guideId, int $clientId) {
+    public function search(array $params, int $guideId, int $clientId): SqlDataProvider
+    {
         $this->load($params);
-        
+        if(empty($this->searchString) || $this->searchString == ''){
+            $this->searchString = $params['search_string'] ?? '';
+        }
+
         $searchString = "%$this->searchString%";
 
         $where = [];
@@ -66,7 +71,7 @@ class GuideProductsSearch extends \yii\base\Model {
         }
 
         $query = "
-            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note 
+            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cbg.updated_at as price_updated_at
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
@@ -78,7 +83,7 @@ class GuideProductsSearch extends \yii\base\Model {
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
             UNION ALL
-            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note
+            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cg.updated_at as price_updated_at
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 
@@ -92,29 +97,21 @@ class GuideProductsSearch extends \yii\base\Model {
                 AND (cbg.deleted = 0))
                 ";
 
-        $sort = [
-
-        ];
         if(isset($params['sort'])){
-            $arr = explode(' ', $params['sort']);
             $query.= " ORDER BY ";
             if($params['sort'] == ''){
                 $query.= " product ASC";
             }else{
                 $query.= str_replace('4', "ASC", str_replace('3', "DESC", $params['sort']));
             }
-        }else{
-            $query.= " ORDER BY product ASC";
         }
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query,
             'params' => [':searchString' => $searchString],
-            //'totalCount' => $count1 + $count2,
-            'pagination' => false,
-            'sort' => $sort,
+            'pagination' => false
         ]);
-        
+
         return $dataProvider;
     }
 }

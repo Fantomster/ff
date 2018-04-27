@@ -60,4 +60,6 @@ return [
      *  /runtime/logs/iiko_api_response_{ID}.log
      */
     'iikoLogOrganization' => [],
+
+    'web' => 'https://mixcart.ru/',
 ];

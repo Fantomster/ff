@@ -237,6 +237,17 @@ ob_start();
     });
 
     $('#save-button').click(function () {
+
+        var button = $(this);
+
+        if(button.attr('disabled') === 'disabled') {
+            alert('Идет обработка накладной, подождите...');
+            return;
+        }
+
+        button.attr('disabled', 'disabled');
+        button.html('Сохранение...');
+
         var params = {};
         var create_order = true;
         row_invoice = $('.invoice_radio:checked').parents('tr');
@@ -275,6 +286,8 @@ ob_start();
         if (create_order === true) {
             $.post('<?= $url ?>/create-order', params, function (data) {
                 if (data.status === true) {
+                    button.removeAttr('disabled', false);
+                    button.html('<i class="fa fa-save"></i> Сохранить');
                     swal(
                         'Накладная успешно привязана!',
                         'Перейти в интеграцию: <?=$list_integration?>',
@@ -285,7 +298,6 @@ ob_start();
                 }
             });
         }
-
     });
 
     function errorSwal(message) {

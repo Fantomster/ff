@@ -46,6 +46,7 @@ $this->registerJs(
                             ).done(function (result) {
                                 if (result) {
                                     resolve(result);
+                                     $.pjax.reload("#checkout", {timeout:30000});
                                 } else {
                                     resolve(false);
                                 }
@@ -66,21 +67,29 @@ $this->registerJs(
                 if (!$(".block_wrap_bask_tover").length) {
                     return false;
                 }
+                
                 var clicked = $(this);
                 var form = $("#cartForm");
                 var extData = "&all=" + clicked.data("all") + "&id=" + clicked.data("id"); 
+                
                 if (clicked.hasClass("create")) {
+                    var vendor_id = clicked.data("id")
+                    if($("input[data-vendor_id=\'" + vendor_id +"\']").val() == "")
+                    {
+                        swal({title: "'.Yii::t('message', 'frontend.views.order.order_create_one', ['ru' => 'Заказ не оформлен']).'",
+                         text: "'.Yii::t('message', 'frontend.views.order.order_create_one_get_delivery_date', ['ru' => 'Укажите дату доставки']).'", type: "error"});
+                        return false;
+                    }
+                
                     title = "' . Yii::t('message', 'frontend.views.order.order_create_two', ['ru' => 'Создание заказа']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.will_be_send', ['ru' => 'Заказ будет оформлен и направлен поставщику. Продолжить?']) . ' ";
-                    success = "' . Yii::t('message', 'frontend.views.order.good_is_ready', ['ru' => 'Заказ оформлен!']) . ' ";
                 } else if (clicked.hasClass("createAll")){
                     title = "' . Yii::t('message', 'frontend.views.order.orders_creating', ['ru' => 'Создание заказов']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.all_goods_three', ['ru' => 'Все заказы из корзины будут оформлены и направлены соответствующим поставщикам. Продолжить?']) . ' ";
-                    success = "' . Yii::t('message', 'frontend.views.order.all_orders_complete', ['ru' => 'Все заказы оформлены!']) . ' ";
                 }
                 swal({
                     title: title,
-                    text: text,
+                    html:text,
                     type: "warning",
                     showCancelButton: true,
                     confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep_two', ['ru' => 'Да']) . ' ",
@@ -94,6 +103,7 @@ $this->registerJs(
                             ).done(function (result) {
                                 if (result) {
                                     resolve(result);
+                                     $.pjax.reload("#checkout", {timeout:30000});
                                 } else {
                                     resolve(false);
                                 }
@@ -104,7 +114,7 @@ $this->registerJs(
                     if (result.dismiss === "cancel") {
                         swal.close();
                     } else {
-                        swal({title: success, type: "success"});
+                        swal({title: result.value.title, html: result.value.description, type: result.value.type});
                     }
                 });
             });
@@ -149,7 +159,7 @@ $this->registerJs(
             $("#checkout").on("change", ".delivery-date", function(e) {
                 $.post(
                     "' . Url::to(['/order/ajax-set-delivery']) . '",
-                    {"order_id":$(this).data("order_id"), "delivery_date":$(this).val() }
+                    {"vendor_id":$(this).data("vendor_id"), "delivery_date":$(this).val() }
                 ).done(function(result) {
                     if (result) {
                         swal(result.value);
@@ -353,7 +363,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     Html::a('<i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> ' . Yii::t('message', 'frontend.views.order.basket_empty_two', ['ru' => 'Очистить корзину']) . ' </span>', '#', [
                         'class' => 'btn btn-danger pull-right deleteAll',
                         'style' => 'margin-right: 10px; margin-left: 3px;',
-                        'data-url' => Url::to(['/order/ajax-delete-order', 'all' => true]),
+                        'data-url' => Url::to(['/order/ajax-delete-order']),
                     ]);
                     ?>
                     <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> <?= Yii::t('app', 'Сохранить') ?></span></button>
@@ -374,56 +384,54 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                 ]);
                 ?>
                 <?php
-                foreach ($orders as $order) {
-                    $currencySymbol = $order->currency->symbol;
-                    $forMinOrderPrice = $order->forMinOrderPrice();
-                    $forFreeDelivery = $order->forFreeDelivery();
-                    if ($forMinOrderPrice):
+                foreach ($carts as $cart) {
+                    if ($cart['for_min_cart_price']):
                         ?><style>#createAll{display: none;}</style>
                     <?php endif; ?>
-                    <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
+                    <div class="block_wrap_bask_tover" id="cartOrder<?= $cart['id'] ?>">
                         <div class="block_left">
                             <div class="block_left_top">
 
                                 <?=
                                 Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">', '#', [
                                     'class' => 'delete',
-                                    'data-url' => Url::to(['/order/ajax-delete-order', 'all' => false, 'order_id' => $order->id]),
+                                    'data-url' => Url::to(['/order/ajax-delete-order', 'vendor_id' => $cart['id']]),
                                 ]);
                                 ?>
                                 <div class="block_wrap_activess">
-                                    <p class = "basket_tovar_postav_name"><?= Yii::t('message', 'frontend.views.order.vendors_order', ['ru' => 'Заказ у поставщика']) ?> <span><?= $order->vendor->name ?> </span>
+                                    <p class = "basket_tovar_postav_name"><?= Yii::t('message', 'frontend.views.order.vendors_order', ['ru' => 'Заказ у поставщика']) ?> <span><?= $cart['vendor']['name'] ?> </span>
                                         <img class = "" src="/img/bot_ar.png" alt="">
                                     </p>
                                 </div>
                                 <div class="checkout_buttons">
                                     <span class="checkout-button">
-                                    <?= $this->render("_checkout-position-button", compact("order", "forMinOrderPrice", "currencySymbol")) ?>
+                                    <?= $this->render("_checkout-position-button", compact("cart")) ?>
                                     </span>
                                     <?=
                                     Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
                                         'class' => 'but_comments comment pull-right',
                                         'data' => [
-                                            'url' => Url::to(['order/ajax-set-comment', 'order_id' => $order->id]),
+                                            'url' => Url::to(['order/ajax-set-comment', 'vendor_id' => $cart['id']]),
                                             'toggle' => "tooltip",
                                             'placement' => "bottom",
-                                            "original-title" => $order->comment,
+                                            "original-title" => Yii::$app->request->cookies->getValue('order_comment_'.$cart['id'], null),
                                         ]
                                     ]);
                                     ?>
-                                    <?=
-                                    DatePicker::widget([
+                                    <?php
+                                    $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_'.$cart['id']);
+                                    echo DatePicker::widget([
                                         'name' => '',
-                                        'value' => isset($order->requested_delivery) ? date('d.m.Y', strtotime($order->requested_delivery)) : null,
+                                        'value' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
                                         'options' => [
                                             'placeholder' => Yii::t('message', 'frontend.views.order.delivery_date', ['ru' => 'Дата доставки']),
                                             'class' => 'delivery-date',
-                                            'data-order_id' => $order->id,
+                                            'data-vendor_id' => $cart['id'],
                                         ],
                                         'type' => DatePicker::TYPE_COMPONENT_APPEND,
                                         'layout' => '{picker}{input}{remove}',
                                         'pluginOptions' => [
-                                            'daysOfWeekDisabled' => $order->vendor->getDisabledDeliveryDays(),
+                                            'daysOfWeekDisabled' => $cart['vendor']['disabled_delivery_days'],
                                             'format' => 'dd.mm.yyyy',
                                             'autoclose' => true,
                                             'startDate' => "0d",
@@ -434,10 +442,10 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     ?>
                                 </div>
                             </div>
-                            <?= $this->render('_checkout-content', ['order' => $order]) ?>
+                            <?= $this->render('_checkout-content', ['cart' => $cart]) ?>
                         </div>
-                        <div class="block_right" data-url="<?= Url::to(['order/ajax-calculate-total', 'id' => $order->id]) ?>">
-                            <?= $this->render("_checkout-total", compact('order', 'currencySymbol', 'forMinOrderPrice', 'forFreeDelivery')); ?>
+                        <div class="block_right" data-url="<?= Url::to(['order/ajax-calculate-total', 'id' => $cart['id']]) ?>">
+                            <?= $this->render("_checkout-total", compact('cart')); ?>
                         </div>
                     </div>
                 <?php } ?>

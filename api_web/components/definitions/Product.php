@@ -86,6 +86,12 @@ class Product
     public $currency;
 
     /**
+     * @SWG\Property(@SWG\Xml(name="currency_id"), example=1)
+     * @var string
+     */
+    public $currency_id;
+
+    /**
      * @SWG\Property(@SWG\Xml(name="image"), example="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAA==")
      * @var string
      */

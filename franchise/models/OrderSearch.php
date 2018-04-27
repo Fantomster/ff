@@ -28,7 +28,8 @@ class OrderSearch extends Order {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules(): array
+    {
         return [
             [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price'], 'integer'],
             [['created_at', 'updated_at', 'date_from', 'date_to', 'searchString', 'clientName', 'clientManager', 'vendor', 'vendorManager'], 'safe'],

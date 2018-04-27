@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use common\models\CatalogGoods;
 use common\models\Category;
 use common\models\MpCategory;
@@ -58,6 +59,7 @@ class MarketWebApi extends WebApi
             }
         }
 
+
         if (!empty(\Yii::$app->session->get('city')) || !empty(\Yii::$app->session->get('region'))) {
             $supplierRegion = DeliveryRegions::getSuppRegion(\Yii::$app->session->get('city'), \Yii::$app->session->get('region'));
             if (!empty($supplierRegion)) {
@@ -74,6 +76,7 @@ class MarketWebApi extends WebApi
             }
         }
 
+
         //Условия поиска
         if (isset($post['search'])) {
             foreach ($post['search'] as $key => $value) {
@@ -84,8 +87,18 @@ class MarketWebApi extends WebApi
 
                 if ($key == 'supplier_id') {
                     $key = 'supp_org_id';
-                }
-
+                    if(!empty($value)) {
+                        if(is_array($value)) {
+                            foreach ($value as $supp_org_id) {
+                                $supp_orgs[] = (int) $supp_org_id;
+                            }
+                            $value = implode(', ', $supp_orgs);
+                        } else {
+                            $value = (int) $value;
+                        }
+                        $result->andWhere("$key IN ($value)");
+                    }
+                }else
                 if (is_numeric($value) OR is_int($value)) {
                     $result->andFilterWhere([$key => $value]);
                 } else {
@@ -298,7 +311,7 @@ class MarketWebApi extends WebApi
         //Результат
         $result = $result->all();
         foreach ($result as $model) {
-            $return['organizations'][] = $this->prepareOrganization($model);
+            $return['organizations'][] = WebApiHelper::prepareOrganization($model);
         }
         /**
          * @var CatalogBaseGoods $model
@@ -322,6 +335,7 @@ class MarketWebApi extends WebApi
 
         $price = (isset($catalogGoodsModel->price) ? $catalogGoodsModel->price : $model->price);
         $discount_price = (isset($catalogGoodsModel->discountPrice) ? $catalogGoodsModel->discountPrice : $model->price);
+        $catalog_id = (isset($catalogGoodsModel->catalog) ? $catalogGoodsModel->catalog->id : $model->catalog->id);
 
         if ($price == $discount_price) {
             $discount_price = 0;
@@ -329,7 +343,7 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = ((int)$model->catalog->id ?? null);
+        $item['catalog_id'] = ((int)$catalog_id ?? null);
         $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
@@ -344,44 +358,6 @@ class MarketWebApi extends WebApi
         $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
-        return $item;
-    }
-
-    /**
-     * Собираем массив для отдачи, из модели
-     * @param Organization $model
-     * @return mixed
-     */
-    public function prepareOrganization($model)
-    {
-        if (empty($model)) {
-            return null;
-        }
-
-        $item['id'] = (int)$model->id;
-        $item['name'] = $model->name ?? "";
-        $item['legal_entity'] = $model->legal_entity ?? "";
-        $item['contact_name'] = $model->contact_name ?? "";
-        $item['phone'] = $model->phone ?? "";
-        $item['email'] = $model->email ?? "";
-        $item['site'] = $model->website ?? "";
-        $item['address'] = $model->address ?? "";
-        $item['image'] = $model->pictureUrl;
-        $item['type_id'] = (int)$model->type_id;
-        $item['type'] = $model->type->name  ?? "";
-        $item['rating'] = round($model->ratingStars, 1);
-        $item['house'] = ($model->street_number === 'undefined' ? "" : $model->street_number ?? "");
-        $item['route'] = ($model->route === 'undefined' ? "" : $model->route ?? "");
-        $item['city'] = ($model->locality === 'undefined' ? "" : $model->locality ?? "");
-        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? "" : $model->administrative_area_level_1 ?? "");
-        $item['country'] = ($model->country === 'undefined' ? "" : $model->country ?? "");
-        $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
-        $item['about'] = $model->about  ?? "";
-
-        if ($model->type_id == Organization::TYPE_SUPPLIER) {
-            $item['allow_editing'] = $model->allow_editing;
-        }
-
         return $item;
     }
 

@@ -96,4 +96,16 @@ class Vendor extends Organization {
      * @var integer
      */
     public $allow_editing;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="min_order_price"), example=100)
+     * @var float
+     */
+    public $min_order_price;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="min_free_delivery_charge"), example=100)
+     * @var float
+     */
+    public $min_free_delivery_charge;
 }

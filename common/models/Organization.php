@@ -709,17 +709,17 @@ class Organization extends \yii\db\ActiveRecord
             $delivery->save();
 
             //Если нет главного каталога, создаем
-            if (!Catalog::find()->where(['supp_org_id' => $this->id, 'type' => 1])->exists()) {
-                $catalog = new Catalog([
-                    'type' => 1,
-                    'supp_org_id' => $this->id,
-                    'status' => 1,
-                    'created_at' => new \yii\db\Expression('NOW()'),
-                    'updated_at' => new \yii\db\Expression('NOW()'),
-                    'name' => Yii::t('app', 'Главный каталог'),
-                ]);
-                $catalog->save();
-            }
+//            if (!Catalog::find()->where(['supp_org_id' => $this->id, 'type' => 1])->exists()) {
+//                $catalog = new Catalog([
+//                    'type' => 1,
+//                    'supp_org_id' => $this->id,
+//                    'status' => 1,
+//                    'created_at' => new \yii\db\Expression('NOW()'),
+//                    'updated_at' => new \yii\db\Expression('NOW()'),
+//                    'name' => Yii::t('app', 'Главный каталог'),
+//                ]);
+//                $catalog->save();
+//            }
         }
 
         parent::afterSave($insert, $changedAttributes);

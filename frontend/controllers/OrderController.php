@@ -795,7 +795,7 @@ class OrderController extends DefaultController
         $client = $this->currentUser->organization;
         $data = ['product_id' => $product_id, 'quantity' => 0];
         $items = (new CartWebApi())->add($data);
-        $cartCount = count($items);
+        $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
 
         return $product_id;

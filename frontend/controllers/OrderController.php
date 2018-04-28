@@ -1397,7 +1397,6 @@ class OrderController extends DefaultController
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING;
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();

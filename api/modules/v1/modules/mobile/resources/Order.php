@@ -22,8 +22,7 @@ class Order extends \common\models\Order
      /**
      * @inheritdoc
      */
-    public function rules(): array
-     {
+    public function rules(): array {
         return [
             [['id', 'client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type','count', 'page'], 'integer'],
             [['total_price', 'discount'], 'number'],

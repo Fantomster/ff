@@ -1485,8 +1485,8 @@ class OrderController extends DefaultController
 
         if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {
             $content = Yii::$app->request->post('CartContent');
-            $this->saveCartChanges($content);
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            $this->saveCartChanges($content);
             return ["title" => Yii::t('message', 'frontend.controllers.order.changes_saved', ['ru' => "Изменения сохранены!"]), "type" => "success"];
         }
 

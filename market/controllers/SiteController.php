@@ -2,6 +2,7 @@
 
 namespace market\controllers;
 
+use api_web\classes\CartWebApi;
 use common\models\DeliveryRegions;
 use yii\web\HttpException;
 use Yii;
@@ -1189,8 +1190,6 @@ class SiteController extends Controller
             return $this->successNotify(Yii::t('message', 'market.controllers.site.you_vendor', ['ru' => "Опомнитесь, вы и есть поставщик!"]));
         }
 
-        $orders = $client->getCart();
-
         $post = Yii::$app->request->post();
         $relation = null;
 
@@ -1207,42 +1206,20 @@ class SiteController extends Controller
             return $this->successNotify(Yii::t('error', 'market.controllers.site.undefined_error', ['ru' => "Неизвестная ошибка!"]));
         }
 
-        $isNewOrder = true;
+        $quantity = ($product->units) ? $product->units : 1;
 
-        foreach ($orders as $order) {
-            if ($order->vendor_id == $product->vendor->id) {
-                $isNewOrder = false;
-                $alteringOrder = $order;
-            }
-        }
-        if ($isNewOrder) {
-            $newOrder = new Order();
-            $newOrder->client_id = $client->id;
-            $newOrder->vendor_id = $product->vendor->id;
-            $newOrder->status = Order::STATUS_FORMING;
-            $newOrder->save();
-            $alteringOrder = $newOrder;
+        if ($quantity <= 0) {
+            return false;
         }
 
-        $isNewPosition = true;
-        foreach ($alteringOrder->orderContent as $position) {
-            if ($position->product_id == $product->id) {
-                $isNewPosition = false;
-            }
-        }
-        if ($isNewPosition) {
-            $position = new OrderContent();
-            $position->order_id = $alteringOrder->id;
-            $position->product_id = $product->id;
-            $position->quantity = ($product->units) ? $product->units : 1;
-            $position->price = $product->mp_show_price ? $product->price : 1;
-            $position->product_name = $product->product;
-            $position->units = $product->units;
-            $position->article = $product->article;
-            $position->save();
+        $products = ['product_id' => $post['product_id'], 'quantity' => $quantity];
+
+        try {
+            (new CartWebApi())->add($products);
+        } catch (\Exception $e) {
+            return false;
         }
 
-        $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         if (!$relation) {
             $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF, true);

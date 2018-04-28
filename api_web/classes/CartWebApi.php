@@ -244,7 +244,7 @@ class CartWebApi extends \api_web\components\WebApi
                 $orderContent->product_name = $cartContent->product_name;
                 $orderContent->units = $cartContent->units;
                 $orderContent->comment = $cartContent->comment;
-                $orderContent->article = $cartContent->product->article;
+                $orderContent->article = $cartContent->product['article'];
                 if ($orderContent->validate() && $orderContent->save()) {
                     $cartContent->delete();
                 } else {

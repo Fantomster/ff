@@ -61,6 +61,7 @@ class CartWebApi extends \api_web\components\WebApi
          * @var Organization $client
          */
         $client = $this->user->organization;
+
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $cart = $this->getCart();
@@ -71,6 +72,8 @@ class CartWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
             }
             $this->setPosition($cart, $product, $post['quantity']);
+            //Сообщение в очередь, Изменение количества товара в корзине
+            Notice::init('Order')->sendOrderToTurnClient($client);
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -334,7 +337,10 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function getCart()
     {
-        $cart = Cart::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+        $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
+        if (isset($individual_cart_enable))
+            $cart = Cart::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+
         if (empty($cart)) {
             $cart = new Cart([
                 'organization_id' => $this->user->organization->id,

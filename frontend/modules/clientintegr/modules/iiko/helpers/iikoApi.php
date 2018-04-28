@@ -188,7 +188,7 @@ class iikoApi
         }
 
         if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '.curl_error($ch));
         }
 
         return $response;
@@ -217,7 +217,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 100);
         curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
@@ -257,7 +257,7 @@ class iikoApi
         }
 
         if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '. curl_error($ch));
         }
 
         $response ='';
@@ -320,7 +320,7 @@ class iikoApi
         curl_close($ch);
 
         if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ');
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '.curl_error($ch));
         }
 
 
@@ -364,7 +364,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
         curl_setopt($ch, CURLOPT_POST, true);

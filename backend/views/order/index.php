@@ -27,7 +27,7 @@ $gridColumns = [
         'label' => 'Город ресторана',
         'attribute' => 'client_city',
         'value' => function($data) {
-            return $data['client']['city'];
+            return $data['client']['locality'];
         },
     ],
     [

@@ -4,7 +4,10 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
-$count = count($carts);
+$count = 0;
+
+foreach ($carts as $row)
+    $count += count($row['items']);
 ?>
 <div class="maska1"></div>
 <div class="block_right_basket" style="padding-bottom: 50px;">

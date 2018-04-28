@@ -60,6 +60,7 @@ class EmailIntegrationController extends Controller
         ];
 
         print_r($result);
+        file_put_contents('result.txt', print_r($result,true));
     }
 
 

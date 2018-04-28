@@ -71,8 +71,8 @@ class ParserTorg12
         'not_cnt' => ['в одном месте'],
         'price_without_tax' => ['Цена', 'цена', 'цена без ндс', 'цена без ндс, руб.', 'цена без ндс руб.', 'цена без учета ндс', 'цена без учета ндс, руб.', 'цена без учета ндс руб.', 'цена, руб. коп.', 'цена руб. коп.'],
         'price_with_tax' => ['цена с ндс, руб.', 'цена с ндс руб.', 'цена, руб.', 'цена руб.', 'сумма с учетом ндс, руб. коп.'],
-        'sum_with_tax' => 'сумма.*с.*ндс.*', // regexp
-        'sum_without_tax' => 'сумма.*без.*ндс.*', // regexp
+        'sum_with_tax' => ['сумма.*с.*ндс.*','стоимость.*товаров.*с налогом.*всего'], // regexp
+        'sum_without_tax' => ['сумма.*без.*ндс.*','стоимость.*товаров.*без налога.*всего'], // regexp
         'tax_rate' => ['ндс, %', 'ндс %', 'ставка ндс, %', 'ставка ндс %', 'ставка ндс', 'ставка, %', 'ставка %', 'ндс'],
         'total' => ['всего по накладной'],
     ];
@@ -112,6 +112,8 @@ class ParserTorg12
         foreach ($result as $row) {
             if($row['regular_expression'] == 1) {
                 $this->settingsRow[$row['name']] = trim($row['value']);
+            } else if ($row['regular_expression'] == 3) {
+                $this->settingsRow[$row['name']] = ['reg' => [explode('|', trim($row['value']))]];
             } else {
                 $this->settingsRow[$row['name']] = explode('|', trim($row['value']));
             }
@@ -328,7 +330,19 @@ class ParserTorg12
 
         $match = function ($cellValue, $setting) {
             if (is_array($setting)) {
-                return in_array($cellValue, $setting);
+
+                if (isset($setting['reg'])) {
+                    $isTrue = false;
+
+                        foreach ($setting['reg'][0] as $is) {
+                            $isTrue = (bool)preg_match('#' . $is . '#siu', $cellValue);
+                            if ($isTrue === true)
+                                  break;
+                        }
+                    return $isTrue;
+                } else
+                    return in_array($cellValue, $setting);
+
             } elseif (is_string($setting)) {
                 return (bool)preg_match('#' . $setting . '#siu', $cellValue);
             } else {
@@ -342,6 +356,8 @@ class ParserTorg12
          */
         for ($row = $this->firstRow; $row <= $this->highestRow; $row++) {
             for ($col = 0; $col <= $this->highestColumn; $col++) {
+
+
 
                 $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
@@ -380,12 +396,12 @@ class ParserTorg12
                     $this->columnList['price_without_tax']['col'] = $col;
                     $this->columnList['price_without_tax']['row'] = $row;
 
-                } elseif (!isset($this->columnList['price_with_tax']) && $match($cellValue, $this->settingsRow['price_with_tax'])) {
+              /*  } elseif (!isset($this->columnList['price_with_tax']) && $match($cellValue, $this->settingsRow['price_with_tax'])) {
 
                     $this->columnList['price_with_tax']['col'] = $col;
                     $this->columnList['price_with_tax']['row'] = $row;
-
-                } elseif (!isset($this->columnList['sum_with_tax']) && $match($cellValue, $this->settingsRow['sum_with_tax'])) {
+*/
+                 } elseif (!isset($this->columnList['sum_with_tax']) && $match($cellValue, $this->settingsRow['sum_with_tax'])) {
 
                     $this->columnList['sum_with_tax']['col'] = $col;
                     $this->columnList['sum_with_tax']['row'] = $row;
@@ -394,6 +410,7 @@ class ParserTorg12
 
                     $this->columnList['sum_without_tax']['col'] = $col;
                     $this->columnList['sum_without_tax']['row'] = $row;
+                    echo "Hello";
 
                 } elseif (!isset($this->columnList['tax_rate']) && $match($cellValue, $this->settingsRow['tax_rate'])) {
 
@@ -406,6 +423,7 @@ class ParserTorg12
                     $this->columnList['ed']['row'] = $row;
 
                 }
+               //  if($row == 17) { var_dump($cellValue); }
             }
         }
 
@@ -413,6 +431,8 @@ class ParserTorg12
         $this->checkRowsHeader();
 
         $this->startRow = $this->getMaxRowFromComplexHeader($this->columnList);
+        // var_dump($this->startRow);
+        // var_dump($this->columnList);
     }
 
     /**
@@ -457,13 +477,19 @@ class ParserTorg12
         } elseif (!isset($this->columnList['sum_without_tax'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий сумму товара без НДС ("%s")';
-            $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['sum_without_tax']));
+            if(!is_array ($this->settingsRow['sum_without_tax'])) {
+                $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['sum_without_tax']));
+            } else {
+                $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['sum_without_tax']['reg'][0]));
+            }
 
-        } elseif (!isset($this->columnList['price_with_tax']) && !isset($this->columnList['sum_with_tax'])) {
+
+
+      /*  } elseif (!isset($this->columnList['price_with_tax']) && !isset($this->columnList['sum_with_tax'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий цену товара c НДС ("%s")';
             $headErrors[] = sprintf($msg, implode('"; "', array_merge($this->settingsRow['price_with_tax'], (array)$this->settingsRow['sum_with_tax'])));
-
+*/
         } elseif (!isset($this->columnList['tax_rate'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий ставку НДС ("%s")';
@@ -471,9 +497,6 @@ class ParserTorg12
 
         }
 
-        if ($headErrors) {
-            throw new ParseTorg12Exception(implode("\n", $headErrors));
-        }
     }
 
     /**
@@ -542,6 +565,9 @@ class ParserTorg12
             return false;
         }
         */
+       if (empty($row[1])) {
+           return false;
+       }
 
         if($row[1] == 'А' and $row[2] == 'Б') {
             return false;
@@ -611,12 +637,22 @@ class ParserTorg12
 
 
             // сумма без НДС
+            if(isset($this->columnList['sum_without_tax']))
             $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
-       //     if ($invoiceRow->sum_without_tax) {
-       //         $this->invoice->sum_without_tax_sum += $invoiceRow->sum_without_tax;
-       //     }
+            if ($invoiceRow->sum_without_tax) {
+                $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
+                $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum,2);
+            }
 
-            // цена c НДС
+            // сумма  c НДС
+            if(isset($this->columnList['sum_with_tax']))
+            $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
+                   if ($invoiceRow->sum_with_tax) {
+                      $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
+                      $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum,2);
+                   }
+
+            /*
             if (isset($this->columnList['price_with_tax'])) {
 
                 $invoiceRow->price_with_tax = (float)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_with_tax']['col'], $row)->getValue(), true);
@@ -633,15 +669,14 @@ class ParserTorg12
                 }
 
             }
+            */
             // цена без НДС
             $invoiceRow->price_without_tax = (float)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_without_tax']['col'], $row)->getValue(), true);
-            if ($invoiceRow->price_without_tax) {
-                $this->invoice->price_with_tax_sum += $invoiceRow->price_with_tax;
-            }
-            if (!$invoiceRow->price_with_tax) {
+
+           /* if (!$invoiceRow->price_with_tax) {
                 $invoiceRow->errors['price_with_tax'] = 'Не указана цена с учетом НДС';
             }
-
+*/
             // НДС
             $taxRate = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['tax_rate']['col'], $row)->getValue(), true);
             $taxRate = str_replace('%', '', $taxRate);
@@ -667,6 +702,13 @@ class ParserTorg12
                 $this->invoice->errors['diff_price_with_tax'] = 'В накладной присутсвует товар, по которому указана некорректная цена или ставка НДС';
             }
 */
+            // Проверка на корректность расчета цены единицы
+
+       /*     if ($invoiceRow->price_without_tax == $invoiceRow->sum_without_tax) {
+                $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
+            }
+*/
+            $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax/$invoiceRow->cnt,2);
             // добавляем обработанную строку в накладную
             $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
         }

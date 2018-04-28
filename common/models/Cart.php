@@ -137,8 +137,10 @@ class Cart extends \yii\db\ActiveRecord
     }
 
     public function getRawPrice($vendor_id) {
-        /*if($this->id != null)
-            return CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor_id])->scalar();*/
+        if (isset($individual_cart_enable)) {
+            if ($this->id != null)
+                return CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor_id])->scalar();
+        }
         return CartContent::find()->select('SUM(quantity*price)')->where(['vendor_id' => $vendor_id])->scalar();
     }
 

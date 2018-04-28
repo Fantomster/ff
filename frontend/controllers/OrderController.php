@@ -2081,8 +2081,7 @@ class OrderController extends DefaultController
         try {
             (new CartWebApi())->add($data);
         } catch (\Exception $e) {
-            throw $e;
-            //return false;
+            return false;
         }
     }
 

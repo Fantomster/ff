@@ -21,7 +21,7 @@ class GuideProductsSearch extends \yii\base\Model {
     /**
      * @inheritdoc
      */
-    public function rules(): array
+    public function rules()
     {
         return [
             [['searchString', 'guide_id', 'cbg_id'], 'safe'],

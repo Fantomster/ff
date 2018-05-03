@@ -587,7 +587,7 @@ class OrganizationController extends DefaultController {
             $ma->save();
         }
         mail('otpixto@yandex.ru', '1', Yii::$app->params['staticUrl'][Yii::$app->language]['home']);
-        $redirectURL = Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?? Yii::$app->urlManagerFrontend->baseUrl;
+        $redirectURL = Yii::$app->params['staticUrl'][Yii::$app->language]['home'];
         return $this->redirect($redirectURL . "/user/login");
     }
 }

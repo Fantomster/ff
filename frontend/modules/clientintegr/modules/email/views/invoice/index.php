@@ -257,11 +257,15 @@ ob_start();
 
         if (params.invoice_id === undefined) {
             errorSwal('Необходимо выбрать накладную.');
+            button.removeAttr('disabled', false);
+            button.html('<i class="fa fa-save"></i> Сохранить');
             return false;
         }
 
         if (params.vendor_id === undefined) {
             errorSwal('Необходимо задать связь с поставщиком.');
+            button.removeAttr('disabled', false);
+            button.html('<i class="fa fa-save"></i> Сохранить');
             return false;
         }
 
@@ -280,14 +284,17 @@ ob_start();
                 if (result.value) {
                     create_order = true;
                 }
+                button.removeAttr('disabled', false);
+                button.html('<i class="fa fa-save"></i> Сохранить');
             });
         }
 
         if (create_order === true) {
             $.post('<?= $url ?>/create-order', params, function (data) {
                 if (data.status === true) {
-                    button.removeAttr('disabled', false);
-                    button.html('<i class="fa fa-save"></i> Сохранить');
+                    $('input[class="orders_radio"]').prop('checked', false);
+                    $('.catalog-index.orders').hide();
+                    $(row_invoice).find('.invoice_radio').remove();
                     swal(
                         'Накладная успешно привязана!',
                         'Перейти в интеграцию: <?=$list_integration?>',
@@ -296,6 +303,8 @@ ob_start();
                 } else {
                     errorSwal(data.error)
                 }
+                button.removeAttr('disabled', false);
+                button.html('<i class="fa fa-save"></i> Сохранить');
             });
         }
     });

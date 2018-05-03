@@ -119,13 +119,14 @@ class Organization extends \yii\db\ActiveRecord
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
+            [['gln_code'], 'string', 'max' => 50],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
-            [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
+            [['is_allowed_for_franchisee', 'is_work', 'is_ecom_integration'], 'boolean'],
         ];
     }
 
@@ -200,7 +201,9 @@ class Organization extends \yii\db\ActiveRecord
             'manager_id' => Yii::t('app', 'common.models.manager', ['ru' => 'Менеджер']),
             'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
             'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
-            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе'])
+            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе']),
+            'gln_code' => Yii::t('app', 'GLN-код'),
+            'is_ecom_integration' => Yii::t('app', 'Интеграция через E-COM'),
         ];
     }
 

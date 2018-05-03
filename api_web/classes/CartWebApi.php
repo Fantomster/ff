@@ -163,7 +163,8 @@ class CartWebApi extends \api_web\components\WebApi
         //Результат для ответа
         $result = [
             'success' => 0,
-            'error' => 0
+            'error' => 0,
+            'message' => '',
         ];
 
         if (!empty($post)) {

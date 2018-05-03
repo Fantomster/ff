@@ -14,7 +14,7 @@ class m180428_161004_update_torg12_patterns2 extends Migration
     {
         $this->truncateTable('{{%integration_torg12_columns}}');
 
-        $this->execute( "INSERT INTO `f-keeper`.integration_torg12_columns (id,name,value,regular_expression) VALUES 
+        $this->execute( "INSERT INTO integration_torg12_columns (id,name,value,regular_expression) VALUES 
               (1,'num','№|№№|№ п/п|номер по порядку|Номер по порядку',0)
               ,(2,'name','название|наименование|наименование, характеристика, сорт, артикул товара|наименование товара (описание выполненных работ, оказанных услуг), имущественного права',0)
               ,(3,'ed','наименование|Единица измерения|ед. изм.|наиме-нование|Единица измерения|условное обозначение (национальное)',0)
@@ -26,7 +26,7 @@ class m180428_161004_update_torg12_patterns2 extends Migration
               ,(9,'price_with_tax','цена с ндс, руб.|цена с ндс руб.|цена, руб.|цена руб.|сумма с учетом ндс, руб. коп.',0)
               ,(10,'sum_with_tax','сумма.*с.*ндс.*|стоимость.*товаров.*с.*налогом.*|Сумма с.*',3);");
 
-        $this->execute("INSERT INTO `f-keeper`.integration_torg12_columns (id,name,value,regular_expression) VALUES 
+        $this->execute("INSERT INTO integration_torg12_columns (id,name,value,regular_expression) VALUES 
               (11,'tax_rate','ндс, %|ндс %|ставка ндс, %|ставка ндс %|ставка ндс|ставка, %|ставка %|ндс|налоговая ставка',0)
               ,(12,'total','всего по накладной',0)
               ,(14,'sum_without_tax','сумма.*без.*ндс.*|стоимость.*товаров.*без налога.*|Сумма без.*',3);");

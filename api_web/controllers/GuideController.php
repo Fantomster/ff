@@ -451,8 +451,8 @@ class GuideController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "product_id": 1,
-     *                      "guide_id": 1
+     *                      "guide_id": 1,
+     *                      "product_ids": {1, 2, 3}
      *                  }
      *              )
      *         )
@@ -462,27 +462,8 @@ class GuideController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-     *                   "id": 1,
-     *                   "name": "Название шаблона",
-     *                   "color": "FFEECC",
-     *                   "products": {
-     *                       {
-     *                           "id": 470371,
-     *                           "product": "name",
-     *                           "catalog_id": 2770,
-     *                           "price": 678,
-     *                           "discount_price": 0,
-     *                           "rating": 0,
-     *                           "supplier": "kjghkjgkj",
-     *                           "brand": "",
-     *                           "article": "1",
-     *                           "ed": "432",
-     *                           "units": 1,
-     *                           "currency": "RUB",
-     *                           "image": "url_to_image",
-     *                           "in_basket": 0
-     *                       }
-     *                   }
+     *                   "success": 3,
+     *                   "error": 0
      *               }
      *          ),
      *     ),
@@ -512,8 +493,8 @@ class GuideController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "product_id": 1,
-     *                      "guide_id": 1
+     *                      "guide_id": 1,
+     *                      "product_ids": {1, 2, 3}
      *                  }
      *              )
      *         )
@@ -523,28 +504,9 @@ class GuideController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-     *                   "id": 1,
-     *                   "name": "Название шаблона",
-     *                   "color": "FFEECC",
-     *                   "products": {
-     *                       {
-     *                           "id": 470371,
-     *                           "product": "name",
-     *                           "catalog_id": 2770,
-     *                           "price": 678,
-     *                           "discount_price": 0,
-     *                           "rating": 0,
-     *                           "supplier": "kjghkjgkj",
-     *                           "brand": "",
-     *                           "article": "1",
-     *                           "ed": "432",
-     *                           "units": 1,
-     *                           "currency": "RUB",
-     *                           "image": "url_to_image",
-     *                           "in_basket": 0
-     *                       }
-     *                   }
-     *               }
+     *                   "success": 3,
+     *                   "error": 0
+     *              }
      *          ),
      *     ),
      *     @SWG\Response(

@@ -97,13 +97,17 @@ class GuideProductsSearch extends \yii\base\Model {
                 AND (cbg.deleted = 0))
                 ";
 
-        if(isset($params['sort'])){
-            $query.= " ORDER BY ";
-            if($params['sort'] == ''){
-                $query.= " product ASC";
-            }else{
-                $query.= str_replace('4', "ASC", str_replace('3', "DESC", $params['sort']));
+        if (isset($params['sort'])) {
+            $query .= " ORDER BY ";
+            if ($params['sort'] == '') {
+                $query .= " product ASC";
+            } else {
+                $query .= str_replace('4', "ASC", str_replace('3', "DESC", $params['sort']));
             }
+        }
+
+        if (isset($params['limit'])) {
+            $query .= " LIMIT " . $params['limit'];
         }
 
         $dataProvider = new SqlDataProvider([

@@ -501,9 +501,13 @@ class GuideWebApi extends \api_web\components\WebApi
             if ($model) {
                 $product = $model->getGuideProducts()->where(['cbg_id' => $pid])->one();
                 if ($product) {
-                    $product->delete();
-                    $model->updated_at = new Expression('NOW()');
-                    $model->save();
+                    if($product->delete()) {
+                        $model->updated_at = new Expression('NOW()');
+                        $model->save();
+                        $transaction->commit();
+                    } else {
+                        throw new ValidationException($product->getFirstErrors());
+                    }
                 } else {
                     throw new BadRequestHttpException("Product not found " . $pid);
                 }

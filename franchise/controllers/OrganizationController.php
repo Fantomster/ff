@@ -586,7 +586,6 @@ class OrganizationController extends DefaultController {
             $ma->organization_id = $rest_id;
             $ma->save();
         }
-        dd(Yii::$app->params['staticUrl'][Yii::$app->language]['home']);
 
         return $this->redirect(Yii::$app->params['staticUrl'][Yii::$app->language]['home'] . "/user/login");
     }

@@ -350,24 +350,16 @@ class GuideWebApi extends \api_web\components\WebApi
         if (empty($params['guide_id'])) {
             throw new BadRequestHttpException("ERROR: Empty guide_id");
         }
-        if (empty($params['product_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty product_id");
+        if (empty($params['product_ids'])) {
+            throw new BadRequestHttpException("ERROR: Empty product_ids");
+        }
+
+        if (is_numeric($params['product_ids']) && !is_array($params['product_ids'])) {
+            $params['product_ids'] = [$params['product_ids']];
         }
 
         $this->isMyGuide($params['guide_id']);
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            $this->addProduct($params['guide_id'], $params['product_id']);
-            $guide = Guide::findOne($params['guide_id']);
-            $guide->updated_at = new Expression('NOW()');
-            $guide->save();
-            $transaction->commit();
-            return $this->prepareGuide($params['guide_id']);
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-
+        return $this->productOperation($params['guide_id'], $params['product_ids'], 'add');
     }
 
     /**
@@ -381,22 +373,16 @@ class GuideWebApi extends \api_web\components\WebApi
         if (empty($params['guide_id'])) {
             throw new BadRequestHttpException("ERROR: Empty guide_id");
         }
-        if (empty($params['product_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty product_id");
+        if (empty($params['product_ids'])) {
+            throw new BadRequestHttpException("ERROR: Empty product_ids");
+        }
+
+        if (is_numeric($params['product_ids']) && !is_array($params['product_ids'])) {
+            $params['product_ids'] = [$params['product_ids']];
         }
 
         $this->isMyGuide($params['guide_id']);
-
-        $model = Guide::findOne($params['guide_id']);
-        if ($model) {
-            $product = $model->getGuideProducts()->where(['cbg_id' => $params['product_id']])->one();
-            if ($product) {
-                $product->delete();
-                $model->updated_at = new Expression('NOW()');
-                $model->save();
-            }
-            return $this->prepareGuide($model->id);
-        }
+        return $this->productOperation($params['guide_id'], $params['product_ids'], 'del');
     }
 
     /**
@@ -440,49 +426,90 @@ class GuideWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * WIP
-     *
-     *
-     *
-     * Операции с продуктами в шаблоне
-     * @param array $post
+     *  Операции с продуктами в шаблоне
+     * @param int $guide_id
+     * @param array $products
+     * @param null $operation
      * @return array
      * @throws BadRequestHttpException
      */
-    public function productOperation(array $post) {
-
-        if (empty($post['guide_id'])) {
+    private function productOperation(int $guide_id, array $products, $operation = null)
+    {
+        if (empty($guide_id)) {
             throw new BadRequestHttpException("ERROR: Empty guide_id");
         }
 
-        if (empty($post['products'])) {
+        if (empty($products)) {
             throw new BadRequestHttpException("ERROR: Empty products");
         }
 
-        $guid_id = (int) $post['guide_id'];
-        $products = $post['products'];
+        if (empty($operation)) {
+            throw new BadRequestHttpException("ERROR: Empty operation");
+        }
+
         $result = [
             'success' => 0,
             'error' => 0
         ];
+
         try {
-            foreach($products as $product) {
-                $operation = trim($product['operation']);
-                if(!in_array($operation, ['add', 'del'])) {
+            foreach ($products as $product_id) {
+                if (!in_array($operation, ['add', 'del'])) {
                     throw new BadRequestHttpException("Operation not found " . $operation);
                 }
 
+                //Добавляем продукт в шаблон
                 if ($operation == 'add') {
-
+                    $this->operationAddProduct($guide_id, $product_id);
                 }
 
-                $result['success'] += 1;
+                //Удаление продукта из шаблона
+                if ($operation == 'del') {
+                    $this->operationRemoveProduct($guide_id, $product_id);
+                }
+
+                $result['success']++;
             }
-        } catch(\Exception $e) {
-            $result['error'] += 1;
+        } catch (\Exception $e) {
+            $result['error']++;
+            $result['messages'][] = $e->getMessage();
         }
 
         return $result;
+    }
+
+    private function operationAddProduct($guide_id, $pid)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $this->addProduct($guide_id, $pid);
+            $guide = Guide::findOne($guide_id);
+            $guide->updated_at = new Expression('NOW()');
+            $guide->save();
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    private function operationRemoveProduct($guide_id, $pid)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $model = Guide::findOne($guide_id);
+            if ($model) {
+                $product = $model->getGuideProducts()->where(['cbg_id' => $pid])->one();
+                if ($product) {
+                    $product->delete();
+                    $model->updated_at = new Expression('NOW()');
+                    $model->save();
+                }
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -506,7 +533,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
             if ($product_list === true) {
                 $products = [];
-                $dataProvider = (new GuideProductsSearch())->search([], $model->id, $this->user->organization->id);
+                $dataProvider = (new GuideProductsSearch())->search(['limit' => 4], $model->id, $this->user->organization->id);
                 foreach ($dataProvider->models as $row) {
                     $products[] = $this->prepareProduct($row);
                 }

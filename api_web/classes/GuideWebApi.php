@@ -504,6 +504,8 @@ class GuideWebApi extends \api_web\components\WebApi
                     $product->delete();
                     $model->updated_at = new Expression('NOW()');
                     $model->save();
+                } else {
+                    throw new BadRequestHttpException("Product not found " . $pid);
                 }
             }
         } catch (\Exception $e) {

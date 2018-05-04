@@ -1,28 +1,45 @@
 <?php
+
 use yii\helpers\Url;
+
+/**
+ * @var $userToken \common\models\UserToken
+ */
 ?>
-<p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><img src="https://mixcart.ru/img/immotion1.jpg" style="max-width: 100%; margin: 0; padding: 0;" alt="" /></p>
-<h3 style="line-height: 1.1; color: #3f3e3e; font-weight: 500; font-size: 27px; margin: 0 0 15px; padding: 0;">
-    <?= Yii::t('app', 'api.common.mail.confirm_email.hello', ['ru'=>'Здравствуйте,']) ?> <small style="font-size: 60%; color: #787878; line-height: 0; text-transform: none; margin: 0; padding: 0;"><?= $profile->full_name ?></small>
-</h3>
-<p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
-    <?= Yii::t('app', 'api.common.mail.confirm_email.you_registered', ['ru'=>'Вы зарегистрировались в сервисе']) ?> <a href="<?= Url::toRoute(["/site/index"], true); ?>" style="color: #84bf76; margin: 0; padding: 0;">MixCart</a>
-</p>
-<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;"><?= Yii::t('app', 'api.common.mail.confirm_email.go_to', ['ru'=>'Для завершения регистрации, пожалуйста, пройдите по следующей ссылке:']) ?></p>
-<br style="margin: 0; padding: 0;" />
-<div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-    <a href="<?= \Yii::$app->urlManagerFrontEnd->createUrl(["/user/confirm", "type" => $user->organization->type_id, "token" => $userToken->token]); ?>" 
-       style="text-decoration: none;
-    color: #FFF;
-    background-color: #84bf76;
-    padding: 10px 16px;
-    font-weight: bold;
-    margin-right: 10px;
-    text-align: center;
-    cursor: pointer;
-    display: inline-block;
-    border-radius: 4px;
-    width: 80%;"><?= Yii::t('app', 'api.common.mail.confirm_email.confirm', ['ru'=>'Подтвердить']) ?></a>
-</div>
-<br style="margin: 0; padding: 0;" />
-<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;"><?= Yii::t('app', 'api.common.mail.confirm_email.or_enter', ['ru'=>'Или введите код в мобильном приложении:']) ?> <b><?=$userToken->pin?></b></p>
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background: #ffffff; min-width: 340px; font-size: 1px; line-height: normal;">
+    <tbody>
+    <tr>
+        <td align="center" valign="top">
+            <table cellpadding="0" cellspacing="0" border="0" width="580"
+                   style="max-width: 580px; min-width: 320px; background: #ffffff;padding-top: 30px;padding-bottom: 30px;">
+                <tbody>
+                <tr>
+                    <td style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+                        <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+                            <?= Yii::t('app', 'common.mail.confirm_email.hello', ['ru' => 'Здравствуйте,']) ?>
+                        </p>
+                        <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+                            <?= Yii::t('app', 'common.mail.confirm_email.full_text_mobile', [
+                                'ru' => "Благодарим Вас за регистрацию в MixCart! Перед началом работы необходимо подтвердить этот адрес электронной почты. Для этого введите PIN <b>{pin}</b> в мобильном приложении или пройдите по ссылке:",
+                                'pin' => $userToken->pin
+                            ]) ?>
+                        </p>
+                        <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 600;text-decoration: underline;color: #00b66b;">
+                            <a href="<?= Url::toRoute(["/user/confirm", "type" => $user->organization->type_id, "token" => $userToken->token], true) ?>"
+                               target="_blank"
+                               style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 600;text-decoration: underline;color: #00b66b;">
+                                <?= Yii::t('app', 'common.mail.confirm_email.confirm', ['ru' => 'Подтвердить']) ?>
+                            </a>
+                        </p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<?=$this->renderAjax('@common/mail/layouts/mail_footer', ['user' => $user ?? null])?>

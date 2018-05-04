@@ -115,6 +115,7 @@ class UserController extends ActiveController
                 }
 
                 $user = User::findOne($user->id);
+                Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
                 $this->afterRegister($user);
                 return ['success' => 1];
             } elseif (!$profile->validate())

@@ -288,7 +288,7 @@ class OrderController extends WebApiController
      *                                   "product":"искомая строка",
      *                                   "category_id": {24, 17},
      *                                   "supplier_id": {3803, 4},
-     *                                   "price": {"start":100, "end":300},
+     *                                   "price": {"from":100, "to":300},
      *                               },
      *                               "pagination":{
      *                                   "page":1,

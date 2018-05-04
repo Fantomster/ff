@@ -30,7 +30,9 @@ class MarketController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "product":"искомая строка",
-     *                                   "supplier_id": {3803, 4}
+     *                                   "supplier_id": {3803, 4},
+     *                                   "category_id": {1,2},
+     *                                   "price":{"from":100, "to":200}
      *                               },
      *                               "pagination":{
      *                                   "page":1,

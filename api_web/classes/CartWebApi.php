@@ -168,6 +168,11 @@ class CartWebApi extends \api_web\components\WebApi
         ];
 
         if (!empty($post)) {
+
+            if (isset($post['id'])) {
+                $post[] = $post;
+            }
+
             $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {

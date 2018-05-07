@@ -77,7 +77,7 @@ class CatalogBaseGoodsController extends ActiveController {
         $params->load(Yii::$app->request->queryParams);
 
         $fieldsCBG = "cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
-        $fieldsCG = "cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
+        $fieldsCG = "cbg.id as id, cbg.product, cbg.units, coalesce( cg.price, cbg.price) as price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
 
         $where = '';
         $where_all = '';

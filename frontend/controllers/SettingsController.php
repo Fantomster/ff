@@ -2,10 +2,14 @@
 
 namespace frontend\controllers;
 
+use common\components\EComIntegration;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
 use common\components\AccessRule;
+use yii\base\ErrorException;
+use yii\base\ExitException;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use common\models\Role;
 use yii\data\ArrayDataProvider;
@@ -35,7 +39,8 @@ class SettingsController extends DefaultController {
                             'notifications',
                             'ajax-add-email',
                             'ajax-delete-email',
-                            'ajax-change-email-notification'
+                            'ajax-change-email-notification',
+                            'test'
                         ],
                         'allow' => true,
                         'roles' => [
@@ -52,6 +57,17 @@ class SettingsController extends DefaultController {
             ],
         ];
     }
+
+
+    public function actionTest()
+    {
+        $eComParams = Yii::$app->params['e_com'];
+        $eComIntegration = new EComIntegration();
+        $open = $eComIntegration->connect($eComParams);
+        if(!$open) exit();
+        $eComIntegration->handleFilesList($open, $eComParams);
+    }
+
 
     public function actionUser() {
         $profile = $this->currentUser->profile;

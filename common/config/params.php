@@ -62,4 +62,12 @@ return [
     'iikoLogOrganization' => [],
 
     'web' => 'https://mixcart.ru/',
+    'e_com' => [
+        'host' => 'ftpex.e-vo.ru',
+        'port' => 21,
+        'timeout' => 30,
+        'login' => 'markettest',
+        'password' => 'JcqWlY',
+        'directory' => 'inbox',
+    ]
 ];

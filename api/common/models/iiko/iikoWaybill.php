@@ -52,6 +52,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
         return [
             [['org', 'order_id', 'num_code', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
             [['doc_date', 'created_at', 'exported_at', 'updated_at'], 'safe'],
+            [['org', 'store_id', 'agent_uuid'], 'required'],
             [['agent_uuid'], 'string', 'max' => 36],
             [['text_code'], 'string', 'max' => 128],
             [['note'], 'string', 'max' => 255],

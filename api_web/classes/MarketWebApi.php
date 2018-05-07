@@ -24,6 +24,7 @@ class MarketWebApi extends WebApi
      * Список доступных для заказа продуктов на маркете
      * @param $post
      * @return array
+     * @throws BadRequestHttpException
      */
     public function products($post)
     {
@@ -34,7 +35,7 @@ class MarketWebApi extends WebApi
         $currentUser = $this->user;
 
         $result = CatalogBaseGoods::find()
-            ->joinWith('vendor')
+            ->joinWith(['vendor', 'category'])
             ->where([
                 'organization.white_list' => Organization::WHITE_LIST_ON,
                 'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
@@ -112,7 +113,7 @@ class MarketWebApi extends WebApi
                         } else {
                             $value = (int)$value;
                         }
-                        $result->andWhere("$key IN ($value)");
+                        $result->andWhere("$key IN ($value) OR parent IN ($value)");
                     }
                 }
 
@@ -142,6 +143,7 @@ class MarketWebApi extends WebApi
                 'total_page' => ceil($result->count() / $pageSize)]];
         //Сортировка
         if ($sort) {
+            $sort = str_replace('supplier_id', 'organization.id', $sort);
             $sort = str_replace('supplier', 'organization.name', $sort);
             $return['sort'] = $sort;
             $order = 'ASC';
@@ -174,13 +176,18 @@ class MarketWebApi extends WebApi
      * Список доступных категорий на маркете
      * @return array
      */
-    public
-    function categories()
+    public function categories()
     {
         $return = [];
         $categories = MpCategory::find()->where('parent is null')->all();
         \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
+            $category = [
+                'id' => $model->id,
+                'name' => $model->name,
+                'image' => $this->getCategoryImage($model->id),
+                'subcategories' => []
+            ];
             $all_child = $model->child;
             if (!empty($all_child)) {
                 foreach ($all_child as $child) {
@@ -190,14 +197,14 @@ class MarketWebApi extends WebApi
                     if (strstr($image, 'product_placeholder') !== false) {
                         $image = $this->getCategoryImage($model->id);
                     }
-
-                    $return[$model->name][] = [
+                    $category['subcategories'][] = [
                         'id' => $child->id,
                         'name' => $child->name,
                         'image' => $image
                     ];
                 }
             }
+            $return[] = $category;
         }
         return $return;
     }
@@ -207,8 +214,7 @@ class MarketWebApi extends WebApi
      * @return mixed
      * @throws BadRequestHttpException
      */
-    public
-    function product($post)
+    public function product($post)
     {
         if (isset($post['id'])) {
 

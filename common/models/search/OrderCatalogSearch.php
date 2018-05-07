@@ -86,12 +86,12 @@ class OrderCatalogSearch extends \yii\base\Model {
         }
 
         if(!empty($this->searchPrice)) {
-            if(isset($this->searchPrice['start'])) {
-                $params_sql[':price_start'] = $this->searchPrice['start'];
+            if(isset($this->searchPrice['from'])) {
+                $params_sql[':price_start'] = $this->searchPrice['from'];
                 $where_all .= ' AND price >= :price_start ';
             }
-            if(isset($this->searchPrice['end'])) {
-                $params_sql[':price_end'] = $this->searchPrice['end'];
+            if(isset($this->searchPrice['to'])) {
+                $params_sql[':price_end'] = $this->searchPrice['to'];
                 $where_all .= ' AND price <= :price_end ';
             }
         }

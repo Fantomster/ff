@@ -118,7 +118,7 @@ class MarketWebApi extends WebApi
                 }
 
                 if (in_array($key, ['product'])) {
-                    $result->andFilterWhere(['like', $key, '%' . $value . '%']);
+                    $result->andFilterWhere(['like', $key, $value]);
                 }
 
                 if (in_array($key, ['price'])) {

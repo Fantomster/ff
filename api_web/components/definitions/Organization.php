@@ -87,13 +87,15 @@ class Organization
 
 }
 
+
 /**
  * @SWG\Definition(type="object", @SWG\Xml(name="Vendor"))
  */
 class Vendor extends Organization {
+
     /**
-     * @SWG\Property(@SWG\Xml(name="allow_editing"), example=1)
      * @var integer
+     * @SWG\Property(@SWG\Xml(name="allow_editing"), example=1)
      */
     public $allow_editing;
 
@@ -108,4 +110,10 @@ class Vendor extends Organization {
      * @var float
      */
     public $min_free_delivery_charge;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="delivery_days"), example={"mon": 0,"tue": 1,"wed": 0,"thu": 0,"fri": 0,"sat": 1,"sun": 1})
+     * @var object
+     */
+    public $delivery_days;
 }

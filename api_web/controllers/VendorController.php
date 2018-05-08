@@ -94,7 +94,7 @@ class VendorController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              ref="#/definitions/Organization"
+     *              ref="#/definitions/Vendor"
      *          ),
      *     ),
      *     @SWG\Response(

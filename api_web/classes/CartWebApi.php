@@ -66,6 +66,7 @@ class CartWebApi extends \api_web\components\WebApi
         try {
             $cart = $this->getCart();
             $product = (new Product())->findFromCatalogs($post['product_id']);
+
             $catalogs = explode(',', $client->getCatalogs());
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $catalogs) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
@@ -77,6 +78,7 @@ class CartWebApi extends \api_web\components\WebApi
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
+            \Yii::error($e->getMessage());
             throw $e;
         }
     }

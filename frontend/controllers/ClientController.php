@@ -1691,13 +1691,11 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 //        }
     }
 
+
     public function actionSuppliers() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
         $profile = new Profile();
         $profile->scenario = 'invite';
-        //$relationCategory = new RelationCategory();
-        $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
 
         $currentOrganization = $this->currentUser->organization;
@@ -1709,11 +1707,12 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
+            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'profile', 'currentOrganization'));
         } else {
-            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
+            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'profile', 'currentOrganization'));
         }
     }
+
 
     public function actionApplySupplier ()
     {

@@ -921,7 +921,12 @@ $("#organization-name").keyup(function() {
                 })
             }
         })        
-    });        
+    });
+    $(document).on('click', '.pagination a', function() {
+      setTimeout(function() {
+            $('.editCatalogButtons').removeAttr('disabled').html('<i class="fa fa-pencil"></i>');
+      }, 2000)
+    })
 JS;
 $this->registerJs($customJs, View::POS_READY);
 if ($currentOrganization->isEmpty()) {

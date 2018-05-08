@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\EComIntegration;
 use Yii;
 use yii\helpers\Url;
 
@@ -447,11 +448,24 @@ class Order extends \yii\db\ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
-                if($this->status != self::STATUS_FORMING)
-                \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
-            else
-                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
-
+                if($this->status != self::STATUS_FORMING){
+                    \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
+                    $organization = Organization::findOne(['id'=>$this->vendor_id]);
+                    if($organization->is_ecom_integration){
+                        $eComIntegration = new EComIntegration();
+                        $eComIntegration->sendOrderInfo($this, $organization);
+                    }
+                }else{
+                    \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
+                }
+        }
+        if($this->status != self::STATUS_FORMING){
+            $vendor = Organization::findOne(['id'=>$this->vendor_id]);
+            $client = Organization::findOne(['id'=>$this->client_id]);
+            if($vendor->is_ecom_integration && $client->gln_code && $vendor->gln_code){
+                $eComIntegration = new EComIntegration();
+                $eComIntegration->sendOrderInfo($this, $vendor, $client);
+            }
         }
     }
 

@@ -1,30 +1,30 @@
 <table cellpadding="0" cellspacing="0" border="0" width="100%"
        style="background: #ffffff; min-width: 340px; font-size: 1px; line-height: normal;">
     <tbody>
-    <tr>
-        <td align="center" valign="top">
-            <table cellpadding="0" cellspacing="0" border="0" width="680"
-                   style="max-width: 680px; min-width: 320px; background: #ffffff;">
-                <tr>
-                    <td align="center" valign="middle" height="320"
-                        style="width: 100%;background-image: url('https://preview.ibb.co/bRS9nH/banner_fruits.png');background-repeat: no-repeat;background-position: 0 -15px;background-size: cover;">
-                        <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;font-weight: bold;text-transform: uppercase;">
+        <tr>
+            <td align="center" valign="top">
+                <table cellpadding="0" cellspacing="0" border="0" width="680"
+                       style="max-width: 680px; min-width: 320px; background: #ffffff;">
+                    <tr>
+                        <td align="center" valign="middle" height="320"
+                            style="width: 100%;background-image: url('https://preview.ibb.co/bRS9nH/banner_fruits.png');background-repeat: no-repeat;background-position: 0 -15px;background-size: cover;">
+                            <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;font-weight: bold;text-transform: uppercase;">
                             <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;line-height: normal;">
                                 <?= Yii::t('app', 'common.mail.welcome.head_good', ['ru' => 'Здорово,']) ?>
                             </span>
                             <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;line-height: normal;display: block;width: 100%;">
                                 <?= Yii::t('app', 'common.mail.welcome.head_good_1', ['ru' => 'Что вы с нами']) ?>
                             </span>
-                        </font>
-                        <span style="height: 115px;display: block;width: 100%;"></span>
-                    </td>
-                </tr>
-                <tr>
-                    <td height="20"></td>
-                </tr>
-            </table>
-        </td>
-    </tr>
+                            </font>
+                            <span style="height: 115px;display: block;width: 100%;"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="20"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -39,16 +39,16 @@
                         style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
                         <font face="'Open Sans', Arial, sans-serif"
                               style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;font-weight: 600;">
-                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;color: #2a2c2e;display: block;">
-                                <?= Yii::t('app', 'common.mail.welcome.hello', ['ru' => 'Здравствуйте!']) ?>
-                            </span>
+                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;color: #2a2c2e;display: block;">
+                            <?= Yii::t('app', 'common.mail.welcome.hello', ['ru' => 'Здравствуйте!']) ?>
+                        </span>
                         </font>
                     </td>
                 </tr>
                 <tr>
                     <td valign="bottom"
                         style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                        <?= Yii::t('app', 'common.mail.welcome.full_text', ['ru' => '<p style="font-family: \'Open Sans\', Arial, sans-serif;font-size: 16px;margin: 0;">Меня зовут
+                            <?= Yii::t('app', 'common.mail.welcome.full_text', ['ru' => '<p style="font-family: \'Open Sans\', Arial, sans-serif;font-size: 16px;margin: 0;">Меня зовут
                             Ильдар Хасанов, я являюсь сооснователем сервиса MixCart. Я искренне рад видеть Вас в числе
                             наших клиентов!</p>
                         <p style="font-family: \'Open Sans\', Arial, sans-serif;font-size: 16px;">Технологии уже давно
@@ -70,47 +70,52 @@
                            style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;text-decoration: none;color: #ffffff;display: block;width: 280px;background-image: url('https://image.ibb.co/eydtxH/btn_hover.png');background-position: -3px -12px;background-repeat: no-repeat;height: 83px;">
                             <font face="'Open Sans', Arial, sans-serif"
                                   style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;color: #ffffff;">
-                                <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;line-height: 60px;color: #ffffff;">
-                                    <?= Yii::t('app', 'common.mail.welcome.start', ['ru' => 'Начнем']) ?>
-                                </span>
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;line-height: 60px;color: #ffffff;">
+                                <?= Yii::t('app', 'common.mail.welcome.start', ['ru' => 'Начнем']) ?>
+                            </span>
                             </font>
                         </a>
                     </td>
                 </tr>
-                </tr>
-                <tr>
-                    <td height="10"></td>
-                </tr>
-                <tr>
-                    <td valign="bottom"
-                        style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                        <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
-                            <?= Yii::t('app', 'common.mail.welcome.read_instruction', ['ru' => 'Ознакомьтесь, пожалуйста, с инструкцией по работе с MixCart:']) ?>
-                        </p>
-                        <ul>
-                            <li>
-                                <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
-                                    <?= Yii::t('app', 'common.mail.welcome.instruction_restaurant', ['ru' => 'для ресторанов']) ?>
-                                    <a href="https://mixcart.ru/restaurant-help.html" target="_blank"
-                                       style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff;">https://mixcart.ru/restaurant-help.html</a>
-                                </p></li>
-                            <li>
-                                <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
-                                    <?= Yii::t('app', 'common.mail.welcome.instruction_supplier', ['ru' => 'для поставщиков']) ?>
-                                    <a href="https://mixcart.ru/supplier-help.html" target="_blank"
-                                       style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff">https://mixcart.ru/supplier-help.html</a>
-                                </p></li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td valign="middle" height="170">
-                        <img src="https://image.ibb.co/m6Gd7S/image008.jpg" alt="Ильдар Хасанов" border="0"/>
-                    </td>
-                </tr>
-            </table>
+    </tr>
+    <tr>
+        <td height="10"></td>
+    </tr>
+    <tr>
+        <td valign="bottom"
+            style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
+            <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
+                <?= Yii::t('app', 'common.mail.welcome.read_instruction', ['ru' => 'Ознакомьтесь, пожалуйста, с инструкцией по работе с MixCart:']) ?>
+            </p>
+            <ul>
+                <li>
+                    <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
+                        <?= Yii::t('app', 'common.mail.welcome.instruction_restaurant', ['ru' => 'для ресторанов']) ?>
+                        <a href="https://mixcart.ru/restaurant-help.html" target="_blank"
+                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff;">https://mixcart.ru/restaurant-help.html</a>
+                    </p></li>
+                <li>
+                    <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
+                        <?= Yii::t('app', 'common.mail.welcome.instruction_supplier', ['ru' => 'для поставщиков']) ?>
+                        <a href="https://mixcart.ru/supplier-help.html" target="_blank"
+                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff">https://mixcart.ru/supplier-help.html</a>
+                    </p></li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td valign="middle" height="170">
+            <img src="https://image.ibb.co/m6Gd7S/image008.jpg" alt="Ильдар Хасанов" border="0"/>
+        </td>
+        <td valign="middle">
+            <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin: 0;"><?= Yii::t('app', 'common.mail.welcome.sign_1', ['ru' => 'Ильдар Хасанов']) ?></p>
+            <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin: 0;"><?= Yii::t('app', 'common.mail.welcome.sign_2', ['ru' => 'Сооснователь MixCart']) ?></p>
+            <a href="https://mixcart.ru" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #00a9ff;"><span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #00a9ff;">www.mixcart.ru</span></a>
         </td>
     </tr>
 </table>
+</td>
+</tr>
+</table>
 
-<?=$this->renderAjax('layouts/mail_footer', ['user' => $user ?? null])?>
+<?= $this->renderAjax('layouts/mail_footer', ['user' => $user ?? null]) ?>

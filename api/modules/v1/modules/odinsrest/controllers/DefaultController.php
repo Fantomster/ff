@@ -150,9 +150,9 @@ class DefaultController extends Controller
     public function OpenSession()
     {
 
-       $this->username =  isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] :  $_SERVER['REDIRECT_REMOTE_USER'];
+       if(!isset($this->username))  $this->username =  (isset($_SERVER['PHP_AUTH_USER'])) ? $_SERVER['PHP_AUTH_USER'] : "";
 
-       $this->password =  $_SERVER['PHP_AUTH_PW'];
+       if (!isset($this->password)) $this->password =  (isset($_SERVER['PHP_AUTH_PW'])) ? $_SERVER['PHP_AUTH_PW'] : "";
 
        if (empty($this->username) || empty($this->password)) {
             header('WWW-Authenticate: Basic realm="f-keeper.ru"');
@@ -224,7 +224,7 @@ class DefaultController extends Controller
      */
     public function security($header)
     {
-/*
+
 
         if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
         {
@@ -239,7 +239,7 @@ class DefaultController extends Controller
             $this->extimefrom = $header->UsernameToken->Created;
             return $header;
         }
-*/
+
     }
 
     /**

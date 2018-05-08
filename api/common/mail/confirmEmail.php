@@ -27,7 +27,7 @@ use yii\helpers\Url;
                             ]) ?>
                         </p>
                         <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 600;text-decoration: underline;color: #00b66b;">
-                            <a href="<?= Url::toRoute(["/user/confirm", "type" => $user->organization->type_id, "token" => $userToken->token], true) ?>"
+                            <a href="<?= \Yii::$app->urlManagerFrontEnd->createUrl(["/user/confirm", "type" => $user->organization->type_id, "token" => $userToken->token]) ?>"
                                target="_blank"
                                style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 600;text-decoration: underline;color: #00b66b;">
                                 <?= Yii::t('app', 'common.mail.confirm_email.confirm', ['ru' => 'Подтвердить']) ?>

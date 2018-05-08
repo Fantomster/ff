@@ -150,13 +150,22 @@ class DefaultController extends Controller
     public function OpenSession()
     {
 
+       $this->username =  $_SERVER['PHP_AUTH_USER'];
+       $this->password =  $_SERVER['PHP_AUTH_PW'];
 
-       if (empty($_SERVER['PHP_AUTH_USER']) || empty($_SERVER['PHP_AUTH_PW'])) {
+       if (empty($this->username) || empty($this->password)) {
             header('WWW-Authenticate: Basic realm="f-keeper.ru"');
             header('HTTP/1.0 401 Unauthorized');
             exit();
         } else {
-        return $_SERVER['PHP_AUTH_USER']."-". $_SERVER['PHP_AUTH_PW'];
+        if ($this->username == "cyborg" && $this->password == "testpass") {
+            return "Welcome to MixCart integration, Cyborg";
+        } else {
+            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
+            header('HTTP/1.0 401 Unauthorized');
+            exit();
+        }
+
         }
 
         /*

@@ -315,10 +315,6 @@ class CartWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("ERROR: Empty product_id");
         }
 
-        if (empty($post['comment'])) {
-            throw new BadRequestHttpException("ERROR: Empty comment");
-        }
-
         /**
          * @var $model CartContent
          */
@@ -328,7 +324,7 @@ class CartWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Нет такого товара в корзине");
         }
 
-        $model->comment = $post['comment'];
+        $model->comment = $post['comment'] ?? '';
 
         if (!$model->validate()) {
             throw new ValidationException($model->getFirstErrors());
@@ -439,7 +435,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param $row CartContent
      * @return mixed
      */
-    private function prepareProduct($row)
+    private function prepareProduct(CartContent $row)
     {
         $model = $row->product;
 
@@ -449,13 +445,13 @@ class CartWebApi extends \api_web\components\WebApi
         $item['category_id'] = isset($model['model']->category) ? (int)$model['model']->category->id : 0;
         $item['price'] = round($model['price'], 2);
         $item['rating'] = round($model['model']->ratingStars, 1);
-        $item['supplier'] = Organization::findOne($model['vendor_id'])->name;
+        $item['supplier'] = $row->vendor->name;
         $item['brand'] = ($model['model']->brand ? $model['model']->brand : '');
         $item['article'] = $model['model']->article;
         $item['ed'] = $model['model']->ed;
         $item['units'] = round(($model['units'] ?? 0), 3);
-        $item['currency'] = $model['model']->catalog->currency->symbol;
-        $item['currency_id'] = $model['model']->catalog->currency->id;
+        $item['currency'] = $row->currency->symbol;
+        $item['currency_id'] = $row->currency->id;
         $item['image'] = (new MarketWebApi())->getProductImage($model['model']);
         $item['in_basket'] = $this->countProductInCart($model['id']);
         $item['comment'] = $row->comment;

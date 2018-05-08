@@ -31,65 +31,65 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return array
      * @throws \Exception
      *
-    public function registration(array $orders)
-    {
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            $user = $this->user;
-            $client = $user->organization;
-
-            if (empty($client->getCartCount())) {
-                throw new BadRequestHttpException("Корзина пуста.");
-            }
-
-            if (empty($orders['orders'])) {
-                throw new BadRequestHttpException("Необходимо передать список заказов для оформления.");
-            }
-
-            $return = [];
-            foreach ($orders['orders'] as $order_id) {
-                $order = Order::findOne([
-                    'id' => $order_id,
-                    'client_id' => $client->id,
-                    'status' => Order::STATUS_FORMING
-                ]);
-
-                if (empty($order)) {
-                    $return[] = [
-                        'order_id' => $order_id,
-                        'result' => 'Не найден'
-                    ];
-                    continue;
-                }
-
-                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $order->created_by_id = $user->id;
-                $order->created_at = gmdate("Y-m-d H:i:s");
-
-                if (!$order->validate()) {
-                    throw new ValidationException($order->getFirstErrors());
-                }
-
-                $return[] = [
-                    'order_id' => $order->id,
-                    'result' => $order->save()
-                ];
-
-                //Сообщение в очередь поставщику, что есть новый заказ
-                Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
-                //Емайл и смс о новом заказе
-                Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
-            }
-            //Сообщение в очередь, Изменение количества товара в корзине
-            Notice::init('Order')->sendOrderToTurnClient($client);
-            $transaction->commit();
-            return $return;
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-    }
-    */
+     * public function registration(array $orders)
+     * {
+     * $transaction = \Yii::$app->db->beginTransaction();
+     * try {
+     * $user = $this->user;
+     * $client = $user->organization;
+     *
+     * if (empty($client->getCartCount())) {
+     * throw new BadRequestHttpException("Корзина пуста.");
+     * }
+     *
+     * if (empty($orders['orders'])) {
+     * throw new BadRequestHttpException("Необходимо передать список заказов для оформления.");
+     * }
+     *
+     * $return = [];
+     * foreach ($orders['orders'] as $order_id) {
+     * $order = Order::findOne([
+     * 'id' => $order_id,
+     * 'client_id' => $client->id,
+     * 'status' => Order::STATUS_FORMING
+     * ]);
+     *
+     * if (empty($order)) {
+     * $return[] = [
+     * 'order_id' => $order_id,
+     * 'result' => 'Не найден'
+     * ];
+     * continue;
+     * }
+     *
+     * $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+     * $order->created_by_id = $user->id;
+     * $order->created_at = gmdate("Y-m-d H:i:s");
+     *
+     * if (!$order->validate()) {
+     * throw new ValidationException($order->getFirstErrors());
+     * }
+     *
+     * $return[] = [
+     * 'order_id' => $order->id,
+     * 'result' => $order->save()
+     * ];
+     *
+     * //Сообщение в очередь поставщику, что есть новый заказ
+     * Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
+     * //Емайл и смс о новом заказе
+     * Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
+     * }
+     * //Сообщение в очередь, Изменение количества товара в корзине
+     * Notice::init('Order')->sendOrderToTurnClient($client);
+     * $transaction->commit();
+     * return $return;
+     * } catch (\Exception $e) {
+     * $transaction->rollBack();
+     * throw $e;
+     * }
+     * }
+     */
 
     /**
      * Оставляем комментарий к заказу
@@ -427,7 +427,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $field = str_replace('-', '', $sort);
 
-            if ($field == 'supplier') {
+            if ($field == 'supplier' || $field == 'supplier_id') {
                 $field = 'name';
             }
 

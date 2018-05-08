@@ -89,6 +89,12 @@ class WebApiHelper
             $item['min_order_price'] = round($model->delivery->min_order_price, 2);
             $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge, 2);
             $item['disabled_delivery_days'] = $model->getDisabledDeliveryDays();
+
+            //Дни доставки
+            $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            foreach ($days as $day) {
+                $item['delivery_days'][$day] = (int)$model->delivery->{$day};
+            }
         }
 
         return $item;

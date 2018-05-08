@@ -150,7 +150,8 @@ class DefaultController extends Controller
     public function OpenSession()
     {
 
-       $this->username =  $_SERVER['PHP_AUTH_USER'];
+       $this->username =  isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] :  $_SERVER['REDIRECT_REMOTE_USER'];
+
        $this->password =  $_SERVER['PHP_AUTH_PW'];
 
        if (empty($this->username) || empty($this->password)) {

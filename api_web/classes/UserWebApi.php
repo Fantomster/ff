@@ -287,6 +287,13 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        /**
+         * Поиск по наименованию
+         */
+        if (isset($post['search']['name'])) {
+            $dataProvider->query->andFilterWhere(['like', 'u.vendor_name', $post['search']['name']]);
+        }
+
         //Поиск по адресу
         if (isset($post['search']['location'])) {
             if (strstr($post['search']['location'], ':') !== false) {

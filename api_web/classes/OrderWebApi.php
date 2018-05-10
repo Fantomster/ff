@@ -449,6 +449,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'ed' => $model['ed'],
                 'units' => (int)$model['units'] ?? 1,
                 'currency' => $model['symbol'],
+                'currency_id' => (int)$model['currency_id'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket' => $this->container->get('CartWebApi')->countProductInCart($model['id']),
             ];

@@ -481,14 +481,6 @@ class ClientWebApi extends WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            //Ищем сотрудника среди всех, в этом ресторане
-            $user = $this->employeeSearch($post);
-            //Если нашли бросаем исключение, что уже работает
-            if (!empty($user)) {
-                $relation = RelationUserOrganization::findOne(['user_id' => $user['id'], 'organization_id' => $this->user->organization->id]);
-                throw new BadRequestHttpException('Этот сотрудник уже работает под ролью: ' . $relation->user->role->name);
-            }
-
             /**
              * Проверка полей
              */
@@ -506,38 +498,48 @@ class ClientWebApi extends WebApi
             }
 
             //Интуем роль
-            $post['role_id'] = (int)$post['role_id'];
+            $role_id = (int)$post['role_id'];
             //Проверка, можно ли проставить эту роль что прислали
             $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
             if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
                 throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
             }
 
-            //готовим запрос на создание пользователя
-            $request = [
-                'user' => [
-                    'email' => $post['email'],
-                    'password' => substr(md5(time() . time()), 0, 8)
-                ],
-                'profile' => [
-                    'phone' => $post['phone'],
-                    'full_name' => $post['name']
-                ]
-            ];
-
-            /**
-             * @var $user_api UserWebApi
-             */
-            $user_api = $this->container->get('UserWebApi');
-            //Создаем пользователя
-            $user = $user_api->createUser($request, (int)$post['role_id']);
-            //Устанавливаем текущую организацию
-            $user->setOrganization($this->user->organization, true);
-            //Создаем профиль пользователя
-            $user_api->createProfile($request, $user);
-            $user->refresh();
+            //Ищем пользователя
+            $user = User::findOne(['email' => $post['email']]);
+            if (!empty($user)) {
+                //Смотрим, вдруг он уже работает в этом ресторане
+                $relation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->user->organization->id]);
+                if (!empty($relation)) {
+                    throw new BadRequestHttpException('Этот сотрудник уже работает под ролью: ' . Role::findOne($relation->role_id)->name);
+                }
+            } else {
+                /**
+                 * @var $user_api UserWebApi
+                 */
+                $user_api = $this->container->get('UserWebApi');
+                //Это новый пользователь, идем создавать
+                //готовим запрос на создание пользователя
+                $request = [
+                    'user' => [
+                        'email' => $post['email'],
+                        'password' => substr(md5(time() . time()), 0, 8)
+                    ],
+                    'profile' => [
+                        'phone' => $post['phone'],
+                        'full_name' => $post['name']
+                    ]
+                ];
+                //Создаем пользователя
+                $user = $user_api->createUser($request, $role_id);
+                //Устанавливаем текущую организацию
+                $user->setOrganization($this->user->organization, true);
+                //Создаем профиль пользователя
+                $user_api->createProfile($request, $user);
+                $user->refresh();
+            }
             //Создаем связь нового сотрудника с рестораном
-            $user->setRelationUserOrganization($user->id, $this->user->organization->id, (int)$post['role_id']);
+            $user->createRelationUserOrganization($user->id, $this->user->organization->id, $role_id);
             //Все хорошо, применяем изменения в базе
             $transaction->commit();
             //Тут нужно отправить письмо для смены пароля пользователю

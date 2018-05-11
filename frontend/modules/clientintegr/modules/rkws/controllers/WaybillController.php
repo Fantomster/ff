@@ -230,6 +230,51 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
     }
 
+    public function actionMakevat($waybill_id, $vat) {
+
+        $model = $this->findModel($waybill_id);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE rk_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+        /*
+        $model->quant = $model->defquant;
+        $model->koef = 1;
+
+        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $model->waybill_id])->one();
+        if(!$wmodel) {
+            echo "Cant find wmodel in map controller cleardata";
+            die();
+        }
+
+        if ($wmodel->vat_included) {
+            $model->sum = round($model->defsum/(1+$model->vat/10000),2);
+        } else {
+            $model->sum = $model->defsum;
+        }
+
+
+        if (!$model->save()) {
+            echo $model->getErrors();
+            die();
+        }
+*/
+        return $this->redirect(['map', 'waybill_id' => $model->id]);
+    }
+
+
+    public function actionChvat($id, $vat) {
+
+        $model = $this->findDataModel($id);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE rk_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+
+    }
+
+
+
     public function actionAutocomplete($term = null) {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         // $out = ['results' => ['id' => '0', 'text' => 'Создать контрагента']];

@@ -10,6 +10,7 @@ use common\models\User;
 use kartik\widgets\Select2;
 use yii\helpers\Url;
 use yii\web\JsExpression;
+use api\common\models\RkDicconst;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\pdict\DictAgent */
@@ -21,10 +22,17 @@ use yii\web\JsExpression;
     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; // var_dump($org); ?>
     <?php $agentModel = \api\common\models\RkAgent::findOne(['acc' => $org, 'rid' => $model->corr_rid]); ?>
     <?php $data = ($agentModel) ? [ $agentModel->rid => $agentModel->denom ] : []; ?>
+    <?php $autoNumber = (RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue() != null) ?
+        (RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue()) : 0; ?>
 
 
     <?php if (empty($model->store_rid)) $model->store_rid = -1; ?>
+    <?php if ($autoNumber) {
+      $model->text_code = "mixcart";
+      $model->num_code = $model->order_id;
+    }
 
+    ?>
     <?php $form = ActiveForm::begin(); ?>
 
     <?php echo $form->errorSummary($model); ?>

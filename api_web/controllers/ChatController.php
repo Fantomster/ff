@@ -48,6 +48,7 @@ class ChatController extends WebApiController
      *                      "client_id": 1,
      *                      "vendor":"OOO Unity",
      *                      "vendor_id": 4,
+     *                      "image": "http://mixcar.ru/image.jpg",
      *                      "count_message": 9,
      *                      "unread_message": 2,
      *                      "last_message":"Последнее сообщение",

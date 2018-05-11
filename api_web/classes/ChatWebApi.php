@@ -252,6 +252,7 @@ class ChatWebApi extends WebApi
             'client_id' => (int)$model->client->id,
             'vendor' => $model->vendor->name,
             'vendor_id' => (int)$model->vendor->id,
+            'image' => $model->vendor->pictureUrl ?? '',
             'count_message' => (int)$model->orderChatCount ?? 0,
             'unread_message' => (int)$model->orderChatUnreadCount ?? 0,
             'last_message' => $model->orderChatLastMessage->message ?? 'Нет сообщений',

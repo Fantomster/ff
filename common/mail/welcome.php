@@ -104,13 +104,19 @@
         </td>
     </tr>
     <tr>
-        <td valign="middle" height="170">
-            <img src="https://image.ibb.co/m6Gd7S/image008.jpg" alt="Ильдар Хасанов" border="0"/>
-        </td>
-        <td valign="middle">
-            <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin: 0;"><?= Yii::t('app', 'common.mail.welcome.sign_1', ['ru' => 'Ильдар Хасанов']) ?></p>
-            <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin: 0;"><?= Yii::t('app', 'common.mail.welcome.sign_2', ['ru' => 'Сооснователь MixCart']) ?></p>
-            <a href="https://mixcart.ru" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #00a9ff;"><span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #00a9ff;">www.mixcart.ru</span></a>
+        <td align="center" valign="top">
+            <table cellpadding="0" cellspacing="0" border="0" width="580" style="max-width: 580px; min-width: 320px; background: #ffffff;">
+                <tbody><tr>
+                        <td valign="middle" height="170" style="width: 120px;">
+                            <img src="https://static.mixcart.ru/ildar.jpg" alt="Ильдар Хасанов" border="0">
+                        </td>
+                        <td valign="middle">
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::t('app', 'common.mail.welcome.sign_1', ['ru' => 'Ильдар Хасанов']) ?></span><br>
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::t('app', 'common.mail.welcome.sign_2', ['ru' => 'Сооснователь MixCart']) ?></span><br>
+                            <a href="https://mixcart.ru" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #00a9ff;"><span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #00a9ff;">www.mixcart.ru</span></a>
+                        </td>
+                    </tr>
+                </tbody></table>
         </td>
     </tr>
 </table>

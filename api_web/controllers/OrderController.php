@@ -212,6 +212,51 @@ class OrderController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/order/history-count",
+     *     tags={"Order"},
+     *     summary="История заказов в цифрах",
+     *     description="История заказов в цифрах",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *          response = 200,
+     *          description = "success",
+     *          @SWG\Schema(
+     *              default={
+     *                   "waiting": 61,
+     *                   "processing": 3,
+     *                   "success": 21,
+     *                   "canceled": 12
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionHistoryCount()
+    {
+        $this->response = $this->container->get('OrderWebApi')->getHistoryCount($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/order/history",
      *     tags={"Order"},
      *     summary="История заказов",
@@ -248,11 +293,9 @@ class OrderController extends WebApiController
      *         )
      *     ),
      *     @SWG\Response(
-     *         response = 200,
+     *          response = 200,
      *         description = "success",
-     *         @SWG\Schema(
-     *              default={"orders":{}}
-     *          ),
+     *         @SWG\Schema(ref="#/definitions/History"),
      *     ),
      *     @SWG\Response(
      *         response = 400,

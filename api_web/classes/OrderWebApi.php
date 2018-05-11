@@ -274,6 +274,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     case Order::STATUS_DONE:
                         $return['success'] += $row['count'];
                         break;
+                    case Order::STATUS_CANCELLED:
                     case Order::STATUS_REJECTED:
                         $return['canceled'] += $row['count'];
                         break;

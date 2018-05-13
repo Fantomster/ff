@@ -15,6 +15,7 @@ use api_web\components\Notice;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -236,6 +237,52 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
         return $result;
+    }
+
+    /**
+     *
+     */
+    public function getHistoryCount()
+    {
+        $result = (new Query())->from(Order::tableName())
+            ->select(['status', 'COUNT(status) as count'])
+            ->where([
+                'or',
+                ['client_id' => $this->user->organization->id],
+                ['vendor_id' => $this->user->organization->id],
+            ])
+            ->groupBy('status')
+            ->all();
+
+        $return = [
+            'waiting' => 0,
+            'processing' => 0,
+            'success' => 0,
+            'canceled' => 0
+        ];
+
+        if (!empty($result)) {
+            foreach ($result as $row) {
+                switch ($row['status']) {
+                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        $return['waiting'] += $row['count'];
+                        break;
+                    case Order::STATUS_PROCESSING:
+                        $return['processing'] += $row['count'];
+                        break;
+                    case Order::STATUS_DONE:
+                        $return['success'] += $row['count'];
+                        break;
+                    case Order::STATUS_CANCELLED:
+                    case Order::STATUS_REJECTED:
+                        $return['canceled'] += $row['count'];
+                        break;
+                }
+            }
+        }
+
+        return $return;
     }
 
     /**

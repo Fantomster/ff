@@ -35,6 +35,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                             $rkProd = iikoProduct::findOne(['id' => $value]);
                             $model->product_rid = $rkProd->id;
                             $model->munit = $rkProd->unit;
+                            $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                             $model->save(false);
                             return $rkProd->denom;
                             return '';
@@ -351,6 +352,29 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
+
+    public function actionMakevat($waybill_id, $vat) {
+
+        $model = $this->findModel($waybill_id);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE iiko_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+
+        return $this->redirect(['map', 'waybill_id' => $model->id]);
+    }
+
+
+    public function actionChvat($id, $vat) {
+
+        $model = $this->findDataModel($id);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE iiko_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+
+    }
+
 
     /**
      * @param $id

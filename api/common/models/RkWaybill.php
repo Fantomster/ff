@@ -157,6 +157,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
             try {
 
+                $taxVat = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+
                 foreach ($records as $record) {
 
                     $wdmodel = new RkWaybilldata();
@@ -167,7 +169,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
                     $wdmodel->sum = round($record->price*$record->quantity,2);
                     $wdmodel->defquant = $record->quantity;                    
                     $wdmodel->defsum = round($record->price*$record->quantity,2);
-                    $wdmodel->vat = 1800;
+                    $wdmodel->vat = $taxVat*100;
                     $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                     $wdmodel->org = $this->org;
                     $wdmodel->koef = 1;
@@ -188,6 +190,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
                         $wdmodel->munit_rid = $ch->munit_rid;
                         $wdmodel->koef = $ch->koef;
                         $wdmodel->quant = $wdmodel->quant*$ch->koef;
+                        $wdmodel->vat = $ch->vat;
 
                     }
                     

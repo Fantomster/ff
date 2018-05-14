@@ -78,8 +78,8 @@ class WaybillHelper extends AuthHelper {
     </DOC>
     </RQ>'; 
 */
-    var_dump($xml);
-    die();
+//    var_dump($xml);
+//    die();
 
 
      $res = ApiHelper::sendCurl($xml,$this->restr);

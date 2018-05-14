@@ -6,6 +6,8 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use common\models\AdditionalEmail;
+use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use common\models\Organization;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -224,79 +226,133 @@ class ClientWebApi extends WebApi
     }
 
     /**
-     * Список дополнительных емайл адресов
+     * Список уведомлений
      * @return mixed
      * @throws BadRequestHttpException
      */
-    public function additionalEmailList()
+    public function notificationList()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
             throw new BadRequestHttpException('This method is forbidden for the vendor.');
         }
-
-        $emails = $this->user->organization->additionalEmail;
-
         $result = [];
-        if (!empty($emails)) {
-            $result = $emails;
+
+        $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $this->user->organization->id]);
+        if (!empty($user_phone)) {
+            $result[] = [
+                'id' => $user_phone->id,
+                'value' => $this->user->profile->phone,
+                'type' => 'user_phone',
+                'order_created' => $user_phone['order_created'],
+                'order_canceled' => $user_phone['order_canceled'],
+                'order_changed' => $user_phone['order_changed'],
+                'order_processing' => $user_phone['order_processing'],
+                'order_done' => $user_phone['order_done'],
+                'request_accept' => $user_phone['request_accept']
+            ];
+        }
+
+        $user_email = EmailNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $this->user->organization->id]);
+        if (!empty($user_email)) {
+            $result[] = [
+                'id' => $user_email->id,
+                'value' => $this->user->email,
+                'type' => 'user_email',
+                'order_created' => $user_email['order_created'],
+                'order_canceled' => $user_email['order_canceled'],
+                'order_changed' => $user_email['order_changed'],
+                'order_processing' => $user_email['order_processing'],
+                'order_done' => $user_email['order_done'],
+                'request_accept' => $user_email['request_accept'],
+            ];
+        }
+
+        $additional_emails = $this->user->organization->additionalEmail;
+        if (!empty($additional_emails)) {
+            foreach ($additional_emails as $row) {
+                $result[] = [
+                    'id' => $row['id'],
+                    'value' => $row['email'],
+                    'type' => 'additional_email',
+                    'order_created' => $row['order_created'],
+                    'order_canceled' => $row['order_canceled'],
+                    'order_changed' => $row['order_changed'],
+                    'order_processing' => $row['order_processing'],
+                    'order_done' => $row['order_done'],
+                    'request_accept' => $row['request_accept'],
+                ];
+            }
         }
 
         return $result;
     }
 
     /**
-     * Обновление дополнительного емайла
-     * @param array $post
+     * Обновление уведомления
+     * @param array $posts
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function additionalEmailUpdate(array $post)
+    public function notificationUpdate(array $posts)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
             throw new BadRequestHttpException('This method is forbidden for the vendor.');
         }
 
-        if (!isset($post['id'])) {
-            throw new BadRequestHttpException('Empty id');
-        }
+        foreach ($posts as $post) {
+            if (!isset($post['id'])) {
+                throw new BadRequestHttpException('Empty id');
+            }
 
-        $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
-        if (empty($model)) {
-            throw new BadRequestHttpException('Additional email not found.');
-        }
+            switch ($post['type']) {
+                case 'user_phone':
+                    $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $this->user->organization->id]);
+                    break;
+                case 'user_email':
+                    $model = EmailNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $this->user->organization->id]);
+                    break;
+                case 'additional_email':
+                    $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
+                    break;
+            }
 
-        $t = \Yii::$app->db->beginTransaction();
-        try {
+            if (empty($model)) {
+                throw new BadRequestHttpException('Model not found.');
+            }
 
-            $params = [
-                "order_created",
-                "order_canceled",
-                "order_changed",
-                "order_processing",
-                "order_done",
-                "request_accept"
-            ];
+            $t = \Yii::$app->db->beginTransaction();
+            try {
 
-            foreach ($params as $param) {
-                if (isset($post[$param])) {
-                    $model->$param = $post[$param];
+                $params = [
+                    "order_created",
+                    "order_canceled",
+                    "order_changed",
+                    "order_processing",
+                    "order_done",
+                    "request_accept"
+                ];
+
+                foreach ($params as $param) {
+                    if (isset($post[$param]) && in_array($post[$param], [0, 1])) {
+                        $model->$param = $post[$param];
+                    }
                 }
-            }
 
-            if (isset($post['email']) && $model->email != $post['email']) {
-                $model->email = $post['email'];
-            }
+                if (isset($post['value']) && $model instanceof AdditionalEmail) {
+                    $model->email = $post['value'];
+                }
 
-            if ($model->validate() && $model->save()) {
-                $t->commit();
-                return $model->getAttributes();
-            } else {
-                throw new ValidationException($model->getFirstErrors());
+                if ($model->validate() && $model->save()) {
+                    $t->commit();
+                    return $this->notificationList();
+                } else {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+            } catch (\Exception $e) {
+                $t->rollBack();
+                throw $e;
             }
-        } catch (\Exception $e) {
-            $t->rollBack();
-            throw $e;
         }
     }
 

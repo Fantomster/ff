@@ -241,6 +241,15 @@ class ChatWebApi extends WebApi
     }
 
     /**
+     * Отмечаем все сообщения прочитаными
+     * @return array
+     */
+    public function readAllMessages()
+    {
+        return ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
+    }
+
+    /**
      * @param Order $model
      * @return array
      */

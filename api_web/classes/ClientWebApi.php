@@ -311,7 +311,7 @@ class ClientWebApi extends WebApi
                 throw new BadRequestHttpException('Empty id');
             }
 
-            $rel = RelationUserOrganization::findOne(['user_id' => $post['id'], 'organization_id' => $this->user->organization->id]);
+            $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
 
             if (empty($rel)) {
                 throw new BadRequestHttpException('Relation not found.');

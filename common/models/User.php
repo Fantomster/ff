@@ -242,10 +242,11 @@ class User extends \amnah\yii2\user\models\User {
     }
 
     /**
-     * @return Organization
+     * @return \yii\db\ActiveQuery
      */
     public function getOrganization() {
-        return Organization::findOne($this->organization_id);
+        $organization = $this->module->model("Organization");
+        return $this->hasOne($organization::className(), ['id' => 'organization_id']);
     }
 
     public function getOrganizations() {

@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'partnership')->checkBox(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'is_ecom_integration')->checkBox(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'legal_entity')->textInput(['maxlength' => true]) ?>
     <style>#map{width:100%;height:250px;}</style>
     <?='адрес в базе: ' . $model->address;?>
@@ -309,6 +311,8 @@ function changeFields(fields, results) {
     <?= $form->field($model, 'website')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'contact_name')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'gln_code')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'about')->textarea() ?>
 

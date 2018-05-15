@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EComIntegration;
 use Yii;
+use yii\base\ExitException;
 use yii\helpers\Url;
 
 /**
@@ -459,12 +460,14 @@ class Order extends \yii\db\ActiveRecord {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
                 }
         }
-        if($this->status != self::STATUS_FORMING){
+        if($this->status != self::STATUS_FORMING && !$insert){
             $vendor = Organization::findOne(['id'=>$this->vendor_id]);
             $client = Organization::findOne(['id'=>$this->client_id]);
             if($vendor->is_ecom_integration && $client->gln_code && $vendor->gln_code){
                 $eComIntegration = new EComIntegration();
-                $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                if(!$eComIntegration->sendOrderInfo($this, $vendor, $client)){
+                    //throw new ExitException();
+                }
             }
         }
     }

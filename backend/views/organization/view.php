@@ -115,6 +115,18 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
                 'label' => 'Товары',
                 'value' => $goodsListUrl ? Html::a('Список', $goodsListUrl) : '',
             ],
+            'gln_code',
+            [
+                'attribute' => 'is_ecom_integration',
+                'label' => 'Поставщик работает через E-COM',
+                'value' => function ($data){
+                    if($data->is_ecom_integration == 1) {
+                        return 'Да';
+                    } else {
+                        return 'Нет';
+                    }
+                },
+            ],
         ],
     ])
     ?>

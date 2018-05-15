@@ -237,7 +237,9 @@ class ClientWebApi extends WebApi
         }
         $result = [];
 
-        $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $this->user->organization->id]);
+        $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+
+        $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
         if (!empty($user_phone)) {
             $result[] = [
                 'id' => $user_phone->id,
@@ -252,7 +254,7 @@ class ClientWebApi extends WebApi
             ];
         }
 
-        $user_email = EmailNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $this->user->organization->id]);
+        $user_email = EmailNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
         if (!empty($user_email)) {
             $result[] = [
                 'id' => $user_email->id,

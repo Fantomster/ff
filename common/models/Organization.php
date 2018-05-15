@@ -34,6 +34,7 @@ use common\models\guides\Guide;
  * @property bool $partnership
  * @property integer $rating
  * @property integer $allow_editing
+ * @property integer $is_allowed_for_franchisee
  * @property integer $is_work
  * @property double $lat
  * @property double $lng

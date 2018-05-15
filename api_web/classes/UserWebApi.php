@@ -484,6 +484,53 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Смена пароля пользователя
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function changePassword($post)
+    {
+        if (empty($post['password'])) {
+            throw new BadRequestHttpException('Empty password');
+        }
+
+        if (empty($post['new_password'])) {
+            throw new BadRequestHttpException('Empty new_password');
+        }
+
+        if (empty($post['new_password_confirm'])) {
+            throw new BadRequestHttpException('Empty new_password_confirm');
+        }
+
+        if (!$this->user->validatePassword($post['password'])) {
+            throw new BadRequestHttpException('Bad password');
+        }
+
+        if ($post['password'] == $post['new_password']) {
+            throw new BadRequestHttpException('You have sent the same password.');
+        }
+
+        $tr = \Yii::$app->db->beginTransaction();
+        try {
+            $this->user->scenario = 'reset';
+            $this->user->newPassword = $post['new_password'];
+            $this->user->newPasswordConfirm = $post['new_password_confirm'];
+
+            if (!$this->user->validate() || !$this->user->save()) {
+                throw new ValidationException($this->user->getFirstErrors());
+            }
+
+            $tr->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $tr->rollBack();
+            return ['result' => false];
+        }
+
+    }
+
+    /**
      * Информация о поставщике
      * @param RelationSuppRest $model
      * @return array

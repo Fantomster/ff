@@ -84,6 +84,10 @@ class ClientWebApi extends WebApi
                 $model->name = $post['name'];
             }
 
+            if (!empty($post['is_allowed_for_franchisee'])) {
+                $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
+            }
+
             if (!empty($post['address'])) {
                 if (!empty($post['address']['country'])) {
                     $model->country = $post['address']['country'];

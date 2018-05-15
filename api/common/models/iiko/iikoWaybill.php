@@ -220,6 +220,9 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('sum', $row->sum);
         }
 
+        var_dump($xml);
+        die();
+        
         return $xml->asXML();
     }
 }

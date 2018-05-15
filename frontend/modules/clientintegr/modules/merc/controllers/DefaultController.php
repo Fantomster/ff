@@ -2,13 +2,10 @@
 
 namespace frontend\modules\clientintegr\modules\merc\controllers;
 
-// use api\common\models\iiko\iikoWaybill;
-// use api\common\models\iiko\iikoWaybillData;
 use api\common\models\merc\search\mercDicSearch;
 use api\common\models\merc\mercService;
-// use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 use Yii;
-use yii\httpclient\Response;
 
 class DefaultController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -30,10 +27,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionTest() {
- /*
-        $model = iikoWaybill::findOne(7);
-        header('Content-type: text/xml');
-        echo $model->getXmlDocument();
-   */
+        $api = mercApi::getInstance();
+        $api->GetVetDocumentList();
     }
 }

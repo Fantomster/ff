@@ -23,7 +23,7 @@ class mercDicconst extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%iiko_dicconst}}';
+        return '{{%merc_dicconst}}';
     }
 
     /**
@@ -65,7 +65,7 @@ class mercDicconst extends \yii\db\ActiveRecord
      */
     public function getPconstValue()
     {
-        $pConst = iikoPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
+        $pConst = mercPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
         $res = (!empty($pConst)) ? $pConst->value : $this->def_value;
         if ($pConst == 'taxVat') {
             $res = $res / 100;
@@ -77,7 +77,7 @@ class mercDicconst extends \yii\db\ActiveRecord
     {
         $model = self::findOne(['denom' => $denom]);
         if ($model) {
-            $pConst = iikoPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+            $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
             if (!empty($pConst)) {
                 return $pConst->value;
             } else {

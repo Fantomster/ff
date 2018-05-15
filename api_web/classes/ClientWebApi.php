@@ -239,6 +239,10 @@ class ClientWebApi extends WebApi
 
         $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
 
+        if (empty($rel)) {
+            throw new BadRequestHttpException('Relation not found.');
+        }
+
         $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
         if (!empty($user_phone)) {
             $result[] = [
@@ -307,15 +311,21 @@ class ClientWebApi extends WebApi
                 throw new BadRequestHttpException('Empty id');
             }
 
+            $rel = RelationUserOrganization::findOne(['user_id' => $post['id'], 'organization_id' => $this->user->organization->id]);
+
+            if (empty($rel)) {
+                throw new BadRequestHttpException('Relation not found.');
+            }
+
             switch ($post['type']) {
                 case 'user_phone':
-                    $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $this->user->organization->id]);
+                    $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
                     break;
                 case 'user_email':
-                    $model = EmailNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $this->user->organization->id]);
+                    $model = EmailNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
                     break;
                 case 'additional_email':
-                    $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
+                    $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $rel->organization_id]);
                     break;
             }
 

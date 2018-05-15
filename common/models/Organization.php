@@ -120,7 +120,7 @@ class Organization extends \yii\db\ActiveRecord
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership', 'inn'], 'safe'],
             [['name', 'inn', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
-            [['gln_code'], 'string', 'max' => 50],
+            [['gln_code'], 'string', 'min' => 13, 'max' => 17],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],

@@ -200,10 +200,10 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $records = iikoWaybillData::findAll(['waybill_id' => $model->id]);
         $vatPercent = 0;
         $discount = 0;
-        $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-        if($vatModel) {
-            $vatPercent = $vatModel->getPconstValue() / 100;
-        }
+      //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
+      //  if($vatModel) {
+      //      $vatPercent = $vatModel->getPconstValue() / 100;
+      //  }
         
         foreach ($records as $i => $row) {
             $item = $items->addChild('item');
@@ -213,7 +213,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('containerId');
             $item->addChild('store', $model->store->uuid);
             $item->addChild('amountUnit', $row->munit);
-            $item->addChild('vatPercent', $vatPercent);
+            $item->addChild('ndsPercent', ($row->vat)/100);
             $item->addChild('amount', $row->quant);
             $item->addChild('price', round($row->sum/$row->quant, 2));
             $item->addChild('discountSum', $discount);

@@ -207,22 +207,24 @@ class iikoWaybill extends \yii\db\ActiveRecord
         
         foreach ($records as $i => $row) {
             $item = $items->addChild('item');
-            $item->addChild('isAdditionalExpense', false);
-            $item->addChild('num', (++$i));
-            $item->addChild('product', $row->product->uuid);
-            $item->addChild('containerId');
-            $item->addChild('store', $model->store->uuid);
-            $item->addChild('amountUnit', $row->munit);
-            $item->addChild('ndsPercent', ($row->vat)/100);
+
             $item->addChild('amount', $row->quant);
-            $item->addChild('price', round($row->sum/$row->quant, 2));
+            $item->addChild('product', $row->product->uuid);
+            $item->addChild('num', (++$i));
+            $item->addChild('containerId');
+            $item->addChild('amountUnit', $row->munit);
             $item->addChild('discountSum', $discount);
+            $item->addChild('ndsPercent', '18');
             $item->addChild('sum', $row->sum);
+            $item->addChild('price', round($row->sum/$row->quant, 2));
+            $item->addChild('isAdditionalExpense', false);
+            $item->addChild('store', $model->store->uuid);
+
         }
 
-        var_dump($xml);
-        die();
-        
+//        var_dump($xml);
+//        die();
+
         return $xml->asXML();
     }
 }

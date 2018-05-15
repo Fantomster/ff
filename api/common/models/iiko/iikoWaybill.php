@@ -213,7 +213,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('containerId');
             $item->addChild('store', $model->store->uuid);
             $item->addChild('amountUnit', $row->munit);
-            $item->addChild('vatPercent', $row->vat/100);
+            $item->addChild('ndsPercent', ($row->vat)/100);
             $item->addChild('amount', $row->quant);
             $item->addChild('price', round($row->sum/$row->quant, 2));
             $item->addChild('discountSum', $discount);

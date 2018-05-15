@@ -2,6 +2,8 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use common\models\CatalogBaseGoods;
+use common\models\OrderContent;
 use Yii;
 use yii\web\Controller;
 use api\common\models\RkWaybill;
@@ -158,8 +160,41 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             ]);
         }
     }
-    
-    public function actionChangevat() {
+
+    public function actionGetpopover()
+    {
+
+        $id = Yii::$app->request->post('key');
+
+        $goodCount = OrderContent::find()->andWhere('order_id = :id',['id' => $id])->count('*');
+
+        $listIds = OrderContent::find()->select('product_id')->andWhere('order_id = :id',['id' => $id])->limit(10)->asArray()->all();
+
+        foreach ($listIds as $ids ) {
+            foreach($ids as $key => $value) {
+                $fList[]  = $value;
+            }
+        }
+
+        $listGoods = CatalogBaseGoods::find()->select('product')->andWhere(['IN', 'id', $fList])->asArray()->all();
+
+        $result ="";
+        $ind = 1;
+
+        foreach ($listGoods as $ids ) {
+            foreach($ids as $key => $value) {
+              //  $result  .= $ind++.')&nbsp;'.str_replace(' ', '&nbsp;',$value)."<br>";
+                  $result  .= $ind++.')&nbsp;'.$value."<br>";
+            }
+        }
+
+        if ($goodCount > 10)
+            $result  .= "и другие...";
+        return $result;
+
+    }
+
+        public function actionChangevat() {
         
       $checked = Yii::$app->request->post('key');
       
@@ -423,5 +458,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     return $eDate->updated_at;
 
     }
+
+
 
 }

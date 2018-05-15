@@ -34,11 +34,11 @@ class WaybillHelper extends AuthHelper {
     $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
 
     $exportApproved        = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
-    $useAutoVAT            = (RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() : 1;
-    $exportVAT             = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 0;
-    $exportAutoNumber      = RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue();
+    // $useAutoVAT            = (RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useTaxVat'])->getPconstValue() : 1;
+    // $exportVAT             = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 0;
+    // $exportAutoNumber      = RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue();
 
-    $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';
+    $autoNumber = 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ';
 
 
     $xml = '<?xml version="1.0" encoding="utf-8"?>
@@ -59,7 +59,7 @@ class WaybillHelper extends AuthHelper {
     foreach($recs as $rec) {
        
        // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
-       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.(($useAutoVAT == 1) ? ($exportVAT*100) : ($rec['vat'])).'" />'.PHP_EOL;
+       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.($rec['vat']).'" />'.PHP_EOL;
 
     }
    
@@ -77,11 +77,10 @@ class WaybillHelper extends AuthHelper {
     <ITEM rid="3" quant="12345" mu="1" sum="1290000" vatrate="1800" />
     </DOC>
     </RQ>'; 
-    
-    var_dump($xml2);
-    exit;
-     * 
-     */
+*/
+//    var_dump($xml);
+//    die();
+
 
      $res = ApiHelper::sendCurl($xml,$this->restr);
      

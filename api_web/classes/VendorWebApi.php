@@ -87,6 +87,15 @@ class VendorWebApi extends \api_web\components\WebApi
                     }
                     $profile->save();
                     $organization->name = $org;
+
+                    if (!empty($post['user']['inn'])) {
+                        $organization->inn = $post['user']['inn'];
+                    }
+
+                    if (!empty($post['user']['contact_name'])) {
+                        $organization->contact_name = $post['user']['contact_name'];
+                    }
+
                     if (!$organization->validate()) {
                         throw new ValidationException($organization->getFirstErrors());
                     }
@@ -258,6 +267,14 @@ class VendorWebApi extends \api_web\components\WebApi
 
             if (!empty($post['name'])) {
                 $model->name = $post['name'];
+            }
+
+            if (!empty($post['inn'])) {
+                $model->inn = $post['inn'];
+            }
+
+            if (!empty($post['contact_name'])) {
+                $model->contact_name = $post['contact_name'];
             }
 
             if (!empty($post['address'])) {

@@ -97,7 +97,8 @@ class UserWebApi extends \api_web\components\WebApi
         if (!$user->validate()) {
             throw new ValidationException($user->getFirstErrors());
         }
-        $user->setRegisterAttributes($role_id)->save();
+        $user->setRegisterAttributes($role_id);
+        $user->save();
         return $user;
     }
 
@@ -285,6 +286,13 @@ class UserWebApi extends \api_web\components\WebApi
             if (isset($addWhere)) {
                 $dataProvider->query->andFilterWhere($addWhere);
             }
+        }
+
+        /**
+         * Поиск по наименованию
+         */
+        if (isset($post['search']['name'])) {
+            $dataProvider->query->andFilterWhere(['like', 'u.vendor_name', $post['search']['name']]);
         }
 
         //Поиск по адресу

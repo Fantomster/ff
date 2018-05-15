@@ -203,8 +203,8 @@ class UserController extends WebApiController
     /**
      * @SWG\Post(path="/user/set-organization",
      *     tags={"User"},
-     *     summary="Переключение текщей организации пользователя",
-     *     description="Переключение текщей организации пользователя",
+     *     summary="Переключение текущей организации пользователя",
+     *     description="Переключение текущей организации пользователя",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -382,6 +382,7 @@ class UserController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "location":"Россия:Москва",
+     *                                   "name":"поставщик",
      *                                   "status":1
      *                               },
      *                               "pagination":{

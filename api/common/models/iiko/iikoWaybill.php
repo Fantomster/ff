@@ -114,6 +114,8 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
+                $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+
                 foreach ($records as $record) {
                     $wdmodel = new iikoWaybillData();
                     $wdmodel->waybill_id = $this->id;
@@ -122,7 +124,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
                     $wdmodel->sum = round($record->price * $record->quantity, 2);
                     $wdmodel->defquant = $record->quantity;
                     $wdmodel->defsum = round($record->price * $record->quantity, 2);
-                    $wdmodel->vat = 1800;
+                    $wdmodel->vat = $taxVat;
                     $wdmodel->org = $this->org;
                     $wdmodel->koef = 1;
                     // Check previous
@@ -130,10 +132,13 @@ class iikoWaybill extends \yii\db\ActiveRecord
                         ->andWhere('product_id = :prod', ['prod' => $wdmodel->product_id])
                         ->andWhere('org = :org', ['org' => $wdmodel->org])
                         ->andWhere('product_rid is not null')
+                        ->orderBy(['linked_at' => SORT_DESC])
                         ->one();
                     if ($ch) {
                         $wdmodel->product_rid = $ch->product_rid;
                         $wdmodel->munit = $ch->munit;
+                        $wdmodel->koef = $ch->koef;
+                        $wdmodel->vat = $ch->vat;
                     }
                     if (!$wdmodel->save()) {
                         var_dump($wdmodel->getErrors());

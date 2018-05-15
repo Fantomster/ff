@@ -246,7 +246,6 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getOrganization() {
         $organization = $this->module->model("Organization");
-
         return $this->hasOne($organization::className(), ['id' => 'organization_id']);
     }
 

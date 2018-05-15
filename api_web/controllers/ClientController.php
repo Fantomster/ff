@@ -296,7 +296,6 @@ class ClientController extends WebApiController
      *                  property="request",
      *                  default={{
      *                      "id": 2,
-     *                      "value": "email@email.ru",
      *                      "type": "additional_email",
      *                      "order_created": 1,
      *                      "order_canceled": 1,

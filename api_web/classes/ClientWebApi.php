@@ -351,10 +351,6 @@ class ClientWebApi extends WebApi
                     }
                 }
 
-                if (isset($post['value']) && $model instanceof AdditionalEmail) {
-                    $model->email = $post['value'];
-                }
-
                 if ($model->validate() && $model->save()) {
                     $t->commit();
                     return $this->notificationList();

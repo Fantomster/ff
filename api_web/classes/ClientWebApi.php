@@ -121,9 +121,6 @@ class ClientWebApi extends WebApi
                 $model->formatted_address = $model->address;
             }
 
-            if (empty($model->gln_code)) {
-                $model->gln_code = null;
-            }
 
             if (!$model->validate() || !$model->save()) {
                 throw new ValidationException($model->getFirstErrors());

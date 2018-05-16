@@ -405,7 +405,7 @@ GridView::widget([
 ]);
 ?> 
                         <?= Html::a('Вернуться',
-            ['index'],
+            ['index','way'=>$wmodel->order_id],
             ['class' => 'btn btn-success btn-export']);
         ?>
                     </div>
@@ -450,3 +450,4 @@ $js = "
 $this->registerJs($js);  
 */
 ?>
+

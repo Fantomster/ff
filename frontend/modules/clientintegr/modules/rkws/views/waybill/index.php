@@ -68,6 +68,7 @@ $this->registerCss("
     ])
     ?>
 </section>
+
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     ЗАВЕРШЕННЫЕ ЗАКАЗЫ
@@ -150,10 +151,16 @@ $this->registerCss("
                                         'dataProvider' => $dataProvider,
                                         'pjax' => true, // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+                                          'pjaxSettings' => ['options' => ['id' => 'waybill_grid1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                     //    'filterModel' => $searchModel,
                                         'columns' => [
-                                                'id',
+                                                [
+                                                    'attribute' => 'id',
+                                                    'contentOptions' => function($data) {
+                                                        return ["id" => "way".$data->id];
+                                                    }
+                                                ],
                                                 [
                                                     'attribute' => 'vendor.name',
                                                     'value' => 'vendor.name',
@@ -229,7 +236,10 @@ $this->registerCss("
                                                 [
                                                     'class'=>'kartik\grid\ExpandRowColumn',
                                                     'width'=>'50px',
-                                                    'value'=>function ($model, $key, $index, $column) {
+                                                    'value'=>function ($model, $key, $index, $column) use ($way) {
+                                                                if ($model->id == $way) {
+                                                                    return GridView::ROW_EXPANDED;
+                                                                }
                                                                 return GridView::ROW_COLLAPSED;
                                                              },
                                                     'detail'=>function ($model, $key, $index, $column) {
@@ -269,7 +279,7 @@ $this->registerCss("
 
                 </div>
             </div>
-        <?php Pjax::end() ?>
+       <?php Pjax::end() ?>
     </div>            
 </section>
 <?php
@@ -383,6 +393,19 @@ $('.ajax-popover').click(function() {
 
 })
 SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>
+
+<?php
+$js = <<< JS
+$(document).ready(function () {
+    $('html, body').animate({
+      scrollTop: $("#way$way").offset().top
+    }, 1000);
+    jQuery('#w2').dropdown();
+});    
+JS;
 // Register tooltip/popover initialization javascript
 $this->registerJs($js,View::POS_END);
 ?>

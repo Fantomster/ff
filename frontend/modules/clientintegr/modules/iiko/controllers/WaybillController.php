@@ -71,6 +71,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
+        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
         $lic = iikoService::getLicense();
@@ -79,6 +81,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
+            'way' => $way,
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -266,7 +269,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }
-            return $this->redirect(['index']);
+            return $this->redirect(['index','way'=>$model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -297,7 +300,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }
-            return $this->redirect(['index']);
+            return $this->redirect(['index','way'=>$model->order_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,

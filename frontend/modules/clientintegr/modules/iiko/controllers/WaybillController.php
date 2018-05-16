@@ -79,7 +79,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
 
-        $dataProvider->pagination->pageSize=3;
+       // $dataProvider->pagination->pageSize=3;
 
         $lic = iikoService::getLicense();
         $view = $lic ? 'index' : '/default/_nolic';

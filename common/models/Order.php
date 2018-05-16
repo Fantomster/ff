@@ -466,7 +466,7 @@ class Order extends \yii\db\ActiveRecord {
             if($vendor->is_ecom_integration && $client->gln_code && $vendor->gln_code){
                 $eComIntegration = new EComIntegration();
                 if(!$eComIntegration->sendOrderInfo($this, $vendor, $client)){
-                    //throw new ExitException();
+                    throw new ExitException();
                 }
             }
         }

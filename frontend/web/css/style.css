@@ -1601,13 +1601,12 @@ ul.own-mnu {
   z-index: 1000; }
 
 /* callback */
-.callback {
-  .modal_title {
+.callback .modal_title {
     font-size: 24px;
     display: block;
     margin-bottom: 20px;
     margin-top: 15px;
-    text-align: left; } }
+    text-align: left; }
 
 /* modalWindowWrap */
 .modalWindowWrap {

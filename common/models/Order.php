@@ -463,7 +463,7 @@ class Order extends \yii\db\ActiveRecord {
         if($this->status != self::STATUS_FORMING && !$insert){
             $vendor = Organization::findOne(['id'=>$this->vendor_id]);
             $client = Organization::findOne(['id'=>$this->client_id]);
-            if($vendor->is_ecom_integration && $client->gln_code && $vendor->gln_code){
+            if($client->gln_code && $vendor->gln_code){
                 $eComIntegration = new EComIntegration();
                 if(!$eComIntegration->sendOrderInfo($this, $vendor, $client)){
                     throw new ExitException();

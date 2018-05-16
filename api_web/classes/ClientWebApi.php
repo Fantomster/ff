@@ -84,6 +84,10 @@ class ClientWebApi extends WebApi
                 $model->name = $post['name'];
             }
 
+            if (isset($post['is_allowed_for_franchisee']) && in_array($post['is_allowed_for_franchisee'], [0, 1, true, false])) {
+                $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
+            }
+
             if (!empty($post['address'])) {
                 if (!empty($post['address']['country'])) {
                     $model->country = $post['address']['country'];
@@ -116,6 +120,7 @@ class ClientWebApi extends WebApi
                 $model->address = implode(', ', $post['address']);
                 $model->formatted_address = $model->address;
             }
+
 
             if (!$model->validate() || !$model->save()) {
                 throw new ValidationException($model->getFirstErrors());

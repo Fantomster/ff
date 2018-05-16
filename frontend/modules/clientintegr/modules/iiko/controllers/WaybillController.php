@@ -358,7 +358,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($waybill_id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->id]);
     }
@@ -369,7 +369,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findDataModel($id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
 

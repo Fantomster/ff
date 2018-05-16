@@ -85,6 +85,12 @@ class Organization
      */
     public $about;
 
+    /**
+     * @SWG\Property(@SWG\Xml(name="is_allowed_for_franchisee"), example=1)
+     * @var integer
+     */
+    public $is_allowed_for_franchisee;
+
 }
 
 

@@ -44,7 +44,12 @@ $this->title = 'Интеграция с iiko Office';
                             'pjax' => true,
                             'filterPosition' => false,
                             'columns' => [
-                                'id',
+                                [
+                                    'attribute' => 'id',
+                                    'contentOptions' => function($data) {
+                                        return ["id" => "way".$data->id];
+                                    }
+                                ],
                                 [
                                     'attribute' => 'vendor.name',
                                     'value' => 'vendor.name',
@@ -100,7 +105,10 @@ $this->title = 'Интеграция с iiko Office';
                                 [
                                     'class' => 'kartik\grid\ExpandRowColumn',
                                     'width' => '50px',
-                                    'value' => function ($model, $key, $index, $column) {
+                                    'value'=>function ($model, $key, $index, $column) use ($way) {
+                                        if ($model->id == $way) {
+                                            return GridView::ROW_EXPANDED;
+                                        }
                                         return GridView::ROW_COLLAPSED;
                                     },
                                     'detail' => function ($model, $key, $index, $column) {
@@ -295,6 +303,19 @@ $('.ajax-popover').click(function() {
 
 })
 SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>
+
+<?php
+$js = <<< JS
+$(document).ready(function () {
+    $('html, body').animate({
+      scrollTop: $("#way$way").offset().top
+    }, 1000);
+    jQuery('#w2').dropdown();
+});    
+JS;
 // Register tooltip/popover initialization javascript
 $this->registerJs($js,View::POS_END);
 ?>

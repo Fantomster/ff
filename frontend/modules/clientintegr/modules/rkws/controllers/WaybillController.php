@@ -87,6 +87,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex() {
 
+        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+
         $searchModel = new \common\models\search\OrderSearch();
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
 
@@ -105,12 +107,14 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'way' => $way
             ]);
         } else {
             return $this->render($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'way' => $way,
             ]);
         }
     }
@@ -369,7 +373,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
 
-            return $this->redirect(['index']);
+            return $this->redirect(['index','way'=>$model->order_id]);
         } else {
             return $this->render($vi, [
                         'model' => $model,
@@ -398,7 +402,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
 
-            return $this->redirect(['index']);
+            return $this->redirect(['index','way'=>$model->order_id]);
         } else {
             return $this->render('create', [
                         'model' => $model,

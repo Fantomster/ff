@@ -310,10 +310,12 @@ $this->registerJs($js,View::POS_END);
 <?php
 $js = <<< JS
 $(document).ready(function () {
-    $('html, body').animate({
-      scrollTop: $("#way$way").offset().top
-    }, 1000);
-    jQuery('#w2').dropdown();
+    if ($way > 0) {
+        $('html, body').animate({
+            scrollTop: $("#way$way").offset().top
+        }, 1000);
+       // jQuery('#w2').dropdown();
+    }
 });    
 JS;
 // Register tooltip/popover initialization javascript

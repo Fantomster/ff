@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use common\models\Organization;
 use common\models\Order;
+use yii\helpers\Url;
 
 
 // use yii\mongosoft\soapserver\Action;
@@ -88,6 +89,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionIndex() {
 
         $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+       //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+       //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+
+        Url::remember();
 
         $searchModel = new \common\models\search\OrderSearch();
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
@@ -97,6 +102,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
+
+      //  $dataProvider->pagination->pageSize=3;
         
         $lic = $this->checkLic();       
         
@@ -107,7 +114,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
-                        'way' => $way
+                        'way' => $way,
             ]);
         } else {
             return $this->render($vi, [
@@ -115,6 +122,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
                         'way' => $way,
+
             ]);
         }
     }
@@ -361,8 +369,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionUpdate($id) {
         $model = $this->findModel($id);
-        
-        $lic = $this->checkLic();       
+
+        $lic = $this->checkLic();
         $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -373,7 +381,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
 
-            return $this->redirect(['index','way'=>$model->order_id]);
+            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render($vi, [
                         'model' => $model,
@@ -384,7 +392,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionCreate($order_id) {
         
         $ord = \common\models\Order::findOne(['id' => $order_id]);
-        
+
         if (!$ord) {
             echo "Can't find order";
             die();
@@ -402,12 +410,39 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
 
-            return $this->redirect(['index','way'=>$model->order_id]);
+            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render('create', [
                         'model' => $model,
             ]);
         }
+    }
+    public function getLastUrl() {
+
+        $lastUrl = Url::previous();
+        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+
+        $lastUrl = $this->deleteGET($lastUrl,'way');
+
+        if(!strpos($lastUrl,"?")) {
+            $lastUrl .= "?";
+        } else {
+            $lastUrl .= "&";
+        }
+        return $lastUrl;
+    }
+
+    public function deleteGET($url, $name, $amp = true) {
+        $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
+        list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
+        parse_str($qs_part, $qs_vars); // Разбиваем строку с запросом на массив с параметрами и их значениями
+        unset($qs_vars[$name]); // Удаляем необходимый параметр
+        if (count($qs_vars) > 0) { // Если есть параметры
+            $url = $url_part."?".http_build_query($qs_vars); // Собираем URL обратно
+            if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
+        }
+        else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
+        return $url; // Возвращаем итоговый URL
     }
 
     public function actionSendws($waybill_id) {
@@ -462,7 +497,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     return $eDate->updated_at;
 
     }
-
 
 
 }

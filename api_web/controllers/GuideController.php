@@ -437,90 +437,6 @@ class GuideController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/guide/add-product-to-guide",
-     *     tags={"Guide"},
-     *     summary="Добавить продукт в шаблон",
-     *     description="Добавить продукт в шаблон",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                      "guide_id": 1,
-     *                      "product_ids": {1, 2, 3}
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                   "success": 3,
-     *                   "error": 0
-     *               }
-     *          ),
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException||ValidationException"
-     *     )
-     * )
-     */
-    public function actionAddProductToGuide()
-    {
-        $this->response = $this->container->get('GuideWebApi')->addProductToGuide($this->request);
-    }
-
-    /**
-     * @SWG\Post(path="/guide/remove-product-from-guide",
-     *     tags={"Guide"},
-     *     summary="Удалить продукт из шаблона",
-     *     description="Удалить продукт из шаблона",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                      "guide_id": 1,
-     *                      "product_ids": {1, 2, 3}
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                   "success": 3,
-     *                   "error": 0
-     *              }
-     *          ),
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException||ValidationException"
-     *     )
-     * )
-     */
-    public function actionRemoveProductFromGuide()
-    {
-        $this->response = $this->container->get('GuideWebApi')->removeProductFromGuide($this->request);
-    }
-
-    /**
      * @SWG\Post(path="/guide/add-to-cart",
      *     tags={"Guide"},
      *     summary="Добавить шаблон в корзину",
@@ -607,5 +523,61 @@ class GuideController extends WebApiController
     public function actionAddToCart()
     {
         $this->response = $this->container->get('GuideWebApi')->addToCart($this->request);
+    }
+
+
+    /**
+     * @SWG\Post(path="/guide/action-product",
+     *     tags={"Guide"},
+     *     summary="Добавить/Удалить продукт из шаблона",
+     *     description="Добавить/Удалить продукт из шаблона",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guide_id": 1,
+     *                      "products": {
+     *                          {
+     *                              "operation": "add",
+     *                              "product_id": 1
+     *                          },
+     *                          {
+     *                              "operation": "del",
+     *                              "product_id": 31
+     *                          },
+     *                          {
+     *                              "operation": "add",
+     *                              "product_id": 2
+     *                          }
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                   "success": 3,
+     *                   "error": 0
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionActionProduct()
+    {
+        $this->response = $this->container->get('GuideWebApi')->actionProductFromGuide($this->request);
     }
 }

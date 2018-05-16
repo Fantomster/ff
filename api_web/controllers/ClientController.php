@@ -90,6 +90,7 @@ class ClientController extends WebApiController
      *                             "phone": "+79182225588",
      *                             "email":"test@test.ru",
      *                             "about": "Вот контора так контора",
+     *                             "is_allowed_for_franchisee": 1,
      *                             "address": {
      *                                  "country":"Россия",
      *                                  "region": "Московская область",
@@ -107,28 +108,7 @@ class ClientController extends WebApiController
      *     @SWG\Response(
      *         response = 200,
      *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                          "id": 1,
-     *                          "name": "Космическая пятница",
-     *                          "legal_entity": "ООО 'Космическая пятница'",
-     *                          "contact_name": "Космический Чел",
-     *                          "phone": "+7 9279279279",
-     *                          "email": "investor@f-keeper.ru",
-     *                          "site": "mixcart.ru",
-     *                          "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
-     *                          "type_id": 1,
-     *                          "type": "Ресторан",
-     *                          "rating": 0,
-     *                          "house": "50А",
-     *                          "route": "Бакалейная улица",
-     *                          "city": "Казань",
-     *                          "administrative_area_level_1": "Республика Татарстан",
-     *                          "country": "Россия",
-     *                          "about": "Вот контора так контора"
-     *             }
-     *          ),
+     *         @SWG\Schema(ref="#/definitions/Organization"),
      *     ),
      *     @SWG\Response(
      *         response = 400,

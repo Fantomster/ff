@@ -476,7 +476,11 @@ class GuideWebApi extends \api_web\components\WebApi
             $result['messages'][] = $e->getMessage();
         }
 
-        \Yii::$app->response->setStatusCode(200);
+        $result['e'][] = \Yii::$app->response->getStatusCode();
+        $result['e'][] = \Yii::$app->response->getIsServerError();
+        $result['e'][] = \Yii::$app->response->getHeaders();
+        $result['e'][] = \Yii::$app->response->statusText;
+
         return $result;
     }
 

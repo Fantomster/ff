@@ -51,7 +51,6 @@ Breadcrumbs::widget([
 <section class="content-header">
 <?= $this->render('/default/_menu.php'); ?>
 
-
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
 </section>
 <section class="content">
@@ -405,7 +404,7 @@ GridView::widget([
 ]);
 ?> 
                         <?= Html::a('Вернуться',
-            ['index','way'=>$wmodel->order_id],
+            [$this->context->getLastUrl().'way='.$wmodel->order_id],
             ['class' => 'btn btn-success btn-export']);
         ?>
                     </div>

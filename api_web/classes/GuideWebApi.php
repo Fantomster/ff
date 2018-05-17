@@ -450,7 +450,7 @@ class GuideWebApi extends \api_web\components\WebApi
         ];
 
         try {
-            foreach ($params['products'] as $product) {
+            foreach ($params['products'] as &$product) {
 
                 if (!in_array($product['operation'], ['add', 'del'])) {
                     throw new BadRequestHttpException("Operation not found " . $product['operation']);
@@ -471,15 +471,15 @@ class GuideWebApi extends \api_web\components\WebApi
 
                 $result['success']++;
             }
+
+            $guide = Guide::findOne($params['guide_id']);
+            $guide->updated_at = new Expression('NOW()');
+            $guide->save();
+
         } catch (\Exception $e) {
             $result['error']++;
             $result['messages'][] = $e->getMessage();
         }
-
-        $result['e'][] = \Yii::$app->response->getStatusCode();
-        $result['e'][] = \Yii::$app->response->getIsServerError();
-        $result['e'][] = \Yii::$app->response->getHeaders();
-        $result['e'][] = \Yii::$app->response->statusText;
 
         return $result;
     }
@@ -542,9 +542,6 @@ class GuideWebApi extends \api_web\components\WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $this->addProduct($guide_id, $pid);
-            $guide = Guide::findOne($guide_id);
-            $guide->updated_at = new Expression('NOW()');
-            $guide->save();
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -561,8 +558,6 @@ class GuideWebApi extends \api_web\components\WebApi
                 $product = $model->getGuideProducts()->where(['cbg_id' => $pid])->one();
                 if ($product) {
                     if ($product->delete()) {
-                        $model->updated_at = new Expression('NOW()');
-                        $model->save();
                         $transaction->commit();
                     } else {
                         throw new ValidationException($product->getFirstErrors());

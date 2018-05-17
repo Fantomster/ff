@@ -64,13 +64,14 @@ use api\common\models\RkAccess;
                         </div>
                     </div>
                 </div>
-                <div class="hpanel" style="display:none">
+                <div class="hpanel" >
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">Email ТОРГ-12</h4>', ['email/default']) ?>
-                            <p class="small">Интеграция Email ТОРГ-12</p>
+                            <?= Html::a('<h4 class="m-b-xs text-info">Накладные поставщика</h4>', ['email/default']) ?>
+                            <p class="small">Загрузка накладных из 1С с помощью EMAIL</p>
                         </div>
                         <div class="col-md-6 text-right">
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
                         </div>
                     </div>
                 </div>

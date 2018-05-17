@@ -20,11 +20,11 @@ class initiator extends BaseRequest
     public function getXML()
     {
             $xml = '<merc:initiator>'.PHP_EOL;
-            if (isset($thist->initiator->UUID))
-                $xml .= '<com:UUID>' . $this->initiator->UUID . '</com:UUID>'.PHP_EOL;
+            if (isset($thist->UUID))
+                $xml .= '<com:UUID>' . $this->UUID . '</com:UUID>'.PHP_EOL;
 
-            if (isset($this->initiator->login))
-                $xml .= '<com:login>' . $this->initiator->login . '</com:login>'.PHP_EOL;
+            if (isset($this->login))
+                $xml .= '<com:login>' . $this->login . '</com:login>'.PHP_EOL;
 
             $xml .= '</merc:initiator>'.PHP_EOL;
         return $xml;

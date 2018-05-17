@@ -67,7 +67,6 @@ class getVetDocumentListRequest extends BaseRequest
         $this->initiator = new initiator();
         $this->initiator->login = $login;
         $this->soap_namespaces[] = $this->initiator->soap_namespaces;
-
     }
 
     public function setEnterpriseGuid($GUID)

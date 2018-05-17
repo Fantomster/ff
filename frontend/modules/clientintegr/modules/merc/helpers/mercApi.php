@@ -92,7 +92,7 @@ class mercApi
             $application = new application();
             $application->serviceId = $this->service_id;
             $application->issuerId = $this->issuerID;
-            $application->issueDate = time();
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
 
             //Проставляем id запроса
             $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
@@ -104,12 +104,9 @@ class mercApi
             $vetDoc->setInitiator($this->vetisLogin);
             $application->addData($vetDoc);
             $request->setApplication($application);
-
-            echo htmlentities($request->getXML());
-
+            
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), self::Endpoint_URL, 'submitApplicationRequest', SOAP_1_1);
-            var_dump(2);
 
             $result = $this->parseResponse($response);
 
@@ -118,23 +115,19 @@ class mercApi
                 die();
             }
 
-
-            var_dump($result);
-            //$result = $client->submitApplicationRequest($request);
-
+            //timeout перед запросом результата
+            sleep(2);
             //Получаем результат запроса
-            $result = $this->getReceiveApplicationResult($result->application->applicationId);
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
 
 
         }catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
         }
-
-        echo "Запрос:\n" . htmlentities($client->__getLastRequest()) . "\n";
-        echo "Ответ:\n" . htmlentities($client->__getLastResponse()) . "\n";
         return $result;
     }
 
@@ -145,7 +138,7 @@ class mercApi
         $request->apiKey = $this->apiKey;
         $request->issuerId = $this->issuerID;
         $request->applicationId = $applicationId;
-
+var_dump(htmlentities($request->getXML()));
         return $client->__doRequest($request->getXML(), self::Endpoint_URL, 'receiveApplicationResultRequest', SOAP_1_1);
         //return $client->receiveApplicationResult($request);
     }
@@ -154,16 +147,18 @@ class mercApi
     {
         //Пишем лог
         $log = new mercLog();
-        $log->applicationId = $response->application->applicationId;
-        $log->status = $response->application->status;
+        $log->applicationId = $response->application->applicationId->__toString();
+        $log->status = $response->application->status->__toString();
         $log->action = $method;
         $log->localTransactionId =  $localTransactionId;
+        var_dump("STATUS", $log->status);
         if($log->status == mercLog::REJECTED) {
             var_dump($response);
             $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
         }
 
-        $log->save();
+        if (!$log->save())
+            var_dump($log->getErrors());
     }
 
 }

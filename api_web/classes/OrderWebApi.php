@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
@@ -91,6 +92,187 @@ class OrderWebApi extends \api_web\components\WebApi
      * }
      * }
      */
+
+
+    /**
+     * Редактирование заказа
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function update($post)
+    {
+        WebApiHelper::clearRequest($post);
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty order_id');
+        }
+        //Поиск заказа
+        $order = Order::findOne($post['order_id']);
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+        }
+        //Проверим статус заказа
+        if (in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
+            throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
+        }
+        //Если сменили комментарий
+        if (!empty($post['comment'])) {
+            $order->comment = trim($post['comment']);
+        }
+        //Если поменяли скидку
+        if (!empty($post['discount'])) {
+            if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
+                throw new BadRequestHttpException("Discount type FIXED or PERCENT");
+            }
+            if (empty($post['discount']['amount'])) {
+                throw new BadRequestHttpException("Discount amount empty");
+            }
+            $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+            $order->discount = $post['discount']['amount'];
+        }
+
+        $tr = \Yii::$app->db->beginTransaction();
+        try {
+            //Тут операции с продуктами в этом заказе
+            if (!empty($post['products']) && is_array($post['products'])) {
+                foreach ($post['products'] as $product) {
+                    $operation = strtolower($product['operation']);
+                    if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
+                        throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+                    }
+                    switch ($operation) {
+                        case 'delete':
+                            $this->deleteProduct($order, $product['id']);
+                            break;
+                        case 'add':
+                            $this->addProduct($order, $product);
+                            break;
+                        case 'edit':
+                            $this->editProduct($order, $product);
+                            break;
+                    }
+                }
+            } else {
+                throw new BadRequestHttpException("products not array");
+            }
+
+            $order->calculateTotalPrice();
+
+            if (!$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            $tr->commit();
+            return $this->getInfo(['order_id' => $order->id]);
+        } catch (\Exception $e) {
+            $tr->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Редактирвание продукта в заказе
+     * @param Order $order
+     * @param array $product
+     * @return bool
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    private function editProduct(Order $order, array $product)
+    {
+        if (empty($product['id'])) {
+            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+        }
+
+        /**
+         * @var $orderContent OrderContent
+         */
+        $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+        if (empty($orderContent)) {
+            throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
+        }
+
+        if (!empty($product['quantity'])) {
+            $orderContent->quantity = $product['quantity'];
+        }
+
+        if (!empty($product['comment'])) {
+            $orderContent->comment = $product['comment'];
+        }
+
+        if (!empty($product['price'])) {
+            $orderContent->price = $product['price'];
+        }
+
+        if ($orderContent->validate() && $orderContent->save()) {
+            return true;
+        } else {
+            throw new ValidationException($orderContent->getFirstErrors());
+        }
+    }
+
+    /**
+     * Удаление продукта из заказа
+     * @param Order $order
+     * @param int $id
+     * @throws BadRequestHttpException
+     */
+    private function deleteProduct(Order $order, int $id)
+    {
+        if (empty($id)) {
+            throw new BadRequestHttpException("DELETE CANCELED product id empty");
+        }
+
+        $orderContentRow = $order->getOrderContent()->where(['product_id' => $id])->one();
+
+        if (empty($orderContentRow)) {
+            throw new BadRequestHttpException("DELETE CANCELED not found product: " . $id);
+        }
+
+        $orderContentRow->delete();
+    }
+
+    /**
+     * Добавление продукта в заказ
+     * @param Order $order
+     * @param array $product
+     * @return bool
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    private function addProduct(Order $order, array $product)
+    {
+        if (empty($product['id'])) {
+            throw new BadRequestHttpException("ADD CANCELED product id empty");
+        }
+
+        $orderContentRow = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+
+        if (empty($orderContentRow)) {
+            $productModel = (new Product())->findFromCatalogs($product['id'], $this->user->organization->getCatalogs());
+            if (!in_array($productModel['supp_org_id'], [$order->vendor->id])) {
+                throw new BadRequestHttpException("В этот заказ можно добавлять только товары поставщика: " . $order->vendor->name);
+            }
+
+            $orderContent = new OrderContent();
+            $orderContent->order_id = $order->id;
+            $orderContent->product_id = $productModel['id'];
+            $orderContent->quantity = (new CartWebApi())->recalculationQuantity($productModel, $product['quantity'] ?? 1);
+            $orderContent->comment = $product['comment'] ?? '';
+            $orderContent->price = $productModel['price'];
+            $orderContent->initial_quantity = $orderContent->quantity;
+            $orderContent->product_name = $productModel['product'];
+            $orderContent->units = $productModel['units'];
+            $orderContent->article = $productModel['article'];
+            if ($orderContent->validate() && $orderContent->save()) {
+                return true;
+            } else {
+                throw new ValidationException($orderContent->getFirstErrors());
+            }
+        } else {
+            throw new BadRequestHttpException("ADD CANCELED the product is already in the order: " . $product['id']);
+        }
+    }
 
     /**
      * Оставляем комментарий к заказу
@@ -193,7 +375,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение комментария к заказу");
+            throw new BadRequestHttpException("У вас нет прав для просмотра этого заказа.");
         }
 
         $result = $order->attributes;

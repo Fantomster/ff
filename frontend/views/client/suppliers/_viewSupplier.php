@@ -5,7 +5,26 @@ use yii\widgets\ActiveForm;
 use common\models\Category;
 use yii\helpers\ArrayHelper;
 use kartik\checkbox\CheckboxX;
+
+$this->registerJs(
+    '$("document").ready(function(){
+            var gln = $("#organization-gln_code");
+            var value = gln.val();
+            var length = value.length;
+            if(length>0){
+                var sub = value.substr(-4);
+                var strPart = length - 4;
+                var stars = "";
+                for(var i=0; i<strPart; i++){
+                    stars+="*";
+                }
+                var completeValue = stars + sub;
+                gln.val(completeValue);
+            }   
+        });'
+);
 ?>
+
 <?php
 $form = ActiveForm::begin([
             'id' => 'supplier-form',
@@ -91,6 +110,13 @@ $form = ActiveForm::begin([
                 $form->field($organization, 'website')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-website']):
                 $form->field($organization, 'website')->textInput(['id' => 'organization-view-supplirs-website']);
             ?>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <?=
+                $form->field($organization, 'gln_code')->textInput(['disabled' => true])->label(Yii::t('message', 'GLN-код'))
+                ?>
+            </div>
         </div>
     </div>
 </div>

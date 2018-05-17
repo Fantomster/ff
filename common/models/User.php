@@ -742,16 +742,13 @@ class User extends \amnah\yii2\user\models\User {
             if ($user) {
                 EmailNotification::deleteAll(['user_id' => $userID]);
                 SmsNotification::deleteAll(['user_id' => $userID]);
-                $user_token = UserToken::findOne(['user_id' => $userID]);
-                $profile = $user->profile;
-                if ($profile) {
-                    $profile->delete();
-                }
-
-                if ($user_token) {
-                    $user_token->delete();
-                }
-                if ($user->delete()) {
+                if ($user) {
+                    $first = md5(time());
+                    $second = md5(rand(1111111, 999999999999));
+                    $email = $first . "@" . $second . ".ru";
+                    $user->email = $email;
+                    $user->organization_id = null;
+                    $user->save();
                     $transaction->commit();
                     return true;
                 }

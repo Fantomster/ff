@@ -6,6 +6,7 @@ use common\components\EComIntegration;
 use Yii;
 use yii\base\ExitException;
 use yii\helpers\Url;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "order".
@@ -469,8 +470,12 @@ class Order extends \yii\db\ActiveRecord {
                     throw new ExitException();
                 }
             }
+            if(!$client->gln_code && $vendor->gln_code){
+                throw new BadRequestHttpException(Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']));
+            }
         }
     }
+
 
     public function afterDelete()
     {

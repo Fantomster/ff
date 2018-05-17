@@ -231,13 +231,6 @@ $this->registerCss("
                                     ->checkbox()
                                 ?>
                             </div>
-<!--                            <div class="form-group">-->
-<!--                                <?//=
-//                                $form->field($organization, 'is_ecom_integration')
-//                                    ->label(Yii::t('app', 'Интеграция через E-COM'))
-//                                    ->checkbox()
-//                                ?>-->
-<!--                            </div>-->
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
@@ -319,14 +312,13 @@ $this->registerCss("
                             ?>
                         </div>
                     </div>
-<!--                    <div class="col-md-2">-->
-<!--                        <div class="form-group">-->
-<!--                            <?//=
-//                            $form->field($organization, 'gln_code')
-//                                ->label(Yii::t('message', 'GLN-код'))
-//                            ?>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <?=
+                            $form->field($organization, 'gln_code')->textInput(['disabled' => true])->label(Yii::t('message', 'GLN-код'))
+                            ?>
+                        </div>
+                    </div>
                 </div>
             </fieldset>
         </div>

@@ -18,7 +18,7 @@ use kartik\grid\GridView;
                 'label' => 'Интеграция',
                 'url' => ['/clientintegr/default'],
             ],
-            'Интеграция с iiko Office',
+            'Интеграция с системой ВЕТИС "Меркурий"',
         ],
     ])
     ?>
@@ -41,7 +41,7 @@ use kartik\grid\GridView;
             </div>
         </div>
     </div>
-    СПРАВОЧНИКИ:
+    ВСД:
 </section>
 <section class="content-header">
     <div class="box box-info">
@@ -115,6 +115,28 @@ use kartik\grid\GridView;
                                     return $data['recipient_name'];
                                 },
                             ],
+                            [
+                                'class' => 'yii\grid\ActionColumn',
+                                'contentOptions' => ['style' => 'width: 6%;'],
+                                'template' => '{view}&nbsp;&nbsp;&nbsp;{get}',
+                                'buttons' => [
+                                    'get' => function ($url, $model) {
+                                        return \yii\helpers\Html::a(
+                                            \yii\helpers\Html::tag('i', '', [
+                                                'class' => 'fa fa-download get-content-sync',
+                                                'aria-hidden' => true,
+                                                'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['UUID'] . '-get']),
+                                                'data-id' => $data['uuid']
+                                            ]),
+                                            '#',
+                                            [
+                                                'title' => Yii::t('backend', 'Загрузка'),
+                                                'data-pjax' => "0",
+                                            ]
+                                        );
+                                    },
+                                ]
+                            ]
                         ],
                     ]);
                     Pjax::end();

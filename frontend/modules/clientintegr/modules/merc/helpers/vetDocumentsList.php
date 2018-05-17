@@ -66,7 +66,7 @@ class vetDocumentsList extends Component
         die();*/
 
         $dataProvider = new ArrayDataProvider([
-            //'key' => 'uid',
+            'key' => 'UUID',
             'allModels' => $data,
             // 'sort' => $sort,
             /*'pagination' => [

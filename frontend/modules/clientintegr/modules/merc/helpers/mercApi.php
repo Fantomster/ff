@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use Yii;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
@@ -189,9 +190,9 @@ class mercApi
     }
 
     public function getBusinessEntityByUuid ($UUID)
-    {
-        $client = $this->getSoapClient('vetis');
-        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+{
+    $client = $this->getSoapClient('vetis');
+    $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
    <soapenv:Header/>
    <soapenv:Body>
@@ -200,8 +201,78 @@ class mercApi
       </v2:getBusinessEntityByUuidRequest>
    </soapenv:Body>
 </soapenv:Envelope>';
-        $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
+    $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
+    return $this->parseResponse($result);
+}
+
+    public function getEnterpriseByUuid ($UUID)
+    {
+        $client = $this->getSoapClient('vetis');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+       <v2:getEnterpriseByUuidRequest>
+         <base:uuid>'.$UUID.'</base:uuid>
+      </v2:getEnterpriseByUuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetEnterpriseByUuid', SOAP_1_1);
         return $this->parseResponse($result);
     }
+
+    public function getVetDocumentByUUID($UUID)
+    {
+        $client = $this->getSoapClient('mercury');
+        $result = null;
+
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new getVetDocumentByUUIDRequest();
+            $vetDoc->localTransactionId = $localTransactionId;
+            $vetDoc->setEnterpriseGuid('f8805c8f-1da4-4bda-aaca-a08b5d1cab1b');
+            $vetDoc->setInitiator($this->vetisLogin);
+            $vetDoc->UUID = $UUID;
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+            //Делаем запрос
+            $response = $client->__doRequest($request->getXML($UUID), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                echo "Bad request";
+                die();
+            }
+
+            //timeout перед запросом результата
+            sleep(2);
+            //Получаем результат запроса
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
+        }
+        return $result;
+    }
+
+
 
 }

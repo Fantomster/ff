@@ -63,11 +63,7 @@ return [
 
     'web' => 'https://mixcart.ru/',
     'e_com' => [
-        'host' => 'ftpex.e-vo.ru',
-        'port' => 21,
-        'timeout' => 30,
         'login' => 'markettest',
-        'password' => 'JcqWlY',
-        'directory' => 'inbox',
+        'pass' => 'e1fa52810ea9d18a5af901c147c804e6',
     ]
 ];

@@ -15,6 +15,7 @@ use api\common\models\iiko\iikoService;
 use api\common\models\iiko\iikoWaybill;
 use api\common\models\iiko\iikoWaybillData;
 use yii\web\Response;
+use yii\helpers\Url;
 
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -71,14 +72,22 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
+        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+
+        Url::remember();
+
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
+
+       // $dataProvider->pagination->pageSize=3;
+
         $lic = iikoService::getLicense();
         $view = $lic ? 'index' : '/default/_nolic';
         $params = [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
+            'way' => $way,
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -266,7 +275,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }
-            return $this->redirect(['index']);
+            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -297,7 +306,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }
-            return $this->redirect(['index']);
+            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -358,7 +367,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($waybill_id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->id]);
     }
@@ -369,10 +378,38 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findDataModel($id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
 
+    }
+
+    public function getLastUrl() {
+
+        $lastUrl = Url::previous();
+        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+
+        $lastUrl = $this->deleteGET($lastUrl,'way');
+
+        if(!strpos($lastUrl,"?")) {
+            $lastUrl .= "?";
+        } else {
+            $lastUrl .= "&";
+        }
+        return $lastUrl;
+    }
+
+    public function deleteGET($url, $name, $amp = true) {
+        $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
+        list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
+        parse_str($qs_part, $qs_vars); // Разбиваем строку с запросом на массив с параметрами и их значениями
+        unset($qs_vars[$name]); // Удаляем необходимый параметр
+        if (count($qs_vars) > 0) { // Если есть параметры
+            $url = $url_part."?".http_build_query($qs_vars); // Собираем URL обратно
+            if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
+        }
+        else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
+        return $url; // Возвращаем итоговый URL
     }
 
 

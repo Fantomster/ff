@@ -410,7 +410,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param $quantity
      * @return float
      */
-    private function recalculationQuantity($product, $quantity)
+    public function recalculationQuantity($product, $quantity)
     {
         $units = $product['units'];
 

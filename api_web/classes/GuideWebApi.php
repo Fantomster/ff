@@ -426,6 +426,56 @@ class GuideWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Агрегированая функция для работы с шаблоном
+     * @param $params
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionProductFromGuide($params)
+    {
+        if (empty($params['guide_id'])) {
+            throw new BadRequestHttpException("ERROR: Empty guide_id");
+        }
+
+        if (empty($params['products'])) {
+            throw new BadRequestHttpException("ERROR: Empty products");
+        }
+
+        $this->isMyGuide($params['guide_id']);
+
+        $result = [
+            'success' => 0,
+            'error' => 0
+        ];
+
+        try {
+            foreach ($params['products'] as $product) {
+
+                if (!in_array($product['operation'], ['add', 'del'])) {
+                    throw new BadRequestHttpException("Operation not found " . $product['operation']);
+                }
+
+                //Добавляем продукт в шаблон
+                if ($product['operation'] == 'add') {
+                    $this->operationAddProduct($params['guide_id'], $product['product_id']);
+                }
+
+                //Удаление продукта из шаблона
+                if ($product['operation'] == 'del') {
+                    $this->operationRemoveProduct($params['guide_id'], $product['product_id']);
+                }
+
+                $result['success']++;
+            }
+        } catch (\Exception $e) {
+            $result['error']++;
+            $result['messages'][] = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
      *  Операции с продуктами в шаблоне
      * @param int $guide_id
      * @param array $products
@@ -501,7 +551,7 @@ class GuideWebApi extends \api_web\components\WebApi
             if ($model) {
                 $product = $model->getGuideProducts()->where(['cbg_id' => $pid])->one();
                 if ($product) {
-                    if($product->delete()) {
+                    if ($product->delete()) {
                         $model->updated_at = new Expression('NOW()');
                         $model->save();
                         $transaction->commit();
@@ -613,6 +663,13 @@ class GuideWebApi extends \api_web\components\WebApi
         } else {
             $products_ids = $id;
         }
+
+        $guide = Guide::findOne($guide_id);
+
+        if ($guide->getProductCount() == 1000) {
+            throw new BadRequestHttpException('MAX = 1000 products.');
+        }
+
         /**
          * @var $client Organization
          */
@@ -623,7 +680,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 $newProduct = GuideProduct::findOne(['guide_id' => $guide_id, 'cbg_id' => $id]);
                 if (!$newProduct) {
                     $newProduct = new GuideProduct();
-                    $newProduct->guide_id = $guide_id;
+                    $newProduct->guide_id = $guide->id;
                     $newProduct->cbg_id = $id;
                     $newProduct->created_at = new Expression('NOW()');
                     $newProduct->updated_at = new Expression('NOW()');

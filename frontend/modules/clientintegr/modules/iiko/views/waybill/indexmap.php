@@ -324,7 +324,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                         ]);
                         ?>
                         <?= Html::a('Вернуться',
-                            ['index'],
+                            [$this->context->getLastUrl().'way='.$wmodel->order_id],
                             ['class' => 'btn btn-success btn-export']);
                         ?>
                     </div>

@@ -315,8 +315,7 @@ $this->registerCss("
                     <div class="col-md-2">
                         <div class="form-group">
                             <?=
-                            $form->field($organization, 'gln_code')
-                                ->label(Yii::t('message', 'GLN-код'))
+                            $form->field($organization, 'gln_code')->textInput(['disabled' => true])->label(Yii::t('message', 'GLN-код'))
                             ?>
                         </div>
                     </div>

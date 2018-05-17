@@ -200,25 +200,32 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $records = iikoWaybillData::findAll(['waybill_id' => $model->id]);
         $vatPercent = 0;
         $discount = 0;
-        $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-        if($vatModel) {
-            $vatPercent = $vatModel->getPconstValue() / 100;
-        }
+      //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
+      //  if($vatModel) {
+      //      $vatPercent = $vatModel->getPconstValue() / 100;
+      //  }
         
         foreach ($records as $i => $row) {
             $item = $items->addChild('item');
-            $item->addChild('isAdditionalExpense', false);
-            $item->addChild('num', (++$i));
-            $item->addChild('product', $row->product->uuid);
-            $item->addChild('containerId');
-            $item->addChild('store', $model->store->uuid);
-            $item->addChild('amountUnit', $row->munit);
-            $item->addChild('vatPercent', $vatPercent);
+
             $item->addChild('amount', $row->quant);
-            $item->addChild('price', round($row->sum/$row->quant, 2));
+            $item->addChild('product', $row->product->uuid);
+            $item->addChild('num', (++$i));
+            $item->addChild('containerId');
+            $item->addChild('amountUnit', $row->munit);
             $item->addChild('discountSum', $discount);
-            $item->addChild('sum', $row->sum);
+            $item->addChild('sumWithoutNds', $row->sum);
+            $item->addChild('vatPercent', $row->vat/100);
+
+            $item->addChild('sum', round($row->sum + ($row->sum*$row->vat/10000),2));
+            $item->addChild('price', round($row->sum/$row->quant, 2));
+            $item->addChild('isAdditionalExpense', false);
+            $item->addChild('store', $model->store->uuid);
+
         }
+
+//        var_dump($xml);
+//        die();
 
         return $xml->asXML();
     }

@@ -3,138 +3,90 @@
 namespace common\components;
 
 use common\models\Order;
+use common\models\OrderContent;
 use common\models\Organization;
 use Yii;
 use yii\base\Component;
+use yii\base\ErrorException;
 
-
+/**
+ * Class for E-COM integration methods
+ *
+ * @author alexey.sergeev
+ *
+ */
 class EComIntegration extends Component {
 
 
-    public function connect(array $eComParams)
+    public function handleFilesList(String $login, String $pass): void
     {
-        try{
-            $open = ftp_connect($eComParams['host'], $eComParams['port'], $eComParams['timeout']);
-            ftp_login($open, $eComParams['login'], $eComParams['password']);
-        }catch (ErrorException $e){
-            Yii::error("E-COM FTP connection error");
-            return null;
+        $client = Yii::$app->siteApi;
+        $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+        if($object->result->errorCode != 0){
+            throw new ErrorException();
         }
-        return $open;
+        $list = $object->result->list;
+        if(is_iterable($list)){
+            foreach ($list as $fileName){
+                $this->sendDoc($client, $fileName);
+            }
+        }else{
+            $this->sendDoc($client, $list);
+        }
     }
 
 
-    public function handleFilesList($open, array $eComParams): void
+    private function getDoc(Object $client, String $fileName): bool
     {
-        $site = ftp_nlist($open, $eComParams['directory']);
-        $d = count($site);
-        for ($i = 0; $i < $d; $i++) {
-            $localFile = "/tmp/" . time() . rand(9999, 99999999) . '.xml';
-            $resource = fopen($localFile, 'w');
 
-            if(ftp_get($open, $localFile, $site[$i], FTP_BINARY)){
-                $content = simplexml_load_file($localFile);
-                //dd($content);
-            }
-            fclose($resource);
-
-            try{
-                unlink($localFile);
-            }catch (ErrorException $e){
-                Yii::error('Error delete file with e-com data.');
-            }
-        }
-        ftp_close($open);
     }
 
 
     public function sendOrderInfo(Order $order, Organization $vendor, Organization $client): bool
     {
-        $eComParams = Yii::$app->params['e_com'];
-        $open = $this->connect($eComParams);
-        $localFile = "/tmp/" . time() . rand(9999, 99999999) . '.xml';
-        $resource = fopen($localFile, 'w');
-        $createdAt = $this->formateDate($order->created_at ?? '');
-        $requestedDeliveryDate = $this->formateDate($order->requested_delivery ?? '');
-        $actualDeliveryDate = $this->formateDate($order->actual_delivery ?? '');
-        $string = <<<XML
-<?xml version="1.0" encoding="utf-8"?>
-<ORDER>
-<DOCUMENTNAME>220</DOCUMENTNAME>
-<NUMBER>1</NUMBER>
-<DATE>{$createdAt}</DATE>
-<DELIVERYDATE>{$requestedDeliveryDate}</DELIVERYDATE>
-<CAMPAIGNNUMBER>test26042018</CAMPAIGNNUMBER>
-<CURRENCY>RUB</CURRENCY>    
-<DOCTYPE>O</DOCTYPE>
-<ORDRTYPE>ORIGINAL</ORDRTYPE>
-<EARLIESTDELIVERYDATE>{$requestedDeliveryDate}</EARLIESTDELIVERYDATE>
-<LATESTDELIVERYDATE>{$actualDeliveryDate}</LATESTDELIVERYDATE>
-<HEAD>
-<SUPPLIER>9864232240006</SUPPLIER>
-<BUYER>9864232239956</BUYER>
-<DELIVERYPLACE>9864232239956</DELIVERYPLACE>
-<FINALRECIPIENT>9864232239956</FINALRECIPIENT>
-<SENDER>9864232240006</SENDER>
-<RECIPIENT>9864232239956</RECIPIENT>
-<EDIINTERCHANGEID>1</EDIINTERCHANGEID>
-<POSITION>
-<POSITIONNUMBER>1</POSITIONNUMBER>
-<PRODUCT>4602541000202</PRODUCT>
-    <ORDEREDQUANTITY>10.00</ORDEREDQUANTITY>
-<QUANTITYOFCUINTU>0.00</QUANTITYOFCUINTU>
-<ORDERUNIT>GB</ORDERUNIT>
-<ORDERPRICE>50.00</ORDERPRICE>
-<PRICEWITHVAT>59.00</PRICEWITHVAT>
-<ORDERPRICEBASIS>50.00</ORDERPRICEBASIS><
-ORDERPRICEUNIT>GB</ORDERPRICEUNIT>
-<VAT>18.00</VAT>
-<CHARACTERISTIC>
-</CHARACTERISTIC>
-    </POSITION>
-</HEAD>
-</ORDER>
-
-XML;
-        //Yii::error(print_r($string));
-        fwrite($resource, $string);
-        fclose($resource);
-        //$resource = fopen($localFile, 'r');
-        $remote_file = 'remote.xml';
-        ftp_chdir($open, "inbox");
-
-        $ret = ftp_nb_fput($open, $remote_file, $resource, FTP_BINARY);
-
-        // upload a file
-        if (ftp_put($open, $remote_file, $localFile, FTP_ASCII)) {
-            echo "successfully uploaded $localFile\n";
-        } else {
-            echo "There was a problem while uploading $localFile\n";
-        }
-
-        while ($ret == FTP_MOREDATA) {
-
-            Yii::error(print_r($ret));
-
-            // Continue upload...
-            $ret = ftp_nb_continue($open);
-        }
-        if ($ret != FTP_FINISHED) {
-            echo "There was an error uploading the file...";
-            exit(1);
-        }
-
-        ftp_close($open);
-        //fclose($resource);
-
-        return true;
+        $orderContent = OrderContent::findAll(['order_id'=>$order->id]);
+        $dateArray = $this->getDateData($order);
+        $string = Yii::$app->controller->renderPartial('@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
+        $currentDate = date("Ymdhis");
+        $remoteFile = 'order_' . $currentDate . '_' . $order->id . '.xml';
+        return $this->sendDoc($string, $remoteFile);
     }
 
 
-    private function formateDate(String $dateString): String
+    private function formatDate(String $dateString): String
     {
         $date = new \DateTime($dateString);
         return $date->format('Y-m-d');
+    }
+
+
+    private function formatTime(String $dateString): String
+    {
+        $date = new \DateTime($dateString);
+        return $date->format('H:i');
+    }
+
+
+    private function getDateData(Order $order): array
+    {
+        $arr = [];
+        $arr['created_at'] = $this->formatDate($order->created_at ?? '');
+        $arr['requested_delivery_date'] = $this->formatDate($order->requested_delivery ?? '');
+        $arr['requested_delivery_time'] = $this->formatTime($order->requested_delivery ?? '');
+        $arr['actual_delivery_date'] = $this->formatDate($order->actual_delivery ?? '');
+        $arr['actual_delivery_time'] = $this->formatTime($order->actual_delivery ?? '');
+        return $arr;
+    }
+
+
+    private function sendDoc(String $string, String $remoteFile): bool
+    {
+        $client = Yii::$app->siteApi;
+        $obj = $client->sendDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $remoteFile, 'content' => $string]);
+        if(isset($obj->result->errorCode) && $obj->result->errorCode == 0){
+            return true;
+        }
+        return false;
     }
 
 }

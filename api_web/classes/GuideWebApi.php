@@ -428,6 +428,7 @@ class GuideWebApi extends \api_web\components\WebApi
     /**
      * Агрегированая функция для работы с шаблоном
      * @param $params
+     * @return array
      * @throws BadRequestHttpException
      */
     public function actionProductFromGuide($params)
@@ -662,6 +663,13 @@ class GuideWebApi extends \api_web\components\WebApi
         } else {
             $products_ids = $id;
         }
+
+        $guide = Guide::findOne($guide_id);
+
+        if ($guide->getProductCount() == 1000) {
+            throw new BadRequestHttpException('MAX = 1000 products.');
+        }
+
         /**
          * @var $client Organization
          */
@@ -672,7 +680,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 $newProduct = GuideProduct::findOne(['guide_id' => $guide_id, 'cbg_id' => $id]);
                 if (!$newProduct) {
                     $newProduct = new GuideProduct();
-                    $newProduct->guide_id = $guide_id;
+                    $newProduct->guide_id = $guide->id;
                     $newProduct->cbg_id = $id;
                     $newProduct->created_at = new Expression('NOW()');
                     $newProduct->updated_at = new Expression('NOW()');

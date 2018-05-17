@@ -82,8 +82,8 @@ class EComIntegration extends Component {
     private function sendDoc(String $string, String $remoteFile): bool
     {
         $client = Yii::$app->siteApi;
-        $res = $client->sendDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $remoteFile, 'content' => $string]);
-        if(isset($res->errorCode) && $res->errorCode == 0){
+        $obj = $client->sendDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $remoteFile, 'content' => $string]);
+        if(isset($obj->result->errorCode) && $obj->result->errorCode == 0){
             return true;
         }
         return false;

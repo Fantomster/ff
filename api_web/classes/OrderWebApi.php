@@ -113,7 +113,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
         //Проверим статус заказа
-        if(in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
+        if (in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
             throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
         }
         //Если сменили комментарий
@@ -193,12 +193,15 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($product['quantity'])) {
-            $productModel = (new Product())->findFromCatalogs($product['id'], $this->user->organization->getCatalogs());
-            $orderContent->quantity = (new CartWebApi())->recalculationQuantity($productModel, $product['quantity']);
+            $orderContent->quantity = $product['quantity'];
         }
 
         if (!empty($product['comment'])) {
-            $orderContent->comment = $product['comment'] ?? '';
+            $orderContent->comment = $product['comment'];
+        }
+
+        if (!empty($product['price'])) {
+            $orderContent->price = $product['price'];
         }
 
         if ($orderContent->validate() && $orderContent->save()) {

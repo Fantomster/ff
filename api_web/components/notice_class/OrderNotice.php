@@ -65,7 +65,6 @@ class OrderNotice
         $senderOrg = $sender;
         $subject = Yii::t('message', 'frontend.controllers.order.new_order') . $order->id . "!";
         $dataProvider = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
-        $order->recipientsList;
         $orgs[] = $order->vendor_id;
         $orgs[] = $order->client_id;
 

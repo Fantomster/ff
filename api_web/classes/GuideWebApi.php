@@ -433,6 +433,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function actionProductFromGuide($params)
     {
+        set_time_limit(60*3);
         if (empty($params['guide_id'])) {
             throw new BadRequestHttpException("ERROR: Empty guide_id");
         }
@@ -457,6 +458,9 @@ class GuideWebApi extends \api_web\components\WebApi
 
                 //Добавляем продукт в шаблон
                 if ($product['operation'] == 'add') {
+                    if(Guide::findOne($params['guide_id'])->getGuideProducts()->where(['cbg_id' => $product['product_id']])->exists()) {
+                        continue;
+                    }
                     $this->operationAddProduct($params['guide_id'], $product['product_id']);
                 }
 
@@ -472,6 +476,7 @@ class GuideWebApi extends \api_web\components\WebApi
             $result['messages'][] = $e->getMessage();
         }
 
+        \Yii::$app->response->setStatusCode(200);
         return $result;
     }
 

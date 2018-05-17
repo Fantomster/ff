@@ -14,7 +14,6 @@ use frontend\modules\clientintegr\modules\merc\models\submitApplicationRequest;
 
 class mercApi
 {
-    private $wsdl = 'http://api.vetrf.ru/schema/platform/services/ApplicationManagementService_v1.4_pilot.wsdl';
     private $login;
     private $pass;
     private $apiKey;
@@ -23,7 +22,20 @@ class mercApi
     private $vetisLogin = '';
     private $_client;
 
-    const Endpoint_URL = 'https://api2.vetrf.ru:8002/platform/services/ApplicationManagementService';
+    private $wsdls = [
+        'mercury' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ApplicationManagementService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ApplicationManagementService_v1.4_pilot.wsdl',
+        ],
+        'dicts' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/DictionaryService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/DictionaryService_v1.4_pilot.wsdl',
+        ],
+        'vetis' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/2.0/EnterpriseService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/cerberus/services/EnterpriseService_v1.4_pilot.wsdl',
+        ],
+    ];
 
     protected static $_instance;
 
@@ -49,10 +61,10 @@ class mercApi
     {
     }
 
-    private function getSoapClient()
+    private function getSoapClient($system)
     {
         if ($this->_client === null)
-            return new \SoapClient($this->wsdl,[
+            return new \SoapClient($this->wsdls[$system]['wsdl'],[
                /* 'use' => SOAP_LITERAL,
                 'style' => SOAP_DOCUMENT,
                 'location' => self::Endpoint_URL,
@@ -74,7 +86,9 @@ class mercApi
 
     private function parseResponse($response)
     {
-        $xmlString = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $xmlString = str_replace('SOAP-ENV', 'soapenv', $response);
+        $xmlString = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $xmlString);
+
         $xml = simplexml_load_string($xmlString);
 
         return new \SimpleXMLElement($xml->asXML());
@@ -82,7 +96,7 @@ class mercApi
 
     public function getVetDocumentList()
     {
-        $client = $this->getSoapClient();
+        $client = $this->getSoapClient('mercury');
         $result = null;
 
         try {
@@ -104,9 +118,9 @@ class mercApi
             $vetDoc->setInitiator($this->vetisLogin);
             $application->addData($vetDoc);
             $request->setApplication($application);
-            
+
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML(), self::Endpoint_URL, 'submitApplicationRequest', SOAP_1_1);
+            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             $result = $this->parseResponse($response);
 
@@ -133,14 +147,12 @@ class mercApi
 
     public function getReceiveApplicationResult ($applicationId)
     {
-        $client = $this->getSoapClient();
+        $client = $this->getSoapClient('mercury');
         $request = new receiveApplicationResultRequest();
         $request->apiKey = $this->apiKey;
         $request->issuerId = $this->issuerID;
         $request->applicationId = $applicationId;
-var_dump(htmlentities($request->getXML()));
-        return $client->__doRequest($request->getXML(), self::Endpoint_URL, 'receiveApplicationResultRequest', SOAP_1_1);
-        //return $client->receiveApplicationResult($request);
+        return $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'receiveApplicationResultRequest', SOAP_1_1);
     }
 
     private function addEventLog ($response, $method, $localTransactionId)
@@ -151,14 +163,45 @@ var_dump(htmlentities($request->getXML()));
         $log->status = $response->application->status->__toString();
         $log->action = $method;
         $log->localTransactionId =  $localTransactionId;
-        var_dump("STATUS", $log->status);
+
         if($log->status == mercLog::REJECTED) {
-            var_dump($response);
             $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
         }
 
         if (!$log->save())
             var_dump($log->getErrors());
+    }
+
+    public function getUnitByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('dicts');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getUnitByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getUnitByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetUnitByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getBusinessEntityByUuid ($UUID)
+    {
+        $client = $this->getSoapClient('vetis');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v2:getBusinessEntityByUuidRequest>
+         <base:uuid>'.$UUID.'</base:uuid>
+      </v2:getBusinessEntityByUuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
+        return $this->parseResponse($result);
     }
 
 }

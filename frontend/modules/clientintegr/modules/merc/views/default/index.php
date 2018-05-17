@@ -6,7 +6,7 @@ use kartik\grid\GridView;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
+        <i class="fa fa-upload"></i> Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -48,81 +48,77 @@ use kartik\grid\GridView;
         <div class="box-header with-border">
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
-                    <?php Pjax::begin(['id' => 'dics_pjax']); ?>
-                    <?=
-                    GridView::widget([
+                    <?php
+                    Pjax::begin(['id' => 'pjax-messages-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true]);
+                    echo GridView::widget([
+                        'id' => 'vetDocumentsList',
                         'dataProvider' => $dataProvider,
-                        'pjax' => false, // pjax is set to always true for this demo
-                        'id' => 'dics_grid',
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        //'filterModel' => $searchModel,
                         'filterPosition' => false,
-                        'layout' => '{items}',
-                        'columns' => [
-                            [
-                                'attribute' => 'dictype_id',
-                                'value' => function ($model) {
-                                    return $model->dictype->denom;
-                                },
-                                'format' => 'raw',
-                                'contentOptions' => ['style' => 'width: 10%;']
-                            ],
-                            'updated_at',
-                            'obj_count',
-                            [
-                                'attribute' => 'dicstatus_id',
-                                'value' => function ($model) {
-                                    return $model->dicstatus->denom;
-                                },
-                                'format' => 'raw',
-                                'contentOptions' => ['style' => 'width: 10%;']
-                            ],
-                            [
-                                'class' => 'yii\grid\ActionColumn',
-                                'contentOptions' => ['style' => 'width: 6%;'],
-                                'template' => '{view}&nbsp;&nbsp;&nbsp;{get}',
-                                'buttons' => [
-                                    'view' => function ($url, $model) {
-                                        return \yii\helpers\Html::a(
-                                            '<i class="fa fa-eye" aria-hidden="true"></i>',
-                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model->dictype->contr . '-view']),
-                                            [
-                                                'title' => Yii::t('backend', 'Просмотр'),
-                                                'data-pjax' => "0"
-                                            ]
-                                        );
-                                    },
-                                    'get' => function ($url, $model) {
-                                        return \yii\helpers\Html::a(
-                                            \yii\helpers\Html::tag('i', '', [
-                                                'class' => 'fa fa-download get-content-sync',
-                                                'aria-hidden' => true,
-                                                'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model->dictype->contr . '-get']),
-                                                'data-id' => $model->id
-                                            ]),
-                                            '#',
-                                            [
-                                                'title' => Yii::t('backend', 'Загрузка'),
-                                                'data-pjax' => "0",
-                                            ]
-                                        );
-                                    },
-                                ]
-                            ]
-                        ],
+                        'summary' => '',
                         'options' => ['class' => 'table-responsive'],
-                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                        'bordered' => false,
-                        'striped' => true,
-                        'condensed' => false,
-                        'responsive' => false,
-                        'hover' => true,
-                        'resizableColumns' => false,
-                        'export' => [
-                            'fontAwesome' => true,
+                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
+                        'columns' => [
+                            /*[
+                                'attribute' => 'number',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['number'];
+                                },
+                            ],*/
+                            [
+                                'attribute' => 'date_doc',
+                                'header' => 'Дата',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['date_doc'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'type',
+                                'header' => 'Тип ВСД',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['type'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'product_name',
+                                'header' => 'Наименование продукции',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['product_name'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'amount',
+                                'header' => 'Объем',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['amount'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'production_date',
+                                'header' => 'Дата выработки',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['production_date'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'recipient_name',
+                                'header' => ' 	Фирма-отправитель',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['recipient_name'];
+                                },
+                            ],
                         ],
                     ]);
+                    Pjax::end();
                     ?>
-                    <?php Pjax::end(); ?>
                 </div>
             </div>
         </div>

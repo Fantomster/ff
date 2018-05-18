@@ -41,7 +41,7 @@ class EmailIntegrationController extends Controller
 
     public function actionTest() {
 
-        $temp_file = '/app/console/runtime/testnac4.xls';
+        $temp_file = '/app/console/runtime/testnac2.xls';
 
         $parser = new ParserTorg12($temp_file);
         try {

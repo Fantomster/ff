@@ -61,7 +61,8 @@ function renderButton($id)
                 <div class="col-sm-12">
                     <?php try {
                         echo GridView::widget([
-                            'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
+                            // 'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
+                            'dataProvider' => $dataProvider,
                             'summary' => false,
                             'striped' => false,
                             'condensed' => true,
@@ -82,6 +83,12 @@ function renderButton($id)
                                     'headerOptions' => ['style' => 'width: 100px;'],
                                 ],
                                 'number',
+                                [
+                                    'attribute' => 'date',
+                                    'value' => function($row){
+                                        return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
+                                    }
+                                ],
                                 [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {

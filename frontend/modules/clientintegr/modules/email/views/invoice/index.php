@@ -101,11 +101,17 @@ function renderButton($id)
                                         return count($data->content);
                                     }
                                 ],
-                                'created_at',
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'created_at',
+                                    'value' => function($data) {
+                                        return Yii::$app->formatter->asDatetime($data->created_at, "php:Y-m-d H:i:s");
+                                    },
+                                ],
                                 [
                                     'attribute' => 'order_id',
                                     'value' => function ($data) {
-                                        return $data->order_id ? 'Да' : 'Нет';
+                                        return $data->order_id ? $data->order_id : 'Нет';
                                     }
                                 ],
                                 [

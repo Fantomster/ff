@@ -77,7 +77,7 @@ use api\common\models\RkAccess;
                 <div class="hpanel" >
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">ВЕТИС "Меркурий"</h4>', ['merc/settings']) ?>
+                            <?= Html::a('<h4 class="m-b-xs text-info">ВЕТИС "Меркурий"</h4>', ['merc/default']) ?>
                             <p class="small">Интеграция с системой ВЕТИС "Меркурий"</p>
                         </div>
                         <div class="col-md-6 text-right">

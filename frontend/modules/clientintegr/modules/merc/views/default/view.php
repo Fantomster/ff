@@ -2,6 +2,7 @@
 
 use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
+use yii\helpers\Html;
 ?>
 <section class="content-header">
     <h1>
@@ -213,6 +214,11 @@ use yii\widgets\DetailView;
                         'model' => $document,
                         'attributes' => $attributes,
                     ]) ?>
+                    <div class="col-md-12">
+                        <?= Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
+                        Html::a('Частичня приемка', ['#'], ['class' => 'btn btn-warning']).' '.
+                        Html::a('Возврат', ['#'], ['class' => 'btn btn-danger']); ?>
+                    </div>
                 </div>
             </div>
         </div>

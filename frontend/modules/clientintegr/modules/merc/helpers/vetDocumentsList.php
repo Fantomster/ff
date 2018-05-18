@@ -21,6 +21,24 @@ class vetDocumentsList extends Component
         self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
     ];
 
+    const DOC_STATUS_ALL = 'ALL';
+    const DOC_STATUS_CONFIRMED = 'CONFIRMED';
+    const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
+    const DOC_STATUS_UTILIZED = 'UTILIZED';
+
+    public static $statuses = [
+        self::DOC_STATUS_ALL => 'Все',
+        self::DOC_STATUS_CONFIRMED => 'Оформлен',
+        self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
+        self::DOC_STATUS_UTILIZED => 'Погашен',
+    ];
+
+    public $status_color = [
+        self::DOC_STATUS_CONFIRMED => 'new',
+        self::DOC_STATUS_WITHDRAWN => 'cancelled',
+        self::DOC_STATUS_UTILIZED => 'done',
+    ];
+
     public function createDocumentsList($list) {
 
         $result = [];
@@ -33,20 +51,16 @@ class vetDocumentsList extends Component
                 'UUID' => $item->bsuuid,
                 'number' => '',
                 'date_doc' => $item->ns2issueDate,
-                'type' => $this->types[$item->ns2type->__toString()],
+                'status' => '<span class="status ' . $this->status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
+                'status_raw' => $item->ns2status->__toString(),
                 'product_name' => $item->ns2batch->ns2productItem->prodname,
                 'amount' => $item->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
-                'production_date' => $this->getData($item->ns2batch->ns2dateOfProduction->ns2firstDate),
+                'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
                 'recipient_name' => $recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString(),
             ];
         }
 
         return $result;
-    }
-
-    private function getData($raw_data)
-    {
-        return $raw_data->bsyear.'-'.$raw_data->bsmonth.'-'.$raw_data->bsday.' '.$raw_data->hour.":00:00";
     }
 
     public function getArrayDataProvider()
@@ -79,6 +93,21 @@ class vetDocumentsList extends Component
         //$dataProvider->setSort(['defaultOrder' => ['UUID'=>SORT_DESC], 'attributes' => ['UUID', 'number', 'date_doc', 'type', 'product_name', 'aount', 'production_date', 'recipient_name']]);
 
         return $dataProvider;
+    }
+
+    public function getDate($date_raw)
+    {
+        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday;
+        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
+
+        if($date_raw->ns2secondDate)
+        {
+            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
+            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
+            return 'с '.$first_date.' до '.$second_date;
+        }
+
+        return $first_date;
     }
 
 }

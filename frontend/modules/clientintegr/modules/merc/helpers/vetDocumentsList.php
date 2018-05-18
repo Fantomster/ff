@@ -34,7 +34,7 @@ class vetDocumentsList extends Component
     ];
 
     public $status_color = [
-        self::DOC_STATUS_CONFIRMED => 'new',
+        self::DOC_STATUS_CONFIRMED => '',
         self::DOC_STATUS_WITHDRAWN => 'cancelled',
         self::DOC_STATUS_UTILIZED => 'done',
     ];

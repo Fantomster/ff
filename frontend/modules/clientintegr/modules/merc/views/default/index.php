@@ -148,7 +148,7 @@ use yii\helpers\Html;
                                                 'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
                                                 'style' => 'width: 16px'
                                             ]),
-                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\?id=' . $model['UUID']]),
+                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\default\view?id=' . $model['UUID']]),
                                             [
                                                 'title' => Yii::t('backend', 'Просмотр'),
                                                 'data-pjax' => "0"
@@ -177,7 +177,7 @@ use yii\helpers\Html;
                         ],
                     ]);
                     echo '<div class="col-md-12">'.Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
-                         Html::a('Возврат', ['#'], ['class' => 'btn btn-danger']).'</div>';
+                         Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']).'</div>';
                     ?>
                     </div>
                     <?php Pjax::end(); ?>

@@ -55,13 +55,13 @@ class AdditionalEmail extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'email' => 'Email',
-            'organization_id' => Yii::t('app', 'common.models.additional_email.org', ['ru'=>'Организация']),
-            'order_created' => Yii::t('app', 'common.models.additional_email.creation', ['ru'=>'Создание']),
-            'order_canceled' => Yii::t('app', 'common.models.additional_email.cancel', ['ru'=>'Отмена']),
-            'order_changed' => Yii::t('app', 'common.models.additional_email.changing', ['ru'=>'Изменение']),
-            'order_processing' => Yii::t('app', 'common.models.additional_email.working', ['ru'=>'В работе']),
-            'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru'=>'Выполнен']),
-            'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru'=>'Принятие заявки']),
+            'organization_id' => Yii::t('app', 'common.models.additional_email.org', ['ru' => 'Организация']),
+            'order_created' => Yii::t('app', 'common.models.additional_email.creation', ['ru' => 'Создание']),
+            'order_canceled' => Yii::t('app', 'common.models.additional_email.cancel', ['ru' => 'Отмена']),
+            'order_changed' => Yii::t('app', 'common.models.additional_email.changing', ['ru' => 'Изменение']),
+            'order_processing' => Yii::t('app', 'common.models.additional_email.working', ['ru' => 'В работе']),
+            'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru' => 'Выполнен']),
+            'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru' => 'Принятие заявки']),
         ];
     }
 
@@ -74,29 +74,39 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null $org_id
      * @return EmailNotification
      */
-    public function getEmailNotification() {
-        $model = new EmailNotification();
-        $model->order_created = $this->order_created;
-        $model->order_canceled = $this->order_canceled;
-        $model->order_changed = $this->order_changed;
-        $model->order_processing = $this->order_processing;
-        $model->order_done = $this->order_done;
-        return $model;
+    public function getEmailNotification($org_id = null)
+    {
+        if ($org_id === null || $org_id == $this->organization_id) {
+            $model = new EmailNotification();
+            $model->order_created = $this->order_created;
+            $model->order_canceled = $this->order_canceled;
+            $model->order_changed = $this->order_changed;
+            $model->order_processing = $this->order_processing;
+            $model->order_done = $this->order_done;
+            return $model;
+        }
+
+        if (!empty($org_id) && $org_id !== $this->organization_id) {
+            return EmailNotification::emptyInstance();
+        }
     }
 
     /**
      * @return SmsNotification
      */
-    public function getSmsNotification() {
-        return new SmsNotification();
+    public function getSmsNotification()
+    {
+        return SmsNotification::emptyInstance();
     }
 
     /**
      * @return \amnah\yii2\user\models\Profile
      */
-    public function getProfile() {
+    public function getProfile()
+    {
         return new \amnah\yii2\user\models\Profile();
     }
 }

@@ -115,7 +115,6 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
                 'label' => 'Товары',
                 'value' => $goodsListUrl ? Html::a('Список', $goodsListUrl) : '',
             ],
-            'gln_code',
         ],
     ])
     ?>

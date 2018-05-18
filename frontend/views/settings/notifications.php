@@ -158,7 +158,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         echo $form->field($emailNotification, 'receive_employee_email')->widget(CheckboxX::classname(), [
                             'autoLabel' => true,
                             'model' => $emailNotification,
-                            'attribute' => 'order_done',
+                            'attribute' => 'receive_employee_email',
                             'pluginOptions' => [
                                 'threeState' => false,
                                 'theme' => 'krajee-flatblue',
@@ -335,7 +335,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         echo $form->field($smsNotification, 'receive_employee_sms')->widget(CheckboxX::classname(), [
                             'autoLabel' => true,
                             'model' => $smsNotification,
-                            'attribute' => 'order_done',
+                            'attribute' => 'receive_employee_sms',
                             'pluginOptions' => [
                                 'threeState' => false,
                                 'theme' => 'krajee-flatblue',

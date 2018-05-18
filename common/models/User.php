@@ -291,28 +291,32 @@ class User extends \amnah\yii2\user\models\User {
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @param null $org_id
+     * @return EmailNotification|null|static
      */
-    public function getEmailNotification($org_id = null) {
+    public function getEmailNotification($org_id = null)
+    {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
         $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
         if ($rel === null) {
-            return new EmailNotification();
+            return EmailNotification::emptyInstance();
         }
         $res = EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
-        return ($res != null) ? $res : new EmailNotification();
+        return ($res != null) ? $res : EmailNotification::emptyInstance();
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @param null $org_id
+     * @return SmsNotification|null|static
      */
-    public function getSmsNotification($org_id = null) {
+    public function getSmsNotification($org_id = null)
+    {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
         $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
         if ($rel === null)
-            return new SmsNotification();
+            return SmsNotification::emptyInstance();
         $res = SmsNotification::findOne(['rel_user_org_id' => $rel->id]);
-        return ($res != null) ? $res : new SmsNotification();
+        return ($res != null) ? $res : SmsNotification::emptyInstance();
     }
 
     /**

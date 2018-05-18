@@ -68,5 +68,14 @@ class EmailNotification extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    public static function emptyInstance() {
+        return new self([
+            'order_created' => 0,
+            'order_canceled' => 0,
+            'order_changed' => 0,
+            'order_processing' => 0,
+            'order_done' => 0
+        ]);
+    }
 
 }

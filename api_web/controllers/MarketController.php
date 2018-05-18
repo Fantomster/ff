@@ -30,7 +30,9 @@ class MarketController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "product":"искомая строка",
-     *                                   "supplier_id": {3803, 4}
+     *                                   "supplier_id": {3803, 4},
+     *                                   "category_id": {1,2},
+     *                                   "price":{"from":100, "to":200}
      *                               },
      *                               "pagination":{
      *                                   "page":1,
@@ -138,13 +140,16 @@ class MarketController extends WebApiController
      *         @SWG\Schema(
      *              default=
      *              {
-     *                  "Мясо": {
-     *                           {
-     *                              "id": 2,
-     *                              "name": "Баранина",
-     *                              "image": "http://web.mixcart.local/fmarket/images/product_placeholder.jpg"
-     *                           }
-     *                   }
+     *                  "id": 1,
+     *                  "name": "МЯСО",
+     *                  "image": "https://market.mixcart.ru/fmarket/images/image-category/1.jpg",
+     *                  "subcategories": {
+     *                      {
+     *                          "id": 2,
+     *                          "name": "Баранина",
+     *                          "image": "https://market.mixcart.ru/fmarket/images/image-category/1.jpg"
+     *                      }
+     *                  }
      *              }
      *          ),
      *     ),

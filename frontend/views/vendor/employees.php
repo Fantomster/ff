@@ -1,5 +1,7 @@
 <?php
 
+/* @var $this \yii\web\View */
+
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\User;
@@ -136,7 +138,7 @@ $this->registerJs(
                             'attribute' => 'profile.full_name',
                             'format' => 'raw',
                             'value' => function ($data) {
-                                $link = Html::a($data->profile->full_name, ['vendor/ajax-update-user', 'id' => $data->id], [
+                                $link = Html::a(($data->profile === null || $data->profile->full_name == '') ? '...' : $data->profile->full_name, ['vendor/ajax-update-user', 'id' => $data->id], [
                                             'data' => [
                                                 'target' => '#add-user',
                                                 'toggle' => 'modal',

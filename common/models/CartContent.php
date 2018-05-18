@@ -22,6 +22,7 @@ use yii\db\Expression;
  * @property string $updated_at
  *
  * @property Cart $cart
+ * @property Currency $currency
  * @property array $product
  * @property Organization $vendor
  */

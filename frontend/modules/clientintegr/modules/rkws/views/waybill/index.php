@@ -68,6 +68,7 @@ $this->registerCss("
     ])
     ?>
 </section>
+
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     ЗАВЕРШЕННЫЕ ЗАКАЗЫ
@@ -150,10 +151,16 @@ $this->registerCss("
                                         'dataProvider' => $dataProvider,
                                         'pjax' => true, // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+                                          'pjaxSettings' => ['options' => ['id' => 'waybill_grid1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                     //    'filterModel' => $searchModel,
                                         'columns' => [
-                                                'id',
+                                                [
+                                                    'attribute' => 'id',
+                                                    'contentOptions' => function($data) {
+                                                        return ["id" => "way".$data->id];
+                                                    }
+                                                ],
                                                 [
                                                     'attribute' => 'vendor.name',
                                                     'value' => 'vendor.name',
@@ -194,6 +201,16 @@ $this->registerCss("
                                                     'attribute' => 'positionCount',
                                                     'label' => 'Кол-во позиций',   
                                                     'format'=>'raw',
+                                                    'value' => function ($data) {
+                                                    return $data->positionCount .
+                                                        '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
+                                                        'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
+                                                        'data-toggle="popover"  data-trigger="focus" data-url="'.
+                                                        Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
+                                                        '/getpopover" role="button" tabindex="0" '.
+                                                        'data-original-title="" title="" data-model="'.$data->id.'"> '.
+                                                        '<i class="fa fa-info-circle"></i></a>';
+                                                    }
                                                 ],                       
                                                 [
                                                     'attribute' => 'total_price',
@@ -219,7 +236,10 @@ $this->registerCss("
                                                 [
                                                     'class'=>'kartik\grid\ExpandRowColumn',
                                                     'width'=>'50px',
-                                                    'value'=>function ($model, $key, $index, $column) {
+                                                    'value'=>function ($model, $key, $index, $column) use ($way) {
+                                                                if ($model->id == $way) {
+                                                                    return GridView::ROW_EXPANDED;
+                                                                }
                                                                 return GridView::ROW_COLLAPSED;
                                                              },
                                                     'detail'=>function ($model, $key, $index, $column) {
@@ -259,7 +279,135 @@ $this->registerCss("
 
                 </div>
             </div>
-        <?php Pjax::end() ?>
+       <?php Pjax::end() ?>
     </div>            
 </section>
+<?php
+   /*  echo 'Testing for ' . Html::tag('span', 'popover', [
+    'title'=>'This is a test tooltip',
+    'data-toggle'=>'popover',
+    'data-trigger' => 'focus',
+    'style'=>'text-decoration: underline; cursor:pointer;'
+    ]);
+*/
+   // echo \yii\helpers\Html::a( '<i class="fa fa-sign-in" aria-hidden="true"></i>', '#',
+   //     ['title' => 'Состав заказа', 'data-pjax'=>"0", 'data-toggle' => 'popover', 'data-trigger' => 'focus',
+   //      'style' => 'text-decoration: underline; cursor:pointer;']);
+    ?>
+<?php
+$js = <<< 'SCRIPT'
+/* To initialize BS3 tooltips set this below */
+// $(function () {
+// $("[data-toggle='tooltip']").tooltip();
+// });;
 
+/* To initialize BS3 popovers set this below */
+$(function () {
+$("[data-toggle='popover']").popover({
+     container: 'body'
+});
+});
+
+// $('.popover-dismiss').popover({
+//  trigger: 'focus'
+// });
+
+// $('html').on('mouseup', function(e) {
+//     if(!$(e.target).closest('.ajax-popover').length) {
+//        $('.ajax-popover').each(function(){
+//            $(this.previousSibling).popover('hide');
+//        });
+//    }
+// });
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>
+
+<?php
+$js = <<< 'SCRIPT'
+$('.ajax-popover').click(function() {
+    var e = $(this);
+    if (e.data('loaded') !== true) {
+        $.ajax({
+      url: e.data('url'),
+      type: "POST",
+      data: {key: e.data('model')}, // данные, которые передаем на сервер
+      dataType: 'html',
+      // dataType: "json", // тип ожидаемых данных в ответе
+      success: function(data) {
+            e.data('loaded', true);
+            e.attr('data-content', data);
+            var popover = e.data('bs.popover');
+            popover.setContent();
+            popover.$tip.addClass(popover.options.placement);
+            var calculated_offset = popover.getCalculatedOffset(popover.options.placement, popover.getPosition(), popover.$tip[0].offsetWidth, popover.$tip[0].offsetHeight);
+            popover.applyPlacement(calculated_offset, popover.options.placement);
+        },
+      error: function(jqXHR, textStatus, errorThrown) {
+            return instance.content('Failed to load data');
+        }
+    });
+  }
+});
+SCRIPT;
+$this->registerJs($js,View::POS_END);
+?>
+<?php
+$js = <<< 'SCRIPT'
+$(document).on('pjax:complete', function() {
+
+/* To initialize BS3 popovers set this below */
+$(function () {
+$("[data-toggle='popover']").popover({
+     container: 'body'
+});
+});
+
+
+$('.ajax-popover').click(function() {
+    var e = $(this);
+    if (e.data('loaded') !== true) {
+        $.ajax({
+      url: e.data('url'),
+      type: "POST",
+      data: {key: e.data('model')}, // данные, которые передаем на сервер
+      dataType: 'html',
+      // dataType: "json", // тип ожидаемых данных в ответе
+      success: function(data) {
+            e.data('loaded', true);
+            e.attr('data-content', data);
+            var popover = e.data('bs.popover');
+            popover.setContent();
+            popover.$tip.addClass(popover.options.placement);
+            var calculated_offset = popover.getCalculatedOffset(popover.options.placement, popover.getPosition(), popover.$tip[0].offsetWidth, popover.$tip[0].offsetHeight);
+            popover.applyPlacement(calculated_offset, popover.options.placement);
+        },
+      error: function(jqXHR, textStatus, errorThrown) {
+            return instance.content('Failed to load data');
+        }
+    });
+  }
+});
+
+
+})
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>
+
+<?php
+$js = <<< JS
+$(document).ready(function () {
+    if ($way > 0) {
+        $('html, body').animate({
+            scrollTop: $("#way$way").offset().top
+        }, 1000);
+        // jQuery('#w2').dropdown();
+    }
+});    
+JS;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>

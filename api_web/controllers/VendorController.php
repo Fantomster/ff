@@ -30,6 +30,8 @@ class VendorController extends WebApiController
      *                                   "fio":"Donald Trump",
      *                                   "phone": "+79182225588",
      *                                   "organization_name": "ООО Рога и Копыта",
+     *                                   "inn": "0001112223",
+     *                                   "contact_name": "Контактное лицо"
      *                               },
      *                               "catalog":{
      *                                   "products":{
@@ -94,7 +96,7 @@ class VendorController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              ref="#/definitions/Organization"
+     *              ref="#/definitions/Vendor"
      *          ),
      *     ),
      *     @SWG\Response(
@@ -132,7 +134,8 @@ class VendorController extends WebApiController
      *                             "name": "ООО Рога и Копыта",
      *                             "phone": "+79182225588",
      *                             "email":"test@test.ru",
-     *                             "site": "www.mixcart.ru",
+     *                             "inn": "0001112223",
+     *                             "contact_name": "Контактное имя",
      *                             "address": {
      *                                  "country":"Россия",
      *                                  "region": "Московская область",
@@ -151,23 +154,7 @@ class VendorController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              default={
-     *                         "id": 3948,
-     *                         "name": "ООО Рога и Копыта",
-     *                         "phone": "+79182225588",
-     *                         "email": "cn13@cn13.ru",
-     *                         "site": "www.mixcart.ru",
-     *                         "address": "Россия, Московская область, Люберцы, улица Побратимов, 7",
-     *                         "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
-     *                         "type_id": 2,
-     *                         "type": "Поставщик",
-     *                         "rating": 0,
-     *                         "city": "Люберцы",
-     *                         "administrative_area_level_1": "Московская область",
-     *                         "country": "Россия",
-     *                         "about": "",
-     *                         "allow_editing": 1
-     *             }
+     *              ref="#/definitions/Vendor"
      *          ),
      *     ),
      *     @SWG\Response(
@@ -210,23 +197,7 @@ class VendorController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *              default={
-     *                         "id": 3948,
-     *                         "name": "ООО Рога и Копыта",
-     *                         "phone": "+79182225588",
-     *                         "email": "cn13@cn13.ru",
-     *                         "site": "www.mixcart.ru",
-     *                         "address": "Россия, Московская область, Люберцы, улица Побратимов, 7",
-     *                         "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
-     *                         "type_id": 2,
-     *                         "type": "Поставщик",
-     *                         "rating": 0,
-     *                         "city": "Люберцы",
-     *                         "administrative_area_level_1": "Московская область",
-     *                         "country": "Россия",
-     *                         "about": "",
-     *                         "allow_editing": 1
-     *             }
+     *              ref="#/definitions/Vendor"
      *          ),
      *     ),
      *     @SWG\Response(

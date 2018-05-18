@@ -586,6 +586,8 @@ class OrganizationController extends DefaultController {
             $ma->organization_id = $rest_id;
             $ma->save();
         }
-        return $this->redirect(Yii::$app->urlManagerFrontend->baseUrl . "/user/login");
+
+        $redirectURL = Yii::$app->params['staticUrl'][Yii::$app->language]['home'] . "user/login";
+        return $this->redirect($redirectURL);
     }
 }

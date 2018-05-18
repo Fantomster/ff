@@ -8,11 +8,13 @@ use common\models\RelationUserOrganization;
 use common\models\Role;
 use api_web\models\User;
 use common\models\Profile;
+use common\models\SmsCodeChangeMobile;
 use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\data\ArrayDataProvider;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -97,7 +99,8 @@ class UserWebApi extends \api_web\components\WebApi
         if (!$user->validate()) {
             throw new ValidationException($user->getFirstErrors());
         }
-        $user->setRegisterAttributes($role_id)->save();
+        $user->setRegisterAttributes($role_id);
+        $user->save();
         return $user;
     }
 
@@ -287,6 +290,13 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        /**
+         * Поиск по наименованию
+         */
+        if (isset($post['search']['name'])) {
+            $dataProvider->query->andFilterWhere(['like', 'u.vendor_name', $post['search']['name']]);
+        }
+
         //Поиск по адресу
         if (isset($post['search']['location'])) {
             if (strstr($post['search']['location'], ':') !== false) {
@@ -473,6 +483,131 @@ class UserWebApi extends \api_web\components\WebApi
             $transaction->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Смена пароля пользователя
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function changePassword($post)
+    {
+        if (empty($post['password'])) {
+            throw new BadRequestHttpException('Empty password');
+        }
+
+        if (empty($post['new_password'])) {
+            throw new BadRequestHttpException('Empty new_password');
+        }
+
+        if (empty($post['new_password_confirm'])) {
+            throw new BadRequestHttpException('Empty new_password_confirm');
+        }
+
+        if (!$this->user->validatePassword($post['password'])) {
+            throw new BadRequestHttpException('Bad password');
+        }
+
+        if ($post['password'] == $post['new_password']) {
+            throw new BadRequestHttpException('You have sent the same password.');
+        }
+
+        $tr = \Yii::$app->db->beginTransaction();
+        try {
+            $this->user->scenario = 'reset';
+            $this->user->newPassword = $post['new_password'];
+            $this->user->newPasswordConfirm = $post['new_password_confirm'];
+
+            if (!$this->user->validate() || !$this->user->save()) {
+                throw new ValidationException($this->user->getFirstErrors());
+            }
+
+            $tr->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $tr->rollBack();
+            return ['result' => false];
+        }
+
+    }
+
+    /**
+     * Смена мобильного номера
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function mobileChange($post)
+    {
+        WebApiHelper::clearRequest($post);
+
+        if (empty($post['phone'])) {
+            throw new BadRequestHttpException('Empty password');
+        }
+
+        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
+        if (mb_substr($phone, 0, 1) == '8') {
+            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
+        }
+        //Проверяем телефон
+        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+            throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+        }
+
+        //Проверяем код, если прилетел
+        if (!empty($post['code'])) {
+            if (!preg_match('#^\d{4}$#', $post['code'])) {
+                throw new ValidationException(['code' => 'Bad format. (9999)']);
+            }
+        }
+
+        //Ищем модель на смену номера
+        $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
+        //Если нет модели, но прилетел какой то код, даем отлуп
+        if (empty($model) && !empty($post['code'])) {
+            throw new BadRequestHttpException('Вы еще не запросили код для смены телефона.');
+        }
+
+        //Если нет модели
+        if (empty($model)) {
+            $model = new SmsCodeChangeMobile();
+            $model->phone = $phone;
+            $model->user_id = $this->user->id;
+        }
+
+        //Даем отлуп если он уже достал выпращивать коды
+        if ($model->isNewRecord === false && $model->accessAllow() === false) {
+            throw new BadRequestHttpException('Wait ' . (300 - (int)$model->wait_time) . ' seconds.');
+        }
+
+        //Если код в запросе не пришел, шлем смс и создаем запись
+        if (empty($post['code'])) {
+            //Если модель не новая, значит уже были попытки отправить смс
+            //поэтому мы их просто наращиваем
+            if ($model->isNewRecord === false) {
+                $model->setAttempt();
+            }
+            //Генерируем код
+            $model->code = rand(1111, 9999);
+            //Сохраняем модель
+            if ($model->validate() && $model->save()) {
+                //Отправляем СМС с кодом
+                \Yii::$app->sms->send('Code: ' . $model->code, $model->phone);
+            } else {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        } else {
+            //Проверяем код
+            if ($model->checkCode($post['code'])) {
+                //Меняем номер телефона, если все хорошо
+                $model->changePhoneUser();
+            } else {
+                throw new BadRequestHttpException('Bad code!');
+            }
+        }
+        return ['result' => true];
     }
 
     /**

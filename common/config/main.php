@@ -201,6 +201,13 @@ return [
             'class' => 'common\components\GoogleShortUrl',
             'apiKey' => 'AIzaSyBBFwzatN-rVz6kESUAziVngA-T3_0W6Pk',
         ],
+        'siteApi' => [
+            'class' => 'mongosoft\soapclient\Client',
+            'url' => 'https://soap.edi.su/soap/?wsdl',
+            'options' => [
+                'cache_wsdl' => WSDL_CACHE_NONE,
+            ],
+        ]
     ],
     'modules' => [
         'user' => [

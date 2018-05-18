@@ -62,4 +62,8 @@ return [
     'iikoLogOrganization' => [],
 
     'web' => 'https://mixcart.ru/',
+    'e_com' => [
+        'login' => 'markettest',
+        'pass' => 'e1fa52810ea9d18a5af901c147c804e6',
+    ]
 ];

@@ -1,5 +1,8 @@
 <?php
 
+/* @var $this \yii\web\View */
+
+
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
@@ -9,9 +12,9 @@ use common\assets\CroppieAsset;
 CroppieAsset::register($this);
 \common\assets\GoogleMapsAsset::register($this);
 
-$this->title = Yii::t('message', 'frontend.views.vendor.settings', ['ru'=>'Настройки']);
+$this->title = Yii::t('message', 'frontend.views.vendor.settings', ['ru' => 'Настройки']);
 $this->registerJs(
-        '$("document").ready(function(){
+    '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
                 //$.pjax.reload({container: "#settingsInfo"});      
                 location.reload();
@@ -127,18 +130,18 @@ $this->registerCss("
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.vendor.custom', ['ru'=>'Общие']) ?>
-        <small><?= Yii::t('message', 'frontend.views.vendor.org_info', ['ru'=>'Информация об организации']) ?></small>
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.vendor.custom', ['ru' => 'Общие']) ?>
+        <small><?= Yii::t('message', 'frontend.views.vendor.org_info', ['ru' => 'Информация об организации']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
         'links' => [
-            Yii::t('message', 'frontend.views.vendor.set', ['ru'=>'Настройки']),
-            Yii::t('message', 'frontend.views.vendor.cust', ['ru'=>'Общие']),
+            Yii::t('message', 'frontend.views.vendor.set', ['ru' => 'Настройки']),
+            Yii::t('message', 'frontend.views.vendor.cust', ['ru' => 'Общие']),
         ],
     ])
     ?>
@@ -148,12 +151,12 @@ $this->registerCss("
         <?php
         //Pjax::begin(['enablePushState' => false, 'id' => 'settingsInfo', 'timeout' => 5000]);
         $form = ActiveForm::begin([
-                    'id' => 'generalSettings',
-                    'enableAjaxValidation' => false,
+            'id' => 'generalSettings',
+            'enableAjaxValidation' => false,
 //                    'options' => [
 //                        'data-pjax' => true,
 //                    ],
-                    'method' => 'post',
+            'method' => 'post',
         ]);
         ?>
         <div class="box-body">
@@ -161,20 +164,24 @@ $this->registerCss("
 
                 <div class="col-md-12">
                     <fieldset>
-                        <legend><?= Yii::t('message', 'frontend.views.vendor.org_data', ['ru'=>'Данные организации:']) ?></legend>
+                        <legend><?= Yii::t('message', 'frontend.views.vendor.org_data', ['ru' => 'Данные организации:']) ?></legend>
                         <div class="avatar-option" style="">
 
                             <div class="upload-demo-wrap">
                                 <div id="upload-avatar"></div>
                             </div>
-                            <img id="newAvatar" style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px;" class="center-block" src="<?= $organization->pictureUrl ?>">
-                            <label class="btn btn-gray" id="uploadAvatar" style="width:420px; display: block; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px;"> <?= Yii::t('message', 'frontend.views.vendor.avatar', ['ru'=>'Загрузить аватар']) ?>
+                            <img id="newAvatar"
+                                 style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px;"
+                                 class="center-block" src="<?= $organization->pictureUrl ?>">
+                            <label class="btn btn-gray" id="uploadAvatar"
+                                   style="width:420px; display: block; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px;"> <?= Yii::t('message', 'frontend.views.vendor.avatar', ['ru' => 'Загрузить аватар']) ?>
                                 <?=
-                                        $form->field($organization, 'picture', ['template' => '<div class="input-group">{input}</div>{error}'])
-                                        ->fileInput(['id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
+                                $form->field($organization, 'picture', ['template' => '<div class="input-group">{input}</div>{error}'])
+                                    ->fileInput(['id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
                                 ?>
                             </label>
-                            <div id="stub" style="width:420px; display: none; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px; height: 44px; background-color: #3f3e3e;"></div>
+                            <div id="stub"
+                                 style="width:420px; display: none; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px; height: 44px; background-color: #3f3e3e;"></div>
 
                             <?= Html::hiddenInput('Organization[picture]', null, ['id' => 'image-crop-result']) ?>
 
@@ -184,43 +191,43 @@ $this->registerCss("
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                    <?=
-                                            $form->field($organization, 'name', [
-                                                'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
-                                            ])
-                                            ->label(Yii::t('message', 'frontend.views.vendor.vendor_name', ['ru'=>'Название поставщика']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['value' => Html::decode($organization->name), 'placeholder' => Yii::t('message', 'frontend.views.vendor.name_insert', ['ru'=>'Введите название поставщика'])])
-                                    ?>
-                            </div>
-                            <div class="form-group">
-                                    <?=
-                                            $form->field($organization, 'legal_entity', [
-                                                'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
-                                            ])
-                                            ->label(Yii::t('message', 'frontend.views.vendor.jur_name', ['ru'=>'Название юридического лица']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['value' => Html::decode($organization->legal_entity), 'placeholder' => Yii::t('message', 'frontend.views.vendor.jur_name_insert', ['ru'=>'Введите название юридического лица'])])
-                                    ?>
+                                <?=
+                                $form->field($organization, 'name', [
+                                    'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
+                                ])
+                                    ->label(Yii::t('message', 'frontend.views.vendor.vendor_name', ['ru' => 'Название поставщика']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
+                                    ->textInput(['value' => Html::decode($organization->name), 'placeholder' => Yii::t('message', 'frontend.views.vendor.name_insert', ['ru' => 'Введите название поставщика'])])
+                                ?>
                             </div>
                             <div class="form-group">
                                 <?=
-                                        $form->field($organization, 'website', [
-                                            'addon' => ['prepend' => ['content' => '<i class="fa fa-globe"></i>']]
-                                        ])
-                                        ->label(Yii::t('message', 'frontend.views.vendor.site', ['ru'=>'Веб-сайт']))
-                                        ->textInput(['value' => Html::decode($organization->website), 'placeholder' => Yii::t('message', 'frontend.views.vendor.site_print', ['ru'=>'Введите адрес вашего веб-сайта'])])
+                                $form->field($organization, 'legal_entity', [
+                                    'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
+                                ])
+                                    ->label(Yii::t('message', 'frontend.views.vendor.jur_name', ['ru' => 'Название юридического лица']) . '  <span style="font-size:12px; color: #dd4b39;"></span>')
+                                    ->textInput(['value' => Html::decode($organization->legal_entity), 'placeholder' => Yii::t('message', 'frontend.views.vendor.jur_name_insert', ['ru' => 'Введите название юридического лица'])])
+                                ?>
+                            </div>
+                            <div class="form-group">
+                                <?=
+                                $form->field($organization, 'website', [
+                                    'addon' => ['prepend' => ['content' => '<i class="fa fa-globe"></i>']]
+                                ])
+                                    ->label(Yii::t('message', 'frontend.views.vendor.site', ['ru' => 'Веб-сайт']))
+                                    ->textInput(['value' => Html::decode($organization->website), 'placeholder' => Yii::t('message', 'frontend.views.vendor.site_print', ['ru' => 'Введите адрес вашего веб-сайта'])])
                                 ?>
                             </div>
                             <div class="form-group">
                                 <?=
                                 $form->field($organization, 'about')
-                                ->label(Yii::t('message', 'frontend.views.vendor.org_info_two', ['ru'=>'Информация об организации']))
-                                ->textarea(['value' => Html::decode($organization->about), 'placeholder' => Yii::t('error', 'frontend.views.vendor.several_words', ['ru'=>"Несколько слов об организации ..."]), 'rows' => 2])
+                                    ->label(Yii::t('message', 'frontend.views.vendor.org_info_two', ['ru' => 'Информация об организации']))
+                                    ->textarea(['value' => Html::decode($organization->about), 'placeholder' => Yii::t('error', 'frontend.views.vendor.several_words', ['ru' => "Несколько слов об организации ..."]), 'rows' => 2])
                                 ?>
                             </div>
                             <div class="form-group">
                                 <?=
                                 $form->field($organization, 'is_allowed_for_franchisee')
-                                    ->label(Yii::t('message', 'frontend.views.vendor.franch_enter', ['ru'=>'Разрешить франчайзи вход в данный Личный Кабинет']))
+                                    ->label(Yii::t('message', 'frontend.views.vendor.franch_enter', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']))
                                     ->checkbox()
                                 ?>
                             </div>
@@ -228,78 +235,87 @@ $this->registerCss("
                         <div class="col-md-6">
                             <div class="form-group">
                                 <?=
-                                        $form->field($organization, 'address', [
-                                            'addon' => ['prepend' => ['content' => '<i class="fa fa-compass"></i>']]
-                                        ])
-                                        ->label(Yii::t('message', 'frontend.views.vendor.add', ['ru'=>'Адрес']))
-                                        ->textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.enter_add', ['ru'=>'Введите ваш адрес'])])
-                                ?> 
+                                $form->field($organization, 'address', [
+                                    'addon' => ['prepend' => ['content' => '<i class="fa fa-compass"></i>']]
+                                ])
+                                    ->label(Yii::t('message', 'frontend.views.vendor.add', ['ru' => 'Адрес']))
+                                    ->textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.enter_add', ['ru' => 'Введите ваш адрес'])])
+                                ?>
                             </div>
-        <div id="map" style="width:100%;height:250px;"></div>
-<?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
-<?= Html::activeHiddenInput($organization, 'lng'); //долгота ?>
-<?= Html::activeHiddenInput($organization, 'country'); //страна ?> 
-<?= Html::activeHiddenInput($organization, 'locality'); //Город ?>
-<?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область ?>
-<?= Html::activeHiddenInput($organization, 'route'); //улица ?>
-<?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
-<?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
-<?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
-<script type="text/javascript"> 
+                            <div id="map" style="width:100%;height:250px;"></div>
+                            <?= Html::activeHiddenInput($organization, 'lat'); //широта  ?>
+                            <?= Html::activeHiddenInput($organization, 'lng'); //долгота  ?>
+                            <?= Html::activeHiddenInput($organization, 'country'); //страна  ?>
+                            <?= Html::activeHiddenInput($organization, 'locality'); //Город  ?>
+                            <?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область  ?>
+                            <?= Html::activeHiddenInput($organization, 'route'); //улица  ?>
+                            <?= Html::activeHiddenInput($organization, 'street_number'); //дом  ?>
+                            <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места  ?>
+                            <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес  ?>
+                            <script type="text/javascript">
 
-function stopRKey(evt) { 
-var evt = (evt) ? evt : ((event) ? event : null); 
-var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
-if ((evt.keyCode == 13) && (node.type=="text")) {return false;} 
-} 
+                                function stopRKey(evt) {
+                                    var evt = (evt) ? evt : ((event) ? event : null);
+                                    var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+                                    if ((evt.keyCode == 13) && (node.type == "text")) {
+                                        return false;
+                                    }
+                                }
 
-document.onkeypress = stopRKey; 
+                                document.onkeypress = stopRKey;
 
-</script> 
+                            </script>
                         </div>
                     </div>
                 </div>
             </div>
             <fieldset>
-                <legend><?= Yii::t('message', 'frontend.views.vendor.contact', ['ru'=>'Контактное лицо:']) ?></legend>
+                <legend><?= Yii::t('message', 'frontend.views.vendor.contact', ['ru' => 'Контактное лицо:']) ?></legend>
                 <div class="row">
 
                     <div class="col-md-4">
                         <div class="form-group">
                             <?=
-                                    $form->field($organization, 'contact_name', [
-                                        'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
-                                    ])
-                                    ->label(Yii::t('message', 'frontend.views.vendor.fio', ['ru'=>'ФИО контактного лица']))
-                                    ->textInput(['value' => Html::decode($organization->contact_name), 'placeholder' => Yii::t('message', 'frontend.views.vendor.cont_fio', ['ru'=>'Введите ФИО контактного лица'])])
+                            $form->field($organization, 'contact_name', [
+                                'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
+                            ])
+                                ->label(Yii::t('message', 'frontend.views.vendor.fio', ['ru' => 'ФИО контактного лица']))
+                                ->textInput(['value' => Html::decode($organization->contact_name), 'placeholder' => Yii::t('message', 'frontend.views.vendor.cont_fio', ['ru' => 'Введите ФИО контактного лица'])])
                             ?>                        </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <?=
-                                    $form->field($organization, 'email', [
-                                        'addon' => ['prepend' => ['content' => '<i class="fa fa-envelope"></i>']]
-                                    ])
-                                    ->label('E-mail')
-                                    ->textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.enter_email', ['ru'=>"Введите E-mail"])])
+                            $form->field($organization, 'email', [
+                                'addon' => ['prepend' => ['content' => '<i class="fa fa-envelope"></i>']]
+                            ])
+                                ->label('E-mail')
+                                ->textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.enter_email', ['ru' => "Введите E-mail"])])
                             ?>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <?=
-                                    $form->field($organization, 'phone')
-                                    ->widget(\common\widgets\PhoneInput::className(), [
-                                'jsOptions' => [
-                                    'preferredCountries' => ['ru'],
-                                    'nationalMode' => false,
-                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
-                                ],
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                            ])
-                                    ->label(Yii::t('message', 'frontend.views.vendor.phone', ['ru'=>'Телефон']))
+                            $form->field($organization, 'phone')
+                                ->widget(\common\widgets\PhoneInput::className(), [
+                                    'jsOptions' => [
+                                        'preferredCountries' => ['ru'],
+                                        'nationalMode' => false,
+                                        'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                    ],
+                                    'options' => [
+                                        'class' => 'form-control',
+                                    ],
+                                ])
+                                ->label(Yii::t('message', 'frontend.views.vendor.phone', ['ru' => 'Телефон']))
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <?=
+                            $form->field($organization, 'gln_code')->textInput(['disabled' => true])->label(Yii::t('message', 'GLN-код'))
                             ?>
                         </div>
                     </div>
@@ -307,8 +323,8 @@ document.onkeypress = stopRKey;
             </fieldset>
         </div>
         <div class="box-footer clearfix">
-            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.save', ['ru'=>'Сохранить изменения']) . ' ', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
-            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.vendor.', ['ru'=>'Отменить изменения']) . ' ', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
+            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.save', ['ru' => 'Сохранить изменения']) . ' ', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
+            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.vendor.', ['ru' => 'Отменить изменения']) . ' ', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
         </div>
         <?php
         ActiveForm::end();

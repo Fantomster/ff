@@ -1239,7 +1239,7 @@ class OrderController extends DefaultController
                 $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->status = $order->status == Order::STATUS_PROCESSING;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->vendor, $order);
@@ -1397,7 +1397,6 @@ class OrderController extends DefaultController
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();

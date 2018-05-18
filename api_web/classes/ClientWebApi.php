@@ -6,6 +6,8 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use common\models\AdditionalEmail;
+use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use common\models\Organization;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -82,6 +84,10 @@ class ClientWebApi extends WebApi
                 $model->name = $post['name'];
             }
 
+            if (isset($post['is_allowed_for_franchisee']) && in_array($post['is_allowed_for_franchisee'], [0, 1, true, false])) {
+                $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
+            }
+
             if (!empty($post['address'])) {
                 if (!empty($post['address']['country'])) {
                     $model->country = $post['address']['country'];
@@ -114,6 +120,7 @@ class ClientWebApi extends WebApi
                 $model->address = implode(', ', $post['address']);
                 $model->formatted_address = $model->address;
             }
+
 
             if (!$model->validate() || !$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
@@ -224,79 +231,141 @@ class ClientWebApi extends WebApi
     }
 
     /**
-     * Список дополнительных емайл адресов
+     * Список уведомлений
      * @return mixed
      * @throws BadRequestHttpException
      */
-    public function additionalEmailList()
+    public function notificationList()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
             throw new BadRequestHttpException('This method is forbidden for the vendor.');
         }
-
-        $emails = $this->user->organization->additionalEmail;
-
         $result = [];
-        if (!empty($emails)) {
-            $result = $emails;
+
+        $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+
+        if (empty($rel)) {
+            throw new BadRequestHttpException('Relation not found.');
+        }
+
+        $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
+        if (!empty($user_phone)) {
+            $result[] = [
+                'id' => $user_phone->id,
+                'value' => $this->user->profile->phone,
+                'type' => 'user_phone',
+                'order_created' => $user_phone['order_created'],
+                'order_canceled' => $user_phone['order_canceled'],
+                'order_changed' => $user_phone['order_changed'],
+                'order_processing' => $user_phone['order_processing'],
+                'order_done' => $user_phone['order_done'],
+                'request_accept' => $user_phone['request_accept']
+            ];
+        }
+
+        $user_email = EmailNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
+        if (!empty($user_email)) {
+            $result[] = [
+                'id' => $user_email->id,
+                'value' => $this->user->email,
+                'type' => 'user_email',
+                'order_created' => $user_email['order_created'],
+                'order_canceled' => $user_email['order_canceled'],
+                'order_changed' => $user_email['order_changed'],
+                'order_processing' => $user_email['order_processing'],
+                'order_done' => $user_email['order_done'],
+                'request_accept' => $user_email['request_accept'],
+            ];
+        }
+
+        $additional_emails = $this->user->organization->additionalEmail;
+        if (!empty($additional_emails)) {
+            foreach ($additional_emails as $row) {
+                $result[] = [
+                    'id' => $row['id'],
+                    'value' => $row['email'],
+                    'type' => 'additional_email',
+                    'order_created' => $row['order_created'],
+                    'order_canceled' => $row['order_canceled'],
+                    'order_changed' => $row['order_changed'],
+                    'order_processing' => $row['order_processing'],
+                    'order_done' => $row['order_done'],
+                    'request_accept' => $row['request_accept'],
+                ];
+            }
         }
 
         return $result;
     }
 
     /**
-     * Обновление дополнительного емайла
-     * @param array $post
+     * Обновление уведомления
+     * @param array $posts
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function additionalEmailUpdate(array $post)
+    public function notificationUpdate(array $posts)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
             throw new BadRequestHttpException('This method is forbidden for the vendor.');
         }
 
-        if (!isset($post['id'])) {
-            throw new BadRequestHttpException('Empty id');
-        }
+        foreach ($posts as $post) {
+            if (!isset($post['id'])) {
+                throw new BadRequestHttpException('Empty id');
+            }
 
-        $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
-        if (empty($model)) {
-            throw new BadRequestHttpException('Additional email not found.');
-        }
+            $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
 
-        $t = \Yii::$app->db->beginTransaction();
-        try {
+            if (empty($rel)) {
+                throw new BadRequestHttpException('Relation not found.');
+            }
 
-            $params = [
-                "order_created",
-                "order_canceled",
-                "order_changed",
-                "order_processing",
-                "order_done",
-                "request_accept"
-            ];
+            switch ($post['type']) {
+                case 'user_phone':
+                    $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
+                    break;
+                case 'user_email':
+                    $model = EmailNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
+                    break;
+                case 'additional_email':
+                    $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $rel->organization_id]);
+                    break;
+            }
 
-            foreach ($params as $param) {
-                if (isset($post[$param])) {
-                    $model->$param = $post[$param];
+            if (empty($model)) {
+                throw new BadRequestHttpException('Model not found.');
+            }
+
+            $t = \Yii::$app->db->beginTransaction();
+            try {
+
+                $params = [
+                    "order_created",
+                    "order_canceled",
+                    "order_changed",
+                    "order_processing",
+                    "order_done",
+                    "request_accept"
+                ];
+
+                foreach ($params as $param) {
+                    if (isset($post[$param]) && in_array($post[$param], [0, 1])) {
+                        $model->$param = $post[$param];
+                    }
                 }
-            }
 
-            if (isset($post['email']) && $model->email != $post['email']) {
-                $model->email = $post['email'];
+                if ($model->validate() && $model->save()) {
+                    $t->commit();
+                    return $this->notificationList();
+                } else {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+            } catch (\Exception $e) {
+                $t->rollBack();
+                throw $e;
             }
-
-            if ($model->validate() && $model->save()) {
-                $t->commit();
-                return $model->getAttributes();
-            } else {
-                throw new ValidationException($model->getFirstErrors());
-            }
-        } catch (\Exception $e) {
-            $t->rollBack();
-            throw $e;
         }
     }
 
@@ -481,14 +550,6 @@ class ClientWebApi extends WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            //Ищем сотрудника среди всех, в этом ресторане
-            $user = $this->employeeSearch($post);
-            //Если нашли бросаем исключение, что уже работает
-            if (!empty($user)) {
-                $relation = RelationUserOrganization::findOne(['user_id' => $user['id'], 'organization_id' => $this->user->organization->id]);
-                throw new BadRequestHttpException('Этот сотрудник уже работает под ролью: ' . $relation->user->role->name);
-            }
-
             /**
              * Проверка полей
              */
@@ -506,38 +567,48 @@ class ClientWebApi extends WebApi
             }
 
             //Интуем роль
-            $post['role_id'] = (int)$post['role_id'];
+            $role_id = (int)$post['role_id'];
             //Проверка, можно ли проставить эту роль что прислали
             $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
             if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
                 throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
             }
 
-            //готовим запрос на создание пользователя
-            $request = [
-                'user' => [
-                    'email' => $post['email'],
-                    'password' => substr(md5(time() . time()), 0, 8)
-                ],
-                'profile' => [
-                    'phone' => $post['phone'],
-                    'full_name' => $post['name']
-                ]
-            ];
-
-            /**
-             * @var $user_api UserWebApi
-             */
-            $user_api = $this->container->get('UserWebApi');
-            //Создаем пользователя
-            $user = $user_api->createUser($request, (int)$post['role_id']);
-            //Устанавливаем текущую организацию
-            $user->setOrganization($this->user->organization, true);
-            //Создаем профиль пользователя
-            $user_api->createProfile($request, $user);
-            $user->refresh();
+            //Ищем пользователя
+            $user = User::findOne(['email' => $post['email']]);
+            if (!empty($user)) {
+                //Смотрим, вдруг он уже работает в этом ресторане
+                $relation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->user->organization->id]);
+                if (!empty($relation)) {
+                    throw new BadRequestHttpException('Этот сотрудник уже работает под ролью: ' . Role::findOne($relation->role_id)->name);
+                }
+            } else {
+                /**
+                 * @var $user_api UserWebApi
+                 */
+                $user_api = $this->container->get('UserWebApi');
+                //Это новый пользователь, идем создавать
+                //готовим запрос на создание пользователя
+                $request = [
+                    'user' => [
+                        'email' => $post['email'],
+                        'password' => substr(md5(time() . time()), 0, 8)
+                    ],
+                    'profile' => [
+                        'phone' => $post['phone'],
+                        'full_name' => $post['name']
+                    ]
+                ];
+                //Создаем пользователя
+                $user = $user_api->createUser($request, $role_id);
+                //Устанавливаем текущую организацию
+                $user->setOrganization($this->user->organization, true);
+                //Создаем профиль пользователя
+                $user_api->createProfile($request, $user);
+                $user->refresh();
+            }
             //Создаем связь нового сотрудника с рестораном
-            $user->setRelationUserOrganization($user->id, $this->user->organization->id, (int)$post['role_id']);
+            $user->createRelationUserOrganization($user->id, $this->user->organization->id, $role_id);
             //Все хорошо, применяем изменения в базе
             $transaction->commit();
             //Тут нужно отправить письмо для смены пароля пользователю

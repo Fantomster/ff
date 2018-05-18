@@ -45,7 +45,7 @@ class RkPconst extends \yii\db\ActiveRecord
     {
         return [
             [['id', 'const_id', 'org'], 'integer'],
-            [['value'], 'string', 'max' => 255],
+            [['value'], 'string', 'max' => 65534],
             [['const_id','org','value','created_at','updated_at'], 'safe'],
             
         ];

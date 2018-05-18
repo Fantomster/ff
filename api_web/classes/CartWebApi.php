@@ -66,6 +66,7 @@ class CartWebApi extends \api_web\components\WebApi
         try {
             $cart = $this->getCart();
             $product = (new Product())->findFromCatalogs($post['product_id']);
+
             $catalogs = explode(',', $client->getCatalogs());
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $catalogs) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
@@ -77,6 +78,7 @@ class CartWebApi extends \api_web\components\WebApi
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
+            \Yii::error($e->getMessage());
             throw $e;
         }
     }
@@ -168,6 +170,11 @@ class CartWebApi extends \api_web\components\WebApi
         ];
 
         if (!empty($post)) {
+
+            if (isset($post['id'])) {
+                $post[] = $post;
+            }
+
             $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {
@@ -308,10 +315,6 @@ class CartWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("ERROR: Empty product_id");
         }
 
-        if (empty($post['comment'])) {
-            throw new BadRequestHttpException("ERROR: Empty comment");
-        }
-
         /**
          * @var $model CartContent
          */
@@ -321,7 +324,7 @@ class CartWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Нет такого товара в корзине");
         }
 
-        $model->comment = $post['comment'];
+        $model->comment = $post['comment'] ?? '';
 
         if (!$model->validate()) {
             throw new ValidationException($model->getFirstErrors());
@@ -407,7 +410,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param $quantity
      * @return float
      */
-    private function recalculationQuantity($product, $quantity)
+    public function recalculationQuantity($product, $quantity)
     {
         $units = $product['units'];
 
@@ -432,7 +435,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param $row CartContent
      * @return mixed
      */
-    private function prepareProduct($row)
+    private function prepareProduct(CartContent $row)
     {
         $model = $row->product;
 
@@ -442,13 +445,13 @@ class CartWebApi extends \api_web\components\WebApi
         $item['category_id'] = isset($model['model']->category) ? (int)$model['model']->category->id : 0;
         $item['price'] = round($model['price'], 2);
         $item['rating'] = round($model['model']->ratingStars, 1);
-        $item['supplier'] = Organization::findOne($model['vendor_id'])->name;
+        $item['supplier'] = $row->vendor->name;
         $item['brand'] = ($model['model']->brand ? $model['model']->brand : '');
         $item['article'] = $model['model']->article;
         $item['ed'] = $model['model']->ed;
         $item['units'] = round(($model['units'] ?? 0), 3);
-        $item['currency'] = $model['model']->catalog->currency->symbol;
-        $item['currency_id'] = $model['model']->catalog->currency->id;
+        $item['currency'] = $row->currency->symbol;
+        $item['currency_id'] = $row->currency->id;
         $item['image'] = (new MarketWebApi())->getProductImage($model['model']);
         $item['in_basket'] = $this->countProductInCart($model['id']);
         $item['comment'] = $row->comment;

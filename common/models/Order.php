@@ -2,8 +2,11 @@
 
 namespace common\models;
 
+use common\components\EComIntegration;
 use Yii;
+use yii\base\ExitException;
 use yii\helpers\Url;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "order".
@@ -447,13 +450,34 @@ class Order extends \yii\db\ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
-                if($this->status != self::STATUS_FORMING)
-                \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
-            else
-                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
-
+                if($this->status != self::STATUS_FORMING){
+                    \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
+                    $organization = Organization::findOne(['id'=>$this->vendor_id]);
+                    if($organization->is_ecom_integration){
+                        $eComIntegration = new EComIntegration();
+                        $eComIntegration->sendOrderInfo($this, $organization);
+                    }
+                }else{
+                    \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
+                }
+        }
+        if($this->status != self::STATUS_FORMING && !$insert){
+            $vendor = Organization::findOne(['id'=>$this->vendor_id]);
+            $client = Organization::findOne(['id'=>$this->client_id]);
+            $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
+            if($client->gln_code && $vendor->gln_code){
+                $eComIntegration = new EComIntegration();
+                $success = $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                if(!$success){
+                    throw new BadRequestHttpException('EDI error');
+                }
+            }
+            if(!$client->gln_code && $vendor->gln_code){
+                throw new BadRequestHttpException($errorText);
+            }
         }
     }
+
 
     public function afterDelete()
     {

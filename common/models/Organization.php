@@ -34,6 +34,7 @@ use common\models\guides\Guide;
  * @property bool $partnership
  * @property integer $rating
  * @property integer $allow_editing
+ * @property integer $is_allowed_for_franchisee
  * @property integer $is_work
  * @property double $lat
  * @property double $lng
@@ -45,6 +46,7 @@ use common\models\guides\Guide;
  * @property string $administrative_area_level_1
  * @property string $formatted_address
  * @property string $franchisee_sorted
+ * @property string $inn
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -117,8 +119,9 @@ class Organization extends \yii\db\ActiveRecord
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted'], 'integer'],
-            [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
+            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn'], 'safe'],
+            [['name', 'inn', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
+            [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
@@ -200,7 +203,8 @@ class Organization extends \yii\db\ActiveRecord
             'manager_id' => Yii::t('app', 'common.models.manager', ['ru' => 'Менеджер']),
             'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
             'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
-            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе'])
+            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе']),
+            'gln_code' => Yii::t('app', 'GLN-код'),
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
@@ -15,6 +16,7 @@ use api_web\components\Notice;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -31,65 +33,246 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return array
      * @throws \Exception
      *
-    public function registration(array $orders)
+     * public function registration(array $orders)
+     * {
+     * $transaction = \Yii::$app->db->beginTransaction();
+     * try {
+     * $user = $this->user;
+     * $client = $user->organization;
+     *
+     * if (empty($client->getCartCount())) {
+     * throw new BadRequestHttpException("Корзина пуста.");
+     * }
+     *
+     * if (empty($orders['orders'])) {
+     * throw new BadRequestHttpException("Необходимо передать список заказов для оформления.");
+     * }
+     *
+     * $return = [];
+     * foreach ($orders['orders'] as $order_id) {
+     * $order = Order::findOne([
+     * 'id' => $order_id,
+     * 'client_id' => $client->id,
+     * 'status' => Order::STATUS_FORMING
+     * ]);
+     *
+     * if (empty($order)) {
+     * $return[] = [
+     * 'order_id' => $order_id,
+     * 'result' => 'Не найден'
+     * ];
+     * continue;
+     * }
+     *
+     * $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+     * $order->created_by_id = $user->id;
+     * $order->created_at = gmdate("Y-m-d H:i:s");
+     *
+     * if (!$order->validate()) {
+     * throw new ValidationException($order->getFirstErrors());
+     * }
+     *
+     * $return[] = [
+     * 'order_id' => $order->id,
+     * 'result' => $order->save()
+     * ];
+     *
+     * //Сообщение в очередь поставщику, что есть новый заказ
+     * Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
+     * //Емайл и смс о новом заказе
+     * Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
+     * }
+     * //Сообщение в очередь, Изменение количества товара в корзине
+     * Notice::init('Order')->sendOrderToTurnClient($client);
+     * $transaction->commit();
+     * return $return;
+     * } catch (\Exception $e) {
+     * $transaction->rollBack();
+     * throw $e;
+     * }
+     * }
+     */
+
+
+    /**
+     * Редактирование заказа
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function update($post)
     {
-        $transaction = \Yii::$app->db->beginTransaction();
+        WebApiHelper::clearRequest($post);
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty order_id');
+        }
+        //Поиск заказа
+        $order = Order::findOne($post['order_id']);
+        if (!$this->accessAllow($order)) {
+            throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+        }
+        //Проверим статус заказа
+        if (in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
+            throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
+        }
+        //Если сменили комментарий
+        if (!empty($post['comment'])) {
+            $order->comment = trim($post['comment']);
+        }
+        //Если поменяли скидку
+        if (!empty($post['discount'])) {
+            if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
+                throw new BadRequestHttpException("Discount type FIXED or PERCENT");
+            }
+            if (empty($post['discount']['amount'])) {
+                throw new BadRequestHttpException("Discount amount empty");
+            }
+            $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+            $order->discount = $post['discount']['amount'];
+        }
+
+        $tr = \Yii::$app->db->beginTransaction();
         try {
-            $user = $this->user;
-            $client = $user->organization;
-
-            if (empty($client->getCartCount())) {
-                throw new BadRequestHttpException("Корзина пуста.");
-            }
-
-            if (empty($orders['orders'])) {
-                throw new BadRequestHttpException("Необходимо передать список заказов для оформления.");
-            }
-
-            $return = [];
-            foreach ($orders['orders'] as $order_id) {
-                $order = Order::findOne([
-                    'id' => $order_id,
-                    'client_id' => $client->id,
-                    'status' => Order::STATUS_FORMING
-                ]);
-
-                if (empty($order)) {
-                    $return[] = [
-                        'order_id' => $order_id,
-                        'result' => 'Не найден'
-                    ];
-                    continue;
+            //Тут операции с продуктами в этом заказе
+            if (!empty($post['products']) && is_array($post['products'])) {
+                foreach ($post['products'] as $product) {
+                    $operation = strtolower($product['operation']);
+                    if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
+                        throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+                    }
+                    switch ($operation) {
+                        case 'delete':
+                            $this->deleteProduct($order, $product['id']);
+                            break;
+                        case 'add':
+                            $this->addProduct($order, $product);
+                            break;
+                        case 'edit':
+                            $this->editProduct($order, $product);
+                            break;
+                    }
                 }
-
-                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $order->created_by_id = $user->id;
-                $order->created_at = gmdate("Y-m-d H:i:s");
-
-                if (!$order->validate()) {
-                    throw new ValidationException($order->getFirstErrors());
-                }
-
-                $return[] = [
-                    'order_id' => $order->id,
-                    'result' => $order->save()
-                ];
-
-                //Сообщение в очередь поставщику, что есть новый заказ
-                Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
-                //Емайл и смс о новом заказе
-                Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
+            } else {
+                throw new BadRequestHttpException("products not array");
             }
-            //Сообщение в очередь, Изменение количества товара в корзине
-            Notice::init('Order')->sendOrderToTurnClient($client);
-            $transaction->commit();
-            return $return;
+
+            $order->calculateTotalPrice();
+
+            if (!$order->save()) {
+                throw new ValidationException($order->getFirstErrors());
+            }
+            $tr->commit();
+            return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
-            $transaction->rollBack();
+            $tr->rollBack();
             throw $e;
         }
     }
-    */
+
+    /**
+     * Редактирвание продукта в заказе
+     * @param Order $order
+     * @param array $product
+     * @return bool
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    private function editProduct(Order $order, array $product)
+    {
+        if (empty($product['id'])) {
+            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+        }
+
+        /**
+         * @var $orderContent OrderContent
+         */
+        $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+        if (empty($orderContent)) {
+            throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
+        }
+
+        if (!empty($product['quantity'])) {
+            $orderContent->quantity = $product['quantity'];
+        }
+
+        if (!empty($product['comment'])) {
+            $orderContent->comment = $product['comment'];
+        }
+
+        if (!empty($product['price'])) {
+            $orderContent->price = $product['price'];
+        }
+
+        if ($orderContent->validate() && $orderContent->save()) {
+            return true;
+        } else {
+            throw new ValidationException($orderContent->getFirstErrors());
+        }
+    }
+
+    /**
+     * Удаление продукта из заказа
+     * @param Order $order
+     * @param int $id
+     * @throws BadRequestHttpException
+     */
+    private function deleteProduct(Order $order, int $id)
+    {
+        if (empty($id)) {
+            throw new BadRequestHttpException("DELETE CANCELED product id empty");
+        }
+
+        $orderContentRow = $order->getOrderContent()->where(['product_id' => $id])->one();
+
+        if (empty($orderContentRow)) {
+            throw new BadRequestHttpException("DELETE CANCELED not found product: " . $id);
+        }
+
+        $orderContentRow->delete();
+    }
+
+    /**
+     * Добавление продукта в заказ
+     * @param Order $order
+     * @param array $product
+     * @return bool
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    private function addProduct(Order $order, array $product)
+    {
+        if (empty($product['id'])) {
+            throw new BadRequestHttpException("ADD CANCELED product id empty");
+        }
+
+        $orderContentRow = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+
+        if (empty($orderContentRow)) {
+            $productModel = (new Product())->findFromCatalogs($product['id'], $this->user->organization->getCatalogs());
+            if (!in_array($productModel['supp_org_id'], [$order->vendor->id])) {
+                throw new BadRequestHttpException("В этот заказ можно добавлять только товары поставщика: " . $order->vendor->name);
+            }
+
+            $orderContent = new OrderContent();
+            $orderContent->order_id = $order->id;
+            $orderContent->product_id = $productModel['id'];
+            $orderContent->quantity = (new CartWebApi())->recalculationQuantity($productModel, $product['quantity'] ?? 1);
+            $orderContent->comment = $product['comment'] ?? '';
+            $orderContent->price = $productModel['price'];
+            $orderContent->initial_quantity = $orderContent->quantity;
+            $orderContent->product_name = $productModel['product'];
+            $orderContent->units = $productModel['units'];
+            $orderContent->article = $productModel['article'];
+            if ($orderContent->validate() && $orderContent->save()) {
+                return true;
+            } else {
+                throw new ValidationException($orderContent->getFirstErrors());
+            }
+        } else {
+            throw new BadRequestHttpException("ADD CANCELED the product is already in the order: " . $product['id']);
+        }
+    }
 
     /**
      * Оставляем комментарий к заказу
@@ -192,7 +375,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение комментария к заказу");
+            throw new BadRequestHttpException("У вас нет прав для просмотра этого заказа.");
         }
 
         $result = $order->attributes;
@@ -236,6 +419,52 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
         return $result;
+    }
+
+    /**
+     *
+     */
+    public function getHistoryCount()
+    {
+        $result = (new Query())->from(Order::tableName())
+            ->select(['status', 'COUNT(status) as count'])
+            ->where([
+                'or',
+                ['client_id' => $this->user->organization->id],
+                ['vendor_id' => $this->user->organization->id],
+            ])
+            ->groupBy('status')
+            ->all();
+
+        $return = [
+            'waiting' => 0,
+            'processing' => 0,
+            'success' => 0,
+            'canceled' => 0
+        ];
+
+        if (!empty($result)) {
+            foreach ($result as $row) {
+                switch ($row['status']) {
+                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        $return['waiting'] += $row['count'];
+                        break;
+                    case Order::STATUS_PROCESSING:
+                        $return['processing'] += $row['count'];
+                        break;
+                    case Order::STATUS_DONE:
+                        $return['success'] += $row['count'];
+                        break;
+                    case Order::STATUS_CANCELLED:
+                    case Order::STATUS_REJECTED:
+                        $return['canceled'] += $row['count'];
+                        break;
+                }
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -427,7 +656,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $field = str_replace('-', '', $sort);
 
-            if ($field == 'supplier') {
+            if ($field == 'supplier' || $field == 'supplier_id') {
                 $field = 'name';
             }
 
@@ -449,6 +678,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'ed' => $model['ed'],
                 'units' => (int)$model['units'] ?? 1,
                 'currency' => $model['symbol'],
+                'currency_id' => (int)$model['currency_id'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket' => $this->container->get('CartWebApi')->countProductInCart($model['id']),
             ];

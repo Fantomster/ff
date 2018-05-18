@@ -203,8 +203,8 @@ class UserController extends WebApiController
     /**
      * @SWG\Post(path="/user/set-organization",
      *     tags={"User"},
-     *     summary="Переключение текщей организации пользователя",
-     *     description="Переключение текщей организации пользователя",
+     *     summary="Переключение текущей организации пользователя",
+     *     description="Переключение текущей организации пользователя",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -382,6 +382,7 @@ class UserController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "location":"Россия:Москва",
+     *                                   "name":"поставщик",
      *                                   "status":1
      *                               },
      *                               "pagination":{
@@ -491,5 +492,94 @@ class UserController extends WebApiController
     public function actionRemoveVendor()
     {
         $this->response = $this->container->get('UserWebApi')->removeVendor($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/user/password-change",
+     *     tags={"User"},
+     *     summary="Смена пароля пользователя",
+     *     description="Смена пароля пользователя",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "password": "qazwsx",
+     *                      "new_password": "qazwsx123",
+     *                      "new_password_confirm": "qazwsx123",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"result": true}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionPasswordChange()
+    {
+        $this->response = $this->container->get('UserWebApi')->changePassword($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/user/mobile-change",
+     *     tags={"User"},
+     *     summary="Смена телефона пользователя",
+     *     description="Смена телефона пользователя.
+     *     Запрос на отправку смс ,или повторную отправку, осуществяется без параметра code
+     *     Параметр code указываем только для проверки кода.",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "phone": "+79162221133",
+     *                      "code": 4433
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"result": true}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionMobileChange()
+    {
+        $this->response = $this->container->get('UserWebApi')->mobileChange($this->request);
     }
 }

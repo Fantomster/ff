@@ -24,6 +24,7 @@ class MarketWebApi extends WebApi
      * Список доступных для заказа продуктов на маркете
      * @param $post
      * @return array
+     * @throws BadRequestHttpException
      */
     public function products($post)
     {
@@ -34,7 +35,7 @@ class MarketWebApi extends WebApi
         $currentUser = $this->user;
 
         $result = CatalogBaseGoods::find()
-            ->joinWith('vendor')
+            ->joinWith(['vendor', 'category'])
             ->where([
                 'organization.white_list' => Organization::WHITE_LIST_ON,
                 'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
@@ -87,37 +88,62 @@ class MarketWebApi extends WebApi
 
                 if ($key == 'supplier_id') {
                     $key = 'supp_org_id';
-                    if(!empty($value)) {
-                        if(is_array($value)) {
+                    if (!empty($value)) {
+                        if (is_array($value)) {
+                            $supp_orgs = [];
                             foreach ($value as $supp_org_id) {
-                                $supp_orgs[] = (int) $supp_org_id;
+                                $supp_orgs[] = (int)$supp_org_id;
                             }
                             $value = implode(', ', $supp_orgs);
                         } else {
-                            $value = (int) $value;
+                            $value = (int)$value;
                         }
                         $result->andWhere("$key IN ($value)");
                     }
-                }else
-                if (is_numeric($value) OR is_int($value)) {
-                    $result->andFilterWhere([$key => $value]);
-                } else {
+                }
+
+                if (in_array($key, ['category_id'])) {
+                    if (!empty($value)) {
+                        if (is_array($value)) {
+                            $categories = [];
+                            foreach ($value as $category) {
+                                $categories[] = (int)$category;
+                            }
+                            $value = implode(', ', $categories);
+                        } else {
+                            $value = (int)$value;
+                        }
+                        $result->andWhere("$key IN ($value) OR parent IN ($value)");
+                    }
+                }
+
+                if (in_array($key, ['product'])) {
                     $result->andFilterWhere(['like', $key, $value]);
+                }
+
+                if (in_array($key, ['price'])) {
+                    if (is_array($value)) {
+                        if (!empty($value['from'])) {
+                            $result->andWhere('price >= :price_start', [':price_start' => $value['from']]);
+                        }
+                        if (!empty($value['to'])) {
+                            $result->andWhere('price <= :price_end', [':price_end' => $value['to']]);
+                        }
+                    } else {
+                        throw new BadRequestHttpException('Filter "price" not array');
+                    }
                 }
             }
         }
         //Готовим ответ
-        $return = [
-            'headers' => [],
+        $return = ['headers' => [],
             'products' => [],
-            'pagination' => [
-                'page' => $page,
+            'pagination' => ['page' => $page,
                 'page_size' => $pageSize,
-                'total_page' => ceil($result->count() / $pageSize)
-            ]
-        ];
+                'total_page' => ceil($result->count() / $pageSize)]];
         //Сортировка
         if ($sort) {
+            $sort = str_replace('supplier_id', 'organization.id', $sort);
             $sort = str_replace('supplier', 'organization.name', $sort);
             $return['sort'] = $sort;
             $order = 'ASC';
@@ -125,11 +151,12 @@ class MarketWebApi extends WebApi
                 $sort = $out[1];
                 $order = 'DESC';
             }
+
             $result->orderBy($sort . ' ' . $order);
         } else {
             $result->orderBy(['rating' => SORT_DESC]);
         }
-        //Результат
+//Результат
         $result = $result->all();
         foreach ($result as $model) {
             $return['products'][] = $this->prepareProduct($model);
@@ -155,6 +182,12 @@ class MarketWebApi extends WebApi
         $categories = MpCategory::find()->where('parent is null')->all();
         \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
+            $category = [
+                'id' => $model->id,
+                'name' => $model->name,
+                'image' => $this->getCategoryImage($model->id),
+                'subcategories' => []
+            ];
             $all_child = $model->child;
             if (!empty($all_child)) {
                 foreach ($all_child as $child) {
@@ -164,14 +197,14 @@ class MarketWebApi extends WebApi
                     if (strstr($image, 'product_placeholder') !== false) {
                         $image = $this->getCategoryImage($model->id);
                     }
-
-                    $return[$model->name][] = [
+                    $category['subcategories'][] = [
                         'id' => $child->id,
                         'name' => $child->name,
                         'image' => $image
                     ];
                 }
             }
+            $return[] = $category;
         }
         return $return;
     }
@@ -222,7 +255,8 @@ class MarketWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function organizations($post)
+    public
+    function organizations($post)
     {
         $sort = (isset($post['sort']) ? $post['sort'] : null);
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -329,7 +363,8 @@ class MarketWebApi extends WebApi
      * @param CatalogBaseGoods $model
      * @return mixed
      */
-    public function prepareProduct($model)
+    public
+    function prepareProduct($model)
     {
         $catalogGoodsModel = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $model->cat_id]);
 
@@ -366,7 +401,8 @@ class MarketWebApi extends WebApi
      * @param CatalogBaseGoods $model
      * @return string
      */
-    public function getProductImage($model)
+    public
+    function getProductImage($model)
     {
         $url = $model->getImageUrl();
         if (strstr($url, 'amazon') === false && strstr($url, 'data:image') === false) {
@@ -381,7 +417,8 @@ class MarketWebApi extends WebApi
      * @param $id
      * @return string
      */
-    private function getCategoryImage($id)
+    private
+    function getCategoryImage($id)
     {
         if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
             return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);

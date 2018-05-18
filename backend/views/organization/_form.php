@@ -310,6 +310,8 @@ function changeFields(fields, results) {
 
     <?= $form->field($model, 'contact_name')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'gln_code')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'about')->textarea() ?>
 
     <?= $form->field($franchiseeModel, 'franchisee_id')->dropDownList($franchiseeList,

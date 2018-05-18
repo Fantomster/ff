@@ -125,7 +125,7 @@ class Guide extends \yii\db\ActiveRecord {
      * @return integer
      */
     public function getProductCount() {
-        return count($this->guideProducts);
+        return GuideProduct::find()->where(['guide_id' => $this->id])->count();
     }
 
     /**

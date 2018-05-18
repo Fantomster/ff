@@ -135,26 +135,28 @@ class OrderWebApi extends \api_web\components\WebApi
         $tr = \Yii::$app->db->beginTransaction();
         try {
             //Тут операции с продуктами в этом заказе
-            if (!empty($post['products']) && is_array($post['products'])) {
-                foreach ($post['products'] as $product) {
-                    $operation = strtolower($product['operation']);
-                    if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
-                        throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+            if (isset($post['products']) && !empty($post['products'])) {
+                if (is_array($post['products'])) {
+                    foreach ($post['products'] as $product) {
+                        $operation = strtolower($product['operation']);
+                        if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
+                            throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+                        }
+                        switch ($operation) {
+                            case 'delete':
+                                $this->deleteProduct($order, $product['id']);
+                                break;
+                            case 'add':
+                                $this->addProduct($order, $product);
+                                break;
+                            case 'edit':
+                                $this->editProduct($order, $product);
+                                break;
+                        }
                     }
-                    switch ($operation) {
-                        case 'delete':
-                            $this->deleteProduct($order, $product['id']);
-                            break;
-                        case 'add':
-                            $this->addProduct($order, $product);
-                            break;
-                        case 'edit':
-                            $this->editProduct($order, $product);
-                            break;
-                    }
+                } else {
+                    throw new BadRequestHttpException("products not array");
                 }
-            } else {
-                throw new BadRequestHttpException("products not array");
             }
 
             $order->calculateTotalPrice();

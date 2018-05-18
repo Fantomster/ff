@@ -109,8 +109,8 @@ class OrderSearch extends Order {
         ];
 
         $dataProvider->sort->attributes['client_city'] = [
-            'asc' => ["client.city" => SORT_ASC],
-            'desc' => ["client.city" => SORT_DESC],
+            'asc' => ["client.locality" => SORT_ASC],
+            'desc' => ["client.locality" => SORT_DESC],
         ];
 
         $this->load($params);
@@ -141,7 +141,7 @@ class OrderSearch extends Order {
         $query
                 ->andFilterWhere(['like', 'comment', $this->comment])
                 ->andFilterWhere(['like', "client.name", $this->client_name])
-                ->andFilterWhere(['like', "client.city", $this->client_city])
+                ->andFilterWhere(['like', "client.locality", $this->client_city])
                 ->andFilterWhere(['like', "vendor.name", $this->vendor_name])
                 ->andFilterWhere(['like', "createdByProfile.full_name", $this->client_manager])
                 ->andFilterWhere(['like', "acceptedByProfile.full_name", $this->vendor_manager])

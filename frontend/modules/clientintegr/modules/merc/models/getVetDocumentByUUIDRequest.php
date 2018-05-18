@@ -69,6 +69,21 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         self::DOC_STATUS_UTILIZED => 'Погашен',
     ];
 
+    public $forms = [
+        'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
+        'LIC1' => 'Форма 1 ветеринарного свидетельства',
+        'CERTCU2' => 'Форма 2 ветеринарного сертификата ТС',
+        'LIC2' => 'Форма 2 ветеринарного свидетельства',
+        'CERTCU3' => 'Форма 3 ветеринарного сертификата ТС',
+        'LIC3' => 'Форма 3 ветеринарного свидетельства',
+        'NOTE4' => 'Форма 4 ветеринарной справки',
+        'CERT5I' => 'Форма 5i ветеринарного сертификата',
+        'CERT61' => 'Форма 6.1 ветеринарного сертификата',
+        'CERT62' => 'Форма 6.2 ветеринарного сертификата',
+        'CERT63' => 'Форма 6.3 ветеринарного сертификата',
+        'PRODUCTIVE' => 'Производственный сертификат',
+    ];
+
     public $transport_types = [
         1 => 'Автомобильный',
         2 => 'Железнодорожный',
@@ -86,6 +101,13 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         6 => 'Непищевые продукты и другое',
         7 => 'Рыба и морепродукты',
         8 => 'Продукция, не требующая разрешения',
+    ];
+
+    public $storage_types = [
+        'FROZEN' => 'Замороженный',
+        'CHILLED' => 'Охлажденный',
+        'COOLED' => 'Охлаждаемый',
+        'VENTILATED' => 'Вентилируемый'
     ];
 
     /*public function rules()
@@ -189,12 +211,12 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
-        $this->issueSeries = $doc->ns2issueSeries;
-        $this->issueNumber = $doc->ns2issueNumber;
+        $this->issueSeries = $doc->ns2issueSeries->__toString();
+        $this->issueNumber = $doc->ns2issueNumber->__toString();
         $this->issueDate = $doc->ns2issueDate;
-        $this->form = $doc->ns2from;
-        $this->type = $doc->ns2type;
-        $this->status = $doc->ns2status;
+        $this->form = $doc->ns2form->__toString();
+        $this->type = $doc->ns2type->__toString();
+        $this->status = $doc->ns2status->__toString();
 
         $consingtor_buisness = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignor->entbusinessEntity->bsuuid->__toString());
         $consingtor_enterprise = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2consignor->ententerprise->bsuuid->__toString());
@@ -299,7 +321,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => $doc->ns2batch->ns2perishable->__toString(),
+                'value' => ($doc->ns2batch->ns2perishable->__toString() == 'true') ? 'Да' : 'Нет',
             ],
             [
                 'label' => 'Страна происхождения продукции',
@@ -307,7 +329,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список производителей продукции',
-                'value' => '',
+                'value' => null,
             ],
             [
                 'label' => 'Список маркировки, доступный для данного производителя',
@@ -315,7 +337,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Является ли продукция некачественной',
-                'value' => $doc->ns2batch->ns2lowGradeCargo->__toString(),
+                'value' => ($doc->ns2batch->ns2lowGradeCargo->__toString() == 'true') ? 'Да' : 'Нет',
             ],
             [
                 'label' => 'Собственник продукции',
@@ -355,13 +377,13 @@ class getVetDocumentByUUIDRequest extends BaseRequest
                 ]
             ]
         ];
-        $this->transportStorageType = $doc->ns2transportStorageType;
+        $this->transportStorageType = $doc->ns2transportStorageType->__toString();
         $this->cargoReloadingPointList;
-        $this->waybillSeries = $doc->ns2waybillSeries;
-        $this->waybillNumber = $doc->ns2waybillNumber;
+        $this->waybillSeries = $doc->ns2waybillSeries->__toString();
+        $this->waybillNumber = $doc->ns2waybillNumber->__toString();
         $this->waybillDate = $doc->ns2waybillDate;
-        $this->cargoExpertized = $doc->ns2cargoExpertized;
-        $this->expertiseInfo = $doc->ns2expertiseInfo;
+        $this->cargoExpertized = $doc->ns2cargoExpertized->__toString();
+        $this->expertiseInfo = $doc->ns2expertiseInfo->__toString();
         $this->confirmedBy = [
             ['label' => 'ФИО',
                 'value' => $doc->ns2confirmedBy->argcfio],
@@ -374,15 +396,46 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
     public function getDate($date_raw)
     {
-        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday.' '.$date_raw->ns2firstDate->hour.":00:00";
+        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday;
+        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
 
         if($date_raw->ns2secondDate)
         {
             $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
-
+            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
             return 'с '.$first_date.' до '.$second_date;
         }
 
         return $first_date;
+    }
+
+    public function getNumber ()
+    {
+        if(empty($this->issueNumber) && empty($this->issueSeries))
+            return null;
+
+        $res = '';
+        if(isset($this->issueSeries))
+            $res =  $this->issueSeries.' ';
+
+        if(isset($this->issueNumber))
+            $res .=  $this->issueNumber;
+
+        return $res;
+    }
+
+    public function getWaybillNumber ()
+    {
+        if(empty($this->waybillNumber) && empty($this->waybillSeries))
+            return null;
+
+        $res = '';
+        if(isset($this->waybillSeries))
+            $res =  $this->waybillSeries.' ';
+
+        if(isset($this->waybillNumber))
+            $res .=  $this->waybillNumber;
+
+        return $res;
     }
 }

@@ -54,7 +54,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $document = new getVetDocumentByUUIDRequest();
         $document->getDocumentByUUID($id);
         $license = mercService::getLicense();
-        $view = $license ? 'index' : '/default/_nolic';
+        $view = $license ? 'view' : '/default/_nolic';
         $params = ['document' => $document, 'lic' => $license];
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($view, $params);

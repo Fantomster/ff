@@ -36,6 +36,14 @@ class mercApi
             'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/2.0/EnterpriseService',
             'wsdl' => 'http://api.vetrf.ru/schema/platform/cerberus/services/EnterpriseService_v1.4_pilot.wsdl',
         ],
+        'product' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ProductService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ProductService_v1.4_pilot.wsdl',
+        ],
+        'ikar' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/ikar/services/IkarService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/ikar/services/IkarService_v1.4_pilot.wsdl',
+        ],
     ];
 
     protected static $_instance;
@@ -273,6 +281,50 @@ class mercApi
         return $result;
     }
 
+    public function getProductByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('product');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+       <soapenv:Header/>
+       <soapenv:Body>
+          <ws:getProductByGuidRequest>
+             <base:guid>'.$GUID.'</base:guid>
+          </ws:getProductByGuidRequest>
+       </soapenv:Body>
+    </soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getSubProductByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('product');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getSubProductByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getSubProductByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getCountryByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('ikar');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/ikar/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getCountryByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getCountryByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['ikar']['Endpoint_URL'], 'GetCountryByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
 
 
 }

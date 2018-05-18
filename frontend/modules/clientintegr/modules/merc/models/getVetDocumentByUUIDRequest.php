@@ -69,6 +69,25 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         self::DOC_STATUS_UTILIZED => 'Погашен',
     ];
 
+    public $transport_types = [
+        1 => 'Автомобильный',
+        2 => 'Железнодорожный',
+        3 => 'Авиатранспортный',
+        4 => 'Морской (контейнер)',
+        5 => 'Морской (трюм)'
+    ];
+
+    public $product_types = [
+        1 => 'Мясо и мясопродукты',
+        2 => 'Корма и кормовые добавки',
+        3 => 'Живые животные',
+        4 => 'Лекарственные средства',
+        5 => 'Пищевые продукты',
+        6 => 'Непищевые продукты и другое',
+        7 => 'Рыба и морепродукты',
+        8 => 'Продукция, не требующая разрешения',
+    ];
+
     /*public function rules()
     {
         return [
@@ -191,7 +210,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
                   .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtin->__toString(),
+                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtinn->__toString(),
             ]
         ];
 
@@ -208,14 +227,126 @@ class getVetDocumentByUUIDRequest extends BaseRequest
                     .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtin->__toString(),
+                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtinn->__toString(),
             ]
         ];
 
-        $this->batch;
+        $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->entbusinessEntity->bsuuid->__toString());
+
+        $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+
+        $this->broker = [ 'label' => 'Название предприятия',
+                'value' => $broker->dtname->__toString().', ИНН:'.$broker->dtinn->__toString(),
+            ];
+
+        $owner_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->entbusinessEntity->bsuuid->__toString());
+
+        $owner = $owner_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+
+        $product_raw = mercApi::getInstance()->getProductByGuid($doc->ns2batch->ns2product->bsguid->__toString());
+        $product = $product_raw->soapBody->wsgetProductByGuidResponse->proproduct->proname->__toString();
+
+        $sub_product_raw = mercApi::getInstance()->getSubProductByGuid($doc->ns2batch->ns2subProduct->bsguid->__toString());
+        $sub_product = $product_raw->soapBody->wsgetSubProductByGuidRespons->prosubProduct->proname->__toString();
+
+        $unit = mercApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
+
+        $country_raw = mercApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
+        $country = $product_raw->soapenvBody->wsgetCountryByGuidResponse ->ikarcountry->ikarfullName>__toString();
+
+        $this->batch =
+        [
+            [
+                'label' => 'Тип продукции',
+                'value' => $this->product_types[$doc->nsBatch->ns2productType->__toString()],
+            ],
+            [
+                'label' => 'Продукция',
+                'value' => $product,
+            ],
+            [
+                'label' => 'Вид продукции',
+                'value' => $sub_product,
+            ],
+            [
+                'label' => 'Наименование произведенной продукции в номенклатуре производителя',
+                'value' => $doc->ns2batch->ns2productItem->prodname->__toString(),
+            ],
+            [
+                'label' => 'Объем',
+                'value' => $doc->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
+            ],
+            [
+                'label' => 'Список видов упаковки, которые используются для производственной партии',
+                'value' => $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString(),
+            ],
+            [
+                'label' => 'Общее количество единиц упаковки для производственной партии',
+                'value' => $doc->ns2batch->ns2packingAmount->__toString(),
+            ],
+            [
+                'label' => 'Дата выработки продукции',
+                'value' => $this->getDate($doc->ns2batch->ns2dateOfProduction),
+            ],
+            [
+                'label' => 'Дата окончания срока годности продукции',
+                'value' => $this->getDate($doc->ns2batch->ns2expiryDate),
+            ],
+            [
+                'label' => 'Описывает, является ли продукция скоропортящейся',
+                'value' => $doc->ns2batch->ns2perishable->__toBoolean(),
+            ],
+            [
+                'label' => 'Страна происхождения продукции',
+                'value' => $country,
+            ],
+            [
+                'label' => 'Список производителей продукции',
+                'value' => '',
+            ],
+            [
+                'label' => 'Список маркировки, доступный для данного производителя',
+                'value' => $doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString(),
+            ],
+            [
+                'label' => 'Является ли продукция некачественной',
+                'value' => $doc->ns2batch->ns2lowGradeCargo->__toBoolean(),
+            ],
+            [
+                'label' => 'Собственник продукции',
+                'value' =>  $owner->dtname->__toString().', ИНН:'.$owner->dtinn->__toString(),
+            ],
+        ];
         $this->purpose;
-        $this->broker;
-        $this->transportInfo;
+        $this->transportInfo = [
+            'type' => $this->transport_types[$doc->ns2transportInfo->shptransportType->__toString()],
+            'numbers' => [
+                [
+                'label' => 'Номер контейнера (при автомобильной перевозке)',
+                'number' => $doc->ns2transportInfo->shptransportNumber->shpcontainerNumber->__toString(),
+                ],
+                [
+                    'label' => 'Номер вагона',
+                    'number' => $doc->ns2transportInfo->shptransportNumber->shpwagonNumber->__toString(),
+                ],
+                [
+                    'label' => 'Номер автомобиля',
+                    'number' => $doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString(),
+                ],
+                [
+                    'label' => 'Номер прицепа (полуприцепа)',
+                    'number' => $doc->ns2transportInfo->shptransportNumber->shptrailerNumber->__toString(),
+                ],
+                [
+                    'label' => 'Название судна (или номер контейнера)',
+                    'number' => $doc->ns2transportInfo->shptransportNumber->shpshipName->__toString(),
+                ],
+                [
+                    'label' => 'Номер авиарейса',
+                    'number' => $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString(),
+                ]
+            ]
+        ];
         $this->transportStorageType = $doc->ns2transportStorageType;
         $this->cargoReloadingPointList;
         $this->waybillSeries = $doc->ns2waybillSeries;
@@ -231,5 +362,19 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         ];
         $this->locationProsperity = $doc->ns2locationProsperity;
         $this->specialMarks = $doc->ns2specialMarks;
+    }
+
+    public function getDate($date_raw)
+    {
+        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday.' '.$date_raw->ns2firstDate->hour.":00:00";
+
+        if($date_raw->ns2secondDate)
+        {
+            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
+
+            return 'с '.$first_date.' до '.$second_date;
+        }
+
+        return $first_date;
     }
 }

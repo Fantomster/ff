@@ -129,6 +129,15 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("Discount amount empty");
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+
+            if($order->discount_type == Order::DISCOUNT_FIXED && $order->total_price < $post['discount']['amount']) {
+                throw new BadRequestHttpException("Discount amount > Total Price");
+            }
+
+            if($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
+                throw new BadRequestHttpException("Discount amount > 100%");
+            }
+
             $order->discount = $post['discount']['amount'];
         }
 

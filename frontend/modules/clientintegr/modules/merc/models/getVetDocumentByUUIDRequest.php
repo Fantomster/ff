@@ -254,6 +254,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         $country_raw = mercApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
         $country = $product_raw->soapenvBody->wsgetCountryByGuidResponse ->ikarcountry->ikarfullName>__toString();
 
+        $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2batch->ns2purpose->bsguid->__toString());
+        $purpose = $purpose_raw->soapBody->wsgetPurposeByGuidResponse ->compurpose->comname->__toString();
+
         $this->batch =
         [
             [
@@ -317,7 +320,10 @@ class getVetDocumentByUUIDRequest extends BaseRequest
                 'value' =>  $owner->dtname->__toString().', ИНН:'.$owner->dtinn->__toString(),
             ],
         ];
-        $this->purpose;
+        $this->purpose = [
+            'label' => 'Цель. Назначение груза',
+            'value' => $purpose,
+        ];
         $this->transportInfo = [
             'type' => $this->transport_types[$doc->ns2transportInfo->shptransportType->__toString()],
             'numbers' => [

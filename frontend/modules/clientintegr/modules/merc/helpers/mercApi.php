@@ -326,5 +326,18 @@ class mercApi
         return $this->parseResponse($result);
     }
 
-
+    public function getPurposeByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('dicts');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getPurposeByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getPurposeByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetPurposeByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
 }

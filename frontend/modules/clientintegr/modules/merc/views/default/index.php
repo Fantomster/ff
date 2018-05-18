@@ -142,18 +142,31 @@ use yii\helpers\Html;
                                 'contentOptions' => ['style' => 'width: 6%;'],
                                 'template' => '{view}&nbsp;&nbsp;&nbsp;{get}',
                                 'buttons' => [
+                                    'view' => function ($url, $model) {
+                                        return \yii\helpers\Html::a(
+                                            \yii\helpers\Html::tag('img', '', [
+                                                'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
+                                                'style' => 'width: 20px'
+                                            ]),
+                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\?id=' . $model['UUID']]),
+                                            [
+                                                'title' => Yii::t('backend', 'Просмотр'),
+                                                'data-pjax' => "0"
+                                            ]
+                                        );
+                                    },
                                     'get' => function ($url, $model) {
                                         if($model['status_raw'] == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return \yii\helpers\Html::a(
-                                                \yii\helpers\Html::tag('i', '', [
-                                                    'class' => 'fa fa-download get-content-sync',
-                                                    'aria-hidden' => true,
+                                                \yii\helpers\Html::tag('img', '', [
+                                                    'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
                                                     'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['UUID'] . '-get']),
-                                                    'data-id' => $model['uuid']
+                                                    'data-id' => $model['uuid'],
+                                                    'style' => 'width: 26px'
                                                 ]),
                                                 '#',
                                                 [
-                                                    'title' => Yii::t('backend', 'Загрузка'),
+                                                    'title' => Yii::t('backend', 'Частичня приемка'),
                                                     'data-pjax' => "0",
                                                 ]
                                             );

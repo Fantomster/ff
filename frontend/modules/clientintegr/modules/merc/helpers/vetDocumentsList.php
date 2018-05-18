@@ -40,12 +40,14 @@ class vetDocumentsList extends Component
     ];
 
     public function createDocumentsList($list) {
-
+        $cache = \Yii::$app->cache;
         $result = [];
         foreach ($list as $item)
         {
-            $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
+            if(!$cache->get('vetDocRaw_'.$item->bsuuid->__toString()))
+                $cache->add('vetDocRaw_'.$item->bsuuid->__toString(), $item->asXML(),60);
 
+            $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
             $recipient = mercApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
             $result[] = [
                 'UUID' => $item->bsuuid,

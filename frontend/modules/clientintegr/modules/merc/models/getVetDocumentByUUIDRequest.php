@@ -110,12 +110,17 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         'VENTILATED' => 'Вентилируемый'
     ];
 
-    /*public function rules()
+    public function rules()
     {
         return [
-            [['localTransactionId', 'vetDocumentType', 'vetDocumentStatus', 'enterpriseGuid', 'initiator', '_soap_namespace'], 'safe'],
+            [['UUID', 'issueSeries',
+        'issueNumber', 'issueDate', 'form', 'type', 'status', 'consignor',
+        'consignee', 'batch', 'purpose', 'broker', 'transportInfo',
+        'transportStorageType', 'cargoReloadingPointList', 'waybillSeries',
+        'waybillNumber', 'waybillDate', 'cargoExpertized', 'expertiseInfo',
+        'confirmedBy', 'locationProsperity', 'specialMarks'], 'safe'],
         ];
-    }*/
+    }
 
     /**
      * @inheritdoc
@@ -206,14 +211,31 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
     public function getDocumentByUUID($UUID)
     {
-        $this->UUID = $UUID;
-        $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+        $cache = \Yii::$app->cache;
+        //$cache->flush();
+        $attributes = $cache->get('vetDoc_'.$UUID);
+        if($attributes) {
+            $this->setAttributes($attributes);
+            return;
+        }
 
-        $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+        $this->UUID = $UUID;
+
+        $doc = $cache->get('vetDocRaw_'.$UUID);
+        if(!$doc) {
+            $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+            $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+            $cache->add('vetDocRaw_'.$UUID, $doc->asXML());
+        }
+        else
+        {
+            $doc = simplexml_load_string($doc);
+            $doc = new \SimpleXMLElement($doc->asXML());
+        }
 
         $this->issueSeries = $doc->ns2issueSeries->__toString();
         $this->issueNumber = $doc->ns2issueNumber->__toString();
-        $this->issueDate = $doc->ns2issueDate;
+        $this->issueDate = $doc->ns2issueDate->__toString();
         $this->form = $doc->ns2form->__toString();
         $this->type = $doc->ns2type->__toString();
         $this->status = $doc->ns2status->__toString();
@@ -378,31 +400,34 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ]
         ];
         $this->transportStorageType = $doc->ns2transportStorageType->__toString();
-        $this->cargoReloadingPointList;
+        $this->cargoReloadingPointList = (isset($this->cargoReloadingPointList)) ? $this->cargoReloadingPointList->__toString() : null;
         $this->waybillSeries = $doc->ns2waybillSeries->__toString();
         $this->waybillNumber = $doc->ns2waybillNumber->__toString();
-        $this->waybillDate = $doc->ns2waybillDate;
+        $this->waybillDate = $doc->ns2waybillDate->__toString();
         $this->cargoExpertized = $doc->ns2cargoExpertized->__toString();
         $this->expertiseInfo = $doc->ns2expertiseInfo->__toString();
         $this->confirmedBy = [
             ['label' => 'ФИО',
-                'value' => $doc->ns2confirmedBy->argcfio],
+                'value' => $doc->ns2confirmedBy->argcfio->__toString()],
             ['label' => 'Должность',
-                'value' => $doc->ns2confirmedBy->argcpost]
+                'value' => $doc->ns2confirmedBy->argcpost->__toString()]
         ];
-        $this->locationProsperity = $doc->ns2locationProsperity;
-        $this->specialMarks = $doc->ns2specialMarks;
+        $this->locationProsperity = $doc->ns2locationProsperity->__toString();
+        $this->specialMarks = $doc->ns2specialMarks->__toString();
+
+        $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
+
     }
 
     public function getDate($date_raw)
     {
-        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday;
-        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
+        $first_date =  $date_raw->ns2firstDate->bsyear->__toString().'-'.$date_raw->ns2firstDate->bsmonth->__toString().'-'.$date_raw->ns2firstDate->bsday->__toString();
+        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour->__toString().":00:00" : "";
 
         if($date_raw->ns2secondDate)
         {
-            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
-            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
+            $second_date = $date_raw->ns2secondDate->bsyear->__toString().'-'.$date_raw->ns2secondDate->bsmonth->__toString().'-'.$date_raw->ns2secondDate->bsday->__toString().' '.$date_raw->ns2secondDate->hour->__toString().":00:00";
+            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour->__toString().":00:00" : "";
             return 'с '.$first_date.' до '.$second_date;
         }
 

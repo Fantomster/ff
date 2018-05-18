@@ -67,7 +67,7 @@ use yii\helpers\Html;
                         'dataProvider' => $dataProvider,
                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                         //'filterModel' => $searchModel,
-                        'filterPosition' => false,
+                        //'filterPosition' => false,
                         'summary' => '',
                         'options' => ['class' => ''],
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
@@ -91,7 +91,7 @@ use yii\helpers\Html;
                             ],*/
                             [
                                 'attribute' => 'date_doc',
-                                'header' => 'Дата оформления',
+                                'label' => 'Дата оформления',
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return Yii::$app->formatter->asDatetime($data['date_doc'], "php:j M Y");
@@ -99,7 +99,7 @@ use yii\helpers\Html;
                             ],
                             [
                                 'attribute' => 'status',
-                                'header' => 'Статус',
+                                'label' => 'Статус',
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['status'];
@@ -107,7 +107,7 @@ use yii\helpers\Html;
                             ],
                             [
                                 'attribute' => 'product_name',
-                                'header' => 'Наименование продукции',
+                                'label' => 'Наименование продукции',
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['product_name'];
@@ -115,7 +115,7 @@ use yii\helpers\Html;
                             ],
                             [
                                 'attribute' => 'amount',
-                                'header' => 'Объем',
+                                'label' => 'Объем',
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['amount'];
@@ -123,7 +123,7 @@ use yii\helpers\Html;
                             ],
                             [
                                 'attribute' => 'production_date',
-                                'header' => 'Дата изготовления',
+                                'label' => 'Дата изготовления',
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
@@ -131,7 +131,7 @@ use yii\helpers\Html;
                             ],
                             [
                                 'attribute' => 'recipient_name',
-                                'header' => ' 	Фирма-отправитель',
+                                'label' => ' 	Фирма-отправитель',
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['recipient_name'];
@@ -149,7 +149,7 @@ use yii\helpers\Html;
                                                     'class' => 'fa fa-download get-content-sync',
                                                     'aria-hidden' => true,
                                                     'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['UUID'] . '-get']),
-                                                    'data-id' => $data['uuid']
+                                                    'data-id' => $model['uuid']
                                                 ]),
                                                 '#',
                                                 [

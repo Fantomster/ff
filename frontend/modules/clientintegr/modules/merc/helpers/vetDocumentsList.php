@@ -79,18 +79,33 @@ class vetDocumentsList extends Component
        /* var_dump($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentListResponse->ns2vetDocumentList->ns2vetDocument);
         die();*/
 
+       $sort = [
+           'attributes' => [
+               'UUID',
+               'number',
+               'date_doc',
+               'status',
+               'product_name',
+               'amount',
+               'production_date',
+               'recipient_name'
+           ],
+           'defaultOrder' => [
+               'date_doc' => SORT_DESC
+           ]
+       ];
+
+
         $dataProvider = new ArrayDataProvider([
             'key' => 'UUID',
             'allModels' => $data,
-            // 'sort' => $sort,
+             'sort' => $sort,
             /*'pagination' => [
                 'class' => 'backend\modules\mailbox\components\Pagination',
                 'pageSize' => 10, //($pageSize != -1) ? $pageSize : false,
                 'offset' => 0
             ],*/
         ]);
-
-        //$dataProvider->setSort(['defaultOrder' => ['UUID'=>SORT_DESC], 'attributes' => ['UUID', 'number', 'date_doc', 'type', 'product_name', 'aount', 'production_date', 'recipient_name']]);
 
         return $dataProvider;
     }

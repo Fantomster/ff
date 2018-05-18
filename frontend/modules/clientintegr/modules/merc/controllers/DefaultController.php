@@ -51,7 +51,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionView($id)
     {
         //$searchModel = new mercDicSearch();
-        $document = getVetDocumentByUUIDRequest::getDocumentByUUID($id);
+        $document = new getVetDocumentByUUIDRequest();
+        $document->getDocumentByUUID($id);
         $license = mercService::getLicense();
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['document' => $document, 'lic' => $license];

@@ -186,7 +186,6 @@ class getVetDocumentByUUIDRequest extends BaseRequest
     {
         $this->UUID = $UUID;
         $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
-        var_dump($raw_doc);
 
         $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
@@ -231,15 +230,16 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ]
         ];
 
-        $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->entbusinessEntity->bsuuid->__toString());
-
-        $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
-
-        $this->broker = [ 'label' => 'Название предприятия',
-                'value' => $broker->dtname->__toString().', ИНН:'.$broker->dtinn->__toString(),
+        if(isset($doc->ns2broker)) {
+            $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->entbusinessEntity->bsuuid->__toString());
+            $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+            $this->broker = ['label' => 'Название предприятия',
+                'value' => $broker->dtname->__toString() . ', ИНН:' . $broker->dtinn->__toString(),
             ];
+        }
 
-        $owner_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->entbusinessEntity->bsuuid->__toString());
+        $owner_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2batch->ns2owner->bsuuid->__toString());
+
 
         $owner = $owner_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
 
@@ -247,21 +247,23 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         $product = $product_raw->soapBody->wsgetProductByGuidResponse->proproduct->proname->__toString();
 
         $sub_product_raw = mercApi::getInstance()->getSubProductByGuid($doc->ns2batch->ns2subProduct->bsguid->__toString());
-        $sub_product = $product_raw->soapBody->wsgetSubProductByGuidRespons->prosubProduct->proname->__toString();
+
+        $sub_product = $sub_product_raw->soapBody->wsgetSubProductByGuidResponse->prosubProduct->proname->__toString();
 
         $unit = mercApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
 
         $country_raw = mercApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
-        $country = $product_raw->soapenvBody->wsgetCountryByGuidResponse ->ikarcountry->ikarfullName>__toString();
 
-        $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2batch->ns2purpose->bsguid->__toString());
+        $country = $country_raw->soapenvBody->wsgetCountryByGuidResponse->ikarcountry->ikarfullName->__toString();
+
+        $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
         $purpose = $purpose_raw->soapBody->wsgetPurposeByGuidResponse ->compurpose->comname->__toString();
 
         $this->batch =
         [
             [
                 'label' => 'Тип продукции',
-                'value' => $this->product_types[$doc->nsBatch->ns2productType->__toString()],
+                'value' => $this->product_types[$doc->ns2batch->ns2productType->__toString()],
             ],
             [
                 'label' => 'Продукция',
@@ -297,7 +299,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => $doc->ns2batch->ns2perishable->__toBoolean(),
+                'value' => $doc->ns2batch->ns2perishable->__toString(),
             ],
             [
                 'label' => 'Страна происхождения продукции',
@@ -313,7 +315,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Является ли продукция некачественной',
-                'value' => $doc->ns2batch->ns2lowGradeCargo->__toBoolean(),
+                'value' => $doc->ns2batch->ns2lowGradeCargo->__toString(),
             ],
             [
                 'label' => 'Собственник продукции',

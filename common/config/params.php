@@ -65,6 +65,7 @@ return [
     'e_com' => [
         'login' => 'markettest',
         'pass' => 'e1fa52810ea9d18a5af901c147c804e6',
-        //e1ea1cbd3c8b8498735bcd54e5d8e32b
+        'loginClient' => 'markettest1',
+        'passClient' => 'e1ea1cbd3c8b8498735bcd54e5d8e32b',
     ]
 ];

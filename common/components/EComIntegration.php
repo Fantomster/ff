@@ -30,14 +30,15 @@ class EComIntegration extends Component {
         $client = Yii::$app->siteApi;
         $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
         if($object->result->errorCode != 0){
+            Yii::error('EComIntegration getList Error');
             throw new ErrorException();
         }
         $list = $object->result->list;
         if(is_iterable($list)){
             foreach ($list as $fileName){
-                //if(strpos($fileName, 'ricat_')) {
+                if(strpos($fileName, 'esadv_')) {
                     $this->getDoc($client, $fileName, $login, $pass);
-                //}
+                }
             }
         }else{
             $this->getDoc($client, $list, $login, $pass);
@@ -52,20 +53,30 @@ class EComIntegration extends Component {
         $dom = new \DOMDocument();
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);
+        if(strpos($content, 'PRICAT>')){
+            $this->handlePriceListUpdating($simpleXMLElement);
+        }
         if(strpos($content, 'ORDRSP>')){
             $this->handleOrderResponse($simpleXMLElement);
         }
-        if(strpos($content, 'PRICAT>')){
-            $this->handlePriceListUpdating($simpleXMLElement);
+        if(strpos($content, 'DESADV>')){
+            $this->handleOrderResponse($simpleXMLElement, true);
         }
         return true;
     }
 
 
-    private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement)
+    private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, bool $isDesadv = false)
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
+        if(!$order){
+            Yii::error('No such order');
+            return false;
+        }
+        if($isDesadv){
+            $order->status = Order::STATUS_PROCESSING;
+        }
         $order->updated_at = new Expression('NOW()');
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
@@ -123,14 +134,20 @@ class EComIntegration extends Component {
             $goodsArray[$barcode]['ed'] = (String) $good->QUANTITYOFCUINTUUNIT ?? 'шт';
             $goodsArray[$barcode]['units'] = (float) $good->PACKINGMULTIPLENESS ?? 0.0;
         }
-//        $catalog_base_goods = Yii::$app->db->createCommand('SELECT `barcode` FROM `catalog_base_goods` WHERE cat_id=:cat_id', ['cat_id' => $baseCatalog->id])
-//            ->queryAll();
-//        foreach ($catalog_base_goods as $base_good){
-//
-//        }
-//        dd($catalog_base_goods);
 
-        $i=0;
+        $catalog_base_goods = (new \yii\db\Query())
+            ->select(['id', 'barcode'])
+            ->from('catalog_base_goods')
+            ->where(['cat_id' => $baseCatalog->id])
+            ->andWhere('`barcode` IS NOT NULL')
+            ->all();
+
+        foreach ($catalog_base_goods as $base_good){
+            if(!in_array($base_good['barcode'], $goodsArray)){
+                Yii::$app->db->createCommand()->update('catalog_base_goods', ['status' => CatalogBaseGoods::STATUS_OFF], 'id='.$base_good['id'])->execute();
+            }
+        }
+
         $buyerGLN = $simpleXMLElement->BUYER;
         $rest = Organization::findOne(['gln_code' => $buyerGLN]);
         if(!$rest){
@@ -138,19 +155,22 @@ class EComIntegration extends Component {
         }
 
         $rel = RelationSuppRest::findOne(['rest_org_id' => $rest->id, 'supp_org_id' => $organization->id]);
-        if(!$rel || !$rel->cat_id){
-            return false;
+        if(!$rel){
+            $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
+        }else{
+            $relationCatalogID = $rel->cat_id;
         }
 
+        $i=0;
         foreach ($goodsArray as $barcode => $good){
-            if($i>7)break;
+            if($i>14)break;
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = Yii::$app->db->createCommand()->insert('catalog_base_goods', [
                     'cat_id' => $baseCatalog->id,
                     'article' => $good['article'],
                     'product' => $good['name'],
-                    'status' => 1,
+                    'status' => CatalogBaseGoods::STATUS_ON,
                     'supp_org_id' => $organization->id,
                     'price' => $good['price'],
                     'units' => $good['units'],
@@ -162,37 +182,48 @@ class EComIntegration extends Component {
                 ])->execute();
                 if(!$res)continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
-
-                $res2 = $this->insertGood($rel->cat_id, $catalogBaseGood->id, $good['price']);
-
+                $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
                 if(!$res2)continue;
-
             }else{
-                $catalogGood = CatalogGoods::findOne(['cat_id'=>$rel->cat_id, 'base_goods_id' => $catalogBaseGood->id]);
+                $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
                 if(!$catalogGood){
-                    $res2 = $this->insertGood($rel->cat_id, $catalogBaseGood->id, $good['price']);
+                    $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
                     if(!$res2)continue;
                 }else{
                     $catalogGood->price = $good['price'];
                     $catalogGood->save();
                 }
             }
-            $catalogBaseGood->updated_at = new Expression('NOW()');
-            $catalogBaseGood->save();
+            Yii::$app->db->createCommand()->update('catalog_base_goods', ['updated_at' => new Expression('NOW()'), 'status' => CatalogBaseGoods::STATUS_ON], 'id='.$catalogBaseGood->id)->execute();
             $i++;
         }
-
-//        if(!$rel || !$rel->cat_id){
-//            return false;
-//        }else{
-//            $indCat = CatalogGoods::findAll(['cat_id' => $rel->cat_id]);
-//            dd($indCat);
-//            foreach ($indCat as $item){
-//                //$baseCatalog
-//            }
-//        }
-
         return true;
+    }
+
+
+    private function createCatalog(Organization $organization, Currency $currency, Organization $rest): int
+    {
+        $catalog = new Catalog();
+        $catalog->type = Catalog::CATALOG;
+        $catalog->supp_org_id = $organization->id;
+        $catalog->name = $organization->name;
+        $catalog->status = Catalog::STATUS_ON;
+        $catalog->created_at = new Expression('NOW()');
+        $catalog->updated_at = new Expression('NOW()');
+        $catalog->currency_id = $currency->id ?? 1;
+        $catalog->save();
+        $catalogID = $catalog->id;
+
+        $rel = new RelationSuppRest();
+        $rel->rest_org_id = $rest->id;
+        $rel->supp_org_id = $organization->id;
+        $rel->cat_id = $catalogID;
+        $rel->invite = 1;
+        $rel->created_at = new Expression('NOW()');
+        $rel->updated_at = new Expression('NOW()');
+        $rel->status = RelationSuppRest::CATALOG_STATUS_ON;
+        $rel->save();
+        return $catalogID;
     }
 
 

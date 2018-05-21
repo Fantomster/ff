@@ -201,9 +201,9 @@ class vetDocumentDone extends Component
                               </shp:transportNumber>
                            </vet:transportInfo>
                            <vet:transportStorageType>'.$doc->ns2transportStorageType->__toString().'</vet:transportStorageType>
-                           <vet:cargoInspected>'.$doc->ns2cargoInspected->__toString().'</vet:cargoInspected>
-                           <vet:cargoExpertized>'.$doc->ns2cargoExpertized->__toString().'</vet:cargoExpertized>
-                           <vet:expertiseInfo>'.$doc->ns2expertiseInfo->__toString().'</vet:expertiseInfo>
+                           <vet:cargoInspected>'.$doc->ns2cargoInspected->__toString().'</vet:cargoInspected>'.
+                         //  <vet:cargoExpertized>'.$doc->ns2cargoExpertized->__toString().'</vet:cargoExpertized>
+                           '<vet:expertiseInfo>'.$doc->ns2expertiseInfo->__toString().'</vet:expertiseInfo>
                            <vet:confirmedBy>
                               <com:fio>'.$doc->ns2confirmedBy->argcfio->__toString().'</com:fio>
                               <com:post>'.$doc->ns2confirmedBy->argcpost->__toString().'</com:post>

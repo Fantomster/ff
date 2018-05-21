@@ -148,7 +148,7 @@ use yii\helpers\Html;
                                                 'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
                                                 'style' => 'width: 16px'
                                             ]),
-                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\default\view?id=' . $model['UUID']]),
+                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\default\view?id=' . $model['uuid']]),
                                             [
                                                 'title' => Yii::t('backend', 'Просмотр'),
                                                 'data-pjax' => "0"
@@ -160,7 +160,7 @@ use yii\helpers\Html;
                                             return \yii\helpers\Html::a(
                                                 \yii\helpers\Html::tag('img', '', [
                                                     'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
-                                                    'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['UUID'] . '-get']),
+                                                    'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['uuid'] . '-get']),
                                                     'data-id' => $model['uuid'],
                                                     'style' => 'width: 24px'
                                                 ]),

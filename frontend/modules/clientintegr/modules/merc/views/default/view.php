@@ -215,7 +215,8 @@ use yii\helpers\Html;
                         'attributes' => $attributes,
                     ]) ?>
                     <div class="col-md-12">
-                        <?= Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                        <?php // Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                        echo Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
                         Html::a('Частичня приемка', ['#'], ['class' => 'btn btn-warning']).' '.
                         Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']); ?>
                     </div>

@@ -83,7 +83,7 @@ use kartik\grid\GridView;
                                     ],
                                     'buttons' => [
                                         'clear' => function ($url, $model) {
-                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\settings\change-const', 'id' => $model->id]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/settings/change-const', 'id' => $model->id]);
                                             return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
                                                 ['title' => 'Изменить значение', 'data-pjax' => "0"]);
                                         },

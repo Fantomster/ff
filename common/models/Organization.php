@@ -209,9 +209,12 @@ class Organization extends \yii\db\ActiveRecord
     }
 
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getRelationUserOrganization()
     {
-        return $this->hasOne(RelationUserOrganization::className(), ['organization_id' => 'id', 'organization_id' => 'id']);
+        return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
     }
 
 

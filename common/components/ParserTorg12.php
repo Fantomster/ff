@@ -5,6 +5,7 @@ namespace common\components;
 use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
+use PHPExcel_Shared_Date;
 
 class ParserTorg12
 {
@@ -52,6 +53,10 @@ class ParserTorg12
         ],
         'document_date' => [
             'label' => ['дата составления'],
+            'shift_row' => 1,
+        ],
+        'document_upd_info' => [
+            'label' => ['(1)'],
             'shift_row' => 1,
         ],
     ];
@@ -262,14 +267,38 @@ class ParserTorg12
         $checkSell = function ($col, $row, $attribute) {
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
+            if($cellValue == '(1)') {
+
+                $attributeValue ="";
+
+                for($i=1;$i<$col;$i++) {
+                    if (!empty($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue())))
+                    $attributeValue .= ' '.$this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue());
+
+                }
+                $attributeValue = str_replace(",", ".", $attributeValue);
+
+                $attributeValue = trim(preg_replace("/.*№/", "", $attributeValue));
+                $attributeValue = trim(preg_replace("/.г.*/", "", $attributeValue));
+
+                return $attributeValue;
+
+            }
+
             if (in_array($cellValue, $attribute['label'])) {
+
                 // заголовок атрибута в одной ячейке
                 $attributeValue = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row + $attribute['shift_row'])->getValue());
+
+                if($cellValue == 'дата составления' && (int)$attributeValue)
+                    $attributeValue = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
+
                 $this->firstRow = $row;
                 return $attributeValue;
             } else {
                 // заголовок атрибута разбит на две строки
                 $nextValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row + 1)->getValue());
+
                 // считаем что два слова в заголовке всегда, если есть переносы - не распознается
                 foreach ($attribute['label'] as $val) {
                     $multiRowHeader = explode(' ', $val);
@@ -295,11 +324,32 @@ class ParserTorg12
                 // номер
                 if (empty($documentNumber)) {
                     $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_number']);
+                    if(!empty($documentNumber)) {
+                        var_dump($documentNumber);
+                        $documentNumber = preg_replace('/.от.*/', "", $documentNumber);
+                    }
+                /*    if (empty($documentNumber)) {
+                        $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_upd_info']);
+                       // if(!empty($documentNumber)) {
+                            var_dump("s".$documentNumber);
+                       //     die();
+                        //}
+*/
+                         //   $documentNumber = preg_replace('/.от.*/', "", $documentNumber);
+                         //   var_dump($documentNumber);
+
+                //    }
+
+
                 }
 
                 // дата составления
                 if (empty($documentDate)) {
                     $documentDate = $checkSell($col, $row, $this->settingsHeader['document_date']);
+                    if(!empty($documentDate)) {
+                        var_dump($documentDate);
+                        $documentDate = preg_replace('/.*от/', "", $documentDate);
+                    }
                 }
 
             }
@@ -410,7 +460,6 @@ class ParserTorg12
 
                     $this->columnList['sum_without_tax']['col'] = $col;
                     $this->columnList['sum_without_tax']['row'] = $row;
-                    echo "Hello";
 
                 } elseif (!isset($this->columnList['tax_rate']) && $match($cellValue, $this->settingsRow['tax_rate'])) {
 
@@ -708,8 +757,11 @@ class ParserTorg12
                 $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
             }
 */
+            if($invoiceRow->cnt > 0)
             $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax/$invoiceRow->cnt,2);
+
             // добавляем обработанную строку в накладную
+            if($invoiceRow->cnt > 0)
             $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
         }
     }

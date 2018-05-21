@@ -111,13 +111,6 @@ $form = ActiveForm::begin([
                 $form->field($organization, 'website')->textInput(['id' => 'organization-view-supplirs-website']);
             ?>
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <?=
-                $form->field($organization, 'gln_code')->textInput(['disabled' => true])->label(Yii::t('message', 'GLN-код'))
-                ?>
-            </div>
-        </div>
     </div>
 </div>
 <div class="modal-footer">

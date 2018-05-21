@@ -3,6 +3,13 @@
 namespace api_web\components\definitions;
 
 /**
+ * @SWG\Definition(type="array", @SWG\Xml(name="VendorSearch"), @SWG\Items(ref="#/definitions/Vendor"))
+ */
+class VendorSearch
+{
+}
+
+/**
  * @SWG\Definition(type="object", @SWG\Xml(name="Organization"))
  */
 class Organization
@@ -93,11 +100,11 @@ class Organization
 
 }
 
-
 /**
  * @SWG\Definition(type="object", @SWG\Xml(name="Vendor"))
  */
-class Vendor {
+class Vendor
+{
 
     /**
      * @SWG\Property(@SWG\Xml(name="id"), example=1)

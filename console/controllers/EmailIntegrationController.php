@@ -41,7 +41,7 @@ class EmailIntegrationController extends Controller
 
     public function actionTest() {
 
-        $temp_file = '/app/console/runtime/testnac.xls';
+        $temp_file = '/app/console/runtime/testnac2.xls';
 
         $parser = new ParserTorg12($temp_file);
         try {
@@ -59,7 +59,9 @@ class EmailIntegrationController extends Controller
             'invoice' => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
         ];
 
-        print_r($result);
+        print_r("Result date:".$result[0]['invoice']['date'].PHP_EOL);
+        print_r("Result number:".$result[0]['invoice']['number'].PHP_EOL);
+
         file_put_contents('result.txt', print_r($result,true));
     }
 

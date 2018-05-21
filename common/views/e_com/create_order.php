@@ -1,6 +1,6 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <ORDER>
-    <DOCUMENTNAME>220</DOCUMENTNAME>
+    <DOCUMENTNAME>218</DOCUMENTNAME>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
@@ -16,11 +16,13 @@
         <SENDER><?= $client->gln_code ?></SENDER>
         <RECIPIENT><?= $vendor->gln_code ?></RECIPIENT>
         <EDIINTERCHANGEID><?= $order->id ?></EDIINTERCHANGEID>
-        <?php foreach ($orderContent as $position): ?>
+        <?php
+        $i = 1;
+        foreach ($orderContent as $position): ?>
             <POSITION>
-                <POSITIONNUMBER><?= $position['order_id']  ?></POSITIONNUMBER>
-                <PRODUCT><?= $position['id']  ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $position['order_id']  ?></PRODUCTIDBUYER>
+                <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
+                <PRODUCT><?= $position['barcode'] ?? $position['order_id'] ?></PRODUCT>
+                <PRODUCTIDBUYER><?= $position['id']  ?></PRODUCTIDBUYER>
                 <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>

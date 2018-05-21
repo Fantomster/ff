@@ -321,7 +321,7 @@ array_push($columns,
                 }
 
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\chvat', 'id'=>$model->id, 'vat' =>0]);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' =>0]);
                 return \yii\helpers\Html::a( '&nbsp;0', $customurl,
                     ['title' => Yii::t('backend', '0%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
             },
@@ -336,7 +336,7 @@ array_push($columns,
                 }
 
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\chvat', 'id'=>$model->id, 'vat' => '1000']);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' => '1000']);
                 return \yii\helpers\Html::a( '10', $customurl,
                     ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
             },
@@ -351,7 +351,7 @@ array_push($columns,
                 }
 
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\chvat', 'id'=>$model->id, 'vat' => '1800']);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' => '1800']);
                 return \yii\helpers\Html::a( '18', $customurl,
                     ['title' => Yii::t('backend', '18%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
             },
@@ -372,7 +372,7 @@ array_push($columns,
         'buttons'=>[
             'clear' =>  function ($url, $model) {
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\cleardata', 'id'=>$model->id]);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/cleardata', 'id'=>$model->id]);
                 return \yii\helpers\Html::a( '<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
                     ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax'=>"0"]);
             },

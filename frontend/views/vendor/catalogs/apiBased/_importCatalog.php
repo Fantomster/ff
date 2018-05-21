@@ -2,13 +2,20 @@
 
 use dosamigos\fileupload\FileUpload;
 
+$url = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/upload-main-catalog"]);
+
 ?>
-<?=
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.vendor.file_import', ['ru' => 'Импорт из файла']) ?></h4>
+</div>
+<div class="modal-body">
+    <?=
     FileUpload::widget([
 //    'model' => $model,
 //    'attribute' => 'image',
         'name' => 'catalogFile',
-        'url' => Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/reset"]), 
+        'url' => $url,
         'options' => ['accept' => 'file/*.xlsx'],
         'clientOptions' => [
             'maxFileSize' => 2000000,
@@ -27,9 +34,22 @@ use dosamigos\fileupload\FileUpload;
                                     var reader = new FileReader();
                                     reader.readAsDataURL(data.files[0]);
                                     reader.onload = function () {
-                                        console.log(reader.result);
+                                        var base64 = reader.result;
+                                        $.post(
+                                            '$url',
+                                            {
+                                                'user': {
+                                                    language: 'RU',
+                                                    token: '{$currentUser->access_token}'
+                                                },
+                                                'request': {
+                                                    cat_id: {$cat_id},
+                                                    data: base64                                         }
+                                            }
+                                        ).done(function (response) {
+                                            console.log(JSON.stringify(response));
+                                        });
                                     };
-                                    //data.submit();
                                 }",
             'fileuploaddone' => "function (e, data) {
                                     data.context.text(data.result.files[0].name);
@@ -40,3 +60,4 @@ use dosamigos\fileupload\FileUpload;
     ]);
     ?>
     <div id="files" class="files"></div>
+</div>

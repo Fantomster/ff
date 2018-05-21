@@ -391,6 +391,8 @@ class VendorWebApi extends \api_web\components\WebApi {
                 throw $e;
             }
             return ['result' => false];
+        } else {
+            return ['result' => false];
         }
     }
 

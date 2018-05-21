@@ -620,7 +620,9 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportBaseCatalog($id) {
-        return $this->renderAjax('catalogs/apiBased/_importCatalog', compact('importModel'));
+        $cat_id = $id;
+        $currentUser = $this->currentUser;
+        return $this->renderAjax('catalogs/apiBased/_importCatalog', compact('importModel', 'cat_id', 'currentUser'));
     }
     
     public function actionImport($id) {

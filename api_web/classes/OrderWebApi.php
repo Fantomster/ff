@@ -130,7 +130,7 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
 
-            if($order->discount_type == Order::DISCOUNT_FIXED && $order->total_price < $post['discount']['amount']) {
+            if($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
                 throw new BadRequestHttpException("Discount amount > Total Price");
             }
 

@@ -362,10 +362,6 @@ class mercApi
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
-            var_dump(htmlentities($request->getXML()));
-            var_dump('____________________________________');
-            var_dump($response); die();
-
             $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {

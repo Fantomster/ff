@@ -67,7 +67,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionDone($uuid)
     {
         $cache = \Yii::$app->cache;
-        $cache->flush();
         $api = mercApi::getInstance();
         $api->getVetDocumentDone($uuid);
         $document = new getVetDocumentByUUIDRequest();

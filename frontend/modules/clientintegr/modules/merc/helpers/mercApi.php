@@ -62,14 +62,6 @@ class mercApi
         return self::$_instance;
     }
 
-    private function __construct()
-    {
-    }
-
-    private function __clone()
-    {
-    }
-
     private function getSoapClient($system)
     {
         if ($this->_client === null)
@@ -339,5 +331,61 @@ class mercApi
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetPurposeByGuid', SOAP_1_1);
         return $this->parseResponse($result);
+    }
+
+    public function getVetDocumentDone($UUID)
+    {
+        $client = $this->getSoapClient('mercury');
+        $result = null;
+
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new vetDocumentDone();
+            $vetDoc->login = $this->vetisLogin;
+            $vetDoc->UUID = $UUID;
+            $vetDoc->doc = (new getVetDocumentByUUIDRequest())->getDocumentByUUID($UUID, true);
+            $vetDoc->localTransactionId = $localTransactionId;
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+            //Делаем запрос
+            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            var_dump(htmlentities($request->getXML()));
+            var_dump('____________________________________');
+            var_dump($response); die();
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                echo "Bad request";
+                die();
+            }
+
+            //timeout перед запросом результата
+            sleep(2);
+            //Получаем результат запроса
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
+        }
+        return $result;
     }
 }

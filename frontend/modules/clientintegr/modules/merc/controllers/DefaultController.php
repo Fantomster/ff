@@ -63,4 +63,23 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->render($view, $params);
         }
     }
+
+    public function actionDone($uuid)
+    {
+        $cache = \Yii::$app->cache;
+        $cache->flush();
+        $api = mercApi::getInstance();
+        $api->getVetDocumentDone($uuid);
+        $document = new getVetDocumentByUUIDRequest();
+        $document->getDocumentByUUID($uuid);
+        //var_dump($document);
+        $license = mercService::getLicense();
+        $view = $license ? 'view' : '/default/_nolic';
+        $params = ['document' => $document, 'lic' => $license];
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial($view, $params);
+        } else {
+            return $this->render($view, $params);
+        }
+    }
 }

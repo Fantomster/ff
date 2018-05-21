@@ -157,13 +157,6 @@ class getVetDocumentByUUIDRequest extends BaseRequest
     public function getSoap_namespaces()
     {
         return $this->soap_namespaces;
-        /*return [  'xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"',
-                  'xmlns:vet="http://api.vetrf.ru/schema/cdm/mercury/vet-document"',
-                  'xmlns:base="http://api.vetrf.ru/schema/cdm/base"',
-                  'xmlns:com="http://api.vetrf.ru/schema/cdm/argus/common"',
-                  'xmlns:ent="http://api.vetrf.ru/schema/cdm/cerberus/enterprise"',
-                  'xmlns:ikar="http://api.vetrf.ru/schema/cdm/ikar"'
-        ];*/
     }
 
     public function setInitiator($login)
@@ -209,12 +202,12 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         return $xml;
     }
 
-    public function getDocumentByUUID($UUID)
+    public function getDocumentByUUID($UUID, $raw = false)
     {
         $cache = \Yii::$app->cache;
         //$cache->flush();
         $attributes = $cache->get('vetDoc_'.$UUID);
-        if($attributes) {
+        if($attributes && !$raw) {
             $this->setAttributes($attributes);
             return;
         }
@@ -232,6 +225,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             $doc = simplexml_load_string($doc);
             $doc = new \SimpleXMLElement($doc->asXML());
         }
+
+        if($raw)
+            return $doc;
 
         $this->issueSeries = $doc->ns2issueSeries->__toString();
         $this->issueNumber = $doc->ns2issueNumber->__toString();

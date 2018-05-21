@@ -72,8 +72,10 @@ class submitApplicationRequest extends BaseRequest
 
             if (isset($this->application->data)) {
                 $xml .= '<app:data>';
-                foreach ($this->application->data as $key => $item)
+
+                foreach ($this->application->data as $key => $item){
                     $xml .= $item->getXML().PHP_EOL;
+                }
 
                 $xml .= '</app:data>'.PHP_EOL;
             }

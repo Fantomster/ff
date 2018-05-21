@@ -113,7 +113,7 @@ use api\common\models\RkWaybill;
                                     'buttons'=>[
                                         'clear' =>  function ($url, $model) {
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\settings\changeconst', 'id'=>$model->id]);
+                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/settings/changeconst', 'id'=>$model->id]);
                                             return \yii\helpers\Html::a( '<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
                                                 ['title' => 'Изменить значение', 'data-pjax'=>"0"]);
                                         },

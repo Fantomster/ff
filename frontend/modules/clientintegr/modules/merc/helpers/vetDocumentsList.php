@@ -50,7 +50,7 @@ class vetDocumentsList extends Component
             $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
             $recipient = mercApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
             $result[] = [
-                'UUID' => $item->bsuuid,
+                'uuid' => $item->bsuuid,
                 'number' => '',
                 'date_doc' => $item->ns2issueDate,
                 'status' => '<span class="status ' . $this->status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
@@ -83,7 +83,7 @@ class vetDocumentsList extends Component
 
        $sort = [
            'attributes' => [
-               'UUID',
+               'uuid',
                'number',
                'date_doc',
                'status',
@@ -99,7 +99,7 @@ class vetDocumentsList extends Component
 
 
         $dataProvider = new ArrayDataProvider([
-            'key' => 'UUID',
+            'key' => 'uuid',
             'allModels' => $data,
              'sort' => $sort,
             /*'pagination' => [

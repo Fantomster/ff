@@ -135,8 +135,8 @@ class mercApi
             //Получаем результат запроса
             $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
 
-            var_dump(htmlentities($response));
-            die();
+        //    var_dump(htmlentities($response));
+        //    die();
 
             $result = $this->parseResponse($response);
 

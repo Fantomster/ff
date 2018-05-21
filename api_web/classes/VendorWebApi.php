@@ -442,5 +442,20 @@ class VendorWebApi extends \api_web\components\WebApi {
         //
         return ['result' => true];
     }
+    
+    /**
+     * Смена уникального индекса главного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function changeMainIndex(array $request) {
+        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('Catalog not found');
+        }
+        return $this->container->get('CatalogWebApi')->changeMainIndex($catalog, $request['index']);
+    }
 
 }

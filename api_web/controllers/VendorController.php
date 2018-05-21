@@ -406,6 +406,10 @@ class VendorController extends WebApiController
     }
     
     public function actionDeleteMainCatalog() {
-        $this->response = $this->container->get('VendorWebApi')->importDeleteMainCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->deleteMainCatalog($this->request);
+    }
+    
+    public function actionChangeMainIndex() {
+        $this->response = $this->container->get('VendorWebApi')->changeMainIndex($this->request);
     }
 }

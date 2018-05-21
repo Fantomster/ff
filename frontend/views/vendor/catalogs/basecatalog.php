@@ -20,6 +20,10 @@ kartik\select2\Select2Asset::register($this);
 $currencyList = Json::encode(Currency::getList());
 $currencySymbolList = Json::encode(Currency::getSymbolList());
 $indexesList = Json::encode(\common\models\Catalog::getBaseIndexTitleList());
+$titleDeleteAll = Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']);
+$cancelText = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
+$catalogDeleted = Yii::t('message', 'frontend.views.vendor.catalog_deleted', ['ru' => 'Каталог удален!']);
+$indexChanged = Yii::t('message', 'frontend.views.vendor.index_changed', ['ru' => 'Индекс изменен!']);
 
 $changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
 $calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
@@ -207,7 +211,7 @@ Modal::end();
                     ])
                     ?>
                     <?=
-                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']), [
+                    Html::button('<span class="text-label">' . $titleDeleteAll, [
                         'class' => 'btn btn-outline-default btn-sm pull-right delete-all-products',
                         'style' => ['margin-right' => '10px;'],
                     ])
@@ -538,6 +542,9 @@ $baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
+$deleteAllUrl = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/delete-main-catalog"]);
+$restoreCatalogLastSnapshot = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/restore-catalog-last-snapshot"]);
+$changeMainIndexUrl = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/change-main-index"]);
 
 $var1 = Yii::t('message', 'frontend.views.vendor.del_good', ['ru' => 'Удалить этот продукт?']);
 $var2 = Yii::t('message', 'frontend.views.vendor.will_remove', ['ru' => 'Продукт будет удален из всех каталогов']);
@@ -679,20 +686,20 @@ $(document).on("click", ".del-product", function(e){
             className: "danger-fk",
             callback: function(result) {
 		if(result){
-		$.ajax({
-	        url: "$deleteProductUrl",
-	        type: "POST",
-	        dataType: "json",
-	        data: {'id' : id},
-	        cache: false,
-	        success: function(response) {
-		        if(response.success){
-			        $.pjax.reload({container: "#kv-unique-id-1"}); 
-			        }else{
-				    console.log('$var5');    
-			        }
-		        }	
-		    });
+                    $.ajax({
+                    url: "$deleteProductUrl",
+                    type: "POST",
+                    dataType: "json",
+                    data: {'id' : id},
+                    cache: false,
+                    success: function(response) {
+                            if(response.success) {
+                                $.pjax.reload({container: "#kv-unique-id-1"}); 
+                            } else {
+                                console.log('$var5');    
+                            }
+                        }	
+                    });
 		}else{
 		console.log('cancel');	
 		}
@@ -747,6 +754,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             showCancelButton: true,
             showLoaderOnConfirm: true,
             confirmButtonText: '$var13',
+            cancelButtonText: '$cancelText',
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
@@ -778,10 +786,11 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                         '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency],
                     showCancelButton: true,
                     showLoaderOnConfirm: true,
+                    cancelButtonText: '$cancelText',
                     allowOutsideClick: false,
                     preConfirm: function () {
                         return new Promise(function (resolve) {
-                             $.post(
+                            $.post(
                                 "{$changeCurrencyUrl}",
                                 {newCurrencyId: newCurrency}
                             ).done(function (response) {
@@ -831,6 +840,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
 
     var indexes = $indexesList;
     
+    var newIndex = {$currentCatalog->index_column};
     var currentIndex = {$currentCatalog->index_column};
         
     $(document).on("click", "#changeBaseIndex", function() {
@@ -841,11 +851,12 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             showCancelButton: true,
             showLoaderOnConfirm: true,
             confirmButtonText: '$var13',
+            cancelButtonText: '$cancelText',
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (value != currentIndex) {
-                        newCurrency = value;
+                        newIndex = value;
                         resolve();
                     } else {
                         swal({
@@ -857,11 +868,85 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             },
             preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
-                    resolve();
+                    $.post(
+                        "{$changeMainIndexUrl}",
+                        {
+                            "user":{"language": "RU", "token":"{$currentUser->access_token}"},
+                            "request":{
+                                "cat_id": {$cat_id},
+                                "index": newIndex
+                            }
+                        }
+                    ).done(function (response) {
+                        if (response.result) {
+                            resolve();
+                        } else {
+//                            swal({
+//                                type: response.result,
+//                                title: response.message
+//                            });
+                        }
+                    });
                 })
             },
         }).then(function (result) {
-            //
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    type: "success",
+                    title: "$indexChanged",
+                    allowOutsideClick: true,
+                }).then(function (result) {
+                    $.pjax.reload({container: "body", timeout:1000000});
+                });
+            }
+        })        
+    });
+   
+    $(document).on("click", ".delete-all-products", function() {
+        swal({
+            title: '$titleDeleteAll',
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            confirmButtonText: '$var13',
+            cancelButtonText: '$cancelText',
+            allowOutsideClick: false,
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        "{$deleteAllUrl}",
+                        {
+                            "user":{"language": "RU", "token":"{$currentUser->access_token}"},
+                            "request":{
+                                "cat_id": {$cat_id}
+                            }
+                        }
+                    ).done(function (response) {
+                        if (response.result) {
+                          //  alert("success!");
+                            $.pjax.reload({container: "#kv-unique-id-1"}); 
+                            resolve();
+                        } else {
+                            alert("fail!");
+//                            swal({
+//                                type: response.result,
+//                                title: response.message
+//                            });
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    type: "success",
+                    title: "$catalogDeleted",
+                    allowOutsideClick: true,
+                });
+            }
         })        
     });
    

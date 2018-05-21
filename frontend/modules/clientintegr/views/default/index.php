@@ -69,6 +69,9 @@ use api\common\models\RkAccess;
                         <div class="col-md-6 text-left">
                             <?= Html::a('<h4 class="m-b-xs text-info">Накладные поставщика</h4>', ['email/default']) ?>
                             <p class="small">Загрузка накладных из 1С с помощью EMAIL</p>
+
+                            <?= Html::a('<h4 class="m-b-xs text-info">ВЕТИС "Меркурий"</h4>', ['merc/default']) ?>
+                            <p class="small">Интеграция с системой ВЕТИС "Меркурий"</p>
                         </div>
                         <div class="col-md-6 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>

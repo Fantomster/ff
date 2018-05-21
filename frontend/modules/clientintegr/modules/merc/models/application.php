@@ -17,9 +17,11 @@ class application extends BaseRequest
     public $issueDate;
     public $rcvDate;
     public $prdcRsltDate;
-    public $data;
     public $result;
     public $errors;
+
+    private $data;
+    private $soap_namespaces = [];
 
     const ACCEPTED = 'ACCEPTED';
     const IN_PROCESS = 'IN_PROCESS';
@@ -37,7 +39,24 @@ class application extends BaseRequest
     {
         return [
             [['applicationId'], 'number', 'numberPattern' => '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'],
-            [['applicationId', 'status', 'serviceId','issuerId', 'issueDate', 'rcvDate', 'prdcRsltDate',  'data', 'result', 'errors'], 'safe'],
+            [['applicationId', 'status', 'serviceId','issuerId', 'issueDate', 'rcvDate', 'prdcRsltDate',  'data', 'result', 'errors', 'private $_soap_namespaces'], 'safe'],
         ];
     }
+
+    public function addData($item)
+    {
+        $this->data[get_class($item)] = $item;
+        $this->soap_namespaces = array_merge($this->soap_namespaces, $item->soap_namespaces);
+    }
+
+    public function getSoap_namespaces()
+    {
+        return $this->soap_namespaces;
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
 }

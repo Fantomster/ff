@@ -2,11 +2,12 @@
 
 use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
+use yii\grid\GridView;
+use yii\helpers\Html;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
+        <i class="fa fa-upload"></i> Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -18,7 +19,7 @@ use kartik\grid\GridView;
                 'label' => 'Интеграция',
                 'url' => ['/clientintegr/default'],
             ],
-            'Интеграция с iiko Office',
+            'Интеграция с системой ВЕТИС "Меркурий"',
         ],
     ])
     ?>
@@ -41,39 +42,100 @@ use kartik\grid\GridView;
             </div>
         </div>
     </div>
-    СПРАВОЧНИКИ:
+    <h4>Список ВСД:</h4>
 </section>
 <section class="content-header">
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
-                    <?php Pjax::begin(['id' => 'dics_pjax']); ?>
-                    <?=
-                    GridView::widget([
+                    <?php
+                    Pjax::begin(['id' => 'pjax-messages-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true]);
+                    ?>
+                    <div class="col-md-12">
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <div class="form-group field-statusFilter">
+                                <label class="label" style="color:#555" for="statusFilter">Статус</label>
+                                <?= Html::dropDownList('status', 'null', \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['class' => 'form-control']); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                    <?php
+                    echo GridView::widget([
+                        'id' => 'vetDocumentsList',
                         'dataProvider' => $dataProvider,
-                        'pjax' => false, // pjax is set to always true for this demo
-                        'id' => 'dics_grid',
-                        'filterPosition' => false,
-                        'layout' => '{items}',
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        //'filterModel' => $searchModel,
+                        //'filterPosition' => false,
+                        'summary' => '',
+                        'options' => ['class' => ''],
+                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                         'columns' => [
                             [
-                                'attribute' => 'dictype_id',
-                                'value' => function ($model) {
-                                    return $model->dictype->denom;
-                                },
-                                'format' => 'raw',
-                                'contentOptions' => ['style' => 'width: 10%;']
+                                'class' => 'yii\grid\CheckboxColumn',
+                                'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
+                                'headerOptions'    =>   ['style' => 'text-align:center;'],
+                                'checkboxOptions' => function($model, $key, $index, $widget){
+                                    $enable = !($model['status_raw'] == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED);
+                                    $style = ($enable) ? "visibility:hidden" : "";
+                                    return ['value' => $model['uuid'],'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
+                                }
                             ],
-                            'updated_at',
-                            'obj_count',
-                            [
-                                'attribute' => 'dicstatus_id',
-                                'value' => function ($model) {
-                                    return $model->dicstatus->denom;
-                                },
+                            /*[
+                                'attribute' => 'number',
                                 'format' => 'raw',
-                                'contentOptions' => ['style' => 'width: 10%;']
+                                'value' => function ($data) {
+                                    return $data['number'];
+                                },
+                            ],*/
+                            [
+                                'attribute' => 'date_doc',
+                                'label' => 'Дата оформления',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return Yii::$app->formatter->asDatetime($data['date_doc'], "php:j M Y");
+                                },
+                            ],
+                            [
+                                'attribute' => 'status',
+                                'label' => 'Статус',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['status'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'product_name',
+                                'label' => 'Наименование продукции',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['product_name'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'amount',
+                                'label' => 'Объем',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['amount'];
+                                },
+                            ],
+                            [
+                                'attribute' => 'production_date',
+                                'label' => 'Дата изготовления',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+                                },
+                            ],
+                            [
+                                'attribute' => 'recipient_name',
+                                'label' => ' 	Фирма-отправитель',
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return $data['recipient_name'];
+                                },
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
@@ -82,8 +144,11 @@ use kartik\grid\GridView;
                                 'buttons' => [
                                     'view' => function ($url, $model) {
                                         return \yii\helpers\Html::a(
-                                            '<i class="fa fa-eye" aria-hidden="true"></i>',
-                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model->dictype->contr . '-view']),
+                                            \yii\helpers\Html::tag('img', '', [
+                                                'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
+                                                'style' => 'width: 16px'
+                                            ]),
+                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\default\view?id=' . $model['UUID']]),
                                             [
                                                 'title' => Yii::t('backend', 'Просмотр'),
                                                 'data-pjax' => "0"
@@ -91,39 +156,32 @@ use kartik\grid\GridView;
                                         );
                                     },
                                     'get' => function ($url, $model) {
-                                        return \yii\helpers\Html::a(
-                                            \yii\helpers\Html::tag('i', '', [
-                                                'class' => 'fa fa-download get-content-sync',
-                                                'aria-hidden' => true,
-                                                'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model->dictype->contr . '-get']),
-                                                'data-id' => $model->id
-                                            ]),
-                                            '#',
-                                            [
-                                                'title' => Yii::t('backend', 'Загрузка'),
-                                                'data-pjax' => "0",
-                                            ]
-                                        );
+                                        if($model['status_raw'] == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                            return \yii\helpers\Html::a(
+                                                \yii\helpers\Html::tag('img', '', [
+                                                    'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
+                                                    'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['UUID'] . '-get']),
+                                                    'data-id' => $model['uuid'],
+                                                    'style' => 'width: 24px'
+                                                ]),
+                                                '#',
+                                                [
+                                                    'title' => Yii::t('backend', 'Частичня приемка'),
+                                                    'data-pjax' => "0",
+                                                ]
+                                            );
+                                        return "";
                                     },
                                 ]
                             ]
                         ],
-                        'options' => ['class' => 'table-responsive'],
-                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                        'bordered' => false,
-                        'striped' => true,
-                        'condensed' => false,
-                        'responsive' => false,
-                        'hover' => true,
-                        'resizableColumns' => false,
-                        'export' => [
-                            'fontAwesome' => true,
-                        ],
                     ]);
+                    echo '<div class="col-md-12">'.Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
+                         Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']).'</div>';
                     ?>
+                    </div>
                     <?php Pjax::end(); ?>
-                </div>
+                  </div>
             </div>
         </div>
     </div>

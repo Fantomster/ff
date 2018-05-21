@@ -439,8 +439,11 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws ValidationException
      */
     public function deleteMainCatalog(array $request) {
-        //
-        return ['result' => true];
+        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('Catalog not found');
+        }
+        return $this->container->get('CatalogWebApi')->deleteMainCatalog($catalog);
     }
     
     /**

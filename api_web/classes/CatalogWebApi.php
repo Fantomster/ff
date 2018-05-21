@@ -17,7 +17,7 @@ use api_web\components\WebApi;
  * @package api_web\classes
  */
 class CatalogWebApi extends WebApi {
-    
+
     /**
      * Смена уникального индекса главного каталога
      * @param Catalog $catalog
@@ -37,7 +37,7 @@ class CatalogWebApi extends WebApi {
             throw new BadRequestHttpException('Catalog not empty');
         }
     }
-    
+
     /**
      * Удаление главного каталога
      * @param Catalog $catalog
@@ -47,13 +47,16 @@ class CatalogWebApi extends WebApi {
     public function deleteMainCatalog($catalog) {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
-            $catalog->index_column = $index;
-            $catalog->save();
-            return [
-                'result' => true
-            ];
+            throw new BadRequestHttpException('Catalog is empty');
         } else {
-            throw new BadRequestHttpException('Catalog not empty');
+            if ($catalog->deleteAllProducts()) {
+                return [
+                    'result' => true
+                ];
+            } else {
+                throw new BadRequestHttpException('Deleting failed');
+            }
         }
     }
+
 }

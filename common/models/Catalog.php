@@ -281,10 +281,39 @@ class Catalog extends \yii\db\ActiveRecord
     }
     
     public function makeSnapshot() {
+        if ($this->type !== self::BASE_CATALOG) {
+            return false;
+        }
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $newSnapshot = new CatalogSnapshot();
+            $newSnapshot->cat_id = $this->id;
+            $newSnapshot->save();
+            $sql = "INSERT INTO catalog_snapshot_content "
+                    . "(snapshot_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price) "
+                    . "(SELECT :snapshot_id"
+                    . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price "
+                    . "FROM catalog_base_goods WHERE cat_id = :cat_id AND deleted = 0)";
+            \Yii::$app->db->createCommand($sql)
+                    ->bindValues([":snapshot_id" => $newSnapshot->id, ":cat_id" => $this->id])
+                    ->execute();
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return false;
+        }
+    }
+    
+    public function restoreLastSnapshot() {
         //
     }
     
     public function deleteAllProducts() {
-        //
+        if ($this->makeSnapshot()) { 
+            CatalogBaseGoods::updateAll(["deleted" => 1], ["cat_id" => $this->id]);
+            return true;
+        }
+        return false;
     }
 }

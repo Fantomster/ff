@@ -92,6 +92,7 @@ class VendorController extends DefaultController {
                             'events',
                             'get-sub-cat',
                             'import-base-catalog-from-xls',
+                            'import-base-catalog',
                             'import',
                             'import-restaurant',
                             'list-catalog',
@@ -618,6 +619,10 @@ class VendorController extends DefaultController {
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id', 'currentUser'));
     }
 
+    public function actionImportBaseCatalog($id) {
+        return $this->renderAjax('catalogs/apiBased/_importCatalog', compact('importModel'));
+    }
+    
     public function actionImport($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();

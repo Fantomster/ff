@@ -46,7 +46,7 @@
         "kartik-v/yii2-widget-typeahead": "*",
         "2amigos/yii2-chartjs-widget": "~2.0",
         "bower-asset/sweetalert2": "7.3.0",
-        "npm-asset/core-js": "*",
+        "npm-asset/core-js": "dev-master",
         "yii2assets/yii2-fullscreen-modal": "*",
         "delocker/yii2-animate.css": "dev-master",
         "borales/yii2-phone-input": "*",

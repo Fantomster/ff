@@ -67,11 +67,16 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionDone($uuid)
     {
         $cache = \Yii::$app->cache;
+
         $api = mercApi::getInstance();
         $api->getVetDocumentDone($uuid);
+
+        $cache->flush();
+
         $document = new getVetDocumentByUUIDRequest();
         $document->getDocumentByUUID($uuid);
         //var_dump($document);
+
         $license = mercService::getLicense();
         $view = $license ? 'view' : '/default/_nolic';
         $params = ['document' => $document, 'lic' => $license];

@@ -134,6 +134,10 @@ class mercApi
             sleep(2);
             //Получаем результат запроса
             $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+
+            var_dump($response);
+            die();
+
             $result = $this->parseResponse($response);
 
             //Пишем лог

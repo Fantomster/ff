@@ -363,8 +363,13 @@ class mercApi
             $application->addData($vetDoc);
             $request->setApplication($application);
 
+            var_dump(htmlentities($request->getXML()));
+            die();
+
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+
 
             $result = $this->parseResponse($response);
 

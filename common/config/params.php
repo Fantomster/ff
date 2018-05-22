@@ -66,6 +66,6 @@ return [
         'login' => 'markettest',
         'pass' => 'e1fa52810ea9d18a5af901c147c804e6',
         'loginClient' => 'markettest1',
-        'passClient' => 'e1ea1cbd3c8b8498735bcd54e5d8e32b',
+        'passClient' => '32da77b28033f8fcd7d6d64a9801062d',
     ]
 ];

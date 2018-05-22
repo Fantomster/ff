@@ -1,6 +1,6 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <ORDER>
-    <DOCUMENTNAME>218</DOCUMENTNAME>
+    <DOCUMENTNAME>220</DOCUMENTNAME>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>

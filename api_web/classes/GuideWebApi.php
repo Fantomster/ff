@@ -248,6 +248,7 @@ class GuideWebApi extends \api_web\components\WebApi
                         foreach ($post['products'] as $id) {
                             $this->addProduct($guide->id, $id);
                         }
+                        $this->productInsert();
                     }
                 } else {
                     throw new ValidationException($guide->getFirstErrors());
@@ -425,14 +426,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 $result['success']++;
             }
 
-            if(!empty($this->add_products)) {
-                \Yii::$app->db->createCommand()->batchInsert(GuideProduct::tableName(), [
-                    'guide_id',
-                    'cbg_id',
-                    'created_at',
-                    'updated_at'
-                ], $this->add_products)->execute();
-            }
+            $this->productInsert();
 
             $guide = Guide::findOne($params['guide_id']);
             $guide->updated_at = new Expression('NOW()');
@@ -488,6 +482,19 @@ class GuideWebApi extends \api_web\components\WebApi
         }
     }
 
+    /**
+     * Записать продукты в базу
+     */
+    private function productInsert() {
+        if(!empty($this->add_products)) {
+            \Yii::$app->db->createCommand()->batchInsert(GuideProduct::tableName(), [
+                'guide_id',
+                'cbg_id',
+                'created_at',
+                'updated_at'
+            ], $this->add_products)->execute();
+        }
+    }
     /**
      * @param $guide_id
      * @param $pid
@@ -559,7 +566,7 @@ class GuideWebApi extends \api_web\components\WebApi
             $model = CatalogBaseGoods::find()->where(['id' => $row['cbg_id'], 'cat_id' => $row['cat_id']])->one();
         }
 
-        $item['id'] = (int)$model->id;
+        $item['id'] = ($model instanceof CatalogGoods) ? (int)$model->baseProduct->id : (int)$model->id;
         $item['product'] = $model->baseProduct->product;
         $item['catalog_id'] = ((int)$model->cat_id ?? null);
         $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);

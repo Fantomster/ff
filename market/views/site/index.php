@@ -27,6 +27,11 @@ $this->title = Yii::t('message', 'market.views.site.index.main', ['ru'=>'MixCart
                     </div>
                 </div>
                 <?=empty($row->vendor->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
+                <?php if($row->vendor->gln_code > 0){
+                    $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
+                    echo "<div  class='pro-partner' style='border: 0; padding: 0'>" . Html::img(Url::to('/images/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 40]) . "</div>";
+                }
+                ?>
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
                 <img class="product-image wow animated fadeInUp" src="<?= $row->imageUrl ?>">
                 </a>
@@ -91,6 +96,11 @@ $this->title = Yii::t('message', 'market.views.site.index.main', ['ru'=>'MixCart
             </div>
          </div>
           <?=empty($row->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
+            <?php if($row->gln_code > 0){
+                $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
+                echo "<div  class='pro-partner' style='border: 0; padding: 0'>" . Html::img(Url::to('/images/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 40]) . "</div>";
+            }
+            ?>
           <a href="<?=Url::to(['/site/supplier', 'id' => $row->id]);?>">
             <img class="supplier-image  animated fadeInUp" src="<?= empty($row->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->pictureUrl ?>">
           </a>

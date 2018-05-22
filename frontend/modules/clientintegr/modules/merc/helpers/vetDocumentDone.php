@@ -31,6 +31,7 @@ class vetDocumentDone extends Component
     {
 
         $doc = $this->doc;
+       // var_dump($doc); die();
         $date = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.\Yii::$app->formatter->asTime('now', 'HH:mm:ss');
         $xml = '<merc:processIncomingConsignmentRequest>
                   <merc:localTransactionId>'.$this->localTransactionId.'</merc:localTransactionId>
@@ -39,26 +40,26 @@ class vetDocumentDone extends Component
                   </merc:initiator>
                   <merc:delivery>
                      <vet:deliveryDate>'.$date.'</vet:deliveryDate>
-                     <vet:consignor>
-                        <ent:businessEntity>
-                           <base:guid>'.$doc->ns2consignor->entbusinessEntity->bsguid->__toString().'</base:guid>
-                           <base:uuid>'.$doc->ns2consignor->entbusinessEntity->bsuuid->__toString().'</base:uuid>
-                        </ent:businessEntity>
-                        <ent:enterprise>
-                           <base:guid>'.$doc->ns2consignor->ententerprise->bsguid->__toString().'</base:guid>
-                           <base:uuid>'.$doc->ns2consignor->ententerprise->bsuuid->__toString().'</base:uuid>
-                        </ent:enterprise>
-                     </vet:consignor>
-                     <vet:consignee>
-                        <ent:businessEntity>
-                           <base:guid>'.$doc->ns2consignee->entbusinessEntity->bsguid->__toString().'</base:guid>
-                           <base:uuid>'.$doc->ns2consignee->entbusinessEntity->bsuuid->__toString().'</base:uuid>
-                        </ent:businessEntity>
-                        <ent:enterprise>
-                           <base:guid>'.$doc->ns2consignee->ententerprise->bsguid->__toString().'</base:guid>
-                           <base:uuid>'.$doc->ns2consignee->ententerprise->bsuuid->__toString().'</base:uuid>
-                        </ent:enterprise>
-                     </vet:consignee>
+                     	 <vet:consignor>
+		                        <ent:businessEntity>
+		                           <base:uuid>'.$doc->ns2consignor->entbusinessEntity->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignor->entbusinessEntity->bsguid->__toString().'</base:guid>
+		                        </ent:businessEntity>
+		                        <ent:enterprise>
+		                           <base:uuid>'.$doc->ns2consignor->ententerprise->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignor->ententerprise->bsguid->__toString().'</base:guid>
+		                        </ent:enterprise>
+		                     </vet:consignor>
+		                     <vet:consignee>
+		                        <ent:businessEntity>
+		                           <base:uuid>'.$doc->ns2consignee->entbusinessEntity->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignee->entbusinessEntity->bsguid->__toString().'</base:guid>
+		                        </ent:businessEntity>
+		                        <ent:enterprise>
+		                           <base:uuid>'.$doc->ns2consignee->ententerprise->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignee->ententerprise->bsguid->__toString().'</base:guid>
+		                        </ent:enterprise>
+		                     </vet:consignee>
                      <vet:consignment>
                        <vet:productType>'.$doc->ns2batch->ns2productType->__toString().'</vet:productType>
                         <vet:product>
@@ -91,14 +92,15 @@ class vetDocumentDone extends Component
                            <base:uuid>'.$doc->ns2batch->ns2countryOfOrigin->bsuuid->__toString().'</base:uuid>
                         </vet:countryOfOrigin>';
 
-                        /*<vet:producerList>
+                        if(isset($doc->ns2batch->ns2producerList))
+                        $xml .= '<vet:producerList>
                            <ent:producer>
                               <ent:enterprise>
-                                 <base:guid>guid</base:guid>
+                                 <base:guid>'.$doc->ns2batch->ns2producerList->entproducer->ententerprise->bsguid.'</base:guid>
                               </ent:enterprise>
-                              <ent:role>PRODUCER</ent:role>
+                              <ent:role>'.$doc->ns2batch->ns2producerList->entproducer->entrole.'</ent:role>
                            </ent:producer>
-                        </vet:producerList>*/
+                        </vet:producerList>';
 
                         $xml .= '<vet:productMarkingList>
                            <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>

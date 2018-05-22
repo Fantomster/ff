@@ -55,10 +55,14 @@ class ParserTorg12
             'label' => ['дата составления'],
             'shift_row' => 1,
         ],
-        'document_upd_info' => [
-            'label' => ['(1)'],
+     //   'document_upd_info' => [
+     //       'label' => ['(1)'],
+     //       'shift_row' => 1,
+     //   ],
+        'document_headinfo' => [
+            'label' => ['счет-фактура №'],
             'shift_row' => 1,
-        ],
+        ]
     ];
 
     /**
@@ -267,19 +271,69 @@ class ParserTorg12
         $checkSell = function ($col, $row, $attribute) {
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
-            if($cellValue == '(1)') {
+            if(strpos($cellValue, 'счет-фактура №') !== false) {
 
                 $attributeValue ="";
 
-                for($i=1;$i<$col;$i++) {
+                for($i=$col;$i<$this->highestColumn ;$i++) {
                     if (!empty($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue())))
                     $attributeValue .= ' '.$this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue());
 
                 }
                 $attributeValue = str_replace(",", ".", $attributeValue);
 
-                $attributeValue = trim(preg_replace("/.*№/", "", $attributeValue));
-                $attributeValue = trim(preg_replace("/.г.*/", "", $attributeValue));
+                // var_dump($attributeValue);
+
+                $leftSide = trim(preg_replace("/.от.*/", "", $attributeValue));
+                $rightSide = trim(str_replace($leftSide." от","",$attributeValue));
+                $leftSide = trim(preg_replace("/.*№/", "", $leftSide));
+
+
+                $check = substr($rightSide, 0, strpos($rightSide," "));
+
+                if (is_numeric($check) && (int)$check > 30000) {
+                    $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($check));
+                } else {
+                    // года для распознования даты документа
+                    $years = [date('Y', strtotime('-1 year')), date('Y'), date('Y', strtotime('+1 year'))];
+
+                    foreach ($years as $year) {
+                        $rightSide = trim(preg_replace("/.".$year.".*/", ".".$year, $rightSide));
+                    }
+
+                    $monthArr = [
+                     ' января.' => '.01.',
+                     ' февраля.' => '.02.',
+                     ' марта.' => '.03.',
+                     ' апреля.' => '.04.',
+                     ' мая.' => '.05.',
+                     ' июня.' => '.06.',
+                     ' июля.' => '.07.',
+                     ' августа.' => '.08.',
+                     ' сентября.' => '.09.',
+                     ' октября.' => '.10.',
+                     ' ноября.' => '.11.',
+                     ' декабря.' => '.12.',
+                    ];
+
+                    foreach ($monthArr as $key => $value) {
+                        if (strpos($rightSide,$key) !== false) {
+                            $rightSide = str_replace($key, $value,$rightSide);
+                        }
+                    }
+                    $rightSide = str_replace("-", ".",$rightSide);
+                    $rightSide = date('Y-m-d', strtotime($rightSide));
+                }
+
+
+               // var_dump("left:".$leftSide);
+               // var_dump("right:".$rightSide);
+
+                $attributeValue = $leftSide."%%%%".$rightSide;
+
+            //    $attributeValue = trim(preg_replace("/.*Счет-фактура/", "", $attributeValue));
+            //    $attributeValue = trim(preg_replace("/.2018.*/", ".2018", $attributeValue));
+            //    $attributeValue = trim(preg_replace("/.*№/", "", $attributeValue));
 
                 return $attributeValue;
 
@@ -325,8 +379,9 @@ class ParserTorg12
                 if (empty($documentNumber)) {
                     $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_number']);
                     if(!empty($documentNumber)) {
-                        var_dump($documentNumber);
-                        $documentNumber = preg_replace('/.от.*/', "", $documentNumber);
+
+                        $docArr = explode('%%%%',$documentNumber);
+                        $documentNumber = $docArr[0];
                     }
                 /*    if (empty($documentNumber)) {
                         $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_upd_info']);
@@ -347,8 +402,12 @@ class ParserTorg12
                 if (empty($documentDate)) {
                     $documentDate = $checkSell($col, $row, $this->settingsHeader['document_date']);
                     if(!empty($documentDate)) {
-                        var_dump($documentDate);
-                        $documentDate = preg_replace('/.*от/', "", $documentDate);
+
+                          $docArr = explode('%%%%',$documentDate);
+
+                          if (sizeof($docArr) > 1)
+                               $documentDate = $docArr[1];
+
                     }
                 }
 
@@ -362,8 +421,11 @@ class ParserTorg12
         }
 
         if (isset($documentDate)) {
-            $documentTime = strtotime($documentDate); // TODO Проверить формат даты
-            $this->invoice->date = date('Y-m-d', $documentTime);
+       //     $documentTime = strtotime($documentDate); // TODO Проверить формат даты
+       //     $this->invoice->date = date('Y-m-d', $documentTime);
+              $this->invoice->date = $documentDate;
+       //     var_dump("date ".$documentDate);
+
         } else {
             $this->invoice->errors['invoice_date'] = 'Не найдена дата накладной';
         }

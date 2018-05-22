@@ -7,8 +7,6 @@ namespace api_web\components;
  * @package api\modules\v1\modules\web\components
  */
 
-use yii\web\UploadedFile;
-
 /**
  * @SWG\Swagger(
  *     schemes={"https", "http"},

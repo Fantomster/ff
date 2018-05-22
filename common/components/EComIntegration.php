@@ -36,9 +36,7 @@ class EComIntegration extends Component {
         $list = $object->result->list;
         if(is_iterable($list)){
             foreach ($list as $fileName){
-                if(strpos($fileName, 'esadv_')) {
                     $this->getDoc($client, $fileName, $login, $pass);
-                }
             }
         }else{
             $this->getDoc($client, $list, $login, $pass);
@@ -161,9 +159,7 @@ class EComIntegration extends Component {
             $relationCatalogID = $rel->cat_id;
         }
 
-        $i=0;
         foreach ($goodsArray as $barcode => $good){
-            if($i>14)break;
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = Yii::$app->db->createCommand()->insert('catalog_base_goods', [
@@ -195,7 +191,6 @@ class EComIntegration extends Component {
                 }
             }
             Yii::$app->db->createCommand()->update('catalog_base_goods', ['updated_at' => new Expression('NOW()'), 'status' => CatalogBaseGoods::STATUS_ON], 'id='.$catalogBaseGood->id)->execute();
-            $i++;
         }
         return true;
     }

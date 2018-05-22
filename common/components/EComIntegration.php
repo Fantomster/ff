@@ -78,7 +78,7 @@ class EComIntegration extends Component {
         $positionsArray = [];
         $arr = [];
         foreach ($positions as $position){
-            $contID = (int) $position->PRODUCT;
+            $contID = (int) $position->PRODUCTIDBUYER;
             $positionsArray[] = (int) $contID;
             $arr[$contID]['ORDEREDQUANTITY'] = $position->ORDEREDQUANTITY;
             $arr[$contID]['PRICE'] = $position->PRICE;

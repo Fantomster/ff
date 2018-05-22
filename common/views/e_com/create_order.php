@@ -25,7 +25,7 @@
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $position['product_id']  ?></PRODUCTIDBUYER>
+                <PRODUCTIDBUYER><?= $position['id']  ?></PRODUCTIDBUYER>
                 <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>

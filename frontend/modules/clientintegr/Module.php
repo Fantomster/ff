@@ -19,6 +19,9 @@ class Module extends \yii\base\Module
             'email' => [
                 'class' => 'frontend\modules\clientintegr\modules\email\Module',
             ],
+            'merc' => [
+                'class' => 'frontend\modules\clientintegr\modules\merc\Module',
+            ],
 /*            
             'supp' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен

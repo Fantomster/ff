@@ -35,7 +35,8 @@ $resArr = [];
 
 $arrService = \api\common\models\RkServicedata::find()->select('org')->asArray()->column();
 $arrServiceiiko = \api\common\models\iiko\iikoService::find()->select('org')->asArray()->column();
-$resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
+$arrServicemerc = \api\common\models\merc\mercService::find()->select('org')->asArray()->column();
+$resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko, $arrServicemerc);
 ?>
 
 <aside class="main-sidebar">

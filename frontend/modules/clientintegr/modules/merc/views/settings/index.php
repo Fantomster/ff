@@ -2,11 +2,23 @@
 
 use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
+use yii\bootstrap\Modal;
+use yii\widgets\Pjax;
+use yii\web\View;
 
 ?>
+
+<?=
+Modal::widget([
+    'id' => 'settings-edit-form',
+    'size' => 'modal-md',
+    'clientOptions' => false,
+])
+?>
+
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
+        <i class="fa fa-upload"></i> Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -18,7 +30,7 @@ use kartik\grid\GridView;
                 'label' => 'Интеграция',
                 'url' => ['/clientintegr'],
             ],
-            'Интеграция с iiko Office',
+            'Интеграция с системой ВЕТИС "Меркурий"',
         ],
     ])
     ?>
@@ -33,6 +45,7 @@ use kartik\grid\GridView;
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
+                        <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 10000, 'id' => 'st-list']) ?>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
@@ -49,10 +62,10 @@ use kartik\grid\GridView;
                                 ],
                                 [
                                     'value' => function ($data) {
-                                        $model = \api\common\models\iiko\iikoDicconst::findOne(['id' => $data->id]);
+                                        $model = \api\common\models\merc\mercDicconst::findOne(['id' => $data->id]);
                                         $res = $model->getPconstValue();
 
-                                        if($model->type == \api\common\models\iiko\iikoDicconst::TYPE_PASSWORD) {
+                                        if($model->type == \api\common\models\merc\mercDicconst::TYPE_PASSWORD) {
                                             return str_pad('', strlen($res), '*');
                                         }
 
@@ -83,9 +96,15 @@ use kartik\grid\GridView;
                                     ],
                                     'buttons' => [
                                         'clear' => function ($url, $model) {
-                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\settings\change-const', 'id' => $model->id]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\settings\change-const', 'id' => $model->id]);
                                             return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
-                                                ['title' => 'Изменить значение', 'data-pjax' => "0"]);
+                                                ['title' => 'Изменить значение',
+                                                    'data' => [
+                                                    'target' => '#settings-edit-form',
+                                                    'toggle' => 'modal',
+                                                    'backdrop' => 'static',
+                                                    ]
+                                                ]);
                                         },
                                     ]
                                 ],
@@ -105,12 +124,44 @@ use kartik\grid\GridView;
                             ],
                         ]);
                         ?>
+                        <?php Pjax::end(); ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<?php
+$customJs = <<< JS
+$(".modal").removeAttr("tabindex");
+
+$("#settings-edit-form").on("click", ".save-form", function() {
+    var form = $("#settings-form");
+    $.ajax({
+    url: form.attr("action"),
+    type: "POST",
+    data: form.serialize(),
+    cache: false,
+    success: function(response) {
+        $.pjax.reload({container: "#st-list",timeout:30000});
+        if(response != true) 
+            form.replaceWith(response);
+        else
+                $("#settings-edit-form").modal('hide');
+                  
+        },
+        failure: function(errMsg) {
+        console.log(errMsg);
+    }
+    });
+});
+
+$("body").on("hidden.bs.modal", "#settings-edit-form", function() {
+$(this).data("bs.modal", null);
+})
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>
 
 
 

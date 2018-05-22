@@ -23,7 +23,7 @@ class mercPconst extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%iiko_pconst}}';
+        return '{{%merc_pconst}}';
     }
 
     /**
@@ -43,7 +43,7 @@ class mercPconst extends \yii\db\ActiveRecord
             [['const_id', 'org'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['value'], 'string', 'max' => 255],
-            [['const_id'], 'exist', 'skipOnError' => true, 'targetClass' => iikoDicconst::className(), 'targetAttribute' => ['const_id' => 'id']],
+            [['const_id'], 'exist', 'skipOnError' => true, 'targetClass' => mercDicconst::className(), 'targetAttribute' => ['const_id' => 'id']],
         ];
     }
 

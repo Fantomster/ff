@@ -2,18 +2,49 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
-use api\common\models\iiko\iikoDicconst;
-use api\common\models\iiko\iikoWaybill;
-use yii\helpers\ArrayHelper;
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
+use Yii;
+use api\common\models\merc\mercDicconst;
+use api\common\models\merc\mercLog;
+use frontend\modules\clientintegr\modules\merc\models\application;
+use frontend\modules\clientintegr\modules\merc\models\ApplicationDataWrapper;
+use frontend\modules\clientintegr\modules\merc\models\data;
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest;
+use frontend\modules\clientintegr\modules\merc\models\receiveApplicationResultRequest;
+use frontend\modules\clientintegr\modules\merc\models\submitApplicationRequest;
 
 class mercApi
 {
-    private $host = 'http://192.168.100.39:8080/resto/api';
     private $login;
     private $pass;
-    private $token;
+    private $apiKey;
+    private $issuerID;
+    private $service_id = 'mercury-g2b.service';
+    private $vetisLogin = '';
+    private $_client;
 
-    var $response = '';
+    private $wsdls = [
+        'mercury' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ApplicationManagementService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ApplicationManagementService_v1.4_pilot.wsdl',
+        ],
+        'dicts' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/DictionaryService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/DictionaryService_v1.4_pilot.wsdl',
+        ],
+        'vetis' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/2.0/EnterpriseService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/cerberus/services/EnterpriseService_v1.4_pilot.wsdl',
+        ],
+        'product' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ProductService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ProductService_v1.4_pilot.wsdl',
+        ],
+        'ikar' => [
+            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/ikar/services/IkarService',
+            'wsdl' => 'http://api.vetrf.ru/schema/platform/ikar/services/IkarService_v1.4_pilot.wsdl',
+        ],
+    ];
 
     protected static $_instance;
 
@@ -21,394 +52,345 @@ class mercApi
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
-            self::$_instance->host = iikoDicconst::getSetting('URL');
-            self::$_instance->login = iikoDicconst::getSetting('auth_login');
-            self::$_instance->pass = iikoDicconst::getSetting('auth_password');
+            self::$_instance->wsdl = \Yii::$app->params['mercury_wsdl'];
+            self::$_instance->login = mercDicconst::getSetting('auth_login');
+            self::$_instance->pass = mercDicconst::getSetting('auth_password');
+            self::$_instance->apiKey = mercDicconst::getSetting('api_key');
+            self::$_instance->issuerID = mercDicconst::getSetting('issuer_id');
+            self::$_instance->vetisLogin = mercDicconst::getSetting('vetis_login');
         }
         return self::$_instance;
     }
 
-    private function __construct()
+    private function getSoapClient($system)
     {
+        if ($this->_client === null)
+            return new \SoapClient($this->wsdls[$system]['wsdl'],[
+               /* 'use' => SOAP_LITERAL,
+                'style' => SOAP_DOCUMENT,
+                'location' => self::Endpoint_URL,
+                'uri' => 'https://api2.vetrf.ru',*/
+                'login' => $this->login,
+                'password' => $this->pass,
+                'exceptions' => 1,
+                'trace' => 1,
+                //'soap_version' => SOAP_1_1,
+            ]);
+
+        return $$this->_client;
     }
 
-    private function __clone()
+    private function getLocalTransactionId($method)
     {
+        return base64_encode($method.time());
     }
 
-    /**
-     * Авторизация
-     * @param $login
-     * @param $password
-     * @return bool
-     */
-    public function auth($login = null, $password = null)
+    private function parseResponse($response)
     {
-        if(is_null($login)) {
-            $login = $this->login;
-        }
+        $xmlString = str_replace('SOAP-ENV', 'soapenv', $response);
+        $xmlString = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $xmlString);
 
-        if(is_null($password)) {
-            $password = $this->pass;
-        }
+        $xml = simplexml_load_string($xmlString);
 
-        $params = [
-            'login' => $login,
-            'pass' => hash('sha1', $password)
-        ];
-
-        if($this->token = $this->sendAuth('/auth', $params)) {
-            return true;
-        } else {
-            return false;
-        }
+        return new \SimpleXMLElement($xml->asXML());
     }
 
-    /**
-     * Выход с апи
-     * @return mixed
-     */
-    public function logout()
+    public function getVetDocumentList()
     {
-        if (!empty($this->token)) {
-            $this->sendAuth('/logout');
-        }
-    }
+        $client = $this->getSoapClient('mercury');
+        $result = null;
 
-    /**
-     * Список категорий и продуктов
-     * @return array
-     */
-    public function getProducts()
-    {
-        $products = [];
-        $categories = [];
-        $units = [];
-        $result = self::xmlToArray($this->send('/products/'));
-        if (!empty($result) && isset($result['productDto'])) {
-            foreach ($result['productDto'] as $item) {
-                $id = $item['id'];
-                unset($item['id']);
-                if (isset($item['productGroupType'])) {
-                    $categories[$id] = $item;
-                } else {
-                    $products[$id] = $item;
-                    $units[] = $item['mainUnit'];
-                }
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new getVetDocumentListRequest();
+            $vetDoc->localTransactionId = $localTransactionId;
+            $vetDoc->setEnterpriseGuid('f8805c8f-1da4-4bda-aaca-a08b5d1cab1b');
+            $vetDoc->setInitiator($this->vetisLogin);
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+            //Делаем запрос
+            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                echo "Bad request";
+                die();
             }
+
+            //timeout перед запросом результата
+            sleep(2);
+            //Получаем результат запроса
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+
+        //    var_dump(htmlentities($response));
+        //    die();
+
+            $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
         }
-
-        return [
-            'categories' => $categories,
-            'products' => $products,
-            'units' => array_unique($units)
-        ];
+        return $result;
     }
 
-
-    /**
-     * Список складов
-     * @return mixed
-     */
-    public function getStores() {
-        return self::xmlToArray($this->send('/corporation/stores/'));
-    }
-
-    /**
-     * Список контрагентов
-     * @return mixed
-     */
-    public function getSuppliers() {
-        return self::xmlToArray($this->send('/suppliers/'));
-    }
-
-    /**
-     * @param iikoWaybill $model
-     * @return mixed
-     */
-    public function sendWaybill(iikoWaybill $model) {
-        $url = '/documents/import/incomingInvoice';
-        return $this->sendXml($url, $model->getXmlDocument());
-    }
-
-    /**
-     * Обычный SEND без чанков. Копия обычной SEND() для авторизации,
-     * так как авторизация не поддерживает запрос только с HEADERS для определения чанков
-     * @param $url
-     * @param array $params
-     * @param string $method
-     * @param array $headers
-     * @return mixed
-     */
-    private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
+    public function getReceiveApplicationResult ($applicationId)
     {
-        $header = ['Content-Type: application/x-www-form-urlencoded'];
-        $header = ArrayHelper::merge($header, $headers);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-        curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-
-        /**
-         * Logger
-         */
-        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
-            $org_id  = \Yii::$app->user->identity->organization_id;
-            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
-                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
-                $message = [
-                    '(AUTH PROCEDURE!)',
-                    'DATE: ' . date('d.m.Y H:i:s'),
-                    'URL: ' . $url,
-                    'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'],
-                    'HTTP_URL: ' . $info['url'],
-                    'RESPONSE: ' . $response,
-                    'RESP_SIZE:' . sizeof($response),
-                    'KEY: ' . $this->token,
-                    str_pad('', 200, '-') . PHP_EOL
-                ];
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
-                file_put_contents($file, print_r($info,true).PHP_EOL, FILE_APPEND);
-
-            }
-        }
-
-        if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '.curl_error($ch));
-        }
-
-        return $response;
+        $client = $this->getSoapClient('mercury');
+        $request = new receiveApplicationResultRequest();
+        $request->apiKey = $this->apiKey;
+        $request->issuerId = $this->issuerID;
+        $request->applicationId = $applicationId;
+        return $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'receiveApplicationResultRequest', SOAP_1_1);
     }
 
-    /**
-     * @param $url
-     * @param array $params
-     * @param string $method
-     * @param array $headers
-     * @return mixed
-     */
-    private function send($url, $params = [], $method = 'GET', $headers = [])
+    private function addEventLog ($response, $method, $localTransactionId)
     {
-        $header = ['Content-Type: application/x-www-form-urlencoded'];
-        $header = ArrayHelper::merge($header, $headers);
+        //Пишем лог
+        $log = new mercLog();
+        $log->applicationId = $response->application->applicationId->__toString();
+        $log->status = $response->application->status->__toString();
+        $log->action = $method;
+        $log->localTransactionId =  $localTransactionId;
 
-        $chunked = false; // Признак разбиения BODY на chunked куски
-        $response = &$this -> response;
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_NOBODY, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 100);
-        curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        $headerArray = self::getHeadersCurl($response);
-
-        if (array_key_exists('Transfer-Encoding',$headerArray)) {
-            if ($headerArray['Transfer-Encoding'] == 'chunked')
-                $chunked = true;
+        if($log->status == mercLog::REJECTED) {
+            $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
         }
 
-        /**
-         * Chunked Logger
-         */
-        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
-            $org_id  = \Yii::$app->user->identity->organization_id;
-            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
-                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
-                $message = [
-                    '(Chunked mode detection...)',
-                    'DATE: ' . date('d.m.Y H:i:s'),
-                    'URL: ' . $url,
-                    'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'],
-                    'HTTP_URL: ' . $info['url'],
-                    'RESPONSE: ' . $response,
-                    'RESP_SIZE:' . sizeof($response),
-                    'KEY: ' . $this->token,
-                    'CHUNKED MODE DETECTED :' . $chunked,
-                    str_pad('', 200, '-') . PHP_EOL
-                ];
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-            }
-        }
-
-        if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '. curl_error($ch));
-        }
-
-        $response ='';
-        unset($info);
-        curl_close($ch);
-
-        // Start real request with BODY onboard
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-        curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
-        if ($chunked) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
-            curl_exec($ch);
-        } else {
-            $response = curl_exec($ch);
-        }
-
-        $info = curl_getinfo($ch);
-
-
-
-        /**
-         * Logger
-         */
-
-        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
-            $org_id  = \Yii::$app->user->identity->organization_id;
-            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
-                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
-                $message = [
-                    '(Normal request)',
-                    'DATE: ' . date('d.m.Y H:i:s'),
-                    'URL: ' . $url,
-                    'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'],
-                    'HTTP_URL: ' . $info['url'],
-                    'RESP_SIZE:' . sizeof($response),
-                    'KEY: ' . $this->token,
-                    str_pad('', 200, '-') . PHP_EOL
-                ];
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, '************!', FILE_APPEND);
-                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
-                file_put_contents($file, '!************'.PHP_EOL.curl_error($ch).'!'.PHP_EOL, FILE_APPEND);
-
-            }
-        }
-
-        curl_close($ch);
-
-        if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '.curl_error($ch));
-        }
-
-
-        return $response;
+        if (!$log->save())
+            var_dump($log->getErrors());
     }
 
-    /**
-     * @param $ch
-     * @param $str
-     * @return int
-     */
-
-    function Callback($ch, $str){
-       $response = &$this -> response;
-       $response .= $str;
-
-        return strlen($str);
-    }
-
-    /**
-     * @param $url
-     * @param $body
-     * @param array $headers
-     * @return mixed
-     */
-    private function sendXml($url, $body, $headers = [])
+    public function getUnitByGuid ($GUID)
     {
-        $header = [
-            "Content-type: application/xml",
-            "Content-length: " . strlen($body),
-            "Connection: close"
-        ];
-
-        $header = ArrayHelper::merge($header, $headers);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->host . $url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-
-
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        $info1 = curl_getinfo($ch, CURLINFO_HEADER_OUT);
-        if($info['http_code'] !== 200) {
-            print_r($response);
-            //print_r(['r' => $response,'header' => $header, 'info' => $info1]);
-            //\Yii::info('error: ' . print_r($info, 1), 'iiko_api');
-            return false;
-        }
-
-        return $response;
+        $client = $this->getSoapClient('dicts');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getUnitByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getUnitByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetUnitByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
     }
 
-    /**
-     * @param $xml
-     * @return mixed
-     */
-    public static function xmlToArray($xml)
+    public function getBusinessEntityByUuid ($UUID)
+{
+    $client = $this->getSoapClient('vetis');
+    $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v2:getBusinessEntityByUuidRequest>
+         <base:uuid>'.$UUID.'</base:uuid>
+      </v2:getBusinessEntityByUuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+    $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
+    return $this->parseResponse($result);
+}
+
+    public function getEnterpriseByUuid ($UUID)
     {
-        return json_decode(json_encode(simplexml_load_string($xml)), true);
+        $client = $this->getSoapClient('vetis');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+       <v2:getEnterpriseByUuidRequest>
+         <base:uuid>'.$UUID.'</base:uuid>
+      </v2:getEnterpriseByUuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetEnterpriseByUuid', SOAP_1_1);
+        return $this->parseResponse($result);
     }
 
-    /**
-     * @param $response
-     * @return array
-     */
+    public function getVetDocumentByUUID($UUID)
+    {
+        $client = $this->getSoapClient('mercury');
+        $result = null;
 
-    public static function getHeadersCurl($response){
-        $headers = array();
-        $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
-        foreach (explode("\r\n", $header_text) as $i => $line){
-            if ($i === 0)
-                $headers['http_code'] = $line;
-            else{
-                list ($key, $value) = explode(': ', $line);
-                $headers[$key] = $value;
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new getVetDocumentByUUIDRequest();
+            $vetDoc->localTransactionId = $localTransactionId;
+            $vetDoc->setEnterpriseGuid('f8805c8f-1da4-4bda-aaca-a08b5d1cab1b');
+            $vetDoc->setInitiator($this->vetisLogin);
+            $vetDoc->UUID = $UUID;
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+            //Делаем запрос
+            $response = $client->__doRequest($request->getXML($UUID), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                echo "Bad request";
+                die();
             }
+
+            //timeout перед запросом результата
+            sleep(2);
+            //Получаем результат запроса
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
         }
-        return $headers;
+        return $result;
+    }
+
+    public function getProductByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('product');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+       <soapenv:Header/>
+       <soapenv:Body>
+          <ws:getProductByGuidRequest>
+             <base:guid>'.$GUID.'</base:guid>
+          </ws:getProductByGuidRequest>
+       </soapenv:Body>
+    </soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getSubProductByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('product');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getSubProductByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getSubProductByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getCountryByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('ikar');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/ikar/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getCountryByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getCountryByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['ikar']['Endpoint_URL'], 'GetCountryByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getPurposeByGuid ($GUID)
+    {
+        $client = $this->getSoapClient('dicts');
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getPurposeByGuidRequest>
+         <base:guid>'.$GUID.'</base:guid>
+      </ws:getPurposeByGuidRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetPurposeByGuid', SOAP_1_1);
+        return $this->parseResponse($result);
+    }
+
+    public function getVetDocumentDone($UUID)
+    {
+        $client = $this->getSoapClient('mercury');
+        $result = null;
+
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new vetDocumentDone();
+            $vetDoc->login = $this->vetisLogin;
+            $vetDoc->UUID = $UUID;
+            $vetDoc->doc = (new getVetDocumentByUUIDRequest())->getDocumentByUUID($UUID, true);
+            $vetDoc->localTransactionId = $localTransactionId;
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+           // var_dump(htmlentities($request->getXML()));
+           // die();
+
+            //Делаем запрос
+            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                echo "Bad request";
+                die();
+            }
+
+            //timeout перед запросом результата
+            sleep(2);
+            //Получаем результат запроса
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
+        }
+        return $result;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\modules\clientintegr\modules\iiko\controllers;
+namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
@@ -54,16 +54,27 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         }
 
         $lic = mercService::getLicense();
-        $vi = $lic ? 'update' : '/default/_nolic';
+        if(Yii::$app->request->isAjax)
+            $vi = $lic ? '_ajaxForm' : '/default/_nolic';
+        else
+            $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($pConst->load(Yii::$app->request->post()) && $pConst->save()) {
             if ($pConst->getErrors()) {
                 var_dump($pConst->getErrors());
                 exit;
             }
+            if(Yii::$app->request->isAjax)
+                return true;
             return $this->redirect(['index']);
         } else {
             $dicConst = mercDicconst::findOne(['id' => $pConst->const_id]);
+            if(Yii::$app->request->isAjax)
+                return $this->renderAjax($vi, [
+                    'model' => $pConst,
+                    'dicConst' => $dicConst,
+                ]);
+
             return $this->render($vi, [
                 'model' => $pConst,
                 'dicConst' => $dicConst,

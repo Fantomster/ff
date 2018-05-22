@@ -273,7 +273,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         if(isset($doc->ns2broker)) {
             $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->bsuuid->__toString());
             $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
-            $this->broker = ['label' => 'Название предприятия',
+            $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
                 'value' => $broker->dtname->__toString() . ', ИНН:' . $broker->dtinn->__toString(),
             ];
         }
@@ -298,6 +298,18 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
         $purpose = $purpose_raw->soapBody->wsgetPurposeByGuidResponse ->compurpose->comname->__toString();
+
+        $producer = null;
+
+        if(isset($doc->ns2batch->ns2producerList->entproducer)) {
+            $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
+
+            $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
+
+            $producer = $producer->dtname->__toString() . '(' .
+                $producer->dtaddress->dtaddressView->__toString()
+                . ')';
+        }
 
         $this->batch =
         [
@@ -347,7 +359,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список производителей продукции',
-                'value' => null,
+                'value' => $producer,
             ],
             [
                 'label' => 'Список маркировки, доступный для данного производителя',

@@ -31,7 +31,7 @@ class vetDocumentDone extends Component
     {
 
         $doc = $this->doc;
-       // var_dump($doc); die();
+        //var_dump($this->UUID); die();
         $date = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.\Yii::$app->formatter->asTime('now', 'HH:mm:ss');
         $xml = '<merc:processIncomingConsignmentRequest>
                   <merc:localTransactionId>'.$this->localTransactionId.'</merc:localTransactionId>
@@ -114,9 +114,10 @@ class vetDocumentDone extends Component
                         $xml .= isset($doc->ns2waybillDate) ? '<shp:issueDate>'.$doc->ns2waybillDate->__toString().'</shp:issueDate>' : '';
                         $xml .= isset($doc->ns2waybillType) ? '<shp:type>'.$doc->ns2waybillType->__toString().'</shp:type>' : '';
 
-                           /*<shp:broker>
-                              <base:guid>fce1f0e1-218a-11e2-a69b-b499babae7ea</base:guid>
-                           </shp:broker>*/
+                        if(isset($doc->ns2broker))
+                            $xml .='<shp:broker>
+                              <base:guid>'.$doc->ns2broker->bsguid->__toString().'</base:guid>
+                           </shp:broker>';
 
                            $xml .= '<shp:transportInfo>
                               <shp:transportType>'.$doc->ns2transportInfo->shptransportType->__toString().'</shp:transportType>

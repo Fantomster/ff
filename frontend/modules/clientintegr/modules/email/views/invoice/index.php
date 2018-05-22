@@ -115,9 +115,9 @@ function renderButton($id)
                                     }
                                 ],
                                 [
-                                    'attribute' => 'total',
+                                    'attribute' => 'total_sum_withtax',
                                     'value' => function ($data) {
-                                        return number_format($data->totalSumm, 2, '.', ' ');
+                                        return number_format($data->total_sum_withtax, 2, '.', ' ');
                                     }
                                 ],
                                 [

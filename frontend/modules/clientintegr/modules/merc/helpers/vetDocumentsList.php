@@ -51,7 +51,7 @@ class vetDocumentsList extends Component
             $recipient = mercApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
             $result[] = [
                 'uuid' => $item->bsuuid,
-                'number' => '',
+                'number' => $this->getNumber($item->ns2issueSeries, $item->ns2issueNumber),
                 'date_doc' => $item->ns2issueDate,
                 'status' => '<span class="status ' . $this->status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
                 'status_raw' => $item->ns2status->__toString(),
@@ -65,10 +65,23 @@ class vetDocumentsList extends Component
         return $result;
     }
 
+    public function getNumber($series, $number)
+    {
+        if(empty($number) && empty($series))
+            return null;
+
+        $res = '';
+        if(isset($series))
+            $res =  $series.' ';
+
+        if(isset($number))
+            $res .=  $number;
+
+        return $res;
+    }
+
     public function getArrayDataProvider()
     {
-        //$pageSize = isset($params['per-page']) ? intval($params['per-page']) : Yii::$app->params['defaultPageSize'];
-
         $api = mercApi::getInstance();
 
         $result = $api->getVetDocumentList();
@@ -77,9 +90,6 @@ class vetDocumentsList extends Component
             $data = [];
         else
             $data = $this->createDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentListResponse->ns2vetDocumentList->ns2vetDocument);
-
-       /* var_dump($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentListResponse->ns2vetDocumentList->ns2vetDocument);
-        die();*/
 
        $sort = [
            'attributes' => [

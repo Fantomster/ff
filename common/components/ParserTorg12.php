@@ -300,7 +300,6 @@ class ParserTorg12
                     foreach ($years as $year) {
                         $rightSide = trim(preg_replace("/.".$year.".*/", ".".$year, $rightSide));
                     }
-
                     $monthArr = [
                      ' января.' => '.01.',
                      ' февраля.' => '.02.',
@@ -322,6 +321,7 @@ class ParserTorg12
                         }
                     }
                     $rightSide = str_replace("-", ".",$rightSide);
+                    $rightSide = str_replace(" ", ".",$rightSide);
                     $rightSide = date('Y-m-d', strtotime($rightSide));
                 }
 
@@ -424,7 +424,7 @@ class ParserTorg12
        //     $documentTime = strtotime($documentDate); // TODO Проверить формат даты
        //     $this->invoice->date = date('Y-m-d', $documentTime);
               $this->invoice->date = $documentDate;
-       //     var_dump("date ".$documentDate);
+         //   var_dump("date ".$documentDate);
 
         } else {
             $this->invoice->errors['invoice_date'] = 'Не найдена дата накладной';

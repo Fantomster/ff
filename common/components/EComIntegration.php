@@ -54,17 +54,14 @@ class EComIntegration extends Component {
         if(strpos($content, 'PRICAT>')){
             $this->handlePriceListUpdating($simpleXMLElement);
         }
-        if(strpos($content, 'ORDRSP>')){
+        if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
             $this->handleOrderResponse($simpleXMLElement);
-        }
-        if(strpos($content, 'DESADV>')){
-            $this->handleOrderResponse($simpleXMLElement, true);
         }
         return true;
     }
 
 
-    private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, bool $isDesadv = false)
+    private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement)
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
@@ -72,9 +69,9 @@ class EComIntegration extends Component {
             Yii::error('No such order');
             return false;
         }
-        if($isDesadv){
-            $order->status = Order::STATUS_PROCESSING;
-        }
+
+        $order->status = Order::STATUS_PROCESSING;
+
         $order->updated_at = new Expression('NOW()');
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
@@ -104,13 +101,13 @@ class EComIntegration extends Component {
     {
         $supplierGLN = $simpleXMLElement->SUPPLIER;
         $organization = Organization::findOne(['gln_code'=>$supplierGLN]);
-        if(!$organization || $organization->type_id != 2){
+        if(!$organization || $organization->type_id != Organization::TYPE_SUPPLIER){
             return false;
         }
         $baseCatalog = $organization->baseCatalog;
         if(!$baseCatalog){
             $baseCatalog = new Catalog();
-            $baseCatalog->type = 1;
+            $baseCatalog->type = Catalog::BASE_CATALOG;
             $baseCatalog->supp_org_id = $organization->id;
             $baseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);;
             $baseCatalog->created_at = new Expression('NOW()');
@@ -242,13 +239,14 @@ class EComIntegration extends Component {
     }
 
 
-    public function sendOrderInfo(Order $order, Organization $vendor, Organization $client): bool
+    public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, bool $done = false): bool
     {
         $orderContent = OrderContent::findAll(['order_id'=>$order->id]);
         $dateArray = $this->getDateData($order);
-        $string = Yii::$app->controller->renderPartial('@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
+        $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
         $currentDate = date("Ymdhis");
-        $remoteFile = 'order_' . $currentDate . '_' . $order->id . '.xml';
+        $fileName = $done ? 'recadv_' : 'order_';
+        $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
         return $this->sendDoc($string, $remoteFile);
     }
 

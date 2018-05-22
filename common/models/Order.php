@@ -504,7 +504,11 @@ class Order extends \yii\db\ActiveRecord
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if ($client->gln_code && $vendor->gln_code) {
                 $eComIntegration = new EComIntegration();
-                $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                if($this->status == self::STATUS_DONE){
+                    $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
+                }else{
+                    $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                }
             }
             if (!$client->gln_code && $vendor->gln_code) {
                 throw new BadRequestHttpException($errorText);

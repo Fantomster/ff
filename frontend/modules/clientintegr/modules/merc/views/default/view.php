@@ -130,20 +130,20 @@ use yii\helpers\Html;
                            ]
                     ];
 
-                    foreach ($document->transportInfo['numbers'] as $row)
-                    {
-                        if(!empty($row['number']))
-                            $attributes[] = [
-                                    'label' => $row['label'],
-                                    'value' => $row['number'],
-                        ];
-                    }
+                    if(isset($document->transportInfo)){
+                        foreach ($document->transportInfo['numbers'] as $row)
+                        {
+                            if(!empty($row['number']))
+                                $attributes[] = [
+                                        'label' => $row['label'],
+                                        'value' => $row['number'],
+                            ];
+                        }
 
-                    echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => $attributes,
-                    ]) ?>
-
+                        echo DetailView::widget([
+                            'model' => $document,
+                            'attributes' => $attributes,
+                        ]); }?>
                     <h4>Транспортная накладная: </h4>
                     <?php
                     $attributes = [
@@ -215,8 +215,8 @@ use yii\helpers\Html;
                         'attributes' => $attributes,
                     ]) ?>
                     <div class="col-md-12">
-                        <?php // Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                        echo Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
+                        <?php  echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                        //echo Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
                         Html::a('Частичня приемка', ['#'], ['class' => 'btn btn-warning']).' '.
                         Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']); ?>
                     </div>

@@ -229,8 +229,8 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         if($raw)
             return $doc;
 
-        $this->issueSeries = $doc->ns2issueSeries->__toString();
-        $this->issueNumber = $doc->ns2issueNumber->__toString();
+        $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
+        $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
         $this->issueDate = $doc->ns2issueDate->__toString();
         $this->form = $doc->ns2form->__toString();
         $this->type = $doc->ns2type->__toString();
@@ -271,9 +271,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         ];
 
         if(isset($doc->ns2broker)) {
-            $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->entbusinessEntity->bsuuid->__toString());
+            $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->bsuuid->__toString());
             $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
-            $this->broker = ['label' => 'Название предприятия',
+            $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
                 'value' => $broker->dtname->__toString() . ', ИНН:' . $broker->dtinn->__toString(),
             ];
         }
@@ -299,6 +299,18 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
         $purpose = $purpose_raw->soapBody->wsgetPurposeByGuidResponse ->compurpose->comname->__toString();
 
+        $producer = null;
+
+        if(isset($doc->ns2batch->ns2producerList->entproducer)) {
+            $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
+
+            $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
+
+            $producer = $producer->dtname->__toString() . '(' .
+                $producer->dtaddress->dtaddressView->__toString()
+                . ')';
+        }
+
         $this->batch =
         [
             [
@@ -315,7 +327,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Наименование произведенной продукции в номенклатуре производителя',
-                'value' => $doc->ns2batch->ns2productItem->prodname->__toString(),
+                'value' => isset($doc->ns2batch->ns2productItem->prodname) ? $doc->ns2batch->ns2productItem->prodname->__toString() : null,
             ],
             [
                 'label' => 'Объем',
@@ -323,11 +335,11 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
-                'value' => $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString(),
+                'value' => isset($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
             ],
             [
                 'label' => 'Общее количество единиц упаковки для производственной партии',
-                'value' => $doc->ns2batch->ns2packingAmount->__toString(),
+                'value' => isset($doc->ns2batch->ns2packingAmount) ? $doc->ns2batch->ns2packingAmount->__toString() : null,
             ],
             [
                 'label' => 'Дата выработки продукции',
@@ -339,7 +351,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => ($doc->ns2batch->ns2perishable->__toString() == 'true') ? 'Да' : 'Нет',
+                'value' => isset($doc->ns2batch->ns2perishable) ? (($doc->ns2batch->ns2perishable->__toString() == 'true') ? 'Да' : 'Нет') : null,
             ],
             [
                 'label' => 'Страна происхождения продукции',
@@ -347,11 +359,11 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список производителей продукции',
-                'value' => null,
+                'value' => $producer,
             ],
             [
                 'label' => 'Список маркировки, доступный для данного производителя',
-                'value' => $doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString(),
+                'value' => isset($doc->ns2batch->ns2productMarkingList) ? $doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString() : null,
             ],
             [
                 'label' => 'Является ли продукция некачественной',
@@ -366,41 +378,42 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             'label' => 'Цель. Назначение груза',
             'value' => $purpose,
         ];
-        $this->transportInfo = [
+
+        $this->transportInfo = isset ($doc->ns2transportInfo) ? ([
             'type' => $this->transport_types[$doc->ns2transportInfo->shptransportType->__toString()],
             'numbers' => [
                 [
                 'label' => 'Номер контейнера (при автомобильной перевозке)',
-                'number' => $doc->ns2transportInfo->shptransportNumber->shpcontainerNumber->__toString(),
+                'number' => isset($doc->ns2transportInfo->shptransportNumber->shpcontainerNumber) ? $doc->ns2transportInfo->shptransportNumber->shpcontainerNumber->__toString() : null,
                 ],
                 [
                     'label' => 'Номер вагона',
-                    'number' => $doc->ns2transportInfo->shptransportNumber->shpwagonNumber->__toString(),
+                    'number' => isset ($doc->ns2transportInfo->shptransportNumber->shpwagonNumber) ? $doc->ns2transportInfo->shptransportNumber->shpwagonNumber->__toString() : null,
                 ],
                 [
                     'label' => 'Номер автомобиля',
-                    'number' => $doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString(),
+                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpvehicleNumber) ? $doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString() : null,
                 ],
                 [
                     'label' => 'Номер прицепа (полуприцепа)',
-                    'number' => $doc->ns2transportInfo->shptransportNumber->shptrailerNumber->__toString(),
+                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shptrailerNumber) ? $doc->ns2transportInfo->shptransportNumber->shptrailerNumber->__toString() : null,
                 ],
                 [
                     'label' => 'Название судна (или номер контейнера)',
-                    'number' => $doc->ns2transportInfo->shptransportNumber->shpshipName->__toString(),
+                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpshipName) ? $doc->ns2transportInfo->shptransportNumber->shpshipName->__toString() : null,
                 ],
                 [
                     'label' => 'Номер авиарейса',
-                    'number' => $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString(),
+                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpflightNumbe) ? $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString() : null,
                 ]
             ]
-        ];
-        $this->transportStorageType = $doc->ns2transportStorageType->__toString();
-        $this->cargoReloadingPointList = (isset($this->cargoReloadingPointList)) ? $this->cargoReloadingPointList->__toString() : null;
-        $this->waybillSeries = $doc->ns2waybillSeries->__toString();
-        $this->waybillNumber = $doc->ns2waybillNumber->__toString();
-        $this->waybillDate = $doc->ns2waybillDate->__toString();
-        $this->cargoExpertized = $doc->ns2cargoExpertized->__toString();
+        ]) : null;
+        $this->transportStorageType = isset($doc->ns2transportStorageType) ? $doc->ns2transportStorageType->__toString() : null;
+        $this->cargoReloadingPointList = isset($this->cargoReloadingPointList) ? $this->cargoReloadingPointList->__toString() : null;
+        $this->waybillSeries = isset($doc->ns2waybillSeries) ? $doc->ns2waybillSeries->__toString() : null;
+        $this->waybillNumber = isset($doc->ns2waybillNumber) ? $doc->ns2waybillNumber->__toString() : null;
+        $this->waybillDate = isset($doc->ns2waybillDate) ? $doc->ns2waybillDate->__toString() : null;
+        $this->cargoExpertized = isset($doc->ns2cargoExpertized) ? $doc->ns2cargoExpertized->__toString() : null;
         $this->expertiseInfo = $doc->ns2expertiseInfo->__toString();
         $this->confirmedBy = [
             ['label' => 'ФИО',
@@ -409,7 +422,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
                 'value' => $doc->ns2confirmedBy->argcpost->__toString()]
         ];
         $this->locationProsperity = $doc->ns2locationProsperity->__toString();
-        $this->specialMarks = $doc->ns2specialMarks->__toString();
+        $this->specialMarks = isset($doc->ns2specialMarks) ? $doc->ns2specialMarks->__toString() : null;
 
         $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
 

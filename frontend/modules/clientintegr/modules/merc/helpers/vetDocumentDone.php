@@ -31,6 +31,7 @@ class vetDocumentDone extends Component
     {
 
         $doc = $this->doc;
+        //var_dump($this->UUID); die();
         $date = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.\Yii::$app->formatter->asTime('now', 'HH:mm:ss');
         $xml = '<merc:processIncomingConsignmentRequest>
                   <merc:localTransactionId>'.$this->localTransactionId.'</merc:localTransactionId>
@@ -39,22 +40,26 @@ class vetDocumentDone extends Component
                   </merc:initiator>
                   <merc:delivery>
                      <vet:deliveryDate>'.$date.'</vet:deliveryDate>
-                     <vet:consignor>
-                        <ent:businessEntity>
-                           <base:guid>'.$doc->ns2consignor->entbusinessEntity->bsguid->__toString().'</base:guid>
-                        </ent:businessEntity>
-                        <ent:enterprise>
-                           <base:guid>'.$doc->ns2consignor->ententerprise->bsguid->__toString().'</base:guid>
-                        </ent:enterprise>
-                     </vet:consignor>
-                     <vet:consignee>
-                        <ent:businessEntity>
-                           <base:guid>'.$doc->ns2consignee->entbusinessEntity->bsguid->__toString().'</base:guid>
-                        </ent:businessEntity>
-                        <ent:enterprise>
-                           <base:guid>'.$doc->ns2consignee->ententerprise->bsguid->__toString().'</base:guid>
-                        </ent:enterprise>
-                     </vet:consignee>
+                     	 <vet:consignor>
+		                        <ent:businessEntity>
+		                           <base:uuid>'.$doc->ns2consignor->entbusinessEntity->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignor->entbusinessEntity->bsguid->__toString().'</base:guid>
+		                        </ent:businessEntity>
+		                        <ent:enterprise>
+		                           <base:uuid>'.$doc->ns2consignor->ententerprise->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignor->ententerprise->bsguid->__toString().'</base:guid>
+		                        </ent:enterprise>
+		                     </vet:consignor>
+		                     <vet:consignee>
+		                        <ent:businessEntity>
+		                           <base:uuid>'.$doc->ns2consignee->entbusinessEntity->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignee->entbusinessEntity->bsguid->__toString().'</base:guid>
+		                        </ent:businessEntity>
+		                        <ent:enterprise>
+		                           <base:uuid>'.$doc->ns2consignee->ententerprise->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignee->ententerprise->bsguid->__toString().'</base:guid>
+		                        </ent:enterprise>
+		                     </vet:consignee>
                      <vet:consignment>
                        <vet:productType>'.$doc->ns2batch->ns2productType->__toString().'</vet:productType>
                         <vet:product>
@@ -87,14 +92,15 @@ class vetDocumentDone extends Component
                            <base:uuid>'.$doc->ns2batch->ns2countryOfOrigin->bsuuid->__toString().'</base:uuid>
                         </vet:countryOfOrigin>';
 
-                        /*<vet:producerList>
+                        if(isset($doc->ns2batch->ns2producerList))
+                        $xml .= '<vet:producerList>
                            <ent:producer>
                               <ent:enterprise>
-                                 <base:guid>guid</base:guid>
+                                 <base:guid>'.$doc->ns2batch->ns2producerList->entproducer->ententerprise->bsguid.'</base:guid>
                               </ent:enterprise>
-                              <ent:role>PRODUCER</ent:role>
+                              <ent:role>'.$doc->ns2batch->ns2producerList->entproducer->entrole.'</ent:role>
                            </ent:producer>
-                        </vet:producerList>*/
+                        </vet:producerList>';
 
                         $xml .= '<vet:productMarkingList>
                            <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
@@ -102,15 +108,16 @@ class vetDocumentDone extends Component
                         <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
                      </vet:consignment>
                      <vet:accompanyingForms>
-                        <vet:waybill>
-                           <shp:issueSeries>'.$doc->ns2waybillSeries->__toString().'</shp:issueSeries>
-                           <shp:issueNumber>'.$doc->ns2waybillNumber->__toString().'</shp:issueNumber>
-                           <shp:issueDate>'.$doc->ns2waybillDate->__toString().'</shp:issueDate>
-                           <shp:type>'.$doc->ns2waybillType->__toString().'</shp:type>';
+                        <vet:waybill>';
+                        $xml .= isset($doc->ns2waybillSeries) ? '<shp:issueSeries>'.$doc->ns2waybillSeries->__toString().'</shp:issueSeries>' : '';
+                        $xml .= isset($doc->ns2waybillNumber) ? '<shp:issueNumber>'.$doc->ns2waybillNumber->__toString().'</shp:issueNumber>' : '';
+                        $xml .= isset($doc->ns2waybillDate) ? '<shp:issueDate>'.$doc->ns2waybillDate->__toString().'</shp:issueDate>' : '';
+                        $xml .= isset($doc->ns2waybillType) ? '<shp:type>'.$doc->ns2waybillType->__toString().'</shp:type>' : '';
 
-                           /*<shp:broker>
-                              <base:guid>fce1f0e1-218a-11e2-a69b-b499babae7ea</base:guid>
-                           </shp:broker>*/
+                        if(isset($doc->ns2broker))
+                            $xml .='<shp:broker>
+                              <base:guid>'.$doc->ns2broker->bsguid->__toString().'</base:guid>
+                           </shp:broker>';
 
                            $xml .= '<shp:transportInfo>
                               <shp:transportType>'.$doc->ns2transportInfo->shptransportType->__toString().'</shp:transportType>
@@ -121,8 +128,8 @@ class vetDocumentDone extends Component
                            <shp:transportStorageType>'.$doc->ns2transportStorageType->__toString().'</shp:transportStorageType>
                         </vet:waybill>
                         <vet:vetCertificate>
-                            <base:uuid>'.$this->UUID.'</base:uuid>
-                           <vet:issueSeries>'.$doc->ns2issueSeries->__toString().'</vet:issueSeries>
+                            <base:uuid>'.$this->UUID.'</base:uuid>';
+                           /*<vet:issueSeries>'.$doc->ns2issueSeries->__toString().'</vet:issueSeries>
                            <vet:issueNumber>'.$doc->ns2issueNumber->__toString().'</vet:issueNumber>
                            <vet:issueDate>'.$doc->ns2issueDate->__toString().'</vet:issueDate>
                            <vet:form>'.$doc->ns2form->__toString().'</vet:form>
@@ -182,7 +189,7 @@ class vetDocumentDone extends Component
                                  </ent:producer>
                               </vet:producerList>*/
 
-                              $xml .= '<vet:productMarkingList>
+                              /*$xml .= '<vet:productMarkingList>
                                  <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
                               </vet:productMarkingList>
                               <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
@@ -194,7 +201,7 @@ class vetDocumentDone extends Component
                               <base:guid>fce1f0e1-218a-11e2-a69b-b499babae7ea</base:guid>
                            </vet:broker>*/
 
-                           $xml .= '<vet:transportInfo>
+                           /*$xml .= '<vet:transportInfo>
                               <shp:transportType>'.$doc->ns2transportInfo->shptransportType->__toString().'</shp:transportType>
                               <shp:transportNumber>
                                  <shp:vehicleNumber>'.$doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString().'</shp:vehicleNumber>
@@ -215,9 +222,10 @@ class vetDocumentDone extends Component
                               <com:issueNumber>120685</com:issueNumber>
                               <com:issueDate>2019-12-06</com:issueDate>
                            </vet:importPermit>*/
-                           $xml .= '<vet:specialMarks>'.$doc->ns2specialMarks->__toString().'</vet:specialMarks>
-                        </vet:vetCertificate>
+                           /*$xml .= '<vet:specialMarks>'.$doc->ns2specialMarks->__toString().'</vet:specialMarks>
+                        </vet:vetCertificate>*/
 
+                  $xml .= '</vet:vetCertificate>
                   </vet:accompanyingForms>
                   </merc:delivery>
                   <merc:deliveryFacts>

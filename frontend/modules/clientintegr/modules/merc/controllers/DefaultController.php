@@ -50,10 +50,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($id)
     {
-        //$searchModel = new mercDicSearch();
+        /*$cache = \Yii::$app->cache;
+        $cache->flush();*/
         $document = new getVetDocumentByUUIDRequest();
         $document->getDocumentByUUID($id);
-        //var_dump($document);
         $license = mercService::getLicense();
         $view = $license ? 'view' : '/default/_nolic';
         $params = ['document' => $document, 'lic' => $license];
@@ -71,11 +71,11 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $api = mercApi::getInstance();
         $api->getVetDocumentDone($uuid);
 
-        $cache->flush();
+        $cache->delete('vetDocRaw_'.$uuid);
+        $cache->delete('vetDoc_'.$uuid);
 
         $document = new getVetDocumentByUUIDRequest();
         $document->getDocumentByUUID($uuid);
-        //var_dump($document);
 
         $license = mercService::getLicense();
         $view = $license ? 'view' : '/default/_nolic';

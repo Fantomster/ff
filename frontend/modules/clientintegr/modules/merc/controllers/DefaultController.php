@@ -82,7 +82,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             if ($model->load(Yii::$app->request->post()) && $model->validate())
             {
                 $api = mercApi::getInstance();
-                $api->getVetDocumentDone($uuid, $model->attributes);
+                $api->getVetDocumentDonePartial($uuid, $model->attributes);
 
                 $cache = \Yii::$app->cache;
                 $cache->delete('vetDocRaw_'.$uuid);
@@ -101,7 +101,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 'model' => $model,
             ]);
 
-        return $this->render('rejected/create', [
+        return $this->render('rejected/rejectedAct', [
             'model' => $model,
         ]);
     }

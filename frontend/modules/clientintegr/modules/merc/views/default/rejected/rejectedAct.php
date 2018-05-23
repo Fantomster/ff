@@ -21,10 +21,20 @@ $this->title = 'Акт несоответствия';
             $this->title,
         ],
     ]) ?>
-<div class="production-act-defect-create">
 
-    <?php echo $this->render('_form', [
-        'model' => $model,
-    ]) ?>
+<section class="content">
+    <h4><?= $this->title ?></h4>
+    <div class="catalog-index">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <div class="panel-body">
+                    <div class="production-act-defect-create">
+                        <?php echo $this->render('_form', [
+                            'model' => $model,
+                        ]) ?>
 
-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>

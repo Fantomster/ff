@@ -77,7 +77,7 @@ class EComIntegration extends Component {
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
         if(!count($positions)){
-            $positions = $simpleXMLElement->HEAD->PACKINGSEQUENCE;
+            $positions = $simpleXMLElement->HEAD->PACKINGSEQUENCE->POSITION;
         }
         $positionsArray = [];
         $arr = [];

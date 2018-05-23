@@ -76,12 +76,15 @@ class EComIntegration extends Component {
         $order->updated_at = new Expression('NOW()');
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
+        if(!count($positions)){
+            $positions = $simpleXMLElement->HEAD->PACKINGSEQUENCE->POSITION;
+        }
         $positionsArray = [];
         $arr = [];
         foreach ($positions as $position){
             $contID = (int) $position->PRODUCTIDBUYER;
             $positionsArray[] = (int) $contID;
-            $arr[$contID]['ORDEREDQUANTITY'] = $position->ORDEREDQUANTITY;
+            $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
             $arr[$contID]['PRICE'] = $position->PRICE;
         }
         foreach ($order->orderContent as $orderContent){
@@ -90,8 +93,8 @@ class EComIntegration extends Component {
             if(!in_array($ordCont->id, $positionsArray)){
                 $ordCont->delete();
             }else{
-                $ordCont->quantity = $arr[$ordCont->id]['ACCEPTEDQUANTITY'] ?? $arr[$ordCont->id]['ORDEREDQUANTITY'];
-                $ordCont->price = $arr[$ordCont->id]['PRICE'];
+                $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
+                $ordCont->price = $arr[$orderContent->id]['PRICE'];
                 $ordCont->save();
             }
         }
@@ -282,10 +285,13 @@ class EComIntegration extends Component {
     {
         $client = Yii::$app->siteApi;
         $obj = $client->sendDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $remoteFile, 'content' => $string]);
-        if(isset($obj->result->errorCode) && $obj->result->errorCode == 0){
+        if(isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0){
+            Yii::error("<pre>" . print_r($obj, 1) . "</pre>");
             return true;
+        }else{
+            Yii::error("Ecom returns error code");
+            return false;
         }
-        return false;
     }
 
 }

@@ -489,15 +489,11 @@ class Order extends \yii\db\ActiveRecord
             if (isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
                 if ($this->status != self::STATUS_FORMING) {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
-                    $organization = Organization::findOne(['id' => $this->vendor_id]);
-                    if ($organization->is_ecom_integration) {
-                        $eComIntegration = new EComIntegration();
-                        $eComIntegration->sendOrderInfo($this, $organization);
-                    }
                 } else {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
                 }
         }
+
         if ($this->status != self::STATUS_FORMING && !$insert) {
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
@@ -505,9 +501,12 @@ class Order extends \yii\db\ActiveRecord
             if ($client->gln_code && $vendor->gln_code) {
                 $eComIntegration = new EComIntegration();
                 if($this->status == self::STATUS_DONE){
-                    $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
                 }else{
-                    $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                }
+                if (!$result) {
+                    //throw new BadRequestHttpException("EDI Server error");
                 }
             }
             if (!$client->gln_code && $vendor->gln_code) {

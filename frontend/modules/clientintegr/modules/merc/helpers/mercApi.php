@@ -392,4 +392,57 @@ class mercApi
         }
         return $result;
     }
+
+    public function getVetDocumentDonePartial($UUID, $rejectedData)
+    {
+        $client = $this->getSoapClient('mercury');
+        $result = null;
+
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new vetDocumentDonePartial();
+            $vetDoc->login = $this->vetisLogin;
+            $vetDoc->UUID = $UUID;
+            $vetDoc->rejected_data = $rejectedData;
+            $vetDoc->doc = (new getVetDocumentByUUIDRequest())->getDocumentByUUID($UUID, true);
+            $vetDoc->localTransactionId = $localTransactionId;
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+            //Делаем запрос
+            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                echo "Bad request";
+                die();
+            }
+
+            //timeout перед запросом результата
+            sleep(2);
+            //Получаем результат запроса
+            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
+        }
+        return $result;
+    }
 }

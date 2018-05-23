@@ -10,7 +10,7 @@ namespace frontend\modules\clientintegr\modules\merc\helpers;
 
 use yii\base\Component;
 
-class vetDocumentDone extends Component
+class vetDocumentDonePartial extends Component
 {
 
     public $soap_namespaces = [ 'xmlns:com="http://api.vetrf.ru/schema/cdm/argus/common"',
@@ -26,6 +26,7 @@ class vetDocumentDone extends Component
     public $doc;
     public $login;
     public $UUID;
+    public $rejected_data;
 
     public function getXML()
     {
@@ -71,7 +72,7 @@ class vetDocumentDone extends Component
                         <vet:productItem>
                            <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
                         </vet:productItem>
-                        <vet:volume>'.$doc->ns2batch->ns2volume.'</vet:volume>
+                        <vet:volume>'.$this->rejected_data['volume'].'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>
@@ -129,101 +130,6 @@ class vetDocumentDone extends Component
                         </vet:waybill>
                         <vet:vetCertificate>
                             <base:uuid>'.$this->UUID.'</base:uuid>';
-                           /*<vet:issueSeries>'.$doc->ns2issueSeries->__toString().'</vet:issueSeries>
-                           <vet:issueNumber>'.$doc->ns2issueNumber->__toString().'</vet:issueNumber>
-                           <vet:issueDate>'.$doc->ns2issueDate->__toString().'</vet:issueDate>
-                           <vet:form>'.$doc->ns2form->__toString().'</vet:form>
-                           <vet:consignor>
-                             <ent:businessEntity>
-                                <base:guid>'.$doc->ns2consignor->entbusinessEntity->bsguid->__toString().'</base:guid>
-                             </ent:businessEntity>
-                             <ent:enterprise>
-                                 <base:guid>'.$doc->ns2consignor->ententerprise->bsguid->__toString().'</base:guid>
-                             </ent:enterprise>
-                           </vet:consignor>
-                           <vet:consignee>
-                              <ent:businessEntity>
-                                <base:guid>'.$doc->ns2consignee->entbusinessEntity->bsguid->__toString().'</base:guid>
-                              </ent:businessEntity>
-                              <ent:enterprise>
-                                 <base:guid>'.$doc->ns2consignee->ententerprise->bsguid->__toString().'</base:guid>
-                              </ent:enterprise>
-                           </vet:consignee>
-                           <vet:batch>
-                              <vet:productType>'.$doc->ns2batch->ns2productType->__toString().'</vet:productType>
-                             <vet:product>
-                                <base:uuid>'.$doc->ns2batch->ns2product->bsuuid->__toString().'</base:uuid>
-                            </vet:product>
-                            <vet:subProduct>
-                               <base:uuid>'.$doc->ns2batch->ns2subProduct->bsuuid->__toString().'</base:uuid>
-                            </vet:subProduct>
-                            <vet:productItem>
-                               <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
-                            </vet:productItem>
-                               <vet:volume>'.$doc->ns2batch->ns2volume.'</vet:volume>
-                                <vet:unit>
-                                   <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
-                                </vet:unit>
-                               <vet:packingList>
-                                   <com:packingForm>
-                                      <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
-                                   </com:packingForm>
-                                </vet:packingList>
-                               <vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
-                        <vet:dateOfProduction>'.
-                          $this->getDate($doc->ns2batch->ns2dateOfProduction)
-                        .'</vet:dateOfProduction>
-                        <vet:expiryDate>'.
-                            $this->getDate($doc->ns2batch->ns2expiryDate)
-                        .'</vet:expiryDate>
-                        <vet:perishable>'.$doc->ns2batch->ns2perishable->__toString().'</vet:perishable>
-                        <vet:countryOfOrigin>
-                           <base:uuid>'.$doc->ns2batch->ns2countryOfOrigin->bsguid->__toString().'</base:uuid>
-                        </vet:countryOfOrigin>';
-                              /*<vet:producerList>
-                                 <ent:producer>
-                                    <ent:enterprise>
-                                       <base:guid>guid</base:guid>
-                                    </ent:enterprise>
-                                    <ent:role>PRODUCER</ent:role>
-                                 </ent:producer>
-                              </vet:producerList>*/
-
-                              /*$xml .= '<vet:productMarkingList>
-                                 <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
-                              </vet:productMarkingList>
-                              <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
-                           </vet:batch>
-                           <vet:purpose>
-                              <base:guid>'.$doc->ns2purpose->bsguid->__toString().'</base:guid>
-                           </vet:purpose>';
-                           /*<vet:broker>
-                              <base:guid>fce1f0e1-218a-11e2-a69b-b499babae7ea</base:guid>
-                           </vet:broker>*/
-
-                           /*$xml .= '<vet:transportInfo>
-                              <shp:transportType>'.$doc->ns2transportInfo->shptransportType->__toString().'</shp:transportType>
-                              <shp:transportNumber>
-                                 <shp:vehicleNumber>'.$doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString().'</shp:vehicleNumber>
-                              </shp:transportNumber>
-                           </vet:transportInfo>
-                           <vet:transportStorageType>'.$doc->ns2transportStorageType->__toString().'</vet:transportStorageType>
-                           <vet:cargoInspected>'.$doc->ns2cargoInspected->__toString().'</vet:cargoInspected>'.
-                         //  <vet:cargoExpertized>'.$doc->ns2cargoExpertized->__toString().'</vet:cargoExpertized>
-                           '<vet:expertiseInfo>'.$doc->ns2expertiseInfo->__toString().'</vet:expertiseInfo>
-                           <vet:confirmedBy>
-                              <com:fio>'.$doc->ns2confirmedBy->argcfio->__toString().'</com:fio>
-                              <com:post>'.$doc->ns2confirmedBy->argcpost->__toString().'</com:post>
-                           </vet:confirmedBy>';
-                           //<vet:confirmedDate>'.$doc->ns2confirmedBy->argcpost->__toString().'</vet:confirmedDate>
-                           $xml .= '<vet:locationProsperity>'.$doc->ns2locationProsperity->__toString().'</vet:locationProsperity>';
-                           /*<vet:precedingVetDocuments>ВСД №5891</vet:precedingVetDocuments>
-                           <vet:importPermit>
-                              <com:issueNumber>120685</com:issueNumber>
-                              <com:issueDate>2019-12-06</com:issueDate>
-                           </vet:importPermit>*/
-                           /*$xml .= '<vet:specialMarks>'.$doc->ns2specialMarks->__toString().'</vet:specialMarks>
-                        </vet:vetCertificate>*/
 
                   $xml .= '</vet:vetCertificate>
                   </vet:accompanyingForms>
@@ -234,16 +140,95 @@ class vetDocumentDone extends Component
                         <vet:responsible>
                            <com:login>'.$this->login.'</com:login>
                         </vet:responsible>
-                        <vet:result>CORRESPONDS</vet:result>
+                        <vet:result>MISMATCH</vet:result>
                      </vet:docInspection>
                      <vet:vetInspection>
                         <vet:responsible>
                            <com:login>'.$this->login.'</com:login>
                         </vet:responsible>
-                        <vet:result>CORRESPONDS</vet:result>
+                        <vet:result>MISMATCH</vet:result>
                      </vet:vetInspection>
-                     <vet:decision>ACCEPT_ALL</vet:decision>
+                     <vet:decision>PARTIALLY</vet:decision>
                   </merc:deliveryFacts>
+                  <merc:discrepancyReport>
+                     <vet:issueDate>'.$date.'</vet:issueDate>
+                     <vet:reason>
+                        <vet:name>'.$this->rejected_data['reason'].'</vet:name>
+                     </vet:reason>
+                     <vet:description>'.$this->rejected_data['description'].'</vet:description>
+                  </merc:discrepancyReport>
+                  
+                  <merc:returnedDelivery>
+                     <vet:deliveryDate>'.$date.'</vet:deliveryDate>
+                     <vet:consignor>
+                         <ent:businessEntity>
+		                           <base:uuid>'.$doc->ns2consignee->entbusinessEntity->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignee->entbusinessEntity->bsguid->__toString().'</base:guid>
+		                        </ent:businessEntity>
+		                        <ent:enterprise>
+		                           <base:uuid>'.$doc->ns2consignee->ententerprise->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignee->ententerprise->bsguid->__toString().'</base:guid>
+		                        </ent:enterprise>
+                     </vet:consignor>
+                     <vet:consignee>
+                          <ent:businessEntity>
+		                           <base:uuid>'.$doc->ns2consignor->entbusinessEntity->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignor->entbusinessEntity->bsguid->__toString().'</base:guid>
+		                        </ent:businessEntity>
+		                        <ent:enterprise>
+		                           <base:uuid>'.$doc->ns2consignor->ententerprise->bsuuid->__toString().'</base:uuid>
+		                           <base:guid>'.$doc->ns2consignor->ententerprise->bsguid->__toString().'</base:guid>
+		                        </ent:enterprise>
+                     </vet:consignee>
+                     <vet:consignment>
+                     <vet:productType>'.$doc->ns2batch->ns2productType->__toString().'</vet:productType>
+                        <vet:product>
+                           <base:uuid>'.$doc->ns2batch->ns2product->bsuuid->__toString().'</base:uuid>
+                        </vet:product>
+                        <vet:subProduct>
+                           <base:uuid>'.$doc->ns2batch->ns2subProduct->bsuuid->__toString().'</base:uuid>
+                        </vet:subProduct>
+                        <vet:productItem>
+                           <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
+                        </vet:productItem>
+                        <vet:volume>'.abs($doc->ns2batch->ns2volume - $this->volume).'</vet:volume>
+                        <vet:unit>
+                           <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
+                        </vet:unit>
+                        <vet:packingList>
+                           <com:packingForm>
+                              <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
+                           </com:packingForm>
+                        </vet:packingList>
+                        <vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
+                        <vet:dateOfProduction>'.
+                          $this->getDate($doc->ns2batch->ns2dateOfProduction)
+                        .'</vet:dateOfProduction>
+                        <vet:expiryDate>'.
+                            $this->getDate($doc->ns2batch->ns2expiryDate)
+                        .'</vet:expiryDate>
+                        <vet:perishable>'.$doc->ns2batch->ns2perishable->__toString().'</vet:perishable>
+                        <vet:countryOfOrigin>
+                           <base:uuid>'.$doc->ns2batch->ns2countryOfOrigin->bsuuid->__toString().'</base:uuid>
+                        </vet:countryOfOrigin>';
+
+                        if(isset($doc->ns2batch->ns2producerList))
+                        $xml .= '<vet:producerList>
+                           <ent:producer>
+                              <ent:enterprise>
+                                 <base:guid>'.$doc->ns2batch->ns2producerList->entproducer->ententerprise->bsguid.'</base:guid>
+                              </ent:enterprise>
+                              <ent:role>'.$doc->ns2batch->ns2producerList->entproducer->entrole.'</ent:role>
+                           </ent:producer>
+                        </vet:producerList>';
+
+                        $xml .= '<vet:productMarkingList>
+                           <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
+                        </vet:productMarkingList>
+                        <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
+                     </vet:consignment>
+                  </merc:returnedDelivery>
+                  
                </merc:processIncomingConsignmentRequest>';
               return $xml;
     }

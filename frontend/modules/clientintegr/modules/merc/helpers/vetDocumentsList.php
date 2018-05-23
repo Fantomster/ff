@@ -50,7 +50,7 @@ class vetDocumentsList extends Component
             $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
             $recipient = mercApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
             $result[] = [
-                'uuid' => $item->bsuuid,
+                'uuid' => $item->bsuuid->__toString(),
                 'number' => $this->getNumber($item->ns2issueSeries, $item->ns2issueNumber),
                 'date_doc' => $item->ns2issueDate,
                 'status' => '<span class="status ' . $this->status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',

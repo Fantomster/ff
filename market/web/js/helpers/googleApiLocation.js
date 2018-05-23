@@ -116,6 +116,9 @@ function geocodeLatLng(geocoder, latlng) {
             } else {
                 console.log('No results found');
             }
+        } else if(status === 'ZERO_RESULTS'){
+            $('.loc-submit').removeClass('disabled');
+            $('.loc-submit').attr('type', 'submit');
         } else {
             console.log('Geocoder failed due to: ' + status);
         }

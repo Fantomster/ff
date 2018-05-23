@@ -214,12 +214,14 @@ use yii\helpers\Html;
                         'model' => $document,
                         'attributes' => $attributes,
                     ]) ?>
-                    <div class="col-md-12">
-                        <?php  echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                        //echo Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
-                        Html::a('Частичня приемка', ['#'], ['class' => 'btn btn-warning']).' '.
-                        Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']); ?>
-                    </div>
+                    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED): ?>
+                        <div class="col-md-12">
+                            <?php  echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                            //echo Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
+                            Html::a('Частичня приемка', ['#'], ['class' => 'btn btn-warning']).' '.
+                            Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']); ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -19,10 +19,11 @@ $form = ActiveForm::begin([
     </div>
     <div class="modal-body">
         <?php echo $form->errorSummary($model); ?>
-
-        <?php echo $form->field($model, 'uuid')->hiddenInput(['value' => $model->uuid])->label(false); ?>
-
-        <?php echo $form->field($model, 'volume')->textInput() ?>
+        <?php
+        if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial::RETURN_ALL)
+            echo $form->field($model, 'volume')->hiddenInput(['value' => 0])->label(false);
+        else
+            echo $form->field($model, 'volume')->textInput()->label($model->getAttributeLabel('volume')." (".$volume.")"); ?>
 
         <?php echo $form->field($model, 'reason')->textInput() ?>
 

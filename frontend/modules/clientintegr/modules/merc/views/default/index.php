@@ -140,8 +140,8 @@ use yii\helpers\Url;
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'contentOptions' => ['style' => 'width: 6%;'],
-                                'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}',
+                                'contentOptions' => ['style' => 'width: 7%;'],
+                                'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;&nbsp;{rejected}',
                                 'buttons' => [
                                     'view' => function ($url, $model, $key) {
                                         $options = [
@@ -167,14 +167,27 @@ use yii\helpers\Url;
                                                 'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
                                                 'style' => 'width: 24px'
                                             ]);
-                                        return Html::a($icon, ['view', 'uuid' => $key], $options);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $key], $options);
+                                    },
+                                    'rejected' => function ($url, $model, $key) {
+                                        if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                            return "";
+                                        $options = [
+                                            'title' => 'Возврат',
+                                            'aria-label' => 'Возврат',
+                                            'data-pjax' => '0',
+                                        ];
+                                        $icon = Html::tag('img', '', [
+                                            'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
+                                            'style' => 'width: 18px'
+                                        ]);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $key], $options);
                                     },
                                 ]
                             ]
                         ],
                     ]);
-                    echo '<div class="col-md-12">'.Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).' '.
-                         Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']).'</div>';
+                    echo '<div class="col-md-12">'.Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).'</div>';
                     ?>
                     </div>
                     <?php Pjax::end(); ?>

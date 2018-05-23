@@ -17,6 +17,7 @@ class rejectedForm extends Model {
     public $reason;
     public $description;
     public $uuid;
+    public $decision;
 
     public function rules()
     {

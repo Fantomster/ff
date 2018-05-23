@@ -28,6 +28,10 @@ class vetDocumentDonePartial extends Component
     public $UUID;
     public $rejected_data;
 
+    const PARTIAL = 'PARTIALLY';
+    const RETURN_ALL = 'RETURN_ALL';
+    const ACCEPT_ALL = 'ACCEPT_ALL';
+
     public function getXML()
     {
 
@@ -152,7 +156,7 @@ class vetDocumentDonePartial extends Component
                         </vet:responsible>
                         <vet:result>MISMATCH</vet:result>
                      </vet:vetInspection>
-                     <vet:decision>PARTIALLY</vet:decision>
+                     <vet:decision>'.$this->rejected_data['decision'].'</vet:decision>
                   </merc:deliveryFacts>
                   <merc:discrepancyReport>
                      <vet:issueDate>'.\Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'</vet:issueDate>

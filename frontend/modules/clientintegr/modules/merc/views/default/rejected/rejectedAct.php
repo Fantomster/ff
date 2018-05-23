@@ -31,6 +31,7 @@ $this->title = 'Акт несоответствия';
                     <div class="production-act-defect-create">
                         <?php echo $this->render('_form', [
                             'model' => $model,
+                            'volume' => $volume
                         ]) ?>
 
                     </div>

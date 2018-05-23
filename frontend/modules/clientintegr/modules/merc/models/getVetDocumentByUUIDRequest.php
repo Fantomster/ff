@@ -205,6 +205,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
     public function getDocumentByUUID($UUID, $raw = false)
     {
         $cache = \Yii::$app->cache;
+        $cache->flush();
         //$cache->flush();
         $attributes = $cache->get('vetDoc_'.$UUID);
         if($attributes && !$raw) {
@@ -303,9 +304,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         if(isset($doc->ns2batch->ns2producerList->entproducer)) {
             $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
-
             $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
-
+            if(!isset($producer))
+                $producer = $producer_raw->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
             $producer = $producer->dtname->__toString() . '(' .
                 $producer->dtaddress->dtaddressView->__toString()
                 . ')';
@@ -430,13 +431,16 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
     public function getDate($date_raw)
     {
-        $first_date =  $date_raw->ns2firstDate->bsyear->__toString().'-'.$date_raw->ns2firstDate->bsmonth->__toString().'-'.$date_raw->ns2firstDate->bsday->__toString();
-        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour->__toString().":00:00" : "";
+       //var_dump($date_raw->ns2firstDate); die();
+        $first_date =  $date_raw->ns2firstDate->bsyear
+            .'-'.$date_raw->ns2firstDate->bsmonth
+            .'-'.$date_raw->ns2firstDate->bsday;
+        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
 
         if($date_raw->ns2secondDate)
         {
-            $second_date = $date_raw->ns2secondDate->bsyear->__toString().'-'.$date_raw->ns2secondDate->bsmonth->__toString().'-'.$date_raw->ns2secondDate->bsday->__toString().' '.$date_raw->ns2secondDate->hour->__toString().":00:00";
-            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour->__toString().":00:00" : "";
+            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
+            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
             return 'с '.$first_date.' до '.$second_date;
         }
 

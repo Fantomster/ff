@@ -4,6 +4,7 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\helpers\Url;
 ?>
 <section class="content-header">
     <h1>
@@ -140,37 +141,33 @@ use yii\helpers\Html;
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'contentOptions' => ['style' => 'width: 6%;'],
-                                'template' => '{view}&nbsp;&nbsp;&nbsp;{get}',
+                                'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}',
                                 'buttons' => [
-                                    'view' => function ($url, $model) {
-                                        return \yii\helpers\Html::a(
-                                            \yii\helpers\Html::tag('img', '', [
-                                                'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
-                                                'style' => 'width: 16px'
-                                            ]),
-                                            Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\default\view?id=' . $model['uuid']]),
-                                            [
-                                                'title' => Yii::t('backend', 'Просмотр'),
-                                                'data-pjax' => "0"
-                                            ]
-                                        );
+                                    'view' => function ($url, $model, $key) {
+                                        $options = [
+                                            'title' => 'Просмотр',
+                                            'aria-label' => 'Просмотр',
+                                            'data-pjax' => '0',
+                                        ];
+                                        $icon = Html::tag('img', '', [
+                                            'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
+                                            'style' => 'width: 16px'
+                                        ]);
+                                        return Html::a($icon, ['view', 'uuid' => $key], $options);
                                     },
-                                    'get' => function ($url, $model) {
-                                        if($model['status_raw'] == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
-                                            return \yii\helpers\Html::a(
-                                                \yii\helpers\Html::tag('img', '', [
-                                                    'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
-                                                    'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\\' . $model['uuid'] . '-get']),
-                                                    'data-id' => $model['uuid'],
-                                                    'style' => 'width: 24px'
-                                                ]),
-                                                '#',
-                                                [
-                                                    'title' => Yii::t('backend', 'Частичня приемка'),
-                                                    'data-pjax' => "0",
-                                                ]
-                                            );
-                                        return "";
+                                    'done-partial' => function ($url, $model, $key) {
+                                        if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                            return "";
+                                         $options = [
+                                                'title' => 'Частичня приемка',
+                                                'aria-label' => 'Частичня приемка',
+                                                'data-pjax' => '0',
+                                            ];
+                                         $icon = Html::tag('img', '', [
+                                                'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
+                                                'style' => 'width: 24px'
+                                            ]);
+                                        return Html::a($icon, ['view', 'uuid' => $key], $options);
                                     },
                                 ]
                             ]
@@ -186,51 +183,3 @@ use yii\helpers\Html;
         </div>
     </div>
 </section>
-
-
-<?php
-$js = <<< JS
-    $(function () {
-        $('.grid-category').on('click', '.get-content-sync', function () {
-            var url = $(this).data('url');
-            var id = $(this).data('id');
-            swal({
-                title: 'Выполнить загрузку данных?',
-                type: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Загрузить',
-                cancelButtonText: 'Отмена',
-            }).then((result) => {
-                if(result.value)
-                {
-                    swal({
-                        title: 'Синхронизация',
-                        text: 'Подождите пока закончится загрузка...',
-                        onOpen: () => {
-                            swal.showLoading();
-                            $.post(url, {id:id}, function (data) {
-                                if (data.success === true) {
-                                    swal.close();
-                                    swal('Готово', '', 'success')
-                                } else {
-                                    console.log(data);
-                                    swal(
-                                        'Ошибка',
-                                        'Обратитесь в службу поддержки.',
-                                        'error'
-                                    )
-                                }
-                                $.pjax.reload({container:"#dics_pjax", timeout:2000});
-                            });
-                        }
-                    })
-                }
-            })
-        });
-    });
-JS;
-
-$this->registerJs($js);
-?>

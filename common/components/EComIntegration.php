@@ -36,7 +36,9 @@ class EComIntegration extends Component {
         $list = $object->result->list;
         if(is_iterable($list)){
             foreach ($list as $fileName){
+                //if (strpos($fileName, 'ricat_')){
                     $this->getDoc($client, $fileName, $login, $pass);
+                //}
             }
         }else{
             $this->getDoc($client, $list, $login, $pass);
@@ -71,7 +73,6 @@ class EComIntegration extends Component {
         }
 
         $order->status = Order::STATUS_PROCESSING;
-
         $order->updated_at = new Expression('NOW()');
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
@@ -89,7 +90,7 @@ class EComIntegration extends Component {
             if(!in_array($ordCont->id, $positionsArray)){
                 $ordCont->delete();
             }else{
-                $ordCont->quantity = $arr[$ordCont->id]['ORDEREDQUANTITY'];
+                $ordCont->quantity = $arr[$ordCont->id]['ACCEPTEDQUANTITY'] ?? $arr[$ordCont->id]['ORDEREDQUANTITY'];
                 $ordCont->price = $arr[$ordCont->id]['PRICE'];
                 $ordCont->save();
             }

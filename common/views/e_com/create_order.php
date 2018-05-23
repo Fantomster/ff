@@ -21,6 +21,7 @@
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
                 $barcode = $product->barcode;
+            if (!$barcode)continue;
             ?>
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>

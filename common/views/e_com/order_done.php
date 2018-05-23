@@ -1,35 +1,41 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
-<ORDER>
-    <DOCUMENTNAME>220</DOCUMENTNAME>
+<RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
-    <CURRENCY><?= $order->currency->iso_code ?></CURRENCY>
-    <SUPORDER><?= $order->id ?></SUPORDER>
-    <DOCTYPE>O</DOCTYPE>
-    <CAMPAIGNNUMBER><?= $order->id ?></CAMPAIGNNUMBER>
-    <ORDRTYPE>ORIGINAL</ORDRTYPE>
+    <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
+    <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
+    <DELIVERYNOTENUMBER><?= $order->id ?></DELIVERYNOTENUMBER>
+    <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
+    <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
     <HEAD>
         <SUPPLIER><?= $vendor->gln_code ?></SUPPLIER>
         <BUYER><?= $client->gln_code ?></BUYER>
         <DELIVERYPLACE><?= $client->gln_code ?></DELIVERYPLACE>
         <SENDER><?= $client->gln_code ?></SENDER>
         <RECIPIENT><?= $vendor->gln_code ?></RECIPIENT>
-        <EDIINTERCHANGEID><?= $order->id ?></EDIINTERCHANGEID>
+        <HIERARCHICALID><?= $order->id ?></HIERARCHICALID>
         <?php
         $i = 1;
         foreach ($orderContent as $position): ?>
+            <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
+            $barcode = $product->barcode;
+            if (!$barcode)continue;
+            ?>
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
-                <PRODUCT><?= $position['barcode'] ?? $position['order_id'] ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $position['id']  ?></PRODUCTIDBUYER>
-                <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
-                <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
-                <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>
-                <CHARACTERISTIC>
-                    <DESCRIPTION><?= $position['product_name']  ?></DESCRIPTION>
-                </CHARACTERISTIC>
+                <PRODUCT><?= $barcode ?></PRODUCT>
+                <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
+                <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
+                <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
+                <DELIVEREDUNIT><?= $position['units'] ?></DELIVEREDUNIT>
+                <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
+                <EGAISCODE><?= $position['id'] ?></EGAISCODE>
+                <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
+                <PRICE><?= $position['price'] ?></PRICE>
+                <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
+                <TAXRATE>0</TAXRATE>
             </POSITION>
         <?php endforeach; ?>
     </HEAD>
-</ORDER>
+</RECADV>

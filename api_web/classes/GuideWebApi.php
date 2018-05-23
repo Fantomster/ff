@@ -23,6 +23,21 @@ use yii\web\BadRequestHttpException;
 class GuideWebApi extends \api_web\components\WebApi
 {
     /**
+     * Сюда собираем продукты, которые методом productInsert() вносим в базу
+     * формат заполнения
+     * array(
+     *   array(
+     *      'guide_id' => integer,
+     *      'cbg_id' => integer,
+     *      'created_at' => NOW(),
+     *      'updated_at' => NOW()
+     *   ), ...
+     * )
+     * @var array
+     */
+    private $add_products = [];
+
+    /**
      * Список шаблонов
      * @param array $post
      * @return array
@@ -387,7 +402,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function actionProductFromGuide($params)
     {
-        set_time_limit(60*3);
+        set_time_limit(60 * 3);
         if (empty($params['guide_id'])) {
             throw new BadRequestHttpException("ERROR: Empty guide_id");
         }
@@ -412,7 +427,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
                 //Добавляем продукт в шаблон
                 if ($product['operation'] == 'add') {
-                    if(Guide::findOne($params['guide_id'])->getGuideProducts()->where(['cbg_id' => $product['product_id']])->exists()) {
+                    if (Guide::findOne($params['guide_id'])->getGuideProducts()->where(['cbg_id' => $product['product_id']])->exists()) {
                         continue;
                     }
                     $this->addProduct($params['guide_id'], $product['product_id']);
@@ -440,7 +455,6 @@ class GuideWebApi extends \api_web\components\WebApi
         return $result;
     }
 
-    private $add_products = [];
     /**
      * @param int $guide_id
      * @param $id
@@ -485,8 +499,9 @@ class GuideWebApi extends \api_web\components\WebApi
     /**
      * Записать продукты в базу
      */
-    private function productInsert() {
-        if(!empty($this->add_products)) {
+    private function productInsert()
+    {
+        if (!empty($this->add_products)) {
             \Yii::$app->db->createCommand()->batchInsert(GuideProduct::tableName(), [
                 'guide_id',
                 'cbg_id',
@@ -495,6 +510,7 @@ class GuideWebApi extends \api_web\components\WebApi
             ], $this->add_products)->execute();
         }
     }
+
     /**
      * @param $guide_id
      * @param $pid

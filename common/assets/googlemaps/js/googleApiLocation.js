@@ -85,7 +85,6 @@ function initAutocomplete() {
 
 function geocodeLatLng(geocoder, latlng) {
     geocoder.geocode({'location': latlng}, function (results, status) {
-        status = 'ZERO_RESULTS';
         if (status === 'OK') {
             if (results[1]) {
                 var setCountry;

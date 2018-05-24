@@ -1986,7 +1986,7 @@ class OrderController extends DefaultController
      * @param Organization $senderOrg
      * @param Order $order
      */
-    private function sendOrderProcessing($senderOrg, $order)
+    public function sendOrderProcessing($senderOrg, $order)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */

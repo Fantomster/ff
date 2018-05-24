@@ -10,6 +10,7 @@ use common\models\Order;
 use common\models\OrderContent;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use frontend\controllers\OrderController;
 use mongosoft\soapclient\Client;
 use Yii;
 use yii\base\Component;
@@ -59,6 +60,7 @@ class EComIntegration extends Component {
         if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
             $this->handleOrderResponse($simpleXMLElement);
         }
+        $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
         return true;
     }
 
@@ -74,7 +76,13 @@ class EComIntegration extends Component {
 
         $order->status = Order::STATUS_PROCESSING;
         $order->updated_at = new Expression('NOW()');
-        $order->save();
+        if(isset($simpleXMLElement->DELIVERYNOTENUMBER)){
+            $order->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER;
+        }
+        if(isset($simpleXMLElement->DELIVERYNOTEDATE)){
+            $order->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE;
+        }
+
         $positions = $simpleXMLElement->HEAD->POSITION;
         $isDesadv = false;
         if(!count($positions)){
@@ -93,7 +101,10 @@ class EComIntegration extends Component {
             }
             $arr[$contID]['PRICE'] = $position->PRICE;
         }
+        $summ = 0;
+        $ordContArr = [];
         foreach ($order->orderContent as $orderContent){
+            $ordContArr[] = $orderContent->id;
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
             if(!$ordCont)continue;
             if(!in_array($ordCont->id, $positionsArray)){
@@ -101,9 +112,37 @@ class EComIntegration extends Component {
             }else{
                 $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
                 $ordCont->price = $arr[$orderContent->id]['PRICE'];
+                $summ+=$arr[$orderContent->id]['ACCEPTEDQUANTITY']*$arr[$orderContent->id]['PRICE'];
                 $ordCont->save();
             }
         }
+        foreach ($positions as $position){
+            $contID = (int) $position->PRODUCTIDBUYER;
+            if(!in_array($contID, $ordContArr)){
+                $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                if($isDesadv){
+                    $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                }else{
+                    $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                }
+                Yii::$app->db->createCommand()->insert('catalog_base_goods', [
+                    'order_id' => $order->id,
+                    'product_id' => $good->id,
+                    'quantity' => $quan,
+                    'price' => $position->PRICE,
+                    'initial_quantity' => $quan,
+                    'product_name' => $good->product,
+                    'plan_quantity' => $quan,
+                    'plan_price' => $position->PRICE,
+                    'units' => $good->units,
+                    'updated_at' => new Expression('NOW()'),
+                ])->execute();
+                $summ+=$quan*$position->PRICE;
+            }
+        }
+        $order->total_price = $summ;
+        $order->save();
+        OrderController::sendOrderProcessing($order->client, $order);
     }
 
 
@@ -292,7 +331,6 @@ class EComIntegration extends Component {
         $client = Yii::$app->siteApi;
         $obj = $client->sendDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $remoteFile, 'content' => $string]);
         if(isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0){
-            Yii::error("<pre>" . print_r($obj, 1) . "</pre>");
             return true;
         }else{
             Yii::error("Ecom returns error code");

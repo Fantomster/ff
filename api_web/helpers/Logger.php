@@ -5,6 +5,7 @@ namespace api_web\helpers;
 use Yii;
 use yii\db\Expression;
 use common\models\User;
+use yii\db\Query;
 
 class Logger
 {
@@ -13,8 +14,13 @@ class Logger
     private static $guide;
     private static $instance;
 
-    function __clone(){}
-    function __wakeup(){}
+    function __clone()
+    {
+    }
+
+    function __wakeup()
+    {
+    }
 
     function __construct()
     {
@@ -44,9 +50,14 @@ class Logger
 
     /**
      * @param $request
+     * @throws \Exception
      */
     public static function request($request)
     {
+        if (!empty(self::get()['request_at'])) {
+            throw new \Exception('Request already recorded.', 999);
+        }
+
         self::update([
             'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
             'request_at' => new Expression('NOW()')
@@ -55,9 +66,14 @@ class Logger
 
     /**
      * @param $response
+     * @throws \Exception
      */
     public static function response($response)
     {
+        if (!empty(self::get()['response_at'])) {
+            throw new \Exception('Response already recorded.', 999);
+        }
+
         self::update([
             'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
             'response_at' => new Expression('NOW()')
@@ -75,7 +91,8 @@ class Logger
     }
 
     /**
-     * @param User $user
+     * @param $user User
+     * @throws \Exception
      */
     public static function setUser($user)
     {
@@ -83,6 +100,9 @@ class Logger
          * @var $user User
          */
         if (!empty($user)) {
+            if (!empty(self::get()['user_id'])) {
+                throw new \Exception('User already recorded.', 999);
+            }
             self::update([
                 'user_id' => $user->id,
                 'organization_id' => $user->organization->id
@@ -108,5 +128,13 @@ class Logger
         if (Yii::$app->params['web_api_log'] == true) {
             Yii::$app->db->createCommand()->update(self::$tableName, $columns, ['guide' => self::$guide])->execute();
         }
+    }
+
+    /**
+     * @return array|bool
+     */
+    private static function get()
+    {
+        return (new Query())->select('*')->from(self::$tableName)->where(['guide' => self::$guide])->one();
     }
 }

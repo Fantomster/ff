@@ -218,7 +218,7 @@ use yii\helpers\Html;
                         <div class="col-md-12">
                             <?php  echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
                             Html::a('Частичня приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
-                            Html::a('Вернуть', ['#'], ['class' => 'btn btn-danger']); ?>
+                            Html::a('Вернуть', ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']); ?>
                         </div>
                     <?php endif; ?>
                 </div>

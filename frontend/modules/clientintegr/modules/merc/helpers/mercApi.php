@@ -423,6 +423,8 @@ class mercApi
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
+
+
             $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {

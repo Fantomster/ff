@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 use api\common\models\merc\search\mercDicSearch;
 use api\common\models\merc\mercService;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
+use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial;
 use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList;
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
@@ -75,14 +76,18 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
-    public function actionDonePartial($uuid)
+    public function actionDonePartial($uuid, $reject = false)
     {
         $model = new rejectedForm();
+        if($reject)
+            $model->decision = vetDocumentDonePartial::RETURN_ALL;
+        else
+            $model->decision = vetDocumentDonePartial::PARTIAL;
 
             if ($model->load(Yii::$app->request->post()) && $model->validate())
             {
                 $api = mercApi::getInstance();
-                $api->getVetDocumentDone($uuid, $model->attributes);
+                $api->getVetDocumentDonePartial($uuid, $model->attributes);
 
                 $cache = \Yii::$app->cache;
                 $cache->delete('vetDocRaw_'.$uuid);
@@ -90,19 +95,23 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
                 if (Yii::$app->request->isAjax)
                     return true;
-                return $this->redirect(['index']);
+                return $this->redirect(['view', 'uuid' => $uuid]);
             }
 
-        if (!isset($model->uuid))
-            $model->uuid = $uuid;
+        $document = new getVetDocumentByUUIDRequest();
+        $document->getDocumentByUUID($uuid);
+
+        //var_dump($document->batch[4]);
 
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [
                 'model' => $model,
+                'volume' => $document->batch[4]['value']
             ]);
 
-        return $this->render('rejected/create', [
+        return $this->render('rejected/rejectedAct', [
             'model' => $model,
+            'volume' => $document->batch[4]['value']
         ]);
     }
 }

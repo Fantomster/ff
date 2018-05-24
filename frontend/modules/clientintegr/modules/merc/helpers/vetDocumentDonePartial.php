@@ -28,11 +28,14 @@ class vetDocumentDonePartial extends Component
     public $UUID;
     public $rejected_data;
 
+    const PARTIAL = 'PARTIALLY';
+    const RETURN_ALL = 'RETURN_ALL';
+    const ACCEPT_ALL = 'ACCEPT_ALL';
+
     public function getXML()
     {
 
         $doc = $this->doc;
-        //var_dump($this->UUID); die();
         $date = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.\Yii::$app->formatter->asTime('now', 'HH:mm:ss');
         $xml = '<merc:processIncomingConsignmentRequest>
                   <merc:localTransactionId>'.$this->localTransactionId.'</merc:localTransactionId>
@@ -75,13 +78,16 @@ class vetDocumentDonePartial extends Component
                         <vet:volume>'.$this->rejected_data['volume'].'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
-                        </vet:unit>
-                        <vet:packingList>
+                        </vet:unit>';
+
+                        if(isset($doc->ns2batch->ns2packingList))
+                        $xml .= '<vet:packingList>
                            <com:packingForm>
                               <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
                            </com:packingForm>
-                        </vet:packingList>
-                        <vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
+                        </vet:packingList>';
+
+                        $xml .= '<vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
                         <vet:dateOfProduction>'.
                           $this->getDate($doc->ns2batch->ns2dateOfProduction)
                         .'</vet:dateOfProduction>
@@ -103,10 +109,12 @@ class vetDocumentDonePartial extends Component
                            </ent:producer>
                         </vet:producerList>';
 
+                        if (isset($doc->ns2batch->ns2productMarkingList))
                         $xml .= '<vet:productMarkingList>
                            <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
-                        </vet:productMarkingList>
-                        <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
+                        </vet:productMarkingList>';
+
+                        $xml .= '<vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
                      </vet:consignment>
                      <vet:accompanyingForms>
                         <vet:waybill>';
@@ -148,10 +156,10 @@ class vetDocumentDonePartial extends Component
                         </vet:responsible>
                         <vet:result>MISMATCH</vet:result>
                      </vet:vetInspection>
-                     <vet:decision>PARTIALLY</vet:decision>
+                     <vet:decision>'.$this->rejected_data['decision'].'</vet:decision>
                   </merc:deliveryFacts>
                   <merc:discrepancyReport>
-                     <vet:issueDate>'.$date.'</vet:issueDate>
+                     <vet:issueDate>'.\Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'</vet:issueDate>
                      <vet:reason>
                         <vet:name>'.$this->rejected_data['reason'].'</vet:name>
                      </vet:reason>
@@ -191,16 +199,19 @@ class vetDocumentDonePartial extends Component
                         <vet:productItem>
                            <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
                         </vet:productItem>
-                        <vet:volume>'.abs($doc->ns2batch->ns2volume - $this->volume).'</vet:volume>
+                        <vet:volume>'.abs($doc->ns2batch->ns2volume - $this->rejected_data['volume']).'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
-                        </vet:unit>
-                        <vet:packingList>
+                        </vet:unit>';
+
+                        if(isset($doc->ns2batch->ns2packingList))
+                            $xml .= '<vet:packingList>
                            <com:packingForm>
                               <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
                            </com:packingForm>
-                        </vet:packingList>
-                        <vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
+                        </vet:packingList>';
+
+                        $xml .= '<vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
                         <vet:dateOfProduction>'.
                           $this->getDate($doc->ns2batch->ns2dateOfProduction)
                         .'</vet:dateOfProduction>
@@ -222,11 +233,50 @@ class vetDocumentDonePartial extends Component
                            </ent:producer>
                         </vet:producerList>';
 
-                        $xml .= '<vet:productMarkingList>
+                        if (isset($doc->ns2batch->ns2productMarkingList))
+                            $xml .= '<vet:productMarkingList>
                            <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
-                        </vet:productMarkingList>
-                        <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
+                        </vet:productMarkingList>';
+                       $xml .= '<vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
                      </vet:consignment>
+                      <vet:accompanyingForms>
+                        <vet:waybill>';
+                        $xml .= isset($doc->ns2waybillSeries) ? '<shp:issueSeries>'.$doc->ns2waybillSeries->__toString().'</shp:issueSeries>' : '';
+                        $xml .= isset($doc->ns2waybillNumber) ? '<shp:issueNumber>'.$doc->ns2waybillNumber->__toString().'</shp:issueNumber>' : '';
+                        $xml .= isset($doc->ns2waybillDate) ? '<shp:issueDate>'.$doc->ns2waybillDate->__toString().'</shp:issueDate>' : '';
+                        $xml .= isset($doc->ns2waybillType) ? '<shp:type>'.$doc->ns2waybillType->__toString().'</shp:type>' : '';
+
+                        if(isset($doc->ns2broker))
+                            $xml .='<shp:broker>
+                              <base:guid>'.$doc->ns2broker->bsguid->__toString().'</base:guid>
+                           </shp:broker>';
+
+                           $xml .= '<shp:transportInfo>
+                              <shp:transportType>'.$doc->ns2transportInfo->shptransportType->__toString().'</shp:transportType>
+                              <shp:transportNumber>
+                                 <shp:vehicleNumber>'.$doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString().'</shp:vehicleNumber>
+                              </shp:transportNumber>
+                           </shp:transportInfo>
+                           <shp:transportStorageType>'.$doc->ns2transportStorageType->__toString().'</shp:transportStorageType>
+                        </vet:waybill>
+                        <vet:vetCertificate>
+                                   <vet:issueDate>'.\Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'</vet:issueDate>
+                                   <vet:purpose>
+                                      <base:guid>'.$doc->ns2purpose->bsguid->__toString().'</base:guid>
+                                   </vet:purpose>';
+
+                                   if(isset($doc->ns2cargoInspected))
+                                   $xml .= '<vet:cargoInspected>'.$doc->ns2cargoInspected->__toString().'</vet:cargoInspected>';
+                                   $xml .= '<vet:cargoExpertized>'.(isset($doc->ns2cargoExpertized) ? $doc->ns2cargoExpertized->__toString(): 'false').'</vet:cargoExpertized>
+                                   <vet:confirmedBy>
+                                      <com:fio>'.$doc->ns2confirmedBy->argcfio->__toString().'</com:fio>
+                                      <com:post>'.$doc->ns2confirmedBy->argcpost->__toString().'</com:post>
+                                   </vet:confirmedBy>
+                                   <vet:confirmedDate>'.$date.'</vet:confirmedDate>
+                                   <vet:locationProsperity>'.$doc->ns2locationProsperity->__toString().'</vet:locationProsperity>
+                    </vet:vetCertificate>
+                  </vet:accompanyingForms>
+                     
                   </merc:returnedDelivery>
                   
                </merc:processIncomingConsignmentRequest>';

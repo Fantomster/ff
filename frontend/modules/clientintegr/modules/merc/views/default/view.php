@@ -28,7 +28,6 @@ use yii\helpers\Html;
     ])
     ?>
 </section>
-
 <section class="content-header">
     <h4>Просмотр ВСД</h4>
 </section>

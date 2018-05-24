@@ -33,7 +33,6 @@ $this->title = 'Акт несоответствия';
 </section>
 
 <section class="content">
-    <h4><?= $this->title ?></h4>
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">

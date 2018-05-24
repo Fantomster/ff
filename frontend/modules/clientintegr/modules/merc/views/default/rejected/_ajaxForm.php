@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use common\themes\dasha\widgets\yii2\ActiveForm;
+use kartik\form\ActiveForm;
 use kartik\widgets\TouchSpin;
 use kartik\widgets\DatePicker;
 use kartik\widgets\SwitchInput;
@@ -14,8 +14,8 @@ $form = ActiveForm::begin([
 ]);
 ?>
     <div class="modal-header">
-        <h4 class="modal-title">Акт несоответствия</h4>
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Акт несоответствия</h4>
     </div>
     <div class="modal-body">
         <?php echo $form->errorSummary($model); ?>
@@ -30,7 +30,7 @@ $form = ActiveForm::begin([
         <?php echo $form->field($model, 'description')->textarea(['maxlength' => true]) ?>
     </div>
     <div class="modal-footer">
-        <?= Html::button('<i class="icon fa fa-save"></i> Сохранить ', ['class' => 'btn btn-success save-form']) ?>
-        <a href="#" class="btn btn-info" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'Close') ?></a>
+        <?= Html::button('<i class="icon fa fa-save save-form"></i> Сохранить ', ['class' => 'btn btn-success save-form']) ?>
+        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'Close') ?></a>
     </div>
 <?php ActiveForm::end(); ?>

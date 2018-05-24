@@ -17,7 +17,7 @@ class getVetDocumentListRequest extends BaseRequest
 
     private $initiator;
     private $enterpriseGuid;
-    private $soap_namespaces = ['xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"'];
+    private $soap_namespaces = ['xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"', 'xmlns:vet="http://api.vetrf.ru/schema/cdm/mercury/vet-document"'];
 
     const DOC_TYPE_INCOMMING = 'INCOMING';
     const DOC_TYPE_OUTGOING = 'OUTGOING';
@@ -92,11 +92,11 @@ class getVetDocumentListRequest extends BaseRequest
         if (isset($this->initiator))
             $xml .= $this->initiator->getXML();
 
-       /* $xml .= '<base:listOptions>'.PHP_EOL.
+        $xml .= /*'<base:listOptions>'.PHP_EOL.
             '<base:count>10</base:count>'.PHP_EOL.
             '<base:offset>0</base:offset>'.PHP_EOL.
-        '</base:listOptions>'.PHP_EOL.
-        '<vet:vetDocumentType>INCOMING</vet:vetDocumentType>'.PHP_EOL.
+        '</base:listOptions>'.PHP_EOL.*/
+        '<vet:vetDocumentType>INCOMING</vet:vetDocumentType>'; /*
         '<vet:vetDocumentStatus>UTILIZED</vet:vetDocumentStatus>'.PHP_EOL;*/
 
         $xml .= '<ent:enterpriseGuid>'.$this->enterpriseGuid.'</ent:enterpriseGuid>'.PHP_EOL.

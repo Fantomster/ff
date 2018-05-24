@@ -13,6 +13,7 @@ use frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest;
 use frontend\modules\clientintegr\modules\merc\models\receiveApplicationResultRequest;
 use frontend\modules\clientintegr\modules\merc\models\submitApplicationRequest;
 use yii\base\Component;
+use yii\web\BadRequestHttpException;
 
 class mercApi extends Component
 {
@@ -125,23 +126,25 @@ class mercApi extends Component
             $application->addData($vetDoc);
             $request->setApplication($application);
 
+            /*var_dump(htmlentities($request->getXML()));
+            die();*/
+
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            /*var_dump(htmlentities($response));
+            die();*/
 
             $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {
-                echo "Bad request";
-                die();
+                throw new BadRequestHttpException();
             }
 
             //timeout перед запросом результата
             sleep(2);
             //Получаем результат запроса
             $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
-
-        //    var_dump(htmlentities($response));
-        //    die();
 
             $result = $this->parseResponse($response);
 
@@ -187,7 +190,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $unit = $cache->get('Unit_'.$GUID);
 
-        if($unit)
+        if(!($unit === false))
             return $this->parseResponse($unit, true);
 
         $client = $this->getSoapClient('dicts');
@@ -212,7 +215,7 @@ class mercApi extends Component
 
         $business = $cache->get('Business_'.$UUID);
 
-        if($business)
+        if(!($business === false))
             return $this->parseResponse($business, true);
 
         $client = $this->getSoapClient('vetis');
@@ -236,7 +239,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $enterprise = $cache->get('Enterprise_'.$UUID);
 
-        if($enterprise)
+        if(!($enterprise === false))
             return $this->parseResponse($enterprise, true);
 
         $client = $this->getSoapClient('vetis');
@@ -261,7 +264,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $doc = $cache->get('vetDocRaw_'.$UUID);
 
-        if ($doc)
+        if (!($doc === false))
             return $this->parseResponse($doc, true);
 
         $client = $this->getSoapClient('mercury');
@@ -294,8 +297,7 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {
-                echo "Bad request";
-                die();
+                throw new BadRequestHttpException();
             }
 
             //timeout перед запросом результата
@@ -308,11 +310,14 @@ class mercApi extends Component
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
 
 
+            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETE')
+                $cache->add('vetDocRaw_'.$UUID, $result->asXML(), 60*5);
+            else
+                $result->null;
+
         }catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
         }
-
-        $cache->add('vetDocRaw_'.$UUID, $result->asXML(), 60*5);
         return $result;
     }
 
@@ -321,7 +326,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $product = $cache->get('Product_'.$GUID);
 
-        if($product)
+        if(!($product === false))
             return $this->parseResponse($product, true);
 
         $client = $this->getSoapClient('product');
@@ -346,7 +351,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $subProduct = $cache->get('SubProduct_'.$GUID);
 
-        if($subProduct)
+        if(!($subProduct === false))
             return $this->parseResponse($subProduct, true);
 
         $client = $this->getSoapClient('product');
@@ -370,7 +375,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $country = $cache->get('Country_'.$GUID);
 
-        if($country)
+        if(!($country === false))
             return $this->parseResponse($country, true);
 
         $client = $this->getSoapClient('ikar');
@@ -394,7 +399,7 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $purpose = $cache->get('Purpose_'.$GUID);
 
-        if($purpose)
+        if(!($purpose === false))
             return $this->parseResponse($purpose, true);
 
         $client = $this->getSoapClient('dicts');
@@ -443,8 +448,6 @@ class mercApi extends Component
             die();*/
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
-
-
 
             $result = $this->parseResponse($response);
 
@@ -497,9 +500,14 @@ class mercApi extends Component
             $request->setApplication($application);
 
             //Делаем запрос
+
+           /* var_dump(htmlentities($request->getXML()));
+            die();*/
+
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
-
+            /*var_dump(htmlentities($response));
+            die();*/
 
             $result = $this->parseResponse($response);
 

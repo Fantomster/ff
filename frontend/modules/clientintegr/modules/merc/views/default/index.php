@@ -4,8 +4,18 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\helpers\Url;
+use yii\bootstrap\Modal;
+use yii\web\View;
 ?>
+
+<?=
+Modal::widget([
+    'id' => 'ajax-load',
+    'size' => 'modal-md',
+    'clientOptions' => false,
+])
+?>
+
 <section class="content-header">
     <h1>
         <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
@@ -36,7 +46,7 @@ use yii\helpers\Url;
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php
-                    Pjax::begin(['id' => 'pjax-messages-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true]);
+                    Pjax::begin(['id' => 'pjax-vsd-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true]);
                     ?>
                     <div class="col-md-12">
                         <div class="col-lg-2 col-md-3 col-sm-6">
@@ -132,7 +142,13 @@ use yii\helpers\Url;
                                         $options = [
                                             'title' => 'Просмотр',
                                             'aria-label' => 'Просмотр',
-                                            'data-pjax' => '0',
+                                            'data' => [
+                                               //'pjax'=>0,
+                                                'target' => '#ajax-load',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                            //'data-pjax' => '0',
                                         ];
                                         $icon = Html::tag('img', '', [
                                             'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
@@ -143,11 +159,16 @@ use yii\helpers\Url;
                                     'done-partial' => function ($url, $model, $key) {
                                         if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
-                                         $options = [
-                                                'title' => 'Частичня приемка',
-                                                'aria-label' => 'Частичня приемка',
-                                                'data-pjax' => '0',
-                                            ];
+                                        $options = [
+                                            'title' => 'Частичная приемка',
+                                            'aria-label' => 'Частичная приемка',
+                                            'data' => [
+                                                //'pjax'=>0,
+                                                'target' => '#ajax-load',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                        ];
                                          $icon = Html::tag('img', '', [
                                                 'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
                                                 'style' => 'width: 24px'
@@ -160,13 +181,18 @@ use yii\helpers\Url;
                                         $options = [
                                             'title' => 'Возврат',
                                             'aria-label' => 'Возврат',
-                                            'data-pjax' => '0',
+                                            'data' => [
+                                                //'pjax'=>0,
+                                                'target' => '#ajax-load',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
                                         ];
                                         $icon = Html::tag('img', '', [
                                             'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
                                             'style' => 'width: 18px'
                                         ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $key], $options);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $key,  'reject' => true], $options);
                                     },
                                 ]
                             ]
@@ -181,3 +207,43 @@ use yii\helpers\Url;
         </div>
     </div>
 </section>
+
+<?php
+$customJs = <<< JS
+$("body").on("show.bs.modal", "#ajax-load", function() {
+    $(this).data("bs.modal", null);
+    var modal = $(this);
+    modal.find('.modal-content').html(
+    "<div class=\"modal-header\">" + 
+    "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>" + 
+    "</span><h4 class=\"modal-title\"><span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Загрузка</h4></div>");
+});
+
+
+$(".modal").removeAttr("tabindex");
+
+$("body").on("hidden.bs.modal", "#ajax-load", function() {
+    $(this).data("bs.modal", null);
+});
+
+$("#ajax-load").on("click", ".save-form", function() {
+    var form = $("#ajax-form");
+    $.post(
+        form.attr("action"),
+            form.serialize()
+            )
+            .done(function(result) {
+            $.pjax.reload({container: "#pjax-vsd-list",timeout:30000});
+            if(result != true)    
+                form.replaceWith(result);
+            else
+                //$("#ajax-load").modal('hide');
+                $("#ajax-load .close").click();
+                //$('#ajax-load').modal().hide();
+        });
+        return false;
+    });
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>
+

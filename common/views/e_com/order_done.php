@@ -5,7 +5,8 @@
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
     <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
-    <DELIVERYNOTENUMBER><?= $order->id ?></DELIVERYNOTENUMBER>
+    <DELIVERYNOTENUMBER><?= $order->invoice_number ?? $order->id ?></DELIVERYNOTENUMBER>
+    <DELIVERYNOTEDATE><?= $order->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
     <HEAD>

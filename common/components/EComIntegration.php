@@ -74,6 +74,12 @@ class EComIntegration extends Component {
 
         $order->status = Order::STATUS_PROCESSING;
         $order->updated_at = new Expression('NOW()');
+        if(isset($simpleXMLElement->DELIVERYNOTENUMBER)){
+            $order->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER;
+        }
+        if(isset($simpleXMLElement->DELIVERYNOTEDATE)){
+            $order->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE;
+        }
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
         $isDesadv = false;

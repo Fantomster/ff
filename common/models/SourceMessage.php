@@ -15,7 +15,7 @@ use Yii;
  */
 class SourceMessage extends \yii\db\ActiveRecord
 {
-    const LANGUAGES = ['ru', 'en', 'es', 'md'];
+    const LANGUAGES = ['ru', 'en', 'es', 'md', 'ua'];
 
     /**
      * @inheritdoc

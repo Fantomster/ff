@@ -52,6 +52,14 @@ return [
             'about' => 'https://mixcart.ru/md/about.html',
             'contacts' => 'https://mixcart.ru/md/contacts.html',
         ],
+        'ua' => [
+            'market' => 'https://market.mixcart.ru/ua/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client' => 'https://client.mixcart.ru/',
+            'home' => 'https://mixcart.ru/ua/',
+            'about' => 'https://mixcart.ru/ua/about.html',
+            'contacts' => 'https://mixcart.ru/ua/contacts.html',
+        ],
     ],
     'enableYandexMetrics' => 1,
     /**

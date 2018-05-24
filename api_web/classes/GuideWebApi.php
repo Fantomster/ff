@@ -120,7 +120,7 @@ class GuideWebApi extends \api_web\components\WebApi
              * @var $model Guide
              */
             foreach ($models as $model) {
-                $result[] = $this->prepareGuide($model->id, $product_list);
+                $result[] = $this->prepareGuide($model->id, $product_list, ['limit' => 4]);
             }
         }
         $return = [
@@ -544,7 +544,7 @@ class GuideWebApi extends \api_web\components\WebApi
      * @param $id
      * @return array
      */
-    private function prepareGuide($id, $product_list = true)
+    private function prepareGuide($id, $product_list = true, $attr = [])
     {
         $model = Guide::findOne($id);
         if ($model) {
@@ -560,7 +560,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
             if ($product_list === true) {
                 $products = [];
-                $dataProvider = (new GuideProductsSearch())->search(['limit' => 4], $model->id, $this->user->organization->id);
+                $dataProvider = (new GuideProductsSearch())->search($attr, $model->id, $this->user->organization->id);
                 foreach ($dataProvider->models as $row) {
                     $products[] = $this->prepareProduct($row);
                 }

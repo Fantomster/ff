@@ -76,15 +76,21 @@ class EComIntegration extends Component {
         $order->updated_at = new Expression('NOW()');
         $order->save();
         $positions = $simpleXMLElement->HEAD->POSITION;
+        $isDesadv = false;
         if(!count($positions)){
             $positions = $simpleXMLElement->HEAD->PACKINGSEQUENCE->POSITION;
+            $isDesadv = true;
         }
         $positionsArray = [];
         $arr = [];
         foreach ($positions as $position){
             $contID = (int) $position->PRODUCTIDBUYER;
             $positionsArray[] = (int) $contID;
-            $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+            if($isDesadv){
+                $arr[$contID]['ACCEPTEDQUANTITY'] = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+            }else{
+                $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+            }
             $arr[$contID]['PRICE'] = $position->PRICE;
         }
         foreach ($order->orderContent as $orderContent){

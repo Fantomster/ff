@@ -18,7 +18,8 @@ Modal::widget([
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с системой ВЕТИС "Меркурий"
+        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -36,8 +37,21 @@ Modal::widget([
     ?>
 </section>
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-    Настройки
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <div class="panel-body">
+                <div class="box-body table-responsive no-padding">
+                    <p>
+                        Состояние лицензии:
+                        <?php echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') '; ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content-header">
+    <h4>Настройки:</h4>
 </section>
 <section class="content">
     <div class="catalog-index">

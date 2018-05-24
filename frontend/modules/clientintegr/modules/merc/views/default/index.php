@@ -8,7 +8,8 @@ use yii\helpers\Url;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с системой ВЕТИС "Меркурий"
+        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -27,22 +28,6 @@ use yii\helpers\Url;
 </section>
 
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-</section>
-
-<section class="content-header">
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <div class="panel-body">
-                <div class="box-body table-responsive no-padding">
-                    <p>
-                        Состояние лицензии:
-                        <?php echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') '; ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
     <h4>Список ВСД:</h4>
 </section>
 <section class="content-header">

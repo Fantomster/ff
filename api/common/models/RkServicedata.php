@@ -141,4 +141,18 @@ class RkServicedata extends \yii\db\ActiveRecord {
         return \Yii::$app->db_api;
     }
 
+    /**
+     * Лизензия
+     * @return iikoService|array|null|\yii\db\ActiveRecord
+     */
+    public static function getLicense()
+    {
+        return self::find()
+            ->where(['status_id' => 2])
+            ->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])
+            ->andOnCondition('td >= NOW()')
+            ->andOnCondition('fd <= NOW()')
+            ->one();
+    }
+
 }

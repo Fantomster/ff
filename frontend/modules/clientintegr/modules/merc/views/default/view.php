@@ -6,7 +6,8 @@ use yii\helpers\Html;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Просмотр ВСД
+        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -26,6 +27,10 @@ use yii\helpers\Html;
         ],
     ])
     ?>
+</section>
+
+<section class="content-header">
+    <h4>Просмотр ВСД</h4>
 </section>
 
 <section class="content-header">

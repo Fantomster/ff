@@ -215,17 +215,8 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $this->UUID = $UUID;
 
-        $doc = $cache->get('vetDocRaw_'.$UUID);
-        if(!$doc) {
-            $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
-            $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
-            $cache->add('vetDocRaw_'.$UUID, $doc->asXML());
-        }
-        else
-        {
-            $doc = simplexml_load_string($doc);
-            $doc = new \SimpleXMLElement($doc->asXML());
-        }
+        $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+        $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
         if($raw)
             return $doc;

@@ -89,7 +89,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         2 => 'Железнодорожный',
         3 => 'Авиатранспортный',
         4 => 'Морской (контейнер)',
-        5 => 'Морской (трюм)'
+        5 => 'Морской (трюм)',
+        6 => 'Речной',
+        7 => 'Перегон',
     ];
 
     public $product_types = [

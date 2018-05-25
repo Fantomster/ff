@@ -271,8 +271,10 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $doc = $cache->get('vetDocRaw_'.$UUID);
 
-        if (!($doc === false))
+        if (!($doc === false)) {
+            //var_dump(2);
             return $this->parseResponse($doc, true);
+        }
 
         $client = $this->getSoapClient('mercury');
         $result = null;

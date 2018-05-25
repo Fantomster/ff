@@ -55,7 +55,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($uuid)
     {
-        Yii::$app->cache->flush();
         try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);

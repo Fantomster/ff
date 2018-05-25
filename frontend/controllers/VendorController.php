@@ -622,7 +622,12 @@ class VendorController extends DefaultController {
     public function actionImportBaseCatalog($id) {
         $cat_id = $id;
         $currentUser = $this->currentUser;
-        return $this->renderAjax('catalogs/apiBased/_importCatalog', compact('importModel', 'cat_id', 'currentUser'));
+        $tempCatalog = \common\models\CatalogTemp::findOne(['cat_id' => $id, 'user_id' => $currentUser->id]);
+        if (empty($tempCatalog)) {
+            return $this->renderAjax('catalogs/apiBased/_uploadCatalog', compact('cat_id', 'currentUser'));
+        } else {
+            return $this->renderAjax('catalogs/apiBased/_importCatalog', compact('tempCatalog', 'cat_id', 'currentUser'));
+        }
     }
     
     public function actionImport($id) {

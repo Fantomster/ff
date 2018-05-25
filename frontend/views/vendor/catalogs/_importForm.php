@@ -52,7 +52,7 @@ $form = ActiveForm::begin([
     <?= Html::submitButton('<i class="glyphicon glyphicon-import"></i> ' . Yii::t('message', 'frontend.views.vendor.import_three', ['ru'=>'Импорт']) . ' ',
             ['class' => 'btn btn-success import','style'=>'display:block;width:100%;margin-bottom:5px']) ?>
     <?= Html::a(
-       '<i class="fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.vendor.cancel_seven', ['ru'=>'Отмена']) . ' </a>','#',
+       '<i class="fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.vendor.cancel_seven', ['ru'=>'Отмена']),'#',
        ['class' => 'btn btn-gray', 'data-dismiss'=>'modal',
         'style'=>'display:block;width:100%;margin-left:0px;']) 
     ?>

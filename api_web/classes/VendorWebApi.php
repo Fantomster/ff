@@ -9,6 +9,7 @@ use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;
+use common\models\CatalogTemp;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\web\BadRequestHttpException;
@@ -378,6 +379,13 @@ class VendorWebApi extends \api_web\components\WebApi {
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
+        //проверка нет ли уже загруженного временного каталога
+        //если есть - удаляем
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (!empty($tempCatalog)) {
+            Yii::$app->get('resourceManager')->delete($this->excelTempFolder . "/" . $tempCatalog->excel_file);
+            $tempCatalog->delete();
+        }
         //сохранение и загрузка на s3
         $base64 = $request['data'];
         $type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
@@ -386,7 +394,13 @@ class VendorWebApi extends \api_web\components\WebApi {
             try {
                 $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
                 Yii::$app->get('resourceManager')->save($file, $this->excelTempFolder . "/" . $file->name);
-                return ['result' => true, 'file' => $file->name];
+                $newTempCatalog = new CatalogTemp();
+                $newTempCatalog->cat_id = $request['cat_id'];
+                $newTempCatalog->user_id = $this->user->id;
+                $newTempCatalog->excel_file = $file->name;
+                $newTempCatalog->save();
+                $first20Rows = \api_web\helpers\Excel::get20Rows($file->tempName);
+                return ['result' => true, 'rows' => $first20Rows];
             } catch (\yii\base\Exception $e) {
                 throw $e;
             }
@@ -453,7 +467,6 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
      */
     public function changeMainIndex(array $request) {
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
@@ -463,4 +476,31 @@ class VendorWebApi extends \api_web\components\WebApi {
         return $this->container->get('CatalogWebApi')->changeMainIndex($catalog, $request['index']);
     }
 
+    /**
+     * Удаление загруженного необработанного каталога
+     * @param array $request
+     * @return array
+     */
+    public function deleteTempMainCatalog(array $request) {
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (!empty($tempCatalog)) {
+            Yii::$app->get('resourceManager')->delete($this->excelTempFolder . "/" . $tempCatalog->excel_file);
+            $tempCatalog->delete();
+        }
+        return ['result' => true];
+    }
+    
+    /**
+     * Статус загруженного, но не импортированного каталога
+     * @param array $request
+     * @return array
+     */
+    public function getTempMainCatalog(array $request) {
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (!empty($tempCatalog)) {
+            return ['exists' => true];
+        } else {
+            return ['exists' => false];
+        }
+    }
 }

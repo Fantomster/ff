@@ -80,11 +80,11 @@ class vetDocumentsList extends Component
         return $res;
     }
 
-    public function getArrayDataProvider()
+    public function getArrayDataProvider($status = null)
     {
         $api = mercApi::getInstance();
 
-        $result = $api->getVetDocumentList();
+        $result = $api->getVetDocumentList($status);
 
         if(empty($result))
             $data = [];

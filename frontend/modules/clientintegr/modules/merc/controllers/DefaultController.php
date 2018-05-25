@@ -33,8 +33,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if(!mercDicconst::checkSettings())
             return $this->redirect(['/clientintegr/merc/settings']);
 
-        $dataProvider = (new vetDocumentsList())->getArrayDataProvider();
-        $params = [/*'searchModel' => $searchModel, */
+        $status = Yii::$app->request->get('status');
+
+        if(!($status == getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED || $status == getVetDocumentByUUIDRequest::DOC_STATUS_UTILIZED || $status == getVetDocumentByUUIDRequest::DOC_STATUS_WITHDRAWN))
+            $status = null;
+
+        $dataProvider = (new vetDocumentsList())->getArrayDataProvider($status);
+        $params = ['status' => $status,
             'dataProvider' => $dataProvider];
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
@@ -50,7 +55,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($uuid)
     {
-        Yii::$app->cache->flush();
         try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
@@ -143,5 +147,29 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             'model' => $model,
             'volume' => $document->batch[4]['value']
         ]);
+    }
+
+    public function actionDoneAll()
+    {
+        $selected = Yii::$app->request->get('selected');
+
+        try {
+            $selected = explode(',', $selected);
+            foreach ($selected as $uuid) {
+                $api = mercApi::getInstance();
+                $api->getVetDocumentDone($uuid);
+
+                $cache = \Yii::$app->cache;
+                $cache->delete('vetDocRaw_' . $uuid);
+                $cache->delete('vetDoc_' . $uuid);
+            }
+        } catch (\Error $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+        }
+
+        return $this->redirect(['index']);
     }
 }

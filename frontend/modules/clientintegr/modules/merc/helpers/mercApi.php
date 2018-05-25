@@ -103,7 +103,7 @@ class mercApi extends Component
         return new \SimpleXMLElement($xml->asXML());
     }
 
-    public function getVetDocumentList()
+    public function getVetDocumentList($status)
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -122,6 +122,7 @@ class mercApi extends Component
 
             //Формируем тело запроса
             $vetDoc = new getVetDocumentListRequest();
+            $vetDoc->status = $status;
             $vetDoc->localTransactionId = $localTransactionId;
             $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
             $vetDoc->setInitiator($this->vetisLogin);
@@ -270,8 +271,10 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $doc = $cache->get('vetDocRaw_'.$UUID);
 
-        if (!($doc === false))
+        if (!($doc === false)) {
+            //var_dump(2);
             return $this->parseResponse($doc, true);
+        }
 
         $client = $this->getSoapClient('mercury');
         $result = null;

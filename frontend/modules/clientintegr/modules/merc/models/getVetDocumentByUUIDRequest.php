@@ -214,14 +214,14 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         $this->UUID = $UUID;
 
         $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+         //var_dump($raw_doc);
         $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
         if($raw) {
             return $doc;
         }
 
-        $doc = null;
-        //var_dump($doc);
+
         $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
         $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
         $this->issueDate = $doc->ns2issueDate->__toString();

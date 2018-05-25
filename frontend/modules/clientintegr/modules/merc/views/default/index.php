@@ -6,6 +6,8 @@ use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\bootstrap\Modal;
 use yii\web\View;
+use yii\helpers\Url;
+use kartik\form\ActiveForm;
 ?>
 
 <?=
@@ -55,16 +57,25 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?php
-                    Pjax::begin(['id' => 'pjax-vsd-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true]);
-                    ?>
+                    Pjax::begin(['id' => 'pjax-vsd-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
+                    $form = ActiveForm::begin([
+                    'options' => [
+                    'data-pjax' => true,
+                    'id' => 'search-form',
+                    'role' => 'search',
+                    ],
+                    'enableClientValidation' => false,
+                    'method' => 'get',
+                    ]); ?>
                     <div class="col-md-12">
                         <div class="col-lg-2 col-md-3 col-sm-6">
                             <div class="form-group field-statusFilter">
                                 <label class="label" style="color:#555" for="statusFilter">Статус</label>
-                                <?= Html::dropDownList('status', 'null', \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['class' => 'form-control']); ?>
+                                <?= Html::dropDownList('status', $status, \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['class' => 'form-control', 'id'=>'statusFilter']); ?>
                             </div>
                         </div>
                     </div>
+                    <?php ActiveForm::end(); ?>
                     <div class="col-md-12">
                     <?php
                     echo GridView::widget([
@@ -207,7 +218,7 @@ Modal::widget([
                             ]
                         ],
                     ]);
-                    echo '<div class="col-md-12">'.Html::a('Погасить', ['#'], ['class' => 'btn btn-success']).'</div>';
+                    echo '<div class="col-md-12">'.Html::submitButton('Погасить', ['class' => 'btn btn-success done_all']).'</div>';
                     ?>
                     </div>
                     <?php Pjax::end(); ?>
@@ -218,7 +229,14 @@ Modal::widget([
 </section>
 
 <?php
+$urlDoneAll = Url::to(['done-all']);
 $customJs = <<< JS
+$(document).on("click", ".done_all", function(e) {
+        if($("#vetDocumentsList").yiiGridView("getSelectedRows").length > 0){
+            window.location.href =  "$urlDoneAll?selected=" +  $("#vetDocumentsList").yiiGridView("getSelectedRows");  
+        }
+    });
+
 $("body").on("show.bs.modal", "#ajax-load", function() {
     $(this).data("bs.modal", null);
     var modal = $(this);
@@ -252,6 +270,12 @@ $("#ajax-load").on("click", ".save-form", function() {
         });
         return false;
     });
+
+ $("document").ready(function(){
+        $(".box-body").on("change", "#statusFilter", function() {
+            $("#search-form").submit();
+        });
+     });   
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

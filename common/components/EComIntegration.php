@@ -78,15 +78,6 @@ class EComIntegration extends Component {
             return false;
         }
 
-        $order->status = Order::STATUS_PROCESSING;
-        $order->updated_at = new Expression('NOW()');
-        if(isset($simpleXMLElement->DELIVERYNOTENUMBER)){
-            $order->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER;
-        }
-        if(isset($simpleXMLElement->DELIVERYNOTEDATE)){
-            $order->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE;
-        }
-
         $positions = $simpleXMLElement->HEAD->POSITION;
         $isDesadv = false;
         if(!count($positions)){
@@ -144,8 +135,7 @@ class EComIntegration extends Component {
                 $summ+=$quan*$position->PRICE;
             }
         }
-        $order->total_price = $summ;
-        $order->save();
+        Yii::$app->db->createCommand()->update('order', ['status' => Order::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()'), 'invoice_number' => $simpleXMLElement->DELIVERYNOTENUMBER ?? '', 'invoice_date' => $simpleXMLElement->DELIVERYNOTEDATE ?? ''], 'id='.$order->id)->execute();
         OrderController::sendOrderProcessing($order->client, $order);
     }
 

@@ -64,6 +64,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->redirect(['index']);
         }
+        catch (\Exception $e){
+            Yii::$app->session->setFlash('success', 'Ошибка загрузки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->redirect(['index']);
+        }
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -84,6 +90,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
         } catch (\Error $e)
         {
+            Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
+        catch (\Exception $e){
             Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -125,11 +137,25 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
+        catch (\Exception $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
 
         try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
         }catch (\Error $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка загрузки формы акта неоответствия ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
+        catch (\Exception $e)
         {
             Yii::$app->session->setFlash('success', 'Ошибка загрузки формы акта неоответствия ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -164,6 +190,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 $cache->delete('vetDoc_' . $uuid);
             }
         } catch (\Error $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+        }
+        catch (\Exception $e)
         {
             Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам

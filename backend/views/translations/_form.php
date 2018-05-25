@@ -24,6 +24,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($message, 'translation[md]')->textInput(['maxlength' => true])->label('Перевод[md]') ?>
 
+    <?= $form->field($message, 'translation[ua]')->textInput(['maxlength' => true])->label('Перевод[ua]') ?>
+
     <div class="form-group">
         <?= Html::submitButton('Create') ?>
     </div>

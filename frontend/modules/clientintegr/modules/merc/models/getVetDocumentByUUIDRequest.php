@@ -220,6 +220,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             return $doc;
         }
 
+        $doc = null;
         //var_dump($doc);
         $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
         $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;

@@ -39,8 +39,15 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionView($uuid)
     {
         Yii::$app->cache->flush();
-        $document = new getVetDocumentByUUIDRequest();
-        $document->getDocumentByUUID($uuid);
+        try {
+            $document = new getVetDocumentByUUIDRequest();
+            $document->getDocumentByUUID($uuid);
+        }catch (\Error $e) {
+            Yii::$app->session->setFlash('success', 'Ошибка загрузки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->redirect(['index']);
+        }
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -51,22 +58,27 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionDone($uuid)
     {
-        $api = mercApi::getInstance();
-        $api->getVetDocumentDone($uuid);
+        try {
+            $api = mercApi::getInstance();
+            $api->getVetDocumentDone($uuid);
 
-        $cache = \Yii::$app->cache;
-        $cache->delete('vetDocRaw_'.$uuid);
-        $cache->delete('vetDoc_'.$uuid);
+            $cache = \Yii::$app->cache;
+            $cache->delete('vetDocRaw_' . $uuid);
+            $cache->delete('vetDoc_' . $uuid);
 
-        $document = new getVetDocumentByUUIDRequest();
-        $document->getDocumentByUUID($uuid);
-
-        $params = ['document' => $document];
-        if (Yii::$app->request->isAjax) {
-            return true;
-        } else {
-            return $this->render('view', $params);
+        } catch (\Error $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
+
+            if (Yii::$app->request->isAjax) {
+                return true;
+            } else {
+                return $this->redirect(['view', 'uuid' => $uuid]);
+            }
     }
 
     public function actionDonePartial($uuid, $reject = false)
@@ -77,24 +89,37 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         else
             $model->decision = vetDocumentDonePartial::PARTIAL;
 
-            if ($model->load(Yii::$app->request->post()) && $model->validate())
-            {
+        try {
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercApi::getInstance();
-                $api->getVetDocumentDonePartial($uuid, $model->attributes);
+                $api->getVetDocumentDone($uuid, $model->attributes);
 
                 $cache = \Yii::$app->cache;
-                $cache->delete('vetDocRaw_'.$uuid);
-                $cache->delete('vetDoc_'.$uuid);
+                $cache->delete('vetDocRaw_' . $uuid);
+                $cache->delete('vetDoc_' . $uuid);
 
                 if (Yii::$app->request->isAjax)
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
             }
+        } catch (\Error $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
 
-        $document = new getVetDocumentByUUIDRequest();
-        $document->getDocumentByUUID($uuid);
-
-        //var_dump($document->batch[4]);
+        try {
+            $document = new getVetDocumentByUUIDRequest();
+            $document->getDocumentByUUID($uuid);
+        }catch (\Error $e)
+        {
+            Yii::$app->session->setFlash('success', 'Ошибка загрузки формы акта неоответствия ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
+                  <small>Если ошибка повторяется, пожалуйста, сообщите нам
+                  <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
 
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [

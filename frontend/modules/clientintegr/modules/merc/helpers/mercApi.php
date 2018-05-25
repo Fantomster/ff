@@ -205,6 +205,7 @@ class mercApi extends Component
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetUnitByGuid', SOAP_1_1);
         $unit = $this->parseResponse($result);
+        if($unit != null)
         $cache->add('Unit_'.$GUID, $unit->asXML(), 60*60*24*7);
         return $unit;
     }
@@ -230,6 +231,8 @@ class mercApi extends Component
     </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
         $business = $this->parseResponse($result);
+
+        if($business != null)
         $cache->add('Business_'.$UUID, $business->asXML(), 60*60*24);
         return $business;
     }
@@ -255,6 +258,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetEnterpriseByUuid', SOAP_1_1);
         $enterprise = $this->parseResponse($result);
 
+        if($enterprise != null)
         $cache->add('Enterprise_'.$UUID, $enterprise->asXML(), 60*60*24);
         return $enterprise;
     }
@@ -342,6 +346,7 @@ class mercApi extends Component
         //var_dump($result); die();
         $product = $this->parseResponse($result);
 
+        if($product != null)
         $cache->add('Product_'.$GUID, $product->asXML(), 60*60*24);
         return $product;
     }
@@ -366,6 +371,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
         $subProduct = $this->parseResponse($result);
 
+        if($subProduct!= null)
         $cache->add('subProduct_'.$GUID, $subProduct->asXML(), 60*60*24);
         return $subProduct;
     }
@@ -390,6 +396,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['ikar']['Endpoint_URL'], 'GetCountryByGuid', SOAP_1_1);
         $country = $this->parseResponse($result);
 
+        if($country != null)
         $cache->add('Country_'.$GUID, $country->asXML(), 60*60*24*7);
         return $country;
     }
@@ -414,11 +421,12 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetPurposeByGuid', SOAP_1_1);
         $purpose = $this->parseResponse($result);
 
+        if($purpose != null)
         $cache->add('Purpose_'.$GUID, $purpose->asXML(), 60*60*24*7);
         return $purpose;
     }
 
-    public function getVetDocumentDone($UUID)
+    public function getVetDocumentDone($UUID, $rejectedData = null)
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -439,6 +447,13 @@ class mercApi extends Component
             $vetDoc = new vetDocumentDone();
             $vetDoc->login = $this->vetisLogin;
             $vetDoc->UUID = $UUID;
+            $vetDoc->rejected_data = $rejectedData;
+
+            if($rejectedData == null)
+                $vetDoc->type = vetDocumentDone::ACCEPT_ALL;
+            else
+                $vetDoc->type = $rejectedData['decision'];
+
             $vetDoc->doc = (new getVetDocumentByUUIDRequest())->getDocumentByUUID($UUID, true);
             $vetDoc->localTransactionId = $localTransactionId;
             $application->addData($vetDoc);
@@ -472,7 +487,7 @@ class mercApi extends Component
         return $result;
     }
 
-    public function getVetDocumentDonePartial($UUID, $rejectedData)
+    /*public function getVetDocumentDonePartial($UUID, $rejectedData)
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -504,12 +519,12 @@ class mercApi extends Component
            /* var_dump(htmlentities($request->getXML()));
             die();*/
 
-            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+         /*   $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             /*var_dump(htmlentities($response));
             die();*/
 
-            $result = $this->parseResponse($response);
+          /*  $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {
                 echo "Bad request";
@@ -530,5 +545,5 @@ class mercApi extends Component
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
         }
         return $result;
-    }
+    }*/
 }

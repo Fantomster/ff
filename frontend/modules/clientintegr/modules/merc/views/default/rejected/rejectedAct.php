@@ -31,7 +31,15 @@ $this->title = 'Акт несоответствия';
 <section class="content-header">
     <h4><?= $this->title ?></h4>
 </section>
-
+<?php if (Yii::$app->session->hasFlash('success')): ?>
+    <div class="alert alert-danger alert-dismissable">
+        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+        </h4>
+        <?= Yii::$app->session->getFlash('success') ?>
+    </div>
+<?php endif; ?>
 <section class="content">
     <div class="catalog-index">
         <div class="box box-info">

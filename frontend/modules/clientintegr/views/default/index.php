@@ -74,7 +74,7 @@ $licenses = $user->organization->getLicenseList();
                 </div>
             </div>
             <?php endif; ?>
-            <?php if(isset($licenses['email'])): ?>
+            <?php // if(isset($licenses['email'])): ?>
             <div class="box-body">
                 <div class="hpanel" >
                     <div class="panel-body">
@@ -88,7 +88,7 @@ $licenses = $user->organization->getLicenseList();
                     </div>
                 </div>
              </div>
-            <?php endif; ?>
+            <?php // endif; ?>
             <?php if(isset($licenses['mercury'])): ?>
              <div class="box-body">
                 <div class="hpanel" >

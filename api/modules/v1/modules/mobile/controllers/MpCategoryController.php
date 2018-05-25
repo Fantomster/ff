@@ -70,6 +70,7 @@ class MpCategoryController extends ActiveController {
         ));
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            $query->andWhere (['parent' => null]);
             return $dataProvider;
         }
 
@@ -100,12 +101,17 @@ class MpCategoryController extends ActiveController {
 
     public function actionIndex()
     {
-        $dataProvider = $this->prepareDataProvider();
+        $params = new MpCategory();
+        $params->load(Yii::$app->request->queryParams);
 
+        $dataProvider = $this->prepareDataProvider();
         $models = $dataProvider->getModels();
         $res = [];
-        foreach ($models as $model)
-            $res[] = ['id' => $model->id, 'parent' => $model->parent, 'name' => $model->name, 'count' => $model->getCountProducts()];
+        foreach ($models as $model) {
+            $count = $model->getCountProducts();
+            if($params->empty != null || $count > 0)
+                $res[] = ['id' => $model->id, 'parent' => $model->parent, 'name' => $model->name, 'count' => $count];
+        }
 
         return $res;
     }

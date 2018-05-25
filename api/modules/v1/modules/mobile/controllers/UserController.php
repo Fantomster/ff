@@ -101,6 +101,7 @@ class UserController extends ActiveController
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
+                    $user->setRelationUserOrganization($user->id, $organization->id, $role::getManagerRole($organization->type_id));
                     $transaction->commit();
                 } catch (Exception $ex) {
                     $transaction->rollBack();
@@ -114,6 +115,7 @@ class UserController extends ActiveController
                 }
 
                 $user = User::findOne($user->id);
+                Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
                 $this->afterRegister($user);
                 return ['success' => 1];
             } elseif (!$profile->validate())
@@ -297,6 +299,7 @@ class UserController extends ActiveController
         $organization->setAttributes($organizationTemp->attributes);
         $organization->type_id = Organization::TYPE_RESTAURANT;
         $organization->name = "Тестовый ресторан";
+        $organization->blacklisted = 1;
 
         $transaction = Yii::$app->db->beginTransaction();
         try {

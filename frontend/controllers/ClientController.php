@@ -79,6 +79,7 @@ class ClientController extends DefaultController {
                             'tutorial',
                             'analytics',
                             'chkmail',
+                            'check-email',
                             'create',
                             'edit-catalog',
                             'events',
@@ -143,10 +144,10 @@ class ClientController extends DefaultController {
      *  user list page
      */
 
-    public function actionEmployees() {
+    public function actionEmployees(): String
+    {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        //$params = Yii::$app->request->getQueryParams();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
@@ -189,6 +190,8 @@ class ClientController extends DefaultController {
         $profile = new Profile();
         $this->loadCurrentUser();
         $organizationType = $this->currentUser->organization->type_id;
+        $dropDown = Role::dropdown($organizationType);
+        $selected = null;
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -237,7 +240,7 @@ class ClientController extends DefaultController {
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     /*
@@ -247,9 +250,10 @@ class ClientController extends DefaultController {
     public function actionAjaxUpdateUser($id) {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
-        $oldRole = $user->role_id;
         $profile = $user->profile;
-        $organizationType = $user->organization->type_id;
+        $currentUserOrganizationID = $this->currentUser->organization_id;
+        $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
+        $selected = $user->getRelationUserOrganizationRoleID($id);
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -269,7 +273,7 @@ class ClientController extends DefaultController {
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     /*
@@ -305,9 +309,12 @@ class ClientController extends DefaultController {
                         }
                     }
 
-                    $isExists = User::deleteUserFromOrganization($post['id']);
+                    $isExists = User::deleteUserFromOrganization($post['id'], $this->currentUser->organization_id);
                     if($isExists && $user->id != $this->currentUser->id){
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }else{
+                        $message = Yii::t('message', 'frontend.controllers.client.cant_del', ['ru' => 'Не удалось удалить пользователя!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                     $user->organization_id = null;
@@ -337,7 +344,7 @@ class ClientController extends DefaultController {
     public function actionChkmail() {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $result = Organization::checkEmail(\Yii::$app->request->post('email'));
+            $result = RestaurantChecker::checkEmail(\Yii::$app->request->post('email'));
             return $result;
         }
     }
@@ -464,6 +471,7 @@ class ClientController extends DefaultController {
                                 $currentOrganization->step = Organization::STEP_OK;
                                 $currentOrganization->save();
                             }
+                            User::createRelationUserOrganization($user->id, $organization->id, Role::getManagerRole($organization->type_id));
                         } else {
                             //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                             $get_supp_org_id = $check['org_id'];
@@ -1683,13 +1691,11 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 //        }
     }
 
+
     public function actionSuppliers() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
         $profile = new Profile();
         $profile->scenario = 'invite';
-        //$relationCategory = new RelationCategory();
-        $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
 
         $currentOrganization = $this->currentUser->organization;
@@ -1701,11 +1707,12 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
+            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'profile', 'currentOrganization'));
         } else {
-            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'currentOrganization'));
+            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'profile', 'currentOrganization'));
         }
     }
+
 
     public function actionApplySupplier ()
     {
@@ -1831,6 +1838,16 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
 
         return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+    }
+
+
+    public function actionCheckEmail():array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
+            return $result;
+        }
     }
 
 }

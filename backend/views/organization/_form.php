@@ -310,6 +310,8 @@ function changeFields(fields, results) {
 
     <?= $form->field($model, 'contact_name')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'gln_code')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'about')->textarea() ?>
 
     <?= $form->field($franchiseeModel, 'franchisee_id')->dropDownList($franchiseeList,
@@ -318,6 +320,11 @@ function changeFields(fields, results) {
                 (isset($model->franchisee->id)) ? $model->franchisee->id : null => ['selected' => true]
             ]
         ])->label('Название франшизы') ?>
+
+
+    <?php if($model->type_id == \common\models\Organization::TYPE_SUPPLIER):?>
+        <?= $form->field($model, 'is_work')->dropDownList(['1' => 'Да', '0' => 'Нет'])->label('Поствщик работает в системе') ?>
+    <?php endif; ?>
 
     <?= Html::activeHiddenInput($franchiseeModel, 'organization_id', ['value'=>$model->id]); ?>
 

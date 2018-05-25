@@ -75,11 +75,23 @@ class GoogleShortUrl extends Component {
      * @return mixed
      * @throws HttpException on missing apiKey
      */
-    public function shortUrl($longUrl) {
+    public function shortUrlOld($longUrl) {
         $apiParams = json_encode(['longUrl' => $longUrl]);
         $result = $this->request($apiParams, 1);
 
         return (!empty($result['id']) ? $result['id'] : false);
+    }
+
+    public function shortUrl($longUrl) {
+        $apiParams = json_encode(['longUrl' => $longUrl]);
+        $result = $this->request($apiParams, 1);
+
+        $result = (!empty($result['id']) ? $result['id'] : false);
+        if ($result) {
+            $parseUrl = parse_url($result);
+            $result = "https://mxct.ru" .  $parseUrl["path"];
+        }
+        return $result;
     }
 
     /**
@@ -117,7 +129,11 @@ class GoogleShortUrl extends Component {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-type:application/json']);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        if ($post) {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        } else {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+        }
 
         $curl_response = curl_exec($curl);
         $json_decode_response = json_decode($curl_response, TRUE);

@@ -21,11 +21,7 @@ class PaymentController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object"
@@ -65,11 +61,7 @@ class PaymentController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object"
@@ -113,11 +105,7 @@ class PaymentController extends WebApiController
      *     Действует до: 12  |  25
      *     CVC: 000",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  type="object",
-     *                  default={"token":"123123", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",

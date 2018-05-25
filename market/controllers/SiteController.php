@@ -2,6 +2,7 @@
 
 namespace market\controllers;
 
+use api_web\classes\CartWebApi;
 use common\models\DeliveryRegions;
 use yii\web\HttpException;
 use Yii;
@@ -16,6 +17,7 @@ use yii\helpers\Json;
 use yii\web\Response;
 
 //ini_set('xdebug.max_nesting_level', 200);
+
 /**
  * Site controller
  */
@@ -66,11 +68,11 @@ class SiteController extends Controller {
      * @return string
      */
     public function beforeAction($action) {
-        /*if (!(Yii::$app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index') {
-            return $this->redirect(['/site/index']);
-        } else {
-            
-        }*/
+        /* if (!(Yii::$app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index') {
+          return $this->redirect(['/site/index']);
+          } else {
+
+          } */
         if (!parent::beforeAction($action)) {
             return false;
         }
@@ -104,9 +106,13 @@ class SiteController extends Controller {
         Yii::$app->session->remove('country');
     }
 
+    /**
+     * Главная страница маркета
+     * Популярные товары, поставщики
+     * @return string
+     */
     public function actionIndex() {
         $relationSuppliers = [];
-        $supplierRegion = [];
         $oWhere = [];
         $cbgWhere = [];
 
@@ -156,28 +162,30 @@ class SiteController extends Controller {
                 ->andWhere($oWhere)
                 ->count();
 
-        $topProducts = CatalogBaseGoods::find()
-                ->joinWith('vendor')
+        //Популярные товары
+        $query = CatalogBaseGoods::find()->select(['`catalog_base_goods`.*', 'COUNT(`order`.id) as count'])
+                ->innerJoin('`order_content`', '`order_content`.product_id = `catalog_base_goods`.id')
+                ->innerJoin('`order`', '`order`.id = `order_content`.order_id')
+                ->innerJoin('`organization`', '`organization`.id = `order`.vendor_id')
                 ->where([
-                    'organization.white_list' => Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted' => CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
+                    '`organization`.white_list' => Organization::WHITE_LIST_ON,
+                    '`catalog_base_goods`.market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    '`catalog_base_goods`.status' => CatalogBaseGoods::STATUS_ON,
+                    '`catalog_base_goods`.deleted' => CatalogBaseGoods::DELETED_OFF
+                ])
+                ->andWhere('`catalog_base_goods`.category_id is not null')
+                ->andWhere(['in', '`order`.status', [
+                        Order::STATUS_DONE,
+                        Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                        Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                        Order::STATUS_PROCESSING
+            ]])
                 ->andWhere($cbgWhere)
-                ->orderBy(['rating' => SORT_DESC])
-                ->limit(6)
-                ->all();
-        $topProductsCount = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'organization.white_list' => Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted' => CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
-                ->andWhere($cbgWhere)
-                ->count();
+                ->groupBy(['catalog_base_goods.id'])
+                ->orderBy('count DESC');
+
+        $topProductsCount = $query->count();
+        $topProducts = $query->limit(6)->all();
 
         return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
     }
@@ -218,6 +226,7 @@ class SiteController extends Controller {
     }
 
     public function actionSearchProducts($search) {
+        $search = trim($search, '"');
         $where = [];
         $filterNotIn = [];
         if (!\Yii::$app->user->isGuest) {
@@ -262,7 +271,7 @@ class SiteController extends Controller {
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
                             ->where(['in', 'product_supp_id', $where])
-                            ->orderBy(['product_rating' => SORT_DESC])->limit(12)->all();
+                            ->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
             throw new HttpException(404, Yii::t('message', 'market.controllers.site.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
@@ -326,6 +335,7 @@ class SiteController extends Controller {
     }
 
     public function actionSearchSuppliers($search) {
+        $search = trim($search, '"');
         $where = [];
         $filterNotIn = [];
         if (!\Yii::$app->user->isGuest) {
@@ -353,29 +363,23 @@ class SiteController extends Controller {
             }
         }
         $params = [
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        'query_string' => [
-                            'query' => $search . "*",
-                            'fields' => [
-                                'supplier_name',
-                            ],
-                            'default_operator' => 'AND'
-                        ]
-                    ],
-                    'filter' => [
-                        'terms' => [
-                            'supplier_id' => $where
+            'filtered' => [
+                'query' => [
+                    'match' => [
+                        'supplier_name' => [
+                            'query' => $search,
+                            'analyzer' => 'ru',
                         ]
                     ]
                 ]
             ]
         ];
+
         $count = \common\models\ES\Supplier::find()->query($params)
                         ->limit(10000)->count();
         if (!empty($count)) {
             $sp = \common\models\ES\Supplier::find()->query($params)->orderBy(['supplier_rating' => SORT_DESC])
+                            ->andWhere(['in', 'supplier_id', $where])
                             ->limit(12)->all();
             return $this->render('/site/search-suppliers', compact('count', 'sp', 'search'));
         } else {
@@ -572,7 +576,7 @@ class SiteController extends Controller {
     }
 
     /**
-     * Подгрузить еще товаров
+     * Подгрузить еще популярных товаров
      * @param $num
      * @return string
      * @throws HttpException
@@ -612,19 +616,26 @@ class SiteController extends Controller {
             }
         }
 
-        $models = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'organization.white_list' => Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted' => CatalogBaseGoods::DELETED_OFF
-                ])
-                ->andWhere('category_id is not null')
-                ->andWhere($cbgWhere)
-                ->orderBy([CatalogBaseGoods::tableName() . '.rating' => SORT_DESC])
-                ->offset($num)
-                ->limit(6);
+        $models = CatalogBaseGoods::find()->select(['`catalog_base_goods`.*', 'COUNT(`order`.id) as count'])
+                        ->innerJoin('`order_content`', '`order_content`.product_id = `catalog_base_goods`.id')
+                        ->innerJoin('`order`', '`order`.id = `order_content`.order_id')
+                        ->innerJoin('`organization`', '`organization`.id = `order`.vendor_id')
+                        ->where([
+                            '`organization`.white_list' => Organization::WHITE_LIST_ON,
+                            '`catalog_base_goods`.market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                            '`catalog_base_goods`.status' => CatalogBaseGoods::STATUS_ON,
+                            '`catalog_base_goods`.deleted' => CatalogBaseGoods::DELETED_OFF
+                        ])
+                        ->andWhere('`catalog_base_goods`.category_id is not null')
+                        ->andWhere(['in', '`order`.status', [
+                                Order::STATUS_DONE,
+                                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                                Order::STATUS_PROCESSING
+                    ]])
+                        ->andWhere($cbgWhere)
+                        ->groupBy(['catalog_base_goods.id'])
+                        ->orderBy('count DESC')->offset($num)->limit(6);
 
         if ($models->count() > 0) {
             $pr = $models->all();
@@ -1150,8 +1161,6 @@ class SiteController extends Controller {
             return $this->successNotify(Yii::t('message', 'market.controllers.site.you_vendor', ['ru' => "Опомнитесь, вы и есть поставщик!"]));
         }
 
-        $orders = $client->getCart();
-
         $post = Yii::$app->request->post();
         $relation = null;
 
@@ -1168,42 +1177,20 @@ class SiteController extends Controller {
             return $this->successNotify(Yii::t('error', 'market.controllers.site.undefined_error', ['ru' => "Неизвестная ошибка!"]));
         }
 
-        $isNewOrder = true;
+        $quantity = ($product->units) ? $product->units : 1;
 
-        foreach ($orders as $order) {
-            if ($order->vendor_id == $product->vendor->id) {
-                $isNewOrder = false;
-                $alteringOrder = $order;
-            }
-        }
-        if ($isNewOrder) {
-            $newOrder = new Order();
-            $newOrder->client_id = $client->id;
-            $newOrder->vendor_id = $product->vendor->id;
-            $newOrder->status = Order::STATUS_FORMING;
-            $newOrder->save();
-            $alteringOrder = $newOrder;
+        if ($quantity <= 0) {
+            return false;
         }
 
-        $isNewPosition = true;
-        foreach ($alteringOrder->orderContent as $position) {
-            if ($position->product_id == $product->id) {
-                $isNewPosition = false;
-            }
-        }
-        if ($isNewPosition) {
-            $position = new OrderContent();
-            $position->order_id = $alteringOrder->id;
-            $position->product_id = $product->id;
-            $position->quantity = ($product->units) ? $product->units : 1;
-            $position->price = $product->mp_show_price ? $product->price : 1;
-            $position->product_name = $product->product;
-            $position->units = $product->units;
-            $position->article = $product->article;
-            $position->save();
+        $products = ['product_id' => $post['product_id'], 'quantity' => $quantity];
+
+        try {
+            (new CartWebApi())->add($products);
+        } catch (\Exception $e) {
+            return false;
         }
 
-        $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         if (!$relation) {
             $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF, true);

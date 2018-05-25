@@ -28,7 +28,18 @@ $this->registerCss("
 </div>
 <div class="sms-send-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <div class="col-md-6"><h1><?= Html::encode($this->title) ?></h1></div>
+    <div class="col-md-6">
+        <div class="col-md-5">Скачать список переводов:</div>
+        <div class="col-md-3">
+            <?= Html::a('Для тестирования', ['download-excel'], ['class' => 'btn btn-danger']) ?>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-3">
+            <?= Html::a('Для аутсорсеров', ['download-excel', 'outsource'=>1], ['class' => 'btn btn-primary']) ?>
+        </div>
+
+    </div>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

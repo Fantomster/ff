@@ -1,5 +1,7 @@
 <?php
 
+/* @var $this \yii\web\View */
+
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\User;
@@ -128,11 +130,7 @@ $this->registerJs(
                             'format' => 'raw',
                             'value' => function ($data) {
 
-                                if ($data->profile === null) {
-                                    return '';
-                                }
-
-                                $link = Html::a($data->profile->full_name, ['client/ajax-update-user', 'id' => $data->id], [
+                                $link = Html::a(($data->profile === null || $data->profile->full_name == '') ? '...' : $data->profile->full_name, ['client/ajax-update-user', 'id' => $data->id], [
                                             'data' => [
                                                 'target' => '#add-user',
                                                 'toggle' => 'modal',
@@ -161,7 +159,7 @@ $this->registerJs(
                             'attribute' => 'role.name',
                             'label' => \Yii::t('app', 'frontend.views.client.emp.role', ['ru' => 'Роль']),
                             'value' => function($model) {
-                                return Yii::t('app', $model->role->name);
+                                return Yii::t('app', Role::getRoleName($model->getRelationUserOrganizationRoleID($model->id)));
                             },
                         ],
                         [

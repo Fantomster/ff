@@ -2,17 +2,16 @@
 
 namespace common\models;
 
-use Yii;
-use yii\data\ActiveDataProvider;
-use common\behaviors\UploadBehavior;
-use yii\helpers\ArrayHelper;
 
 /**
- * This is the model class for table "relation_supp_rest".
+ * This is the model class for table "relation_user_organization".
  *
  * @property integer $id
- * @property integer $manager_id
+ * @property integer $user_id
  * @property integer $leader_id
+ * @property integer $organization_id
+ * @property integer $role_id
+ * @property User $user
  */
 class RelationUserOrganization extends \yii\db\ActiveRecord {
 
@@ -54,24 +53,42 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     }
 
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOrganization(){
         return $this->hasOne(Organization::className(), ['id'=>'organization_id']);
     }
 
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUser(){
         return $this->hasOne(User::className(), ['id'=>'user_id']);
     }
 
 
-    public function checkRelationExisting($user):bool
+    public function checkRelationExisting(User $user):bool
     {
-        $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
+        $rel = self::findAll(['user_id'=>$user->id]);
         if(count($rel)>1){
             return true;
         }
         return false;
     }
+
+
+    public function getRelationRole(int $organizationID, int $userID):int
+    {
+        $user = User::findIdentity($userID);
+        if($user->role_id == Role::ROLE_ADMIN || $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
+            return $user->role_id;
+        }
+        $rel = self::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
+        return $rel->role_id ?? null;
+    }
+
 
     public function afterSave($insert, $changedAttributes)
     {

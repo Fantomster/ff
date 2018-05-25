@@ -77,7 +77,7 @@ class CatalogBaseGoodsController extends ActiveController {
         $params->load(Yii::$app->request->queryParams);
 
         $fieldsCBG = "cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
-        $fieldsCG = "cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
+        $fieldsCG = "cbg.id as id, cbg.product, cbg.units, coalesce( cg.price, cbg.price) as price, cbg.cat_id, cbg.weight, org.name as organization_name, cbg.ed, curr.symbol, cbg.note, cbg.supp_org_id as supp_org_id, cbg.created_at as created_at ";
 
         $where = '';
         $where_all = '';
@@ -99,7 +99,10 @@ class CatalogBaseGoodsController extends ActiveController {
         }
 
         if(!empty($params->category_id)) {
-            $where .= ' AND category_id IN (' .$params->category_id. ') ';
+            $categories = \api\modules\v1\modules\mobile\resources\MpCategory::getCategories($params->category_id);
+            $categories[] = $params->category_id;
+            $categories = implode(",", $categories);
+            $where .= ' AND category_id IN (' .$categories. ') ';
         }
 
         if (isset($params['OrderCatalogSearch'])) {

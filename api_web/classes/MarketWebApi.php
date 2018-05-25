@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use common\models\CatalogGoods;
 use common\models\Category;
 use common\models\MpCategory;
@@ -23,6 +24,7 @@ class MarketWebApi extends WebApi
      * Список доступных для заказа продуктов на маркете
      * @param $post
      * @return array
+     * @throws BadRequestHttpException
      */
     public function products($post)
     {
@@ -33,7 +35,7 @@ class MarketWebApi extends WebApi
         $currentUser = $this->user;
 
         $result = CatalogBaseGoods::find()
-            ->joinWith('vendor')
+            ->joinWith(['vendor', 'category'])
             ->where([
                 'organization.white_list' => Organization::WHITE_LIST_ON,
                 'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
@@ -58,6 +60,7 @@ class MarketWebApi extends WebApi
             }
         }
 
+
         if (!empty(\Yii::$app->session->get('city')) || !empty(\Yii::$app->session->get('region'))) {
             $supplierRegion = DeliveryRegions::getSuppRegion(\Yii::$app->session->get('city'), \Yii::$app->session->get('region'));
             if (!empty($supplierRegion)) {
@@ -74,6 +77,7 @@ class MarketWebApi extends WebApi
             }
         }
 
+
         //Условия поиска
         if (isset($post['search'])) {
             foreach ($post['search'] as $key => $value) {
@@ -84,27 +88,62 @@ class MarketWebApi extends WebApi
 
                 if ($key == 'supplier_id') {
                     $key = 'supp_org_id';
+                    if (!empty($value)) {
+                        if (is_array($value)) {
+                            $supp_orgs = [];
+                            foreach ($value as $supp_org_id) {
+                                $supp_orgs[] = (int)$supp_org_id;
+                            }
+                            $value = implode(', ', $supp_orgs);
+                        } else {
+                            $value = (int)$value;
+                        }
+                        $result->andWhere("$key IN ($value)");
+                    }
                 }
 
-                if (is_numeric($value) OR is_int($value)) {
-                    $result->andFilterWhere([$key => $value]);
-                } else {
+                if (in_array($key, ['category_id'])) {
+                    if (!empty($value)) {
+                        if (is_array($value)) {
+                            $categories = [];
+                            foreach ($value as $category) {
+                                $categories[] = (int)$category;
+                            }
+                            $value = implode(', ', $categories);
+                        } else {
+                            $value = (int)$value;
+                        }
+                        $result->andWhere("$key IN ($value) OR parent IN ($value)");
+                    }
+                }
+
+                if (in_array($key, ['product'])) {
                     $result->andFilterWhere(['like', $key, $value]);
+                }
+
+                if (in_array($key, ['price'])) {
+                    if (is_array($value)) {
+                        if (!empty($value['from'])) {
+                            $result->andWhere('price >= :price_start', [':price_start' => $value['from']]);
+                        }
+                        if (!empty($value['to'])) {
+                            $result->andWhere('price <= :price_end', [':price_end' => $value['to']]);
+                        }
+                    } else {
+                        throw new BadRequestHttpException('Filter "price" not array');
+                    }
                 }
             }
         }
         //Готовим ответ
-        $return = [
-            'headers' => [],
+        $return = ['headers' => [],
             'products' => [],
-            'pagination' => [
-                'page' => $page,
+            'pagination' => ['page' => $page,
                 'page_size' => $pageSize,
-                'total_page' => ceil($result->count() / $pageSize)
-            ]
-        ];
+                'total_page' => ceil($result->count() / $pageSize)]];
         //Сортировка
         if ($sort) {
+            $sort = str_replace('supplier_id', 'organization.id', $sort);
             $sort = str_replace('supplier', 'organization.name', $sort);
             $return['sort'] = $sort;
             $order = 'ASC';
@@ -112,11 +151,12 @@ class MarketWebApi extends WebApi
                 $sort = $out[1];
                 $order = 'DESC';
             }
+
             $result->orderBy($sort . ' ' . $order);
         } else {
             $result->orderBy(['rating' => SORT_DESC]);
         }
-        //Результат
+//Результат
         $result = $result->all();
         foreach ($result as $model) {
             $return['products'][] = $this->prepareProduct($model);
@@ -142,6 +182,12 @@ class MarketWebApi extends WebApi
         $categories = MpCategory::find()->where('parent is null')->all();
         \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
+            $category = [
+                'id' => $model->id,
+                'name' => $model->name,
+                'image' => $this->getCategoryImage($model->id),
+                'subcategories' => []
+            ];
             $all_child = $model->child;
             if (!empty($all_child)) {
                 foreach ($all_child as $child) {
@@ -151,14 +197,14 @@ class MarketWebApi extends WebApi
                     if (strstr($image, 'product_placeholder') !== false) {
                         $image = $this->getCategoryImage($model->id);
                     }
-
-                    $return[$model->name][] = [
+                    $category['subcategories'][] = [
                         'id' => $child->id,
                         'name' => $child->name,
                         'image' => $image
                     ];
                 }
             }
+            $return[] = $category;
         }
         return $return;
     }
@@ -209,7 +255,8 @@ class MarketWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function organizations($post)
+    public
+    function organizations($post)
     {
         $sort = (isset($post['sort']) ? $post['sort'] : null);
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -298,7 +345,7 @@ class MarketWebApi extends WebApi
         //Результат
         $result = $result->all();
         foreach ($result as $model) {
-            $return['organizations'][] = $this->prepareOrganization($model);
+            $return['organizations'][] = WebApiHelper::prepareOrganization($model);
         }
         /**
          * @var CatalogBaseGoods $model
@@ -316,12 +363,14 @@ class MarketWebApi extends WebApi
      * @param CatalogBaseGoods $model
      * @return mixed
      */
-    public function prepareProduct($model)
+    public
+    function prepareProduct($model)
     {
         $catalogGoodsModel = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $model->cat_id]);
 
         $price = (isset($catalogGoodsModel->price) ? $catalogGoodsModel->price : $model->price);
         $discount_price = (isset($catalogGoodsModel->discountPrice) ? $catalogGoodsModel->discountPrice : $model->price);
+        $catalog_id = (isset($catalogGoodsModel->catalog) ? $catalogGoodsModel->catalog->id : $model->catalog->id);
 
         if ($price == $discount_price) {
             $discount_price = 0;
@@ -329,7 +378,7 @@ class MarketWebApi extends WebApi
 
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product;
-        $item['catalog_id'] = ((int)$model->catalog->id ?? null);
+        $item['catalog_id'] = ((int)$catalog_id ?? null);
         $item['category_id'] = (isset($model->category) ? (int)$model->category->id : 0);
         $item['price'] = round($price, 2);
         $item['discount_price'] = round($discount_price, 2);
@@ -341,41 +390,9 @@ class MarketWebApi extends WebApi
         $item['ed'] = $model->ed;
         $item['units'] = $model->units ?? 0;
         $item['currency'] = $model->catalog->currency->symbol;
+        $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
-        return $item;
-    }
-
-    /**
-     * Собираем массив для отдачи, из модели
-     * @param Organization $model
-     * @return mixed
-     */
-    public function prepareOrganization($model)
-    {
-        if (empty($model)) {
-            return null;
-        }
-
-        $item['id'] = (int)$model->id;
-        $item['name'] = $model->name;
-        $item['phone'] = $model->phone;
-        $item['email'] = $model->email;
-        $item['site'] = $model->website;
-        $item['address'] = $model->address;
-        $item['image'] = $model->pictureUrl;
-        $item['type_id'] = (int)$model->type_id;
-        $item['type'] = $model->type->name;
-        $item['rating'] = round($model->ratingStars, 1);
-        $item['city'] = ($model->locality === 'undefined' ? null : $model->locality);
-        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? null : $model->administrative_area_level_1);
-        $item['country'] = ($model->country === 'undefined' ? null : $model->country);
-        $item['about'] = $model->about;
-
-        if ($model->type_id == Organization::TYPE_SUPPLIER) {
-            $item['allow_editing'] = $model->getAttribute('allow_editing');
-        }
-
         return $item;
     }
 
@@ -384,7 +401,8 @@ class MarketWebApi extends WebApi
      * @param CatalogBaseGoods $model
      * @return string
      */
-    public function getProductImage($model)
+    public
+    function getProductImage($model)
     {
         $url = $model->getImageUrl();
         if (strstr($url, 'amazon') === false && strstr($url, 'data:image') === false) {
@@ -399,7 +417,8 @@ class MarketWebApi extends WebApi
      * @param $id
      * @return string
      */
-    private function getCategoryImage($id)
+    private
+    function getCategoryImage($id)
     {
         if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
             return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);

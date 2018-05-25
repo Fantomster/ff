@@ -41,27 +41,46 @@ class EmailIntegrationController extends Controller
 
     public function actionTest() {
 
-        $temp_file = 'D:\OSPanel\1.xls';
+        $temp_file[1] = '/app/console/runtime/testnac.xls';
+        $temp_file[2] = '/app/console/runtime/testnac2.xls';
+        $temp_file[3] = '/app/console/runtime/testnac3.xls';
+        $temp_file[4] = '/app/console/runtime/testnac4.xls';
+        $temp_file[5] = '/app/console/runtime/testnac10.xlsx';
+        $temp_file[6] = '/app/console/runtime/testnac11.xlsx';
+        $temp_file[7] = '/app/console/runtime/testnac12.xls';
+        $temp_file[8] = '/app/console/runtime/testnac13.xlsx';
 
-        $parser = new ParserTorg12($temp_file);
-        try {
-            $parser->parse();
-        } catch (ParseTorg12Exception $e) {
-            exit('ERROR PARSING TORG12 FILE' . $e->getMessage());
+
+        $i =1;
+
+        foreach ($temp_file as $filet) {
+
+            $parser = new ParserTorg12($filet);
+            try {
+                $parser->parse();
+            } catch (ParseTorg12Exception $e) {
+                exit('ERROR PARSING TORG12 FILE' . $e->getMessage());
+            }
+
+            if(empty($parser->invoice->rows)) {
+                exit('Error: empty rows ');
+            }
+
+            //Данные необходимые для сохранения в базу
+            $result[] = [
+                'invoice' => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
+            ];
+
+            echo $filet.PHP_EOL;
+            print_r("Result date:".$result[$i-1]['invoice']['date'].PHP_EOL);
+            print_r("Result number:".$result[$i-1]['invoice']['number'].PHP_EOL);
+            print_r("=================================".PHP_EOL);
+
+            file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
+            file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
+            $i++;
         }
-
-        if(empty($parser->invoice->rows)) {
-            exit('Error: empty rows ');
-        }
-
-        //Данные необходимые для сохранения в базу
-        $result[] = [
-            'invoice' => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
-        ];
-
-        print_r($result);
     }
-
 
     public function actionIndex()
     {

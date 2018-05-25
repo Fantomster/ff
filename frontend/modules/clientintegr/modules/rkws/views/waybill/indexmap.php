@@ -51,7 +51,6 @@ Breadcrumbs::widget([
 <section class="content-header">
 <?= $this->render('/default/_menu.php'); ?>
 
-
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
 </section>
 <section class="content">
@@ -263,47 +262,17 @@ $columns = array(
         'pageSummary'=>true
     ]);
 
-if ($useAutoVAT) {
+
 
     array_push($columns,
         [
             'attribute' => 'vat',
             'format' => 'raw',
-            'label' => 'Ставка НДС',
+            'label' => 'НДС',
             'contentOptions' => ['class' => 'text-right'],
             'value' => function($model) {
-                $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue();
-                return $exportVAT; }
+                return $model->vat/100; }
         ]);
-} else {
-
-    array_push($columns,
-    [
-        'class'=>'kartik\grid\EditableColumn',
-        'attribute'=>'vat',
-        //   'data' => $exportVAT;
-        'label' => 'Ставка НДС',
-        'value' => function ($model) {
-            return $model->vat/100;
-        },
-        'refreshGrid' => true,
-        'editableOptions'=>[
-            'asPopover' => $isAndroid ? false : true,
-            'header'=>'<strong>Новая ставка НДС равна:&nbsp; &nbsp;</srong>',
-            'inputType'=>\kartik\editable\Editable::INPUT_DROPDOWN_LIST,
-            'data' => ['0' => '0', '1000' => '10', '1800' => '18'],
-            'formOptions' => [
-                'action' => Url::toRoute('changekoef')
-            ],
-        ],
-        'hAlign'=>'right',
-        'vAlign'=>'middle',
-        // 'width'=>'100px',
-        'format'=>['decimal'],
-
-        'pageSummary'=>true
-    ]);
-}
 
     /*   [
         'attribute' => 'vat',
@@ -315,6 +284,79 @@ if ($useAutoVAT) {
            return $exportVAT;
         }
        ], */
+
+       $sLinkzero = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>0]);
+       $sLinkten = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>1000]);
+       $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>1800]);
+
+array_push($columns,
+    [
+        'class' => 'yii\grid\ActionColumn',
+        'contentOptions'=>['style'=>'width: 6%;'],
+        'template'=>'{zero}&nbsp;{ten}&nbsp;{eighteen}',
+        // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
+        'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\''.$sLinkzero.'\';" class="btn btn-xs btn-link" style="color:green;">0</button>'.
+                    '<button id="btnTen" type="button" onClick="location.href=\''.$sLinkten.'\';" class="btn btn-xs btn-link" style="color:green;">10</button>'.
+                    '<button id="btnEight" type="button" onClick="location.href=\''.$sLinkeight.'\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+
+      //  'sort' => false,
+      //  '' => false,
+
+        'visibleButtons' => [
+            'zero' => function ($model, $key, $index) {
+                // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                return true;
+            },
+        ],
+        'buttons'=>[
+            'zero' =>  function ($url, $model) {
+
+                if ($model->vat == 0) {
+                    $tClass = "label label-success";
+                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+
+                } else {
+                    $tClass = "label label-default";
+                    $tStyle = "";
+                }
+
+                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' =>0]);
+                return \yii\helpers\Html::a( '&nbsp;0', $customurl,
+                    ['title' => Yii::t('backend', '0%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+            },
+            'ten' =>  function ($url, $model) {
+
+                if ($model->vat == 1000) {
+                    $tClass = "label label-success";
+                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                } else {
+                    $tClass = "label label-default";
+                    $tStyle = "";
+                }
+
+                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' => '1000']);
+                return \yii\helpers\Html::a( '10', $customurl,
+                    ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+            },
+            'eighteen' =>  function ($url, $model) {
+
+                if ($model->vat == 1800) {
+                    $tClass = "label label-success";
+                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                } else {
+                    $tClass = "label label-default";
+                    $tStyle = "";
+                }
+
+                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' => '1800']);
+                return \yii\helpers\Html::a( '18', $customurl,
+                    ['title' => Yii::t('backend', '18%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+            },
+        ]
+    ]);
 
 array_push($columns,
     [
@@ -330,7 +372,7 @@ array_push($columns,
         'buttons'=>[
             'clear' =>  function ($url, $model) {
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\cleardata', 'id'=>$model->id]);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/cleardata', 'id'=>$model->id]);
                 return \yii\helpers\Html::a( '<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
                     ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax'=>"0"]);
             },
@@ -362,7 +404,7 @@ GridView::widget([
 ]);
 ?> 
                         <?= Html::a('Вернуться',
-            ['index'],
+            [$this->context->getLastUrl().'way='.$wmodel->order_id],
             ['class' => 'btn btn-success btn-export']);
         ?>
                     </div>
@@ -407,3 +449,4 @@ $js = "
 $this->registerJs($js);  
 */
 ?>
+

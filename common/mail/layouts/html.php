@@ -33,8 +33,9 @@ use yii\helpers\Html;
                                     <td style="margin: 0; padding: 0;text-align:center;"><img src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" alt="" /></td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small><?= Yii::t('app', 'common.mail.layouts.revolution', ['ru'=>'Революция в работе с поставщиками.']) ?>
-                                            <?= Yii::t('app', 'common.mail.layouts.two_click', ['ru'=>'Закупка в 2 клика.']) ?></small></td>
+                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small><?= '' //Yii::t('app', 'common.mail.layouts.revolution', ['ru'=>'Революция в работе с поставщиками.']) ?>
+                                            <?= '' //Yii::t('app', 'common.mail.layouts.two_click', ['ru'=>'Закупка в 2 клика.']) ?>
+                                        <?= Yii::t('app', 'common.mail.layouts.be_successful', ['ru' => 'Будьте успешнее с MixCart!']) ?></small></td>
                                 </tr>
                             </table>
                         </div>

@@ -73,7 +73,7 @@ $this->registerJs('
             preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
                     $.post(
-                        "' . $guideUrl . '?name=" + text,
+                        "' . $guideUrl . '?name=" + text
                     ).done(function (result) {
                         if (result) {
                             resolve(result);
@@ -336,6 +336,7 @@ $this->registerJs('
                         <div class="pull-left">
                             <?php
                             $form = ActiveForm::begin([
+                                        'method' => 'get',
                                         'options' => [
                                             'id' => 'searchForm',
                                             'class' => "navbar-form no-padding no-margin",

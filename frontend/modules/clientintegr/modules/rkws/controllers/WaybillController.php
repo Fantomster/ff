@@ -2,6 +2,8 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use common\models\CatalogBaseGoods;
+use common\models\OrderContent;
 use Yii;
 use yii\web\Controller;
 use api\common\models\RkWaybill;
@@ -14,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use common\models\Organization;
 use common\models\Order;
+use yii\helpers\Url;
 
 
 // use yii\mongosoft\soapserver\Action;
@@ -85,6 +88,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex() {
 
+        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+       //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+       //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+
+        Url::remember();
+
         $searchModel = new \common\models\search\OrderSearch();
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
 
@@ -93,6 +102,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
+
+      //  $dataProvider->pagination->pageSize=3;
         
         $lic = $this->checkLic();       
         
@@ -103,12 +114,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'way' => $way,
             ]);
         } else {
             return $this->render($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'way' => $way,
+
             ]);
         }
     }
@@ -158,8 +172,41 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             ]);
         }
     }
-    
-    public function actionChangevat() {
+
+    public function actionGetpopover()
+    {
+
+        $id = Yii::$app->request->post('key');
+
+        $goodCount = OrderContent::find()->andWhere('order_id = :id',['id' => $id])->count('*');
+
+        $listIds = OrderContent::find()->select('product_id')->andWhere('order_id = :id',['id' => $id])->limit(10)->asArray()->all();
+
+        foreach ($listIds as $ids ) {
+            foreach($ids as $key => $value) {
+                $fList[]  = $value;
+            }
+        }
+
+        $listGoods = CatalogBaseGoods::find()->select('product')->andWhere(['IN', 'id', $fList])->asArray()->all();
+
+        $result ="";
+        $ind = 1;
+
+        foreach ($listGoods as $ids ) {
+            foreach($ids as $key => $value) {
+              //  $result  .= $ind++.')&nbsp;'.str_replace(' ', '&nbsp;',$value)."<br>";
+                  $result  .= $ind++.')&nbsp;'.$value."<br>";
+            }
+        }
+
+        if ($goodCount > 10)
+            $result  .= "и другие...";
+        return $result;
+
+    }
+
+        public function actionChangevat() {
         
       $checked = Yii::$app->request->post('key');
       
@@ -230,6 +277,51 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
     }
 
+    public function actionMakevat($waybill_id, $vat) {
+
+        $model = $this->findModel($waybill_id);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE rk_waybill_data set vat = :vat, linked_at = now() where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+        /*
+        $model->quant = $model->defquant;
+        $model->koef = 1;
+
+        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $model->waybill_id])->one();
+        if(!$wmodel) {
+            echo "Cant find wmodel in map controller cleardata";
+            die();
+        }
+
+        if ($wmodel->vat_included) {
+            $model->sum = round($model->defsum/(1+$model->vat/10000),2);
+        } else {
+            $model->sum = $model->defsum;
+        }
+
+
+        if (!$model->save()) {
+            echo $model->getErrors();
+            die();
+        }
+*/
+        return $this->redirect(['map', 'waybill_id' => $model->id]);
+    }
+
+
+    public function actionChvat($id, $vat) {
+
+        $model = $this->findDataModel($id);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE rk_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+
+    }
+
+
+
     public function actionAutocomplete($term = null) {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         // $out = ['results' => ['id' => '0', 'text' => 'Создать контрагента']];
@@ -277,8 +369,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionUpdate($id) {
         $model = $this->findModel($id);
-        
-        $lic = $this->checkLic();       
+
+        $lic = $this->checkLic();
         $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -289,7 +381,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
 
-            return $this->redirect(['index']);
+            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render($vi, [
                         'model' => $model,
@@ -300,7 +392,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionCreate($order_id) {
         
         $ord = \common\models\Order::findOne(['id' => $order_id]);
-        
+
         if (!$ord) {
             echo "Can't find order";
             die();
@@ -318,22 +410,49 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
 
-            return $this->redirect(['index']);
+            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render('create', [
                         'model' => $model,
             ]);
         }
     }
+    public function getLastUrl() {
+
+        $lastUrl = Url::previous();
+        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+
+        $lastUrl = $this->deleteGET($lastUrl,'way');
+
+        if(!strpos($lastUrl,"?")) {
+            $lastUrl .= "?";
+        } else {
+            $lastUrl .= "&";
+        }
+        return $lastUrl;
+    }
+
+    public function deleteGET($url, $name, $amp = true) {
+        $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
+        list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
+        parse_str($qs_part, $qs_vars); // Разбиваем строку с запросом на массив с параметрами и их значениями
+        unset($qs_vars[$name]); // Удаляем необходимый параметр
+        if (count($qs_vars) > 0) { // Если есть параметры
+            $url = $url_part."?".http_build_query($qs_vars); // Собираем URL обратно
+            if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
+        }
+        else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
+        return $url; // Возвращаем итоговый URL
+    }
 
     public function actionSendws($waybill_id) {
 
         //  $resres = ApiHelper::getAgents();     
 
-        $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
-        $res->sendWaybill($waybill_id);
+     //   $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
+     //   $res->sendWaybill($waybill_id);
 
-        $this->redirect('\clientintegr\rkws\waybill\index');
+        $this->redirect('/clientintegr/rkws/waybill/index');
     }
     
     protected function checkLic() {
@@ -378,5 +497,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     return $eDate->updated_at;
 
     }
+
 
 }

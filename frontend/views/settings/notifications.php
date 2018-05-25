@@ -158,7 +158,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         echo $form->field($emailNotification, 'receive_employee_email')->widget(CheckboxX::classname(), [
                             'autoLabel' => true,
                             'model' => $emailNotification,
-                            'attribute' => 'order_done',
+                            'attribute' => 'receive_employee_email',
                             'pluginOptions' => [
                                 'threeState' => false,
                                 'theme' => 'krajee-flatblue',
@@ -172,6 +172,24 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                             ]
                         ])->label(false);
                     }
+                    ?>
+                    <?=
+                    $form->field($user, 'subscribe')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $user,
+                        'attribute' => 'subscribe',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => Yii::t('app', 'frontend.views.settings.info_mail', ['ru'=>'Информационные рассылки по email']),
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
                     ?>
 
                     <?= ''
@@ -317,7 +335,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                         echo $form->field($smsNotification, 'receive_employee_sms')->widget(CheckboxX::classname(), [
                             'autoLabel' => true,
                             'model' => $smsNotification,
-                            'attribute' => 'order_done',
+                            'attribute' => 'receive_employee_sms',
                             'pluginOptions' => [
                                 'threeState' => false,
                                 'theme' => 'krajee-flatblue',

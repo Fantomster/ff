@@ -2,6 +2,8 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\WebApiHelper;
+use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
 use common\models\Profile;
@@ -92,6 +94,15 @@ class VendorWebApi extends \api_web\components\WebApi {
                     }
                     $profile->save();
                     $organization->name = $org;
+
+                    if (!empty($post['user']['inn'])) {
+                        $organization->inn = $post['user']['inn'];
+                    }
+
+                    if (!empty($post['user']['contact_name'])) {
+                        $organization->contact_name = $post['user']['contact_name'];
+                    }
+
                     if (!$organization->validate()) {
                         throw new ValidationException($organization->getFirstErrors());
                     }
@@ -175,19 +186,38 @@ class VendorWebApi extends \api_web\components\WebApi {
             throw new BadRequestHttpException('Empty search attribute email');
         }
 
+        $result = [];
         $email = $post['email'];
 
-        $model = Organization::find()->where(['email' => $email, 'type_id' => Organization::TYPE_SUPPLIER])->one();
-        if (!empty($model)) {
-            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+        $models = Organization::find()
+            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
+            ->where(['organization.type_id' => Organization::TYPE_SUPPLIER])
+            ->andWhere(['or', [
+                'organization.email' => $email
+            ], [
+                'user.email' => $email
+            ]])->all();
+
+        if (!empty($models)) {
+            foreach($models as $model) {
+                $r = WebApiHelper::prepareOrganization($model);
+
+                if($user = RelationUserOrganization::find()->joinWith('user')->where([
+                    'relation_user_organization.organization_id' => $model->id,
+                    'user.email' => $email
+                ])->one()) {
+                    $r['user'] = [
+                        'email' => $user->user->email,
+                        'name' => $user->user->profile->full_name,
+                        'phone' => $user->user->profile->phone,
+                    ];
+                }
+
+                $result[] = $r;
+            }
         }
 
-        $user = User::find()->where(['email' => $email])->one();
-        if (!empty($user)) {
-            throw new BadRequestHttpException("Email $email является пользователем. Необходимо уточнить email адрес поставщика.");
-        }
-
-        return [];
+        return $result;
     }
 
     /**
@@ -261,6 +291,14 @@ class VendorWebApi extends \api_web\components\WebApi {
                 $model->name = $post['name'];
             }
 
+            if (!empty($post['inn'])) {
+                $model->inn = $post['inn'];
+            }
+
+            if (!empty($post['contact_name'])) {
+                $model->contact_name = $post['contact_name'];
+            }
+
             if (!empty($post['address'])) {
                 if (!empty($post['address']['country'])) {
                     $model->country = $post['address']['country'];
@@ -289,6 +327,7 @@ class VendorWebApi extends \api_web\components\WebApi {
                 }
                 unset($post['address']['lat']);
                 unset($post['address']['lng']);
+                unset($post['address']['place_id']);
                 $model->address = implode(', ', $post['address']);
                 $model->formatted_address = $model->address;
             }
@@ -302,7 +341,7 @@ class VendorWebApi extends \api_web\components\WebApi {
             }
 
             $transaction->commit();
-            return $this->container->get('MarketWebApi')->prepareOrganization($model);
+            return WebApiHelper::prepareOrganization($model);
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -311,19 +350,24 @@ class VendorWebApi extends \api_web\components\WebApi {
 
     /**
      * Обновление логотипа поставщика
-     * @param array $request
+     * @param array $post
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadLogo(array $request) {
-        if (empty($request['post']['vendor_id'])) {
+    public function uploadLogo(array $post)
+    {
+        if (empty($post['vendor_id'])) {
             throw new BadRequestHttpException('Empty attribute vendor_id');
         }
 
-        $vendor = Organization::findOne($request['post']['vendor_id']);
+        $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
             throw new BadRequestHttpException('Vendor not found');
+        }
+
+        if (empty($post['image_source'])) {
+            throw new BadRequestHttpException('Empty image_source');
         }
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
@@ -335,26 +379,11 @@ class VendorWebApi extends \api_web\components\WebApi {
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-        /**
-         * @var $file UploadedFile
-         */
-        $file = UploadedFile::getInstancesByName('Organization');
-        if (empty($file[0])) {
-            throw new BadRequestHttpException('Empty file');
-        } else {
-            $file = array_pop($file);
-        }
-
-        $allowExtensions = ['jpeg', 'jpg', 'png'];
-        if (!in_array($file->getExtension(), $allowExtensions)) {
-            throw new BadRequestHttpException('Allow extensions: ' . implode(', ', $allowExtensions));
-        }
-
-        /**
+         /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";
-        $vendor->picture = 'update';
+        $vendor->picture = WebApiHelper::convertLogoFile($post['image_source']);
 
         if (!$vendor->validate()) {
             throw new ValidationException($vendor->getFirstErrors());
@@ -364,7 +393,7 @@ class VendorWebApi extends \api_web\components\WebApi {
             throw new ValidationException($vendor->getFirstErrors());
         }
 
-        return $this->container->get('MarketWebApi')->prepareOrganization($vendor);
+        return WebApiHelper::prepareOrganization($vendor);
     }
 
     /**

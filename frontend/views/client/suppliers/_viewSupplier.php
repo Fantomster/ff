@@ -5,7 +5,26 @@ use yii\widgets\ActiveForm;
 use common\models\Category;
 use yii\helpers\ArrayHelper;
 use kartik\checkbox\CheckboxX;
+
+$this->registerJs(
+    '$("document").ready(function(){
+            var gln = $("#organization-gln_code");
+            var value = gln.val();
+            var length = value.length;
+            if(length>0){
+                var sub = value.substr(-4);
+                var strPart = length - 4;
+                var stars = "";
+                for(var i=0; i<strPart; i++){
+                    stars+="*";
+                }
+                var completeValue = stars + sub;
+                gln.val(completeValue);
+            }   
+        });'
+);
 ?>
+
 <?php
 $form = ActiveForm::begin([
             'id' => 'supplier-form',

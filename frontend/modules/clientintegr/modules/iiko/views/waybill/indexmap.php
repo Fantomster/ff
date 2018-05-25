@@ -18,6 +18,9 @@ use api\common\models\RkDicconst;
 
 $this->title = 'Интеграция с iiko Office';
 
+$sLinkzero = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>0]);
+$sLinkten = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>1000]);
+$sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>1800]);
 ?>
 
 <section class="content-header">
@@ -205,15 +208,83 @@ $this->title = 'Интеграция с iiko Office';
                                 [
                                     'attribute' => 'vat',
                                     'format' => 'raw',
-                                    'label' => 'Ставка НДС',
+                                    'label' => 'НДС',
                                     'contentOptions' => ['class' => 'text-right'],
                                     'value' => function ($model) {
-                                        $const = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-                                        if($const) {
-                                            $result = $const->getPconstValue() / 100;
-                                        }
-                                        return isset($result) ? $result : null;
+                                      //   $const = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
+                                      //  if($const) {
+                                      //      $result = $const->getPconstValue() / 100;
+                                      //  }
+                                        return isset($model->vat) ? $model->vat/100 : null;
                                     }
+                                ],
+                       //
+                                [
+                                    'class' => 'yii\grid\ActionColumn',
+                                    'contentOptions'=>['style'=>'width: 6%;'],
+                                    'template'=>'{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                    // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
+                                    'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\''.$sLinkzero.'\';" class="btn btn-xs btn-link" style="color:green;">0</button>'.
+                                        '<button id="btnTen" type="button" onClick="location.href=\''.$sLinkten.'\';" class="btn btn-xs btn-link" style="color:green;">10</button>'.
+                                        '<button id="btnEight" type="button" onClick="location.href=\''.$sLinkeight.'\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+
+                                    //  'sort' => false,
+                                    //  '' => false,
+
+                                    'visibleButtons' => [
+                                        'zero' => function ($model, $key, $index) {
+                                            // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                            return true;
+                                        },
+                                    ],
+                                    'buttons'=>[
+                                        'zero' =>  function ($url, $model) {
+
+                                            if ($model->vat == 0) {
+                                                $tClass = "label label-success";
+                                                $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+
+                                            } else {
+                                                $tClass = "label label-default";
+                                                $tStyle = "";
+                                            }
+
+                                            //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id'=>$model->id, 'vat' =>0]);
+                                            return \yii\helpers\Html::a( '&nbsp;0', $customurl,
+                                                ['title' => Yii::t('backend', '0%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                        },
+                                        'ten' =>  function ($url, $model) {
+
+                                            if ($model->vat == 1000) {
+                                                $tClass = "label label-success";
+                                                $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                            } else {
+                                                $tClass = "label label-default";
+                                                $tStyle = "";
+                                            }
+
+                                            //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id'=>$model->id, 'vat' => '1000']);
+                                            return \yii\helpers\Html::a( '10', $customurl,
+                                                ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                        },
+                                        'eighteen' =>  function ($url, $model) {
+
+                                            if ($model->vat == 1800) {
+                                                $tClass = "label label-success";
+                                                $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                            } else {
+                                                $tClass = "label label-default";
+                                                $tStyle = "";
+                                            }
+
+                                            //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id'=>$model->id, 'vat' => '1800']);
+                                            return \yii\helpers\Html::a( '18', $customurl,
+                                                ['title' => Yii::t('backend', '18%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                        },
+                                    ]
                                 ],
                                 [
                                     'class' => 'yii\grid\ActionColumn',
@@ -228,7 +299,7 @@ $this->title = 'Интеграция с iiko Office';
                                         'clear' => function ($url, $model) {
                                             return \yii\helpers\Html::a(
                                                     '<i class="fa fa-sign-in" aria-hidden="true"></i>',
-                                                    Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\waybill\clear-data', 'id' => $model->id]),
+                                                    Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/clear-data', 'id' => $model->id]),
                                                     [
                                                         'title' => Yii::t('backend', 'Вернуть начальные данные'),
                                                         'data-pjax' => "0"
@@ -253,7 +324,7 @@ $this->title = 'Интеграция с iiko Office';
                         ]);
                         ?>
                         <?= Html::a('Вернуться',
-                            ['index'],
+                            [$this->context->getLastUrl().'way='.$wmodel->order_id],
                             ['class' => 'btn btn-success btn-export']);
                         ?>
                     </div>

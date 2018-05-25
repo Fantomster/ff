@@ -74,6 +74,7 @@
         "npm-asset/jquery": "^2.2",
         "oomphinc/composer-installers-extender": "^1.1",
         "2amigos/yii2-file-upload-widget": "~1.0"
+        "mongosoft/yii2-soap-client": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

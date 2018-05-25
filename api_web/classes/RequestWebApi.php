@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\helpers\WebApiHelper;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\data\Pagination;
@@ -550,8 +551,8 @@ class RequestWebApi extends WebApi
             "category_id" => (int)$model->category,
             "amount" => $model->amount,
             "comment" => $model->comment,
-            "client" => $this->container->get('MarketWebApi')->prepareOrganization($model->client),
-            "vendor" => $this->container->get('MarketWebApi')->prepareOrganization($model->vendor) ?? null,
+            "client" => WebApiHelper::prepareOrganization($model->client),
+            "vendor" => WebApiHelper::prepareOrganization($model->vendor) ?? null,
             "hits" => (int)$model->count_views ?? 0,
             "count_callback" => (int)$model->countCallback ?? 0,
             "urgent" => (int)$model->rush_order ?? 0,
@@ -572,8 +573,8 @@ class RequestWebApi extends WebApi
         return [
             'id' => (int)$model->id,
             "request_id" => (int)$model->request_id,
-            "client" => $this->container->get('MarketWebApi')->prepareOrganization($model->request->client),
-            "vendor" => $this->container->get('MarketWebApi')->prepareOrganization($model->organization),
+            "client" => WebApiHelper::prepareOrganization($model->request->client),
+            "vendor" => WebApiHelper::prepareOrganization($model->organization),
             "price" => round($model->price, 2),
             "comment" => $model->comment,
             "created_at" => $model->created_at,

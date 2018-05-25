@@ -22,10 +22,7 @@ class ChatController extends WebApiController
      *         required=true,
      *         description="recipient_id = int or empty",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -51,6 +48,7 @@ class ChatController extends WebApiController
      *                      "client_id": 1,
      *                      "vendor":"OOO Unity",
      *                      "vendor_id": 4,
+     *                      "image": "http://mixcar.ru/image.jpg",
      *                      "count_message": 9,
      *                      "unread_message": 2,
      *                      "last_message":"Последнее сообщение",
@@ -90,10 +88,7 @@ class ChatController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -159,10 +154,7 @@ class ChatController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -222,10 +214,7 @@ class ChatController extends WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
@@ -275,5 +264,44 @@ class ChatController extends WebApiController
     public function actionDialogAddMessage()
     {
         $this->response = $this->container->get('ChatWebApi')->addMessage($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/chat/dialog-read-all",
+     *     tags={"Chat"},
+     *     summary="Отметить все сообщения прочитаными",
+     *     description="Отметить все сообщения прочитаными",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(default={"result":1}),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDialogReadAll()
+    {
+        $this->response = $this->container->get('ChatWebApi')->readAllMessages();
     }
 }

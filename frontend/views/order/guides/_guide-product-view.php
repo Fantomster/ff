@@ -5,10 +5,10 @@ use yii\helpers\Url;
 ?>
 <td>
     <div class="guid_block_create_title">
-        <p><?= $model->product ?></p>
+        <p><?= $model->product ?? '' ?></p>
     </div>	
     <div class="guid_block_create_counts">
-        <p><?= $model->vendor->name ?></p> 
+        <p><?= $model->vendor->name ?? '' ?></p>
     </div>     
 </td>
 <td>

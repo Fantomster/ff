@@ -18,16 +18,18 @@ class OrderSearch extends Order {
     public $vendor_name;
     public $client_manager;
     public $vendor_manager;
+    public $client_city;
     private $blacklist = '(1,2,5,16,63,88,99,100,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037)'; 
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules(): array
+    {
         return [
             [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'discount_type'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'client_name', 'vendor_name', 'client_manager', 'vendor_manager'], 'safe'],
+            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'client_name', 'client_city', 'vendor_name', 'client_manager', 'vendor_manager'], 'safe'],
         ];
     }
 
@@ -106,6 +108,11 @@ class OrderSearch extends Order {
             'desc' => ["acceptedByProfile.full_name" => SORT_DESC],
         ];
 
+        $dataProvider->sort->attributes['client_city'] = [
+            'asc' => ["client.locality" => SORT_ASC],
+            'desc' => ["client.locality" => SORT_DESC],
+        ];
+
         $this->load($params);
 
         if (!$this->validate()) {
@@ -134,6 +141,7 @@ class OrderSearch extends Order {
         $query
                 ->andFilterWhere(['like', 'comment', $this->comment])
                 ->andFilterWhere(['like', "client.name", $this->client_name])
+                ->andFilterWhere(['like', "client.locality", $this->client_city])
                 ->andFilterWhere(['like', "vendor.name", $this->vendor_name])
                 ->andFilterWhere(['like', "createdByProfile.full_name", $this->client_manager])
                 ->andFilterWhere(['like', "acceptedByProfile.full_name", $this->vendor_manager])

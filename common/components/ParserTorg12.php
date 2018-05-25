@@ -5,9 +5,11 @@ namespace common\components;
 use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
+use PHPExcel_Shared_Date;
 
 class ParserTorg12
 {
+
 
     /**
      * Путь к файлу
@@ -53,6 +55,14 @@ class ParserTorg12
             'label' => ['дата составления'],
             'shift_row' => 1,
         ],
+     //   'document_upd_info' => [
+     //       'label' => ['(1)'],
+     //       'shift_row' => 1,
+     //   ],
+        'document_headinfo' => [
+            'label' => ['счет-фактура №'],
+            'shift_row' => 1,
+        ]
     ];
 
     /**
@@ -70,7 +80,8 @@ class ParserTorg12
         'not_cnt' => ['в одном месте'],
         'price_without_tax' => ['Цена', 'цена', 'цена без ндс', 'цена без ндс, руб.', 'цена без ндс руб.', 'цена без учета ндс', 'цена без учета ндс, руб.', 'цена без учета ндс руб.', 'цена, руб. коп.', 'цена руб. коп.'],
         'price_with_tax' => ['цена с ндс, руб.', 'цена с ндс руб.', 'цена, руб.', 'цена руб.', 'сумма с учетом ндс, руб. коп.'],
-        'sum_with_tax' => 'сумма.*с.*ндс.*', // regexp
+        'sum_with_tax' => ['сумма.*с.*ндс.*','стоимость.*товаров.*с налогом.*всего'], // regexp
+        'sum_without_tax' => ['сумма.*без.*ндс.*','стоимость.*товаров.*без налога.*всего'], // regexp
         'tax_rate' => ['ндс, %', 'ндс %', 'ставка ндс, %', 'ставка ндс %', 'ставка ндс', 'ставка, %', 'ставка %', 'ндс'],
         'total' => ['всего по накладной'],
     ];
@@ -110,6 +121,8 @@ class ParserTorg12
         foreach ($result as $row) {
             if($row['regular_expression'] == 1) {
                 $this->settingsRow[$row['name']] = trim($row['value']);
+            } else if ($row['regular_expression'] == 3) {
+                $this->settingsRow[$row['name']] = ['reg' => [explode('|', trim($row['value']))]];
             } else {
                 $this->settingsRow[$row['name']] = explode('|', trim($row['value']));
             }
@@ -258,14 +271,88 @@ class ParserTorg12
         $checkSell = function ($col, $row, $attribute) {
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
+            if(strpos($cellValue, 'счет-фактура №') !== false) {
+
+                $attributeValue ="";
+
+                for($i=$col;$i<$this->highestColumn ;$i++) {
+                    if (!empty($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue())))
+                    $attributeValue .= ' '.$this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue());
+
+                }
+                $attributeValue = str_replace(",", ".", $attributeValue);
+
+                // var_dump($attributeValue);
+
+                $leftSide = trim(preg_replace("/.от.*/", "", $attributeValue));
+                $rightSide = trim(str_replace($leftSide." от","",$attributeValue));
+                $leftSide = trim(preg_replace("/.*№/", "", $leftSide));
+
+
+                $check = substr($rightSide, 0, strpos($rightSide," "));
+
+                if (is_numeric($check) && (int)$check > 30000) {
+                    $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($check));
+                } else {
+                    // года для распознования даты документа
+                    $years = [date('Y', strtotime('-1 year')), date('Y'), date('Y', strtotime('+1 year'))];
+
+                    foreach ($years as $year) {
+                        $rightSide = trim(preg_replace("/.".$year.".*/", ".".$year, $rightSide));
+                    }
+                    $monthArr = [
+                     ' января.' => '.01.',
+                     ' февраля.' => '.02.',
+                     ' марта.' => '.03.',
+                     ' апреля.' => '.04.',
+                     ' мая.' => '.05.',
+                     ' июня.' => '.06.',
+                     ' июля.' => '.07.',
+                     ' августа.' => '.08.',
+                     ' сентября.' => '.09.',
+                     ' октября.' => '.10.',
+                     ' ноября.' => '.11.',
+                     ' декабря.' => '.12.',
+                    ];
+
+                    foreach ($monthArr as $key => $value) {
+                        if (strpos($rightSide,$key) !== false) {
+                            $rightSide = str_replace($key, $value,$rightSide);
+                        }
+                    }
+                    $rightSide = str_replace("-", ".",$rightSide);
+                    $rightSide = str_replace(" ", ".",$rightSide);
+                    $rightSide = date('Y-m-d', strtotime($rightSide));
+                }
+
+
+               // var_dump("left:".$leftSide);
+               // var_dump("right:".$rightSide);
+
+                $attributeValue = $leftSide."%%%%".$rightSide;
+
+            //    $attributeValue = trim(preg_replace("/.*Счет-фактура/", "", $attributeValue));
+            //    $attributeValue = trim(preg_replace("/.2018.*/", ".2018", $attributeValue));
+            //    $attributeValue = trim(preg_replace("/.*№/", "", $attributeValue));
+
+                return $attributeValue;
+
+            }
+
             if (in_array($cellValue, $attribute['label'])) {
+
                 // заголовок атрибута в одной ячейке
                 $attributeValue = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row + $attribute['shift_row'])->getValue());
+
+                if($cellValue == 'дата составления' && (int)$attributeValue)
+                    $attributeValue = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
+
                 $this->firstRow = $row;
                 return $attributeValue;
             } else {
                 // заголовок атрибута разбит на две строки
                 $nextValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row + 1)->getValue());
+
                 // считаем что два слова в заголовке всегда, если есть переносы - не распознается
                 foreach ($attribute['label'] as $val) {
                     $multiRowHeader = explode(' ', $val);
@@ -291,11 +378,37 @@ class ParserTorg12
                 // номер
                 if (empty($documentNumber)) {
                     $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_number']);
+                    if(!empty($documentNumber)) {
+
+                        $docArr = explode('%%%%',$documentNumber);
+                        $documentNumber = $docArr[0];
+                    }
+                /*    if (empty($documentNumber)) {
+                        $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_upd_info']);
+                       // if(!empty($documentNumber)) {
+                            var_dump("s".$documentNumber);
+                       //     die();
+                        //}
+*/
+                         //   $documentNumber = preg_replace('/.от.*/', "", $documentNumber);
+                         //   var_dump($documentNumber);
+
+                //    }
+
+
                 }
 
                 // дата составления
                 if (empty($documentDate)) {
                     $documentDate = $checkSell($col, $row, $this->settingsHeader['document_date']);
+                    if(!empty($documentDate)) {
+
+                          $docArr = explode('%%%%',$documentDate);
+
+                          if (sizeof($docArr) > 1)
+                               $documentDate = $docArr[1];
+
+                    }
                 }
 
             }
@@ -308,8 +421,11 @@ class ParserTorg12
         }
 
         if (isset($documentDate)) {
-            $documentTime = strtotime($documentDate);
-            $this->invoice->date = date('Y-m-d', $documentTime);
+       //     $documentTime = strtotime($documentDate); // TODO Проверить формат даты
+       //     $this->invoice->date = date('Y-m-d', $documentTime);
+              $this->invoice->date = $documentDate;
+         //   var_dump("date ".$documentDate);
+
         } else {
             $this->invoice->errors['invoice_date'] = 'Не найдена дата накладной';
         }
@@ -326,7 +442,19 @@ class ParserTorg12
 
         $match = function ($cellValue, $setting) {
             if (is_array($setting)) {
-                return in_array($cellValue, $setting);
+
+                if (isset($setting['reg'])) {
+                    $isTrue = false;
+
+                        foreach ($setting['reg'][0] as $is) {
+                            $isTrue = (bool)preg_match('#' . $is . '#siu', $cellValue);
+                            if ($isTrue === true)
+                                  break;
+                        }
+                    return $isTrue;
+                } else
+                    return in_array($cellValue, $setting);
+
             } elseif (is_string($setting)) {
                 return (bool)preg_match('#' . $setting . '#siu', $cellValue);
             } else {
@@ -340,6 +468,8 @@ class ParserTorg12
          */
         for ($row = $this->firstRow; $row <= $this->highestRow; $row++) {
             for ($col = 0; $col <= $this->highestColumn; $col++) {
+
+
 
                 $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
@@ -378,15 +508,20 @@ class ParserTorg12
                     $this->columnList['price_without_tax']['col'] = $col;
                     $this->columnList['price_without_tax']['row'] = $row;
 
-                } elseif (!isset($this->columnList['price_with_tax']) && $match($cellValue, $this->settingsRow['price_with_tax'])) {
+              /*  } elseif (!isset($this->columnList['price_with_tax']) && $match($cellValue, $this->settingsRow['price_with_tax'])) {
 
                     $this->columnList['price_with_tax']['col'] = $col;
                     $this->columnList['price_with_tax']['row'] = $row;
-
-                } elseif (!isset($this->columnList['sum_with_tax']) && $match($cellValue, $this->settingsRow['sum_with_tax'])) {
+*/
+                 } elseif (!isset($this->columnList['sum_with_tax']) && $match($cellValue, $this->settingsRow['sum_with_tax'])) {
 
                     $this->columnList['sum_with_tax']['col'] = $col;
                     $this->columnList['sum_with_tax']['row'] = $row;
+
+                } elseif (!isset($this->columnList['sum_without_tax']) && $match($cellValue, $this->settingsRow['sum_without_tax'])) {
+
+                    $this->columnList['sum_without_tax']['col'] = $col;
+                    $this->columnList['sum_without_tax']['row'] = $row;
 
                 } elseif (!isset($this->columnList['tax_rate']) && $match($cellValue, $this->settingsRow['tax_rate'])) {
 
@@ -399,6 +534,7 @@ class ParserTorg12
                     $this->columnList['ed']['row'] = $row;
 
                 }
+               //  if($row == 17) { var_dump($cellValue); }
             }
         }
 
@@ -406,6 +542,8 @@ class ParserTorg12
         $this->checkRowsHeader();
 
         $this->startRow = $this->getMaxRowFromComplexHeader($this->columnList);
+        // var_dump($this->startRow);
+        // var_dump($this->columnList);
     }
 
     /**
@@ -447,11 +585,22 @@ class ParserTorg12
             $msg = 'Необходимо добавить столбец, содержащий цену товара без НДС ("%s")';
             $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['price_without_tax']));
 
-        } elseif (!isset($this->columnList['price_with_tax']) && !isset($this->columnList['sum_with_tax'])) {
+        } elseif (!isset($this->columnList['sum_without_tax'])) {
+
+            $msg = 'Необходимо добавить столбец, содержащий сумму товара без НДС ("%s")';
+            if(!is_array ($this->settingsRow['sum_without_tax'])) {
+                $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['sum_without_tax']));
+            } else {
+                $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['sum_without_tax']['reg'][0]));
+            }
+
+
+
+      /*  } elseif (!isset($this->columnList['price_with_tax']) && !isset($this->columnList['sum_with_tax'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий цену товара c НДС ("%s")';
             $headErrors[] = sprintf($msg, implode('"; "', array_merge($this->settingsRow['price_with_tax'], (array)$this->settingsRow['sum_with_tax'])));
-
+*/
         } elseif (!isset($this->columnList['tax_rate'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий ставку НДС ("%s")';
@@ -459,9 +608,6 @@ class ParserTorg12
 
         }
 
-        if ($headErrors) {
-            throw new ParseTorg12Exception(implode("\n", $headErrors));
-        }
     }
 
     /**
@@ -521,9 +667,18 @@ class ParserTorg12
             return false;
         }
 
+        // Hotfix 1.5.10 corrected (#DEV - 874) Непонятно, что здесь проверялось, толи столбцы надо было проверять,
+        // толи все строчки а не только значимые. Но в итоге все накладные где меньше 12 значимых строк не выгружались.
+        // Закомментировано
+
+        /*
         if(count($row) < 12) {
             return false;
         }
+        */
+       if (empty($row[1])) {
+           return false;
+       }
 
         if($row[1] == 'А' and $row[2] == 'Б') {
             return false;
@@ -579,7 +734,7 @@ class ParserTorg12
 
             // количество
             if (isset($this->columnList['cnt'])) {
-                $invoiceRow->cnt = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
+                $invoiceRow->cnt = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
             }
 
             // еденицы измерения
@@ -591,17 +746,28 @@ class ParserTorg12
                 $invoiceRow->cnt = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt_place']['col'], $row)->getValue(), true);
             }
 
-            // цена без НДС
-            $invoiceRow->price_without_tax = (float)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_without_tax']['col'], $row)->getValue(), true);
-            if ($invoiceRow->price_without_tax) {
-                $this->invoice->price_without_tax_sum += $invoiceRow->price_without_tax * $invoiceRow->cnt;
+
+            // сумма без НДС
+            if(isset($this->columnList['sum_without_tax']))
+            $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
+            if ($invoiceRow->sum_without_tax) {
+                $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
+                $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum,2);
             }
 
-            // цена c НДС
+            // сумма  c НДС
+            if(isset($this->columnList['sum_with_tax']))
+            $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
+                   if ($invoiceRow->sum_with_tax) {
+                      $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
+                      $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum,2);
+                   }
+
+            /*
             if (isset($this->columnList['price_with_tax'])) {
 
                 $invoiceRow->price_with_tax = (float)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_with_tax']['col'], $row)->getValue(), true);
-                $this->invoice->price_with_tax_sum += $invoiceRow->price_with_tax * $invoiceRow->cnt;
+                $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
 
             } elseif (isset($this->columnList['sum_with_tax'])) {
 
@@ -610,15 +776,18 @@ class ParserTorg12
                     if ((int)$invoiceRow->cnt > 0) {
                         $invoiceRow->price_with_tax = round($sumWithTax / $invoiceRow->cnt, 4);
                     }
-                    $this->invoice->price_with_tax_sum += $sumWithTax;
+                    $this->invoice->price_without_tax_sum += $sumWithTax;
                 }
 
             }
+            */
+            // цена без НДС
+            $invoiceRow->price_without_tax = (float)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_without_tax']['col'], $row)->getValue(), true);
 
-            if (!$invoiceRow->price_with_tax) {
+           /* if (!$invoiceRow->price_with_tax) {
                 $invoiceRow->errors['price_with_tax'] = 'Не указана цена с учетом НДС';
             }
-
+*/
             // НДС
             $taxRate = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['tax_rate']['col'], $row)->getValue(), true);
             $taxRate = str_replace('%', '', $taxRate);
@@ -633,7 +802,7 @@ class ParserTorg12
                 $invoiceRow->errors['tax_rate'] = sprintf('Значение НДС "%s" отсутсвует в списке доступных', $taxRate);
                 $this->invoice->errors['tax_rate'] = 'В накладной присутсвует товар с некорректной ставкой НДС';
             }
-
+/*
             // проверка корректности указанной ставки НДС
             $calcPriceWithTax = round($invoiceRow->price_without_tax * (1 + $invoiceRow->tax_rate / 100), 2);
             $priceWithTax = round($invoiceRow->price_with_tax, 2);
@@ -643,8 +812,18 @@ class ParserTorg12
                 $invoiceRow->errors['diff_price_with_tax'] = sprintf('Некорректно указана ставка НДС (Цена с учётом НДС: %s, Рассчитанная цена с учетом НДС: %s', $priceWithTax, $calcPriceWithTax);
                 $this->invoice->errors['diff_price_with_tax'] = 'В накладной присутсвует товар, по которому указана некорректная цена или ставка НДС';
             }
+*/
+            // Проверка на корректность расчета цены единицы
+
+       /*     if ($invoiceRow->price_without_tax == $invoiceRow->sum_without_tax) {
+                $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
+            }
+*/
+            if($invoiceRow->cnt > 0)
+            $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax/$invoiceRow->cnt,2);
 
             // добавляем обработанную строку в накладную
+            if($invoiceRow->cnt > 0)
             $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
         }
     }

@@ -15,7 +15,7 @@ use Yii;
  */
 class SourceMessage extends \yii\db\ActiveRecord
 {
-    const LANGUAGES = ['ru', 'en', 'es', 'md'];
+    const LANGUAGES = ['ru', 'en', 'es', 'md', 'ua'];
 
     /**
      * @inheritdoc
@@ -33,6 +33,7 @@ class SourceMessage extends \yii\db\ActiveRecord
         return [
             [['message'], 'string'],
             [['category'], 'string', 'max' => 255],
+            [['message', 'category'], 'unique', 'targetAttribute' => ['message', 'category']],
         ];
     }
 

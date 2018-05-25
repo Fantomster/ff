@@ -2,8 +2,11 @@
 
 namespace common\models;
 
+use common\components\EComIntegration;
 use Yii;
+use yii\base\ExitException;
 use yii\helpers\Url;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "order".
@@ -17,13 +20,14 @@ use yii\helpers\Url;
  * @property string $total_price
  * @property string $created_at
  * @property string $updated_at
+ * @property string $completion_date
  * @property string $requested_delivery
  * @property string $actual_delivery
  * @property string $comment
  * @property string $discount
  * @property integer $discount_type
  * @property integer $currency_id
- * 
+ *
  * @property User $acceptedBy
  * @property User $createdBy
  * @property Profile $createdByProfile
@@ -40,7 +44,8 @@ use yii\helpers\Url;
  * @property User[] $recipientsList
  * @property Currency $currency
  */
-class Order extends \yii\db\ActiveRecord {
+class Order extends \yii\db\ActiveRecord
+{
 
     const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
     const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
@@ -59,14 +64,16 @@ class Order extends \yii\db\ActiveRecord {
      * @inheritdoc
      */
 
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'order';
     }
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors(): array
+    {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -80,12 +87,13 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules(): array
+    {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment'], 'safe'],
+            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'invoice_number', 'invoice_date'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -98,29 +106,32 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels(): array
+    {
         return [
             'id' => Yii::t('app', 'Номер заказа'),
             'client_id' => 'Client ID',
             'vendor_id' => 'Vendor ID',
             'created_by_id' => 'Created By ID',
             'accepted_by_id' => 'Accepted By ID',
-            'status' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
-            'status_text' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
-            'total_price' => Yii::t('app', 'common.models.total_price', ['ru'=>'Итоговая цена']),
+            'status' => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'status_text' => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'total_price' => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
             'created_at' => Yii::t('app', 'Дата создания'),
             'updated_at' => 'Updated At',
             'vendor' => Yii::t('app', 'Поставщик'),
             'create_user' => Yii::t('app', 'Заказ создал'),
+            'plan_price' => Yii::t('app', 'План'),
         ];
     }
 
-    public function beforeSave($insert) {
+    public function beforeSave($insert)
+    {
         $result = parent::beforeSave($insert);
         if ($this->discount_type == Order::DISCOUNT_FIXED) {
             $this->discount = round($this->discount, 2);
         } else {
-            $this->discount = abs((int) $this->discount);
+            $this->discount = abs((int)$this->discount);
         }
         return $result;
     }
@@ -128,28 +139,32 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAcceptedBy() {
+    public function getAcceptedBy()
+    {
         return $this->hasOne(User::className(), ['id' => 'accepted_by_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getClient() {
+    public function getClient()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'client_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCreatedBy() {
+    public function getCreatedBy()
+    {
         return $this->hasOne(User::className(), ['id' => 'created_by_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCreatedByProfile() {
+    public function getCreatedByProfile()
+    {
         return $this->hasOne(Profile::className(), ['user_id' => 'created_by_id']);
     }
 
@@ -157,57 +172,68 @@ class Order extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAcceptedByProfile() {
+    public function getAcceptedByProfile()
+    {
         return $this->hasOne(Profile::className(), ['user_id' => 'accepted_by_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getVendor() {
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrderContent() {
+    public function getOrderContent()
+    {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrderChat() {
-        return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy([OrderChat::tableName().'.created_at' => SORT_ASC]);
+    public function getOrderChat()
+    {
+        return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy([OrderChat::tableName() . '.created_at' => SORT_ASC]);
     }
 
     /**
      * @return int
      */
-    public function getOrderChatCount() {
+    public function getOrderChatCount()
+    {
         return count($this->orderChat);
     }
 
     /**
      * @return int
      */
-    public function getOrderChatUnreadCount() {
+    public function getOrderChatUnreadCount()
+    {
         return count($this->getOrderChat()->where(['viewed' => 0])->all());
     }
 
     /**
      * @return int
      */
-    public function getOrderChatLastMessage() {
+    public function getOrderChatLastMessage()
+    {
         return $this->getOrderChat()->orderBy(['created_at' => SORT_DESC])->one();
     }
 
     //check if order is obsolete i.e. can be set as done from any state by any side
-    public function getIsObsolete() {
+    public function getIsObsolete()
+    {
         if (in_array($this->status, [self::STATUS_DONE, self::STATUS_REJECTED, self::STATUS_CANCELLED, self::STATUS_FORMING])) {
             return false;
         }
+        if (Yii::$app->user->identity->organization->type_id == Organization::TYPE_RESTAURANT)
+            return true;
+
         $today = time();
         if (empty($this->requested_delivery)) {
             $updatedAt = strtotime($this->updated_at);
@@ -220,53 +246,58 @@ class Order extends \yii\db\ActiveRecord {
         }
     }
 
-    public static function statusText($status) {
-        $text = Yii::t('app', 'common.models.undefined', ['ru'=>'Неопределен']);
+    public static function statusText($status)
+    {
+        $text = Yii::t('app', 'common.models.undefined', ['ru' => 'Неопределен']);
         switch ($status) {
             case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
             case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                $text = Yii::t('app', 'common.models.new', ['ru'=>'Новый']);
+                $text = Yii::t('app', 'common.models.new', ['ru' => 'Новый']);
                 break;
             case Order::STATUS_PROCESSING:
-                $text = Yii::t('app', 'common.models.in_process', ['ru'=>'Выполняется']);
+                $text = Yii::t('app', 'common.models.in_process', ['ru' => 'Выполняется']);
                 break;
             case Order::STATUS_DONE:
-                $text = Yii::t('app', 'common.models.done', ['ru'=>'Завершен']);
+                $text = Yii::t('app', 'common.models.done', ['ru' => 'Завершен']);
                 break;
             case Order::STATUS_REJECTED:
             case Order::STATUS_CANCELLED:
-                $text = Yii::t('app', 'common.models.canceled', ['ru'=>'Отменен']);
+                $text = Yii::t('app', 'common.models.canceled', ['ru' => 'Отменен']);
                 break;
         }
         return $text;
     }
 
-    public function discountDropDown() {
+    public function discountDropDown()
+    {
         return [
-            '' => Yii::t('app', 'common.models.no_discount', ['ru'=>'Без скидки']),
-            '1' => Yii::t('app', 'common.models.discount_rouble_two', ['ru'=>'Скидка ({symbol})', 'symbol' => $this->currency->symbol]),
-            '2' => Yii::t('app', 'common.models.discount_percent_two', ['ru'=>'Скидка (%)']),
+            '' => Yii::t('app', 'common.models.no_discount', ['ru' => 'Без скидки']),
+            '1' => Yii::t('app', 'common.models.discount_rouble_two', ['ru' => 'Скидка ({symbol})', 'symbol' => $this->currency->symbol]),
+            '2' => Yii::t('app', 'common.models.discount_percent_two', ['ru' => 'Скидка (%)']),
         ];
     }
 
-    public function getStatusText() {
+    public function getStatusText()
+    {
         $statusList = self::getStatusList();
         return $statusList[$this->status];
     }
 
-    public static function getStatusList() {
+    public static function getStatusList()
+    {
         return [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru'=>'Ожидает подтверждения поставщика']),
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru'=>'Ожидает подтверждения клиента']),
-            Order::STATUS_PROCESSING => Yii::t('app', 'common.models.in_process_two', ['ru'=>'Выполняется']),
-            Order::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru'=>'Завершен']),
-            Order::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru'=>'Отклонен поставщиком']),
-            Order::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru'=>'Отменен клиентом']),
-            Order::STATUS_FORMING => Yii::t('app', 'common.models.forming', ['ru'=>'Формируется']),
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru' => 'Ожидает подтверждения поставщика']),
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
+            Order::STATUS_PROCESSING => Yii::t('app', 'common.models.in_process_two', ['ru' => 'Выполняется']),
+            Order::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
+            Order::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
+            Order::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
+            Order::STATUS_FORMING => Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']),
         ];
     }
 
-    public static function getStatusColors() {
+    public static function getStatusColors()
+    {
         return [
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => '#368CBF',
             Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => '#f39c12',
@@ -278,11 +309,13 @@ class Order extends \yii\db\ActiveRecord {
         ];
     }
 
-    public function getPositionCount() {
+    public function getPositionCount()
+    {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }
 
-    public function calculateDelivery() {
+    public function calculateDelivery()
+    {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         if (isset($this->vendor->delivery)) {
             $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
@@ -296,7 +329,8 @@ class Order extends \yii\db\ActiveRecord {
         return 0;
     }
 
-    public function forFreeDelivery($rawPrice = null) {
+    public function forFreeDelivery($rawPrice = null)
+    {
         if ($this->vendor->delivery->min_free_delivery_charge == 0) {
             return -1;
         }
@@ -308,7 +342,8 @@ class Order extends \yii\db\ActiveRecord {
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
-    public function forMinOrderPrice($rawPrice = null) {
+    public function forMinOrderPrice($rawPrice = null)
+    {
         if (isset($this->vendor->delivery)) {
             $diff = $this->vendor->delivery->min_order_price - (!isset($rawPrice) ? $this->rawPrice : $rawPrice);
         } else {
@@ -317,11 +352,13 @@ class Order extends \yii\db\ActiveRecord {
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
-    public function getRawPrice() {
+    public function getRawPrice()
+    {
         return OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
     }
 
-    public function calculateTotalPrice($save = true, $rawPrice = null) {
+    public function calculateTotalPrice($save = true, $rawPrice = null)
+    {
         $total_price = !isset($rawPrice) ? OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar() : $rawPrice;
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
             $total_price -= $this->discount;
@@ -339,8 +376,9 @@ class Order extends \yii\db\ActiveRecord {
         }
         return $this->total_price;
     }
-    
-    public function getTotalPriceWithOutDiscount() {
+
+    public function getTotalPriceWithOutDiscount()
+    {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
@@ -349,7 +387,8 @@ class Order extends \yii\db\ActiveRecord {
         return number_format(round($total_price, 2), 2, '.', '');
     }
 
-    public function getFormattedDiscount($iso_code = false) {
+    public function getFormattedDiscount($iso_code = false)
+    {
         switch ($this->discount_type) {
             case self::DISCOUNT_NO_DISCOUNT:
                 return false;
@@ -361,9 +400,10 @@ class Order extends \yii\db\ActiveRecord {
     }
 
     /**
-     * @return User[] 
+     * @return User[]
      */
-    public function getRecipientsList() {
+    public function getRecipientsList()
+    {
         $recipients[] = $this->createdBy;
         if (isset($this->accepted_by_id)) {
             $recipients[] = $this->acceptedBy;
@@ -382,71 +422,108 @@ class Order extends \yii\db\ActiveRecord {
 
         //Получаем дополнительные Емайлы для рассылки
         //Для заказчика
-        $recipients = array_merge($recipients, $this->client->additionalEmail);
+        if (!empty($this->client->additionalEmail)) {
+            foreach ($this->client->additionalEmail as $addEmail) {
+                $recipients[] = $addEmail;
+            }
+        }
         //Для поставщика
-        $recipients = array_merge($recipients, $this->vendor->additionalEmail);
+        if (!empty($this->vendor->additionalEmail)) {
+            foreach ($this->vendor->additionalEmail as $addEmail) {
+                $recipients[] = $addEmail;
+            }
+        }
 
-        return $recipients;
+        $result = [];
+        foreach ($recipients as $recipient) {
+            $result[] = $recipient;
+        }
+
+        return $result;
     }
 
-    public function getOrdersExportColumns() {
+    public function getOrdersExportColumns()
+    {
         return [
             [
-                'label' => Yii::t('app', 'common.models.number', ['ru'=>'Номер']),
+                'label' => Yii::t('app', 'common.models.number', ['ru' => 'Номер']),
                 'value' => 'id',
             ],
             [
-                'label' => Yii::t('app', 'common.models.rest', ['ru'=>'Ресторан']),
+                'label' => Yii::t('app', 'common.models.rest', ['ru' => 'Ресторан']),
                 'value' => 'client.name',
             ],
             [
-                'label' => Yii::t('app', 'common.models.vendor_two', ['ru'=>'Поставщик']),
+                'label' => Yii::t('app', 'common.models.vendor_two', ['ru' => 'Поставщик']),
                 'value' => 'vendor.name',
             ],
             [
-                'label' => Yii::t('app', 'common.models.order_created', ['ru'=>'Заказ создал']),
+                'label' => Yii::t('app', 'common.models.order_created', ['ru' => 'Заказ создал']),
                 'value' => 'createdByProfile.full_name',
             ],
             [
-                'label' => Yii::t('app', 'common.models.order_accepted', ['ru'=>'Заказ принял']),
+                'label' => Yii::t('app', 'common.models.order_accepted', ['ru' => 'Заказ принял']),
                 'value' => 'acceptedByProfile.full_name',
             ],
             [
-                'label' => Yii::t('app', 'common.models.sum', ['ru'=>'Сумма']),
+                'label' => Yii::t('app', 'common.models.sum', ['ru' => 'Сумма']),
                 'value' => 'total_price',
             ],
             [
-                'label' => Yii::t('app', 'common.models.creating_date', ['ru'=>'Дата создания']),
+                'label' => Yii::t('app', 'common.models.creating_date', ['ru' => 'Дата создания']),
                 'value' => 'created_at',
             ],
             [
-                'label' => Yii::t('app', 'common.models.status_two', ['ru'=>'Статус']),
-                'value' => function($data) {
+                'label' => Yii::t('app', 'common.models.status_two', ['ru' => 'Статус']),
+                'value' => function ($data) {
                     return Order::statusText($data['status']);
                 },
             ],
         ];
     }
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
-
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if(isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
-                if($this->status != self::STATUS_FORMING)
-                \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
-            else
-                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
+            if (isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
+                if ($this->status != self::STATUS_FORMING) {
+                    \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
+                } else {
+                    \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
+                }
+        }
 
+        //dd($changedAttributes['status']);
+        if ($this->status != self::STATUS_FORMING && !$insert && key_exists('total_price', $changedAttributes)) {
+            //dd($changedAttributes);
+            $vendor = Organization::findOne(['id' => $this->vendor_id]);
+            $client = Organization::findOne(['id' => $this->client_id]);
+            $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
+            if ($client->gln_code && $vendor->gln_code) {
+                $eComIntegration = new EComIntegration();
+                if($this->status == self::STATUS_DONE){
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
+                }else{
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                }
+                if (!$result) {
+                    throw new BadRequestHttpException("EDI Server error");
+                }
+            }
+            if (!$client->gln_code && $vendor->gln_code) {
+                throw new BadRequestHttpException($errorText);
+            }
         }
     }
+
 
     public function afterDelete()
     {
         parent::afterDelete(); // TODO: Change the autogenerated stub
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-                if($this->status == self::STATUS_FORMING)
-                    \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id);
+            if ($this->status == self::STATUS_FORMING)
+                \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id);
         }
     }
 
@@ -457,48 +534,59 @@ class Order extends \yii\db\ActiveRecord {
     public function getUrlForUser($user)
     {
         if ($user instanceof User) {
-            if (empty($user) || (!in_array($user->organization_id, [$this->client_id, $this->vendor_id]))) {
-                return '';
+
+            $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                "/order/view",
+                "id" => $this->id
+            ]);
+
+            if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view",
+                    "id" => $this->id,
+                    "token" => $user->access_token
+                ]);
             }
-            switch ($user->status) {
-                case User::STATUS_UNCONFIRMED_EMAIL:
-                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                        "/order/view",
-                        "id" => $this->id,
-                        "token" => $user->access_token
-                    ]);
-                    break;
-                default:
-                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                        "/order/view",
-                        "id" => $this->id
-                    ]);
+
+            //Если получает заказчик, и он не работает в системе, добавляем токен
+            if ($user->organization_id == $this->vendor_id && $this->vendor->is_work == 0) {
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view",
+                    "id" => $this->id,
+                    "token" => $user->access_token
+                ]);
             }
+
             return $url;
         }
 
         //Если пришла модель с дополнительного Емайла
-        if($user instanceof AdditionalEmail){
+        if ($user instanceof AdditionalEmail) {
             return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                 "/order/view",
                 "id" => $this->id
             ]);
         }
     }
-    
-    public function getCurrency() {
+
+    public function getCurrency()
+    {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
 
-    public function getInvoice() {
+    public function getInvoice()
+    {
         return $this->hasOne(IntegrationInvoice::className(), ['order_id' => 'id']);
     }
 
-    public function getInvoiceRelation() {
+    public function getInvoiceRelation()
+    {
         return $this->hasOne(IntegrationInvoice::className(), ['id' => 'invoice_relation']);
     }
-    
-    public function formatPrice() {
+
+    public function formatPrice()
+    {
         return $this->total_price . " " . $this->currency->symbol;
     }
+
 }

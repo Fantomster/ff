@@ -61,7 +61,8 @@ function renderButton($id)
                 <div class="col-sm-12">
                     <?php try {
                         echo GridView::widget([
-                            'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
+                            // 'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
+                            'dataProvider' => $dataProvider,
                             'summary' => false,
                             'striped' => false,
                             'condensed' => true,
@@ -83,6 +84,12 @@ function renderButton($id)
                                 ],
                                 'number',
                                 [
+                                    'attribute' => 'date',
+                                    'value' => function($row){
+                                        return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
+                                    }
+                                ],
+                                [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {
                                         return $data->organization->name;
@@ -94,17 +101,23 @@ function renderButton($id)
                                         return count($data->content);
                                     }
                                 ],
-                                'created_at',
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'created_at',
+                                    'value' => function($data) {
+                                        return Yii::$app->formatter->asDatetime($data->created_at, "php:Y-m-d H:i:s");
+                                    },
+                                ],
                                 [
                                     'attribute' => 'order_id',
                                     'value' => function ($data) {
-                                        return $data->order_id ? 'Да' : 'Нет';
+                                        return $data->order_id ? $data->order_id : 'Нет';
                                     }
                                 ],
                                 [
-                                    'attribute' => 'total',
+                                    'attribute' => 'total_sum_withtax',
                                     'value' => function ($data) {
-                                        return number_format($data->totalSumm, 2, '.', ' ');
+                                        return number_format($data->total_sum_withtax, 2, '.', ' ');
                                     }
                                 ],
                                 [
@@ -237,6 +250,17 @@ ob_start();
     });
 
     $('#save-button').click(function () {
+
+        var button = $(this);
+
+        if(button.attr('disabled') === 'disabled') {
+            alert('Идет обработка накладной, подождите...');
+            return;
+        }
+
+        button.attr('disabled', 'disabled');
+        button.html('Сохранение...');
+
         var params = {};
         var create_order = true;
         row_invoice = $('.invoice_radio:checked').parents('tr');
@@ -246,11 +270,15 @@ ob_start();
 
         if (params.invoice_id === undefined) {
             errorSwal('Необходимо выбрать накладную.');
+            button.removeAttr('disabled', false);
+            button.html('<i class="fa fa-save"></i> Сохранить');
             return false;
         }
 
         if (params.vendor_id === undefined) {
             errorSwal('Необходимо задать связь с поставщиком.');
+            button.removeAttr('disabled', false);
+            button.html('<i class="fa fa-save"></i> Сохранить');
             return false;
         }
 
@@ -269,12 +297,17 @@ ob_start();
                 if (result.value) {
                     create_order = true;
                 }
+                button.removeAttr('disabled', false);
+                button.html('<i class="fa fa-save"></i> Сохранить');
             });
         }
 
         if (create_order === true) {
             $.post('<?= $url ?>/create-order', params, function (data) {
                 if (data.status === true) {
+                    $('input[class="orders_radio"]').prop('checked', false);
+                    $('.catalog-index.orders').hide();
+                    $(row_invoice).find('.invoice_radio').remove();
                     swal(
                         'Накладная успешно привязана!',
                         'Перейти в интеграцию: <?=$list_integration?>',
@@ -283,9 +316,10 @@ ob_start();
                 } else {
                     errorSwal(data.error)
                 }
+                button.removeAttr('disabled', false);
+                button.html('<i class="fa fa-save"></i> Сохранить');
             });
         }
-
     });
 
     function errorSwal(message) {

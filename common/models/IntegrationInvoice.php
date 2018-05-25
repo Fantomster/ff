@@ -57,7 +57,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return [
             [['organization_id', 'integration_setting_from_email_id'], 'required'],
             [['organization_id', 'integration_setting_from_email_id', 'order_id'], 'integer'],
-            [['date', 'created_at', 'updated_at'], 'safe'],
+            [['date', 'created_at', 'updated_at', 'total_sum_withtax','price_without_tax_sum'], 'safe'],
             [['file_content'], 'string'],
             [['number', 'email_id', 'file_mime_type', 'file_hash_summ'], 'string', 'max' => 255],
             [['id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoiceContent::className(), 'targetAttribute' => ['id' => 'invoice_id']],
@@ -86,6 +86,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             'count' => 'Кол-во позиций',
             'total' => 'Итоговая сумма',
             'updated_at' => 'Updated At',
+            'total_sum_withtax' => 'Итого с НДС',
+            'price_without_tax_sum' => 'Итого без НДС',
         ];
     }
 
@@ -154,6 +156,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->file_hash_summ = $invoice['file_hash_summ'];
         $this->number = $invoice['invoice']['number'];
         $this->date = (!empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null);
+        $this->total_sum_withtax = $invoice['invoice']['price_with_tax_sum'];
+        $this->total_sum_withouttax = $invoice['invoice']['price_without_tax_sum'];
 
         if($this->date == '1970-01-01') {
             $this->date = null;
@@ -172,9 +176,12 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'title' => $row['name'],
                     'ed' => $row['ed'],
                     'percent_nds' => ceil($row['tax_rate']),
-                    'price_nds' => round($row['price_with_tax'], 2),
+                    'price_nds' => round($row['sum_with_tax'], 2),
                     'price_without_nds' => round($row['price_without_tax'], 2),
-                    'quantity' => ceil($row['cnt'])
+                    'quantity' => $row['cnt'],
+                    'sum_without_nds' => $row['sum_without_tax'],
+
+                    // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -213,7 +220,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                 $model->supp_org_id = $vendor->id;
                 $model->ed = $row->ed;
                 $model->units = 1;
-                $model->price = $row->price_without_nds;
+              //  $model->price = $row->price_nds;  // Hotfix 1.5.14
+                $model->price = round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2);
                 if ($model->validate()) {
                     $model->save();
                 } else {
@@ -223,7 +231,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             $models[] = [
                 'id' => $model->id,
                 'quantity' => $row->quantity,
-                'price' => $row->price_without_nds,
+                // 'price' => $row->price_nds, // Hotfix 1.5.14
+                'price' => round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2),
                 'units' => 1,
                 'product_name' => $model->product,
                 'article' => $model->article

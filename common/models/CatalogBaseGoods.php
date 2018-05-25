@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\guides\GuideProduct;
 use market\components\ImagesHelper;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -123,6 +124,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.01],
+            [['barcode'], 'integer', 'min' => 1000000000000, 'max' => 9999999999999],
             [['sub1', 'sub2'], 'required',
                 'when' => function($model) {
             return $model->market_place == self::MARKETPLACE_ON;
@@ -245,6 +247,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
     }
 
+    public function getGuideProduct() {
+        return $this->hasOne(GuideProduct::className(), ['cbg_id' => 'id']);
+    }
+
     /**
      * @return string url to product image
      */
@@ -304,5 +310,84 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     public function getCatalog() {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBaseProduct() {
+        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'id']);
+    }
+
+
+    public function getDataForExcelExport(Catalog $catalog, string $sort, bool $isBase = false): ActiveDataProvider
+    {
+        $q = self::find()
+            ->select([
+                '*',
+                "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
+                "`article` REGEXP '^-?[0-9]+$' as i",
+                "(`article` + 0) AS c_article_1",
+                "`article` AS c_article",
+                "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            ])
+            ->where(['deleted' => 0]);
+        if($isBase){
+            $q->andWhere(['cat_id' => $catalog->id]);
+        }else{
+            $q->leftJoin('catalog_goods', 'catalog_goods.base_goods_id = catalog_base_goods.id');
+
+            $q->andWhere(['catalog_goods.cat_id' => $catalog->id]);
+        }
+
+
+        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
+            $searchString = trim(\Yii::$app->request->get('searchString'));
+            $q->andWhere('product LIKE :p OR article LIKE :a');
+            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" . $searchString . "%"]);
+        }
+
+        if ($sort == 'product') {
+            $q->orderBy('`alf_cyr` DESC, `product` ASC');
+        } else if ($sort == '-product') {
+            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+        }
+
+        if ($sort == 'article') {
+            $q->orderBy('len DESC, i DESC, (article + 0), article');
+        } else if ($sort == '-article') {
+            $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
+        }
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $q,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product',
+                    'price',
+                    'article',
+                    'units',
+                    'status',
+                    'category_id',
+                    'ed',
+                    'market_place',
+                    'c_article_1',
+                    'c_article',
+                    'i',
+                    'len'
+                ],
+                'defaultOrder' => [
+                    'len' => SORT_DESC,
+                    'i' => SORT_DESC,
+                    'c_article_1' => SORT_ASC,
+                    'c_article' => SORT_ASC
+                ]
+            ],
+        ]);
+
+        return $dataProvider;
     }
 }

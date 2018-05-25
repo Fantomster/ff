@@ -6,10 +6,10 @@ return [
         'language' => 'ru-RU'
     ],
     'pictures' => [
-        'org-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/rest-noavatar.gif',
-        'client-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/restaurant-noavatar.gif',
-        'vendor-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif',
-        'bill-logo' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/logo-mix.png',
+        'org-noavatar' => 'https://static.mixcart.ru/rest-noavatar.gif',
+        'client-noavatar' => 'https://static.mixcart.ru/restaurant-noavatar.gif',
+        'vendor-noavatar' => 'https://static.mixcart.ru/vendor-noavatar.gif',
+        'bill-logo' => 'https://static.mixcart.ru/logo-mix.png',
     ],
     'password_generation' => Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']),
     'protocol' => 'http',
@@ -52,6 +52,14 @@ return [
             'about' => 'https://mixcart.ru/md/about.html',
             'contacts' => 'https://mixcart.ru/md/contacts.html',
         ],
+        'ua' => [
+            'market' => 'https://market.mixcart.ru/ua/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client' => 'https://client.mixcart.ru/',
+            'home' => 'https://mixcart.ru/ua/',
+            'about' => 'https://mixcart.ru/ua/about.html',
+            'contacts' => 'https://mixcart.ru/ua/contacts.html',
+        ],
     ],
     'enableYandexMetrics' => 1,
     /**
@@ -60,4 +68,17 @@ return [
      *  /runtime/logs/iiko_api_response_{ID}.log
      */
     'iikoLogOrganization' => [],
+
+    'web' => 'https://mixcart.ru/',
+    /**
+     * Логирование запросов к ВебАпи
+     */
+    'web_api_log' => true,
+
+    'e_com' => [
+        'login' => 'markettest',
+        'pass' => 'e1fa52810ea9d18a5af901c147c804e6',
+        'loginClient' => 'markettest1',
+        'passClient' => '32da77b28033f8fcd7d6d64a9801062d',
+    ]
 ];

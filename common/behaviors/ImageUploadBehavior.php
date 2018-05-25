@@ -144,7 +144,8 @@ class ImageUploadBehavior extends UploadBehavior {
     {
         $url = $this->getThumbUploadPath($this->attribute, $profile);
         $resourceName = $this->getResourceName($url);
-        return $url ? $this->resourceManager->getUrl($resourceName) : null;
+        $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
+        return str_replace("fkeeper.s3.amazonaws.com", "upload.mixcart.ru", $resultUrl); //wtf hardcode, to be fixed
     }
 
     /**

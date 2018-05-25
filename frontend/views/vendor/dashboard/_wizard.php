@@ -87,7 +87,7 @@ $this->registerJs('
                         <?=
                                 $form->field($profile, 'full_name')
                                 ->label(false)
-                                ->textInput(['value' => Html::decode($profile->full_name), 'class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru'=>'ФИО'])]);
+                                ->textInput(['value' => Html::decode($profile->full_name ?? ''), 'class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru'=>'ФИО'])]);
                         ?>
                         <i class="fa fa-user"></i>
                     </label>

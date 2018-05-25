@@ -22,6 +22,7 @@ use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use common\models\ManagerAssociate;
 use common\models\Currency;
+use yii\web\BadRequestHttpException;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -165,10 +166,11 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionEmployees() {
+
+    public function actionEmployees(): String
+    {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        //$params = Yii::$app->request->getQueryParams();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
@@ -181,7 +183,9 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionDelivery() {
+
+    public function actionDelivery()
+    {
         $organization = $this->currentUser->organization;
         $supplier = $organization->id;
         $regionsList = DeliveryRegions::find()->where(['supplier_id' => $supplier])->all();
@@ -212,7 +216,9 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionRemoveDeliveryRegion($id) {
+
+    public function actionRemoveDeliveryRegion(int $id): void
+    {
         $organization = $this->currentUser->organization;
         $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
         if ($deliveryRegions) {
@@ -250,6 +256,8 @@ class VendorController extends DefaultController {
         $profile = new Profile();
         $this->loadCurrentUser();
         $organizationType = $this->currentUser->organization->type_id;
+        $dropDown = Role::dropdown($organizationType);
+        $selected = null;
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -287,19 +295,22 @@ class VendorController extends DefaultController {
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
     /*
      *  User update
      */
 
-    public function actionAjaxUpdateUser($id) {
+    public function actionAjaxUpdateUser(int $id): String
+    {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
         $oldRole = $user->role_id;
         $profile = $user->profile;
-        $organizationType = $user->organization->type_id;
+        $currentUserOrganizationID = $this->currentUser->organization_id;
+        $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
+        $selected = $user->getRelationUserOrganizationRoleID($id);
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -316,7 +327,7 @@ class VendorController extends DefaultController {
 
                     $user->save();
                     $profile->save();
-                    User::updateRelationUserOrganization($user->id, $user->organization_id, $post['User']['role_id']);
+                    User::updateRelationUserOrganization($user->id, $currentUserOrganizationID, $post['User']['role_id']);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -326,11 +337,13 @@ class VendorController extends DefaultController {
             }
         }
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
-    public function actionCatalogs() {
-        $currentUser = $this->currentUser;
+
+    public function actionCatalogs()
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
 
         if (!Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             $step = $currentUser->organization->step;
@@ -542,8 +555,10 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionBasecatalog() {
-        $sort = \Yii::$app->request->get('sort');
+
+    public function actionBasecatalog()
+    {
+        $sort = \Yii::$app->request->get('sort') ?? '';
 
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";
@@ -553,65 +568,7 @@ class VendorController extends DefaultController {
         }
         $currentCatalog = $baseCatalog;
 
-        $q = CatalogBaseGoods::find()
-                ->select([
-                    '*',
-                    "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
-                    "`article` REGEXP '^-?[0-9]+$' as i",
-                    "(`article` + 0) AS c_article_1",
-                    "`article` AS c_article",
-                    "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
-                ])
-                ->where(['deleted' => 0]);
-
-        $q->andWhere(['cat_id' => $baseCatalog->id]);
-
-        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = trim(\Yii::$app->request->get('searchString'));
-            $q->andWhere('product LIKE :p OR article LIKE :a');
-            $q->addParams([':a' => "%" . $searchString . "%", ':p' => "%" . $searchString . "%"]);
-        }
-
-        if ($sort == 'product') {
-            $q->orderBy('`alf_cyr` DESC, `product` ASC');
-        } else if ($sort == '-product') {
-            $q->orderBy('`alf_cyr` ASC, `product` DESC');
-        }
-
-        if ($sort == 'article') {
-            $q->orderBy('len DESC, i DESC, (article + 0), article');
-        } else if ($sort == '-article') {
-            $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
-        }
-
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => $q,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'product',
-                    'price',
-                    'article',
-                    'units',
-                    'status',
-                    'category_id',
-                    'ed',
-                    'market_place',
-                    'c_article_1',
-                    'c_article',
-                    'i',
-                    'len'
-                ],
-                'defaultOrder' => [
-                    'len' => SORT_DESC,
-                    'i' => SORT_DESC,
-                    'c_article_1' => SORT_ASC,
-                    'c_article' => SORT_ASC
-                ]
-            ],
-        ]);
+        $dataProvider = CatalogBaseGoods::getDataForExcelExport($baseCatalog, $sort, true);
 
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
@@ -1429,21 +1386,30 @@ class VendorController extends DefaultController {
                 if ($user && ($usersCount > 1)) {
                     if ($user->id == $this->currentUser->id) {
                         $rel2 = RelationUserOrganization::find()->where(['user_id' => $post['id']])->andWhere(['not', ['organization_id' => $this->currentUser->organization_id]])->all();
-                        if (count($rel2) > 1) {
-                            $user->organization_id = $rel2[0]->organization_id;
-                            $user->role_id = $rel2[0]->role_id;
-                            $user->save();
-                            User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
-                            Yii::$app->user->logout();
-                            return $this->goHome();
+                        if (count($rel2) > 0) {
+                            $transaction = \Yii::$app->db->beginTransaction();
+                            try {
+                                $user->organization_id = $rel2[0]->organization_id;
+                                $user->role_id = $rel2[0]->role_id;
+                                $user->save();
+                                User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
+                                Yii::$app->user->logout();
+
+                                $transaction->commit();
+
+                                return $this->goHome();
+                            } catch (\Exception $e) {
+                                $transaction->rollBack();
+                                throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+                            }
                         } else {
                             $message = Yii::t('message', 'frontend.controllers.client.maybe', ['ru' => 'Может воздержимся от удаления себя?']);
                             return $this->renderAjax('settings/_success', ['message' => $message]);
                         }
                     }
 
-                    $isExists = User::deleteUserFromOrganization($post['id']);
-                    if ($isExists && $user->id != $this->currentUser->id) {
+                    $isExists = User::deleteUserFromOrganization($post['id'], $this->currentUser->organization_id);
+                    if($isExists && $user->id != $this->currentUser->id){
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
@@ -1646,19 +1612,20 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-2', compact('dataProvider', 'cat_id', 'baseCurrencySymbol'));
     }
 
-    public function actionStep3Copy($id) {
+
+    public function actionStep3Copy($id)
+    {
+        ini_set('memory_limit','256M');
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        $baseCurrencySymbol = ' (' . $baseCatalog->currency->iso_code . ')';
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {
             throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_four', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (Yii::$app->request->isPost) {
+        $export = Yii::$app->request->post('export_type') ?? null;
+        if (Yii::$app->request->isPost && !$export) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $post = Yii::$app->request->post();
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             $catalogGoods = CatalogGoods::find()
@@ -1675,8 +1642,6 @@ class VendorController extends DefaultController {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_thirteen', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'Неверный товар')]];
                     return $result;
                 }
-
-//                $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_thirteen', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_price_two', ['ru' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
@@ -1753,11 +1718,20 @@ class VendorController extends DefaultController {
             }
         }
 
+        $sort = \Yii::$app->request->get('sort') ?? '';
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($baseCatalog)) {
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
+        }
 
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
+        $dataProvider = CatalogBaseGoods::getDataForExcelExport($model, $sort);
+
+        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'dataProvider'));
     }
 
-    public function actionStep3UpdateProduct($id) {
+
+    public function actionStep3UpdateProduct($id)
+    {
         $catalogGoods = CatalogGoods::find()->where(['id' => $id])->one();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -2413,7 +2387,7 @@ class VendorController extends DefaultController {
     public function actionChkmail() {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $result = Organization::checkEmail(\Yii::$app->request->post('email'));
+            $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
             return $result;
         }
     }

@@ -44,6 +44,8 @@ return [
             'api/web/assets',
             'api_web/runtime',
             'api_web/web/assets',
+            'mxct/runtime',
+            'mxct/web/assets',
         ],
         'setExecutable' => [
             'yii',
@@ -56,6 +58,7 @@ return [
             'franchise/config/main-local.php',
             'api/config/main-local.php',
             'api_web/config/main-local.php',
+            'mxct/config/main-local.php',
         ],
     ],
     'Production' => [
@@ -73,6 +76,8 @@ return [
             'api/web/assets',
             'api_web/runtime',
             'api_web/web/assets',
+            'mxct/runtime',
+            'mxct/web/assets',
         ],
         'setExecutable' => [
             'yii',
@@ -84,6 +89,7 @@ return [
             'franchise/config/main-local.php',
             'api/config/main-local.php',
             'api_web/config/main-local.php',
+            'mxct/config/main-local.php',
         ],
     ],
 ];

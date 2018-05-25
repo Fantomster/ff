@@ -43,14 +43,16 @@ class OrderCatalogSearch extends \yii\base\Model {
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
+            'curr.id as currency_id'
         ];
         $fieldsCG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
+            'curr.id as currency_id'
         ];
 
         $where = '';
@@ -86,18 +88,18 @@ class OrderCatalogSearch extends \yii\base\Model {
         }
 
         if(!empty($this->searchPrice)) {
-            if(isset($this->searchPrice['start'])) {
-                $params_sql[':price_start'] = $this->searchPrice['start'];
+            if(isset($this->searchPrice['from'])) {
+                $params_sql[':price_start'] = $this->searchPrice['from'];
                 $where_all .= ' AND price >= :price_start ';
             }
-            if(isset($this->searchPrice['end'])) {
-                $params_sql[':price_end'] = $this->searchPrice['end'];
+            if(isset($this->searchPrice['to'])) {
+                $params_sql[':price_end'] = $this->searchPrice['to'];
                 $where_all .= ' AND price <= :price_end ';
             }
         }
 
         $sql = "
-        SELECT * FROM (
+        SELECT DISTINCT * FROM (
            SELECT 
               " . implode(',', $fieldsCBG) . "
            FROM `catalog_base_goods` `cbg`
@@ -150,7 +152,7 @@ class OrderCatalogSearch extends \yii\base\Model {
                     'i'
                 ],
                 'defaultOrder' => [
-                    'i' => SORT_DESC,
+                    'product' => SORT_ASC,
                     'c_article_1' => SORT_ASC,
                     'c_article' => SORT_ASC
                 ]

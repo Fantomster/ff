@@ -10,6 +10,15 @@ use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
 use yii\web\View;
 
+$js = <<<SCRIPT
+/* To initialize BS3 tooltips set this below */
+$(function () { 
+    $("[data-toggle='tooltip']").tooltip(); 
+});;
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js);
+
 $this->title = Yii::t('message', 'frontend.views.order.set_order', ['ru'=>'Разместить заказ']);
 
 yii\jui\JuiAsset::register($this);
@@ -216,10 +225,10 @@ $this->registerJs(
                             'summary' => '',
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
-                            'rowOptions'=>function($model) use ($orders){
-                                foreach ($orders as $order){
-                                    foreach($order->orderContent as $product){
-                                        if($model['id'] == $product->product_id){
+                            'rowOptions'=>function($model) use ($cart){
+                                foreach ($cart as $vendor) {
+                                    foreach ($vendor['items'] as $item) {
+                                        if ($model['id'] == $item['id']) {
                                             return ['class' => 'success'];
                                         }
                                     }
@@ -256,7 +265,8 @@ $this->registerJs(
                                     'attribute' => 'price',
                                     'value' => function ($data) {
                                         $unit = empty($data['ed']) ? '' : " / " . Yii::t('app', $data['ed']);
-                                        return '<b>' . $data['price'] . '</b> ' . $data['symbol'] . $unit;
+                                        return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['updated_at'], "dd-MM-YY").'"><b>'
+                                        . $data['price'] . '</b> ' . $data['symbol'] . $unit.'</span>';
                                     },
                                     'label' => Yii::t('message', 'frontend.views.order.price', ['ru'=>'Цена']),
                                     'contentOptions' => ['class' => 'width150'],

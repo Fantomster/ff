@@ -55,7 +55,7 @@ class ProductgroupController extends \frontend\modules\clientintegr\controllers\
         $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductgroupHelper();
         $res->getCategory();
         
-            $this->redirect('\clientintegr\rkws\default');
+            $this->redirect('/clientintegr/rkws/default');
             
     }
       

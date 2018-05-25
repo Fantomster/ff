@@ -13,14 +13,14 @@ return [
     'bootstrap' => ['log'],
     'controllerNamespace' => 'franchise\controllers',
     'components' => [
-        'request' => [
-            'csrfParam' => '_csrf-franchise',
-        ],
-        'user' => [
-            'identityClass' => 'common\models\User',
-            'enableAutoLogin' => true,
-            'identityCookie' => ['name' => '_identity-franchise', 'httpOnly' => true],
-        ],
+//        'request' => [
+//            'csrfParam' => '_csrf-franchise',
+//        ],
+//        'user' => [
+//            'identityClass' => 'common\models\User',
+//            'enableAutoLogin' => true,
+//            'identityCookie' => ['name' => '_identity-franchise', 'httpOnly' => true],
+//        ],
         'view' => [
             'theme' => [
                 'pathMap' => [
@@ -28,10 +28,10 @@ return [
                 ],
             ],
         ],
-        'session' => [
-            // this is the name of the session cookie used for login on the franchise
-            'name' => 'advanced-franchise',
-        ],
+//        'session' => [
+//            // this is the name of the session cookie used for login on the franchise
+//            'name' => 'advanced-franchise',
+//        ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [

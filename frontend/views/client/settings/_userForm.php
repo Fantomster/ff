@@ -50,7 +50,7 @@ $form = ActiveForm::begin([
     ])
     ?>
 
-    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label(Yii::t('message', 'frontend.views.client.settings.role', ['ru'=>"Роль"])) ?>
+    <?= $form->field($user, 'role_id')->dropDownList($dropDown, ['options' =>[ $selected => ['Selected' => true]]])->label(Yii::t('message', 'frontend.views.client.settings.role', ['ru'=>"Роль"])) ?>
 
 </div>
 <div class="modal-footer">
@@ -75,7 +75,7 @@ $form = ActiveForm::begin([
 
 
 <?php
-$chkmailUrl = Url::to(['client/chkmail']);
+$chkmailUrl = Url::to(['client/check-email']);
 
 $customJs = <<< JS
 
@@ -103,9 +103,11 @@ $('#user-form').on('afterValidateAttribute', function (event, attribute, message
                         $('#user-newpassword').val('********');
                         $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').attr('readonly','readonly');
 		                console.log('type = 6');    
-	                }               
+	                }else{
+	                    $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').removeAttr('readonly');
+	                }            
                 } else {
-		            console.log(response.message); 
+		            $('#profile-full_name,#profile-phone,#organization-name,#user-newpassword').removeAttr('readonly');
                 }
             },
             error: function(response) {

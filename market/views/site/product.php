@@ -93,6 +93,11 @@ font-family: "HelveticaBold",Arial,sans-serif;
                     <h3><?= Html::decode(Html::decode($product->product)) ?> <br>
                         <a class="grey-link" href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
                             <small><?= $vendor->name ?></small>
+                            <?php if($vendor->gln_code > 0){
+                            $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
+                            echo Html::img(Url::to('/images/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 40]);
+                            }
+                            ?>
                         </a>
                     </h3>
               <?php if(empty($product->mp_show_price)){ ?>

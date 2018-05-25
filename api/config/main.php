@@ -12,8 +12,9 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => [
                     'log',
-                    'api\modules\v1\modules\supp\Bootstrap'    
-                   ],
+                    'api\modules\v1\modules\supp\Bootstrap',
+                    'api\modules\v1\modules\odinsrest\Bootstrap'
+    ],
     'controllerNamespace' => 'api\common\controllers',
     'defaultRoute' => 'site',
     'components' => [

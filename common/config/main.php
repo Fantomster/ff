@@ -54,6 +54,12 @@ return [
             'secret' => '5R6cvdzzWSCsNL8s3pi1/6jW+oWElzTOjhvZpJeN',
             'bucket' => 'fkeeper',
         ],
+        'resourceManagerStatic' => [
+            'class' => 'dosamigos\resourcemanager\AmazonS3ResourceManager',
+            'key' => 'AKIAJZH26ZXTQSLVFT6A',
+            'secret' => '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',
+            'bucket' => 'static.mixcart.ru',
+        ],
         'i18n' => [
             'translations' => [
                 'kvexport' => [
@@ -104,7 +110,7 @@ return [
         'urlManager' => [
             'class' => 'codemix\localeurls\UrlManager',
             //Список языков, какая тут очередность, так и будет выводиться в виджите
-            'languages' => ['en', 'ru', 'es', 'md'],
+            'languages' => ['en', 'ru', 'es', 'md', 'ua'],
             //Определение языка по заголовкам
             'enableLanguageDetection' => false,
             //Выводить язык по умолчанию в URL
@@ -124,6 +130,7 @@ return [
                 'forgot' => 'user/forgot',
                 'resend' => 'user/resend',
                 'reset' => 'user/reset',
+                'unsubscribe/<token:.+?>' => 'site/unsubscribe',
                 'orders' => 'order/index',
                 'product/<id:\d+>' => 'site/product',
                 'restaurant/<id:\d+>' => 'site/restaurant',
@@ -202,6 +209,13 @@ return [
             'class' => 'common\components\GoogleShortUrl',
             'apiKey' => 'AIzaSyBBFwzatN-rVz6kESUAziVngA-T3_0W6Pk',
         ],
+        'siteApi' => [
+            'class' => 'mongosoft\soapclient\Client',
+            'url' => 'https://soap.edi.su/soap/?wsdl',
+            'options' => [
+                'cache_wsdl' => WSDL_CACHE_NONE,
+            ],
+        ]
     ],
     'modules' => [
         'user' => [

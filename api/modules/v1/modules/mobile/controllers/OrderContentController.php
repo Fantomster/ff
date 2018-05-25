@@ -218,7 +218,7 @@ class OrderContentController extends ActiveController {
                 }
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->recipientsList as $recipient) {
@@ -233,7 +233,7 @@ class OrderContentController extends ActiveController {
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->status = ($order->status == Order::STATUS_PROCESSING)? Order::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();
@@ -268,19 +268,20 @@ class OrderContentController extends ActiveController {
 
         $order = $product->order;
 
-        if($order->status >=4 && $order->status !=7)
+        if($order->status != 1)
             throw new BadRequestHttpException('This order is close');
 
         $product->save(false);
 
-        $message = "добавил ".$product->product_name." ".$product->quantity." ".$product->product->ed;
+        $message = $message = Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "<br/>добавил {prod} {quantity} {ed} по цене {productPrice} {currencySymbol}/{ed} ",
+            'prod' => $product->product_name, 'productPrice' => $product->price, 'currencySymbol' => $order->currency->symbol, 'ed' => $product->product->ed, 'quantity' => $product->quantity]);
 
         $user = Yii::$app->user->getIdentity();
         $organizationType = $user->organization->type_id;
 
         if ($organizationType == Organization::TYPE_RESTAURANT) {
-            $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-            $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+            //$order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->recipientsList as $recipient) {
                 $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
@@ -294,11 +295,11 @@ class OrderContentController extends ActiveController {
             $order->save();
             $this->sendOrderChange($order->client, $order);
         } elseif ($organizationType == Organization::TYPE_SUPPLIER) {
-            $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
-            $order->accepted_by_id = $user->id;
+            //$order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+            //$order->accepted_by_id = $user->id;
             $order->calculateTotalPrice();
             $order->save();
-            $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+            $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №'])  . $order->id . ":$message");
             $this->sendOrderChange($order->vendor, $order);
             $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
             foreach ($order->client->users as $recipient) {
@@ -367,7 +368,7 @@ class OrderContentController extends ActiveController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-        /*foreach ($clientUsers as $clientUser) {
+        foreach ($clientUsers as $clientUser) {
             $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
@@ -390,7 +391,7 @@ class OrderContentController extends ActiveController {
                     'order_id' => $order_id,
                 ])
             ]);
-        }*/
+        }
 
         return true;
     }
@@ -412,28 +413,30 @@ class OrderContentController extends ActiveController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $notification = ($recipient->getEmailNotification($order->vendor_id)) ? $recipient->getEmailNotification($order->vendor_id) : $recipient->getEmailNotification($order->client_id);
-            if ($notification)
-                if($notification->order_canceled)
-                {
-                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
-            }
-            
-            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+            foreach ($orgs as $org) {
+                $notification = $recipient->getEmailNotification($org);
+                if ($notification)
+                    if ($notification->order_canceled) {
+                        $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
 
-            $notification = ($recipient->getSmsNotification($order->vendor_id)) ? $recipient->getSmsNotification($order->vendor_id) : $recipient->getSmsNotification($order->client_id);
-            if ($notification)
-                if($profile->phone && $notification->order_canceled)
-                {
-                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
-                $target = $profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification)
+                    if ($profile->phone && $notification->order_canceled) {
+                        $text = $senderOrg->name . " отменил заказ " . Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
+                        $target = $profile->phone;
+                        Yii::$app->sms->send($text, $target);
+                    }
             }
         }
     }

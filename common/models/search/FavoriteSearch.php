@@ -2,22 +2,26 @@
 
 namespace common\models\search;
 
+use common\models\Order;
 use Yii;
 use yii\data\SqlDataProvider;
+use yii\db\Query;
 
 /**
  * Description of FavoriteSearch
  *
  * @author elbabuino
  */
-class FavoriteSearch extends \yii\base\Model {
+class FavoriteSearch extends \yii\base\Model
+{
 
     public $searchString;
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['searchString', 'id', 'product', 'order.created_at'], 'safe'],
         ];
@@ -31,92 +35,69 @@ class FavoriteSearch extends \yii\base\Model {
      *
      * @return SqlDataProvider
      */
-    public function search($params, $clientId) {
-
+    public function search($params, $clientId)
+    {
         $this->load($params);
+        //Создаем запрос
+        $query = (new Query())->select([
+            'cbg.id as cbg_id',
+            'cbg.product',
+            'cbg.units',
+            'COALESCE(cg.price, cbg.price) as price',
+            'COALESCE(cg.cat_id, cbg.cat_id) as cat_id',
+            'org.name',
+            'cbg.ed',
+            'curr.symbol',
+            'cbg.note',
+            'count(ord.id) as count'
+        ]);
+        //Толео заказа
+        $query->from('`order_content` AS oc');
+        //Заказ
+        $query->innerJoin('`order` as ord', 'oc.order_id = ord.id');
+        //Товар из главного каталога
+        $query->innerJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
+        //Каталоги, с которыми работает ресторан
+        $query->innerJoin('`catalog` as cat', 'cbg.cat_id = cat.id AND (
+           cbg.cat_id IN (
+                SELECT cat_id FROM relation_supp_rest WHERE supp_org_id=cbg.supp_org_id AND rest_org_id = :client_id
+           )
+        )', [':client_id' => $clientId]);
+        //Индивидуальный каталог
+        $query->leftJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id and cg.cat_id = cat.id');
+        //Организация
+        $query->innerJoin('organization AS org', 'cbg.supp_org_id = org.id');
+        //Валюта
+        $query->innerJoin('currency AS curr', 'cat.currency_id = curr.id');
+        //Условия отбора
+        $query->where('cbg.status = 1 AND cbg.deleted = 0');
+        //Только эти заказы
+        $query->andWhere(['in', 'ord.status', [
+            Order::STATUS_PROCESSING,
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_DONE
+        ]]);
 
-        $searchString = "%$this->searchString%";
+        if (!empty($this->searchString)) {
+            $query->andWhere('cbg.product LIKE :searchString', [':searchString' => "%$this->searchString%"]);
+        }
+        //Группируем по товару
+        $query->groupBy('cbg_id');
 
-        $query = "
-            SELECT
-                cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
-                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
-                    AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
-                JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE 
-                (cbg.product LIKE :searchString) 
-                AND (cbg.status = 1) 
-                AND (cbg.deleted = 0) 
-            GROUP BY cbg.id
-            UNION ALL
-            (SELECT
-                cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
-                LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = oc.product_id 
-                    AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
-                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-                LEFT JOIN catalog cat ON cg.cat_id = cat.id
-                JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE 
-                (cbg.product LIKE :searchString) 
-                AND (cbg.status = 1) 
-                AND (cbg.deleted = 0) 
-            GROUP BY cbg.id)
-        ";
-
-        $query1 = "
-            SELECT
-                COUNT(DISTINCT cbg.id) 
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
-                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
-                    AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
-                JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE 
-                (cbg.product LIKE :searchString) 
-                AND (cbg.status = 1) 
-                AND (cbg.deleted = 0) 
-                ";
-        $count1 = Yii::$app->db->createCommand($query1, [':searchString' => $searchString])->queryScalar();
-        $query2 = "
-            SELECT
-                COUNT(DISTINCT cbg.id) 
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
-                LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = oc.product_id 
-                    AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
-                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-                LEFT JOIN catalog cat ON cg.cat_id = cat.id
-                JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE 
-                (cbg.product LIKE :searchString) 
-                AND (cbg.status = 1) 
-                AND (cbg.deleted = 0) 
-                ";
-        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $searchString])->queryScalar();
-
+        //Выдача в датапровайдер
         $dataProvider = new SqlDataProvider([
-            'sql' => $query,
-            'params' => [':searchString' => $searchString],
-            'totalCount' => $count1 + $count2,
+            'sql' => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 10,
             ],
             'sort' => [
                 'attributes' => [
-                    'product',
+                    'count',
                 ],
                 'defaultOrder' => [
-                    'product' => SORT_ASC
+                    'count' => SORT_DESC
                 ]
             ],
         ]);

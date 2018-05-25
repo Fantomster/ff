@@ -18,7 +18,16 @@ $gridColumns = [
         'format' => 'raw',
         'attribute' => 'id',
         'value' => function($data) {
-            return Html::a($data['id'], ['order/view', 'id' => $data['id']]);
+            return Html::a( $data['id'], ['order/view', 'id' => $data['id']]);
+        },
+    ],
+
+    [
+        'format' => 'raw',
+        'label' => 'Город ресторана',
+        'attribute' => 'client_city',
+        'value' => function($data) {
+            return $data['client']['locality'];
         },
     ],
     [
@@ -113,6 +122,7 @@ $gridColumns = [
     GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'options' => [ 'style' => 'table-layout:fixed;' ],
         'columns' => $gridColumns,
     ]);
     ?>

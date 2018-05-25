@@ -4,7 +4,6 @@
 /* @var $model common\models\Order */
 
 use yii\helpers\Html;
-
 $this->title = Yii::t('app', 'Заказ') . ' №' . $model->id;
 $this->params['breadcrumbs'] = [
     ['label' => Yii::t('app', 'Заказы'), 'url' => ['index']],

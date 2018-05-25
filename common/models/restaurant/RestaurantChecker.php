@@ -97,7 +97,7 @@ class RestaurantChecker
 			//нет в базе такого email
 			$result = ['success'=>true,'eventType'=>self::NEW_VENDOR,'message'=>Yii::t('app', 'common.models.no_email_eq', ['ru'=>'Нет совпадений по Email'])];
 			return $result;
-			exit;  
+			//exit;
 			  
 		}	
 	}

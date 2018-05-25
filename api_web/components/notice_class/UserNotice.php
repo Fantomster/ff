@@ -2,6 +2,7 @@
 
 namespace api_web\components\notice_class;
 
+use Yii;
 use api_web\models\ForgotForm;
 use api_web\models\User;
 use yii\web\BadRequestHttpException;
@@ -26,17 +27,17 @@ class UserNotice
 
     /**
      * Отправляем приветственный емайл
-     * @param \common\models\User $user
+     * @param User $user
      * @return int
      */
-    public function sendEmailWelcome(\common\models\User $user)
+    public function sendEmailWelcome(User $user)
     {
         return $user->sendWelcome();
     }
 
     /**
      * Отправляем письмо с востановлением пароля
-     * @param $email
+     * @param string $email
      * @return int
      * @throws BadRequestHttpException
      */
@@ -52,5 +53,67 @@ class UserNotice
         $model = new ForgotForm();
         $model->email = $email;
         return $model->sendForgotEmail();
+    }
+
+    /**
+     * Отправка Email через неделю после регистрации
+     * @param User $user
+     */
+    public function sendEmailWeekend($user)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.weekend.subject', ['ru' => 'Вы с нами уже неделю!']);
+
+        if(!empty($user->email)) {
+            $mailer->compose('weekend', compact("user"))
+                ->setTo($user->email)
+                ->setSubject($subject)
+                ->send();
+        }
+    }
+
+    /**
+     * Отправка Email через 2 дня после регистрации
+     * @param User $user
+     */
+    public function sendEmailDemonstration($user)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/empty';
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.demonstration.subject', ['ru' => 'Как управлять закупками с MixCart']);
+
+        if(!empty($user->email)) {
+            $mailer->compose('@common/mail/demonstration', compact("user"))
+                ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
+                ->setTo($user->email)
+                ->setSubject($subject)
+                ->send();
+        }
+    }
+
+    /**
+     * Отправка Email через 1 час после логина
+     * @param User $user
+     */
+    public function sendEmailManagerMessage($user)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/empty';
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.manager_message.subject', ['ru' => 'Ольга от MixCart']);
+        if(!empty($user->email)) {
+            //var_dump($user);
+            $mailer->compose('@common/mail/manager-message', ['user' => $user])
+                ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
+                ->setTo($user->email)
+                ->setSubject($subject)
+                ->send();
+        }
     }
 }

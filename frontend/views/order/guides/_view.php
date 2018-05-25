@@ -6,6 +6,47 @@ use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use kartik\touchspin\TouchSpin;
 use kartik\form\ActiveForm;
+
+$js = <<<SCRIPT
+/* To initialize BS3 tooltips set this below */
+$(function () { 
+    $("[data-toggle='tooltip']").tooltip(); 
+});;
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js);
+
+$guideUrl = Url::to(['order/ajax-show-guide', 'id'=>$guide->id]);
+
+$this->registerJs('
+    $(document).on("change", "#guideproductssearch-sort", function() {
+        var sort = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: false,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    sort: sort,
+                   }
+   }).done(function() { console.log(222); });
+    });
+    
+    $(document).on("change", "#searchString", function() {
+        var search = $(this).val();
+            $.pjax({
+             type: "GET",
+             push: false,
+             timeout: 10000,
+             url: "' . $guideUrl . '",
+             container: "#guideProductList",
+             data: {
+                    search_string: search,
+                   }
+   }).done(function() { console.log(222); });
+    });
+    ', \yii\web\View::POS_READY);
 ?>
 
 <div class="modal-header">
@@ -23,6 +64,7 @@ use kartik\form\ActiveForm;
                     ],
         ]);
         ?>
+
         <?=
                 $form->field($guideSearchModel, 'searchString', [
                     'addon' => [
@@ -43,6 +85,25 @@ use kartik\form\ActiveForm;
                     'placeholder' => Yii::t('message', 'frontend.views.order.guides.search', ['ru'=>'Поиск по названию'])])
                 ->label(false)
         ?>
+
+        <?=
+        $form->field($guideSearchModel, 'sort', [
+            'options' => [
+                'id' => 'alSortSelect',
+                'class' => "form-group"
+            ],
+        ])
+            ->dropDownList([
+                '1' => Yii::t('app', 'frontend.views.guides.sort_by', ['ru' => 'Сортировка по']),
+                'product 4' => Yii::t('app', 'frontend.views.guides.sort_by_name_asc', ['ru' => 'Наименованию по возрастанию']),
+                'product 3' => Yii::t('app', 'frontend.views.guides.sort_by_name_desc', ['ru' => 'Наименованию по убыванию']),
+                'id 4' => Yii::t('app', 'frontend.views.guides.sort_by_time_asc', ['ru' => 'Порядку добавления по возрастанию']),
+                'id 3' => Yii::t('app', 'frontend.views.guides.sort_by_time_desc', ['ru' => 'Порядку добавления по убыванию']),
+            ], [
+                'options' => [$params['sort'] ?? 1 => ['selected' => true], '1' => ['disabled' => true]]])
+            ->label(false)
+        ?>
+
         <?php ActiveForm::end(); ?>
     </div>
 </div>
@@ -80,7 +141,8 @@ use kartik\form\ActiveForm;
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
+                            return '<span data-toggle="tooltip" data-placement="bottom" title="'.Yii::t('message', 'frontend.views.order.price_update', ['ru'=>'Обновлена:']).' '.Yii::$app->formatter->asDatetime($data['price_updated_at'], "dd-MM-YY").'">'.
+                                $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"].'</span>';
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],

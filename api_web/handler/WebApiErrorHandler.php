@@ -3,6 +3,7 @@
 namespace api_web\handler;
 
 use api_web\exceptions\ValidationException;
+use api_web\helpers\Logger;
 use Yii;
 use yii\base\ErrorHandler;
 use yii\web\NotFoundHttpException;
@@ -31,6 +32,7 @@ class WebApiErrorHandler extends ErrorHandler
         if (isset($exception->statusCode)) {
             $response->setStatusCode($exception->statusCode);
         }
+
         $response->send();
     }
 
@@ -57,6 +59,9 @@ class WebApiErrorHandler extends ErrorHandler
 
         if ($exception instanceof NotFoundHttpException) {
             $error = \GuzzleHttp\json_encode($error);
+        } else {
+            Logger::getInstance()::setType('error');
+            Logger::getInstance()::response($error);
         }
 
         return $error;

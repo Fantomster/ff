@@ -209,7 +209,9 @@ use dosamigos\chartjs\ChartJs;
                         'columns' => [
                             [
                                 'attribute' => 'id',
-                                'value' => 'id',
+                                'value' => function($data) {
+                                    return $data['id'];
+                                },
                                 'label' => "№",
                             ],
                             [

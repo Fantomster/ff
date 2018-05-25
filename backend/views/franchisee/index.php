@@ -18,9 +18,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Franchisee', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <p>
+        Файл json для frontend-api <a href="https://static.mixcart.ru/files/franchisee<?= (strpos(Yii::$app->request->hostName, 'test') || strpos(Yii::$app->request->hostName, 'ev') || strpos(Yii::$app->request->hostName, 'ackend')) ? '-dev' : '' ?>.json" target="_blank">https://static.mixcart.ru/files/franchisee<?= (strpos(Yii::$app->request->hostName, 'test') || strpos(Yii::$app->request->hostName, 'ev') || strpos(Yii::$app->request->hostName, 'ackend')) ? '-dev' : '' ?>.json</a>
+    </p>
 <?php Pjax::begin(); ?>    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'options' => [ 'style' => 'table-layout:fixed;' ],
         'columns' => [
             'id',
             [
@@ -28,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => 'type.name',
                 'label' => 'Тип',
                 'filter' => common\models\FranchiseType::getList(),
+                'contentOptions' => ['style' => 'width:20px; white-space: normal;'],
             ],
             [
                 'format' => 'raw',

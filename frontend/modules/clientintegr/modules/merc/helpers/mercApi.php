@@ -25,6 +25,7 @@ class mercApi extends Component
     private $vetisLogin = '';
     private $_client;
     private $wsdl;
+    private $enterpriseGuid;
 
     private $wsdls = [
         'mercury' => [
@@ -61,6 +62,7 @@ class mercApi extends Component
             self::$_instance->apiKey = mercDicconst::getSetting('api_key');
             self::$_instance->issuerID = mercDicconst::getSetting('issuer_id');
             self::$_instance->vetisLogin = mercDicconst::getSetting('vetis_login');
+            self::$_instance->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
         }
         return self::$_instance;
     }
@@ -121,7 +123,7 @@ class mercApi extends Component
             //Формируем тело запроса
             $vetDoc = new getVetDocumentListRequest();
             $vetDoc->localTransactionId = $localTransactionId;
-            $vetDoc->setEnterpriseGuid('f8805c8f-1da4-4bda-aaca-a08b5d1cab1b');
+            $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
             $vetDoc->setInitiator($this->vetisLogin);
             $application->addData($vetDoc);
             $request->setApplication($application);
@@ -289,7 +291,7 @@ class mercApi extends Component
             //Формируем тело запроса
             $vetDoc = new getVetDocumentByUUIDRequest();
             $vetDoc->localTransactionId = $localTransactionId;
-            $vetDoc->setEnterpriseGuid('f8805c8f-1da4-4bda-aaca-a08b5d1cab1b');
+            $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
             $vetDoc->setInitiator($this->vetisLogin);
             $vetDoc->UUID = $UUID;
             $application->addData($vetDoc);
@@ -546,4 +548,28 @@ class mercApi extends Component
         }
         return $result;
     }*/
+
+    public function getActivityLocationList ()
+    {
+        $client = $this->getSoapClient('vetis');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+            <soapenv:Envelope 
+            xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+            xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" 
+            xmlns:base="http://api.vetrf.ru/schema/cdm/base" 
+            xmlns:v21="http://api.vetrf.ru/schema/cdm/dictionary/v2">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v2:getActivityLocationListRequest>
+         <v21:businessEntity>
+         		<base:guid>'.$this->issuerID.'</base:guid>
+		</v21:businessEntity>
+      </v2:getActivityLocationListRequest>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetActivityLocationList', SOAP_1_1);
+        $list = $this->parseResponse($result);
+
+        return $list;
+    }
 }

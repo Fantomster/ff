@@ -494,8 +494,9 @@ class Order extends \yii\db\ActiveRecord
                 }
         }
 
-        if ($this->status != self::STATUS_FORMING && !$insert && isset($changedAttributes['status']) && $this->status != $changedAttributes['status']) {
-            mail('otpixto@yandex.ru', '1', "<pre>".print_r($changedAttributes, 1)."</pre>");
+        //dd($changedAttributes['status']);
+        if ($this->status != self::STATUS_FORMING && !$insert && key_exists('total_price', $changedAttributes)) {
+            //dd($changedAttributes);
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
@@ -507,7 +508,7 @@ class Order extends \yii\db\ActiveRecord
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client);
                 }
                 if (!$result) {
-                    //throw new BadRequestHttpException("EDI Server error");
+                    throw new BadRequestHttpException("EDI Server error");
                 }
             }
             if (!$client->gln_code && $vendor->gln_code) {

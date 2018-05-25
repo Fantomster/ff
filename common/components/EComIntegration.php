@@ -10,6 +10,7 @@ use common\models\Order;
 use common\models\OrderContent;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use common\models\User;
 use frontend\controllers\OrderController;
 use mongosoft\soapclient\Client;
 use Yii;
@@ -64,7 +65,7 @@ class EComIntegration extends Component {
         if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
             $this->handleOrderResponse($simpleXMLElement);
         }
-        $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
         return true;
     }
 
@@ -73,6 +74,7 @@ class EComIntegration extends Component {
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
+        $message = "";
         if(!$order){
             Yii::error('No such order');
             return false;
@@ -95,17 +97,31 @@ class EComIntegration extends Component {
                 $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
             }
             $arr[$contID]['PRICE'] = $position->PRICE;
+            $arr[$contID]['BARCODE'] = $position->PRODUCT;
         }
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent){
+            $good = CatalogBaseGoods::findOne(['barcode' => $arr[$orderContent->id]['BARCODE']]);
             $ordContArr[] = $orderContent->id;
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
             if(!$ordCont)continue;
             if(!in_array($ordCont->id, $positionsArray)){
                 $ordCont->delete();
+                $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
             }else{
+                $oldQuantity = $ordCont->quantity + 0;
+                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'] + 0;
+                if($oldQuantity!=$newQuantity){
+                    $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
+                }
                 $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
+
+                $oldPrice = $ordCont->price + 0;
+                $newPrice = $arr[$orderContent->id]['PRICE'] + 0;
+                if($oldPrice!=$newPrice){
+                    $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' =>$orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol'=>$order->currency->iso_code]) . $newPrice . " руб";
+                }
                 $ordCont->price = $arr[$orderContent->id]['PRICE'];
                 $summ+=$arr[$orderContent->id]['ACCEPTEDQUANTITY']*$arr[$orderContent->id]['PRICE'];
                 $ordCont->save();
@@ -136,6 +152,12 @@ class EComIntegration extends Component {
             }
         }
         Yii::$app->db->createCommand()->update('order', ['status' => Order::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()'), 'invoice_number' => $simpleXMLElement->DELIVERYNOTENUMBER ?? '', 'invoice_date' => $simpleXMLElement->DELIVERYNOTEDATE ?? ''], 'id='.$order->id)->execute();
+        $user = User::findOne(['id'=>$order->created_by_id]);
+        OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
+
+        $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
+        OrderController::sendSystemMessage($user, $order->id, $systemMessage);
+
         OrderController::sendOrderProcessing($order->client, $order);
     }
 
@@ -286,6 +308,9 @@ class EComIntegration extends Component {
     {
         $orderContent = OrderContent::findAll(['order_id'=>$order->id]);
         $dateArray = $this->getDateData($order);
+        if(!count($orderContent)){
+            return false;
+        }
         $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
         $currentDate = date("Ymdhis");
         $fileName = $done ? 'recadv_' : 'order_';

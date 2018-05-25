@@ -65,7 +65,7 @@ class EComIntegration extends Component {
         if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
             $this->handleOrderResponse($simpleXMLElement);
         }
-        //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
         return true;
     }
 
@@ -222,9 +222,7 @@ class EComIntegration extends Component {
             $relationCatalogID = $rel->cat_id;
         }
 
-        $i=0;
         foreach ($goodsArray as $barcode => $good){
-            if($i>24)break;
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = Yii::$app->db->createCommand()->insert('catalog_base_goods', [
@@ -256,7 +254,6 @@ class EComIntegration extends Component {
                 }
             }
             Yii::$app->db->createCommand()->update('catalog_base_goods', ['updated_at' => new Expression('NOW()'), 'status' => CatalogBaseGoods::STATUS_ON], 'id='.$catalogBaseGood->id)->execute();
-            $i++;
         }
         return true;
     }

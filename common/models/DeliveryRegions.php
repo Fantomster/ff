@@ -37,7 +37,8 @@ class DeliveryRegions extends \yii\db\ActiveRecord
             [['supplier_id', 'country'], 'required'],
             [['supplier_id', 'exception'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['country', 'locality', 'administrative_area_level_1'], 'string', 'max' => 255],
+            [['locality', 'administrative_area_level_1'], 'string', 'max' => 255],
+            [['country'], 'required', 'message' => 'cfg'],
             [['supplier_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['supplier_id' => 'id']],
         ];
     }

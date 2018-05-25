@@ -137,15 +137,15 @@ class EComIntegration extends Component {
                 }else{
                     $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                 }
-                Yii::$app->db->createCommand()->insert('catalog_base_goods', [
+                Yii::$app->db->createCommand()->insert('order_content', [
                     'order_id' => $order->id,
                     'product_id' => $good->id,
                     'quantity' => $quan,
-                    'price' => $position->PRICE,
+                    'price' => (float)$position->PRICE,
                     'initial_quantity' => $quan,
                     'product_name' => $good->product,
                     'plan_quantity' => $quan,
-                    'plan_price' => $position->PRICE,
+                    'plan_price' => (float)$position->PRICE,
                     'units' => $good->units,
                     'updated_at' => new Expression('NOW()'),
                 ])->execute();

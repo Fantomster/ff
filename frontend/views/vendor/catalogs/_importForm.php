@@ -27,7 +27,7 @@ $form = ActiveForm::begin([
         '2' =>Yii::t('message', 'frontend.views.vendor.refresh_prices', ['ru'=>'Обновить цены']),
         '3' =>Yii::t('message', 'frontend.views.vendor.add_on_mix', ['ru'=>'Добавить на MixMarket'])
     ]); ?>
-<?= $form->field($importModel, 'importFile',['template' => "{error}\n{label}\n{hint}\n{input}"])->fileInput()->label(Yii::t('message', 'frontend.views.vendor.choose_xls_two', ['ru'=>'Выберите .XLSX'])) ?>
+<?= $form->field($importModel, 'importFile',['template' => "{error}\n{label}\n{hint}\n{input}", 'errorOptions' => ['tag' => null]])->fileInput()->label(Yii::t('message', 'frontend.views.vendor.choose_xls_two', ['ru'=>'Выберите .XLSX'])) ?>
 </div>
 <div class="modal-footer">
     <div class="row">

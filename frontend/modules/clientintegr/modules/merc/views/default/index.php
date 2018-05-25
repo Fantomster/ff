@@ -45,6 +45,15 @@ Modal::widget([
         <div class="box-header with-border">
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
+                    <?php if (Yii::$app->session->hasFlash('success')): ?>
+                        <div class="alert alert-danger alert-dismissable">
+                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                            <h4>
+                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                            </h4>
+                            <?= Yii::$app->session->getFlash('success') ?>
+                        </div>
+                    <?php endif; ?>
                     <?php
                     Pjax::begin(['id' => 'pjax-vsd-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true]);
                     ?>

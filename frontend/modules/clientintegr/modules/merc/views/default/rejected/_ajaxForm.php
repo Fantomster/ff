@@ -18,6 +18,15 @@ $form = ActiveForm::begin([
         <h4 class="modal-title">Акт несоответствия</h4>
     </div>
     <div class="modal-body">
+        <?php if (Yii::$app->session->hasFlash('success')): ?>
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <h4>
+                    <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                </h4>
+                <?= Yii::$app->session->getFlash('success') ?>
+            </div>
+        <?php endif; ?>
         <?php echo $form->errorSummary($model); ?>
         <?php
         if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial::RETURN_ALL)

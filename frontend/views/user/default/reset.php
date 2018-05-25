@@ -59,8 +59,8 @@ if (!empty($success) || !empty($invalidToken)) {
 <?php if (!empty($success)): ?>
         <div class="success-message"><a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" class="success-message__ico"></a>
             <div class="success-message__text">
-                <p><?= Yii::t("user", "Password has been reset") ?></p>
-                <p><?= Html::a(Yii::t("user", "Log in here"), ["/user/login"]) ?></p>
+                <p><?= Yii::t("app", "Password has been reset") ?></p>
+                <p><?= Html::a(Yii::t("app", "Log in here"), ["/user/login"]) ?></p>
             </div>
         </div>
 
@@ -108,7 +108,7 @@ if (!empty($success) || !empty($invalidToken)) {
                         <i class="fa fa-lock"></i>
                     </label>
                 </div>
-                <button type="submit" id="btnSend" class="but but_green"><span><?= Yii::t('user', 'Reset') ?></span><i class="ico"></i></button>
+                <button type="submit" id="btnSend" class="but but_green"><span><?= Yii::t('app', 'Reset') ?></span><i class="ico"></i></button>
     <?php ActiveForm::end(); ?>
                 <div class="auth-sidebar__contacts">
                     <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>

@@ -131,6 +131,7 @@ class EComIntegration extends Component {
             $contID = (int) $position->PRODUCTIDBUYER;
             if(!in_array($contID, $ordContArr)){
                 $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                if(!$good)continue;
                 if($isDesadv){
                     $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
                 }else{

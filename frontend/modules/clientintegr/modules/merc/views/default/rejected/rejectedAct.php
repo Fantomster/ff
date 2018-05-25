@@ -6,7 +6,7 @@ $this->title = 'Акт несоответствия';
 
 <section class="content-header">
     <h1>
-        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
         Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=

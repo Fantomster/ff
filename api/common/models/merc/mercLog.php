@@ -16,6 +16,8 @@ use Yii;
  * @property string $description
  * @property string $created_at
  * @property string $action;
+ * @property string $request
+ * @property string $response
  */
 class mercLog extends \yii\db\ActiveRecord
 {
@@ -55,7 +57,7 @@ class mercLog extends \yii\db\ActiveRecord
         return [
             [['user_id', 'organization_id'], 'integer'],
             [['description'], 'string'],
-            [['created_at'], 'safe'],
+            [['created_at', 'request', 'response'], 'safe'],
             [['localTransactionId'], 'string', 'max' => 100],
             [['applicationId','action'], 'string', 'max' => 255],
             [['status'], 'string', 'max' => 45],
@@ -76,7 +78,9 @@ class mercLog extends \yii\db\ActiveRecord
             'status' => 'Status',
             'description' => 'Description',
             'created' => 'Created',
-            'action' => 'Action'
+            'action' => 'Action',
+            'request' => 'Request',
+            'response' => 'Response',
         ];
     }
 

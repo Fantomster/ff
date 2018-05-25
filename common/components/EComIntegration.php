@@ -34,7 +34,7 @@ class EComIntegration extends Component {
             Yii::error('EComIntegration getList Error');
             throw new ErrorException();
         }
-        $list = $object->result->list;
+        $list = $object->result->list ?? null;
         if(!$list){
             echo "No files";
             exit();

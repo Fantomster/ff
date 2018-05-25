@@ -117,8 +117,8 @@ class EComIntegration extends Component {
                 }
                 $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
 
-                $oldPrice = $ordCont->price + 0;
-                $newPrice = $arr[$orderContent->id]['PRICE'] + 0;
+                $oldPrice = $ordCont->price;
+                $newPrice = $arr[$orderContent->id]['PRICE'];
                 if($oldPrice!=$newPrice){
                     $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' =>$orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol'=>$order->currency->iso_code]) . $newPrice . " руб";
                 }
@@ -131,6 +131,7 @@ class EComIntegration extends Component {
             $contID = (int) $position->PRODUCTIDBUYER;
             if(!in_array($contID, $ordContArr)){
                 $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                if(!$good)continue;
                 if($isDesadv){
                     $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
                 }else{

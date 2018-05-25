@@ -35,6 +35,10 @@ class EComIntegration extends Component {
             throw new ErrorException();
         }
         $list = $object->result->list;
+        if(!$list){
+            echo "No files";
+            exit();
+        }
         if(is_iterable($list)){
             foreach ($list as $fileName){
                 //if (strpos($fileName, 'ricat_')){

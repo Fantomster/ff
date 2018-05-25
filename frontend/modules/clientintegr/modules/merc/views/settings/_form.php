@@ -16,21 +16,12 @@ use common\models\User;
     <?php echo $form->errorSummary($model); ?>
     <?php
     switch ($dicConst->type) {
-        case \api\common\models\iiko\iikoDicconst::TYPE_DROP :
-            if ($dicConst->denom === 'taxVat') {
-                echo $form->field($model, 'value')->dropDownList([
-                    '0' => '0',
-                    '1000' => '10',
-                    '1800' => '18'
-                ]);
-            } else {
-                echo $form->field($model, 'value')->dropDownList([
-                    '0' => 'Выключено',
-                    '1' => 'Включено',
-                ]);
+        case \api\common\models\merc\mercDicconst::TYPE_DROP :
+            if ($dicConst->denom === 'enterprise_guid') {
+                echo $form->field($model, 'value')->dropDownList($org_list);
             }
         break;
-        case \api\common\models\iiko\iikoDicconst::TYPE_PASSWORD:
+        case \api\common\models\merc\mercDicconst::TYPE_PASSWORD:
             echo $form->field($model, 'value')->passwordInput(['maxlength' => true]);
         break;
         default:

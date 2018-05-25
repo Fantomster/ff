@@ -18,7 +18,7 @@ use yii\widgets\Breadcrumbs;
                 'label' => 'Интеграция',
                 'url' => ['/vendorintegr'],
             ],
-            'Интеграция с iiko Office',
+            'Интеграция с системой ВЕТИС "Меркурий"',
         ],
     ])
     ?>
@@ -34,7 +34,8 @@ use yii\widgets\Breadcrumbs;
                     <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
                         <?php echo $this->render('_form', [
                             'model' => $model,
-                            'dicConst' => $dicConst
+                            'dicConst' => $dicConst,
+                            'org_list' => $org_list,
                         ]) ?>
                     </div>
                 </div>

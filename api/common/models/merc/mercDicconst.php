@@ -5,7 +5,7 @@ namespace api\common\models\merc;
 use Yii;
 
 /**
- * This is the model class for table "{{%iiko_dicconst}}".
+ * This is the model class for table "{{%merc_dicconst}}".
  *
  * @property integer $id
  * @property string $denom
@@ -56,7 +56,7 @@ class mercDicconst extends \yii\db\ActiveRecord
             'def_value' => Yii::t('app', 'Def Value'),
             'comment' => Yii::t('app', 'Comment'),
             'type' => Yii::t('app', 'Type'),
-            'is_active' => Yii::t('app', 'Is Active'),
+            'is_active' => Yii::t('app', 'Is Active')
         ];
     }
 
@@ -84,5 +84,23 @@ class mercDicconst extends \yii\db\ActiveRecord
                 throw new \Exception('Не заполнено свойство в настройках ' . $denom);
             }
         }
+    }
+
+    public static function checkSettings()
+    {
+        $consts = self::find()->all();
+
+        foreach ($consts as $item)
+        {
+            try {
+                self::getSetting($item->denom);
+            }
+            catch (\Exception $e)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

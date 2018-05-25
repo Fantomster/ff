@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\search\mercDicconstSearch;
+use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 use Yii;
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -69,15 +70,29 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             return $this->redirect(['index']);
         } else {
             $dicConst = mercDicconst::findOne(['id' => $pConst->const_id]);
+
+            $org = [];
+            if($dicConst->denom == 'enterprise_guid')
+            {
+                $list = mercApi::getInstance()->getActivityLocationList();
+
+                foreach ($list->soapenvBody->v2getActivityLocationListResponse->dtactivityLocationList->dtlocation as $item)
+                {
+                    $org[$item->dtenterprise->bsguid->__toString()] = $item->dtenterprise->dtname->__toString(). ' ('.$item->dtenterprise->dtaddress->dtaddressView->__toString().')';
+                }
+
+            }
             if(Yii::$app->request->isAjax)
                 return $this->renderAjax($vi, [
                     'model' => $pConst,
                     'dicConst' => $dicConst,
+                    'org_list' => $org,
                 ]);
 
             return $this->render($vi, [
                 'model' => $pConst,
                 'dicConst' => $dicConst,
+                'org_list' => $org,
             ]);
         }
 

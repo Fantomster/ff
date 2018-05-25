@@ -181,7 +181,7 @@ class mercApi extends Component
         $log->action = $method;
         $log->localTransactionId =  $localTransactionId;
         $log->request = $request;
-        $log->response = $response;
+        $log->response = $response_xml;
 
         if($log->status == mercLog::REJECTED) {
             $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);

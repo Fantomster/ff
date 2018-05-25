@@ -21,6 +21,7 @@ class GuideSearch extends Guide
     public $updated_date_to;
     public $date_to;
     public $vendor_id;
+    public $vendors;
     public $searchString;
 
     /**
@@ -104,6 +105,10 @@ class GuideSearch extends Guide
 
         if (isset($this->vendor_id)) {
             $query->andWhere(['=', CatalogBaseGoods::tableName() . '.supp_org_id', $this->vendor_id]);
+        }
+
+        if (isset($this->vendors)) {
+            $query->andWhere(['IN', CatalogBaseGoods::tableName() . '.supp_org_id', $this->vendors]);
         }
         //dd($query);
 

@@ -117,8 +117,8 @@ class EComIntegration extends Component {
                 }
                 $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
 
-                $oldPrice = $ordCont->price + 0;
-                $newPrice = $arr[$orderContent->id]['PRICE'] + 0;
+                $oldPrice = $ordCont->price;
+                $newPrice = $arr[$orderContent->id]['PRICE'];
                 if($oldPrice!=$newPrice){
                     $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' =>$orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol'=>$order->currency->iso_code]) . $newPrice . " руб";
                 }

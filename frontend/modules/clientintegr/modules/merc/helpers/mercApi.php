@@ -12,8 +12,10 @@ use frontend\modules\clientintegr\modules\merc\models\data;
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest;
 use frontend\modules\clientintegr\modules\merc\models\receiveApplicationResultRequest;
 use frontend\modules\clientintegr\modules\merc\models\submitApplicationRequest;
+use yii\base\Component;
+use yii\web\BadRequestHttpException;
 
-class mercApi
+class mercApi extends Component
 {
     private $login;
     private $pass;
@@ -22,6 +24,7 @@ class mercApi
     private $service_id = 'mercury-g2b.service';
     private $vetisLogin = '';
     private $_client;
+    private $wsdl;
 
     private $wsdls = [
         'mercury' => [
@@ -85,13 +88,16 @@ class mercApi
         return base64_encode($method.time());
     }
 
-    private function parseResponse($response)
+    private function parseResponse($response, $convert = false)
     {
-        $xmlString = str_replace('SOAP-ENV', 'soapenv', $response);
-        $xmlString = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $xmlString);
+        if(!$convert) {
+            $xmlString = str_replace('SOAP-ENV', 'soapenv', $response);
+            $xmlString = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $xmlString);
+        }
+        else
+        $xmlString = $response;
 
         $xml = simplexml_load_string($xmlString);
-
         return new \SimpleXMLElement($xml->asXML());
     }
 
@@ -120,23 +126,25 @@ class mercApi
             $application->addData($vetDoc);
             $request->setApplication($application);
 
+            /*var_dump(htmlentities($request->getXML()));
+            die();*/
+
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+            /*var_dump(htmlentities($response));
+            die();*/
 
             $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {
-                echo "Bad request";
-                die();
+                throw new BadRequestHttpException();
             }
 
             //timeout перед запросом результата
             sleep(2);
             //Получаем результат запроса
             $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
-
-        //    var_dump(htmlentities($response));
-        //    die();
 
             $result = $this->parseResponse($response);
 
@@ -179,6 +187,12 @@ class mercApi
 
     public function getUnitByGuid ($GUID)
     {
+        $cache = Yii::$app->cache;
+        $unit = $cache->get('Unit_'.$GUID);
+
+        if(!($unit === false))
+            return $this->parseResponse($unit, true);
+
         $client = $this->getSoapClient('dicts');
         $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
@@ -190,27 +204,44 @@ class mercApi
    </soapenv:Body>
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetUnitByGuid', SOAP_1_1);
-        return $this->parseResponse($result);
+        $unit = $this->parseResponse($result);
+        $cache->add('Unit_'.$GUID, $unit->asXML(), 60*60*24*7);
+        return $unit;
     }
 
     public function getBusinessEntityByUuid ($UUID)
-{
-    $client = $this->getSoapClient('vetis');
-    $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
-        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <v2:getBusinessEntityByUuidRequest>
-         <base:uuid>'.$UUID.'</base:uuid>
-      </v2:getBusinessEntityByUuidRequest>
-   </soapenv:Body>
-</soapenv:Envelope>';
-    $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
-    return $this->parseResponse($result);
-}
+    {
+        $cache = Yii::$app->cache;
+
+        $business = $cache->get('Business_'.$UUID);
+
+        if(!($business === false))
+            return $this->parseResponse($business, true);
+
+        $client = $this->getSoapClient('vetis');
+        $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
+       <soapenv:Header/>
+       <soapenv:Body>
+          <v2:getBusinessEntityByUuidRequest>
+             <base:uuid>'.$UUID.'</base:uuid>
+          </v2:getBusinessEntityByUuidRequest>
+       </soapenv:Body>
+    </soapenv:Envelope>';
+        $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
+        $business = $this->parseResponse($result);
+        $cache->add('Business_'.$UUID, $business->asXML(), 60*60*24);
+        return $business;
+    }
 
     public function getEnterpriseByUuid ($UUID)
     {
+        $cache = Yii::$app->cache;
+        $enterprise = $cache->get('Enterprise_'.$UUID);
+
+        if(!($enterprise === false))
+            return $this->parseResponse($enterprise, true);
+
         $client = $this->getSoapClient('vetis');
         $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://api.vetrf.ru/schema/cdm/registry/ws-definitions/v2" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
@@ -222,11 +253,20 @@ class mercApi
    </soapenv:Body>
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetEnterpriseByUuid', SOAP_1_1);
-        return $this->parseResponse($result);
+        $enterprise = $this->parseResponse($result);
+
+        $cache->add('Enterprise_'.$UUID, $enterprise->asXML(), 60*60*24);
+        return $enterprise;
     }
 
     public function getVetDocumentByUUID($UUID)
     {
+        $cache = Yii::$app->cache;
+        $doc = $cache->get('vetDocRaw_'.$UUID);
+
+        if (!($doc === false))
+            return $this->parseResponse($doc, true);
+
         $client = $this->getSoapClient('mercury');
         $result = null;
 
@@ -257,8 +297,7 @@ class mercApi
             $result = $this->parseResponse($response);
 
             if(isset($result->envBody->envFault)) {
-                echo "Bad request";
-                die();
+                throw new BadRequestHttpException();
             }
 
             //timeout перед запросом результата
@@ -271,6 +310,11 @@ class mercApi
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
 
 
+            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETE')
+                $cache->add('vetDocRaw_'.$UUID, $result->asXML(), 60*5);
+            else
+                $result->null;
+
         }catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
         }
@@ -279,6 +323,12 @@ class mercApi
 
     public function getProductByGuid ($GUID)
     {
+        $cache = Yii::$app->cache;
+        $product = $cache->get('Product_'.$GUID);
+
+        if(!($product === false))
+            return $this->parseResponse($product, true);
+
         $client = $this->getSoapClient('product');
         $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
        <soapenv:Header/>
@@ -289,11 +339,21 @@ class mercApi
        </soapenv:Body>
     </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
-        return $this->parseResponse($result);
+        //var_dump($result); die();
+        $product = $this->parseResponse($result);
+
+        $cache->add('Product_'.$GUID, $product->asXML(), 60*60*24);
+        return $product;
     }
 
     public function getSubProductByGuid ($GUID)
     {
+        $cache = Yii::$app->cache;
+        $subProduct = $cache->get('SubProduct_'.$GUID);
+
+        if(!($subProduct === false))
+            return $this->parseResponse($subProduct, true);
+
         $client = $this->getSoapClient('product');
         $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/production/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
    <soapenv:Header/>
@@ -304,11 +364,20 @@ class mercApi
    </soapenv:Body>
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['product']['Endpoint_URL'], 'GetProductByGuid', SOAP_1_1);
-        return $this->parseResponse($result);
+        $subProduct = $this->parseResponse($result);
+
+        $cache->add('subProduct_'.$GUID, $subProduct->asXML(), 60*60*24);
+        return $subProduct;
     }
 
     public function getCountryByGuid ($GUID)
     {
+        $cache = Yii::$app->cache;
+        $country = $cache->get('Country_'.$GUID);
+
+        if(!($country === false))
+            return $this->parseResponse($country, true);
+
         $client = $this->getSoapClient('ikar');
         $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/ikar/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
    <soapenv:Header/>
@@ -319,11 +388,20 @@ class mercApi
    </soapenv:Body>
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['ikar']['Endpoint_URL'], 'GetCountryByGuid', SOAP_1_1);
-        return $this->parseResponse($result);
+        $country = $this->parseResponse($result);
+
+        $cache->add('Country_'.$GUID, $country->asXML(), 60*60*24*7);
+        return $country;
     }
 
     public function getPurposeByGuid ($GUID)
     {
+        $cache = Yii::$app->cache;
+        $purpose = $cache->get('Purpose_'.$GUID);
+
+        if(!($purpose === false))
+            return $this->parseResponse($purpose, true);
+
         $client = $this->getSoapClient('dicts');
         $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://api.vetrf.ru/schema/cdm/argus/common/ws-definitions" xmlns:base="http://api.vetrf.ru/schema/cdm/base">
    <soapenv:Header/>
@@ -334,7 +412,10 @@ class mercApi
    </soapenv:Body>
 </soapenv:Envelope>';
         $result =  $client->__doRequest($xml, $this->wsdls['dicts']['Endpoint_URL'], 'GetPurposeByGuid', SOAP_1_1);
-        return $this->parseResponse($result);
+        $purpose = $this->parseResponse($result);
+
+        $cache->add('Purpose_'.$GUID, $purpose->asXML(), 60*60*24*7);
+        return $purpose;
     }
 
     public function getVetDocumentDone($UUID)
@@ -367,8 +448,6 @@ class mercApi
             die();*/
             //Делаем запрос
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
-
-
 
             $result = $this->parseResponse($response);
 
@@ -421,9 +500,14 @@ class mercApi
             $request->setApplication($application);
 
             //Делаем запрос
+
+           /* var_dump(htmlentities($request->getXML()));
+            die();*/
+
             $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
-
+            /*var_dump(htmlentities($response));
+            die();*/
 
             $result = $this->parseResponse($response);
 

@@ -5,7 +5,8 @@ use yii\widgets\Breadcrumbs;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
+        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -23,8 +24,7 @@ use yii\widgets\Breadcrumbs;
     ?>
 </section>
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-    Редактирование настройки: <?php echo "<strong>" . $dicConst->comment . " </strong>"; ?>
+    <h4>Редактирование настройки: <?php echo "<strong>" . $dicConst->comment . " </strong>"; ?></h4>
 </section>
 <section class="content">
     <div class="catalog-index">

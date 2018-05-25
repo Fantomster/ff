@@ -205,31 +205,22 @@ class getVetDocumentByUUIDRequest extends BaseRequest
     public function getDocumentByUUID($UUID, $raw = false)
     {
         $cache = \Yii::$app->cache;
-        $cache->flush();
-        //$cache->flush();
         $attributes = $cache->get('vetDoc_'.$UUID);
         if($attributes && !$raw) {
             $this->setAttributes($attributes);
-            return;
+                return;
         }
 
         $this->UUID = $UUID;
 
-        $doc = $cache->get('vetDocRaw_'.$UUID);
-        if(!$doc) {
-            $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
-            $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
-            $cache->add('vetDocRaw_'.$UUID, $doc->asXML());
-        }
-        else
-        {
-            $doc = simplexml_load_string($doc);
-            $doc = new \SimpleXMLElement($doc->asXML());
-        }
+        $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+        $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
-        if($raw)
+        if($raw) {
             return $doc;
+        }
 
+        //var_dump($doc);
         $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
         $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
         $this->issueDate = $doc->ns2issueDate->__toString();
@@ -405,7 +396,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
                 ],
                 [
                     'label' => 'Номер авиарейса',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpflightNumbe) ? $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString() : null,
+                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpflightNumber) ? $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString() : null,
                 ]
             ]
         ]) : null;

@@ -4,7 +4,12 @@ use yii\widgets\Breadcrumbs;
 $this->title = 'Акт несоответствия';
 ?>
 
- <?=
+<section class="content-header">
+    <h1>
+        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        Интеграция с системой ВЕТИС "Меркурий"
+    </h1>
+    <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
@@ -21,9 +26,13 @@ $this->title = 'Акт несоответствия';
             $this->title,
         ],
     ]) ?>
+</section>
+
+<section class="content-header">
+    <h4><?= $this->title ?></h4>
+</section>
 
 <section class="content">
-    <h4><?= $this->title ?></h4>
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">

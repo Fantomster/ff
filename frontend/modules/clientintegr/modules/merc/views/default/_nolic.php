@@ -29,7 +29,8 @@ $this->registerJs($script);
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
+        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
+        Интеграция с системой ВЕТИС "Меркурий"
     </h1>
     <?=
     Breadcrumbs::widget([

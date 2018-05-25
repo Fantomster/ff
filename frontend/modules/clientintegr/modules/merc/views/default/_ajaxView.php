@@ -4,37 +4,12 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
 use yii\helpers\Html;
 ?>
-<section class="content-header">
-    <h1>
-        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
-    </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'links' => [
-            [
-                'label' => 'Интеграция',
-                'url' => ['/clientintegr/default'],
-            ],
-            [
-                'label' => 'Интеграция с системой ВЕТИС "Меркурий"',
-                'url' => ['/clientintegr/merc/default'],
-            ],
-            'Просмотр ВСД',
-        ],
-    ])
-    ?>
-</section>
-<section class="content-header">
-    <h4>Просмотр ВСД</h4>
-</section>
-<section class="content-header">
-    <div class="box box-info">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h4 class="modal-title">Просмотр ВСД</h4>
+</div>
+<div class="modal-body">
         <div class="box-header with-border">
-            <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <h4>Сведения о ВСД: </h4>
                     <?php echo DetailView::widget([
@@ -203,15 +178,24 @@ use yii\helpers\Html;
                         'model' => $document,
                         'attributes' => $attributes,
                     ]) ?>
-                    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED): ?>
-                        <div class="col-md-12">
-                            <?php  echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                            Html::a('Частичня приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
-                            Html::a('Вернуть', ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']); ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
+<div class="modal-footer">
+    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED) {
+            echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                Html::a('Частичня приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
+                    //'pjax'=>0,
+                    'target' => '#ajax-load',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                ],]).' '.
+                Html::a('Вернуть', ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
+                    //'pjax'=>0,
+                    'target' => '#ajax-load',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                ],]);
+            } ?>
+              <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.client.supp.close_four', ['ru'=>'Закрыть']) ?></a>
+</div>

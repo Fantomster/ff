@@ -27,9 +27,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionIndex()
     {
         $dataProvider = (new vetDocumentsList())->getArrayDataProvider();
-        $license = mercService::getLicense();
         $params = [/*'searchModel' => $searchModel, */
-            'dataProvider' => $dataProvider, 'lic' => $license];
+            'dataProvider' => $dataProvider];
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
         } else {
@@ -37,19 +36,14 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
-    public function actionTest() {
-        $api = mercApi::getInstance();
-        $api->GetVetDocumentList();
-    }
-
     public function actionView($uuid)
     {
+        Yii::$app->cache->flush();
         $document = new getVetDocumentByUUIDRequest();
         $document->getDocumentByUUID($uuid);
-        $license = mercService::getLicense();
-        $params = ['document' => $document, 'lic' => $license];
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('view', $params);
+        $params = ['document' => $document];
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('_ajaxView', $params);
         } else {
             return $this->render('view', $params);
         }
@@ -67,10 +61,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $document = new getVetDocumentByUUIDRequest();
         $document->getDocumentByUUID($uuid);
 
-        $license = mercService::getLicense();
-        $params = ['document' => $document, 'lic' => $license];
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('view', $params);
+        $params = ['document' => $document];
+        if (Yii::$app->request->isAjax) {
+            return true;
         } else {
             return $this->render('view', $params);
         }

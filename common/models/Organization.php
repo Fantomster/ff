@@ -3,6 +3,8 @@
 namespace common\models;
 
 use api\common\models\iiko\iikoService;
+use api\common\models\merc\mercService;
+use api\common\models\RkServicedata;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
@@ -1496,6 +1498,24 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         return $return;
+    }
+
+    public function getLicenseList()
+    {
+        $result = [];
+        $lic = RkServicedata::getLicense();
+        if($lic != null)
+            $result['rkws'] = $lic;
+
+        $lic = iikoService::getLicense();
+        if($lic != null)
+            $result['iiko'] = $lic;
+
+        $lic = mercService::getLicense();
+        if($lic != null)
+            $result['mercury'] = $lic;
+
+        return $result;
     }
 
 }

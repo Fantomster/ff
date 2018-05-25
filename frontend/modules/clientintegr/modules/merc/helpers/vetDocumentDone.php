@@ -129,9 +129,27 @@ class vetDocumentDone extends Component
 
                            $xml .= '<shp:transportInfo>
                               <shp:transportType>'.$doc->ns2transportInfo->shptransportType->__toString().'</shp:transportType>
-                              <shp:transportNumber>
-                                 <shp:vehicleNumber>'.$doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString().'</shp:vehicleNumber>
-                              </shp:transportNumber>
+                              <shp:transportNumber>';
+
+                                if(isset($doc->ns2transportInfo->shptransportNumber->shpcontainerNumber))
+                                    $xml.= '<shp:containerNumber>'.$doc->ns2transportInfo->shptransportNumber->shpcontainerNumber->__toString().'</shp:containerNumber>';
+
+                                if(isset($doc->ns2transportInfo->shptransportNumber->shpwagonNumber))
+                                    $xml.= '<shp:wagonNumber>'.$doc->ns2transportInfo->shptransportNumber->shpwagonNumber->__toString().'</shp:wagonNumber>';
+
+                                if(isset($doc->ns2transportInfo->shptransportNumber->shpvehicleNumber))
+                                    $xml.= '<shp:vehicleNumber>'.$doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString().'</shp:vehicleNumber>';
+
+                                if(isset($doc->ns2transportInfo->shptransportNumber->shptrailerNumber))
+                                    $xml.= '<shp:trailerNumber>'.$doc->ns2transportInfo->shptransportNumber->shptrailerNumber->__toString().'</shp:trailerNumber>';
+
+                                if(isset($doc->ns2transportInfo->shptransportNumber->shpshipName))
+                                    $xml.= '<shp:shipName>'.$doc->ns2transportInfo->shptransportNumber->shpshipName->__toString().'</shp:shipName>';
+
+                                if(isset($doc->ns2transportInfo->shptransportNumber->shpflightNumber))
+                                    $xml.= '<shp:flightNumber>'.$doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString().'</shp:flightNumber>';
+
+                              $xml .= '</shp:transportNumber>
                            </shp:transportInfo>
                            <shp:transportStorageType>'.$doc->ns2transportStorageType->__toString().'</shp:transportStorageType>
                         </vet:waybill>

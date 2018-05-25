@@ -1,6 +1,8 @@
 <b>Выберите заказ для связи с накладной:</b><br>
 <?php
 use \common\models\Order;
+use yii\web\View;
+use yii\helpers\Url;
 
 $columns = [
     [
@@ -31,6 +33,22 @@ $columns = [
         'attribute' => 'acceptedByProfile.full_name',
         'value' => 'acceptedByProfile.full_name',
         'label' => Yii::t('message', 'frontend.views.client.index.rec', ['ru'=>'Заказ принял']),
+    ],
+    [
+        'attribute' => 'positionCount',
+        'label' => 'Кол-во позиций',
+        'format'=>'raw',
+        'value' => function ($data) {
+            return $data->positionCount .
+                '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
+                'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
+                'data-toggle="popover"  data-trigger="focus" data-url="'.
+                Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
+                '/getpopover" role="button" tabindex="0" '.
+                'data-original-title="" title="" data-model="'.$data->id.'"> '.
+                '<i class="fa fa-info-circle"></i></a>';
+        }
+
     ],
     [
         'format' => 'raw',
@@ -92,4 +110,108 @@ echo \kartik\grid\GridView::widget([
     'columns' => $columns
 ]);
 
-\yii\widgets\Pjax::end();
+
+$js = <<< 'SCRIPT'
+/* To initialize BS3 tooltips set this below */
+// $(function () {
+// $("[data-toggle='tooltip']").tooltip();
+// });;
+
+/* To initialize BS3 popovers set this below */
+$(function () {
+$("[data-toggle='popover']").popover({
+     container: 'body'
+});
+});
+
+// $('.popover-dismiss').popover({
+//  trigger: 'focus'
+// });
+
+// $('html').on('mouseup', function(e) {
+//     if(!$(e.target).closest('.ajax-popover').length) {
+//        $('.ajax-popover').each(function(){
+//            $(this.previousSibling).popover('hide');
+//        });
+//    }
+// });
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>
+
+<?php
+$js = <<< 'SCRIPT'
+$('.ajax-popover').click(function() {
+    var e = $(this);
+    if (e.data('loaded') !== true) {
+        $.ajax({
+      url: e.data('url'),
+      type: "POST",
+      data: {key: e.data('model')}, // данные, которые передаем на сервер
+      dataType: 'html',
+      // dataType: "json", // тип ожидаемых данных в ответе
+      success: function(data) {
+            e.data('loaded', true);
+            e.attr('data-content', data);
+            var popover = e.data('bs.popover');
+            popover.setContent();
+            popover.$tip.addClass(popover.options.placement);
+            var calculated_offset = popover.getCalculatedOffset(popover.options.placement, popover.getPosition(), popover.$tip[0].offsetWidth, popover.$tip[0].offsetHeight);
+            popover.applyPlacement(calculated_offset, popover.options.placement);
+        },
+      error: function(jqXHR, textStatus, errorThrown) {
+            return instance.content('Failed to load data');
+        }
+    });
+  }
+});
+SCRIPT;
+$this->registerJs($js,View::POS_END);
+?>
+<?php
+$js = <<< 'SCRIPT'
+$(document).on('pjax:complete', function() {
+
+/* To initialize BS3 popovers set this below */
+$(function () {
+$("[data-toggle='popover']").popover({
+     container: 'body'
+});
+});
+
+
+$('.ajax-popover').click(function() {
+    var e = $(this);
+    if (e.data('loaded') !== true) {
+        $.ajax({
+      url: e.data('url'),
+      type: "POST",
+      data: {key: e.data('model')}, // данные, которые передаем на сервер
+      dataType: 'html',
+      // dataType: "json", // тип ожидаемых данных в ответе
+      success: function(data) {
+            e.data('loaded', true);
+            e.attr('data-content', data);
+            var popover = e.data('bs.popover');
+            popover.setContent();
+            popover.$tip.addClass(popover.options.placement);
+            var calculated_offset = popover.getCalculatedOffset(popover.options.placement, popover.getPosition(), popover.$tip[0].offsetWidth, popover.$tip[0].offsetHeight);
+            popover.applyPlacement(calculated_offset, popover.options.placement);
+        },
+      error: function(jqXHR, textStatus, errorThrown) {
+            return instance.content('Failed to load data');
+        }
+    });
+  }
+});
+
+
+})
+SCRIPT;
+// Register tooltip/popover initialization javascript
+$this->registerJs($js,View::POS_END);
+?>
+
+
+<?php \yii\widgets\Pjax::end(); ?>

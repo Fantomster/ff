@@ -14,6 +14,7 @@ class getVetDocumentListRequest extends BaseRequest
     public $listOptions;
     public $vetDocumentType;
     public $vetDocumentStatus;
+    public $status;
 
     private $initiator;
     private $enterpriseGuid;
@@ -46,7 +47,7 @@ class getVetDocumentListRequest extends BaseRequest
     public function rules()
     {
         return [
-            [['localTransactionId', 'vetDocumentType', 'vetDocumentStatus', 'enterpriseGuid', 'initiator', '_soap_namespace'], 'safe'],
+            [['localTransactionId', 'vetDocumentType', 'vetDocumentStatus', 'enterpriseGuid', 'initiator', '_soap_namespace', 'status'], 'safe'],
         ];
     }
 
@@ -92,12 +93,15 @@ class getVetDocumentListRequest extends BaseRequest
         if (isset($this->initiator))
             $xml .= $this->initiator->getXML();
 
-        $xml .= /*'<base:listOptions>'.PHP_EOL.
+        /*$xml .= '<base:listOptions>'.PHP_EOL.
             '<base:count>10</base:count>'.PHP_EOL.
             '<base:offset>0</base:offset>'.PHP_EOL.
         '</base:listOptions>'.PHP_EOL.*/
-        '<vet:vetDocumentType>INCOMING</vet:vetDocumentType>'; /*
-        '<vet:vetDocumentStatus>UTILIZED</vet:vetDocumentStatus>'.PHP_EOL;*/
+
+        $xml .= '<vet:vetDocumentType>INCOMING</vet:vetDocumentType>';
+
+        if($this->status != null)
+           $xml .= '<vet:vetDocumentStatus>'.$this->status.'</vet:vetDocumentStatus>';
 
         $xml .= '<ent:enterpriseGuid>'.$this->enterpriseGuid.'</ent:enterpriseGuid>'.PHP_EOL.
         '</merc:getVetDocumentListRequest>';

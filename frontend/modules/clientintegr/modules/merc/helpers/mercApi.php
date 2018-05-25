@@ -103,7 +103,7 @@ class mercApi extends Component
         return new \SimpleXMLElement($xml->asXML());
     }
 
-    public function getVetDocumentList()
+    public function getVetDocumentList($status)
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -122,6 +122,7 @@ class mercApi extends Component
 
             //Формируем тело запроса
             $vetDoc = new getVetDocumentListRequest();
+            $vetDoc->status = $status;
             $vetDoc->localTransactionId = $localTransactionId;
             $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
             $vetDoc->setInitiator($this->vetisLogin);

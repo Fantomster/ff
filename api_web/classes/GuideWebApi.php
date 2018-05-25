@@ -60,8 +60,11 @@ class GuideWebApi extends \api_web\components\WebApi
             /**
              * Фильтр по поставщику
              */
-            if (isset($post['search']['vendor_id'])) {
-                $search->vendor_id = (int)$post['search']['vendor_id'];
+            if (isset($post['search']['vendors']) && !empty($post['search']['vendors'])) {
+                if(!is_array($post['search']['vendors'])) {
+                    $post['search']['vendors'] = [$post['search']['vendors']];
+                }
+                $search->vendors = $post['search']['vendors'];
             }
             /**
              * Фильтр по дате создания

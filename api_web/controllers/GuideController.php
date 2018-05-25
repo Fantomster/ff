@@ -87,7 +87,7 @@ class GuideController extends WebApiController
      *                  default={
      *                               "product_list": false,
      *                               "search":{
-     *                                   "vendor_id": 1,
+     *                                   "vendors": {3803},
      *                                   "color":"FFFEEE",
      *                                   "create_date": {
      *                                      "start":"d.m.Y",

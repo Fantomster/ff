@@ -93,15 +93,17 @@ class EComIntegration extends Component {
         }
         $positionsArray = [];
         $arr = [];
+        $barcodeArray = [];
         foreach ($positions as $position){
             $contID = (int) $position->PRODUCTIDBUYER;
             $positionsArray[] = (int) $contID;
+            $barcodeArray[] = $position->PRODUCT;
             if($isDesadv){
                 $arr[$contID]['ACCEPTEDQUANTITY'] = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
             }else{
                 $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = $position->PRICE;
+            $arr[$contID]['PRICE'] = $position->PRICE ?? $position->PRICEWITHVAT;
             $arr[$contID]['BARCODE'] = $position->PRODUCT;
         }
         $summ = 0;
@@ -116,8 +118,8 @@ class EComIntegration extends Component {
                 $ordCont->delete();
                 $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
             }else{
-                $oldQuantity = $ordCont->quantity + 0;
-                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'] + 0;
+                $oldQuantity = (float)$ordCont->quantity;
+                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
                 if($oldQuantity!=$newQuantity){
                     $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }
@@ -136,7 +138,7 @@ class EComIntegration extends Component {
         if (!$isDesadv) {
             foreach ($positions as $position) {
                 $contID = (int)$position->PRODUCTIDBUYER;
-                if (!in_array($contID, $ordContArr)) {
+                if (!in_array($contID, $ordContArr) && !in_array($position->PRODUCT, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
                     if (!$good) continue;
                     if ($isDesadv) {

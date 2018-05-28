@@ -133,7 +133,8 @@ class mercApi extends Component
             die();*/
 
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+            $request = $request->getXML();
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             /*var_dump(htmlentities($response));
             die();*/
@@ -152,7 +153,7 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
 
         }catch (\SoapFault $e) {
@@ -171,7 +172,7 @@ class mercApi extends Component
         return $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'receiveApplicationResultRequest', SOAP_1_1);
     }
 
-    private function addEventLog ($response, $method, $localTransactionId)
+    private function addEventLog ($response, $method, $localTransactionId, $request, $response_xml)
     {
         //Пишем лог
         $log = new mercLog();
@@ -179,6 +180,8 @@ class mercApi extends Component
         $log->status = $response->application->status->__toString();
         $log->action = $method;
         $log->localTransactionId =  $localTransactionId;
+        $log->request = $request;
+        $log->response = $response_xml;
 
         if($log->status == mercLog::REJECTED) {
             $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
@@ -301,7 +304,8 @@ class mercApi extends Component
             $request->setApplication($application);
 
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML($UUID), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+            $request = $request->getXML($UUID);
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             $result = $this->parseResponse($response);
 
@@ -316,7 +320,7 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
 
             if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETE')
@@ -467,7 +471,8 @@ class mercApi extends Component
             /*var_dump(htmlentities($request->getXML()));
             die();*/
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+            $request->$request->getXML();
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             $result = $this->parseResponse($response);
 
@@ -483,7 +488,7 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
 
         }catch (\SoapFault $e) {

@@ -89,7 +89,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         2 => 'Железнодорожный',
         3 => 'Авиатранспортный',
         4 => 'Морской (контейнер)',
-        5 => 'Морской (трюм)'
+        5 => 'Морской (трюм)',
+        6 => 'Речной',
+        7 => 'Перегон',
     ];
 
     public $product_types = [
@@ -296,8 +298,10 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         if(isset($doc->ns2batch->ns2producerList->entproducer)) {
             $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
-            $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
-            if(!isset($producer))
+
+            if(isset($producer_raw->soapBody))
+                $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
+            else
                 $producer = $producer_raw->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
             $producer = $producer->dtname->__toString() . '(' .
                 $producer->dtaddress->dtaddressView->__toString()

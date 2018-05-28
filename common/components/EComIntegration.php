@@ -65,7 +65,7 @@ class EComIntegration extends Component {
         if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
             $this->handleOrderResponse($simpleXMLElement);
         }
-        $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
         return true;
     }
 

@@ -27,6 +27,7 @@
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
                 <PRODUCTIDBUYER><?= $position['id']  ?></PRODUCTIDBUYER>
+                <PRODUCTIDSUPPLIER><?= $position['edi_supplier_article'] ?></PRODUCTIDSUPPLIER>
                 <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>

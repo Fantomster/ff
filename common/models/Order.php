@@ -494,9 +494,7 @@ class Order extends \yii\db\ActiveRecord
                 }
         }
 
-        //dd($changedAttributes['status']);
         if ($this->status != self::STATUS_FORMING && !$insert && key_exists('total_price', $changedAttributes)) {
-            //dd($changedAttributes);
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);

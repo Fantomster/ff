@@ -108,15 +108,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionDonePartial($uuid, $reject = false)
     {
-        Yii::$app->cache->flush();
-
         $model = new rejectedForm();
         if($reject)
             $model->decision = vetDocumentDonePartial::RETURN_ALL;
         else
             $model->decision = vetDocumentDonePartial::PARTIAL;
 
-        //try {
+        try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercApi::getInstance();
                 $api->getVetDocumentDone($uuid, $model->attributes);
@@ -129,7 +127,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
             }
-     /*   } catch (\Error $e)
+        } catch (\Error $e)
         {
             Yii::$app->session->setFlash('success', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -142,7 +140,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }*/
+        }
 
         try {
             $document = new getVetDocumentByUUIDRequest();

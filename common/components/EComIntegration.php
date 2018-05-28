@@ -150,6 +150,7 @@ class EComIntegration extends Component {
                     'units' => $good->units,
                     'updated_at' => new Expression('NOW()'),
                 ])->execute();
+                $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' =>$good->product]);
                 $summ+=$quan*$position->PRICE;
             }
         }

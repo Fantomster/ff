@@ -473,7 +473,7 @@ class mercApi extends Component
             /*var_dump(htmlentities($request->getXML()));
             die();*/
             //Делаем запрос
-            $request->$request->getXML();
+            $request = $request->getXML();
             $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             $result = $this->parseResponse($response);

@@ -117,9 +117,6 @@ class vetDocumentDone extends Component
                         </vet:productMarkingList>';
 
                         $xml .= '<vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
-                           <vet:productMarking>'.$doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString().'</vet:productMarking>
-                        </vet:productMarkingList>
-                        <vet:lowGradeCargo>'.$doc->ns2batch->ns2lowGradeCargo->__toString().'</vet:lowGradeCargo>
                      </vet:consignment>
                      <vet:accompanyingForms>
                         <vet:waybill>';

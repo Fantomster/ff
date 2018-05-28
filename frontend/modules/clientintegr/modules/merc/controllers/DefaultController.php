@@ -33,13 +33,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if(!mercDicconst::checkSettings())
             return $this->redirect(['/clientintegr/merc/settings']);
 
-        $status = Yii::$app->request->get('status');
-
-        if(!($status == getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED || $status == getVetDocumentByUUIDRequest::DOC_STATUS_UTILIZED || $status == getVetDocumentByUUIDRequest::DOC_STATUS_WITHDRAWN))
-            $status = null;
-
-        $dataProvider = (new vetDocumentsList())->getArrayDataProvider($status);
-        $params = ['status' => $status,
+        $searchModel  = new vetDocumentsList();
+        $searchModel->load(Yii::$app->request->get());
+        $dataProvider = $searchModel->getArrayDataProvider();
+        $params = ['searchModel' => $searchModel,
             'dataProvider' => $dataProvider];
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);

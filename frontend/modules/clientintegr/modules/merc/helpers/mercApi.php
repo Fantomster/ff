@@ -323,8 +323,10 @@ class mercApi extends Component
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
 
-            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETE')
-                $cache->add('vetDocRaw_'.$UUID, $result->asXML(), 60*5);
+            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETE') {
+                $result = $result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+                $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);
+            }
             else
                 $result->null;
 

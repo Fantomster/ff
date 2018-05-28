@@ -112,7 +112,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             //[['article'], 'required', 'on' => 'uniqueArticle'],
-            [['article'], 'string', 'max' => 50],
+            [['article', 'edi_supplier_article'], 'string', 'max' => 50],
 //            [['article'], 'uniqueArticle','when' => function($model) {
 //            return !empty($model->cat_id);
 //            }],

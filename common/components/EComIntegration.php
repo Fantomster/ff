@@ -79,6 +79,7 @@ class EComIntegration extends Component {
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
+        \Yii::$app->language = $order->lang ?? 'ru';
         $message = "";
         if(!$order){
             Yii::error('No such order');
@@ -205,6 +206,7 @@ class EComIntegration extends Component {
             $goodsArray[$barcode]['article'] = (String) $good->IDBUYER ?? null;
             $goodsArray[$barcode]['ed'] = (String) $good->QUANTITYOFCUINTUUNIT ?? 'шт';
             $goodsArray[$barcode]['units'] = (float) $good->PACKINGMULTIPLENESS ?? 0.0;
+            $goodsArray[$barcode]['edi_supplier_article'] = $good->IDSUPPLIER ?? null;
         }
 
         $catalog_base_goods = (new \yii\db\Query())
@@ -249,6 +251,7 @@ class EComIntegration extends Component {
                     'category_id' => null,
                     'deleted' => 0,
                     'barcode' => $barcode,
+                    'edi_supplier_article' => $good['edi_supplier_article']
                 ])->execute();
                 if(!$res)continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
@@ -319,6 +322,13 @@ class EComIntegration extends Component {
         $result = false;
         try {
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
+            foreach ($orderContent as &$one){
+                $catGood = CatalogBaseGoods::findOne(['id' => $one->product_id]);
+                if($catGood){
+                    Yii::$app->db->createCommand()->update('order_content', ['edi_supplier_article' => $catGood->edi_supplier_article ?? null], 'id='.$one->id)->execute();
+                }
+            }
+            $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             $dateArray = $this->getDateData($order);
             if (!count($orderContent)) {
                 Yii::error("Empty order content");
@@ -330,6 +340,8 @@ class EComIntegration extends Component {
             $fileName = $done ? 'recadv_' : 'order_';
             $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
             $result =  $this->sendDoc($string, $remoteFile);
+            $lang = \Yii::$app->language ?? 'ru';
+            Yii::$app->db->createCommand()->update('order', ['lang' => $lang], 'id='.$order->id)->execute();
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);

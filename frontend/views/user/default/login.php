@@ -9,6 +9,7 @@ use yii\widgets\ActiveForm;
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
 $this->title = Yii::t('message', 'frontend.views.user.default.enter_register_two', ['ru'=>"Вход / регистрация"]);
+$wrongPassText = Yii::t('app', 'Incorrect password');
 
 $this->registerJs(
         '

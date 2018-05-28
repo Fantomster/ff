@@ -56,9 +56,9 @@ class User extends \amnah\yii2\user\models\User {
             [['newPassword'], 'filter', 'filter' => 'trim'],
             [['newPassword'], 'required', 'on' => ['register', 'reset', 'acceptInvite', 'manageNew']],
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
-            [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
+            [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('app', 'Passwords do not match')],
             // email rules invite client
-            [['email'], 'required', 'message' => Yii::t('app', 'frontend.views.vendor.enter_email', ['ru'=>'Введите E-mail'])],
+            [['email'], 'required', 'message' => Yii::t('message', 'frontend.views.vendor.enter_email', ['ru'=>'Введите E-mail'])],
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru'=>'Введите эл.почту партнера'])],
             [['email'], 'unique', 'on' => ['sendInviteFromVendor2'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
             [['email'],'validateClient', 'on'=>'sendInviteFromActiveVendor'],      // account page

@@ -344,7 +344,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Дата окончания срока годности продукции',
-                'value' => $this->getDate($doc->ns2batch->ns2expiryDate),
+                'value' => isset($doc->ns2batch->ns2expiryDate) ? $this->getDate($doc->ns2batch->ns2expiryDate) : null,
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',

@@ -65,12 +65,14 @@ class EComIntegration extends Component {
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);
         if(strpos($content, 'PRICAT>')){
-            $this->handlePriceListUpdating($simpleXMLElement);
+            $success = $this->handlePriceListUpdating($simpleXMLElement);
         }
         if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
-            $this->handleOrderResponse($simpleXMLElement);
+            $success = $this->handleOrderResponse($simpleXMLElement);
         }
-        //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        if($success){
+            $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        }
         return true;
     }
 
@@ -172,6 +174,7 @@ class EComIntegration extends Component {
         OrderController::sendSystemMessage($user, $order->id, $systemMessage);
 
         OrderController::sendOrderProcessing($order->client, $order);
+        return true;
     }
 
 

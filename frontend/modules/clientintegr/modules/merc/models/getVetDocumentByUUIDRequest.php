@@ -215,9 +215,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $this->UUID = $UUID;
 
-        $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+        $doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
          //var_dump($raw_doc);
-        $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+          //  $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
         if($raw) {
             return $doc;
@@ -344,7 +344,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Дата окончания срока годности продукции',
-                'value' => $this->getDate($doc->ns2batch->ns2expiryDate),
+                'value' => isset($doc->ns2batch->ns2expiryDate) ? $this->getDate($doc->ns2batch->ns2expiryDate) : null,
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',

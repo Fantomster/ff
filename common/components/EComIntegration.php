@@ -102,6 +102,7 @@ class EComIntegration extends Component {
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent){
+            if (!isset($arr[$orderContent->id]['BARCODE']))continue;
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$orderContent->id]['BARCODE']]);
             $ordContArr[] = $orderContent->id;
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);

@@ -66,6 +66,7 @@ if ($order->isObsolete) {
             $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-processing disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.executes', ['ru'=>'Исполняется']) . ' </a>';
+                $actionButtons .= $btnConfirm;
             } else {
                 $actionButtons .= $btnGetOrder;
             }

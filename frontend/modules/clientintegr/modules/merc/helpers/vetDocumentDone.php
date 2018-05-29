@@ -250,7 +250,7 @@ class vetDocumentDone extends Component
                         <vet:productItem>
                            <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
                         </vet:productItem>
-                        <vet:volume>'.(($this->type = self::RETURN_ALL) ? 0 : abs($doc->ns2batch->ns2volume - $this->rejected_data['volume'])).'</vet:volume>
+                        <vet:volume>'.(($this->type == self::RETURN_ALL) ? 0 : abs($doc->ns2batch->ns2volume - $this->rejected_data['volume'])).'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>';

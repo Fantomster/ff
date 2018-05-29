@@ -112,7 +112,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if($reject)
             $model->decision = vetDocumentDone::RETURN_ALL;
         else
-            $model->decision = vetDocumentDone::PARTIAL;
+            $model->decision = vetDocumentDone::PARTIALLY;
 
         try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {

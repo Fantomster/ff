@@ -84,7 +84,7 @@ class EComIntegration extends Component {
         \Yii::$app->language = $order->lang ?? 'ru';
         $message = "";
         if(!$order){
-            Yii::error('No such order');
+            Yii::error('No such order ID: ' . $orderID);
             return false;
         }
 

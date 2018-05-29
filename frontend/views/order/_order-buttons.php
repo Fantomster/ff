@@ -66,7 +66,6 @@ if ($order->isObsolete) {
             $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-processing disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.executes', ['ru'=>'Исполняется']) . ' </a>';
-                $actionButtons .= $btnConfirm;
             } else {
                 $actionButtons .= $btnGetOrder;
             }
@@ -108,7 +107,7 @@ if($order->vendor->gln_code && $order->status!=Order::STATUS_DONE){
                 ]) : ""
         ?>
         <?= $edit ? Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_five', ['ru'=>'Сохранить']) . ' </span>', [
-            'class' => 'btn btn-success pull-right btnSave', 
+            'class' => 'btn btn-success pull-right btnSave',
             'style' => 'margin-right: 7px;',
             'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_two', ['ru'=>'Сохраняем...']),
             ]) : "" ?>

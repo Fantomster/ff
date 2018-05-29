@@ -329,15 +329,21 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $query = new \yii\db\Query;
 
             // $query->select("`id`, CONCAT(`inn`,`denom`) AS `text`")
+            /*
             $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unitname,")")'])
                     ->from('rk_product')
                     ->where('acc = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
                     ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
                     ->limit(20);
+            */
 
-            $command = $query->createCommand();
-            $command->db = Yii::$app->db_api;
-            $data = $command->queryAll();
+            $sql = "( select id, denom as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
+            " union ( select id, denom as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
+            "union ( select id, denom as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
+
+            $db = Yii::$app->db_api;
+            $data = $db->createCommand($sql)->queryAll();
             $out['results'] = array_values($data);
         }
         //  $out['results'][] = ['id' => '0', 'text' => 'Создать контрагента'];

@@ -221,7 +221,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if (!is_null($term)) {
-            $query = new \yii\db\Query;
+       /*     $query = new \yii\db\Query;
             $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unit,")")'])
                 ->from('iiko_product')
                 ->where('org_id = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
@@ -231,6 +231,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $command = $query->createCommand();
             $command->db = Yii::$app->db_api;
             $data = $command->queryAll();
+            $out['results'] = array_values($data);
+       */
+            $sql = "( select id, denom as `text` from iiko_product where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
+                " union ( select id, denom as `text` from iiko_product  where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
+                "union ( select id, denom as `text` from iiko_product where  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+                "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
+
+            $db = Yii::$app->db_api;
+            $data = $db->createCommand($sql)->queryAll();
             $out['results'] = array_values($data);
         }
         return $out;

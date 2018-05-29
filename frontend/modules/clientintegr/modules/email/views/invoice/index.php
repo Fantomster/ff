@@ -61,7 +61,8 @@ function renderButton($id)
                 <div class="col-sm-12">
                     <?php try {
                         echo GridView::widget([
-                            'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
+                            // 'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
+                            'dataProvider' => $dataProvider,
                             'summary' => false,
                             'striped' => false,
                             'condensed' => true,
@@ -83,6 +84,12 @@ function renderButton($id)
                                 ],
                                 'number',
                                 [
+                                    'attribute' => 'date',
+                                    'value' => function($row){
+                                        return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
+                                    }
+                                ],
+                                [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {
                                         return $data->organization->name;
@@ -94,17 +101,23 @@ function renderButton($id)
                                         return count($data->content);
                                     }
                                 ],
-                                'created_at',
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'created_at',
+                                    'value' => function($data) {
+                                        return Yii::$app->formatter->asDatetime($data->created_at, "php:Y-m-d H:i:s");
+                                    },
+                                ],
                                 [
                                     'attribute' => 'order_id',
                                     'value' => function ($data) {
-                                        return $data->order_id ? 'Да' : 'Нет';
+                                        return $data->order_id ? $data->order_id : 'Нет';
                                     }
                                 ],
                                 [
-                                    'attribute' => 'total',
+                                    'attribute' => 'total_sum_withtax',
                                     'value' => function ($data) {
-                                        return number_format($data->totalSumm, 2, '.', ' ');
+                                        return number_format($data->total_sum_withtax, 2, '.', ' ');
                                     }
                                 ],
                                 [

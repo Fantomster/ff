@@ -57,7 +57,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return [
             [['organization_id', 'integration_setting_from_email_id'], 'required'],
             [['organization_id', 'integration_setting_from_email_id', 'order_id'], 'integer'],
-            [['date', 'created_at', 'updated_at'], 'safe'],
+            [['date', 'created_at', 'updated_at', 'total_sum_withtax','price_without_tax_sum'], 'safe'],
             [['file_content'], 'string'],
             [['number', 'email_id', 'file_mime_type', 'file_hash_summ'], 'string', 'max' => 255],
             [['id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoiceContent::className(), 'targetAttribute' => ['id' => 'invoice_id']],
@@ -86,6 +86,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             'count' => 'Кол-во позиций',
             'total' => 'Итоговая сумма',
             'updated_at' => 'Updated At',
+            'total_sum_withtax' => 'Итого с НДС',
+            'price_without_tax_sum' => 'Итого без НДС',
         ];
     }
 
@@ -154,6 +156,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->file_hash_summ = $invoice['file_hash_summ'];
         $this->number = $invoice['invoice']['number'];
         $this->date = (!empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null);
+        $this->total_sum_withtax = $invoice['invoice']['price_with_tax_sum'];
+        $this->total_sum_withouttax = $invoice['invoice']['price_without_tax_sum'];
 
         if($this->date == '1970-01-01') {
             $this->date = null;

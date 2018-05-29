@@ -13,19 +13,18 @@ use common\models\User;
 use yii\base\Exception;
 use yii\web\Controller;
 use yii\web\Response;
+use common\models\search\IntegrationInvoiceSearch;
+use yii;
 
 class InvoiceController extends Controller
 {
 
     public function actionIndex()
     {
-        $user = \Yii::$app->user->identity;
-        $organization = $user->organization;
-        $models = IntegrationInvoice::find()
-            ->where(['organization_id' => $organization->id])
-            ->all();
+        $models = new IntegrationInvoiceSearch();
+        $dataProvider = $models->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', ['models' => $models]);
+        return $this->render('index', ['searchMOdel' => $models, 'dataProvider' => $dataProvider]);
 
     }
 

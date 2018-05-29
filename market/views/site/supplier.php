@@ -70,7 +70,11 @@ font-family: "HelveticaBold",Arial,sans-serif;
         <div class="col-md-8 col-lg-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><?= $vendor->name ?></h3>
+                    <h3><?= $vendor->name ?> <?php if($vendor->gln_code > 0){
+                            $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
+                            echo Html::img(Url::to('/images/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 40]);
+                        }
+                        ?></h3>
                     <h5><span class="title-param"><?= Yii::t('message', 'market.views.site.supplier.contact', ['ru'=>'Контактное лицо:']) ?></span> <?= empty($vendor->contact_name) ? '<span class="noinfo">' . Yii::t('error', 'market.views.site.supplier.no_info', ['ru'=>'нет информации']) . ' </span>':$vendor->contact_name ?></h5>
                     <hr>
                 </div>

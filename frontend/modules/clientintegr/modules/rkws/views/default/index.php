@@ -135,19 +135,19 @@ $this->registerJs($script);
                                                 'buttons'=>[
                                                     
                                                        'view' =>  function ($url, $model) {
-                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\view', 'id'=>$model->id]);
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/'.$model->dictype->contr.'\view', 'id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-eye" aria-hidden="true"></i>', $customurl,
                                                                      ['title' => Yii::t('backend', 'Просмотр'), 'data-pjax'=>"0"]);
                                                            },
                 
                                                         'update' =>  function ($url, $model) {
                                                       //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\index', 'id'=>$model->id]);
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/'.$model->dictype->contr.'\index', 'id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-pencil" aria-hidden="true"></i>', $customurl,
                                                                      ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
                                                            },
                                                         'getws' =>  function ($url, $model) {
-                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\getws', 'id'=>$model->id]);
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/'.$model->dictype->contr.'\getws', 'id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-download" aria-hidden="true"></i>', $customurl,
                                                                      ['title' => Yii::t('backend', 'Загрузка'), 'data-pjax'=>"0"]);
                                                            },     

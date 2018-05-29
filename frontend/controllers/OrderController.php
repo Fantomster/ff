@@ -1770,7 +1770,7 @@ class OrderController extends DefaultController
             $newMessage->recipient_id = $order->client_id;
         }
         $newMessage->save();
-        $body = $this->renderPartial('_chat-message', [
+        $body = Yii::$app->controller->renderPartial('@frontend/views/order/_chat-message', [
             'name' => '',
             'message' => $newMessage->message,
             'time' => $newMessage->created_at,

@@ -52,7 +52,7 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $res = new \frontend\modules\clientintegr\modules\rkws\components\AgentHelper();
         $res->getAgents();
         
-            $this->redirect('\clientintegr\rkws\default');
+            $this->redirect('/clientintegr/rkws/default');
             
     }
       

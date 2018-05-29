@@ -47,7 +47,7 @@ class ProductController extends\frontend\modules\clientintegr\controllers\Defaul
     $res->getProduct();
     
             if($res) {
-            $this->redirect('\clientintegr\rkws\default');
+            $this->redirect('/clientintegr/rkws/default');
         }
             
     }

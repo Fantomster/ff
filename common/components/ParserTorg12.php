@@ -5,6 +5,7 @@ namespace common\components;
 use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
+use PHPExcel_Shared_Date;
 
 class ParserTorg12
 {
@@ -54,6 +55,14 @@ class ParserTorg12
             'label' => ['дата составления'],
             'shift_row' => 1,
         ],
+     //   'document_upd_info' => [
+     //       'label' => ['(1)'],
+     //       'shift_row' => 1,
+     //   ],
+        'document_headinfo' => [
+            'label' => ['счет-фактура №'],
+            'shift_row' => 1,
+        ]
     ];
 
     /**
@@ -262,14 +271,88 @@ class ParserTorg12
         $checkSell = function ($col, $row, $attribute) {
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
 
+            if(strpos($cellValue, 'счет-фактура №') !== false) {
+
+                $attributeValue ="";
+
+                for($i=$col;$i<$this->highestColumn ;$i++) {
+                    if (!empty($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue())))
+                    $attributeValue .= ' '.$this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue());
+
+                }
+                $attributeValue = str_replace(",", ".", $attributeValue);
+
+                // var_dump($attributeValue);
+
+                $leftSide = trim(preg_replace("/.от.*/", "", $attributeValue));
+                $rightSide = trim(str_replace($leftSide." от","",$attributeValue));
+                $leftSide = trim(preg_replace("/.*№/", "", $leftSide));
+
+
+                $check = substr($rightSide, 0, strpos($rightSide," "));
+
+                if (is_numeric($check) && (int)$check > 30000) {
+                    $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($check));
+                } else {
+                    // года для распознования даты документа
+                    $years = [date('Y', strtotime('-1 year')), date('Y'), date('Y', strtotime('+1 year'))];
+
+                    foreach ($years as $year) {
+                        $rightSide = trim(preg_replace("/.".$year.".*/", ".".$year, $rightSide));
+                    }
+                    $monthArr = [
+                     ' января.' => '.01.',
+                     ' февраля.' => '.02.',
+                     ' марта.' => '.03.',
+                     ' апреля.' => '.04.',
+                     ' мая.' => '.05.',
+                     ' июня.' => '.06.',
+                     ' июля.' => '.07.',
+                     ' августа.' => '.08.',
+                     ' сентября.' => '.09.',
+                     ' октября.' => '.10.',
+                     ' ноября.' => '.11.',
+                     ' декабря.' => '.12.',
+                    ];
+
+                    foreach ($monthArr as $key => $value) {
+                        if (strpos($rightSide,$key) !== false) {
+                            $rightSide = str_replace($key, $value,$rightSide);
+                        }
+                    }
+                    $rightSide = str_replace("-", ".",$rightSide);
+                    $rightSide = str_replace(" ", ".",$rightSide);
+                    $rightSide = date('Y-m-d', strtotime($rightSide));
+                }
+
+
+               // var_dump("left:".$leftSide);
+               // var_dump("right:".$rightSide);
+
+                $attributeValue = $leftSide."%%%%".$rightSide;
+
+            //    $attributeValue = trim(preg_replace("/.*Счет-фактура/", "", $attributeValue));
+            //    $attributeValue = trim(preg_replace("/.2018.*/", ".2018", $attributeValue));
+            //    $attributeValue = trim(preg_replace("/.*№/", "", $attributeValue));
+
+                return $attributeValue;
+
+            }
+
             if (in_array($cellValue, $attribute['label'])) {
+
                 // заголовок атрибута в одной ячейке
                 $attributeValue = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row + $attribute['shift_row'])->getValue());
+
+                if($cellValue == 'дата составления' && (int)$attributeValue)
+                    $attributeValue = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
+
                 $this->firstRow = $row;
                 return $attributeValue;
             } else {
                 // заголовок атрибута разбит на две строки
                 $nextValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row + 1)->getValue());
+
                 // считаем что два слова в заголовке всегда, если есть переносы - не распознается
                 foreach ($attribute['label'] as $val) {
                     $multiRowHeader = explode(' ', $val);
@@ -295,11 +378,37 @@ class ParserTorg12
                 // номер
                 if (empty($documentNumber)) {
                     $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_number']);
+                    if(!empty($documentNumber)) {
+
+                        $docArr = explode('%%%%',$documentNumber);
+                        $documentNumber = $docArr[0];
+                    }
+                /*    if (empty($documentNumber)) {
+                        $documentNumber = $checkSell($col, $row, $this->settingsHeader['document_upd_info']);
+                       // if(!empty($documentNumber)) {
+                            var_dump("s".$documentNumber);
+                       //     die();
+                        //}
+*/
+                         //   $documentNumber = preg_replace('/.от.*/', "", $documentNumber);
+                         //   var_dump($documentNumber);
+
+                //    }
+
+
                 }
 
                 // дата составления
                 if (empty($documentDate)) {
                     $documentDate = $checkSell($col, $row, $this->settingsHeader['document_date']);
+                    if(!empty($documentDate)) {
+
+                          $docArr = explode('%%%%',$documentDate);
+
+                          if (sizeof($docArr) > 1)
+                               $documentDate = $docArr[1];
+
+                    }
                 }
 
             }
@@ -312,8 +421,11 @@ class ParserTorg12
         }
 
         if (isset($documentDate)) {
-            $documentTime = strtotime($documentDate); // TODO Проверить формат даты
-            $this->invoice->date = date('Y-m-d', $documentTime);
+       //     $documentTime = strtotime($documentDate); // TODO Проверить формат даты
+       //     $this->invoice->date = date('Y-m-d', $documentTime);
+              $this->invoice->date = $documentDate;
+         //   var_dump("date ".$documentDate);
+
         } else {
             $this->invoice->errors['invoice_date'] = 'Не найдена дата накладной';
         }
@@ -410,7 +522,6 @@ class ParserTorg12
 
                     $this->columnList['sum_without_tax']['col'] = $col;
                     $this->columnList['sum_without_tax']['row'] = $row;
-                    echo "Hello";
 
                 } elseif (!isset($this->columnList['tax_rate']) && $match($cellValue, $this->settingsRow['tax_rate'])) {
 
@@ -708,8 +819,11 @@ class ParserTorg12
                 $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
             }
 */
+            if($invoiceRow->cnt > 0)
             $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax/$invoiceRow->cnt,2);
+
             // добавляем обработанную строку в накладную
+            if($invoiceRow->cnt > 0)
             $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
         }
     }

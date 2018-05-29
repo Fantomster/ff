@@ -3,6 +3,8 @@
 namespace common\models;
 
 use api\common\models\iiko\iikoService;
+use api\common\models\merc\mercService;
+use api\common\models\RkServicedata;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
@@ -122,6 +124,7 @@ class Organization extends \yii\db\ActiveRecord
             [['created_at', 'updated_at', 'white_list', 'partnership', 'inn'], 'safe'],
             [['name', 'inn', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
+            [['gln_code'], 'unique'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
@@ -209,9 +212,12 @@ class Organization extends \yii\db\ActiveRecord
     }
 
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getRelationUserOrganization()
     {
-        return $this->hasOne(RelationUserOrganization::className(), ['organization_id' => 'id', 'organization_id' => 'id']);
+        return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
     }
 
 
@@ -1492,6 +1498,24 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         return $return;
+    }
+
+    public function getLicenseList()
+    {
+        $result = [];
+        $lic = RkServicedata::getLicense();
+        if($lic != null)
+            $result['rkws'] = $lic;
+
+        $lic = iikoService::getLicense();
+        if($lic != null)
+            $result['iiko'] = $lic;
+
+        $lic = mercService::getLicense();
+        if($lic != null)
+            $result['mercury'] = $lic;
+
+        return $result;
     }
 
 }

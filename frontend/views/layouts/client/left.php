@@ -31,11 +31,7 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
-$resArr = [];
-
-$arrService = \api\common\models\RkServicedata::find()->select('org')->asArray()->column();
-$arrServiceiiko = \api\common\models\iiko\iikoService::find()->select('org')->asArray()->column();
-$resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
+$licenses = $user->organization->getLicenseList();
 ?>
 
 <aside class="main-sidebar">
@@ -73,6 +69,11 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
 //                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                      //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.mercury', ['ru'=>'ВЕТИС "Меркурий"']),
+                            'url' => ['/clientintegr/merc/default'],
+                            'options' => ['class' => 'hidden-xs'],
+                            'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}</a>',
+                            'visible' => isset($licenses['mercury'])],
                         [
                             'label' => Yii::t('message', 'frontend.views.layouts.client.left.settings', ['ru'=>'Настройки']),
                             'icon' => 'gears',
@@ -89,7 +90,7 @@ $resArr = \yii\helpers\ArrayHelper::merge($arrService, $arrServiceiiko);
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
                                     'icon' => 'circle-o',
                                     'url' => ['/clientintegr/default'],
-                                    'visible' => (in_array($user->organization_id,$resArr) && in_array($user->role_id,$roles))
+                                    'visible' => (!empty($licenses))
                                 ],
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.employees', ['ru'=>'Сотрудники']),

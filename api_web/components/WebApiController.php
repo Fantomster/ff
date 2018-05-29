@@ -7,7 +7,7 @@ namespace api_web\components;
  * @package api\modules\v1\modules\web\components
  */
 
-use yii\web\UploadedFile;
+use api_web\helpers\Logger;
 
 /**
  * @SWG\Swagger(
@@ -144,6 +144,9 @@ class WebApiController extends \yii\rest\Controller
                 }
             }
 
+            Logger::getInstance()::setUser($this->user);
+            Logger::getInstance()::request($this->request);
+
             if (isset($this->request)) {
                 return true;
             } else {
@@ -162,6 +165,7 @@ class WebApiController extends \yii\rest\Controller
     {
         parent::afterAction($action, $result);
         if (!empty($this->response)) {
+            Logger::getInstance()::response($this->response);
             return \api_web\helpers\WebApiHelper::response($this->response);
         } else {
             return [];

@@ -29,25 +29,30 @@ class EComIntegration extends Component {
 
     public function handleFilesList(String $login, String $pass): void
     {
-        $client = Yii::$app->siteApi;
-        $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
-        if($object->result->errorCode != 0){
-            Yii::error('EComIntegration getList Error');
-            throw new ErrorException();
-        }
-        $list = $object->result->list ?? null;
-        if(!$list){
-            echo "No files";
-            exit();
-        }
-        if(is_iterable($list)){
-            foreach ($list as $fileName){
-                //if (strpos($fileName, 'ricat_')){
-                    $this->getDoc($client, $fileName, $login, $pass);
-                //}
+        $transaction = Yii::$app->db_api->beginTransaction();
+        try {
+            $client = Yii::$app->siteApi;
+            $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+            if ($object->result->errorCode != 0) {
+                Yii::error('EComIntegration getList Error');
+                throw new ErrorException();
             }
-        }else{
-            $this->getDoc($client, $list, $login, $pass);
+            $list = $object->result->list ?? null;
+            if (!$list) {
+                echo "No files";
+                exit();
+            }
+            if (is_iterable($list)) {
+                foreach ($list as $fileName) {
+                    $this->getDoc($client, $fileName, $login, $pass);
+                }
+            } else {
+                $this->getDoc($client, $list, $login, $pass);
+            }
+            $transaction->commit();
+        } catch (Exception $e) {
+            Yii::error($e);
+            $transaction->rollback();
         }
     }
 
@@ -60,12 +65,14 @@ class EComIntegration extends Component {
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);
         if(strpos($content, 'PRICAT>')){
-            $this->handlePriceListUpdating($simpleXMLElement);
+            $success = $this->handlePriceListUpdating($simpleXMLElement);
         }
         if(strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')){
-            $this->handleOrderResponse($simpleXMLElement);
+            $success = $this->handleOrderResponse($simpleXMLElement);
         }
-        //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        if($success){
+            $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+        }
         return true;
     }
 
@@ -74,9 +81,10 @@ class EComIntegration extends Component {
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
+        \Yii::$app->language = $order->lang ?? 'ru';
         $message = "";
         if(!$order){
-            Yii::error('No such order');
+            Yii::error('No such order ID: ' . $orderID);
             return false;
         }
 
@@ -88,20 +96,23 @@ class EComIntegration extends Component {
         }
         $positionsArray = [];
         $arr = [];
+        $barcodeArray = [];
         foreach ($positions as $position){
             $contID = (int) $position->PRODUCTIDBUYER;
             $positionsArray[] = (int) $contID;
+            $barcodeArray[] = $position->PRODUCT;
             if($isDesadv){
                 $arr[$contID]['ACCEPTEDQUANTITY'] = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
             }else{
                 $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = $position->PRICE;
+            $arr[$contID]['PRICE'] = $position->PRICE ?? $position->PRICEWITHVAT;
             $arr[$contID]['BARCODE'] = $position->PRODUCT;
         }
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent){
+            if (!isset($arr[$orderContent->id]['BARCODE']))continue;
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$orderContent->id]['BARCODE']]);
             $ordContArr[] = $orderContent->id;
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
@@ -110,8 +121,8 @@ class EComIntegration extends Component {
                 $ordCont->delete();
                 $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
             }else{
-                $oldQuantity = $ordCont->quantity + 0;
-                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'] + 0;
+                $oldQuantity = (float)$ordCont->quantity;
+                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
                 if($oldQuantity!=$newQuantity){
                     $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }
@@ -127,29 +138,32 @@ class EComIntegration extends Component {
                 $ordCont->save();
             }
         }
-        foreach ($positions as $position){
-            $contID = (int) $position->PRODUCTIDBUYER;
-            if(!in_array($contID, $ordContArr)){
-                $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                if(!$good)continue;
-                if($isDesadv){
-                    $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
-                }else{
-                    $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+        if (!$isDesadv) {
+            foreach ($positions as $position) {
+                $contID = (int)$position->PRODUCTIDBUYER;
+                if (!in_array($contID, $ordContArr) && !in_array($position->PRODUCT, $barcodeArray)) {
+                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                    if (!$good) continue;
+                    if ($isDesadv) {
+                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                    } else {
+                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                    }
+                    Yii::$app->db->createCommand()->insert('order_content', [
+                        'order_id' => $order->id,
+                        'product_id' => $good->id,
+                        'quantity' => $quan,
+                        'price' => (float)$position->PRICE,
+                        'initial_quantity' => $quan,
+                        'product_name' => $good->product,
+                        'plan_quantity' => $quan,
+                        'plan_price' => (float)$position->PRICE,
+                        'units' => $good->units,
+                        'updated_at' => new Expression('NOW()'),
+                    ])->execute();
+                    $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+                    $summ += $quan * $position->PRICE;
                 }
-                Yii::$app->db->createCommand()->insert('catalog_base_goods', [
-                    'order_id' => $order->id,
-                    'product_id' => $good->id,
-                    'quantity' => $quan,
-                    'price' => $position->PRICE,
-                    'initial_quantity' => $quan,
-                    'product_name' => $good->product,
-                    'plan_quantity' => $quan,
-                    'plan_price' => $position->PRICE,
-                    'units' => $good->units,
-                    'updated_at' => new Expression('NOW()'),
-                ])->execute();
-                $summ+=$quan*$position->PRICE;
             }
         }
         Yii::$app->db->createCommand()->update('order', ['status' => Order::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()'), 'invoice_number' => $simpleXMLElement->DELIVERYNOTENUMBER ?? '', 'invoice_date' => $simpleXMLElement->DELIVERYNOTEDATE ?? ''], 'id='.$order->id)->execute();
@@ -160,6 +174,7 @@ class EComIntegration extends Component {
         OrderController::sendSystemMessage($user, $order->id, $systemMessage);
 
         OrderController::sendOrderProcessing($order->client, $order);
+        return true;
     }
 
 
@@ -194,6 +209,7 @@ class EComIntegration extends Component {
             $goodsArray[$barcode]['article'] = (String) $good->IDBUYER ?? null;
             $goodsArray[$barcode]['ed'] = (String) $good->QUANTITYOFCUINTUUNIT ?? 'шт';
             $goodsArray[$barcode]['units'] = (float) $good->PACKINGMULTIPLENESS ?? 0.0;
+            $goodsArray[$barcode]['edi_supplier_article'] = $good->IDSUPPLIER ?? null;
         }
 
         $catalog_base_goods = (new \yii\db\Query())
@@ -222,9 +238,7 @@ class EComIntegration extends Component {
             $relationCatalogID = $rel->cat_id;
         }
 
-        $i=0;
         foreach ($goodsArray as $barcode => $good){
-            if($i>24)break;
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = Yii::$app->db->createCommand()->insert('catalog_base_goods', [
@@ -240,6 +254,7 @@ class EComIntegration extends Component {
                     'category_id' => null,
                     'deleted' => 0,
                     'barcode' => $barcode,
+                    'edi_supplier_article' => $good['edi_supplier_article']
                 ])->execute();
                 if(!$res)continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
@@ -256,7 +271,6 @@ class EComIntegration extends Component {
                 }
             }
             Yii::$app->db->createCommand()->update('catalog_base_goods', ['updated_at' => new Expression('NOW()'), 'status' => CatalogBaseGoods::STATUS_ON], 'id='.$catalogBaseGood->id)->execute();
-            $i++;
         }
         return true;
     }
@@ -307,16 +321,36 @@ class EComIntegration extends Component {
 
     public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, bool $done = false): bool
     {
-        $orderContent = OrderContent::findAll(['order_id'=>$order->id]);
-        $dateArray = $this->getDateData($order);
-        if(!count($orderContent)){
-            return false;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $result = false;
+        try {
+            $orderContent = OrderContent::findAll(['order_id' => $order->id]);
+            foreach ($orderContent as &$one){
+                $catGood = CatalogBaseGoods::findOne(['id' => $one->product_id]);
+                if($catGood){
+                    Yii::$app->db->createCommand()->update('order_content', ['edi_supplier_article' => $catGood->edi_supplier_article ?? null], 'id='.$one->id)->execute();
+                }
+            }
+            $orderContent = OrderContent::findAll(['order_id' => $order->id]);
+            $dateArray = $this->getDateData($order);
+            if (!count($orderContent)) {
+                Yii::error("Empty order content");
+                $transaction->rollback();
+                return $result;
+            }
+            $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
+            $currentDate = date("Ymdhis");
+            $fileName = $done ? 'recadv_' : 'order_';
+            $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
+            $result =  $this->sendDoc($string, $remoteFile);
+            $lang = \Yii::$app->language ?? 'ru';
+            Yii::$app->db->createCommand()->update('order', ['lang' => $lang], 'id='.$order->id)->execute();
+            $transaction->commit();
+        } catch (Exception $e) {
+            Yii::error($e);
+            $transaction->rollback();
         }
-        $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
-        $currentDate = date("Ymdhis");
-        $fileName = $done ? 'recadv_' : 'order_';
-        $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
-        return $this->sendDoc($string, $remoteFile);
+        return $result;
     }
 
 

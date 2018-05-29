@@ -72,7 +72,7 @@ $licenses = $user->organization->getLicenseList();
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.mercury', ['ru'=>'ВЕТИС "Меркурий"']),
                             'url' => ['/clientintegr/merc/default'],
                             'options' => ['class' => 'hidden-xs'],
-                            'template' => '<a href="{url}"><img src="/frontend/web/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}</a>',
+                            'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}</a>',
                             'visible' => isset($licenses['mercury'])],
                         [
                             'label' => Yii::t('message', 'frontend.views.layouts.client.left.settings', ['ru'=>'Настройки']),

@@ -12,7 +12,7 @@ use kartik\form\ActiveForm;
 
     <?php echo $form->errorSummary($model); ?>
     <?php
-    if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial::RETURN_ALL)
+    if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone::RETURN_ALL)
         echo $form->field($model, 'volume')->hiddenInput(['value' => 0])->label(false);
     else
         echo $form->field($model, 'volume')->textInput()->label($model->getAttributeLabel('volume')." (".$volume.")"); ?>

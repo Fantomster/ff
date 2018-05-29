@@ -506,7 +506,7 @@ class Order extends \yii\db\ActiveRecord
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client);
                 }
                 if (!$result) {
-                    throw new BadRequestHttpException("EDI Server error");
+                    throw new BadRequestHttpException(Yii::t('app', 'common.models.order.edi_error'));
                 }
             }
             if (!$client->gln_code && $vendor->gln_code) {

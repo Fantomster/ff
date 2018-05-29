@@ -22,7 +22,7 @@ use kartik\form\ActiveForm;
     <?php echo $form->field($model, 'description')->textarea(['maxlength' => true]) ?>
 
     <div class="form-group">
-        <?php echo Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+        <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

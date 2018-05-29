@@ -6,7 +6,7 @@ use yii\widgets\Breadcrumbs;
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -15,16 +15,16 @@ use yii\widgets\Breadcrumbs;
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/vendorintegr'],
             ],
-            'Интеграция с системой ВЕТИС "Меркурий"',
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
 </section>
 <section class="content-header">
-    <h4>Редактирование настройки: <?php echo "<strong>" . $dicConst->comment . " </strong>"; ?></h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.edit_settings', ['ru'=>'Редактирование настройки']) ?>: <?php echo "<strong>" . $dicConst->comment . " </strong>"; ?></h4>
 </section>
 <section class="content">
     <div class="catalog-index">

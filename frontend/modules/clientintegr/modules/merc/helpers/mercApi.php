@@ -238,7 +238,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
         $business = $this->parseResponse($result);
 
-        if($business != null)
+        if($business != null && !isset($business->soapBody->soapFault))
         $cache->add('Business_'.$UUID, $business->asXML(), 60*60*24);
         return $business;
     }
@@ -264,7 +264,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetEnterpriseByUuid', SOAP_1_1);
         $enterprise = $this->parseResponse($result);
 
-        if($enterprise != null)
+        if($enterprise != null && !isset($enterprise->soapBody->soapFault))
         $cache->add('Enterprise_'.$UUID, $enterprise->asXML(), 60*60*24);
         return $enterprise;
     }

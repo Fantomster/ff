@@ -6,7 +6,7 @@ use yii\helpers\Html;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Просмотр ВСД</h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.client.integration.view_vsd', ['ru' => 'Просмотр ВСД']) ?></h4>
 </div>
 <div class="modal-body">
         <div class="box-header with-border">
@@ -192,14 +192,14 @@ use yii\helpers\Html;
 </div>
 <div class="modal-footer">
     <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED) {
-            echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                Html::a('Частичная приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
+            echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
                     //'pjax'=>0,
                     'target' => '#ajax-load',
                     'toggle' => 'modal',
                     'backdrop' => 'static',
                 ],]).' '.
-                Html::a('Вернуть', ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
+                Html::a(YiiYii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
                     //'pjax'=>0,
                     'target' => '#ajax-load',
                     'toggle' => 'modal',

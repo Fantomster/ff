@@ -7,7 +7,7 @@ use yii\helpers\Html;
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -16,11 +16,11 @@ use yii\helpers\Html;
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
             [
-                'label' => 'Интеграция с системой ВЕТИС "Меркурий"',
+                'label' => Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
                 'url' => ['/clientintegr/merc/default'],
             ],
             'Просмотр ВСД',
@@ -29,7 +29,7 @@ use yii\helpers\Html;
     ?>
 </section>
 <section class="content-header">
-    <h4>Просмотр ВСД</h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.view_vsd', ['ru' => 'Просмотр ВСД'])?></h4>
 </section>
 <section class="content-header">
     <div class="box box-info">
@@ -214,9 +214,9 @@ use yii\helpers\Html;
                     ]) ?>
                     <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED): ?>
                         <div class="col-md-12">
-                            <?php  echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                            Html::a('Частичная приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
-                            Html::a('Вернуть', ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']); ?>
+                            <?php  echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                            Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
+                            Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']); ?>
                         </div>
                     <?php endif; ?>
                 </div>

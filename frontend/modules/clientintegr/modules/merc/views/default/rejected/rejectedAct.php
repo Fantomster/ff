@@ -1,13 +1,13 @@
 <?php
 use yii\widgets\Breadcrumbs;
 
-$this->title = 'Акт несоответствия';
+$this->title = Yii::t('message', 'frontend.client.integration.mercury.act', ['ru'=>'Акт несоответствия']);
 ?>
 
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -16,11 +16,11 @@ $this->title = 'Акт несоответствия';
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
             [
-                'label' => 'Интеграция с системой ВЕТИС "Меркурий"',
+                'label' => Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
                 'url' => ['/clientintegr/merc/default'],
             ],
             $this->title,

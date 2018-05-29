@@ -22,7 +22,7 @@ Modal::widget([
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
+
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -31,17 +31,17 @@ Modal::widget([
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
-            'Интеграция с системой ВЕТИС "Меркурий"',
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
 </section>
 
 <section class="content-header">
-    <h4>Список ВСД:</h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru'=>'Список ВСД"']) ?>:</h4>
 </section>
 <section class="content-header">
     <div class="box box-info">
@@ -83,7 +83,7 @@ Modal::widget([
                                 <?=
                                 $form->field($searchModel, 'recipient')
                                     ->dropDownList($searchModel->recipentList, ['id' => 'recipientFilter'])
-                                    ->label('Фирма-отправитель', ['class' => 'label', 'style' => 'color:#555'])
+                                    ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
@@ -141,7 +141,7 @@ Modal::widget([
                             ],*/
                             [
                                 'attribute' => 'date_doc',
-                                'label' => 'Дата оформления',
+                                'label' => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return Yii::$app->formatter->asDatetime($data['date_doc'], "php:j M Y");
@@ -149,7 +149,7 @@ Modal::widget([
                             ],
                             [
                                 'attribute' => 'status',
-                                'label' => 'Статус',
+                                'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['status'];
@@ -157,7 +157,7 @@ Modal::widget([
                             ],
                             [
                                 'attribute' => 'product_name',
-                                'label' => 'Наименование продукции',
+                                'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['product_name'];
@@ -165,7 +165,7 @@ Modal::widget([
                             ],
                             [
                                 'attribute' => 'amount',
-                                'label' => 'Объем',
+                                'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объем']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['amount'];
@@ -173,7 +173,7 @@ Modal::widget([
                             ],
                             [
                                 'attribute' => 'production_date',
-                                'label' => 'Дата изготовления',
+                                'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
@@ -181,7 +181,7 @@ Modal::widget([
                             ],
                             [
                                 'attribute' => 'recipient_name',
-                                'label' => ' 	Фирма-отправитель',
+                                'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
                                     return $data['recipient_name'];
@@ -194,8 +194,8 @@ Modal::widget([
                                 'buttons' => [
                                     'view' => function ($url, $model, $key) {
                                         $options = [
-                                            'title' => 'Просмотр',
-                                            'aria-label' => 'Просмотр',
+                                            'title' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
+                                            'aria-label' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
                                             'data' => [
                                                //'pjax'=>0,
                                                 'target' => '#ajax-load',
@@ -214,8 +214,8 @@ Modal::widget([
                                         if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
                                         $options = [
-                                            'title' => 'Частичная приемка',
-                                            'aria-label' => 'Частичная приемка',
+                                            'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
+                                            'aria-label' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
                                             'data' => [
                                                 //'pjax'=>0,
                                                 'target' => '#ajax-load',
@@ -233,8 +233,8 @@ Modal::widget([
                                         if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
                                         $options = [
-                                            'title' => 'Возврат',
-                                            'aria-label' => 'Возврат',
+                                            'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
+                                            'aria-label' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
                                             'data' => [
                                                 //'pjax'=>0,
                                                 'target' => '#ajax-load',
@@ -252,7 +252,7 @@ Modal::widget([
                             ]
                         ],
                     ]);
-                    echo '<div class="col-md-12">'.Html::submitButton('Погасить', ['class' => 'btn btn-success done_all']).'</div>';
+                    echo '<div class="col-md-12">'.Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']).'</div>';
                     ?>
                     </div>
                     <?php Pjax::end(); ?>
@@ -264,6 +264,7 @@ Modal::widget([
 
 <?php
 $urlDoneAll = Url::to(['done-all']);
+$loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".done_all", function(e) {
@@ -278,7 +279,7 @@ $("body").on("show.bs.modal", "#ajax-load", function() {
     modal.find('.modal-content').html(
     "<div class=\"modal-header\">" + 
     "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>" + 
-    "</span><h4 class=\"modal-title\"><span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Загрузка</h4></div>");
+    "</span><h4 class=\"modal-title\"><span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span>$loading</h4></div>");
 });
 
 

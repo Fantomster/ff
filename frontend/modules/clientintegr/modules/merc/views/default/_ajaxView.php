@@ -193,7 +193,7 @@ use yii\helpers\Html;
 <div class="modal-footer">
     <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED) {
             echo Html::a('Погасить', ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                Html::a('Частичня приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
+                Html::a('Частичная приемка', ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
                     //'pjax'=>0,
                     'target' => '#ajax-load',
                     'toggle' => 'modal',

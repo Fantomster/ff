@@ -8,6 +8,7 @@ use yii\bootstrap\Modal;
 use yii\web\View;
 use yii\helpers\Url;
 use kartik\form\ActiveForm;
+use kartik\widgets\DatePicker;
 ?>
 
 <?=
@@ -57,7 +58,7 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?php
-                    Pjax::begin(['id' => 'pjax-vsd-list', 'enablePushState' => true,'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
+                    Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
                     $form = ActiveForm::begin([
                     'options' => [
                     'data-pjax' => true,
@@ -70,8 +71,41 @@ Modal::widget([
                     <div class="col-md-12">
                         <div class="col-lg-2 col-md-3 col-sm-6">
                             <div class="form-group field-statusFilter">
-                                <label class="label" style="color:#555" for="statusFilter">Статус</label>
-                                <?= Html::dropDownList('status', $status, \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['class' => 'form-control', 'id'=>'statusFilter']); ?>
+                                <?=
+                                $form->field($searchModel, 'status')
+                                    ->dropDownList(\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['id' => 'statusFilter'])
+                                    ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <div class="form-group field-statusFilter">
+                                <?=
+                                $form->field($searchModel, 'recipient')
+                                    ->dropDownList($searchModel->recipentList, ['id' => 'recipientFilter'])
+                                    ->label('Фирма-отправитель', ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 col-md-6 col-sm-6">
+                            <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                            <div class="form-group" style="width: 300px; height: 44px;">
+                                <?=
+                                DatePicker::widget([
+                                    'model' => $searchModel,
+                                    'attribute' => 'date_from',
+                                    'attribute2' => 'date_to',
+                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
+                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
+                                    'separator' => '-',
+                                    'type' => DatePicker::TYPE_RANGE,
+                                    'pluginOptions' => [
+                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                        'autoclose' => true,
+                                        'endDate' => "0d",
+                                    ]
+                                ])
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -231,6 +265,7 @@ Modal::widget([
 <?php
 $urlDoneAll = Url::to(['done-all']);
 $customJs = <<< JS
+var justSubmitted = false;
 $(document).on("click", ".done_all", function(e) {
         if($("#vetDocumentsList").yiiGridView("getSelectedRows").length > 0){
             window.location.href =  "$urlDoneAll?selected=" +  $("#vetDocumentsList").yiiGridView("getSelectedRows");  
@@ -276,6 +311,22 @@ $("#ajax-load").on("click", ".save-form", function() {
             $("#search-form").submit();
         });
      });   
+ 
+ $("document").ready(function(){
+        $(".box-body").on("change", "#recipientFilter", function() {
+            $("#search-form").submit();
+        });
+     });   
+ 
+ $(".box-body").on("change", "#dateFrom, #dateTo", function() {
+            if (!justSubmitted) {
+                $("#search-form").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 500);
+            }
+        }); 
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

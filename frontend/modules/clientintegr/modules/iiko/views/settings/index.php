@@ -61,6 +61,11 @@ use kartik\grid\GridView;
                                             return $res / 100;
                                         }
 
+                                        // В случае отображения логина
+                                        if($model->denom == 'auth_login') {
+                                            return $res;
+                                        }
+
                                         if(is_numeric($res)) {
                                             return (($res == 1) ? "Включено" : "Выключено");
                                         }

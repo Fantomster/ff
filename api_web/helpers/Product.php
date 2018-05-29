@@ -74,6 +74,10 @@ class Product extends WebApi
             $product['currency'] = $individualModel->catalog->currency->symbol;
         }
 
+        if (strstr($product['image'], 'data:image') !== false) {
+            $product['image'] = \Yii::$app->params['web'] . 'site/image-base?id=' . $product['id'] . '&type=product';
+        }
+
         $product['vendor_id'] = Catalog::findOne($product['cat_id'])->supp_org_id;
         $product['model'] = $baseModel;
 

@@ -5,7 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
-use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial;
+use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone;
 use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList;
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
@@ -110,9 +110,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $model = new rejectedForm();
         if($reject)
-            $model->decision = vetDocumentDonePartial::RETURN_ALL;
+            $model->decision = vetDocumentDone::RETURN_ALL;
         else
-            $model->decision = vetDocumentDonePartial::PARTIAL;
+            $model->decision = vetDocumentDone::PARTIALLY;
 
         try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {

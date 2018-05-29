@@ -12,22 +12,22 @@ function initAutocomplete() {
             $('.loc-submit').attr('type', 'button');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
-                    var pos = {
-                        lat: parseFloat(position.coords.latitude),
-                        lng: parseFloat(position.coords.longitude)
-                    };
-                    geocodeLatLng(geocoder, pos);
-                },
-                        function (failure) {
-                            $.getJSON('https://ipinfo.io/geo', function (response) {
-                                var loc = response.loc.split(',');
-                                var pos = {
-                                    lat: parseFloat(loc[0]),
-                                    lng: parseFloat(loc[1])
-                                };
-                                geocodeLatLng(geocoder, pos);
-                            });
+                        var pos = {
+                            lat: parseFloat(position.coords.latitude),
+                            lng: parseFloat(position.coords.longitude)
+                        };
+                        geocodeLatLng(geocoder, pos);
+                    },
+                    function (failure) {
+                        $.getJSON('https://ipinfo.io/geo', function (response) {
+                            var loc = response.loc.split(',');
+                            var pos = {
+                                lat: parseFloat(loc[0]),
+                                lng: parseFloat(loc[1])
+                            };
+                            geocodeLatLng(geocoder, pos);
                         });
+                    });
             } else {
                 $.getJSON('https://ipinfo.io/geo', function (response) {
                     var loc = response.loc.split(',');
@@ -120,6 +120,9 @@ function geocodeLatLng(geocoder, latlng) {
             } else {
                 console.log('No results found');
             }
+        } else if (status === 'ZERO_RESULTS') {
+            $('.loc-submit').removeClass('disabled');
+            $('.loc-submit').attr('type', 'submit');
         } else {
             console.log('Geocoder failed due to: ' + status);
         }

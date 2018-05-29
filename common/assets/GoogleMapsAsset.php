@@ -10,7 +10,7 @@ class GoogleMapsAsset extends AssetBundle {
     public $sourcePath = '@common/assets/googlemaps';
     public $js = [
         'js/googleMap.js',
-        'js/googleApiLocation.js?v=1',
+        'js/googleApiLocation.js',
         'js/main.js',
     ];
 

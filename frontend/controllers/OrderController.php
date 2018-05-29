@@ -1754,7 +1754,7 @@ class OrderController extends DefaultController
         return true;
     }
 
-    private function sendSystemMessage($user, $order_id, $message, $danger = false)
+    public function sendSystemMessage($user, $order_id, $message, $danger = false)
     {
         $order = Order::findOne(['id' => $order_id]);
 
@@ -1986,7 +1986,7 @@ class OrderController extends DefaultController
      * @param Organization $senderOrg
      * @param Order $order
      */
-    private function sendOrderProcessing($senderOrg, $order)
+    public function sendOrderProcessing($senderOrg, $order)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */

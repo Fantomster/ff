@@ -24,7 +24,7 @@ use yii\db\Expression;
  * @author alexey.sergeev
  *
  */
-class EComIntegration extends Component {
+class EComIntegration{
 
 
     public function handleFilesList(String $login, String $pass): void

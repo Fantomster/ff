@@ -21,7 +21,7 @@ use common\models\User;
     ]); ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Редактирование настройки: <strong> <?= $dicConst->comment?></strong></h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.client.integration.mercury.edit_settings', ['ru'=>'Редактирование настройки']) ?>: <strong> <?= $dicConst->comment?></strong></h4>
 </div>
 <div class="modal-body">
     <?php echo $form->errorSummary($model); ?>

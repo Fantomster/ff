@@ -94,11 +94,11 @@ $licenses = $user->organization->getLicenseList();
                 <div class="hpanel" >
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">ВЕТИС "Меркурий"</h4>', ['merc/settings']) ?>
-                            <p class="small">Интеграция с системой ВЕТИС "Меркурий"</p>
+                            <?= Html::a('<h4 class="m-b-xs text-info"> '.Yii::t('message', 'frontend.client.integration.mercury.title', ['ru'=>'ВЕТИС "Меркурий"']).'</h4>', ['merc/settings']) ?>
+                            <p class="small"><?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?></p>
                         </div>
                         <div class="col-md-6 text-right">
-                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> '.Yii::t('message', 'frontend.client.integration.mercury.documentation', ['ru'=>'Документация']), ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
                         </div>
                     </div>
                 </div>

@@ -29,8 +29,8 @@ use common\models\User;
     }
     ?>
     <div class="form-group">
-        <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
-        <?= Html::a('Вернуться', ['index'], ['class' => 'btn btn-success btn-export']);?>
+        <?php echo Html::submitButton($model->isNewRecord ? Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']) : Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?= Html::a(Yii::t('message', 'Close'), ['index'], ['class' => 'btn btn-success btn-export']);?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

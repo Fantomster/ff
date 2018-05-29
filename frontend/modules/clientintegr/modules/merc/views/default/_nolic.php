@@ -30,7 +30,7 @@ $this->registerJs($script);
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -39,10 +39,10 @@ $this->registerJs($script);
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
-            'Интеграция с iiko Office',
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
@@ -51,15 +51,16 @@ $this->registerJs($script);
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title">Панель управления</h3>
+                <h3 class="box-title"><?= Yii::t('message', 'frontend.client.integration.mercury.control_panel', ['ru'=>'Панель управления']) ?></h3>
             </div>
             <div class="box-body">
 
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-8 text-left">
-                            <span style="color:red;">Лицензия не активна.</span><br> Обратитесь к менеджерам по
-                            сопровождению для получения дополнительной информации!
+                            <span style="color:red;"><?= Yii::t('message', 'frontend.client.integration.mercury.no_lic', ['ru'=>'Лицензия не активна.']) ?></span><br>
+                            <?= Yii::t('message', 'frontend.client.integration.mercury.no_lic_support', ['ru'=>'Обратитесь к менеджерам по
+                            сопровождению для получения дополнительной информации!']) ?>
                         </div>
                     </div>
                 </div>

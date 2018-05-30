@@ -30,7 +30,7 @@ class mercDic extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'iiko_dic';
+        return 'merc_dic';
     }
 
     /**

@@ -34,13 +34,17 @@ use api\common\models\RkAccess;
     ])
     ?>
 </section>
+<?php
+$user = Yii::$app->user->identity;
+$licenses = $user->organization->getLicenseList();
+?>
 <section class="content">
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Партнеры по интеграции</h3>
             </div>
-            <!-- /.box-header -->
+            <?php if(isset($licenses['rkws'])): ?>
             <div class="box-body">
                 <div class="hpanel">
                     <div class="panel-body">
@@ -53,6 +57,10 @@ use api\common\models\RkAccess;
                         </div>
                     </div>
                 </div>
+            </div>
+            <?php endif; ?>
+            <?php if(isset($licenses['iiko'])): ?>
+            <div class="box-body">
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
@@ -64,24 +72,38 @@ use api\common\models\RkAccess;
                         </div>
                     </div>
                 </div>
-                <div class="hpanel" style="display:none">
+            </div>
+            <?php endif; ?>
+            <?php // if(isset($licenses['email'])): ?>
+            <div class="box-body">
+                <div class="hpanel" >
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">Email ТОРГ-12</h4>', ['email/default']) ?>
-                            <p class="small">Интеграция Email ТОРГ-12</p>
+                            <?= Html::a('<h4 class="m-b-xs text-info">Накладные поставщика</h4>', ['email/default']) ?>
+                            <p class="small">Загрузка накладных из 1С с помощью EMAIL</p>
                         </div>
                         <div class="col-md-6 text-right">
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- /.box-body -->
-            <!--div class="box-footer clearfix">
-              <span class="pull-right">5 каталогов</span>
-            </div-->
-            <!-- /.box-footer -->
+             </div>
+            <?php // endif; ?>
+            <?php if(isset($licenses['mercury'])): ?>
+             <div class="box-body">
+                <div class="hpanel" >
+                    <div class="panel-body">
+                        <div class="col-md-6 text-left">
+                            <?= Html::a('<h4 class="m-b-xs text-info"> '.Yii::t('message', 'frontend.client.integration.mercury.title', ['ru'=>'ВЕТИС "Меркурий"']).'</h4>', ['merc/settings']) ?>
+                            <p class="small"><?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?></p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> '.Yii::t('message', 'frontend.client.integration.mercury.documentation', ['ru'=>'Документация']), ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
+                        </div>
+                    </div>
+                </div>
           </div>
-
+          <?php endif; ?>
 </div>
 </section>
 

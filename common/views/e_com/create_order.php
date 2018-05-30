@@ -16,11 +16,17 @@
         <SENDER><?= $client->gln_code ?></SENDER>
         <RECIPIENT><?= $vendor->gln_code ?></RECIPIENT>
         <EDIINTERCHANGEID><?= $order->id ?></EDIINTERCHANGEID>
-        <?php foreach ($orderContent as $position): ?>
+        <?php
+        $i = 1;
+        foreach ($orderContent as $position): ?>
+            <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
+                $barcode = $product->barcode;
+            if (!$barcode)continue;
+            ?>
             <POSITION>
-                <POSITIONNUMBER><?= $position['order_id']  ?></POSITIONNUMBER>
-                <PRODUCT><?= $position['id']  ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $position['order_id']  ?></PRODUCTIDBUYER>
+                <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
+                <PRODUCT><?= $barcode ?></PRODUCT>
+                <PRODUCTIDBUYER><?= $position['id']  ?></PRODUCTIDBUYER>
                 <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>

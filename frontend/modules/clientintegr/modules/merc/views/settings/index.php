@@ -2,11 +2,24 @@
 
 use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
+use yii\bootstrap\Modal;
+use yii\widgets\Pjax;
+use yii\web\View;
 
 ?>
+
+<?=
+Modal::widget([
+    'id' => 'settings-edit-form',
+    'size' => 'modal-md',
+    'clientOptions' => false,
+])
+?>
+
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
+        <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -15,17 +28,30 @@ use kartik\grid\GridView;
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr'],
             ],
-            'Интеграция с iiko Office',
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
 </section>
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-    Настройки
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <div class="panel-body">
+                <div class="box-body table-responsive no-padding">
+                    <p>
+                        <?= Yii::t('message', 'frontend.client.integration.mercury.lic_status', ['ru'=>'Состояние лицензии']) ?>:
+                        <?php echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') '; ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content-header">
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.settings', ['ru'=>'Настройки']) ?>:</h4>
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -33,6 +59,7 @@ use kartik\grid\GridView;
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
+                        <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 10000, 'id' => 'st-list']) ?>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
@@ -40,19 +67,19 @@ use kartik\grid\GridView;
                             'filterPosition' => false,
                             'columns' => [
                                 [
-                                    'label' => 'Свойство',
+                                    'label' => Yii::t('message', 'frontend.client.integration.mercury.attibute', ['ru'=>'Свойство']),
                                     'attribute' => 'denom'
                                 ],
                                 [
-                                    'label' => 'Комментарий',
+                                    'label' =>  Yii::t('message', 'frontend.client.integration.mercury.comment', ['ru'=>'Комментарий']),
                                     'attribute' => 'comment'
                                 ],
                                 [
                                     'value' => function ($data) {
-                                        $model = \api\common\models\iiko\iikoDicconst::findOne(['id' => $data->id]);
+                                        $model = \api\common\models\merc\mercDicconst::findOne(['id' => $data->id]);
                                         $res = $model->getPconstValue();
 
-                                        if($model->type == \api\common\models\iiko\iikoDicconst::TYPE_PASSWORD) {
+                                        if($model->type == \api\common\models\merc\mercDicconst::TYPE_PASSWORD) {
                                             return str_pad('', strlen($res), '*');
                                         }
 
@@ -69,7 +96,7 @@ use kartik\grid\GridView;
 
                                         return $res;
                                     },
-                                    'label' => 'Текущее значение',
+                                    'label' => Yii::t('message', 'frontend.client.integration.mercury.current_value', ['ru'=>'Текущее значение']),
                                     'contentOptions' => ['style' => 'font-weight:bold;'],
                                 ],
                                 [
@@ -83,9 +110,15 @@ use kartik\grid\GridView;
                                     ],
                                     'buttons' => [
                                         'clear' => function ($url, $model) {
-                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr\iiko\settings\change-const', 'id' => $model->id]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\settings\change-const', 'id' => $model->id]);
                                             return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
-                                                ['title' => 'Изменить значение', 'data-pjax' => "0"]);
+                                                ['title' => Yii::t('message', 'frontend.client.integration.mercury.edit_value', ['ru'=>'Изменить значение']),
+                                                    'data' => [
+                                                    'target' => '#settings-edit-form',
+                                                    'toggle' => 'modal',
+                                                    'backdrop' => 'static',
+                                                    ]
+                                                ]);
                                         },
                                     ]
                                 ],
@@ -105,12 +138,44 @@ use kartik\grid\GridView;
                             ],
                         ]);
                         ?>
+                        <?php Pjax::end(); ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<?php
+$customJs = <<< JS
+$(".modal").removeAttr("tabindex");
+
+$("#settings-edit-form").on("click", ".save-form", function() {
+    var form = $("#settings-form");
+    $.ajax({
+    url: form.attr("action"),
+    type: "POST",
+    data: form.serialize(),
+    cache: false,
+    success: function(response) {
+        $.pjax.reload({container: "#st-list",timeout:30000});
+        if(response != true) 
+            form.replaceWith(response);
+        else
+                $("#settings-edit-form").modal('hide');
+                  
+        },
+        failure: function(errMsg) {
+        console.log(errMsg);
+    }
+    });
+});
+
+$("body").on("hidden.bs.modal", "#settings-edit-form", function() {
+$(this).data("bs.modal", null);
+})
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>
 
 
 

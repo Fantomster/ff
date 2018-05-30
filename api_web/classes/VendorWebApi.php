@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
 use common\models\Profile;
@@ -182,19 +183,38 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Empty search attribute email');
         }
 
+        $result = [];
         $email = $post['email'];
 
-        $model = Organization::find()->where(['email' => $email, 'type_id' => Organization::TYPE_SUPPLIER])->one();
-        if (!empty($model)) {
-            return WebApiHelper::prepareOrganization($model);
+        $models = Organization::find()
+            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
+            ->where(['organization.type_id' => Organization::TYPE_SUPPLIER])
+            ->andWhere(['or', [
+                'organization.email' => $email
+            ], [
+                'user.email' => $email
+            ]])->all();
+
+        if (!empty($models)) {
+            foreach($models as $model) {
+                $r = WebApiHelper::prepareOrganization($model);
+
+                if($user = RelationUserOrganization::find()->joinWith('user')->where([
+                    'relation_user_organization.organization_id' => $model->id,
+                    'user.email' => $email
+                ])->one()) {
+                    $r['user'] = [
+                        'email' => $user->user->email,
+                        'name' => $user->user->profile->full_name,
+                        'phone' => $user->user->profile->phone,
+                    ];
+                }
+
+                $result[] = $r;
+            }
         }
 
-        $user = User::find()->where(['email' => $email])->one();
-        if (!empty($user)) {
-            throw new BadRequestHttpException("Email $email является пользователем. Необходимо уточнить email адрес поставщика.");
-        }
-
-        return [];
+        return $result;
     }
 
     /**

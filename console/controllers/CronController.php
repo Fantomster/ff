@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use common\components\EComIntegration;
 use Yii;
 use yii\web\View;
 use yii\console\Controller;
@@ -357,6 +358,14 @@ class CronController extends Controller {
 
     public function actionUpdateBlacklist() {
         Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '%test%' OR name LIKE '%тест%')");
+    }
+
+
+    //handle EDI integration files
+    public function actionHandleFiles()
+    {
+        $eComIntegration = new EComIntegration();
+        $eComIntegration->handleFilesList(Yii::$app->params['e_com']['login'], Yii::$app->params['e_com']['pass']);
     }
 
 }

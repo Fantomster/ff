@@ -237,6 +237,12 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
 <section class="content-header">
     <h1>
         <i class="fa fa-history"></i> <?= $title ?>
+        <?php
+        if ($order->vendor->gln_code > 0) {
+            $alt = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
+            echo ' ' . Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt]);
+        }
+        ?>
     </h1>
     <?=
     Breadcrumbs::widget([

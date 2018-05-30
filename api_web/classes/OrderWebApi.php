@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
@@ -13,6 +14,7 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
+use kartik\mpdf\Pdf;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
@@ -129,32 +131,43 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("Discount amount empty");
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+
+            if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
+                throw new BadRequestHttpException("Discount amount > Total Price");
+            }
+
+            if ($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
+                throw new BadRequestHttpException("Discount amount > 100%");
+            }
+
             $order->discount = $post['discount']['amount'];
         }
 
         $tr = \Yii::$app->db->beginTransaction();
         try {
             //Тут операции с продуктами в этом заказе
-            if (!empty($post['products']) && is_array($post['products'])) {
-                foreach ($post['products'] as $product) {
-                    $operation = strtolower($product['operation']);
-                    if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
-                        throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+            if (isset($post['products']) && !empty($post['products'])) {
+                if (is_array($post['products'])) {
+                    foreach ($post['products'] as $product) {
+                        $operation = strtolower($product['operation']);
+                        if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
+                            throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+                        }
+                        switch ($operation) {
+                            case 'delete':
+                                $this->deleteProduct($order, $product['id']);
+                                break;
+                            case 'add':
+                                $this->addProduct($order, $product);
+                                break;
+                            case 'edit':
+                                $this->editProduct($order, $product);
+                                break;
+                        }
                     }
-                    switch ($operation) {
-                        case 'delete':
-                            $this->deleteProduct($order, $product['id']);
-                            break;
-                        case 'add':
-                            $this->addProduct($order, $product);
-                            break;
-                        case 'edit':
-                            $this->editProduct($order, $product);
-                            break;
-                    }
+                } else {
+                    throw new BadRequestHttpException("products not array");
                 }
-            } else {
-                throw new BadRequestHttpException("products not array");
             }
 
             $order->calculateTotalPrice();
@@ -835,6 +848,51 @@ class OrderWebApi extends \api_web\components\WebApi
             $t->rollBack();
             throw $e;
         }
+    }
+
+    public function saveToPdf(array $post, OrderController $c)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException('Empty param order_id');
+        }
+
+        $order = Order::findOne(['id' => $post['order_id']]);
+        if (empty($order)) {
+            throw new BadRequestHttpException('Order not found');
+        }
+
+        $user = $this->user;
+
+        if ((($order->client_id != $user->organization_id) && ($order->vendor_id != $user->organization_id) && ($order->created_by_id != $user->id))) {
+            throw new BadRequestHttpException(\Yii::t('message', 'frontend.controllers.order.get_out_three', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
+        }
+
+        $order->calculateTotalPrice();
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        $pdf = new Pdf([
+            'mode' => Pdf::MODE_UTF8,
+            'format' => Pdf::FORMAT_A4,
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            'destination' => Pdf::DEST_BROWSER,
+            'content' => $c->renderPartial('@app/../frontend/views/order/_pdf_order', compact('dataProvider', 'order')),
+            'options' => [
+                'defaultfooterline' => false,
+                'defaultfooterfontstyle' => false,
+            ],
+            'methods' => [
+                'SetFooter' => $c->renderPartial('@app/../frontend/views/order/_pdf_signature'),
+            ],
+            'cssFile' => '@app/../frontend/web/css/pdf_styles.css'
+        ]);
+        $pdf->filename = 'mixcart_order_' . $post['order_id'] . '.pdf';
+        ob_start();
+        $pdf->render();
+        $content = base64_encode(ob_get_clean());
+        return $content;
     }
 
     /**

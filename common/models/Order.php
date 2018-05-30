@@ -93,7 +93,7 @@ class Order extends \yii\db\ActiveRecord
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date'], 'safe'],
+            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'invoice_number', 'invoice_date'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -489,24 +489,26 @@ class Order extends \yii\db\ActiveRecord
             if (isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
                 if ($this->status != self::STATUS_FORMING) {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
-                    $organization = Organization::findOne(['id' => $this->vendor_id]);
-                    if ($organization->is_ecom_integration) {
-                        $eComIntegration = new EComIntegration();
-                        $eComIntegration->sendOrderInfo($this, $organization);
-                    }
                 } else {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
                 }
         }
-        if ($this->status != self::STATUS_FORMING && !$insert) {
+
+        //dd($changedAttributes['status']);
+        if ($this->status != self::STATUS_FORMING && !$insert && key_exists('total_price', $changedAttributes)) {
+            //dd($changedAttributes);
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if ($client->gln_code && $vendor->gln_code) {
                 $eComIntegration = new EComIntegration();
-                $success = $eComIntegration->sendOrderInfo($this, $vendor, $client);
-                if (!$success) {
-                    throw new BadRequestHttpException('EDI error');
+                if($this->status == self::STATUS_DONE){
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
+                }else{
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                }
+                if (!$result) {
+                    throw new BadRequestHttpException("EDI Server error");
                 }
             }
             if (!$client->gln_code && $vendor->gln_code) {

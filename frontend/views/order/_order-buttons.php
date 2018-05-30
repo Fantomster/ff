@@ -85,6 +85,10 @@ if ($order->isObsolete) {
 if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Organization::TYPE_FRANCHISEE){
     $canEdit = true;
 }
+
+if($order->vendor->gln_code && $order->status!=Order::STATUS_DONE){
+    $canEdit = false;
+}
 ?>
 <div class="box box-info block_wrapper" style="height:auto;">
     <div class="box-header">
@@ -109,6 +113,18 @@ if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Or
             ]) : "" ?>
         <?= $canEdit && !$edit ? Html::a('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.edit', ['ru'=>'Редактировать']), ['/order/edit', "id" => $order->id], ['class' => 'btn btn-success pull-right btnSave', 'style' => 'margin-right: 7px;']) : "" ?>
 <div style="clear: both; height: 5px;"></div>
+        <?php
+        $user = Yii::$app->user->identity;
+        $licenses = $user->organization->getLicenseList();
+        if(isset($licenses['mercury']))
+            echo Html::a(' ' . Yii::t('app', 'frontend.views.order.index.mercury', ['ru'=>'Погасить ВСД']). ' ', ['/clientintegr/merc/default'], [
+                'class' => 'btn btn-outline-processing pull-right',
+                'target' => '',
+                'data-toggle' => 'tooltip',
+                'title' => Yii::t('app', 'frontend.views.order.index.mercury', ['ru'=>'Погасить ВСД'])
+            ]);
+        ?>
+
         <?=
         Html::a('<i class="icon fa fa-file-excel-o"></i> ' . Yii::t('app', 'frontend.views.order.index.report', ['ru'=>'отчет xls']) . ' ', ['order/order-to-xls', 'id' => $order->id], [
             'class' => 'btn btn-outline-success pull-right',

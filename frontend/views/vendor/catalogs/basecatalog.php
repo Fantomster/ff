@@ -217,9 +217,11 @@ Modal::end();
                             'showColumnSelector' => false,
                             'batchSize' => 200,
                             'timeout' => 0,
+
                             'dropdownOptions' => [
                                 'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . ' </span>',
-                                'class' => ['btn btn-outline-default btn-sm pull-right']
+                                'class' => ['btn btn-outline-default btn-sm pull-right'],
+                                'title' => Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']),
                             ],
                             'exportConfig' => [
                                 ExportMenu::FORMAT_HTML => false,
@@ -435,9 +437,10 @@ Modal::end();
                                 'export' => [
                                     'fontAwesome' => true,
                                 ],
+                                'summary' => Yii::t('message', 'frontend.views.request.showed_three') . " {begin} - {end} " . Yii::t('app', 'из') . " {totalCount} " . Yii::t('app', 'записей'),
                                 'pager' => [
-                                    'firstPageLabel' => true,
-                                    'lastPageLabel' => true,
+                                    'firstPageLabel' => false,
+                                    'lastPageLabel' => false,
                                 ],
                             ]);
                             ?>

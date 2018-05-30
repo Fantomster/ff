@@ -199,7 +199,7 @@ use yii\helpers\Html;
                     'toggle' => 'modal',
                     'backdrop' => 'static',
                 ],]).' '.
-                Html::a(YiiYii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
+                Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
                     //'pjax'=>0,
                     'target' => '#ajax-load',
                     'toggle' => 'modal',

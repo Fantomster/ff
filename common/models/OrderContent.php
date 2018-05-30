@@ -42,7 +42,6 @@ class OrderContent extends \yii\db\ActiveRecord
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
             [['order_id', 'product_id', 'updated_user_id'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
-            [['comment', 'article', 'edi_supplier_article', 'updated_user_id'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
@@ -72,6 +71,28 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEdiOrderContent()
+    {
+        return $this->hasOne(EdiOrderContent::className(), ['order_content_id' => 'id']);
+    }
+
+
+    public function getEdiSupplierArticle()
+    {
+        return $this->ediOrderContent->edi_supplier_article ?? '';
+    }
+
+
+    public function getDocType()
+    {
+        return $this->ediOrderContent->doc_type ?? 0;
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -141,7 +162,6 @@ class OrderContent extends \yii\db\ActiveRecord
                 'product_name' => $product->baseProduct->product,
                 'units' => $product->baseProduct->units,
                 'article' => $product->baseProduct->article,
-                'edi_supplier_article' => $product->baseProduct->edi_supplier_article ?? null,
             ];
         }
         $product = CatalogBaseGoods::find()
@@ -166,7 +186,6 @@ class OrderContent extends \yii\db\ActiveRecord
                 'product_name' => $product->product,
                 'units' => $product->units,
                 'article' => $product->article,
-                'edi_supplier_article' => $product->edi_supplier_article ?? null,
             ];
         }
         return [];

@@ -154,24 +154,6 @@ class Order extends \yii\db\ActiveRecord
     }
 
 
-    public function getInvoiceNumber()
-    {
-        return $this->ediOrder->invoice_number ?? '';
-    }
-
-
-    public function getInvoiceDate()
-    {
-        return $this->ediOrder->invoice_date ?? '';
-    }
-
-
-    public function getLang()
-    {
-        return $this->ediOrder->lang ?? 'ru';
-    }
-
-
     /**
      * @return \yii\db\ActiveQuery
      */

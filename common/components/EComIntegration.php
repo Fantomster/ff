@@ -6,6 +6,7 @@ use common\models\Catalog;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
 use common\models\Currency;
+use common\models\EdiOrder;
 use common\models\EdiOrderContent;
 use common\models\Order;
 use common\models\OrderContent;
@@ -141,7 +142,9 @@ class EComIntegration{
                 $summ+=$arr[$orderContent->id]['ACCEPTEDQUANTITY']*$arr[$orderContent->id]['PRICE'];
                 $ordCont->save();
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
-                Yii::$app->db->createCommand()->update('edi_order_content', ['doc_type' => $docType], 'order_content_id='.$orderContent->id)->execute();
+                $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
+                $ediOrderContent->doc_type = $docType;
+                $ediOrderContent->save();
             }
         }
         if (!$isDesadv) {
@@ -173,7 +176,11 @@ class EComIntegration{
             }
         }
         Yii::$app->db->createCommand()->update('order', ['status' => Order::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id='.$order->id)->execute();
-        Yii::$app->db->createCommand()->update('edi_order', ['invoice_number' => $simpleXMLElement->DELIVERYNOTENUMBER ?? '', 'invoice_date' => $simpleXMLElement->DELIVERYNOTEDATE ?? ''], 'order_id='.$order->id)->execute();
+        $ediOrder = EdiOrder::findOne(['order_id'=>$order->id]);
+        $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
+        $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
+        $ediOrder->save();
+
         $user = User::findOne(['id'=>$order->created_by_id]);
         OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
 
@@ -331,18 +338,24 @@ class EComIntegration{
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
         try {
-            Yii::$app->db->createCommand()->insert('edi_order', [
-                'order_id' => $order->id,
-                'lang' => Yii::$app->language ?? 'ru'
-            ])->execute();
+            $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
+            if(!$ediOrder){
+                Yii::$app->db->createCommand()->insert('edi_order', [
+                    'order_id' => $order->id,
+                    'lang' => Yii::$app->language ?? 'ru'
+                ])->execute();
+            }
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             foreach ($orderContent as &$one){
                 $catGood = CatalogBaseGoods::findOne(['id' => $one->product_id]);
                 if($catGood){
-                    Yii::$app->db->createCommand()->insert('edi_order_content', [
-                        'order_content_id' => $one->id,
-                        'edi_supplier_article' => $catGood->edi_supplier_article ?? null
-                    ])->execute();
+                    $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $one->id]);
+                    if(!$ediOrderContent){
+                        Yii::$app->db->createCommand()->insert('edi_order_content', [
+                            'order_content_id' => $one->id,
+                            'edi_supplier_article' => $catGood->edi_supplier_article ?? null
+                        ])->execute();
+                    }
                 }
             }
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);

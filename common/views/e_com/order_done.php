@@ -5,8 +5,8 @@
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
     <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
-    <DELIVERYNOTENUMBER><?= $order->invoice_number ?? $order->id ?></DELIVERYNOTENUMBER>
-    <DELIVERYNOTEDATE><?= $order->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
+    <DELIVERYNOTENUMBER><?= $order->edi_order->invoice_number ?? $order->id ?></DELIVERYNOTENUMBER>
+    <DELIVERYNOTEDATE><?= $order->edi_order->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
     <HEAD>
@@ -21,13 +21,14 @@
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
             $barcode = $product->barcode;
+            $edi_supplier_article = $product->edi_supplier_article ?? $position['id'];
             if (!$barcode)continue;
             ?>
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
                 <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
-                <PRODUCTIDSUPPLIER><?= $position['edi_supplier_article'] ?? $position['id'] ?></PRODUCTIDSUPPLIER>
+                <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                 <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                 <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
                 <DELIVEREDUNIT><?= $position['units'] ?></DELIVEREDUNIT>

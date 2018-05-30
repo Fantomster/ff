@@ -82,18 +82,6 @@ class OrderContent extends \yii\db\ActiveRecord
     }
 
 
-    public function getEdiSupplierArticle()
-    {
-        return $this->ediOrderContent->edi_supplier_article ?? '';
-    }
-
-
-    public function getDocType()
-    {
-        return $this->ediOrderContent->doc_type ?? 0;
-    }
-
-
     /**
      * @return \yii\db\ActiveQuery
      */

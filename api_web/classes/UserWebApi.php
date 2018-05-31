@@ -646,6 +646,7 @@ class UserWebApi extends \api_web\components\WebApi
             'id' => (int)$model->vendor->id,
             'name' => $model->vendor->name ?? "",
             'contact_name' => $model->vendor->contact_name ?? "",
+            'inn' => $model->vendor->inn ?? null,
             'cat_id' => (int)$model->cat_id,
             'email' => $model->vendor->email ?? "",
             'phone' => $model->vendor->phone ?? "",

@@ -503,11 +503,12 @@ class Order extends \yii\db\ActiveRecord
                     \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
                 }
         }
+
         if ($this->status != self::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == self::STATUS_DONE)) {
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
-            if ($client->gln_code && $vendor->gln_code) {
+            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $eComIntegration = new EComIntegration();
                 if($this->status == self::STATUS_DONE){
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
@@ -518,7 +519,7 @@ class Order extends \yii\db\ActiveRecord
                     throw new BadRequestHttpException(Yii::t('app', 'common.models.order.edi_error'));
                 }
             }
-            if (!$client->gln_code && $vendor->gln_code) {
+            if (!isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code)) {
                 throw new BadRequestHttpException($errorText);
             }
         }

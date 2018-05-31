@@ -86,7 +86,7 @@ if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Or
     $canEdit = true;
 }
 
-if($order->vendor->gln_code && $order->status!=Order::STATUS_DONE){
+if(isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0 && $order->status!=Order::STATUS_DONE){
     $canEdit = false;
 }
 ?>

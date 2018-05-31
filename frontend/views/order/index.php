@@ -243,7 +243,7 @@ $this->registerCss("
                                     $text = "<div class='col-md-10'>";
                                     $text .= Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
                                     $text .= "</div><div class='col-md-2'>";
-                                    if ($data->vendor->gln_code > 0) {
+                                    if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0) {
                                         $alt = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
                                         $text .= Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt, 'width' => 35]);
                                     }

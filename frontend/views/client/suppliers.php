@@ -154,7 +154,7 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'contentOptions' => ['class' => 'text-bold', 'style' => 'vertical-align:middle;width:5%;font-size:14px'],
         'value' => function ($data) {
-            if($data->vendor->gln_code > 0){
+            if(isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0){
                 $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
                 return Html::img(Url::to('/img/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 40]);
             }else{

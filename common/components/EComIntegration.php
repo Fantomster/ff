@@ -66,6 +66,7 @@ class EComIntegration{
         $dom = new \DOMDocument();
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);
+        $success = false;
         if(strpos($content, 'PRICAT>')){
             $success = $this->handlePriceListUpdating($simpleXMLElement);
         }
@@ -183,7 +184,9 @@ class EComIntegration{
         $ediOrder->save();
 
         $user = User::findOne(['id'=>$order->created_by_id]);
-        OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
+        if($message != ''){
+            OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
+        }
 
         $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
         OrderController::sendSystemMessage($user, $order->id, $systemMessage);

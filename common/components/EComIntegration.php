@@ -125,7 +125,7 @@ class EComIntegration{
         foreach ($positions as $position){
             $contID = (int) $position->PRODUCTIDBUYER;
             $positionsArray[] = (int) $contID;
-            $barcodeArray[] = $position->PRODUCT;
+            //$barcodeArray[] = (int)$position->PRODUCT;
             if($isDesadv){
                 $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }else{
@@ -140,6 +140,7 @@ class EComIntegration{
         foreach ($order->orderContent as $orderContent){
             if (!isset($arr[$orderContent->id]['BARCODE']))continue;
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$orderContent->id]['BARCODE']]);
+            $barcodeArray[] = $good->barcode;
             $ordContArr[] = $orderContent->id;
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
             if(!$ordCont)continue;
@@ -171,7 +172,8 @@ class EComIntegration{
         if (!$isDesadv) {
             foreach ($positions as $position) {
                 $contID = (int)$position->PRODUCTIDBUYER;
-                if (!in_array($contID, $ordContArr) && !in_array($position->PRODUCT, $barcodeArray)) {
+                $barcode = (int)$position->PRODUCT;
+                if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
                     if (!$good) continue;
                     if ($isDesadv) {

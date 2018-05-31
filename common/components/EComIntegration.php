@@ -76,7 +76,7 @@ class EComIntegration{
             $success = $this->handleOrderResponse($simpleXMLElement, true);
         }
         if($success){
-            //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+            $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
         }
         return true;
     }
@@ -107,13 +107,14 @@ class EComIntegration{
             $positionsArray[] = (int) $contID;
             $barcodeArray[] = $position->PRODUCT;
             if($isDesadv){
-                $arr[$contID]['ACCEPTEDQUANTITY'] = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }else{
-                $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = $position->PRICE ?? $position->PRICEWITHVAT;
-            $arr[$contID]['BARCODE'] = $position->PRODUCT;
+            $arr[$contID]['PRICE'] = (float)$position->PRICE ?? (float)$position->PRICEWITHVAT;
+            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
         }
+
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent){
@@ -127,20 +128,20 @@ class EComIntegration{
                 $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
             }else{
                 $oldQuantity = (float)$ordCont->quantity;
-                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
-                if($oldQuantity!=$newQuantity){
+                $newQuantity = (float)$arr[$orderContent->id]['ACCEPTEDQUANTITY'];
+
+                if($oldQuantity != $newQuantity){
                     $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }
-                $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
 
-                $oldPrice = $ordCont->price;
-                $newPrice = $arr[$orderContent->id]['PRICE'];
-                if($oldPrice!=$newPrice){
+                $oldPrice = (float)$ordCont->price;
+                $newPrice = (float)$arr[$orderContent->id]['PRICE'];
+                if($oldPrice != $newPrice){
                     $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' =>$orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol'=>$order->currency->iso_code]) . $newPrice . " руб";
                 }
-                $ordCont->price = $arr[$orderContent->id]['PRICE'];
-                $summ+=$arr[$orderContent->id]['ACCEPTEDQUANTITY']*$arr[$orderContent->id]['PRICE'];
-                $ordCont->save();
+                $summ+=$newQuantity*$newPrice;
+                Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id='.$ordCont->id)->execute();
+
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
                 $ediOrderContent->doc_type = $docType;
@@ -346,7 +347,7 @@ class EComIntegration{
                 ])->execute();
             }
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
-            foreach ($orderContent as &$one){
+            foreach ($orderContent as $one){
                 $catGood = CatalogBaseGoods::findOne(['id' => $one->product_id]);
                 if($catGood){
                     $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $one->id]);

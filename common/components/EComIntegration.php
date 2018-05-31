@@ -19,6 +19,7 @@ use mongosoft\soapclient\Client;
 use Yii;
 use yii\base\Component;
 use yii\base\ErrorException;
+use yii\db\Exception;
 use yii\db\Expression;
 
 /**
@@ -40,10 +41,15 @@ class EComIntegration{
                 $transaction = Yii::$app->db_api->beginTransaction();
                 try {
                     $client = Yii::$app->siteApi;
-                    $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+                    try{
+                        $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+                    }catch (Exception $e){
+                        Yii::error($e->getMessage());
+                        continue;
+                    }
                     if ($object->result->errorCode != 0) {
                         Yii::error('EComIntegration getList Error');
-                        throw new ErrorException();
+                        continue;
                     }
                     $list = $object->result->list ?? null;
                     if (!$list) {
@@ -69,7 +75,12 @@ class EComIntegration{
 
     private function getDoc(Client $client, String $fileName, String $login, String $pass): bool
     {
-        $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
+        try{
+            $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
+        }catch (Exception $e){
+            Yii::error($e->getMessage());
+            return false;
+        }
         $content = $doc->result->content;
         $dom = new \DOMDocument();
         $dom->loadXML($content);

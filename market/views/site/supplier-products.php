@@ -61,7 +61,7 @@ $this->title = Yii::t('message', 'market.views.site.supp_prod.vendors_prods', ['
                                 </div>
                                 <div class="product-company">
                                     <a href="<?= Url::to(['/site/supplier', 'id' => $row->vendor->id]); ?>">
-                                        <h5><?= $row->vendor->name; ?> <?php if($vendor->ediOrganization->gln_code > 0){
+                                        <h5><?= $row->vendor->name; ?> <?php if(isset($vendor->ediOrganization->gln_code) && $vendor->ediOrganization->gln_code > 0){
                                                 $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
                                                 echo Html::img(Url::to('/images/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 35]);
                                             }

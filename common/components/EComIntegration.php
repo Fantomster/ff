@@ -76,7 +76,7 @@ class EComIntegration{
             $success = $this->handleOrderResponse($simpleXMLElement, true);
         }
         if($success){
-            //$client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+            $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
         }
         return true;
     }
@@ -130,22 +130,18 @@ class EComIntegration{
                 $oldQuantity = (float)$ordCont->quantity;
                 $newQuantity = (float)$arr[$orderContent->id]['ACCEPTEDQUANTITY'];
 
-                if($oldQuantity!=$newQuantity){
+                if($oldQuantity != $newQuantity){
                     $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }
-                $ordCont->quantity = $newQuantity;
 
                 $oldPrice = (float)$ordCont->price;
                 $newPrice = (float)$arr[$orderContent->id]['PRICE'];
-                if($oldPrice!=$newPrice){
+                if($oldPrice != $newPrice){
                     $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' =>$orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol'=>$order->currency->iso_code]) . $newPrice . " руб";
                 }
-                $ordCont->price = $newPrice;
                 $summ+=$newQuantity*$newPrice;
-                $ordCont->save();
-//                if($orderID==10801){
-//                    //dd($ordCont);
-//                }
+                Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id='.$ordCont->id)->execute();
+
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
                 $ediOrderContent->doc_type = $docType;

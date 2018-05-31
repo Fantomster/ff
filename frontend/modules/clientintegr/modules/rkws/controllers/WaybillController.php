@@ -455,8 +455,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         //  $resres = ApiHelper::getAgents();     
 
-     //   $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
-     //   $res->sendWaybill($waybill_id);
+        $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
+        $res->sendWaybill($waybill_id);
 
         $this->redirect('/clientintegr/rkws/waybill/index');
     }

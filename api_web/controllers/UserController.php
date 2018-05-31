@@ -418,6 +418,7 @@ class UserController extends WebApiController
      *                               {
      *                                       "id": 3449,
      *                                       "name": "testsellfknm4 - поставщик",
+     *                                       "contact_name": "Имя контакта",
      *                                       "cat_id": 0,
      *                                       "email": "testsellfknm4@yandex.ru",
      *                                       "phone": "+7 925 764-84-45",

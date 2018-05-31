@@ -7,6 +7,7 @@ use api\common\models\merc\mercService;
 use api\common\models\RkServicedata;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
@@ -99,6 +100,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public $resourceCategory = 'org-picture';
     public $manager_ids;
+    public $gln_code;
 
     /**
      * @inheritdoc
@@ -130,6 +132,7 @@ class Organization extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
+            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
         ];
@@ -218,6 +221,18 @@ class Organization extends \yii\db\ActiveRecord
     public function getRelationUserOrganization()
     {
         return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
+    }
+
+
+    public function getEdiOrganization(): ActiveQuery
+    {
+        return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
+    }
+
+
+    public function getGlnCode()
+    {
+        return $this->ediOrganization->gln_code;
     }
 
 

@@ -42,7 +42,6 @@ class OrderContent extends \yii\db\ActiveRecord
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
             [['order_id', 'product_id', 'updated_user_id'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
-            [['comment', 'article', 'updated_user_id'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
@@ -72,6 +71,16 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEdiOrderContent()
+    {
+        return $this->hasOne(EdiOrderContent::className(), ['order_content_id' => 'id']);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery

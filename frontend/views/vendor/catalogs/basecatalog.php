@@ -754,6 +754,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             inputOptions: $currencyList,
             inputPlaceholder: '$var7',
             showCancelButton: true,
+            cancelButtonText: '$var4',
             showLoaderOnConfirm: true,
             confirmButtonText: '$var13',
             cancelButtonText: '$cancelText',

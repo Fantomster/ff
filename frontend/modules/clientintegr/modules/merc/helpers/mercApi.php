@@ -103,7 +103,7 @@ class mercApi extends Component
         return new \SimpleXMLElement($xml->asXML());
     }
 
-    public function getVetDocumentList()
+    public function getVetDocumentList($status)
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -122,6 +122,7 @@ class mercApi extends Component
 
             //Формируем тело запроса
             $vetDoc = new getVetDocumentListRequest();
+            $vetDoc->status = $status;
             $vetDoc->localTransactionId = $localTransactionId;
             $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
             $vetDoc->setInitiator($this->vetisLogin);
@@ -132,7 +133,8 @@ class mercApi extends Component
             die();*/
 
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+            $request = $request->getXML();
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             /*var_dump(htmlentities($response));
             die();*/
@@ -151,7 +153,7 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
 
         }catch (\SoapFault $e) {
@@ -170,7 +172,7 @@ class mercApi extends Component
         return $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'receiveApplicationResultRequest', SOAP_1_1);
     }
 
-    private function addEventLog ($response, $method, $localTransactionId)
+    private function addEventLog ($response, $method, $localTransactionId, $request, $response_xml)
     {
         //Пишем лог
         $log = new mercLog();
@@ -178,6 +180,8 @@ class mercApi extends Component
         $log->status = $response->application->status->__toString();
         $log->action = $method;
         $log->localTransactionId =  $localTransactionId;
+        $log->request = $request;
+        $log->response = $response_xml;
 
         if($log->status == mercLog::REJECTED) {
             $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
@@ -234,7 +238,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetBusinessEntityByUuid', SOAP_1_1);
         $business = $this->parseResponse($result);
 
-        if($business != null)
+        if($business != null && !isset($business->soapBody->soapFault))
         $cache->add('Business_'.$UUID, $business->asXML(), 60*60*24);
         return $business;
     }
@@ -260,7 +264,7 @@ class mercApi extends Component
         $result =  $client->__doRequest($xml, $this->wsdls['vetis']['Endpoint_URL'], 'GetEnterpriseByUuid', SOAP_1_1);
         $enterprise = $this->parseResponse($result);
 
-        if($enterprise != null)
+        if($enterprise != null && !isset($enterprise->soapBody->soapFault))
         $cache->add('Enterprise_'.$UUID, $enterprise->asXML(), 60*60*24);
         return $enterprise;
     }
@@ -270,8 +274,10 @@ class mercApi extends Component
         $cache = Yii::$app->cache;
         $doc = $cache->get('vetDocRaw_'.$UUID);
 
-        if (!($doc === false))
+        if (!($doc === false)) {
+            //var_dump(2);
             return $this->parseResponse($doc, true);
+        }
 
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -298,7 +304,8 @@ class mercApi extends Component
             $request->setApplication($application);
 
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML($UUID), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+            $request = $request->getXML($UUID);
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             $result = $this->parseResponse($response);
 
@@ -313,13 +320,14 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
-
-            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETE')
-                $cache->add('vetDocRaw_'.$UUID, $result->asXML(), 60*5);
+            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                $result = $result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+                $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);
+            }
             else
-                $result->null;
+                $result = null;
 
         }catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
@@ -464,7 +472,9 @@ class mercApi extends Component
             /*var_dump(htmlentities($request->getXML()));
             die();*/
             //Делаем запрос
-            $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+            $request = $request->getXML();
+
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
             $result = $this->parseResponse($response);
 
@@ -480,7 +490,7 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
 
         }catch (\SoapFault $e) {
@@ -488,66 +498,6 @@ class mercApi extends Component
         }
         return $result;
     }
-
-    /*public function getVetDocumentDonePartial($UUID, $rejectedData)
-    {
-        $client = $this->getSoapClient('mercury');
-        $result = null;
-
-        try {
-            //Готовим запрос
-            $request = new submitApplicationRequest();
-            $request->apiKey = $this->apiKey;
-            $application = new application();
-            $application->serviceId = $this->service_id;
-            $application->issuerId = $this->issuerID;
-            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
-
-            //Проставляем id запроса
-            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
-
-            //Формируем тело запроса
-            $vetDoc = new vetDocumentDonePartial();
-            $vetDoc->login = $this->vetisLogin;
-            $vetDoc->UUID = $UUID;
-            $vetDoc->rejected_data = $rejectedData;
-            $vetDoc->doc = (new getVetDocumentByUUIDRequest())->getDocumentByUUID($UUID, true);
-            $vetDoc->localTransactionId = $localTransactionId;
-            $application->addData($vetDoc);
-            $request->setApplication($application);
-
-            //Делаем запрос
-
-           /* var_dump(htmlentities($request->getXML()));
-            die();*/
-
-         /*   $response = $client->__doRequest($request->getXML(), $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
-
-            /*var_dump(htmlentities($response));
-            die();*/
-
-          /*  $result = $this->parseResponse($response);
-
-            if(isset($result->envBody->envFault)) {
-                echo "Bad request";
-                die();
-            }
-
-            //timeout перед запросом результата
-            sleep(2);
-            //Получаем результат запроса
-            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
-            $result = $this->parseResponse($response);
-
-            //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId);
-
-
-        }catch (\SoapFault $e) {
-            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
-        }
-        return $result;
-    }*/
 
     public function getActivityLocationList ()
     {

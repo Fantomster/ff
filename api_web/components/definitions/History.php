@@ -49,6 +49,12 @@ class OrderHistory {
     public $create_user;
 
     /**
+     * @SWG\Property(@SWG\Xml(name="accept_user"), example="Admin Supp")
+     * @var string
+     */
+    public $accept_user;
+
+    /**
      * @SWG\Property(@SWG\Xml(name="currency_id"), example=1)
      * @var integer
      */
@@ -69,7 +75,8 @@ class History
             "status_text": "Статус",
             "vendor": "Поставщик",
             "currency_id": "Currency Id",
-            "create_user": "Заказ создал"
+            "create_user": "Заказ создал",
+            "accept_user": "Заказ принял"
         })
      */
     public $headers;

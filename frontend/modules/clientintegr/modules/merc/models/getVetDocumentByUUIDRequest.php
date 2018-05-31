@@ -89,7 +89,9 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         2 => 'Железнодорожный',
         3 => 'Авиатранспортный',
         4 => 'Морской (контейнер)',
-        5 => 'Морской (трюм)'
+        5 => 'Морской (трюм)',
+        6 => 'Речной',
+        7 => 'Перегон',
     ];
 
     public $product_types = [
@@ -213,15 +215,15 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $this->UUID = $UUID;
 
-        $raw_doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
-        $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+        $doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+         //var_dump($raw_doc);
+          //  $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
         if($raw) {
             return $doc;
         }
 
-        $doc = null;
-        //var_dump($doc);
+
         $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
         $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
         $this->issueDate = $doc->ns2issueDate->__toString();
@@ -296,8 +298,10 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         if(isset($doc->ns2batch->ns2producerList->entproducer)) {
             $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
-            $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
-            if(!isset($producer))
+
+            if(isset($producer_raw->soapBody))
+                $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
+            else
                 $producer = $producer_raw->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
             $producer = $producer->dtname->__toString() . '(' .
                 $producer->dtaddress->dtaddressView->__toString()
@@ -340,7 +344,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Дата окончания срока годности продукции',
-                'value' => $this->getDate($doc->ns2batch->ns2expiryDate),
+                'value' => isset($doc->ns2batch->ns2expiryDate) ? $this->getDate($doc->ns2batch->ns2expiryDate) : null,
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',

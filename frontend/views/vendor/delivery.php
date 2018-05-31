@@ -25,6 +25,7 @@ section>h3>small {
     font-weight: 300;
 }
 ');
+//dd($deliveryRegions);
 ?>
 <section class='content-header'>
     <h1>
@@ -194,6 +195,7 @@ section>h3>small {
                     </div>
                     <?php
                     $form = ActiveForm::begin([
+                        'enableClientValidation' => true,
                         'options' => [
                             'id' => 'form-in'
                         ],
@@ -204,7 +206,7 @@ section>h3>small {
                             
                             <div class="row">
                                 <div class="col-md-4">
-                                    <?= $form->field($deliveryRegions, 'country')->textInput()?> 
+                                    <?= $form->field($deliveryRegions, 'country', ['errorOptions' => ['tag' => null]])->textInput()->error(['value'=>'sd'])?>
                                 </div>
                                 <div class="col-md-4">
                                     <?= $form->field($deliveryRegions, 'administrative_area_level_1')->textInput()?> 

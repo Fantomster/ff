@@ -410,6 +410,8 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['delivery_price'] = round($order->calculateDelivery(), 2);
         $result['min_order_price'] = round($order->forMinOrderPrice(), 2);
         $result['total_price_without_discount'] = round($order->getTotalPriceWithOutDiscount(), 2);
+        $result['create_user'] = $order->createdByProfile->full_name ?? '';
+        $result['accept_user'] = $order->acceptedByProfile->full_name ?? '';
 
         $result['items'] = [];
 
@@ -593,7 +595,8 @@ class OrderWebApi extends \api_web\components\WebApi
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,
                     'currency_id' => $model->currency_id,
-                    'create_user' => $model->createdByProfile->full_name ?? ''
+                    'create_user' => $model->createdByProfile->full_name ?? '',
+                    'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
             }
             if (isset($orders[0])) {

@@ -2,10 +2,10 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
-use yii\base\Component;
+use yii\base\Model;
 use yii\data\ArrayDataProvider;
 
-class vetDocumentsList extends Component
+class vetDocumentsList extends Model
 {
     const DOC_TYPE_INCOMMING = 'INCOMING';
     const DOC_TYPE_OUTGOING = 'OUTGOING';
@@ -21,7 +21,7 @@ class vetDocumentsList extends Component
         self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
     ];
 
-    const DOC_STATUS_ALL = 'ALL';
+    const DOC_STATUS_ALL = null;
     const DOC_STATUS_CONFIRMED = 'CONFIRMED';
     const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
     const DOC_STATUS_UTILIZED = 'UTILIZED';
@@ -38,6 +38,21 @@ class vetDocumentsList extends Component
         self::DOC_STATUS_WITHDRAWN => 'cancelled',
         self::DOC_STATUS_UTILIZED => 'done',
     ];
+
+    public $recipentList = [null => 'Все'];
+    public $status;
+    public $date_from;
+    public $date_to;
+    public $recipient;
+
+    private $_params;
+
+    public function rules()
+    {
+        return [
+            [['recipient', 'date_from', 'date_to','status'], 'safe'],
+        ];
+    }
 
     public function createDocumentsList($list) {
         $cache = \Yii::$app->cache;
@@ -60,6 +75,8 @@ class vetDocumentsList extends Component
                 'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
                 'recipient_name' => $recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString(),
             ];
+
+            $this->recipentList[$recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString()] = $recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString();
         }
 
         return $result;
@@ -84,14 +101,21 @@ class vetDocumentsList extends Component
     {
         $api = mercApi::getInstance();
 
-        $result = $api->getVetDocumentList();
+        $result = $api->getVetDocumentList($this->status);
 
         if(empty($result))
             $data = [];
         else
             $data = $this->createDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentListResponse->ns2vetDocumentList->ns2vetDocument);
 
-       $sort = [
+        if(!empty($this->recipient)) {
+            $data = array_filter($data, [$this, 'filterRecipient']);
+        }
+
+        if(!empty($this->date_from))
+            $data = array_filter($data, [$this, 'filterDate']);
+
+        $sort = [
            'attributes' => [
                'uuid',
                'number',
@@ -120,6 +144,20 @@ class vetDocumentsList extends Component
         ]);
 
         return $dataProvider;
+    }
+
+    private function filterDate($var)
+    {
+        $from = strtotime($this->date_from);
+        $to = strtotime($this->date_to);
+        $date = strtotime($var['date_doc']);
+
+        return (($date >= $from) && ($date <= $to));
+    }
+
+    private function filterRecipient($var)
+    {
+        return ($var['recipient_name'] == $this->recipient);
     }
 
     public function getDate($date_raw)

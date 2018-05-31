@@ -419,6 +419,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     ]);
                                     ?>
                                     <?php
+                                    $lang = (Yii::$app->language == 'md') ? 'ro' : Yii::$app->language;
                                     $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_'.$cart['id']);
                                     echo DatePicker::widget([
                                         'name' => '',
@@ -430,6 +431,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         ],
                                         'type' => DatePicker::TYPE_COMPONENT_APPEND,
                                         'layout' => '{picker}{input}{remove}',
+                                        'language' => $lang,
                                         'pluginOptions' => [
                                             'daysOfWeekDisabled' => $cart['vendor']['disabled_delivery_days'],
                                             'format' => 'dd.mm.yyyy',

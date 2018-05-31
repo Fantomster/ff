@@ -9,10 +9,14 @@ use yii\widgets\ActiveForm;
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
 $this->title = Yii::t('message', 'frontend.views.user.default.enter_register_two', ['ru'=>"Вход / регистрация"]);
+$wrongPassText = Yii::t('app', 'Incorrect password');
+$emptyEmail = Yii::t('app', 'Неправильный формат email');
 
 $this->registerJs(
         '
             $("#login-form").on("afterValidate", function (event, messages, errorAttributes) {
+            messages["loginform-email"][0]="'.$emptyEmail.'";
+            messages["loginform-password"][0]="'.$wrongPassText.'";
                 for (var input in messages) {
                     if (messages[input] != "") {
                         $("#" + input).tooltip({title: messages[input], placement: "auto right", container: "body"});

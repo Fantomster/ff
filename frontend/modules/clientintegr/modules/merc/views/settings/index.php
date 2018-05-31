@@ -18,8 +18,8 @@ Modal::widget([
 
 <section class="content-header">
     <h1>
-        <img src="/frontend/web/img/mercuriy_icon.png" style="width: 32px;">
-        Интеграция с системой ВЕТИС "Меркурий"
+        <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -28,10 +28,10 @@ Modal::widget([
         ],
         'links' => [
             [
-                'label' => 'Интеграция',
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr'],
             ],
-            'Интеграция с системой ВЕТИС "Меркурий"',
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
@@ -42,7 +42,7 @@ Modal::widget([
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding">
                     <p>
-                        Состояние лицензии:
+                        <?= Yii::t('message', 'frontend.client.integration.mercury.lic_status', ['ru'=>'Состояние лицензии']) ?>:
                         <?php echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') '; ?>
                     </p>
                 </div>
@@ -51,7 +51,7 @@ Modal::widget([
     </div>
 </section>
 <section class="content-header">
-    <h4>Настройки:</h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.settings', ['ru'=>'Настройки']) ?>:</h4>
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -67,11 +67,11 @@ Modal::widget([
                             'filterPosition' => false,
                             'columns' => [
                                 [
-                                    'label' => 'Свойство',
+                                    'label' => Yii::t('message', 'frontend.client.integration.mercury.attibute', ['ru'=>'Свойство']),
                                     'attribute' => 'denom'
                                 ],
                                 [
-                                    'label' => 'Комментарий',
+                                    'label' =>  Yii::t('message', 'frontend.client.integration.mercury.comment', ['ru'=>'Комментарий']),
                                     'attribute' => 'comment'
                                 ],
                                 [
@@ -96,7 +96,7 @@ Modal::widget([
 
                                         return $res;
                                     },
-                                    'label' => 'Текущее значение',
+                                    'label' => Yii::t('message', 'frontend.client.integration.mercury.current_value', ['ru'=>'Текущее значение']),
                                     'contentOptions' => ['style' => 'font-weight:bold;'],
                                 ],
                                 [
@@ -112,7 +112,7 @@ Modal::widget([
                                         'clear' => function ($url, $model) {
                                             $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr\merc\settings\change-const', 'id' => $model->id]);
                                             return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
-                                                ['title' => 'Изменить значение',
+                                                ['title' => Yii::t('message', 'frontend.client.integration.mercury.edit_value', ['ru'=>'Изменить значение']),
                                                     'data' => [
                                                     'target' => '#settings-edit-form',
                                                     'toggle' => 'modal',

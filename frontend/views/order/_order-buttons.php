@@ -39,7 +39,9 @@ $btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t
 ]);
 $canEdit = false;
 if ($order->isObsolete) {
-    $actionButtons .= $btnCancel;
+    if(isset($data->vendor->ediOrganization->gln_code)){
+        $actionButtons .= $btnCancel;
+    }
     $actionButtons .= $btnCloseOrder;
     $canEdit = true;
 } else {
@@ -63,7 +65,9 @@ if ($order->isObsolete) {
             $canEdit = true;
             break;
         case Order::STATUS_PROCESSING:
-            $actionButtons .= $btnCancel;
+            if(!isset($data->vendor->ediOrganization->gln_code)){
+                $actionButtons .= $btnCancel;
+            }
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-processing disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.executes', ['ru'=>'Исполняется']) . ' </a>';
             } else {
@@ -86,7 +90,7 @@ if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Or
     $canEdit = true;
 }
 
-if($order->vendor->gln_code && $order->status!=Order::STATUS_DONE){
+if(isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0 && $order->status!=Order::STATUS_DONE){
     $canEdit = false;
 }
 ?>
@@ -107,7 +111,7 @@ if($order->vendor->gln_code && $order->status!=Order::STATUS_DONE){
                 ]) : ""
         ?>
         <?= $edit ? Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_five', ['ru'=>'Сохранить']) . ' </span>', [
-            'class' => 'btn btn-success pull-right btnSave', 
+            'class' => 'btn btn-success pull-right btnSave',
             'style' => 'margin-right: 7px;',
             'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_two', ['ru'=>'Сохраняем...']),
             ]) : "" ?>

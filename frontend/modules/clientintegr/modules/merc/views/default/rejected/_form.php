@@ -12,7 +12,7 @@ use kartik\form\ActiveForm;
 
     <?php echo $form->errorSummary($model); ?>
     <?php
-    if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial::RETURN_ALL)
+    if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone::RETURN_ALL)
         echo $form->field($model, 'volume')->hiddenInput(['value' => 0])->label(false);
     else
         echo $form->field($model, 'volume')->textInput()->label($model->getAttributeLabel('volume')." (".$volume.")"); ?>
@@ -22,7 +22,7 @@ use kartik\form\ActiveForm;
     <?php echo $form->field($model, 'description')->textarea(['maxlength' => true]) ?>
 
     <div class="form-group">
-        <?php echo Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+        <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

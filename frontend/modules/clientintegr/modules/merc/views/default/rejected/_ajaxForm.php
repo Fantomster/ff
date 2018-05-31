@@ -15,7 +15,7 @@ $form = ActiveForm::begin([
 ?>
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h4 class="modal-title">Акт несоответствия</h4>
+        <h4 class="modal-title"><?= Yii::t('message', 'frontend.client.integration.mercury.act', ['ru'=>'Акт несоответствия']); ?></h4>
     </div>
     <div class="modal-body">
         <?php if (Yii::$app->session->hasFlash('success')): ?>
@@ -29,7 +29,7 @@ $form = ActiveForm::begin([
         <?php endif; ?>
         <?php echo $form->errorSummary($model); ?>
         <?php
-        if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDonePartial::RETURN_ALL)
+        if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone::RETURN_ALL)
             echo $form->field($model, 'volume')->hiddenInput(['value' => 0])->label(false);
         else
             echo $form->field($model, 'volume')->textInput()->label($model->getAttributeLabel('volume')." (".$volume.")"); ?>
@@ -39,7 +39,7 @@ $form = ActiveForm::begin([
         <?php echo $form->field($model, 'description')->textarea(['maxlength' => true]) ?>
     </div>
     <div class="modal-footer">
-        <?= Html::button('<i class="icon fa fa-save save-form"></i> Сохранить ', ['class' => 'btn btn-success save-form']) ?>
+        <?= Html::button('<i class="icon fa fa-save save-form"></i> '.Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success save-form']) ?>
         <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'Close') ?></a>
     </div>
 <?php ActiveForm::end(); ?>

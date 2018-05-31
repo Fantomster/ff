@@ -310,7 +310,11 @@ function changeFields(fields, results) {
 
     <?= $form->field($model, 'contact_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'gln_code')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($ediModel, 'gln_code')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($ediModel, 'login')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($ediModel, 'pass')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'about')->textarea() ?>
 

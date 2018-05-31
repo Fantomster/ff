@@ -107,12 +107,12 @@ class EComIntegration{
             $positionsArray[] = (int) $contID;
             $barcodeArray[] = $position->PRODUCT;
             if($isDesadv){
-                $arr[$contID]['ACCEPTEDQUANTITY'] = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }else{
-                $arr[$contID]['ACCEPTEDQUANTITY'] = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = $position->PRICE ?? $position->PRICEWITHVAT;
-            $arr[$contID]['BARCODE'] = $position->PRODUCT;
+            $arr[$contID]['PRICE'] = (float)$position->PRICE ?? (float)$position->PRICEWITHVAT;
+            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
         }
 
         $summ = 0;
@@ -143,6 +143,9 @@ class EComIntegration{
                 $ordCont->price = $newPrice;
                 $summ+=$newQuantity*$newPrice;
                 $ordCont->save();
+//                if($orderID==10801){
+//                    //dd($ordCont);
+//                }
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
                 $ediOrderContent->doc_type = $docType;
@@ -340,7 +343,6 @@ class EComIntegration{
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
         try {
-            //dd($order);
             $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
             if(!$ediOrder){
                 Yii::$app->db->createCommand()->insert('edi_order', [
@@ -349,7 +351,7 @@ class EComIntegration{
                 ])->execute();
             }
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
-            foreach ($orderContent as &$one){
+            foreach ($orderContent as $one){
                 $catGood = CatalogBaseGoods::findOne(['id' => $one->product_id]);
                 if($catGood){
                     $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $one->id]);

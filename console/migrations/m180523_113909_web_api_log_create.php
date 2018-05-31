@@ -20,8 +20,8 @@ class m180523_113909_web_api_log_create extends Migration
             'user_id' => $this->integer(),
             'organization_id' => $this->integer(),
             'type' => $this->string()->defaultValue('success'),
-            'request_at' => $this->timestamp(),
-            'response_at' => $this->timestamp(),
+            'request_at' => $this->timestamp()->defaultValue(NULL),
+            'response_at' => $this->timestamp()->defaultValue(NULL),
             'guide' => $this->string(32)->notNull(),
             'ip' => $this->string(),
         ]);

@@ -55,6 +55,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     if ($attribute === 'vat') {
                         return $model->$attribute / 100;
                     } else {
+                        $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                        $model->save(false);
                         return round($model->$attribute, 6);
                     }
                 },

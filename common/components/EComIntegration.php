@@ -114,6 +114,7 @@ class EComIntegration{
             $arr[$contID]['PRICE'] = $position->PRICE ?? $position->PRICEWITHVAT;
             $arr[$contID]['BARCODE'] = $position->PRODUCT;
         }
+
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent){
@@ -127,19 +128,20 @@ class EComIntegration{
                 $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
             }else{
                 $oldQuantity = (float)$ordCont->quantity;
-                $newQuantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
+                $newQuantity = (float)$arr[$orderContent->id]['ACCEPTEDQUANTITY'];
+
                 if($oldQuantity!=$newQuantity){
                     $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }
-                $ordCont->quantity = $arr[$orderContent->id]['ACCEPTEDQUANTITY'];
+                $ordCont->quantity = $newQuantity;
 
-                $oldPrice = $ordCont->price;
-                $newPrice = $arr[$orderContent->id]['PRICE'];
+                $oldPrice = (float)$ordCont->price;
+                $newPrice = (float)$arr[$orderContent->id]['PRICE'];
                 if($oldPrice!=$newPrice){
                     $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' =>$orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol'=>$order->currency->iso_code]) . $newPrice . " руб";
                 }
-                $ordCont->price = $arr[$orderContent->id]['PRICE'];
-                $summ+=$arr[$orderContent->id]['ACCEPTEDQUANTITY']*$arr[$orderContent->id]['PRICE'];
+                $ordCont->price = $newPrice;
+                $summ+=$newQuantity*$newPrice;
                 $ordCont->save();
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
@@ -338,6 +340,7 @@ class EComIntegration{
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
         try {
+            //dd($order);
             $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
             if(!$ediOrder){
                 Yii::$app->db->createCommand()->insert('edi_order', [

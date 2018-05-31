@@ -503,7 +503,7 @@ class Order extends \yii\db\ActiveRecord
                     \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
                 }
         }
-
+        //dd($changedAttributes);
         if ($this->status != self::STATUS_FORMING && !$insert && key_exists('total_price', $changedAttributes)) {
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);

@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\TestVendorsSearch;
+use common\models\EdiOrganization;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
 use common\models\guides\Guide;
@@ -164,11 +165,21 @@ class OrganizationController extends Controller {
     public function actionUpdate($id) {
         $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
+        $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
+        if(!$ediModel){
+            $ediModel = new EdiOrganization();
+            $ediModel->organization_id = $id;
+            $ediModel->save();
+        }
         $franchiseeList = ArrayHelper::map(Franchisee::find()->all(),'id','legal_entity');
-        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
+            if(strlen($ediModel->pass) < 20){
+                $ediModel->pass = md5($ediModel->pass);
+            }
+            $ediModel->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
+            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList', 'ediModel'));
         }
     }
 

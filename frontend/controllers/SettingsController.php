@@ -62,7 +62,7 @@ class SettingsController extends DefaultController {
     public function actionTest()
     {
         $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesList(Yii::$app->params['e_com']['login'], Yii::$app->params['e_com']['pass']);
+        $eComIntegration->handleFilesList();
         echo "success";
     }
 

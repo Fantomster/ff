@@ -39,7 +39,9 @@ $btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t
 ]);
 $canEdit = false;
 if ($order->isObsolete) {
-    $actionButtons .= $btnCancel;
+    if(isset($data->vendor->ediOrganization->gln_code)){
+        $actionButtons .= $btnCancel;
+    }
     $actionButtons .= $btnCloseOrder;
     $canEdit = true;
 } else {
@@ -63,7 +65,9 @@ if ($order->isObsolete) {
             $canEdit = true;
             break;
         case Order::STATUS_PROCESSING:
-            $actionButtons .= $btnCancel;
+            if(!isset($data->vendor->ediOrganization->gln_code)){
+                $actionButtons .= $btnCancel;
+            }
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-processing disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.executes', ['ru'=>'Исполняется']) . ' </a>';
             } else {

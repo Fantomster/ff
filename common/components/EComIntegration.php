@@ -8,6 +8,7 @@ use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
+use common\models\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\Organization;
@@ -29,32 +30,39 @@ use yii\db\Expression;
 class EComIntegration{
 
 
-    public function handleFilesList(String $login, String $pass): void
+    public function handleFilesList(): void
     {
-        $transaction = Yii::$app->db_api->beginTransaction();
-        try {
-            $client = Yii::$app->siteApi;
-            $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
-            if ($object->result->errorCode != 0) {
-                Yii::error('EComIntegration getList Error');
-                throw new ErrorException();
-            }
-            $list = $object->result->list ?? null;
-            if (!$list) {
-                echo "No files";
-                exit();
-            }
-            if (is_iterable($list)) {
-                foreach ($list as $fileName) {
-                    $this->getDoc($client, $fileName, $login, $pass);
+        $ediOrganizations = EdiOrganization::find()->where(['not', ['gln_code' => null]])->andWhere(['not', ['login' => null]])->andWhere(['not', ['pass' => null]])->all();
+        if (is_iterable($ediOrganizations)) {
+            foreach ($ediOrganizations as $ediOrganization) {
+                $login = $ediOrganization['login'];
+                $pass = $ediOrganization['pass'];
+                $transaction = Yii::$app->db_api->beginTransaction();
+                try {
+                    $client = Yii::$app->siteApi;
+                    $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+                    if ($object->result->errorCode != 0) {
+                        Yii::error('EComIntegration getList Error');
+                        throw new ErrorException();
+                    }
+                    $list = $object->result->list ?? null;
+                    if (!$list) {
+                        echo "No files";
+                        exit();
+                    }
+                    if (is_iterable($list)) {
+                        foreach ($list as $fileName) {
+                            $this->getDoc($client, $fileName, $login, $pass);
+                        }
+                    } else {
+                        $this->getDoc($client, $list, $login, $pass);
+                    }
+                    $transaction->commit();
+                } catch (Exception $e) {
+                    Yii::error($e);
+                    $transaction->rollback();
                 }
-            } else {
-                $this->getDoc($client, $list, $login, $pass);
             }
-            $transaction->commit();
-        } catch (Exception $e) {
-            Yii::error($e);
-            $transaction->rollback();
         }
     }
 
@@ -337,7 +345,7 @@ class EComIntegration{
     }
 
 
-    public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, bool $done = false): bool
+    public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, String $login, String $pass, bool $done = false): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
@@ -373,7 +381,7 @@ class EComIntegration{
             $currentDate = date("Ymdhis");
             $fileName = $done ? 'recadv_' : 'order_';
             $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
-            $result =  $this->sendDoc($string, $remoteFile);
+            $result =  $this->sendDoc($vendor, $string, $remoteFile, $login, $pass);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -409,10 +417,10 @@ class EComIntegration{
     }
 
 
-    private function sendDoc(String $string, String $remoteFile): bool
+    private function sendDoc(Organization $vendor, String $string, String $remoteFile, String $login, String $pass): bool
     {
         $client = Yii::$app->siteApi;
-        $obj = $client->sendDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $remoteFile, 'content' => $string]);
+        $obj = $client->sendDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $remoteFile, 'content' => $string]);
         if(isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0){
             return true;
         }else{

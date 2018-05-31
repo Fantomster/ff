@@ -207,7 +207,11 @@ class EComIntegration{
     private function handlePriceListUpdating(\SimpleXMLElement $simpleXMLElement): bool
     {
         $supplierGLN = $simpleXMLElement->SUPPLIER;
-        $organization = Organization::findOne(['gln_code'=>$supplierGLN]);
+        $ediOrganization = EdiOrganization::findOne(['gln_code'=>$supplierGLN]);
+        if(!$ediOrganization){
+            return false;
+        }
+        $organization = Organization::findOne(['id'=>$ediOrganization->organization_id]);
         if(!$organization || $organization->type_id != Organization::TYPE_SUPPLIER){
             return false;
         }
@@ -252,7 +256,11 @@ class EComIntegration{
         }
 
         $buyerGLN = $simpleXMLElement->BUYER;
-        $rest = Organization::findOne(['gln_code' => $buyerGLN]);
+        $ediRest = EdiOrganization::findOne(['gln_code'=>$buyerGLN]);
+        if(!$ediRest){
+            return false;
+        }
+        $rest = Organization::findOne(['id' => $ediRest->organization_id]);
         if(!$rest){
             return false;
         }

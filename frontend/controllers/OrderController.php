@@ -6,6 +6,7 @@ use api_web\classes\CartWebApi;
 use common\models\Cart;
 use common\models\search\OrderProductsSearch;
 use Yii;
+use yii\db\Expression;
 use yii\helpers\Json;
 use yii\helpers\Html;
 use common\models\search\OrderCatalogSearch;
@@ -905,7 +906,6 @@ class OrderController extends DefaultController
 
     public function actionAjaxMakeOrder()
     {
-        $client = $this->currentUser->organization;
         $cart = (new CartWebApi())->items();
         $cartCount = count($cart);
 
@@ -921,7 +921,7 @@ class OrderController extends DefaultController
                 $data = [];
                 foreach ($cart as $item) {
                     $vendor_id = $item['id'];
-                    $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, null);
+                    $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, date('Y-m-d H:i:s'));
                     if ($delivery_date != null) {
                         $data[] = ['id' => $vendor_id,
                             'delivery_date' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
@@ -931,7 +931,7 @@ class OrderController extends DefaultController
                 }
             } else {
                 $vendor_id = Yii::$app->request->post('id');
-                $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, null);
+                $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, date('Y-m-d H:i:s'));
                 if ($delivery_date != null) {
                     $data[] = ['id' => $vendor_id,
                         'delivery_date' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
@@ -1479,7 +1479,6 @@ class OrderController extends DefaultController
 
     public function actionCheckout()
     {
-        //$client = $this->currentUser->organization;
         $totalCart = 0;
 
         if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {

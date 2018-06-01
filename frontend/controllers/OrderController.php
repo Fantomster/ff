@@ -29,6 +29,7 @@ use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
+use yii\web\BadRequestHttpException;
 
 class OrderController extends DefaultController
 {
@@ -2154,7 +2155,7 @@ class OrderController extends DefaultController
         $position->article = $article;
 
         $order = $position->order;
-        if ($order->status >= 3)
+        if ($order->status == 6)
             throw new BadRequestHttpException('Access denided');
 
         if (!$position->save(false))

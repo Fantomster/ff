@@ -39,7 +39,7 @@ $btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t
 ]);
 $canEdit = false;
 if ($order->isObsolete) {
-    if(isset($data->vendor->ediOrganization->gln_code)){
+    if(!isset($order->vendor->ediOrganization->gln_code)){
         $actionButtons .= $btnCancel;
     }
     $actionButtons .= $btnCloseOrder;

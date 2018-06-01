@@ -48,7 +48,7 @@ class mercVSDSearch extends MercVsd
         ]);
 
         if (!($this->load($params) && $this->validate())) {
-            $query->andWhere("consignor = '$guid'");
+            $query->andWhere("consignor <> '$guid'");
             return $dataProvider;
         }
 

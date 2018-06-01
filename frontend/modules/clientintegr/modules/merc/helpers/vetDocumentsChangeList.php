@@ -78,6 +78,7 @@ class vetDocumentsChangeList extends Model
                 'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
                 'recipient_name' => $recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString(),
                 'guid' => $guid,
+                'consignor' => $item->ns2consignor->ententerprise->bsguid->__toString(),
             ]);
 
             if(!$model->save()) {

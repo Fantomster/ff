@@ -19,6 +19,7 @@ use Yii;
  * @property string $recipient_name
  * @property string $guid
  * @property string $type
+ * @property string $consignor
  */
 class MercVsd extends \yii\db\ActiveRecord
 {
@@ -46,7 +47,7 @@ class MercVsd extends \yii\db\ActiveRecord
         return [
             [['date_doc', 'production_date', 'guid'], 'safe'],
             [['amount'], 'number'],
-            [['uuid', 'number', 'status', 'product_name', 'unit', 'recipient_name','type'], 'string', 'max' => 255],
+            [['uuid', 'number', 'status', 'product_name', 'unit', 'recipient_name','type', 'consignor'], 'string', 'max' => 255],
         ];
     }
 

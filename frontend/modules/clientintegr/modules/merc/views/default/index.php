@@ -81,8 +81,8 @@ Modal::widget([
                         <div class="col-lg-2 col-md-3 col-sm-6">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'recipient')
-                                    ->dropDownList($searchModel->recipentList, ['id' => 'recipientFilter'])
+                                $form->field($searchModel, 'recipient_name')
+                                    ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
                                     ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
@@ -127,9 +127,9 @@ Modal::widget([
                                 'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
                                 'headerOptions'    =>   ['style' => 'text-align:center;'],
                                 'checkboxOptions' => function($model, $key, $index, $widget){
-                                    $enable = !($model['status_raw'] == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED);
+                                    $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED);
                                     $style = ($enable) ? "visibility:hidden" : "";
-                                    return ['value' => $model['uuid'],'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
+                                    return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
                                 }
                             ],
                             /*[
@@ -168,7 +168,7 @@ Modal::widget([
                                 'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объем']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
-                                    return $data['amount'];
+                                    return $data['amount']." ".$data['unit'];
                                 },
                             ],
                             [
@@ -211,7 +211,7 @@ Modal::widget([
                                         return Html::a($icon, ['view', 'uuid' => $key], $options);
                                     },
                                     'done-partial' => function ($url, $model, $key) {
-                                        if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
                                         $options = [
                                             'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
@@ -230,7 +230,7 @@ Modal::widget([
                                         return Html::a($icon, ['done-partial', 'uuid' => $key], $options);
                                     },
                                     'rejected' => function ($url, $model, $key) {
-                                        if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
                                         $options = [
                                             'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),

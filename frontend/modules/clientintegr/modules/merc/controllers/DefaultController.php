@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
+use api\common\models\merc\search\mercVSDSearch;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone;
 use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsChangeList;
@@ -38,9 +39,11 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if(!mercDicconst::checkSettings())
             return $this->redirect(['/clientintegr/merc/settings']);
 
-        $searchModel  = new vetDocumentsList();
+        /*$searchModel  = new vetDocumentsList();
         $searchModel->load(Yii::$app->request->get());
-        $dataProvider = $searchModel->getArrayDataProvider();
+        $dataProvider = $searchModel->getArrayDataProvider();*/
+        $searchModel = new mercVSDSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $params = ['searchModel' => $searchModel,
             'dataProvider' => $dataProvider];
         if (Yii::$app->request->isPjax) {
@@ -215,10 +218,11 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $vsd = new vetDocumentsChangeList();
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
-            $transaction->commot();
+            $transaction->commit();
         }catch (\Exception $e)
         {
             $transaction->rollback();
+            var_dump($e->getMessage());
         }
     }
 }

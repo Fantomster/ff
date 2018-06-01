@@ -232,10 +232,10 @@ class UserWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function getAllOrganization(): array
+    public function getAllOrganization($searchString = null, $showEmpty = false): array
     {
-        $list_organisation = $this->user->getAllOrganization();
-        if (empty($list_organisation)) {
+        $list_organisation = $this->user->getAllOrganization($searchString);
+        if (empty($list_organisation) && !$showEmpty) {
             throw new BadRequestHttpException('Нет доступных организаций');
         }
 

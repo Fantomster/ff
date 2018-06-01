@@ -8,7 +8,9 @@
 
 namespace frontend\controllers;
 
+use common\models\OrganizationSearch;
 use common\models\RelationUserOrganization;
+use common\models\search\BusinessSearch;
 use common\models\TestVendors;
 use api_web\classes\UserWebApi;
 use Yii;
@@ -402,11 +404,14 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     public function actionBusiness(): String
     {
         $user = User::findIdentity(Yii::$app->user->id);
-        $dataProvider = User::getAllOrganizationsDataProvider();
+        $searchModel = new BusinessSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['GuideSearch'] = Yii::$app->request->get("searchString");
+        $dataProvider = $searchModel->search($params, null);
 
         $loginRedirect = $this->module->loginRedirect;
         $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
-        return $this->render('business', compact('user','dataProvider', 'returnUrl'));
+        return $this->render('business', compact('user','dataProvider', 'returnUrl', 'searchModel'));
     }
 
 

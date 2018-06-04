@@ -250,6 +250,21 @@ class ChatWebApi extends WebApi
     }
 
     /**
+     * Число диалогов с новыми сообщениями
+     * @return array
+     */
+    public function dialogUnreadCount()
+    {
+        return [
+            'result' => (int)OrderChat::find()
+                ->select('order_id')
+                ->where(['viewed' => 0, 'recipient_id' => $this->user->organization->id])
+                ->groupBy('order_id')
+                ->count()
+        ];
+    }
+
+    /**
      * @param Order $model
      * @return array
      */

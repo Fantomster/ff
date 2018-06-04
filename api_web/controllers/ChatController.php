@@ -304,4 +304,43 @@ class ChatController extends WebApiController
     {
         $this->response = $this->container->get('ChatWebApi')->readAllMessages();
     }
+
+    /**
+     * @SWG\Post(path="/chat/dialog-unread-count",
+     *     tags={"Chat"},
+     *     summary="Количество диалогов с новыми сообщениями",
+     *     description="Количество диалогов с новыми сообщениями",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(default={"result":1}),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDialogUnreadCount()
+    {
+        $this->response = $this->container->get('ChatWebApi')->dialogUnreadCount();
+    }
 }

@@ -811,14 +811,19 @@ class User extends \amnah\yii2\user\models\User {
         $userID = $this->id;
         if($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
             $org = Organization::findOne(['id'=>$this->organization_id]);
-            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id])->orWhere(['organization.parent_id'=>$this->organization_id]);
+            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id]);
             if($searchString){
                 $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
             }
+            $orgArray = $orgArray->orWhere(['organization.parent_id'=>$this->organization_id]);
             if($org && $org->parent_id != null){
                 $orgArray = $orgArray->orWhere(['organization.id'=>$org->parent_id])->orWhere(['organization.parent_id'=>$org->parent_id]);
             }
-            return $orgArray->orderBy('organization.name')->all();
+            if($searchString){
+                $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
+            }
+            $orgArray = $orgArray->orderBy('organization.name')->all();
+            return $orgArray;
         }else{
             $orgArray = Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID]);
             if($searchString){

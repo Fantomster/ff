@@ -178,43 +178,37 @@ $grid = [
                     <h5 class="business-title"><?= Yii::t('message', 'frontend.views.user.default.choose_profile', ['ru'=>'Выберите бизнес-профиль']) ?></h5>
                     <p class="business-p-title"><?= Yii::t('message', 'frontend.views.user.default.choose_list', ['ru'=>'Выберите из имеющихся для доступа в Ваш бизнес-профиль']) ?></p>
 
-
-
-
-
-                                    <?php
-                                    $form = ActiveForm::begin([
-                                        'method' => 'get',
-                                        'options' => [
-                                            'id' => 'searchForm',
-                                            'class' => "navbar-form no-padding no-margin",
-                                            'role' => 'search',
-                                        ],
-                                    ]);
-                                    ?>
-                                    <?=
-                                    $form->field($searchModel, 'searchString', [
-                                        'addon' => [
-                                            'append' => [
-                                                'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
-                                                'options' => [
-                                                    'class' => 'append',
-                                                ],
-                                            ],
-                                        ],
-                                        'options' => [
-                                            'class' => "margin-right-15 form-group",
-                                        ],
-                                    ])
-                                        ->textInput([
-                                            'id' => 'searchString',
-                                            'class' => 'form-control',
-                                            'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru'=>'Поиск'])])
-                                        ->label(false)
-                                    ?>
-                                    <?php ActiveForm::end(); ?>
-
-
+                    <?php
+                    $form = ActiveForm::begin([
+                        'method' => 'get',
+                        'options' => [
+                            'id' => 'searchForm',
+                            'class' => "navbar-form no-padding no-margin",
+                            'role' => 'search',
+                        ],
+                    ]);
+                    ?>
+                    <?=
+                    $form->field($searchModel, 'searchString', [
+                        'addon' => [
+                            'append' => [
+                                'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
+                                'options' => [
+                                    'class' => 'append',
+                                ],
+                            ],
+                        ],
+                        'options' => [
+                            'class' => "margin-right-15 form-group",
+                        ],
+                    ])
+                        ->textInput([
+                            'id' => 'searchString',
+                            'class' => 'form-control',
+                            'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru' => 'Поиск'])])
+                        ->label(false)
+                    ?>
+                    <?php ActiveForm::end(); ?>
 
                     <div class="row">
                         <div class="col-md-12">

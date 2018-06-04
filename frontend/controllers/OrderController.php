@@ -350,7 +350,6 @@ class OrderController extends DefaultController
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Итого:'), " " . $order->getTotalPriceWithOutDiscount() . " " . $order->currency->iso_code);
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
 
-
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
         // Set Orientation, size and scaling
         $objPHPExcel->setActiveSheetIndex(0);
@@ -359,7 +358,6 @@ class OrderController extends DefaultController
         $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
         $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
         $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(0);
-
 
         header('Content-Type: application/vnd.ms-excel');
         $filename = "order_" . $id . ".xls";

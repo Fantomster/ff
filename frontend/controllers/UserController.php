@@ -395,9 +395,12 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     {
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = new Organization();
-        $dataProvider = User::getAllOrganizationsDataProvider();
+        $searchModel = new BusinessSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['GuideSearch'] = Yii::$app->request->get("searchString");
+        $dataProvider = $searchModel->search($params, null);
 
-        return $this->renderAjax('_changeForm', compact('user','dataProvider','organization'));
+        return $this->renderAjax('_changeForm', compact('user','dataProvider','organization', 'searchModel'));
     }
 
 

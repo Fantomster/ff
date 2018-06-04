@@ -26,6 +26,9 @@ $js = <<<JS
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });
+    $(document).on("focusout", "#searchString", function() {
+        $('#searchForm').submit();
+    });
 
     $(document).on("click",".change-net-org", function(e){
     e.preventDefault();

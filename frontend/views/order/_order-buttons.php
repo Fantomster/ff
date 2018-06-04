@@ -41,9 +41,9 @@ $canEdit = false;
 if ($order->isObsolete) {
     if(!isset($order->vendor->ediOrganization->gln_code)){
         $actionButtons .= $btnCancel;
+        $canEdit = true;
     }
     $actionButtons .= $btnCloseOrder;
-    $canEdit = true;
 } else {
     switch ($order->status) {
         case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
@@ -90,8 +90,10 @@ if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Or
     $canEdit = true;
 }
 
-if(isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0 && $order->status!=Order::STATUS_DONE){
+if(isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0 && $order->status!=Order::STATUS_DONE){
     $canEdit = false;
+}else{
+    $canEdit = true;
 }
 ?>
 <div class="box box-info block_wrapper" style="height:auto;">

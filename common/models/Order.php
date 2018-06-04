@@ -518,7 +518,7 @@ class Order extends \yii\db\ActiveRecord
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass);
                 }
                 if (!$result) {
-                    throw new BadRequestHttpException(Yii::t('app', 'common.models.order.edi_error'));
+                    Yii::error(Yii::t('app', 'common.models.order.edi_error'));
                 }
             }
             if ((!isset($client->ediOrganization->gln_code) || empty($client->ediOrganization->gln_code)) && isset($vendor->ediOrganization->gln_code)) {

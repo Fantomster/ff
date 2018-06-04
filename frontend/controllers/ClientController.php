@@ -1151,7 +1151,7 @@ class ClientController extends DefaultController {
                 $article = trim($arrCatalogs['dataItem']['article']);
                 $units = trim($arrCatalogs['dataItem']['units']);
                 $price = trim(str_replace(',', '.', $arrCatalogs['dataItem']['price']));
-                $ed = trim($arrCatalogs['dataItem']['ed']);
+                $ed = trim(str_replace('.', ',', $arrCatalogs['dataItem']['ed']));
                 $note = trim($arrCatalogs['dataItem']['note']);
                 array_push($articleArray, (string) $article);
                 if (
@@ -1236,7 +1236,7 @@ class ClientController extends DefaultController {
                     $article = trim($arrCatalogs['dataItem']['article']);
                     $units = trim($arrCatalogs['dataItem']['units']);
                     $price = trim($arrCatalogs['dataItem']['price']);
-                    $ed = trim($arrCatalogs['dataItem']['ed']);
+                    $ed = trim(str_replace('.', ',', $arrCatalogs['dataItem']['ed']));
                     $note = trim($arrCatalogs['dataItem']['note']);
                     //сравниваем массивы каталога и пришедший массив
                     //Если пришедший ID п есть в массиве каталога

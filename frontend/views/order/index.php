@@ -50,8 +50,13 @@ $this->registerJs('
         $(document).on("click", ".reorder, .complete", function(e) {
             e.preventDefault();
             clicked = $(this);
+            if($(this).hasClass("completeEdi")){
+                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приеме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете, корректность данных?']) . ' ";
+            }else{
+                var title = clicked.data("original-title") + "?";
+            }
             swal({
-                title: clicked.data("original-title") + "?",
+                title: title,
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep', ['ru' => 'Да']) . ' ",
@@ -65,6 +70,7 @@ $this->registerJs('
                 }
             });
         });
+
     });
     $(document).on("click", ".export-to-xls", function(e) {
         if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
@@ -72,6 +78,8 @@ $this->registerJs('
         }
     });
 ');
+
+
 $this->registerCss("
     tr:hover{cursor: pointer;}
     #orderHistory a:not(.btn){color: #333;}
@@ -359,7 +367,7 @@ $this->registerCss("
                                         case Order::STATUS_PROCESSING:
                                             if ($data->isObsolete) {
                                                 return Html::a(Yii::t('message', 'frontend.views.order.complete', ['ru' => 'Завершить']), '#', [
-                                                    'class' => 'complete btn btn-outline-success',
+                                                    'class' => (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0) ? 'complete btn btn-outline-success completeEdi' : 'complete btn btn-outline-success',
                                                     'data' => [
                                                         'toggle' => 'tooltip',
                                                         'original-title' => Yii::t('message', 'frontend.views.order.complete_order', ['ru' => 'Завершить заказ']),

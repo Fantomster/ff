@@ -4,7 +4,6 @@ namespace api_web\components;
 
 use Yii;
 use \Firebase\FirebaseLib;
-use yii\base\ErrorException;
 use yii\web\HttpException;
 
 class FireBase

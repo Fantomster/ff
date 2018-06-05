@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\FireBase;
+use api_web\components\Notice;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\Order;
@@ -181,19 +182,8 @@ class ChatWebApi extends WebApi
             throw new ValidationException($dialogMessage->getFirstErrors());
         }
 
-        FireBase::getInstance()->update([
-            'chat',
-            'organization' => $recipient_id,
-            'dialog' => $dialogMessage->order_id
-        ], ['unread_message_count' => (int)$order->getOrderChatUnreadCount($recipient_id)]);
-
-        FireBase::getInstance()->update([
-            'chat',
-            'organization' => $recipient_id
-        ], [
-            'unread_message_count' => $this->getUnreadMessageCount($recipient_id),
-            'unread_dialog_count' => $this->dialogUnreadCount($recipient_id)['result']
-        ]);
+        //Отправляем нотификацию
+        Notice::init('Chat')->addMessage($recipient_id, $order);
 
         return $this->getDialogMessages(['dialog_id' => $order->id]);
     }
@@ -267,22 +257,13 @@ class ChatWebApi extends WebApi
     public function readAllMessages()
     {
         $result = ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
-
-        FireBase::getInstance()->update([
-            'chat',
-            'organization' => $this->user->organization->id,
-        ], [
-            'unread_message_count' => $this->getUnreadMessageCount($this->user->organization->id),
-            'unread_dialog_count' => $this->dialogUnreadCount($this->user->organization->id)['result']
-        ]);
-
+        Notice::init('Chat')->readAllMessages($this->user->organization->id);
         return $result;
     }
 
-    private function getUnreadMessageCount($r_id = null)
+    public function getUnreadMessageCount($r_id = null)
     {
         $recipient_id = $r_id ?? $this->user->organization->id;
-
         return (int)OrderChat::find()->where(['viewed' => 0, 'recipient_id' => $recipient_id])->count();
     }
 

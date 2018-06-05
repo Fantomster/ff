@@ -320,7 +320,7 @@ class ChatWebApi extends WebApi
             'image' => $model->vendor->pictureUrl ?? '',
             'count_message' => (int)$model->orderChatCount ?? 0,
             'unread_message' => (int)$model->getOrderChatUnreadCount($model->client->id) ?? 0,
-            'last_message' => $model->orderChatLastMessage->message ?? 'Нет сообщений',
+            'last_message' => stripcslashes(trim($model->orderChatLastMessage->message, "'")) ?? 'Нет сообщений',
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];
     }

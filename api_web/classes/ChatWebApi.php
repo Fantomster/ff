@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\FireBase;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\Order;
@@ -175,6 +176,22 @@ class ChatWebApi extends WebApi
             throw new ValidationException($dialogMessage->getFirstErrors());
         }
 
+        FireBase::getInstance()->update([
+            'chat',
+            'organization' => $recipient_id,
+            'dialog' => $dialogMessage->order_id
+        ], ['unread_message_count' => $order->getOrderChatUnreadCount($recipient_id)]);
+
+        FireBase::getInstance()->update([
+            'chat',
+            'organization' => $recipient_id
+        ], ['unread_message_count' => $this->getUnreadMessageCount($recipient_id)]);
+
+        FireBase::getInstance()->update([
+            'chat',
+            'organization' => $recipient_id
+        ], ['unread_dialog_count' => $this->dialogUnreadCount($recipient_id)['result']]);
+
         return $this->getDialogMessages(['dialog_id' => $order->id]);
     }
 
@@ -246,19 +263,38 @@ class ChatWebApi extends WebApi
      */
     public function readAllMessages()
     {
-        return ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
+        $result = ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
+
+        FireBase::getInstance()->update([
+            'chat',
+            'organization' => $this->user->organization->id,
+        ], [
+            'unread_message_count' => $this->getUnreadMessageCount($this->user->organization->id),
+            'unread_dialog_count' => $this->dialogUnreadCount($this->user->organization->id)['result']
+        ]);
+
+        return $result;
+    }
+
+    private function getUnreadMessageCount($r_id = null)
+    {
+        $recipient_id = $r_id ?? $this->user->organization->id;
+
+        return (int)OrderChat::find()->where(['viewed' => 0, 'recipient_id' => $recipient_id])->count();
     }
 
     /**
      * Число диалогов с новыми сообщениями
      * @return array
      */
-    public function dialogUnreadCount()
+    public function dialogUnreadCount($r_id = null)
     {
+        $recipient_id = $r_id ?? $this->user->organization->id;
+
         return [
             'result' => (int)OrderChat::find()
                 ->select('order_id')
-                ->where(['viewed' => 0, 'recipient_id' => $this->user->organization->id])
+                ->where(['viewed' => 0, 'recipient_id' => $recipient_id])
                 ->groupBy('order_id')
                 ->count()
         ];
@@ -278,7 +314,7 @@ class ChatWebApi extends WebApi
             'vendor_id' => (int)$model->vendor->id,
             'image' => $model->vendor->pictureUrl ?? '',
             'count_message' => (int)$model->orderChatCount ?? 0,
-            'unread_message' => (int)$model->orderChatUnreadCount ?? 0,
+            'unread_message' => (int)$model->getOrderChatUnreadCount($model->client->id) ?? 0,
             'last_message' => $model->orderChatLastMessage->message ?? 'Нет сообщений',
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];
@@ -301,7 +337,7 @@ class ChatWebApi extends WebApi
 
         return [
             'message_id' => (int)$model->id,
-            'message' => $model->message,
+            'message' => stripcslashes(trim($model->message, "'")),
             'sender' => $model->is_system ? 'MixCart Bot' : $model->sentBy->profile->full_name,
             'recipient_name' => $model->recipient->name,
             'recipient_id' => (int)$model->recipient->id,

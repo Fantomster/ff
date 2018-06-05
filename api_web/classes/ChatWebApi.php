@@ -185,17 +185,15 @@ class ChatWebApi extends WebApi
             'chat',
             'organization' => $recipient_id,
             'dialog' => $dialogMessage->order_id
-        ], ['unread_message_count' => $order->getOrderChatUnreadCount($recipient_id)]);
+        ], ['unread_message_count' => (int)$order->getOrderChatUnreadCount($recipient_id)]);
 
         FireBase::getInstance()->update([
             'chat',
             'organization' => $recipient_id
-        ], ['unread_message_count' => $this->getUnreadMessageCount($recipient_id)]);
-
-        FireBase::getInstance()->update([
-            'chat',
-            'organization' => $recipient_id
-        ], ['unread_dialog_count' => $this->dialogUnreadCount($recipient_id)['result']]);
+        ], [
+            'unread_message_count' => $this->getUnreadMessageCount($recipient_id),
+            'unread_dialog_count' => $this->dialogUnreadCount($recipient_id)['result']
+        ]);
 
         return $this->getDialogMessages(['dialog_id' => $order->id]);
     }

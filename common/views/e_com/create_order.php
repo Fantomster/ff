@@ -10,23 +10,25 @@
     <CAMPAIGNNUMBER><?= $order->id ?></CAMPAIGNNUMBER>
     <ORDRTYPE>ORIGINAL</ORDRTYPE>
     <HEAD>
-        <SUPPLIER><?= $vendor->gln_code ?></SUPPLIER>
-        <BUYER><?= $client->gln_code ?></BUYER>
-        <DELIVERYPLACE><?= $client->gln_code ?></DELIVERYPLACE>
-        <SENDER><?= $client->gln_code ?></SENDER>
-        <RECIPIENT><?= $vendor->gln_code ?></RECIPIENT>
+        <SUPPLIER><?= $vendor->ediOrganization->gln_code ?? $vendor->gln_code ??'' ?></SUPPLIER>
+        <BUYER><?= $client->ediOrganization->gln_code ?? $client->gln_code ?? '' ?></BUYER>
+        <DELIVERYPLACE><?= $client->ediOrganization->gln_code ?? $client->gln_code ?? '' ?></DELIVERYPLACE>
+        <SENDER><?= $client->ediOrganization->gln_code ?? $client->gln_code ?? '' ?></SENDER>
+        <RECIPIENT><?= $vendor->ediOrganization->gln_code ?? $vendor->gln_code ?? '' ?></RECIPIENT>
         <EDIINTERCHANGEID><?= $order->id ?></EDIINTERCHANGEID>
         <?php
         $i = 1;
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
                 $barcode = $product->barcode;
+                $edi_supplier_article = $product->edi_supplier_article ?? $position['id'];
             if (!$barcode)continue;
             ?>
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
                 <PRODUCTIDBUYER><?= $position['id']  ?></PRODUCTIDBUYER>
+                <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                 <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>

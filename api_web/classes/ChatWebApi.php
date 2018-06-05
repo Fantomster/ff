@@ -311,6 +311,12 @@ class ChatWebApi extends WebApi
      */
     private function prepareDialog(Order $model)
     {
+
+        $last_message = $model->orderChatLastMessage->message;
+        if (!empty($last_message)) {
+            $last_message = stripcslashes(trim($last_message, "'"));
+        }
+
         return [
             'dialog_id' => (int)$model->id,
             'client' => $model->client->name,
@@ -320,7 +326,7 @@ class ChatWebApi extends WebApi
             'image' => $model->vendor->pictureUrl ?? '',
             'count_message' => (int)$model->orderChatCount ?? 0,
             'unread_message' => (int)$model->getOrderChatUnreadCount($model->client->id) ?? 0,
-            'last_message' => stripcslashes(trim($model->orderChatLastMessage->message, "'")) ?? 'Нет сообщений',
+            'last_message' => $last_message ?? 'Нет сообщений',
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];
     }

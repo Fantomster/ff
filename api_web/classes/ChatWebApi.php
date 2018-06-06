@@ -2,6 +2,8 @@
 
 namespace api_web\classes;
 
+use api_web\components\FireBase;
+use api_web\components\Notice;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\Order;
@@ -39,7 +41,10 @@ class ChatWebApi extends WebApi
             throw new BadRequestHttpException('У вас нет доступа к диалогам');
         }
 
-        $search = Order::find()->where($where);
+        $search = Order::find()->select([
+            'order.*',
+            '(SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id and viewed = 0 AND recipient_id = `order`.client_id) as  last_message_date'
+        ])->where($where);
 
         if (empty($search)) {
             throw new BadRequestHttpException("Нет диалогов");
@@ -54,6 +59,8 @@ class ChatWebApi extends WebApi
                 $search->andWhere([$search_field => (int)$post['search']['recipient_id']]);
             }
         }
+
+        $search->orderBy('last_message_date desc, order.created_at DESC');
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()
@@ -175,6 +182,9 @@ class ChatWebApi extends WebApi
             throw new ValidationException($dialogMessage->getFirstErrors());
         }
 
+        //Отправляем нотификацию
+        Notice::init('Chat')->addMessage($recipient_id, $order);
+
         return $this->getDialogMessages(['dialog_id' => $order->id]);
     }
 
@@ -246,19 +256,29 @@ class ChatWebApi extends WebApi
      */
     public function readAllMessages()
     {
-        return ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
+        $result = ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
+        Notice::init('Chat')->readAllMessages($this->user->organization->id);
+        return $result;
+    }
+
+    public function getUnreadMessageCount($r_id = null)
+    {
+        $recipient_id = $r_id ?? $this->user->organization->id;
+        return (int)OrderChat::find()->where(['viewed' => 0, 'recipient_id' => $recipient_id])->count();
     }
 
     /**
      * Число диалогов с новыми сообщениями
      * @return array
      */
-    public function dialogUnreadCount()
+    public function dialogUnreadCount($r_id = null)
     {
+        $recipient_id = $r_id ?? $this->user->organization->id;
+
         return [
             'result' => (int)OrderChat::find()
                 ->select('order_id')
-                ->where(['viewed' => 0, 'recipient_id' => $this->user->organization->id])
+                ->where(['viewed' => 0, 'recipient_id' => $recipient_id])
                 ->groupBy('order_id')
                 ->count()
         ];
@@ -270,6 +290,12 @@ class ChatWebApi extends WebApi
      */
     private function prepareDialog(Order $model)
     {
+
+        $last_message = $model->orderChatLastMessage->message ?? 'Нет сообщений';
+        if (!empty($last_message)) {
+            $last_message = stripcslashes(trim($last_message, "'"));
+        }
+
         return [
             'dialog_id' => (int)$model->id,
             'client' => $model->client->name,
@@ -278,8 +304,8 @@ class ChatWebApi extends WebApi
             'vendor_id' => (int)$model->vendor->id,
             'image' => $model->vendor->pictureUrl ?? '',
             'count_message' => (int)$model->orderChatCount ?? 0,
-            'unread_message' => (int)$model->orderChatUnreadCount ?? 0,
-            'last_message' => $model->orderChatLastMessage->message ?? 'Нет сообщений',
+            'unread_message' => (int)$model->getOrderChatUnreadCount($model->client->id) ?? 0,
+            'last_message' => $last_message,
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];
     }
@@ -301,7 +327,7 @@ class ChatWebApi extends WebApi
 
         return [
             'message_id' => (int)$model->id,
-            'message' => $model->message,
+            'message' => stripcslashes(trim($model->message, "'")),
             'sender' => $model->is_system ? 'MixCart Bot' : $model->sentBy->profile->full_name,
             'recipient_name' => $model->recipient->name,
             'recipient_id' => (int)$model->recipient->id,

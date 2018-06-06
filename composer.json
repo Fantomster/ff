@@ -73,7 +73,8 @@
         "bower-asset/bootstrap": "^3.3",
         "npm-asset/jquery": "^2.2",
         "oomphinc/composer-installers-extender": "^1.1",
-        "mongosoft/yii2-soap-client": "*"
+        "mongosoft/yii2-soap-client": "*",
+        "ktamas77/firebase-php": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

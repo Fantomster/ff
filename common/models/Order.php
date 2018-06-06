@@ -222,9 +222,9 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return int
      */
-    public function getOrderChatUnreadCount()
+    public function getOrderChatUnreadCount($r_id)
     {
-        return count($this->getOrderChat()->where(['viewed' => 0])->all());
+        return OrderChat::find()->where(['order_id' => $this->id, 'viewed' => 0, 'recipient_id' => $r_id])->count();
     }
 
     /**

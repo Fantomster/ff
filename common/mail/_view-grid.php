@@ -20,7 +20,7 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = isset($data->note->note) ? '<p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">' . Yii::t('app', 'common.mail.view_grid.article', ['ru'=>'Заметка: ']) . $data->note->note . '</p>' : "";
+                $note = isset($data->comment) ? '<p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">' . Yii::t('app', 'common.mail.view_grid.article', ['ru'=>'Заметка: ']) . $data->comment . '</p>' : "";
                 return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . Html::decode(Html::decode($data->product_name)) . '</p>
                     <p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">' . Yii::t('app', 'common.mail.view_grid.art', ['ru'=>'Артикул:']) . '  ' . $data->article . '</p>'.$note;
             },

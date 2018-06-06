@@ -2,8 +2,8 @@
 
 namespace common\assets;
 
-use Yii;
-use Yii\web\AssetBundle;
+use yii;
+use yii\web\AssetBundle;
 
 class GoogleMapsAsset extends AssetBundle {
 
@@ -22,6 +22,6 @@ class GoogleMapsAsset extends AssetBundle {
                     'language' => Yii::$app->params['google-api']['language'],
                     'callback' => 'initGoogleMaps'
         ));
-        Yii::$app->view->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()], 'async' => true, 'defer' => true, 'position' => \yii\web\View::POS_END]);
+        \Yii::$app->view->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()], 'async' => true, 'defer' => true, 'position' => \yii\web\View::POS_END]);
     }
 }

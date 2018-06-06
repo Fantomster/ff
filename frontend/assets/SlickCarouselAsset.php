@@ -1,7 +1,7 @@
 <?php
 namespace frontend\assets;
 
-use Yii\web\AssetBundle;
+use yii\web\AssetBundle;
  
 class SlickCarouselAsset extends AssetBundle
 {

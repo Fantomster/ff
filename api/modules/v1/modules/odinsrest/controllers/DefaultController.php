@@ -69,7 +69,7 @@ class DefaultController extends Controller
 
     /**
      * Hello
-     * @param string $name
+     * @param string $name1
      * @return string
      * @soap
      */
@@ -117,13 +117,12 @@ class DefaultController extends Controller
     /**
      * Close session
      * @param string $sessionId
-     * @param string $nonce
      * @return mixed result
      * @soap
      */
-    public function CloseSession($sessionId, $nonce)
+    public function CloseSession(String $sessionId)
     {
-        if ($this->check_session($sessionId, $nonce)) {
+        if ($this->check_session($sessionId)) {
             $sess = ApiSession::find()->where('token = :token and now() between fd and td',
                 [':token' => $sessionId])->one();
 
@@ -144,78 +143,72 @@ class DefaultController extends Controller
 
     /**
      * Soap authorization open session
+     * @param string $login
+     * @param string $pass
      * @return mixed result of auth
      * @soap
      */
-    public function OpenSession()
+    public function OpenSession(String $login, String $pass)
     {
+//       if(!isset($this->username))  $this->username =  (isset($_SERVER['PHP_AUTH_USER'])) ? $_SERVER['PHP_AUTH_USER'] : $login;
+//
+//       if (!isset($this->password)) $this->password =  (isset($_SERVER['PHP_AUTH_PW'])) ? $_SERVER['PHP_AUTH_PW'] : $pass;
+//
+//       if (empty($this->username) || empty($this->password)) {
+//            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
+//            header('HTTP/1.0 401 Unauthorized');
+//            exit();
+//        } else {
+//        if ($this->username == "cyborg" && $this->password == "testpass") {
+//            return "Welcome to MixCart integration, Cyborg";
+//        } else {
+//            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
+//            header('HTTP/1.0 401 Unauthorized');
+//            exit();
+//        }
+//
+//        }
+        //dd(Yii::$app->getSecurity()->generatePasswordHash('testpass'));
 
-       if(!isset($this->username))  $this->username =  (isset($_SERVER['PHP_AUTH_USER'])) ? $_SERVER['PHP_AUTH_USER'] : "";
+        $this->username = $login;
+        $this->password = $pass;
+        if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td', [':username' => $this->username])->one()) {
+            $this->save_action(__FUNCTION__, 0, 0, 'Wrong login', $this->ip);
+            return 'Auth error. Login is not found.';
+        };
 
-       if (!isset($this->password)) $this->password =  (isset($_SERVER['PHP_AUTH_PW'])) ? $_SERVER['PHP_AUTH_PW'] : "";
+        if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
 
-       if (empty($this->username) || empty($this->password)) {
-            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-            header('HTTP/1.0 401 Unauthorized');
-            exit();
-        } else {
-        if ($this->username == "cyborg" && $this->password == "testpass") {
-            return "Welcome to MixCart integration, Cyborg";
-        } else {
-            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-            header('HTTP/1.0 401 Unauthorized');
-            exit();
-        }
+            $sessionId = Yii::$app->getSecurity()->generateRandomString();
+            $oldsess = ApiSession::find()->orderBy('fid DESC')->one();
+            $sess = new ApiSession();
 
-        }
-
-        /*
-
-        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) {
-            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-            header('HTTP/1.0 401 Unauthorized');
-            header('Warning: WSS security in not provided in SOAP header');
-            $this->save_action(__FUNCTION__, 0, 0, 'Auth error HTTP/1.0 401 Unauthorized', $this->ip);
-        } else {
-            if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td', [':username' => $this->username])->one()) {
-                $this->save_action(__FUNCTION__, 0, 0, 'Wrong login', $this->ip);
-                return 'Auth error. Login is not found.';
-            };
-
-            if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
-
-                $sessionId = Yii::$app->getSecurity()->generateRandomString();
-                $oldsess = ApiSession::find()->orderBy('fid DESC')->one();
-                $sess = new ApiSession();
-
-                if ($oldsess) {
-                    $sess->fid = $oldsess->fid + 1;
-                } else {
-                    $sess->fid = 1;
-                }
-
-                $sess->token = $sessionId;
-                $sess->acc = $acc->fid;
-                $sess->nonce = $this->nonce;
-                $sess->fd = gmdate('Y-m-d H:i:s');
-                $sess->td = gmdate('Y-m-d H:i:s', strtotime('+1 day'));
-                $sess->ver = 1;
-                $sess->status = 1;
-                $sess->ip = $this->ip;
-                $sess->extimefrom = gmdate('Y-m-d H:i:s');
-
-                if (!$sess->save()) {
-                    return $sess->errors;
-                } else {
-                    $this->save_action(__FUNCTION__, $sess->token, 1, 'OK', $this->ip);
-                    return 'OK_SOPENED:' . $sess->token;
-                }
+            if ($oldsess) {
+                $sess->fid = $oldsess->fid + 1;
             } else {
-                $this->save_action(__FUNCTION__, 0, 0, 'Wrong password', $this->ip);
-                return 'Auth error. Password is not correct.';
+                $sess->fid = 1;
             }
+
+            $sess->token = $sessionId;
+            $sess->acc = $acc->fid;
+            $sess->nonce = $this->nonce;
+            $sess->fd = gmdate('Y-m-d H:i:s');
+            $sess->td = gmdate('Y-m-d H:i:s', strtotime('+1 day'));
+            $sess->ver = 1;
+            $sess->status = 1;
+            $sess->ip = $this->ip;
+            $sess->extimefrom = gmdate('Y-m-d H:i:s');
+
+            if (!$sess->save()) {
+                return $sess->errors;
+            } else {
+                $this->save_action(__FUNCTION__, $sess->token, 1, 'OK', $this->ip);
+                return 'OK_SOPENED:' . $sess->token;
+            }
+        } else {
+            $this->save_action(__FUNCTION__, 0, 0, 'Wrong password', $this->ip);
+            return 'Auth error. Password is not correct.';
         }
-        */
     }
 
     /**
@@ -224,8 +217,6 @@ class DefaultController extends Controller
      */
     public function security($header)
     {
-
-
         if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
         {
             header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
@@ -239,7 +230,6 @@ class DefaultController extends Controller
             $this->extimefrom = $header->UsernameToken->Created;
             return $header;
         }
-
     }
 
     /**
@@ -247,10 +237,10 @@ class DefaultController extends Controller
      * @param $nonce
      * @return bool
      */
-    public function check_session($session, $nonce)
+    public function check_session($session)
     {
-        if (ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
-            [':token' => $session, ':nonce' => $nonce])->exists()) {
+        if (ApiSession::find()->where('token = :token and now() between fd and td',
+            [':token' => $session])->exists()) {
             return true;
         } else {
             return false;

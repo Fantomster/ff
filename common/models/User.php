@@ -8,6 +8,7 @@
 
 namespace common\models;
 
+use api\common\models\ApiAccess;
 use api_web\classes\UserWebApi;
 use common\components\Mailer;
 use common\models\notifications\EmailBlacklist;
@@ -182,6 +183,9 @@ class User extends \amnah\yii2\user\models\User {
                     }
 
             }
+        }
+        if(!$insert && $this->role_id == Role::ROLE_ONE_S_INTEGRATION){
+            $this->createOneSIntegrationAccount($this->email, $this->password, $this->organization_id);
         }
         parent::afterSave($insert, $changedAttributes);
     }
@@ -549,7 +553,8 @@ class User extends \amnah\yii2\user\models\User {
             Role::ROLE_SUPPLIER_EMPLOYEE,
             Role::ROLE_FRANCHISEE_OWNER,
             Role::ROLE_FRANCHISEE_OPERATOR,
-            Role::ROLE_FRANCHISEE_ACCOUNTANT
+            Role::ROLE_FRANCHISEE_ACCOUNTANT,
+            Role::ROLE_ONE_S_INTEGRATION,
         ];
     }
 
@@ -612,6 +617,31 @@ class User extends \amnah\yii2\user\models\User {
         }else{
             return self::createRelationUserOrganization($userID, $organizationID, $roleID);
         }
+    }
+
+
+    /**
+     * Creating 1C integration account
+     */
+    public function createOneSIntegrationAccount(String $email, String $pass, int $organizationID): bool
+    {
+        $apiAccess = ApiAccess::findOne(['login' => $email, 'org' => $organizationID]);
+        if(!$apiAccess){
+            Yii::$app->db->createCommand()->insert('db_api.api_access', [
+            'login' => $email,
+            'fid' => $this->id,
+            'password' => $pass,
+            'org' => $organizationID,
+            'fd' => new Expression('NOW()'),
+            'td' => new Expression('NOW() + INTERVAL 15 YEAR'),
+            'is_active' => 1,
+            'ver' => 1,
+            ])->execute();
+        }else{
+            $apiAccess->password = $pass;
+            $apiAccess->save();
+        }
+        return true;
     }
 
 

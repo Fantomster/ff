@@ -45,6 +45,7 @@ class SettingsController extends DefaultController {
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,

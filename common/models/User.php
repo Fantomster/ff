@@ -629,22 +629,29 @@ class User extends \amnah\yii2\user\models\User {
         try{
             $apiAccess = ApiAccess::findOne(['login' => $email, 'org' => $organizationID]);
             if(!$apiAccess){
-                Yii::$app->db->createCommand()->insert('db_api.api_access', [
-                    'login' => $email,
-                    'fid' => $this->id,
-                    'password' => $pass,
-                    'org' => $organizationID,
-                    'fd' => new Expression('NOW()'),
-                    'td' => new Expression('NOW() + INTERVAL 15 YEAR'),
-                    'is_active' => 1,
-                    'ver' => 1,
-                ])->execute();
+                $apiAccess = new ApiAccess();
+                $apiAccess->login = $email;
+                $apiAccess->fid = $this->id;
+                $apiAccess->password = $pass;
+                $apiAccess->org = $organizationID;
+                $apiAccess->fd = new Expression('NOW()');
+                $apiAccess->td = new Expression('NOW() + INTERVAL 15 YEAR');
+                $apiAccess->is_active = 1;
+                $apiAccess->ver = 1;
+                $apiAccess->loadDefaultValues();
+                if ($apiAccess->validate()) {
+                    $apiAccess->save();
+                } else {
+                    // validation failed: $errors is an array containing error messages
+                    $errors = $apiAccess->errors;
+                    Yii::error("<pre>" . print_r($errors, 1) . "</pre>");
+                }
+
             }else{
                 $apiAccess->password = $pass;
                 $apiAccess->save();
             }
         }catch (Exception $e){
-            mail('otpixto@yandex.ru', '1', $e->getMessage());
             Yii::error($e->getMessage());
             return false;
         }

@@ -717,6 +717,9 @@ $("#video").attr('src', url);
 $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
     $(this).data("bs.modal", null);
 })
+$(document).on("hidden.bs.modal", "#importToXls", function() {
+    $(this).data("bs.modal", null);
+})
 $("body").on("show.bs.modal", "#add-product-market-place", function() {
     $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
 })        

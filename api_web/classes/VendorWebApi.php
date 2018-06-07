@@ -16,18 +16,13 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\web\BadRequestHttpException;
 use yii\web\UploadedFile;
+use api_web\helpers\Excel;
 
 /**
  * Class VendorWebApi
  * @package api_web\classes
  */
 class VendorWebApi extends \api_web\components\WebApi {
-
-    /**
-     *
-     * Папка в бакете s3 для временного хранения загружаемых каталогов
-     */
-    public $excelTempFolder = "excelTemp";
 
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
@@ -190,22 +185,22 @@ class VendorWebApi extends \api_web\components\WebApi {
         $email = $post['email'];
 
         $models = Organization::find()
-            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
-            ->where(['organization.type_id' => Organization::TYPE_SUPPLIER])
-            ->andWhere(['or', [
-                'organization.email' => $email
-            ], [
-                'user.email' => $email
-            ]])->all();
+                        ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
+                        ->where(['organization.type_id' => Organization::TYPE_SUPPLIER])
+                        ->andWhere(['or', [
+                                'organization.email' => $email
+                            ], [
+                                'user.email' => $email
+                    ]])->all();
 
         if (!empty($models)) {
-            foreach($models as $model) {
+            foreach ($models as $model) {
                 $r = WebApiHelper::prepareOrganization($model);
 
-                if($user = RelationUserOrganization::find()->joinWith('user')->where([
-                    'relation_user_organization.organization_id' => $model->id,
-                    'user.email' => $email
-                ])->one()) {
+                if ($user = RelationUserOrganization::find()->joinWith('user')->where([
+                            'relation_user_organization.organization_id' => $model->id,
+                            'user.email' => $email
+                        ])->one()) {
                     $r['user'] = [
                         'email' => $user->user->email,
                         'name' => $user->user->profile->full_name,
@@ -355,8 +350,7 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadLogo(array $post)
-    {
+    public function uploadLogo(array $post) {
         if (empty($post['vendor_id'])) {
             throw new BadRequestHttpException('Empty attribute vendor_id');
         }
@@ -379,7 +373,7 @@ class VendorWebApi extends \api_web\components\WebApi {
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-         /**
+        /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";
@@ -412,7 +406,7 @@ class VendorWebApi extends \api_web\components\WebApi {
         //если есть - удаляем
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
-            Yii::$app->get('resourceManager')->delete($this->excelTempFolder . "/" . $tempCatalog->excel_file);
+            Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
             $tempCatalog->delete();
         }
         //сохранение и загрузка на s3
@@ -422,13 +416,13 @@ class VendorWebApi extends \api_web\components\WebApi {
         if ($is_xlsx) {
             try {
                 $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
-                Yii::$app->get('resourceManager')->save($file, $this->excelTempFolder . "/" . $file->name);
+                Yii::$app->get('resourceManager')->save($file, Excel::excelTempFolder . DIRECTORY_SEPARATOR . $file->name);
                 $newTempCatalog = new CatalogTemp();
                 $newTempCatalog->cat_id = $request['cat_id'];
                 $newTempCatalog->user_id = $this->user->id;
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
-                $first20Rows = \api_web\helpers\Excel::get20Rows($file->tempName);
+                $first20Rows = Excel::get20Rows($file->tempName);
                 return ['result' => true, 'rows' => $first20Rows];
             } catch (\yii\base\Exception $e) {
                 throw $e;
@@ -490,7 +484,7 @@ class VendorWebApi extends \api_web\components\WebApi {
         }
         return $this->container->get('CatalogWebApi')->deleteMainCatalog($catalog);
     }
-    
+
     /**
      * Смена уникального индекса главного каталога
      * @param array $request
@@ -513,12 +507,12 @@ class VendorWebApi extends \api_web\components\WebApi {
     public function deleteTempMainCatalog(array $request) {
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
-            Yii::$app->get('resourceManager')->delete($this->excelTempFolder . "/" . $tempCatalog->excel_file);
+            Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
             $tempCatalog->delete();
         }
         return ['result' => true];
     }
-    
+
     /**
      * Статус загруженного, но не импортированного каталога
      * @param array $request
@@ -527,9 +521,14 @@ class VendorWebApi extends \api_web\components\WebApi {
     public function getTempMainCatalog(array $request) {
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
-            return ['exists' => true];
+            return [
+                'exists' => true,
+                'rows' => Excel::get20RowsFromTempUploaded($tempCatalog),
+                'mapping' => $tempCatalog->mapping,
+            ];
         } else {
             return ['exists' => false];
         }
     }
+
 }

@@ -40,6 +40,20 @@ class CatalogTemp extends \yii\db\ActiveRecord {
         ];
     }
 
+    //auto created_at
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => \yii\behaviors\TimestampBehavior::className(),
+                'attributes' => [
+                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
+                ],
+                'value' => new \yii\db\Expression('NOW()'),
+            ],
+        ];
+    }
+    
     /**
      * {@inheritdoc}
      */

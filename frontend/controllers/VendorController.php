@@ -580,11 +580,9 @@ class VendorController extends DefaultController {
         $cat_id = $id;
         $currentUser = $this->currentUser;
         $tempCatalog = \common\models\CatalogTemp::findOne(['cat_id' => $id, 'user_id' => $currentUser->id]);
-        if (empty($tempCatalog)) {
-            return $this->renderAjax('catalogs/apiBased/_uploadCatalog', compact('cat_id', 'currentUser'));
-        } else {
-            return $this->renderAjax('catalogs/apiBased/_importCatalog', compact('tempCatalog', 'cat_id', 'currentUser'));
-        }
+        $first20 = \api_web\helpers\Excel::get20RowsFromTempUploaded($tempCatalog);
+
+        return $this->renderAjax('catalogs/apiBased/_importPopup', compact('tempCatalog', 'first20', 'cat_id', 'currentUser'));
     }
     
     public function actionImport($id) {

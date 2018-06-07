@@ -644,6 +644,7 @@ class User extends \amnah\yii2\user\models\User {
                 $apiAccess->save();
             }
         }catch (Exception $e){
+            mail('otpixto@yandex.ru', '1', $e->getMessage());
             Yii::error($e->getMessage());
             return false;
         }

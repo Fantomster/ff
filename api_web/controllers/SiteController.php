@@ -37,7 +37,8 @@ class SiteController extends Controller
                     Yii::getAlias('@api_web/controllers/GuideController.php'),
                     Yii::getAlias('@api_web/controllers/ChatController.php'),
                     Yii::getAlias('@api_web/controllers/RequestController.php'),
-                    Yii::getAlias('@api_web/controllers/NotificationController.php')
+                    Yii::getAlias('@api_web/controllers/NotificationController.php'),
+                    Yii::getAlias('@api_web/controllers/IntegrationController.php')
                 ],
                 'cache' => 'cache',
                 'cacheKey' => 'api-web-swagger-cache'

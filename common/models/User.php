@@ -8,7 +8,7 @@
 
 namespace common\models;
 
-use api\common\models\ApiAccess;
+use api\common\models\one_s\OneSRestAccess;
 use api_web\classes\UserWebApi;
 use common\components\Mailer;
 use common\models\notifications\EmailBlacklist;
@@ -627,9 +627,9 @@ class User extends \amnah\yii2\user\models\User {
     public function createOneSIntegrationAccount(String $email, String $pass, int $organizationID): bool
     {
         try{
-            $apiAccess = ApiAccess::findOne(['login' => $email, 'org' => $organizationID]);
+            $apiAccess = OneSRestAccess::findOne(['login' => $email, 'org' => $organizationID]);
             if(!$apiAccess){
-                $apiAccess = new ApiAccess();
+                $apiAccess = new OneSRestAccess();
                 $apiAccess->login = $email;
                 $apiAccess->fid = $this->id;
                 $apiAccess->password = $pass;

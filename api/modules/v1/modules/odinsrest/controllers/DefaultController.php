@@ -114,6 +114,34 @@ class DefaultController extends Controller
 
     }
 
+
+    /**
+     * Send goods list
+     * @param string $sessionId
+     * @param string $body
+     * @return string
+     * @soap
+     */
+    public function sendGoodsList(String $sessionId, String $body): String
+    {
+        if ($this->check_session($sessionId)) {
+            $content = json_decode($body);
+            $goods = $content->data;
+            if(is_iterable($goods)){
+                foreach ($goods as $good){
+                    //dd($good->name);
+                }
+            }
+            $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
+            return "OK";
+        } else {
+            $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);
+            return 'Session error. Active session is not found.';
+        }
+
+    }
+
+
     /**
      * Close session
      * @param string $sessionId
@@ -150,26 +178,6 @@ class DefaultController extends Controller
      */
     public function OpenSession(String $login, String $pass)
     {
-//       if(!isset($this->username))  $this->username =  (isset($_SERVER['PHP_AUTH_USER'])) ? $_SERVER['PHP_AUTH_USER'] : $login;
-//
-//       if (!isset($this->password)) $this->password =  (isset($_SERVER['PHP_AUTH_PW'])) ? $_SERVER['PHP_AUTH_PW'] : $pass;
-//
-//       if (empty($this->username) || empty($this->password)) {
-//            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-//            header('HTTP/1.0 401 Unauthorized');
-//            exit();
-//        } else {
-//        if ($this->username == "cyborg" && $this->password == "testpass") {
-//            return "Welcome to MixCart integration, Cyborg";
-//        } else {
-//            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-//            header('HTTP/1.0 401 Unauthorized');
-//            exit();
-//        }
-//
-//        }
-        //dd(Yii::$app->getSecurity()->generatePasswordHash('testpass'));
-
         $this->username = $login;
         $this->password = $pass;
         if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td', [':username' => $this->username])->one()) {
@@ -221,8 +229,7 @@ class DefaultController extends Controller
         {
             header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
             header('HTTP/1.0 401 Unauthorized');
-         //   $this->save_action(__FUNCTION__, 0, 0, 'Auth error HTTP/1.0 401 Unauthorized', $this->ip);
-
+            $this->save_action(__FUNCTION__, 0, 0, 'Auth error HTTP/1.0 401 Unauthorized', $this->ip);
         } else {
             $this->username = $header->UsernameToken->Username;
             $this->password = $header->UsernameToken->Password;

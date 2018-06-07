@@ -17,6 +17,7 @@ use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
 use yii\data\ArrayDataProvider;
+use yii\db\Exception;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
@@ -625,21 +626,26 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function createOneSIntegrationAccount(String $email, String $pass, int $organizationID): bool
     {
-        $apiAccess = ApiAccess::findOne(['login' => $email, 'org' => $organizationID]);
-        if(!$apiAccess){
-            Yii::$app->db->createCommand()->insert('db_api.api_access', [
-            'login' => $email,
-            'fid' => $this->id,
-            'password' => $pass,
-            'org' => $organizationID,
-            'fd' => new Expression('NOW()'),
-            'td' => new Expression('NOW() + INTERVAL 15 YEAR'),
-            'is_active' => 1,
-            'ver' => 1,
-            ])->execute();
-        }else{
-            $apiAccess->password = $pass;
-            $apiAccess->save();
+        try{
+            $apiAccess = ApiAccess::findOne(['login' => $email, 'org' => $organizationID]);
+            if(!$apiAccess){
+                Yii::$app->db->createCommand()->insert('db_api.api_access', [
+                    'login' => $email,
+                    'fid' => $this->id,
+                    'password' => $pass,
+                    'org' => $organizationID,
+                    'fd' => new Expression('NOW()'),
+                    'td' => new Expression('NOW() + INTERVAL 15 YEAR'),
+                    'is_active' => 1,
+                    'ver' => 1,
+                ])->execute();
+            }else{
+                $apiAccess->password = $pass;
+                $apiAccess->save();
+            }
+        }catch (Exception $e){
+            Yii::error($e->getMessage());
+            return false;
         }
         return true;
     }

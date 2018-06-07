@@ -1,11 +1,13 @@
 <?php
 
-namespace golovchanskiy\parseTorg12\models;
+namespace common\components;
+
+//use golovchanskiy\parse-torg12\models\invoice;
 
 /**
  * Товарная накладная
  */
-class Invoice extends Model
+class MyInvoice// extends Invoice
 {
 
     /**
@@ -41,6 +43,21 @@ class Invoice extends Model
      *
      * @var InvoiceRow[]
      */
+
     public $rows = [];
+    /**
+     * Массив координат ячеек, содержащих имя поставщика в накладной
+     *
+     * @var array
+     */
+
+    public $tmpMassivsNames;
+
+    /**
+     * Массив координат ячеек, содержащих ИНН и КПП (если есть) поставщика в накладной
+     *
+     * @var array
+     */
+    public $tmpMassivsInns;
 
 }

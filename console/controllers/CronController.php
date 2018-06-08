@@ -368,4 +368,20 @@ class CronController extends Controller {
         $eComIntegration->handleFilesList();
     }
 
+
+    //handle EDI integration files queue
+    public function actionHandleFilesQueue()
+    {
+        $eComIntegration = new EComIntegration();
+        $eComIntegration->handleFilesListQueue();
+    }
+
+
+    //archieve EDI integration files
+    public function actionArchiveFiles()
+    {
+        $eComIntegration = new EComIntegration();
+        $eComIntegration->archiveFiles();
+    }
+
 }

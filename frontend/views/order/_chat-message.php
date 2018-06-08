@@ -1,5 +1,9 @@
 <?php
-$isSender = (Yii::$app->user->identity->id == $sender_id) && !$ajax;
+if(is_a(Yii::$app,'yii\console\Application')){
+    $isSender = 1;
+}else{
+    $isSender = (Yii::$app->user->identity->id == $sender_id) && !$ajax;
+}
 ?>
 <?php if ($isSystem) { ?>
     <div class="direct-chat-msg <?= $danger? "system-danger" : "system" ?>">

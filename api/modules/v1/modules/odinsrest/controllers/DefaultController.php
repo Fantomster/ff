@@ -132,7 +132,7 @@ class DefaultController extends Controller
 
 
     /**
-     * Send goods list
+     * Send stores list
      * @param string $sessionId
      * @param string $body
      * @return string
@@ -145,7 +145,7 @@ class DefaultController extends Controller
 
 
     /**
-     * Send goods list
+     * Send contragents list
      * @param string $sessionId
      * @param string $body
      * @return string
@@ -163,7 +163,6 @@ class DefaultController extends Controller
         if ($res) {
             $content = json_decode($body);
             $positions = $content->data ?? null;
-            //dd($content);
             if(is_iterable($positions)){
                 switch ($type){
                     case 1:

@@ -119,6 +119,7 @@ return [
             'showScriptName' => false,
             // Use pretty URLs
             'enablePrettyUrl' => true,
+            'hostInfo' => 'https://mixcart.ru',
             'rules' => [
                 '/' => 'site/index',
                 'client' => 'client/index',
@@ -146,6 +147,7 @@ return [
         'urlManagerFrontend' => [
             'class' => 'yii\web\urlManager',
             'baseUrl' => '//app.mixcart.ru',
+            'hostInfo' => 'https://mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [

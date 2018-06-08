@@ -19,6 +19,7 @@ use mongosoft\soapclient\Client;
 use Yii;
 use yii\base\Component;
 use yii\base\ErrorException;
+use yii\console\Request;
 use yii\db\Exception;
 use yii\db\Expression;
 
@@ -29,6 +30,11 @@ use yii\db\Expression;
  *
  */
 class EComIntegration{
+
+    const STATUS_NEW = 1;
+    const STATUS_PROCESSING = 2;
+    const STATUS_ERROR = 3;
+    const STATUS_HANDLED = 4;
 
 
     public function handleFilesList(): void
@@ -54,14 +60,14 @@ class EComIntegration{
                     $list = $object->result->list ?? null;
                     if (!$list) {
                         echo "No files";
-                        exit();
+                        continue;
                     }
                     if (is_iterable($list)) {
                         foreach ($list as $fileName) {
-                            $this->getDoc($client, $fileName, $login, $pass);
+                            $this->insertFilesInQueue($fileName, $ediOrganization['organization_id']);
                         }
                     } else {
-                        $this->getDoc($client, $list, $login, $pass);
+                        $this->insertFilesInQueue($list, $ediOrganization['organization_id']);
                     }
                     $transaction->commit();
                 } catch (Exception $e) {
@@ -73,12 +79,71 @@ class EComIntegration{
     }
 
 
-    private function getDoc(Client $client, String $fileName, String $login, String $pass): bool
+    private function insertFilesInQueue(String $fileName, int $organizationID): void
+    {
+        $file = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('edi_files_queue')
+            ->where(['organization_id' => $organizationID, 'name' => $fileName])
+            ->one();
+        if(!$file){
+            Yii::$app->db->createCommand()->insert('edi_files_queue', [
+                'name' => $fileName,
+                'organization_id' => $organizationID,
+            ])->execute();
+        }
+    }
+
+
+    public function handleFilesListQueue(): void
+    {
+        $rows = (new \yii\db\Query())
+            ->select(['id', 'name', 'organization_id'])
+            ->from('edi_files_queue')
+            ->where(['status' => [self::STATUS_NEW, self::STATUS_ERROR]])
+            ->limit(100)
+            ->all();
+        $arr = [];
+        $i = 0;
+        if (is_iterable($rows)) {
+            $client = Yii::$app->siteApi;
+            foreach ($rows as $row) {
+                $organizationID = $row['organization_id'];
+                $arr[$organizationID][$i]['name'] = $row['name'];
+                $arr[$organizationID][$i]['id'] = $row['id'];
+                $i++;
+            }
+        }else{
+            exit();
+        }
+        foreach ($arr as $organizationID => $item){
+            $ediOrganization = (new \yii\db\Query())
+                ->select(['login', 'pass'])
+                ->from('edi_organization')
+                ->where(['organization_id' => $organizationID])
+                ->one();
+            $login = $ediOrganization['login'];
+            $pass = $ediOrganization['pass'];
+            foreach ($item as $value){
+                $fileName = $value['name'];
+                $id = $value['id'];
+                $this->getDoc($client, $fileName, $login, $pass, $id);
+            }
+        }
+    }
+
+
+    private function getDoc(Client $client, String $fileName, String $login, String $pass, int $ediFilesQueueID): bool
     {
         try{
             $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
         }catch (Exception $e){
+            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => self::STATUS_ERROR, 'error_text' => $e->getMessage()], 'id='.$ediFilesQueueID)->execute();
             Yii::error($e->getMessage());
+            return false;
+        }
+        if(!isset($doc->result->content)){
+            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => self::STATUS_ERROR, 'error_text' => 'No such file'], 'id='.$ediFilesQueueID)->execute();
             return false;
         }
         $content = $doc->result->content;
@@ -97,6 +162,7 @@ class EComIntegration{
         }
         if($success){
             $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
+            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => self::STATUS_HANDLED, 'error_text' => ''], 'id='.$ediFilesQueueID)->execute();
         }
         return true;
     }
@@ -140,6 +206,7 @@ class EComIntegration{
         foreach ($order->orderContent as $orderContent){
             if (!isset($arr[$orderContent->id]['BARCODE']))continue;
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$orderContent->id]['BARCODE']]);
+            if (!$good)continue;
             $barcodeArray[] = $good->barcode;
             $ordContArr[] = $orderContent->id;
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
@@ -200,9 +267,12 @@ class EComIntegration{
         }
         Yii::$app->db->createCommand()->update('order', ['status' => Order::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id='.$order->id)->execute();
         $ediOrder = EdiOrder::findOne(['order_id'=>$order->id]);
-        $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-        $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
-        $ediOrder->save();
+        if($ediOrder){
+            $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
+            $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
+            $ediOrder->save();
+        }
+
 
         $user = User::findOne(['id'=>$order->created_by_id]);
         if($message != ''){
@@ -448,6 +518,11 @@ class EComIntegration{
             Yii::error("Ecom returns error code");
             return false;
         }
+    }
+
+
+    public function archiveFiles(){
+        Yii::$app->db->createCommand()->delete('edi_files_queue', 'updated_at <= DATE_SUB(CURDATE(),INTERVAL 30 DAY) AND updated_at IS NOT NULL')->execute();
     }
 
 }

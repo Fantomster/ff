@@ -40,7 +40,6 @@ class SettingsController extends DefaultController {
                             'ajax-add-email',
                             'ajax-delete-email',
                             'ajax-change-email-notification',
-                            'test'
                         ],
                         'allow' => true,
                         'roles' => [
@@ -57,14 +56,6 @@ class SettingsController extends DefaultController {
                 ],
             ],
         ];
-    }
-
-
-    public function actionTest()
-    {
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesList();
-        echo "success";
     }
 
 

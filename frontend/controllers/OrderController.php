@@ -6,6 +6,8 @@ use api_web\classes\CartWebApi;
 use common\models\Cart;
 use common\models\search\OrderProductsSearch;
 use Yii;
+use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\helpers\Json;
 use yii\helpers\Html;
 use common\models\search\OrderCatalogSearch;
@@ -28,6 +30,7 @@ use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
+use yii\web\BadRequestHttpException;
 
 class OrderController extends DefaultController
 {
@@ -68,6 +71,7 @@ class OrderController extends DefaultController
                         // Allow restaurant managers
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
@@ -112,6 +116,7 @@ class OrderController extends DefaultController
                         // Allow restaurant managers
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
@@ -349,6 +354,13 @@ class OrderController extends DefaultController
         $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
 
         $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
+        // Set Orientation, size and scaling
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(0);
 
         header('Content-Type: application/vnd.ms-excel');
         $filename = "order_" . $id . ".xls";
@@ -905,7 +917,6 @@ class OrderController extends DefaultController
 
     public function actionAjaxMakeOrder()
     {
-        $client = $this->currentUser->organization;
         $cart = (new CartWebApi())->items();
         $cartCount = count($cart);
 
@@ -921,7 +932,7 @@ class OrderController extends DefaultController
                 $data = [];
                 foreach ($cart as $item) {
                     $vendor_id = $item['id'];
-                    $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, null);
+                    $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, date('Y-m-d H:i:s'));
                     if ($delivery_date != null) {
                         $data[] = ['id' => $vendor_id,
                             'delivery_date' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
@@ -931,7 +942,7 @@ class OrderController extends DefaultController
                 }
             } else {
                 $vendor_id = Yii::$app->request->post('id');
-                $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, null);
+                $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_' . $vendor_id, date('Y-m-d H:i:s'));
                 if ($delivery_date != null) {
                     $data[] = ['id' => $vendor_id,
                         'delivery_date' => isset($delivery_date) ? date('d.m.Y', strtotime($delivery_date)) : null,
@@ -1479,7 +1490,6 @@ class OrderController extends DefaultController
 
     public function actionCheckout()
     {
-        //$client = $this->currentUser->organization;
         $totalCart = 0;
 
         if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {
@@ -1998,6 +2008,7 @@ class OrderController extends DefaultController
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
+        $dataProvider = new ActiveDataProvider([]);
         $orgs[] = $order->vendor_id;
         $orgs[] = $order->client_id;
 
@@ -2155,7 +2166,7 @@ class OrderController extends DefaultController
         $position->article = $article;
 
         $order = $position->order;
-        if ($order->status >= 3)
+        if ($order->status == 6)
             throw new BadRequestHttpException('Access denided');
 
         if (!$position->save(false))

@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\FireBase;
 use api_web\components\Notice;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
@@ -147,6 +148,10 @@ class CartWebApi extends \api_web\components\WebApi
                 }
             }
         }
+
+        //Сообщение в очередь, Изменение количества товара в корзине
+        Notice::init('Order')->sendOrderToTurnClient($client);
+
         return $this->items();
     }
 

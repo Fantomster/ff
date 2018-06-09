@@ -59,7 +59,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             [['organization_id', 'integration_setting_from_email_id', 'order_id'], 'integer'],
             [['date', 'created_at', 'updated_at', 'total_sum_withtax','price_without_tax_sum'], 'safe'],
             [['file_content'], 'string'],
-            [['number', 'email_id', 'file_mime_type', 'file_hash_summ'], 'string', 'max' => 255],
+            [['number', 'email_id', 'file_mime_type', 'file_hash_summ', 'name_postav', 'inn_postav', 'kpp_postav'], 'string', 'max' => 255],
             [['id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoiceContent::className(), 'targetAttribute' => ['id' => 'invoice_id']],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
             [['integration_setting_from_email_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationSettingFromEmail::className(), 'targetAttribute' => ['integration_setting_from_email_id' => 'id']],
@@ -88,6 +88,9 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'total_sum_withtax' => 'Итого с НДС',
             'price_without_tax_sum' => 'Итого без НДС',
+            'name_postav' => 'Наименование поставщика',
+            'inn_postav' => 'ИНН поставщика',
+            'kpp_postav' => 'КПП поставщика',
         ];
     }
 
@@ -158,6 +161,9 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->date = (!empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null);
         $this->total_sum_withtax = $invoice['invoice']['price_with_tax_sum'];
         $this->total_sum_withouttax = $invoice['invoice']['price_without_tax_sum'];
+        $this->name_postav = $invoice['invoice']['namePostav'];
+        $this->inn_postav = $invoice['invoice']['innPostav'];
+        $this->kpp_postav = $invoice['invoice']['kppPostav'];
 
         if($this->date == '1970-01-01') {
             $this->date = null;

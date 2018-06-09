@@ -1,10 +1,17 @@
 <?php
 
-use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\widgets\ActiveForm;
-use kartik\grid\GridView;
+use yii\widgets\ListView;
+use yii\web\View;
+use yii\helpers\Html;
+use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
+use yii\bootstrap\Modal;
+
+
+
+use kartik\grid\GridView;
+
 frontend\assets\AppAsset::register($this);
 /**
  * @var yii\web\View $this
@@ -15,6 +22,14 @@ $this->title = Yii::t('message', 'frontend.views.user.default.enter_register_thr
 $redirect = empty($returnUrl) ? Url::to(['/site/index']) : $returnUrl;
 $changeNetworkUrl = Url::to(['/user/change']);
 $js = <<<JS
+
+    $(document).on("click", ".btnSubmit", function() {
+        $($(this).data("target-form")).submit();
+    });
+    $(document).on("focusout", "#searchString", function() {
+        $('#searchForm').submit();
+    });
+
     $(document).on("click",".change-net-org", function(e){
     e.preventDefault();
     var id = $(this).attr('data-id'); 
@@ -32,6 +47,8 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 
 $this->registerCss('
+#searchString{height:35px; width: 100%; display: inline-block;}
+.input-group, .form-group{width: 100%;}
 .h5, h4, h3, h2, h1{
      font-family: \'Circe-Bold\';  
      letter-spacing: 0.05em;
@@ -160,12 +177,46 @@ $grid = [
                 <div class="block">
                     <h5 class="business-title"><?= Yii::t('message', 'frontend.views.user.default.choose_profile', ['ru'=>'Выберите бизнес-профиль']) ?></h5>
                     <p class="business-p-title"><?= Yii::t('message', 'frontend.views.user.default.choose_list', ['ru'=>'Выберите из имеющихся для доступа в Ваш бизнес-профиль']) ?></p>
+
+                    <?php
+                    $form = ActiveForm::begin([
+                        'method' => 'get',
+                        'options' => [
+                            'id' => 'searchForm',
+                            'class' => "navbar-form no-padding no-margin",
+                            'role' => 'search',
+                        ],
+                    ]);
+                    ?>
+                    <?=
+                    $form->field($searchModel, 'searchString', [
+                        'addon' => [
+                            'append' => [
+                                'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
+                                'options' => [
+                                    'class' => 'append',
+                                ],
+                            ],
+                        ],
+                        'options' => [
+                            'class' => "margin-right-15 form-group",
+                        ],
+                    ])
+                        ->textInput([
+                            'id' => 'searchString',
+                            'class' => 'form-control',
+                            'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru' => 'Поиск'])])
+                        ->label(false)
+                    ?>
+                    <?php ActiveForm::end(); ?>
+
                     <div class="row">
                         <div class="col-md-12">
-                            <?php Pjax::begin(['id' => 'pjax-network-list', 'enablePushState' => false,'timeout' => 10000])?>
+                            <?php Pjax::begin(['formSelector' => '#searchForm', 'id' => 'pjax-network-list', 'enablePushState' => false,'timeout' => 10000])?>
                             <?=GridView::widget([
                                     'dataProvider' => $dataProvider,
-                                    'filterPosition' => false,
+                                    'filterModel' => $searchModel,
+                                    'filterPosition' => true,
                                     'columns' => $grid,
                                     'options' => [],
                                     'tableOptions' => ['class' => 'table'],

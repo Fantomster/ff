@@ -89,6 +89,7 @@ function renderButton($id)
                                         return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
                                     }
                                 ],
+                                'name_postav',
                                 [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {

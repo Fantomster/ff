@@ -257,11 +257,10 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     <div class="row">
         <div class="col-md-8" id="toPrint">
             <div class="box box-info">
-                <?php //Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
                 <div class="box-header">
                     <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru'=>'Заказ']) ?> №<?= $order->id ?></h4><hr>
                     <?=
-                    ($order->status < 3) ?
+                    (($order->status != Order::STATUS_CANCELLED && $order->status != Order::STATUS_REJECTED && !isset($order->vendor->ediOrganization->gln_code)) || ($order->status == Order::STATUS_DONE && isset($order->vendor->ediOrganization->gln_code))) ?
                     Html::a('<span><i class="icon fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']) . ' </span>',
                         Url::to(['order/ajax-show-products', 'order_id' => $order->id]), [
                                 'class' => 'btn btn-success pull-right btnAdd',

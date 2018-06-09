@@ -6,7 +6,6 @@ use api_web\classes\CartWebApi;
 use common\models\Cart;
 use common\models\search\OrderProductsSearch;
 use Yii;
-use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -2008,7 +2007,6 @@ class OrderController extends DefaultController
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
-        $dataProvider = new ActiveDataProvider([]);
         $orgs[] = $order->vendor_id;
         $orgs[] = $order->client_id;
 

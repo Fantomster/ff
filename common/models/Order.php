@@ -545,10 +545,15 @@ class Order extends \yii\db\ActiveRecord
     {
         if ($user instanceof User) {
 
-            $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                "/order/view",
-                "id" => $this->id
-            ]);
+            if (Yii::$app instanceof Yii\console\Application){
+                return Yii::$app->params['url'] . "/order/view" . $this->id;
+            }else{
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view/",
+                    "id" => $this->id
+                ]);
+            }
+
 
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([

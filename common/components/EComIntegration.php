@@ -101,7 +101,6 @@ class EComIntegration{
             ->select(['id', 'name', 'organization_id'])
             ->from('edi_files_queue')
             ->where(['status' => [self::STATUS_NEW, self::STATUS_ERROR]])
-            ->limit(100)
             ->all();
         $arr = [];
         $i = 0;
@@ -135,15 +134,16 @@ class EComIntegration{
 
     private function getDoc(Client $client, String $fileName, String $login, String $pass, int $ediFilesQueueID): bool
     {
+        $this->updateQueue($ediFilesQueueID, self::STATUS_PROCESSING, '');
         try{
             $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
         }catch (Exception $e){
-            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => self::STATUS_ERROR, 'error_text' => $e->getMessage()], 'id='.$ediFilesQueueID)->execute();
+            $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
             Yii::error($e->getMessage());
             return false;
         }
         if(!isset($doc->result->content)){
-            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => self::STATUS_ERROR, 'error_text' => 'No such file'], 'id='.$ediFilesQueueID)->execute();
+            $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'No such file');
             return false;
         }
         $content = $doc->result->content;
@@ -162,9 +162,17 @@ class EComIntegration{
         }
         if($success){
             $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
-            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => self::STATUS_HANDLED, 'error_text' => ''], 'id='.$ediFilesQueueID)->execute();
+            $this->updateQueue($ediFilesQueueID, self::STATUS_HANDLED, '');
+        }else{
+            $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file');
         }
         return true;
+    }
+
+
+    private function updateQueue(int $ediFilesQueueID, int $status, String $errorText): void
+    {
+        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id='.$ediFilesQueueID)->execute();
     }
 
 

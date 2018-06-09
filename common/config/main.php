@@ -119,7 +119,6 @@ return [
             'showScriptName' => false,
             // Use pretty URLs
             'enablePrettyUrl' => true,
-            'hostInfo' => 'https://mixcart.ru',
             'rules' => [
                 '/' => 'site/index',
                 'client' => 'client/index',

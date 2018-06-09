@@ -2,12 +2,12 @@
 
 namespace common\components;
 
-//use golovchanskiy\parse-torg12\models\invoice;
+use golovchanskiy\parseTorg12\models\Invoice;
 
 /**
  * Товарная накладная
  */
-class MyInvoice// extends Invoice
+class Torg12Invoice extends Invoice
 {
 
     /**
@@ -59,5 +59,26 @@ class MyInvoice// extends Invoice
      * @var array
      */
     public $tmpMassivsInns;
+
+    /**
+     * Наименование поставщика вместе с формой собственности, приведённое к верхнему регистру
+     *
+     * @var string
+     */
+    public $namePostav;
+
+    /**
+     * ИНН поставщика
+     *
+     * @var string
+     */
+    public $innPostav;
+
+    /**
+     * КПП поставщика (если есть)
+     *
+     * @var string
+     */
+    public $kppPostav;
 
 }

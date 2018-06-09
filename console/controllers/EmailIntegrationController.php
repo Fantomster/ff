@@ -38,7 +38,6 @@ class EmailIntegrationController extends Controller
         return parent::afterAction($action, $result);
     }
 
-
     public function actionTest() {
 
         $temp_file[1] = '/app/console/runtime/testnac.xls';
@@ -49,6 +48,10 @@ class EmailIntegrationController extends Controller
         $temp_file[6] = '/app/console/runtime/testnac11.xlsx';
         $temp_file[7] = '/app/console/runtime/testnac12.xls';
         $temp_file[8] = '/app/console/runtime/testnac13.xlsx';
+        $temp_file[9] = '/app/console/runtime/testnac22.xlsx';
+        $temp_file[10] = '/app/console/runtime/testnac23.xls';
+        $temp_file[11] = '/app/console/runtime/testnac24.xls';
+        $temp_file[12] = '/app/console/runtime/testnac25.xlsx';
 
 
         $i =1;
@@ -74,6 +77,9 @@ class EmailIntegrationController extends Controller
             echo $filet.PHP_EOL;
             print_r("Result date:".$result[$i-1]['invoice']['date'].PHP_EOL);
             print_r("Result number:".$result[$i-1]['invoice']['number'].PHP_EOL);
+            print_r("Result name:".$result[$i-1]['invoice']['namePostav'].PHP_EOL);
+            print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
+            print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
             print_r("=================================".PHP_EOL);
 
             file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);

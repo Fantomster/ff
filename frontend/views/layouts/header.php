@@ -348,7 +348,7 @@ JS;
                 <ul class="nav navbar-nav">
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
-                            <a class="basket_a" href="<?= Url::to(['order/checkout']) ?>">
+                            <a class="basket_a" href="<?= Url::to(['/order/checkout']) ?>">
                                 <i class="fa fa-shopping-cart"></i><span class="label label-primary cartCount"><?= $organization->getCartCount() ?></span>
                             </a>
                         </li>

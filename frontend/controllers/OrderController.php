@@ -63,6 +63,7 @@ class OrderController extends DefaultController
                             'pdf',
                             'export-to-xls',
                             'order-to-xls',
+                            'grid-report',
                             'ajax-show-products',
                             'ajax-add-to-order',
                         ],
@@ -2206,5 +2207,85 @@ class OrderController extends DefaultController
             }
         }
         return true;
+    }
+
+    public function actionGridReport()
+    {
+        $selected = Yii::$app->request->get('selected');
+        if (empty($selected))
+            exit();
+
+            $sql = "SELECT org.id as id, concat_ws(', ',org.name, org.city, org.address) as client_name 
+                    FROM `order` 
+                    left join organization as org on org.id = `order`.client_id
+                    where `order`.id in ($selected) group by `order`.client_id";
+
+            $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
+
+            $sql = "SELECT cbg.product as 'Заказанный товар', cbg.ed as 'Ед.изм.', ";
+
+            foreach ($orgs as $org)
+            {
+                $sql .= "SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) as '".$org['client_name']."'";
+            }
+
+
+            $sql .= " from `order`
+                    left join order_content as oc on oc.order_id = `order`.id
+                    left join catalog_base_goods as cbg on cbg.id = oc.product_id
+                    where `order`.id in ($selected) group by client_id, product_id";
+
+            $report = \Yii::$app->db->createCommand($sql)->queryAll();
+
+            $objPHPExcel = new \PHPExcel();
+            $sheet = 0;
+            $objPHPExcel->setActiveSheetIndex($sheet);
+            $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.grid-report', ['ru' => 'Cеточный отчет']));
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(60);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getStyle("A1")->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getStyle("B1")->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(135);
+
+            $col = 'A';
+            $row_data = 2;
+            foreach ($report[0] as $key=>$data) {
+                $objPHPExcel->getActiveSheet()->setCellValue($col.'1', $key);
+                $col++;
+                if($data == null);
+                $row_data = 3;
+            }
+
+            $col = $col--;
+
+            $objPHPExcel->getActiveSheet()->fromArray($report, NULL, 'A'.$row_data);
+
+            $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+
+           /* $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(60);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
+                ->setCellValue('A1', Yii::t('message', 'frontend.controllers.order.art', ['ru' => 'Артикул']))
+                ->setCellValue('B1', Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']))
+                ->setCellValue('C1', Yii::t('message', 'frontend.controllers.order.amo', ['ru' => 'Кол-во']))
+                ->setCellValue('D1', Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']));*/
+            /*$row = 2;
+            foreach ($model as $foo) {
+                $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
+                $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode(Html::decode(Html::decode($foo['product']))));
+                $objPHPExcel->getActiveSheet()->setCellValue('C' . $row, $foo['total_quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $foo['ed']);
+                $row++;
+            }*/
+            header('Content-Type: application/vnd.ms-excel');
+            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            header('Content-Disposition: attachment;filename=' . $filename . ' ');
+            header('Cache-Control: max-age=0');
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+            exit();
     }
 }

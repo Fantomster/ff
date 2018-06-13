@@ -1,4 +1,5 @@
 <?php
+
 namespace backend\controllers;
 
 use common\models\Catalog;
@@ -14,13 +15,12 @@ use common\models\Role;
 /**
  * Site controller
  */
-class SiteController extends Controller
-{
+class SiteController extends Controller {
+
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -33,7 +33,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'get-sub-cat', 'send-test-mail'],
+                        'actions' => ['index', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'get-sub-cat', 'send-test-mail', 'get-file'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -54,8 +54,7 @@ class SiteController extends Controller
     /**
      * @inheritdoc
      */
-    public function actions()
-    {
+    public function actions() {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -68,8 +67,7 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
-    {
+    public function actionIndex() {
         //return $this->render('index');
         return $this->redirect(['/statistics/registered']);
     }
@@ -79,8 +77,7 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionLogin()
-    {
+    public function actionLogin() {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
@@ -90,7 +87,7 @@ class SiteController extends Controller
             return $this->goBack();
         } else {
             return $this->render('login', [
-                'model' => $model,
+                        'model' => $model,
             ]);
         }
     }
@@ -100,16 +97,15 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionLogout()
-    {
+    public function actionLogout() {
         Yii::$app->user->logout();
 
         return $this->goHome();
     }
 
-    public function actionImportFromXls($id){
+    public function actionImportFromXls($id) {
         $catalog = Catalog::findOne([
-            'supp_org_id'=>$id
+                    'supp_org_id' => $id
         ]);
         $catalogId = $catalog->id;
 
@@ -120,23 +116,23 @@ class SiteController extends Controller
         return \franchise\controllers\SiteController::actionAjaxDeleteProduct();
     }
 
-    public function actionAjaxEditCatalogForm($catalog=null) {
+    public function actionAjaxEditCatalogForm($catalog = null) {
         return GoodsController::actionAjaxUpdateProductMarketPlace(null);
     }
 
     public function actionGetSubCat() {
         return \franchise\controllers\SiteController::actionGetSubCat();
     }
-    
+
     public function actionSendTestMail() {
         $model = new \backend\models\TestMail;
         if ($model->load(Yii::$app->request->post())) {
             try {
                 $subject = "mixcart - Проверка почтовой службы";
                 $result = Yii::$app->mailer->compose('test')
-                    ->setTo($model->email)
-                    ->setSubject($subject)
-                    ->send();
+                        ->setTo($model->email)
+                        ->setSubject($subject)
+                        ->send();
                 if ($result) {
                     Yii::$app->session->setFlash("email-success", 'Письмо отослано на почту ' . $model->email);
                     $model->email = '';
@@ -145,7 +141,38 @@ class SiteController extends Controller
                 //
             }
         }
-        
+
         return $this->render('send-test-mail', compact('model'));
     }
+
+    function getRemoteFileSize($url) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 0);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        curl_exec($ch);
+        $fileSize = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+        curl_close($ch);
+        if ($fileSize) {
+            return $fileSize;
+        }
+    }
+
+    public function actionGetFile($id) {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        $file = '_prufy_billi_yapfiles.ru.gif';
+        $size = $this->getRemoteFileSize('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/_prufy_billi_yapfiles.ru.gif');
+        header('Content-Type: image/gif');
+        header('Content-Disposition: attachment; filename=' . $file);
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . $size);
+        flush();
+        readfile('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/_prufy_billi_yapfiles.ru.gif');
+        exit;
+    }
+
 }

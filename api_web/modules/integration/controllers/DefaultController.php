@@ -1,17 +1,14 @@
 <?php
 
-namespace api_web\controllers;
+namespace api_web\modules\integration\controllers;
 
-use api_web\components\WebApiController;
-
-class IntegrationController extends WebApiController
+class DefaultController extends \api_web\components\WebApiController
 {
-
     /**
-     * @SWG\Post(path="/integration/list",
-     *     tags={"Интеграция"},
-     *     summary="Список провайдеров интерграции",
-     *     description="Список провайдеров интерграции",
+     * @SWG\Post(path="/integration/default/service-list",
+     *     tags={"Integration"},
+     *     summary="Список сервисов интерграции",
+     *     description="Список сервисов интерграции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -28,11 +25,11 @@ class IntegrationController extends WebApiController
      *     @SWG\Response(
      *         response = 200,
      *         description = "success",
-     *         @SWG\Schema(ref="#/definitions/IntegrationProviderList"),
+     *         @SWG\Schema(ref="#/definitions/IntegrationServiceList"),
      *     )
      * )
      */
-    public function actionList()
+    public function actionServiceList()
     {
         $this->response = $this->container->get('IntegrationWebApi')->list($this->request);
     }

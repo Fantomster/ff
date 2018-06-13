@@ -3,9 +3,9 @@
 namespace api_web\components\definitions;
 
 /**
- * @SWG\Definition(type="object", @SWG\Xml(name="IntegrationProvider"))
+ * @SWG\Definition(type="object", @SWG\Xml(name="IntegrationService"))
  */
-class IntegrationProvider
+class IntegrationService
 {
     /**
      * @SWG\Property(@SWG\Xml(name="service"), example="iiko")

@@ -4,29 +4,36 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\modules\integration\interfaces\ServiceInterface;
+use yii\base\Exception;
 
 class IntegrationWebApi extends WebApi
 {
 
     private static $service = [
-        'iiko' => \api_web\modules\integration\modules\iiko\models\iikoService::class
+        \api_web\modules\integration\modules\iiko\models\iikoService::class
     ];
 
     /**
      * Список интеграторов и лицензий
      * @return array
+     * @throws Exception
      */
     public function list()
     {
         $result = [];
-        foreach (self::$service as $name => $service_class) {
+        foreach (self::$service as $service_class) {
             /**
              * @var $service ServiceInterface
              */
             $service = new $service_class();
+
+            if (!($service instanceof ServiceInterface)) {
+                throw new Exception(get_class($service) . ' not implements ServiceInterface');
+            }
+
             $result[] = [
-                'service' => $name,
-                'image' => \Yii::$app->params['web'] . 'images/' . $name . '.jpg',
+                'service' => $service->getServiceName(),
+                'image' => \Yii::$app->params['web'] . 'images/' . $service->getServiceName() . '.jpg',
                 'license' => $this->prepareLicense($service->getLicenseMixCart()),
                 'options' => $service->getOptions()
             ];

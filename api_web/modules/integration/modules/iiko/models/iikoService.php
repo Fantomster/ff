@@ -10,16 +10,36 @@ use common\models\Order;
 class iikoService extends WebApi implements ServiceInterface
 {
 
+    /**
+     * Название сервиса
+     * @return string
+     */
+    public function getServiceName()
+    {
+        return 'iiko';
+    }
+
+    /**
+     * Информация о лицензии MixCart
+     * @return \api\common\models\iiko\iikoService|array|null|\yii\db\ActiveRecord
+     */
     public function getLicenseMixCart()
     {
         return \api\common\models\iiko\iikoService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
+    /**
+     * Настройки
+     */
     public function getSettings()
     {
         // TODO: Implement getSettings() method.
     }
 
+    /**
+     * Список опций, отображаемых на главной странице интеграции
+     * @return array
+     */
     public function getOptions()
     {
         $result = 0;

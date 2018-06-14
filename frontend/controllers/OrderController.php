@@ -2242,8 +2242,7 @@ class OrderController extends DefaultController
                     where `order`.id in ($selected) group by `order`.client_id order by org.parent_id";
 
             $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
-
-            $sql = "SELECT cbg.product as 'Заказанный товар', cbg.ed as 'Ед.изм.', ";
+            $sql = "SELECT cbg.product as '".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара'])."', cbg.ed as '".Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм'])."', ";
 
             foreach ($orgs as $org)
             {
@@ -2285,7 +2284,7 @@ class OrderController extends DefaultController
                 if($parent <> $org['parent_id']) {
                     $parent = 0;
                     $objPHPExcel->getActiveSheet()->mergeCells($start_grid_col.'2:'.$last_col.'2');
-                    $objPHPExcel->getActiveSheet()->setCellValue($start_grid_col.'2', 'Сеть '.$grid);
+                    $objPHPExcel->getActiveSheet()->setCellValue($start_grid_col.'2', Yii::t('message', 'frontend.controllers.order.org_grid', ['ru' => 'Сеть'])." ".$grid);
                     $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
 
                     $objPHPExcel->getActiveSheet()->getStyle($start_grid_col.'2')->applyFromArray(
@@ -2317,7 +2316,7 @@ class OrderController extends DefaultController
                 $row_data = 3;
             }
 
-            $objPHPExcel->getActiveSheet()->setCellValue($col.'1', 'ОБЩЕЕ КОЛИЧЕСТВО');
+            $objPHPExcel->getActiveSheet()->setCellValue($col.'1', Yii::t('message', 'frontend.controllers.order.grid-report.total-count', ['ru' => 'ОБЩЕЕ КОЛИЧЕСТВО']));
             $objPHPExcel->getActiveSheet()->getStyle($col.'1')->getAlignment()->setTextRotation(90);
             $objPHPExcel->getActiveSheet()->getStyle($col.'1')->getFont()->setBold(true);
 
@@ -2330,6 +2329,7 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.'1')->getAlignment()->setWrapText(true);
             $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
             $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A2:A'.(count($report) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
             $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
 

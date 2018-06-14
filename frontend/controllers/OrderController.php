@@ -66,6 +66,7 @@ class OrderController extends DefaultController
                             'grid-report',
                             'ajax-show-products',
                             'ajax-add-to-order',
+                            'save-selected-orders',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -133,8 +134,16 @@ class OrderController extends DefaultController
 
     public function actionExportToXls()
     {
-        $selected = Yii::$app->request->get('selected');
+        $this->actionSaveSelectedOrders();
+        $selected = Yii::$app->session->get('selected', []);
         if (!empty($selected)) {
+
+            $res = [];
+            foreach ($selected as $page)
+                $res = array_merge($res, $page);
+
+            $selected = implode(',', $res);
+
             $model = \Yii::$app->db->createCommand("
                 select 
                     cbg.article,
@@ -1138,11 +1147,16 @@ class OrderController extends DefaultController
             }
         }
         $dataProvider = $searchModel->search($params);
+        $page = (isset($params['page'])) ? $params['page'] : 1;
+        $selected =  $session = Yii::$app->session->get('selected',[]);
+        $selected = (isset($selected[$page])) ? $selected[$page] : [];
+
+        //var_dump($selected, $page);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));
+            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
         } else {
-            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));
+            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
         }
     }
 
@@ -2211,14 +2225,23 @@ class OrderController extends DefaultController
 
     public function actionGridReport()
     {
-        $selected = Yii::$app->request->get('selected');
+        $this->actionSaveSelectedOrders();
+        $selected = Yii::$app->session->get('selected', []);
         if (empty($selected))
             exit();
+
+            $res = [];
+            foreach ($selected as $page)
+                $res = array_merge($res, $page);
+
+            $selected = implode(',', $res);
+
+            var_dump($selected);
 
             $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
                     FROM `order` 
                     left join organization as org on org.id = `order`.client_id
-                    where `order`.id in ($selected) group by `order`.client_id";
+                    where `order`.id in ($selected) group by `order`.client_id order by org.parent_id";
 
             $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
 
@@ -2284,5 +2307,19 @@ class OrderController extends DefaultController
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
             $objWriter->save('php://output');
             exit();
+    }
+
+    public function actionSaveSelectedOrders()
+    {
+        $selected = Yii::$app->request->get('selected');
+        $page = Yii::$app->request->get('page') + 1;
+        if (empty($selected))
+            exit();
+
+        $session = Yii::$app->session;
+        $list = $session->get('selected', []);
+        $list[$page] = explode(",", $selected);
+
+        $session->set('selected', $list);
     }
 }

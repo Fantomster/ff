@@ -46,7 +46,7 @@ class ServiceHelper extends AuthHelper {
 
      yii::$app->db_api-> // Set all records to deleted
      createCommand()->
-     update('rk_service', ['is_deleted' => '1', 'status_id' => '1'])
+     update('rk_service', ['is_deleted' => '1', 'status_id' => '0'])
      ->execute();
        
                // Обновление списка доступных объектов
@@ -78,7 +78,7 @@ class ServiceHelper extends AuthHelper {
         $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $nmodel->is_deleted = 0;
 
-        $nmodel->status_id=1;
+        $nmodel->status_id=0;
 
         //var_dump($nmodel);
         
@@ -102,7 +102,7 @@ class ServiceHelper extends AuthHelper {
         $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
         $rcount->last_active = Yii::$app->formatter->asDate($lastDate, 'yyyy-MM-dd HH:mm:ss');
         $rcount->address = isset($res2['resp']['address']) ? $res2['resp']['address'] : 'Не задано';
-        $rcount->status_id = $statLic+1;
+        $rcount->status_id = $statLic;
         //var_dump($rcount);
 
         if (!$rcount->save()) {
@@ -127,7 +127,7 @@ class ServiceHelper extends AuthHelper {
         } else {
             
             $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
-            $rmodel->dicstatus_id= 2;
+            $rmodel->dicstatus_id= 1;
             $rmodel->obj_count = 0;
     
             if (!$rmodel->save()) {

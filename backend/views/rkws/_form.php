@@ -122,7 +122,7 @@ use yii\web\JsExpression;
 
 ?>
     
-      <?php  echo $form->field($model, 'status_id')->dropDownList([1 => 'Неактивно', 2 => 'Активно']); ?>
+      <?php  echo $form->field($model, 'status_id')->dropDownList([0 => 'Не активно', 1 => 'Активно']); ?>
     
     <?php // echo $form->field($model, 'num_code')->hiddenInput(['value' => Yii::$app->user->identity->userProfile->branch_id])->label(''); ?>
 

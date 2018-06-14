@@ -2246,7 +2246,7 @@ class OrderController extends DefaultController
 
             foreach ($orgs as $org)
             {
-                $sql .= "SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) as '".$org['client_name']."'";
+                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."'";
             }
 
 
@@ -2254,7 +2254,7 @@ class OrderController extends DefaultController
                     left join order_content as oc on oc.order_id = `order`.id
                     left join catalog_base_goods as cbg on cbg.id = oc.product_id
                     left join organization as org on org.id = `order`.client_id
-                    where `order`.id in ($selected) group by client_id, product_id  order by org.parent_id";
+                    where `order`.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
 
             $report = \Yii::$app->db->createCommand($sql)->queryAll();
 

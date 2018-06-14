@@ -146,8 +146,12 @@ class iikoWaybillData extends \yii\db\ActiveRecord
 
     public function getFproductname()
     {
-        $prod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id]);
-        return $prod;
+        return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
+    }
+
+    public function getFproductnameProduct()
+    {
+        return $this->fproductname->product;
     }
 
     /**

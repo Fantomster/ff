@@ -82,7 +82,13 @@ function renderButton($id)
                                     'contentOptions' => ['class' => 'text-center'],
                                     'headerOptions' => ['style' => 'width: 100px;'],
                                 ],
-                                'number',
+                                [
+                                        'format'=>'raw',
+                                        'header'=>'Номер накладной',
+                                        'value'=>function($data){
+                                            return \yii\helpers\Html::a($data->number,['/clientintegr/iiko/waybill/index','way'=>$data->order_id]);
+                                        }
+                                ],
                                 [
                                     'attribute' => 'date',
                                     'value' => function($row){

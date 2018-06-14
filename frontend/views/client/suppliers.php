@@ -317,6 +317,11 @@ $gridColumnsCatalog = [
                 );
             }
 
+            //Кнопка сопоставления номенклатуры
+            $result .= Html::button('<i class="fa fa-paperclip m-r-xs"></i>', [
+                'class' => 'btn btn-default btn-sm',
+                'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
+            ]);
 
             //Кнопка удаления
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [

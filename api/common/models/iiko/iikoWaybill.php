@@ -187,6 +187,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $xml->addChild('documentNumber', $model->num_code);
         $datetime = new \DateTime($model->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
+        $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
         $xml->addChild('invoice', $model->text_code);
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
@@ -216,6 +217,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('discountSum', $discount);
             $item->addChild('sumWithoutNds', $row->sum);
             $item->addChild('vatPercent', $row->vat/100);
+            $item->addChild('ndsPercent', $row->vat/100);
 
             $item->addChild('sum', round($row->sum + ($row->sum*$row->vat/10000),2));
             $item->addChild('price', round($row->sum/$row->quant, 2));

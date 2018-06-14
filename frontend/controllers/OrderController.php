@@ -63,8 +63,10 @@ class OrderController extends DefaultController
                             'pdf',
                             'export-to-xls',
                             'order-to-xls',
+                            'grid-report',
                             'ajax-show-products',
                             'ajax-add-to-order',
+                            'save-selected-orders',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -132,8 +134,16 @@ class OrderController extends DefaultController
 
     public function actionExportToXls()
     {
-        $selected = Yii::$app->request->get('selected');
+        $this->actionSaveSelectedOrders();
+        $selected = Yii::$app->session->get('selected', []);
         if (!empty($selected)) {
+
+            $res = [];
+            foreach ($selected as $page)
+                $res = array_merge($res, $page);
+
+            $selected = implode(',', $res);
+
             $model = \Yii::$app->db->createCommand("
                 select 
                     cbg.article,
@@ -1137,11 +1147,16 @@ class OrderController extends DefaultController
             }
         }
         $dataProvider = $searchModel->search($params);
+        $page = (isset($params['page'])) ? $params['page'] : 1;
+        $selected =  $session = Yii::$app->session->get('selected',[]);
+        $selected = (isset($selected[$page])) ? $selected[$page] : [];
+
+        //var_dump($selected, $page);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));
+            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
         } else {
-            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));
+            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
         }
     }
 
@@ -2206,5 +2221,138 @@ class OrderController extends DefaultController
             }
         }
         return true;
+    }
+
+    public function actionGridReport()
+    {
+        $this->actionSaveSelectedOrders();
+        $selected = Yii::$app->session->get('selected', []);
+        if (empty($selected))
+            exit();
+
+            $res = [];
+            foreach ($selected as $page)
+                $res = array_merge($res, $page);
+
+            $selected = implode(',', $res);
+
+            $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
+                    FROM `order` 
+                    left join organization as org on org.id = `order`.client_id
+                    where `order`.id in ($selected) group by `order`.client_id order by org.parent_id";
+
+            $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
+            $sql = "SELECT cbg.product as '".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара'])."', cbg.ed as '".Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм'])."', ";
+
+            foreach ($orgs as $org)
+            {
+                $sql .= "SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) as '".$org['client_name']."'";
+            }
+
+
+            $sql .= " from `order`
+                    left join order_content as oc on oc.order_id = `order`.id
+                    left join catalog_base_goods as cbg on cbg.id = oc.product_id
+                    left join organization as org on org.id = `order`.client_id
+                    where `order`.id in ($selected) group by client_id, product_id  order by org.parent_id";
+
+            $report = \Yii::$app->db->createCommand($sql)->queryAll();
+
+            $objPHPExcel = new \PHPExcel();
+            $sheet = 0;
+            $objPHPExcel->setActiveSheetIndex($sheet);
+            $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.grid-report', ['ru' => 'Cеточный отчет']));
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(60);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getStyle("A1")->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getStyle("B1")->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(135);
+
+            $parent = 0;
+            $col = 'C';
+            $last_col = 'C';
+            $start_grid_col = 'C';
+            $grid = 1;
+            foreach ($orgs as $org)
+            {
+                $sql .= "SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) as '".$org['client_name']."'";
+
+                if ($org['parent_id'] != 0) {
+                    $start_grid_col = $col;
+                    $parent = $org['parent_id'];
+                }
+                if($parent <> $org['parent_id']) {
+                    $parent = 0;
+                    $objPHPExcel->getActiveSheet()->mergeCells($start_grid_col.'2:'.$last_col.'2');
+                    $objPHPExcel->getActiveSheet()->setCellValue($start_grid_col.'2', Yii::t('message', 'frontend.controllers.order.org_grid', ['ru' => 'Сеть'])." ".$grid);
+                    $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+
+                    $objPHPExcel->getActiveSheet()->getStyle($start_grid_col.'2')->applyFromArray(
+                        [
+                            'fill' => [
+                                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                                'color' => ['rgb' => $color]
+                            ]
+                        ]
+                    );
+
+                    $grid++;
+                }
+                $last_col = $col;
+                $col++;
+            }
+
+            $col = 'A';
+            $row_data = 2;
+            $last_col = 'A';
+
+            foreach ($report[0] as $key=>$data) {
+                $last_col = $col;
+                $objPHPExcel->getActiveSheet()->setCellValue($col.'1', $key);
+                if($col > 'B')
+                    $objPHPExcel->getActiveSheet()->getStyle($col.'1')->getAlignment()->setTextRotation(90);
+                $col++;
+                if($data == null);
+                $row_data = 3;
+            }
+
+            $objPHPExcel->getActiveSheet()->setCellValue($col.'1', Yii::t('message', 'frontend.controllers.order.grid-report.total-count', ['ru' => 'ОБЩЕЕ КОЛИЧЕСТВО']));
+            $objPHPExcel->getActiveSheet()->getStyle($col.'1')->getAlignment()->setTextRotation(90);
+            $objPHPExcel->getActiveSheet()->getStyle($col.'1')->getFont()->setBold(true);
+
+            for($i = $row_data; $i <= (count($report)+2); $i++){
+                $objPHPExcel->getActiveSheet()->setCellValue($col.$i, '=SUM(C'.$i.':'.$last_col.$i.')');
+            }
+
+            $objPHPExcel->getActiveSheet()->fromArray($report, NULL, 'A'.$row_data);
+
+            $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.'1')->getAlignment()->setWrapText(true);
+            $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A2:A'.(count($report) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+            $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+            header('Content-Type: application/vnd.ms-excel');
+            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            header('Content-Disposition: attachment;filename=' . $filename . ' ');
+            header('Cache-Control: max-age=0');
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+            exit();
+    }
+
+    public function actionSaveSelectedOrders()
+    {
+        $selected = Yii::$app->request->get('selected');
+        $page = Yii::$app->request->get('page') + 1;
+        if (empty($selected))
+            exit();
+
+        $session = Yii::$app->session;
+        $list = $session->get('selected', []);
+        $list[$page] = explode(",", $selected);
+
+        $session->set('selected', $list);
     }
 }

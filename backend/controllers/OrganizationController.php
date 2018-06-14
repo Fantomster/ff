@@ -239,7 +239,7 @@ class OrganizationController extends Controller {
     public function actionNotifications(int $id): String
     {
         Yii::$app->language = 'ru';
-        $users = User::find()->joinWith(['relationUserOrganization'])->where('relation_user_organization.organization_id='.$id)->all();
+        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id='.$id)->all();
         if (count(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             $emails = $post['Email'];

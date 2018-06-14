@@ -2236,8 +2236,6 @@ class OrderController extends DefaultController
 
             $selected = implode(',', $res);
 
-            var_dump($selected);
-
             $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
                     FROM `order` 
                     left join organization as org on org.id = `order`.client_id
@@ -2271,9 +2269,44 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->getStyle("B1")->getFont()->setBold(true);
             $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(135);
 
+            $parent = 0;
+            $col = 'C';
+            $last_col = 'C';
+            $start_grid_col = 'C';
+            $grid = 1;
+            foreach ($orgs as $org)
+            {
+                $sql .= "SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) as '".$org['client_name']."'";
+
+                if ($org['parent_id'] != 0) {
+                    $start_grid_col = $col;
+                    $parent = $org['parent_id'];
+                }
+                if($parent <> $org['parent_id']) {
+                    $parent = 0;
+                    $objPHPExcel->getActiveSheet()->mergeCells($start_grid_col.'2:'.$last_col.'2');
+                    $objPHPExcel->getActiveSheet()->setCellValue($start_grid_col.'2', 'Сеть '.$grid);
+                    $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+
+                    $objPHPExcel->getActiveSheet()->getStyle($start_grid_col.'2')->applyFromArray(
+                        [
+                            'fill' => [
+                                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                                'color' => ['rgb' => $color]
+                            ]
+                        ]
+                    );
+
+                    $grid++;
+                }
+                $last_col = $col;
+                $col++;
+            }
+
             $col = 'A';
             $row_data = 2;
             $last_col = 'A';
+
             foreach ($report[0] as $key=>$data) {
                 $last_col = $col;
                 $objPHPExcel->getActiveSheet()->setCellValue($col.'1', $key);

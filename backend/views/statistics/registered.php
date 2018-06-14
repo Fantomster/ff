@@ -36,9 +36,9 @@ $form = ActiveForm::begin([
         ]);
 ?>
 <div class="row">
-    <div>
+<!--    <div>
         <img src="<?= \yii\helpers\Url::to(['site/get-file', 'id' => 1]) ?>">
-    </div>
+    </div>-->
     <div class="col-md-12 text-center">
         <h3>Зарегистрировано</h3>
     </div>

@@ -8,11 +8,14 @@ use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
 use common\models\guides\Guide;
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\TestVendors;
+use common\models\User;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
+use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -43,7 +46,7 @@ class OrganizationController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating'],
+                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -225,6 +228,44 @@ class OrganizationController extends Controller {
             $model = new FranchiseeAssociate();
         }
         return $model;
+    }
+
+
+    /**
+     * Edit notifications.
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionNotifications(int $id): String
+    {
+        Yii::$app->language = 'ru';
+        $users = User::find()->joinWith(['relationUserOrganization'])->where('relation_user_organization.organization_id='.$id)->all();
+        if (count(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post();
+            $emails = $post['Email'];
+            foreach ($emails as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                if(isset($post['User'][$userId]['subscribe'])){
+                    $user->subscribe = $post['User'][$userId]['subscribe'];
+                    $user->save();
+                }
+                $emailNotification = $user->emailNotification;
+                foreach ($fields as $key => $value){
+                    $emailNotification->$key = $value;
+                }
+                $emailNotification->save();
+            }
+            $sms = $post['Sms'];
+            foreach ($sms as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                $smsNotification = $user->smsNotification;
+                foreach ($fields as $key => $value){
+                    $smsNotification->$key = $value;
+                }
+                $smsNotification->save();
+            }
+        }
+        return $this->render('notifications', compact('users'));
     }
 
 }

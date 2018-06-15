@@ -2246,9 +2246,14 @@ class OrderController extends DefaultController
 
             foreach ($orgs as $org)
             {
+<<<<<<< HEAD
                 $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."'";
+=======
+                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."',";
+>>>>>>> b412e1f416448b6334f2534047b943cefb925d4a
             }
 
+            $sql = substr($sql, 0, -1);
 
             $sql .= " from `order`
                     left join order_content as oc on oc.order_id = `order`.id

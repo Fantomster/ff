@@ -23,9 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]);
         ?>
         <div class="box-body">
-            <?php foreach ($users
-
-                           as $user){
+            <?php foreach ($users as $user){
             $emailNotification = $user->emailNotification;
             $smsNotification = $user->smsNotification;
             ?>

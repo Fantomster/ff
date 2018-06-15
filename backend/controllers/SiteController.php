@@ -172,7 +172,6 @@ class SiteController extends Controller {
         header('Content-Length: ' . $size);
         flush();
         readfile('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/_prufy_billi_yapfiles.ru.gif');
-        exit;
     }
 
 }

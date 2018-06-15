@@ -236,10 +236,10 @@ class OrganizationController extends Controller {
      * @param integer $id
      * @return mixed
      */
-    public function actionNotifications(int $id): String
+    public function actionNotifications(int $id)
     {
         Yii::$app->language = 'ru';
-        $users = User::find()->joinWith(['relationUserOrganization'])->where('relation_user_organization.organization_id='.$id)->all();
+        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id='.$id)->all();
         if (count(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             $emails = $post['Email'];
@@ -254,6 +254,7 @@ class OrganizationController extends Controller {
                     $emailNotification->$key = $value;
                 }
                 $emailNotification->save();
+                unset($user);
             }
             $sms = $post['Sms'];
             foreach ($sms as $userId => $fields){
@@ -263,7 +264,9 @@ class OrganizationController extends Controller {
                     $smsNotification->$key = $value;
                 }
                 $smsNotification->save();
+                unset($user);
             }
+            return $this->redirect(['view', 'id' => $id]);
         }
         return $this->render('notifications', compact('users'));
     }

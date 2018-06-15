@@ -35,7 +35,6 @@ class VendorWebApi extends \api_web\components\WebApi
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
-
         $check = RestaurantChecker::checkEmail($email);
 
         if ($check['eventType'] != 5) {
@@ -55,9 +54,8 @@ class VendorWebApi extends \api_web\components\WebApi
 
         $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
         $currentUser = $this->user;
-        $arrCatalog = $post['catalog']['products'];
-        Catalog::addCatalog($arrCatalog);
-
+        $arrCatalog = $post['catalog']['products'] ?? [];
+        Catalog::addCatalog($arrCatalog, true);
 
         if (in_array($check['eventType'], [1, 2, 4, 6])) {
             throw new BadRequestHttpException(Yii::t('app', 'common.models.already_in_use', ['ru' => 'Данный email не может быть использован']));
@@ -113,8 +111,11 @@ class VendorWebApi extends \api_web\components\WebApi
                     $get_supp_org_id = $check['org_id'];
                 }
 
-                $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
-
+                if(count($arrCatalog)){
+                    $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
+                }else{
+                    $lastInsert_cat_id = 0;
+                }
                 /**
                  *
                  * 5) Связь ресторана и поставщика

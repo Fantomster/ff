@@ -148,7 +148,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
     public static function getLicense()
     {
         return self::find()
-            ->where(['status_id' => 2])
+            //->where(['status_id' => 2])
             ->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])
             ->andOnCondition('td >= NOW()')
             ->andOnCondition('fd <= NOW()')

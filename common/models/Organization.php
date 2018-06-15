@@ -1533,4 +1533,27 @@ class Organization extends \yii\db\ActiveRecord
         return $result;
     }
 
+
+    public function getOrganizationManagersExportColumns(): array
+    {
+        return [
+            [
+                'label' => Yii::t('app', 'common.models.number', ['ru' => 'Номер']),
+                'value' => 'id',
+            ],
+            [
+                'label' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru' => 'ФИО']),
+                'value' => 'profile.full_name',
+            ],
+            [
+                'label' => Yii::t('app', 'franchise.views.organization.contact_email', ['ru' => 'Email контактного лица']),
+                'value' => 'email',
+            ],
+            [
+                'label' => Yii::t('app', 'common.models.phone_two', ['ru' => 'Телефон']),
+                'value' => 'profile.phone',
+            ],
+        ];
+    }
+
 }

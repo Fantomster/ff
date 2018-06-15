@@ -74,7 +74,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+        $way = Yii::$app->request->get('way',0);
 
         Url::remember();
 

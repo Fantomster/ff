@@ -1147,11 +1147,9 @@ class OrderController extends DefaultController
             }
         }
         $dataProvider = $searchModel->search($params);
-        $page = (isset($params['page'])) ? $params['page'] : 1;
+        $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
         $selected =  $session = Yii::$app->session->get('selected',[]);
-        $selected = (isset($selected[$page])) ? $selected[$page] : [];
-
-        //var_dump($selected, $page);
+        $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
@@ -2347,9 +2345,7 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->get('selected');
         $page = Yii::$app->request->get('page') + 1;
-        if (empty($selected))
-            exit();
-
+        
         $session = Yii::$app->session;
         $list = $session->get('selected', []);
         $list[$page] = explode(",", $selected);

@@ -342,6 +342,12 @@ array_push($columns,
         ]
     ]);
 ?>
+<?php
+    $loadUrl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/renewcats']);
+
+    echo Html::a('Обновить данные каталогов', $loadUrl, ['class' => 'btn btn-success btn-export']);
+
+?>
                         <?=
 GridView::widget([
     'dataProvider' => $dataProvider,

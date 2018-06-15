@@ -18,6 +18,7 @@ use kartik\grid\EditableColumnAction;
 use common\models\Organization;
 use common\models\Order;
 use yii\helpers\Url;
+use frontend\modules\clientintegr\modules\rkws\components\FullmapHelper;
 
 
 // use yii\mongosoft\soapserver\Action;
@@ -97,6 +98,14 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
             ]);
         }
         */
+    }
+
+    public function actionRenewcats() {
+
+        $helper = new FullmapHelper();
+
+        $helper->getcats();
+
     }
 
     public function getLastUrl() {

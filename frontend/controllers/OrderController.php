@@ -2346,7 +2346,7 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->get('selected');
         $page = Yii::$app->request->get('page') + 1;
-        
+
         $session = Yii::$app->session;
         $list = $session->get('selected', []);
         $list[$page] = explode(",", $selected);

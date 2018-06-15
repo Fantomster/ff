@@ -46,10 +46,12 @@ class iikoWaybillDataSearch extends iikoWaybillData
      */
     public function search($params)
     {
+        $dbname = explode("=", Yii::$app->db->dsn);
+        $dbname = $dbname[2];
         $query = iikoWaybillData::find()
             ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
             ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
-            ->leftJoin('db.catalog_base_goods', 'catalog_base_goods.id = product_id')
+            ->leftJoin($dbname.'.catalog_base_goods', 'catalog_base_goods.id = product_id')
             ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
 
         // add conditions that should always apply here

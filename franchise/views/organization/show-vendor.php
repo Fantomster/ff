@@ -5,6 +5,7 @@ use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
+use kartik\export\ExportMenu;
 
 $this->title = implode(" - ", [
     Yii::t('app', 'franchise.views.organization.vendor_two', ['ru'=>'Поставщик']),
@@ -318,7 +319,81 @@ $this->registerCss("
                 </div>
                 <div class="modal-body tab-pane" id="tab_4">
                     <div class="modal-header f-header">
-                        <h4 class="modal-title f-title"><?= Yii::t('app', 'franchise.views.organization.employees_list_four', ['ru'=>'Список сотрудников поставщика']) ?> <?= $organization->name ?></h4>
+                        <div class="row">
+                            <div class="col-md-11">
+                                <h4 class="modal-title f-title"><?= Yii::t('app', 'franchise.views.organization.employees_list_four', ['ru'=>'Список сотрудников поставщика']) ?> <?= $organization->name ?></h4>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="pull-right" style="margin-right: 10px;">
+                                    <?= ExportMenu::widget([
+                                        'dataProvider' => $managersDataProvider,
+                                        'columns' => $exportColumns,
+                                        'fontAwesome' => true,
+                                        'filename' => Yii::t('message', 'frontend.views.vendor.emp_two', ['ru' => 'Сотрудники']) . ' - ' . date('Y-m-d'),
+                                        'encoding' => 'UTF-8',
+                                        'target' => ExportMenu::TARGET_SELF,
+                                        'showConfirmAlert' => false,
+                                        'showColumnSelector' => false,
+                                        'batchSize' => 200,
+                                        'timeout' => 0,
+                                        'dropdownOptions' => [
+                                            'label' => '<span class="text-label">' . Yii::t('app', 'franchise.views.site.download_list', ['ru' => 'Скачать список']) . ' </span>',
+                                            'class' => ['btn btn-outline-default btn-sm'],
+                                            'style' => 'margin-right:10px;',
+                                        ],
+                                        'exportConfig' => [
+                                            ExportMenu::FORMAT_HTML => false,
+                                            ExportMenu::FORMAT_TEXT => false,
+                                            ExportMenu::FORMAT_EXCEL => false,
+                                            ExportMenu::FORMAT_PDF => false,
+                                            ExportMenu::FORMAT_CSV => false,
+                                            ExportMenu::FORMAT_EXCEL_X => [
+                                                'label' => Yii::t('kvexport', 'Excel'),
+                                                'icon' => 'file-excel-o',
+                                                'iconOptions' => ['class' => 'text-success'],
+                                                'linkOptions' => [],
+                                                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                                'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                                'extension' => 'xlsx',
+                                                //'writer' => 'Excel2007',
+                                                'styleOptions' => [
+                                                    'font' => [
+                                                        'bold' => true,
+                                                        'color' => [
+                                                            'argb' => 'FFFFFFFF',
+                                                        ],
+                                                    ],
+                                                    'fill' => [
+                                                        'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                                        'startcolor' => [
+                                                            'argb' => 'FFFFFFFF',
+                                                        ],
+                                                        'endcolor' => [
+                                                            'argb' => 'FFFFFFFF',
+                                                        ],
+                                                    ],
+                                                ]
+                                            ],
+                                        ],
+                                        'onRenderSheet' => function ($sheet, $grid) {
+                                            $i = 2;
+                                            while ($sheet->cellExists("B" . $i)) {
+                                                $sheet->setCellValue("B" . $i, html_entity_decode($sheet->getCell("B" . $i)));
+                                                $i++;
+                                            }
+                                            $j = 2;
+                                            while ($sheet->cellExists("C" . $j)) {
+                                                $sheet->setCellValue("C" . $j, html_entity_decode($sheet->getCell("C" . $j)));
+                                                $j++;
+                                            }
+                                        }
+                                    ]);
+                                    ?>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                     <div class="row">
                         <?= GridView::widget([

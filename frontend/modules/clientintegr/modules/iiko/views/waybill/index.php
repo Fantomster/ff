@@ -51,6 +51,13 @@ $this->title = 'Интеграция с iiko Office';
                                     }
                                 ],
                                 [
+                                      'attribute'=>'invoice_relation',
+                                      'format'=>'raw',
+                                        'value'=>function($data){
+                                            return (!empty)?:;
+                                        }
+                                ],
+                                [
                                     'attribute' => 'vendor.name',
                                     'value' => 'vendor.name',
                                     'label' => 'Поставщик',

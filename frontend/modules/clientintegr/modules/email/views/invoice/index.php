@@ -86,7 +86,7 @@ function renderButton($id)
                                         'format'=>'raw',
                                         'header'=>'Номер накладной',
                                         'value'=>function($data){
-                                            return \yii\helpers\Html::a($data->number,['/clientintegr/iiko/waybill/index','way'=>$data->order_id]);
+                                            return (!empty($data->order_id))?\yii\helpers\Html::a($data->number,['/clientintegr/iiko/waybill/index','way'=>$data->order_id]):$data->number;
                                         }
                                 ],
                                 [

@@ -124,7 +124,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
                     $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                     $model->org_id = $this->org;
 
-                    var_dump($model);
+                    //var_dump($model);
 
                     if (!$model->save()) {
                         print_r($model->getErrors());

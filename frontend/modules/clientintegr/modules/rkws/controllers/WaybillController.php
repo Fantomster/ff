@@ -500,7 +500,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
 
-    return $eDate->updated_at;
+    return isset($eDate) ?  $eDate->updated_at : null;
 
     }
 

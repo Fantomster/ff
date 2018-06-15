@@ -31,8 +31,7 @@ class VendorController extends WebApiController
      *                                   "phone": "+79182225588",
      *                                   "organization_name": "ООО Рога и Копыта",
      *                                   "inn": "0001112223",
-     *                                   "contact_name": "Контактное лицо",
-     *                                   "vendor_id": "7777"
+     *                                   "contact_name": "Контактное лицо"
      *                               },
      *                               "catalog":{
      *                                   "products":{

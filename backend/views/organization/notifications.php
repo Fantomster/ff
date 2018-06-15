@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= $form->field($smsNotification, 'request_accept')->checkbox(['label' => Yii::t('app', 'frontend.views.settings.notifications.note_four', ['ru' => 'Уведомления о назначении исполнителем заявки по sms']), 'name' => 'Sms[' . $user->id . '][request_accept]'
                     ]) ?>
                     <?php if ($user->role_id == \common\models\Role::ROLE_SUPPLIER_MANAGER) {
-                        echo $form->field($smsNotification, 'receive_employee_sms')->checkbox(['label' => Yii::t('app', 'frontend.views.settings.receive_employee_sms', ['ru' => 'Получать SMS, если запрос на сотрудничество направлен на почту не мне, а моему работнику']), 'name' => 'Sms[' . $user->id . '][order_created]']);
+                        echo $form->field($smsNotification, 'receive_employee_sms')->checkbox(['label' => Yii::t('app', 'frontend.views.settings.receive_employee_sms', ['ru' => 'Получать SMS, если запрос на сотрудничество направлен на почту не мне, а моему работнику']), 'name' => 'Sms[' . $user->id . '][receive_employee_sms]']);
                     } ?>
                 </div>
             </div>

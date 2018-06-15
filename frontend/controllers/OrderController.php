@@ -1147,9 +1147,9 @@ class OrderController extends DefaultController
             }
         }
         $dataProvider = $searchModel->search($params);
-        $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
+        $page = (isset($params['page'])) ? $params['page'] : 1;
         $selected =  $session = Yii::$app->session->get('selected',[]);
-        $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
+        $selected = (isset($selected[$page])) ? $selected[$page] : [];
 
         //var_dump($selected, $page);
 
@@ -2246,7 +2246,7 @@ class OrderController extends DefaultController
 
             foreach ($orgs as $org)
             {
-                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."'";
+                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."', ";
             }
 
 
@@ -2346,7 +2346,9 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->get('selected');
         $page = Yii::$app->request->get('page') + 1;
-        
+        if (empty($selected))
+            exit();
+
         $session = Yii::$app->session;
         $list = $session->get('selected', []);
         $list[$page] = explode(",", $selected);

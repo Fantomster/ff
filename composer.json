@@ -75,7 +75,8 @@
         "yiisoft/yii2-httpclient": "^2.0",
         "yiisoft/yii2-jui": "~2.0.0",
         "yiisoft/yii2-redis": "^2.0",
-        "yiisoft/yii2-swiftmailer": "*"
+        "yiisoft/yii2-swiftmailer": "*",
+        "kartik-v/yii2-dropdown-x": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

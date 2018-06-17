@@ -11,6 +11,7 @@ use common\models\Currency;
 use yii\helpers\Url;
 use yii\helpers\Json;
 use common\models\RelationSuppRestPotential;
+use kartik\dropdown\DropdownX;
 
 kartik\select2\Select2Asset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
@@ -318,10 +319,23 @@ $gridColumnsCatalog = [
             }
 
             //Кнопка сопоставления номенклатуры
-            $result .= Html::button('<i class="fa fa-paperclip m-r-xs"></i>', [
+           /* $result .= Html::button('<i class="fa fa-paperclip m-r-xs"></i>', [
                 'class' => 'btn btn-default btn-sm',
                 'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
             ]);
+*/
+            $result .= Html::beginTag('span', ['class'=>'text-right dropdown']);
+            $result .= Html::button(' <i class="fa fa-paperclip m-r-xs"></i></button>',
+                ['type'=>'button', 'class'=>'btn btn-default btn-sm', 'data-toggle'=>'dropdown']);
+            $result .= DropdownX::widget([
+                'options'=>['class'=>'pull-right'], // for a right aligned dropdown menu
+                'items' => [
+                    ['label' => 'R-keeper', 'url' => '/clientintegr/rkws/fullmap/index'],
+
+                ],
+            ]);
+            $result .= Html::endTag('span');
+
 
             //Кнопка удаления
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [

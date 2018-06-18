@@ -13,6 +13,8 @@ use common\models\Role;
 
 $this->title = Yii::t('message', 'frontend.views.order.order_four', ['ru' => 'Заказы']);
 $urlExport = Url::to(['/order/export-to-xls']);
+$urlReport = Url::to(['/order/grid-report']);
+$urlSaveSelected = Url::to(['/order/save-selected-orders']);
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
@@ -50,8 +52,13 @@ $this->registerJs('
         $(document).on("click", ".reorder, .complete", function(e) {
             e.preventDefault();
             clicked = $(this);
+            if($(this).hasClass("completeEdi")){
+                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приеме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете, корректность данных?']) . ' ";
+            }else{
+                var title = clicked.data("original-title") + "?";
+            }
             swal({
-                title: clicked.data("original-title") + "?",
+                title: title,
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep', ['ru' => 'Да']) . ' ",
@@ -65,13 +72,38 @@ $this->registerJs('
                 }
             });
         });
+
     });
     $(document).on("click", ".export-to-xls", function(e) {
         if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
-            window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows");  
+            window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;  
         }
     });
+    
+    $(document).on("click", ".grid-report", function(e) {
+        if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
+            window.location.href = "' . $urlReport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;  
+        }
+    });
+    
+    var current_page = 0;
+     $(document).on("click", ".pagination a", function(e) {
+          e.preventDefault();
+          url = $(this).attr("href");
+
+           $.ajax({
+             url: "'.$urlSaveSelected.'?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page,
+             type: "GET",
+             success: function(){
+                 $.pjax.reload({container: "#order-list", url: url, timeout:30000});
+             }
+           });
+           
+           current_page = $(this).attr("data-page")
+    });
 ');
+
+
 $this->registerCss("
     tr:hover{cursor: pointer;}
     #orderHistory a:not(.btn){color: #333;}
@@ -201,11 +233,11 @@ $this->registerCss("
             <?php ActiveForm::end(); ?>
             <?php if ($organization->type_id == Organization::TYPE_SUPPLIER) { ?>
                 <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> ' . Yii::t('app', 'frontend.views.order.index.report', ['ru' => 'отчет xls']), ['class' => 'btn btn-success export-to-xls']) ?>
+                <?= Html::submitButton('<i class="fa fa-th"></i> ' . Yii::t('app', 'frontend.views.order.index.grid-report', ['ru' => 'Сеточный отчет']), ['class' => 'btn btn-success grid-report']) ?>
             <?php } ?>
             <div class="row">
                 <div class="col-md-12">
-                    <?=
-                    GridView::widget([
+                <?= GridView::widget([
                         'id' => 'orderHistory',
                         'dataProvider' => $dataProvider,
                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
@@ -220,8 +252,8 @@ $this->registerCss("
                                 'class' => 'yii\grid\CheckboxColumn',
                                 'contentOptions' => ['class' => 'small_cell_checkbox'],
                                 'headerOptions' => ['style' => 'text-align:center;'],
-                                'checkboxOptions' => function ($model, $key, $index, $widget) {
-                                    return ['value' => $model['id'], 'class' => 'checkbox-export'];
+                                'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+                                    return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => in_array($model['id'], $selected)];
                                 }
                             ],
                             [
@@ -359,7 +391,7 @@ $this->registerCss("
                                         case Order::STATUS_PROCESSING:
                                             if ($data->isObsolete) {
                                                 return Html::a(Yii::t('message', 'frontend.views.order.complete', ['ru' => 'Завершить']), '#', [
-                                                    'class' => 'complete btn btn-outline-success',
+                                                    'class' => (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0) ? 'complete btn btn-outline-success completeEdi' : 'complete btn btn-outline-success',
                                                     'data' => [
                                                         'toggle' => 'tooltip',
                                                         'original-title' => Yii::t('message', 'frontend.views.order.complete_order', ['ru' => 'Завершить заказ']),

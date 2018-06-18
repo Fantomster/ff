@@ -4,6 +4,28 @@ use common\models\Order;
 use common\models\Organization;
 use yii\helpers\Html;
 
+$this->registerJs('
+        $(document).on("click", ".completeEdi", function(e) {
+            e.preventDefault();
+            clicked = $(this);
+                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приеме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете, корректность данных?']) . ' ";
+            swal({
+                title: title,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep', ['ru' => 'Да']) . ' ",
+                cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel', ['ru' => 'Отмена']) . ' ",
+                showLoaderOnConfirm: true,
+            }).then(function(result) {
+                if (result.dismiss === "cancel") {
+                    swal.close();
+                } else {
+                    document.location = clicked.data("url")
+                }
+            });
+        });
+');
+
 $currencySymbol = $order->currency->symbol;
 $statusInfo = '';
 $actionButtons = '';
@@ -30,20 +52,29 @@ $btnGetOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('
         'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.receiving', ['ru'=>'Получаем...']),
     ],
 ]);
-$btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('message', 'frontend.views.order.end_all', ['ru'=>'Завершить']) . ' </span>', [
-    'class' => "btn btn-outline-success btnOrderAction",
-    'data' => [
+if(isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code>0){
+    $data = [
+        'toggle' => 'tooltip',
+        'original-title' => Yii::t('message', 'frontend.views.order.complete_order', ['ru' => 'Завершить заказ']),
+        'url' => \yii\helpers\Url::to(['order/complete-obsolete', 'id' => $order->id])
+    ];
+}else{
+    $data = [
         'action' => "confirm",
         'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.ending_all', ['ru'=>'Завершаем...']),
-    ],
+    ];
+}
+$btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('message', 'frontend.views.order.end_all', ['ru'=>'Завершить']) . ' </span>', [
+    'class' => (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code>0) ? 'btn btn-outline-success completeEdi' : 'btn btn-outline-success btnOrderAction',
+    'data' => $data,
 ]);
 $canEdit = false;
 if ($order->isObsolete) {
     if(!isset($order->vendor->ediOrganization->gln_code)){
         $actionButtons .= $btnCancel;
+        $canEdit = true;
     }
     $actionButtons .= $btnCloseOrder;
-    $canEdit = true;
 } else {
     switch ($order->status) {
         case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
@@ -90,8 +121,10 @@ if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Or
     $canEdit = true;
 }
 
-if(isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0 && $order->status!=Order::STATUS_DONE){
+if(isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0 && $order->status!=Order::STATUS_DONE){
     $canEdit = false;
+}else{
+    $canEdit = true;
 }
 ?>
 <div class="box box-info block_wrapper" style="height:auto;">

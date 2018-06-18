@@ -35,7 +35,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
-
+        $vendorID = $post['user']['vendor_id'] ?? null;
         $check = RestaurantChecker::checkEmail($email);
 
         if ($check['eventType'] != 5) {
@@ -44,7 +44,12 @@ class VendorWebApi extends \api_web\components\WebApi
             $user = new User();
         }
         $relationSuppRest = new RelationSuppRest();
-        $organization = new Organization();
+        if($vendorID){
+            $organization = Organization::findOne(['id'=>$vendorID]);
+        }else{
+            $organization = new Organization();
+        }
+
         $profile = new Profile();
         $profile->scenario = "invite";
 
@@ -55,9 +60,8 @@ class VendorWebApi extends \api_web\components\WebApi
 
         $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
         $currentUser = $this->user;
-        $arrCatalog = $post['catalog']['products'];
-        Catalog::addCatalog($arrCatalog);
-
+        $arrCatalog = $post['catalog']['products'] ?? [];
+        Catalog::addCatalog($arrCatalog, true);
 
         if (in_array($check['eventType'], [1, 2, 4, 6])) {
             throw new BadRequestHttpException(Yii::t('app', 'common.models.already_in_use', ['ru' => 'Данный email не может быть использован']));
@@ -87,13 +91,15 @@ class VendorWebApi extends \api_web\components\WebApi
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    $organization->name = $org;
+                    if(!$vendorID) {
+                        $organization->name = $org;
+                    }
 
-                    if (!empty($post['user']['inn'])) {
+                    if (!empty($post['user']['inn']) && !$vendorID) {
                         $organization->inn = $post['user']['inn'];
                     }
 
-                    if (!empty($post['user']['contact_name'])) {
+                    if (!empty($post['user']['contact_name']) && !$vendorID) {
                         $organization->contact_name = $post['user']['contact_name'];
                     }
 
@@ -113,8 +119,11 @@ class VendorWebApi extends \api_web\components\WebApi
                     $get_supp_org_id = $check['org_id'];
                 }
 
-                $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
-
+                if(count($arrCatalog)){
+                    $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
+                }else{
+                    $lastInsert_cat_id = 0;
+                }
                 /**
                  *
                  * 5) Связь ресторана и поставщика
@@ -379,7 +388,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-         /**
+        /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";

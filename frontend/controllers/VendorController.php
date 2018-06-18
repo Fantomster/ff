@@ -661,7 +661,7 @@ class VendorController extends DefaultController
                         $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
                         $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                        $row_ed = strip_tags(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
+                        $row_ed = strip_tags(trim(str_replace('.', ',', $worksheet->getCellByColumnAndRow(4, $row)))); //единица измерения
                         $row_note = strip_tags(trim($worksheet->getCellByColumnAndRow(5, $row)));  //Комментарий
                         if (!empty($row_product && $row_price && $row_ed)) {
                             if (empty($row_units) || $row_units < 0) {

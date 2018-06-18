@@ -82,13 +82,20 @@ function renderButton($id)
                                     'contentOptions' => ['class' => 'text-center'],
                                     'headerOptions' => ['style' => 'width: 100px;'],
                                 ],
-                                'number',
+                                [
+                                        'format'=>'raw',
+                                        'header'=>'Номер накладной',
+                                        'value'=>function($data){
+                                            return (!empty($data->order_id))?\yii\helpers\Html::a($data->number,['/clientintegr/iiko/waybill/index','way'=>$data->order_id]):$data->number;
+                                        }
+                                ],
                                 [
                                     'attribute' => 'date',
                                     'value' => function($row){
                                         return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
                                     }
                                 ],
+                                'name_postav',
                                 [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {

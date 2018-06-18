@@ -70,14 +70,14 @@ class Logger
      */
     public static function response($response)
     {
-        if (!empty(self::get()['response_at'])) {
+        if (empty(self::get()['response_at']) || self::get()['response_at'] == '0000-00-00 00:00:00') {
+            self::update([
+                'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
+                'response_at' => new Expression('NOW()')
+            ]);
+        } else {
             throw new \Exception('Response already recorded.', 999);
         }
-
-        self::update([
-            'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
-            'response_at' => new Expression('NOW()')
-        ]);
     }
 
     /**

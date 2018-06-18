@@ -2,11 +2,20 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\widgets\ActiveForm;
+use kartik\form\ActiveForm;
 use kartik\grid\GridView;
 use yii\widgets\Pjax;
 ?>
 <?php
+$js = <<<JS
+    $(document).on("click", ".btnSubmit", function() {
+        $($(this).data("target-form")).submit();
+    });
+    $(document).on("focusout", "#searchString", function() {
+        $('#searchForm').submit();
+    });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
 $grid = [
     [
         'label' => false,
@@ -46,7 +55,8 @@ $grid = [
 ];
 ?>
 <style>
-
+    #searchString{height:35px; width: 100%; display: inline-block;}
+    .input-group, .form-group{width: 100%;}
     @media (max-width: 600px){
         .network-list .table {
             overflow-x: scroll;
@@ -79,12 +89,49 @@ $grid = [
                 </div>
                 <div class="row">
                     <div class="col-md-8">
+
+
+                        <br />
+                        <?php
+                        $form = ActiveForm::begin([
+                            'method' => 'get',
+                            'options' => [
+                                'id' => 'searchForm',
+                                'class' => "navbar-form no-padding no-margin",
+                                'role' => 'search',
+                            ],
+                        ]);
+                        ?>
+                        <?=
+                        $form->field($searchModel, 'searchString', [
+                            'addon' => [
+                                'append' => [
+                                    'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
+                                    'options' => [
+                                        'class' => 'append',
+                                    ],
+                                ],
+                            ],
+                            'options' => [
+                                'class' => "margin-right-15 form-group",
+                            ],
+                        ])
+                            ->textInput([
+                                'id' => 'searchString',
+                                'class' => 'form-control',
+                                'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru'=>'Поиск'])])
+                            ->label(false)
+                        ?>
+                        <?php ActiveForm::end(); ?>
+
+
                         <h5><?= Yii::t('message', 'frontend.views.user.default.business_list', ['ru' => 'Список бизнесов']) ?></h5>
                         <div class="network-list">
-                            <?php Pjax::begin(['id' => 'pjax-network-list', 'enablePushState' => false, 'timeout' => 10000]) ?>
+                            <?php Pjax::begin(['formSelector' => '#searchForm', 'id' => 'pjax-network-list', 'enablePushState' => false, 'timeout' => 10000]) ?>
                             <?=
                             GridView::widget([
                                 'dataProvider' => $dataProvider,
+                                'filterModel' => $searchModel,
                                 'filterPosition' => false,
                                 'columns' => $grid,
                                 'options' => [],

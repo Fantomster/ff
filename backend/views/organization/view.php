@@ -35,6 +35,8 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
             Html::a('Заполнить реквизиты', ['buisiness-info/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
     ?>
 
+    <?= ($model->type_id == Organization::TYPE_SUPPLIER) ? Html::a('Настройка уведомлений', ['notifications', 'id' => $model->id], ['class' => 'btn btn-danger', 'style' => 'margin-bottom: 10px;']) : '' ?>
+
     <?=
     DetailView::widget([
         'model' => $model,

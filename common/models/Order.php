@@ -222,9 +222,9 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return int
      */
-    public function getOrderChatUnreadCount()
+    public function getOrderChatUnreadCount($r_id)
     {
-        return count($this->getOrderChat()->where(['viewed' => 0])->all());
+        return OrderChat::find()->where(['order_id' => $this->id, 'viewed' => 0, 'recipient_id' => $r_id])->count();
     }
 
     /**
@@ -518,7 +518,7 @@ class Order extends \yii\db\ActiveRecord
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass);
                 }
                 if (!$result) {
-                    throw new BadRequestHttpException(Yii::t('app', 'common.models.order.edi_error'));
+                    Yii::error(Yii::t('app', 'common.models.order.edi_error'));
                 }
             }
             if ((!isset($client->ediOrganization->gln_code) || empty($client->ediOrganization->gln_code)) && isset($vendor->ediOrganization->gln_code)) {
@@ -545,10 +545,15 @@ class Order extends \yii\db\ActiveRecord
     {
         if ($user instanceof User) {
 
-            $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                "/order/view",
-                "id" => $this->id
-            ]);
+            if (Yii::$app instanceof Yii\console\Application){
+                return Yii::$app->params['url'] . "/order/view" . $this->id;
+            }else{
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view/",
+                    "id" => $this->id
+                ]);
+            }
+
 
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([

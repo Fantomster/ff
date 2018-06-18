@@ -26,7 +26,10 @@ $gridColumns = [
     'id',
     'code',
     'name',
-    'fd',
+    [
+        'attribute' => 'address',
+        'label' => 'Адрес',
+    ],
     'td',
    /* [
         'attribute' => 'org',
@@ -45,7 +48,7 @@ $gridColumns = [
     [
         'attribute' => 'status_id',
         'value' => function ($model) {
-            if ($model) return ($model->status_id == 2) ? 'Активно' : 'Неактивно';
+            if ($model) return ($model->status_id == 1) ? 'Активно' : 'Не активно';
 
         },
     ],

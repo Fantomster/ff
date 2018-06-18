@@ -33,7 +33,7 @@ class ApiAccess extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id','fid'], 'required'],
+            [['fid'], 'required'],
             [['id','fid','org','ver'], 'integer'],
             [['login','password'], 'string', 'max' => 255],
         ];

@@ -21,7 +21,7 @@ echo GridView::widget([
                     Html::tag('p', \Yii::t('app', 'Артикул').': '.$data->article, [
                         'style' => 'line-height: 1;font-size: 11px;color: #999C9E;'
                     ]).
-                    Html::tag('p', isset($data->note->note) ? $data->note->note : '', [
+                    Html::tag('p', isset($data->comment) ? $data->comment : '', [
                         'style' => 'line-height: 1;font-size: 11px;color: #999C9E;'
                     ]);
             },

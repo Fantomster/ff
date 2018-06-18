@@ -80,5 +80,11 @@ return [
         'pass' => 'e1fa52810ea9d18a5af901c147c804e6',
         'loginClient' => 'markettest1',
         'passClient' => '32da77b28033f8fcd7d6d64a9801062d',
+    ],
+
+    'fireBase' => [
+        'DEFAULT_URL' => 'https://mixcart-test.firebaseio.com',
+        'DEFAULT_TOKEN' => '',
+        'DEFAULT_PATH' => '/',
     ]
 ];

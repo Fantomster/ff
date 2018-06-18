@@ -50,6 +50,7 @@ $this->title = 'Интеграция с iiko Office';
                                         return ["id" => "way".$data->id];
                                     }
                                 ],
+                                
                                 [
                                     'attribute' => 'vendor.name',
                                     'value' => 'vendor.name',

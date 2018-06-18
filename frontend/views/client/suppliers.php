@@ -11,6 +11,7 @@ use common\models\Currency;
 use yii\helpers\Url;
 use yii\helpers\Json;
 use common\models\RelationSuppRestPotential;
+use kartik\dropdown\DropdownX;
 
 kartik\select2\Select2Asset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
@@ -242,7 +243,7 @@ $gridColumnsCatalog = [
                 if ($data->cat_id != 0) {
                     //Редактирование каталога
                     $result .= Html::a(
-                        '<i class="fa fa-sun-o glyphicon-refresh-animate"></i>',
+                        '<i class="fa fa-pencil"></i>',
                         [
                             'client/edit-catalog',
                             'id' => $data["cat_id"]
@@ -316,6 +317,24 @@ $gridColumnsCatalog = [
                     ]
                 );
             }
+
+            //Кнопка сопоставления номенклатуры
+           /* $result .= Html::button('<i class="fa fa-paperclip m-r-xs"></i>', [
+                'class' => 'btn btn-default btn-sm',
+                'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
+            ]);
+*/
+            $result .= Html::beginTag('span', ['class'=>'text-right dropdown']);
+            $result .= Html::button(' <i class="fa fa-paperclip m-r-xs"></i></button>',
+                ['type'=>'button', 'class'=>'btn btn-default btn-sm', 'data-toggle'=>'dropdown']);
+            $result .= DropdownX::widget([
+                'options'=>['class'=>'pull-right'], // for a right aligned dropdown menu
+                'items' => [
+                    // ['label' => 'R-keeper', 'url' => '/clientintegr/rkws/fullmap/index'],
+                    '<li><a href="/clientintegr/rkws/fullmap/index" data-pjax=0>R-keeper</a> </li>'
+                ],
+            ]);
+            $result .= Html::endTag('span');
 
 
             //Кнопка удаления
@@ -494,6 +513,9 @@ $(".content").on("change keyup paste cut", "#searchString", function() {
     timer = setTimeout(function() {
         $("#search-form").submit();
     }, 700);
+    setTimeout(function() {
+        $('.editCatalogButtons').removeAttr('disabled');
+    }, 2000);
 });        
 $(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){

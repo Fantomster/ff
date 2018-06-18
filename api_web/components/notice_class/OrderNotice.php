@@ -2,6 +2,7 @@
 
 namespace api_web\components\notice_class;
 
+use api_web\components\FireBase;
 use common\models\Message;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
@@ -14,7 +15,6 @@ use common\models\Order;
 use yii\data\ArrayDataProvider;
 use common\models\Organization;
 use yii\swiftmailer\Mailer;
-use yii\web\Controller;
 
 class OrderNotice
 {
@@ -48,6 +48,11 @@ class OrderNotice
                 'channel' => 'chat',
                 'message' => Json::encode(['body' => $client->getCartCount(), 'channel' => $channel, 'isSystem' => 2])
             ]);
+
+            FireBase::getInstance()->update([
+                'user' => $user->id,
+                'organization' => $client->id
+            ], ['cart_count' => (int) $client->getCartCount()]);
         }
         return true;
     }
@@ -251,6 +256,12 @@ class OrderNotice
                     'order_id' => $order_id,
                 ])
             ]);
+
+            FireBase::getInstance()->update([
+                'user' => $clientUser->id,
+                'organization' => $newMessage->recipient_id,
+                'notifications' => uniqid(),
+            ], ['body' => $newMessage->message]);
         }
         foreach ($vendorUsers as $vendorUser) {
             $channel = 'user' . $vendorUser->id;
@@ -263,8 +274,22 @@ class OrderNotice
                     'order_id' => $order_id,
                 ])
             ]);
+
+            FireBase::getInstance()->update([
+                'user' => $vendorUser->id,
+                'organization' => $newMessage->recipient_id,
+                'notifications' => uniqid(),
+            ], ['body' => $newMessage->message]);
         }
 
         return true;
+    }
+
+    /**
+     * @param Organization $organizaion
+     * @return int
+     */
+    private function getNotificationCount(Organization $organizaion) {
+        return (int) OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
     }
 }

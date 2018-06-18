@@ -49,7 +49,7 @@ if(isset($licenses['iiko'])) {
     ($licenses['iiko']->status_id==1) && ($timestamp_now<=(time($licenses['iiko']->td))) ? $lic_iiko=1 : $lic_iiko=0;
 }
 if(isset($licenses['mercury'])) {
-    ($licenses['mercury']->status_id==2) && ($timestamp_now<=(time($licenses['mercury']->td))) ? $lic_merc=1 : $lic_merc=0;
+    ($licenses['mercury']->status_id==1) && ($timestamp_now<=(time($licenses['mercury']->td))) ? $lic_merc=1 : $lic_merc=0;
 }
 ?>
 <section class="content">

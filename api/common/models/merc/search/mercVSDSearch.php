@@ -65,14 +65,13 @@ class mercVSDSearch extends MercVsd
         else
             $query->andWhere("consignor <> '$guid'");
 
-        if ( !is_null($this->date_from) && !is_null($this->date_to)) {
+        if ( !empty($this->date_from) && !empty($this->date_to)) {
             $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from));
             $end_date = date('Y-m-d 23:59:59',strtotime($this->date_to));
             $query->andFilterWhere(['between', 'date_doc', $start_date, $end_date]);
         }
 
-        $query->andFilterWhere(['like', 'product_name', $this->product_name])
-            ->andFilterWhere(['like', 'recipient_name', $this->product_name]);
+        $query->andFilterWhere(['like', 'product_name', $this->product_name]);
 
         return $dataProvider;
     }
@@ -80,6 +79,6 @@ class mercVSDSearch extends MercVsd
     public function getRecipientList()
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
-        return ArrayHelper::map(MercVsd::find()->where("consignor <> '$guid'")->groupBy('consignor')->all(), 'consignor', 'recipient_name');
+        return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("consignor <> '$guid'")->groupBy('consignor')->all(), 'consignor', 'recipient_name'));
     }
 }

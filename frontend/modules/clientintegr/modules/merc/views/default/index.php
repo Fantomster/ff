@@ -69,7 +69,7 @@ Modal::widget([
                     'method' => 'get',
                     ]); ?>
                     <div class="col-md-12">
-                        <div class="col-lg-2 col-md-3 col-sm-6">
+                        <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'type')
@@ -82,7 +82,7 @@ Modal::widget([
                                 ?>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-md-3 col-sm-6">
+                        <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'status')
@@ -91,7 +91,7 @@ Modal::widget([
                                 ?>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-md-3 col-sm-6">
+                        <div class="col-sm-3 col-md-2">
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'recipient_name')
@@ -100,9 +100,9 @@ Modal::widget([
                                 ?>
                             </div>
                         </div>
-                        <div class="col-lg-5 col-md-6 col-sm-6">
+                        <div class="col-lg-3 col-md-3 col-sm-6">
                             <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                            <div class="form-group" style="width: 300px; height: 44px;">
+                            <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
                                     'model' => $searchModel,
@@ -120,6 +120,28 @@ Modal::widget([
                                 ])
                                 ?>
                             </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group field-statusFilter">
+                            <?=
+                            $form->field($searchModel, "product_name", [
+                                'addon' => [
+                                    'append' => [
+                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                        'options' => [
+                                            'class' => 'append',
+                                        ],
+                                    ],
+                                ],
+                            ])
+                                ->textInput(['prompt' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), 'class' => 'form-control', 'id' => 'product_name'])
+                                ->label(Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), ['class' => 'label search_string', 'style' => 'color:#555'])
+                            ?>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-md-2 col-lg-1">
+                            <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                            <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
                     </div>
                     <?php ActiveForm::end(); ?>
@@ -338,6 +360,16 @@ $("#ajax-load").on("click", ".save-form", function() {
         });
      });   
  
+ $(document).on("click", ".clear_filters", function () {
+           $('#product_name').val(''); 
+           $('#statusFilter').val(''); 
+           $('#typeFilter').val('1');
+           $('#dateFrom').val('');
+           $('#dateTo').val('');
+           $('#recipientFilter').val('');
+           $("#search_form").submit();
+    });
+ 
  $(".box-body").on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
                 $("#search-form").submit();
@@ -347,6 +379,16 @@ $("#ajax-load").on("click", ".save-form", function() {
                 }, 500);
             }
         }); 
+ 
+ $(document).on("change keyup paste cut", "#product_name", function() {
+        if (!justSubmitted) {
+                $("#search-form").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 700);
+            }
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -54,7 +54,7 @@ $this->title = 'Интеграция с iiko Office';
                                       'attribute'=>'invoice_relation',
                                       'format'=>'raw',
                                         'value'=>function($data){
-                                            return (!empty)?:;
+                                            return (!empty($data))? '':'';
                                         }
                                 ],
                                 [

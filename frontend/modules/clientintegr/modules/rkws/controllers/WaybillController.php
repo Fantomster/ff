@@ -154,6 +154,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $dataProvider = new ActiveDataProvider(['query' => $records,
             'sort' => ['defaultOrder' => ['munit_rid' => SORT_ASC]],
         ]);
+
+        $dataProvider->setSort([
+            'attributes' => [
+                'fproductname' => [
+                    'desc' => ['fproductname.product' => SORT_DESC],
+                    'asc' => ['fproductname.product' => SORT_ASC],
+                ]
+            ],
+            'defaultOrder' => [
+                'fproductname' => SORT_ASC
+            ],
+        ]);
         
         $lic = $this->checkLic();       
         $vi = $lic ? 'indexmap' : '/default/_nolic';

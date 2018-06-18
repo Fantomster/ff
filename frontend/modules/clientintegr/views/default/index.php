@@ -37,22 +37,47 @@ use api\common\models\RkAccess;
 <?php
 $user = Yii::$app->user->identity;
 $licenses = $user->organization->getLicenseList();
+//print "<pre>";
+//print_r($licenses);
+//print "</pre>";
+$timestamp_now=time();
+($licenses['rkws']->status_id==1) && ($timestamp_now<=(time($licenses['rkws']->td))) ? $rk_us=1 : $rk_us=0;
+($licenses['rkws_ucs']->status_id==1) && ($timestamp_now<=(time($licenses['rkws_ucs']->td))) ? $rk_lic=1 : $rk_lic=0;
+($licenses['iiko']->status_id==2) && ($timestamp_now<=(time($licenses['iiko']->td))) ? $lic_iiko=1 : $lic_iiko=0;
+($licenses['mercury']->status_id==2) && ($timestamp_now<=(time($licenses['mercury']->td))) ? $lic_merc=1 : $lic_merc=0;
 ?>
 <section class="content">
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
-              <h3 class="box-title">Партнеры по интеграции</h3>
+              <h3 class="box-title">Партнёры по интеграции</h3>
             </div>
             <?php if(isset($licenses['rkws'])): ?>
             <div class="box-body">
                 <div class="hpanel">
                     <div class="panel-body">
-                        <div class="col-md-6 text-left">
+                        <div class="col-md-7 text-left">
                             <?= Html::a('<h4 class="m-b-xs text-info">R-Keeper</h4>', ['rkws/default']) ?>
                             <p class="small">Интеграция с R-keeper STORE HOUSE через White Server (облачная версия)</p>
                         </div>
-                        <div class="col-md-6 text-right">
+                        <div class="col-md-3 text-left">
+                            <?php if ($rk_us==1) {
+                                print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
+                                print 'по '.$licenses['rkws']->td."</br>";
+                            } else {
+                                print "<p class=\"small\"> Лицензия MixCart: <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
+                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
+                            }
+                            if ($rk_lic==1) {
+                                print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
+                                print 'по '.$licenses['rkws_ucs']->td;
+                            } else {
+                                print "<p class=\"small\"> Лицензия MixCart: <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
+                                print "Пожалуйста, обратитесь к вашему дилеру UCS.</p>";
+                            }
+                            ?>
+                        </div>
+                        <div class="col-md-2 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
                         </div>
                     </div>

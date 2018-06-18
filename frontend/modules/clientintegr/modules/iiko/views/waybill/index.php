@@ -53,9 +53,9 @@ $this->title = 'Интеграция с iiko Office';
                                 [
                                       'attribute'=>'invoice_relation',
                                       'format'=>'raw',
+                                    'visible'=>$visible,
                                     'header'=>'№ Накладной',
                                         'value'=>function($data){
-                                            //return \yii\helpers\Html::a($data->invoice->number,['/clientintegr/email/invoice','id'=>$data->invoice->id]);
                                             return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
                                         }
                                 ],

@@ -2,6 +2,8 @@
 
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
+use api\common\models\iiko\iikoPconst;
+use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
@@ -74,10 +76,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
-
+        $way = Yii::$app->request->get('way',0);
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
+        $visible  = iikoPconst::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->asArray()->all();
         Url::remember();
-
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
 
@@ -89,6 +91,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
+            'visible' =>($visible[0]['value'])? true :false,
             'way' => $way,
         ];
 

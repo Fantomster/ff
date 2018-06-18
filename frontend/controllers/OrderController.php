@@ -2234,6 +2234,8 @@ class OrderController extends DefaultController
 
             $selected = implode(',', $res);
 
+            $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
+
             $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
                     FROM `order` 
                     left join organization as org on org.id = `order`.client_id

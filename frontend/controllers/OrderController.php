@@ -144,6 +144,8 @@ class OrderController extends DefaultController
 
             $selected = implode(',', $res);
 
+            $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
+
             $model = \Yii::$app->db->createCommand("
                 select 
                     cbg.article,

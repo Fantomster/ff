@@ -58,11 +58,7 @@ class iikoWaybillDataSearch extends iikoWaybillData
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => [
-                'defaultOrder' => [
-                    'fproductnameProduct' => SORT_ASC,
-                ]
-            ],
+
         ]);
 
         $dataProvider->setSort([
@@ -75,7 +71,10 @@ class iikoWaybillDataSearch extends iikoWaybillData
                     'desc' => ['catalog_base_goods.product' => SORT_DESC],
                     'asc' => ['catalog_base_goods.product' => SORT_ASC],
                 ]
-            ]
+            ],
+            'defaultOrder' => [
+                'fproductnameProduct' => SORT_ASC,
+            ],
         ]);
 
         $this->load($params);

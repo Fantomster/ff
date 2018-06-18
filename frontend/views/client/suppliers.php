@@ -330,7 +330,7 @@ $gridColumnsCatalog = [
             $result .= DropdownX::widget([
                 'options'=>['class'=>'pull-right'], // for a right aligned dropdown menu
                 'items' => [
-                    ['label' => 'R-keeper', 'url' => '/clientintegr/rkws/fullmap/index'],
+                    ['label' => 'R-keeper', 'url' => '/clientintegr/rkws/fullmap/index','data-pjax'=>0],
 
                 ],
             ]);

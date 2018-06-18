@@ -158,8 +158,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $dataProvider->setSort([
             'attributes' => [
                 'fproductname' => [
-                    'desc' => ['catalog_base_goods.product' => SORT_DESC],
-                    'asc' => ['catalog_base_goods.product' => SORT_ASC],
+                    'desc' => ['fproductname.product' => SORT_DESC],
+                    'asc' => ['fproductname.product' => SORT_ASC],
                 ]
             ],
             'defaultOrder' => [

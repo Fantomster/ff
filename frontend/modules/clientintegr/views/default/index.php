@@ -42,7 +42,7 @@ $licenses = $user->organization->getLicenseList();
 //print "</pre>";
 $timestamp_now=time();
 ($licenses['rkws']->status_id==1) && ($timestamp_now<=(time($licenses['rkws']->td))) ? $rk_us=1 : $rk_us=0;
-($licenses['rkws_ucs'][0]['status_id']==1) && ($timestamp_now<=(time($licenses['rkws_ucs'][0]['td']))) ? $rk_lic=1 : $rk_lic=0;
+($licenses['rkws_ucs']->status_id==1) && ($timestamp_now<=(time($licenses['rkws_ucs']->td))) ? $rk_lic=1 : $rk_lic=0;
 ($licenses['iiko']->status_id==2) && ($timestamp_now<=(time($licenses['iiko']->td))) ? $lic_iiko=1 : $lic_iiko=0;
 ($licenses['mercury']->status_id==2) && ($timestamp_now<=(time($licenses['mercury']->td))) ? $lic_merc=1 : $lic_merc=0;
 ?>
@@ -69,8 +69,8 @@ $timestamp_now=time();
                                 print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                             }
                             if ($rk_lic==1) {
-                                print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs'][0]['code']." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
-                                print 'по '.$licenses['rkws_ucs'][0]['td'];
+                                print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
+                                print 'по '.$licenses['rkws_ucs']->td;
                             } else {
                                 print "<p class=\"small\"> Лицензия MixCart: <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
                                 print "Пожалуйста, обратитесь к вашему дилеру UCS.</p>";

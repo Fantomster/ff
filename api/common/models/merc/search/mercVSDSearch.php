@@ -4,6 +4,7 @@ namespace api\common\models\merc\search;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
+use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 

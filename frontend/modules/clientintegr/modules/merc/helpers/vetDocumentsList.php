@@ -33,7 +33,7 @@ class vetDocumentsList extends Model
         self::DOC_STATUS_UTILIZED => 'Погашен',
     ];
 
-    public $status_color = [
+    public static $status_color = [
         self::DOC_STATUS_CONFIRMED => '',
         self::DOC_STATUS_WITHDRAWN => 'cancelled',
         self::DOC_STATUS_UTILIZED => 'done',

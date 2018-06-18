@@ -152,7 +152,7 @@ Modal::widget([
                                 'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
-                                    return $data['status'];
+                                    return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
                                 },
                             ],
                             [

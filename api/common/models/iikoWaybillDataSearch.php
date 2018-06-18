@@ -46,16 +46,19 @@ class iikoWaybillDataSearch extends iikoWaybillData
      */
     public function search($params)
     {
+        $dbname = explode("=", Yii::$app->db->dsn);
+        $dbname = $dbname[2];
         $query = iikoWaybillData::find()
             ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
             ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
-            ->leftJoin('db.catalog_base_goods', 'catalog_base_goods.id = product_id')
+            ->leftJoin($dbname.'.catalog_base_goods', 'catalog_base_goods.id = product_id')
             ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+
         ]);
 
         $dataProvider->setSort([
@@ -65,10 +68,13 @@ class iikoWaybillDataSearch extends iikoWaybillData
                     'desc' => ['catalog_base_goods.id' => SORT_DESC],
                 ],
                 'fproductnameProduct' => [
-                    'asc' => ['catalog_base_goods.product' => SORT_ASC],
                     'desc' => ['catalog_base_goods.product' => SORT_DESC],
+                    'asc' => ['catalog_base_goods.product' => SORT_ASC],
                 ]
-            ]
+            ],
+            'defaultOrder' => [
+                'fproductnameProduct' => SORT_ASC
+            ],
         ]);
 
         $this->load($params);

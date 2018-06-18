@@ -91,6 +91,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'koef' => Yii::t('app', 'Коэфф.'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
         ];
     }
 

@@ -513,6 +513,9 @@ $(".content").on("change keyup paste cut", "#searchString", function() {
     timer = setTimeout(function() {
         $("#search-form").submit();
     }, 700);
+    setTimeout(function() {
+        $('.editCatalogButtons').removeAttr('disabled');
+    }, 2000);
 });        
 $(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){

@@ -35,6 +35,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
+        $vendorID = $post['user']['vendor_id'] ?? null;
         $check = RestaurantChecker::checkEmail($email);
 
         if ($check['eventType'] != 5) {
@@ -43,7 +44,12 @@ class VendorWebApi extends \api_web\components\WebApi
             $user = new User();
         }
         $relationSuppRest = new RelationSuppRest();
-        $organization = new Organization();
+        if($vendorID){
+            $organization = Organization::findOne(['id'=>$vendorID]);
+        }else{
+            $organization = new Organization();
+        }
+
         $profile = new Profile();
         $profile->scenario = "invite";
 
@@ -85,13 +91,15 @@ class VendorWebApi extends \api_web\components\WebApi
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    $organization->name = $org;
+                    if(!$vendorID) {
+                        $organization->name = $org;
+                    }
 
-                    if (!empty($post['user']['inn'])) {
+                    if (!empty($post['user']['inn']) && !$vendorID) {
                         $organization->inn = $post['user']['inn'];
                     }
 
-                    if (!empty($post['user']['contact_name'])) {
+                    if (!empty($post['user']['contact_name']) && !$vendorID) {
                         $organization->contact_name = $post['user']['contact_name'];
                     }
 
@@ -380,7 +388,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-         /**
+        /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";

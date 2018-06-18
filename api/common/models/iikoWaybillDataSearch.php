@@ -72,6 +72,9 @@ class iikoWaybillDataSearch extends iikoWaybillData
                     'asc' => ['catalog_base_goods.product' => SORT_ASC],
                 ]
             ],
+            'defaultOrder' => [
+                'fproductnameProduct' => SORT_ASC
+            ],
         ]);
 
         $this->load($params);

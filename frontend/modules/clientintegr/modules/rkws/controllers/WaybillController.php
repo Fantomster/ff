@@ -163,7 +163,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 ]
             ],
             'defaultOrder' => [
-                'fproductnameProduct' => SORT_ASC
+                'fproductname' => SORT_ASC
             ],
         ]);
         

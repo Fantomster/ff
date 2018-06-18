@@ -78,7 +78,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $way = Yii::$app->request->get('way',0);
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
-        $visible  = iikoPconst::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->asArray()->all();
+        $visible  = iikoPconst::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->one();
+        
         Url::remember();
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
@@ -91,7 +92,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
-            'visible' =>($visible[0]['value'])? true :false,
+            'visible' =>($visible->value)? true :false,
             'way' => $way,
         ];
 

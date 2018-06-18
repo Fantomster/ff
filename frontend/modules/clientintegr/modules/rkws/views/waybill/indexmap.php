@@ -106,7 +106,7 @@ Breadcrumbs::widget([
 $columns = array(
     'product_id',
     [
-        'attribute' => 'product_id',
+        'attribute' => 'fproductname',
         'value' => function ($model) {
             return $model->fproductname->product;
         },

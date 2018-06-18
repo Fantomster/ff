@@ -1147,11 +1147,9 @@ class OrderController extends DefaultController
             }
         }
         $dataProvider = $searchModel->search($params);
-        $page = (isset($params['page'])) ? $params['page'] : 1;
+        $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
         $selected =  $session = Yii::$app->session->get('selected',[]);
-        $selected = (isset($selected[$page])) ? $selected[$page] : [];
-
-        //var_dump($selected, $page);
+        $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
@@ -2236,6 +2234,8 @@ class OrderController extends DefaultController
 
             $selected = implode(',', $res);
 
+            $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
+
             $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
                     FROM `order` 
                     left join organization as org on org.id = `order`.client_id
@@ -2246,9 +2246,10 @@ class OrderController extends DefaultController
 
             foreach ($orgs as $org)
             {
-                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."', ";
+                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."',";
             }
 
+            $sql = substr($sql, 0, -1);
 
             $sql .= " from `order`
                     left join order_content as oc on oc.order_id = `order`.id
@@ -2334,7 +2335,7 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
 
             header('Content-Type: application/vnd.ms-excel');
-            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            $filename = date("d-m-Y")."_Grid_report.xls";
             header('Content-Disposition: attachment;filename=' . $filename . ' ');
             header('Cache-Control: max-age=0');
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
@@ -2346,9 +2347,7 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->get('selected');
         $page = Yii::$app->request->get('page') + 1;
-        if (empty($selected))
-            exit();
-
+        
         $session = Yii::$app->session;
         $list = $session->get('selected', []);
         $list[$page] = explode(",", $selected);

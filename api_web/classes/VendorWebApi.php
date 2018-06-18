@@ -388,7 +388,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-         /**
+        /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";

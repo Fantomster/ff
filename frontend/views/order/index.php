@@ -88,16 +88,18 @@ $this->registerJs('
     
     var current_page = 0;
      $(document).on("click", ".pagination a", function(e) {
+          e.preventDefault();
+          url = $(this).attr("href");
+
            $.ajax({
              url: "'.$urlSaveSelected.'?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page,
              type: "GET",
              success: function(){
+                 $.pjax.reload({container: "#order-list", url: url, timeout:30000});
              }
            });
            
            current_page = $(this).attr("data-page")
-           console.log(current_page);
-           return true;
     });
 ');
 

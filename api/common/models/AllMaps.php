@@ -55,7 +55,8 @@ class AllMaps extends \yii\db\ActiveRecord {
                     }],
             [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
-            [[ 'product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id', 'vat_included', 'linked_at'], 'safe']
+            [[ 'product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id',
+                'vat_included', 'linked_at', 'pdenom', 'munit_rid'], 'safe']
         ];
     }
 
@@ -101,7 +102,7 @@ class AllMaps extends \yii\db\ActiveRecord {
     }
 
     public function getProductrk() {
-        return RkProduct::find()->andWhere('product_rid = :rid', [':rid' => $this->product_rid])->one();
+        return RkProduct::find()->andWhere('id = :rid', [':rid' => $this->product_rid])->one();
     }
 
 
@@ -110,8 +111,8 @@ class AllMaps extends \yii\db\ActiveRecord {
         if (parent::beforeSave($insert)) {
 
             if (!$insert) {  // Обновление
-
-                /*    if (strrpos($this->koef,','))  
+                 /*
+                  if (strrpos($this->koef,','))
                   $this->koef = (double) str_replace(',', '.',$this->koef);
 
                   if (strrpos($this->sum,','))
@@ -124,13 +125,6 @@ class AllMaps extends \yii\db\ActiveRecord {
 
                     if (!$this->koef)
                         $this->koef = 1;
-
-                    $this->quant = round($this->defquant * $this->koef, 10);
-                }
-
-                if ($this->attributes['quant'] != $this->oldAttributes['quant']) {
-
-                    $this->koef = round($this->quant / $this->defquant, 10);
                 }
 
                 $this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
@@ -156,26 +150,14 @@ class AllMaps extends \yii\db\ActiveRecord {
         return false;
     }
 */
+
+/*
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-        $wmodel = $this->waybill;
 
-        $check = $this::find()
-                ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
-                ->andwhere('product_rid is null or munit_rid is null')
-                ->count('*');
-        if ($check > 0) {
-            $wmodel->readytoexport = 0;
-        } else {
-            $wmodel->readytoexport = 1;
-        }
-
-        if (!$wmodel->save(false)) {
-            echo "Can't save model in after save";
-            exit;
-        }
     }
+*/
 
     public static function getDb() {
         return \Yii::$app->db_api;

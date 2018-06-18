@@ -2333,7 +2333,7 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->getStyle('A1:'.$col.(count($report) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
 
             header('Content-Type: application/vnd.ms-excel');
-            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            $filename = date("d-m-Y")."_Grid_report.xls";
             header('Content-Disposition: attachment;filename=' . $filename . ' ');
             header('Cache-Control: max-age=0');
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');

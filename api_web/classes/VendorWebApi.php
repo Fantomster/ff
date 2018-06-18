@@ -35,7 +35,6 @@ class VendorWebApi extends \api_web\components\WebApi
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
-        $vendorID = $post['user']['vendor_id'] ?? null;
         $check = RestaurantChecker::checkEmail($email);
 
         if ($check['eventType'] != 5) {
@@ -44,12 +43,7 @@ class VendorWebApi extends \api_web\components\WebApi
             $user = new User();
         }
         $relationSuppRest = new RelationSuppRest();
-        if($vendorID){
-            $organization = Organization::findOne(['id'=>$vendorID]);
-        }else{
-            $organization = new Organization();
-        }
-
+        $organization = new Organization();
         $profile = new Profile();
         $profile->scenario = "invite";
 
@@ -91,15 +85,13 @@ class VendorWebApi extends \api_web\components\WebApi
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    if(!$vendorID) {
-                        $organization->name = $org;
-                    }
+                    $organization->name = $org;
 
-                    if (!empty($post['user']['inn']) && !$vendorID) {
+                    if (!empty($post['user']['inn'])) {
                         $organization->inn = $post['user']['inn'];
                     }
 
-                    if (!empty($post['user']['contact_name']) && !$vendorID) {
+                    if (!empty($post['user']['contact_name'])) {
                         $organization->contact_name = $post['user']['contact_name'];
                     }
 

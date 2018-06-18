@@ -64,6 +64,14 @@ Breadcrumbs::widget([
 $columns = array(
     'product_id',
     [
+        'attribute' => 'supp_id',
+        'value' => function ($model) {
+            return $model->supplier->name;
+        },
+        'format' => 'raw',
+        'label' => 'Поставщик',
+    ],
+    [
         'attribute' => 'product_id',
         'value' => function ($model) {
             return $model->product->product;
@@ -81,6 +89,7 @@ $columns = array(
     ],
 
     //   'munit_rid',
+    //   'pdenom',
 
     [
         'class' => 'kartik\grid\EditableColumn',
@@ -132,9 +141,9 @@ $columns = array(
     /*   [
        'attribute' => 'product_rid',
        'value' => function ($model) {
-            if (!empty($model->product)) {
+            if (!empty($model->productrk)) {
 
-                return $model->product->denom;
+                return $model->productrk->denom;
             }
 
            return 'Не задано';
@@ -248,9 +257,9 @@ $columns = array(
         }
        ], */
 
-     $sLinkzero = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => 12,'vat' =>0]);
-     $sLinkten = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => 12,'vat' =>1000]);
-     $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => 12,'vat' =>1800]);
+     $sLinkzero = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' =>0]);
+     $sLinkten = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' =>1000]);
+     $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' =>1800]);
 
 array_push($columns,
     [
@@ -284,7 +293,7 @@ array_push($columns,
                 }
 
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' =>0]);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id'=>$model->id, 'vat' =>0]);
                 return \yii\helpers\Html::a( '&nbsp;0', $customurl,
                     ['title' => Yii::t('backend', '0%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
             },
@@ -299,7 +308,7 @@ array_push($columns,
                 }
 
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' => '1000']);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id'=>$model->id, 'vat' => '1000']);
                 return \yii\helpers\Html::a( '10', $customurl,
                     ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
             },
@@ -314,13 +323,13 @@ array_push($columns,
                 }
 
                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id'=>$model->id, 'vat' => '1800']);
+                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id'=>$model->id, 'vat' => '1800']);
                 return \yii\helpers\Html::a( '18', $customurl,
                     ['title' => Yii::t('backend', '18%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
             },
         ]
     ]);
-
+/*
 array_push($columns,
     [
         'class' => 'yii\grid\ActionColumn',
@@ -341,7 +350,17 @@ array_push($columns,
             },
         ]
     ]);
+*/
 ?>
+<div align="right">
+    <?php
+    $loadUrl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/renewcats']);
+
+    echo Html::a('Обновить данные каталогов', $loadUrl, ['class' => 'btn btn-success btn-export']);
+
+    ?>
+</div>
+
                         <?=
 GridView::widget([
     'dataProvider' => $dataProvider,

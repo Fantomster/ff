@@ -1151,8 +1151,6 @@ class OrderController extends DefaultController
         $selected =  $session = Yii::$app->session->get('selected',[]);
         $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
 
-        //var_dump($selected, $page);
-
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
         } else {
@@ -2246,9 +2244,10 @@ class OrderController extends DefaultController
 
             foreach ($orgs as $org)
             {
-                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."'";
+                $sql .= "IF(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = ".$org['id'].", oc.quantity, 0))as CHAR(10))) as '".$org['client_name']."',";
             }
 
+            $sql = substr($sql, 0, -1);
 
             $sql .= " from `order`
                     left join order_content as oc on oc.order_id = `order`.id
@@ -2346,7 +2345,7 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->get('selected');
         $page = Yii::$app->request->get('page') + 1;
-
+        
         $session = Yii::$app->session;
         $list = $session->get('selected', []);
         $list[$page] = explode(",", $selected);

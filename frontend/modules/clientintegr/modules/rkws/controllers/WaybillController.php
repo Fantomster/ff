@@ -130,7 +130,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionMap($waybill_id) {
 
-        $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product', 'rk_product.id = product_rid');
+        $dbname = explode("=", Yii::$app->db->dsn);
+        $dbname = $dbname[2];
+
+        $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])
+            ->leftJoin('rk_product', 'rk_product.id = product_rid')
+            ->leftJoin($dbname.'.catalog_base_goods', 'catalog_base_goods.id = product_id');
         
         $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $waybill_id])->one();
 
@@ -153,6 +158,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $dataProvider = new ActiveDataProvider(['query' => $records,
             'sort' => ['defaultOrder' => ['munit_rid' => SORT_ASC]],
+        ]);
+
+        $dataProvider->setSort([
+            'attributes' => [
+                'fproductname' => [
+                    'desc' => ['catalog_base_goods.product' => SORT_DESC],
+                    'asc' => ['catalog_base_goods.product' => SORT_ASC],
+                ]
+            ],
+            'defaultOrder' => [
+                'fproductname' => SORT_ASC
+            ],
         ]);
         
         $lic = $this->checkLic();       

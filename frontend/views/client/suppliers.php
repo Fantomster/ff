@@ -243,7 +243,7 @@ $gridColumnsCatalog = [
                 if ($data->cat_id != 0) {
                     //Редактирование каталога
                     $result .= Html::a(
-                        '<i class="fa fa-sun-o glyphicon-refresh-animate"></i>',
+                        '<i class="fa fa-pencil"></i>',
                         [
                             'client/edit-catalog',
                             'id' => $data["cat_id"]

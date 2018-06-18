@@ -72,6 +72,19 @@ Modal::widget([
                         <div class="col-lg-2 col-md-3 col-sm-6">
                             <div class="form-group field-statusFilter">
                                 <?=
+                                $form->field($searchModel, 'type')
+                                    ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
+                                        [
+                                            1 => ['selected' => true]
+                                        ]
+                                    ])
+                                    ->label(Yii::t('message', 'frontend.views.order.type', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <div class="form-group field-statusFilter">
+                                <?=
                                 $form->field($searchModel, 'status')
                                     ->dropDownList(\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['id' => 'statusFilter'])
                                     ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
@@ -311,7 +324,13 @@ $("#ajax-load").on("click", ".save-form", function() {
         $(".box-body").on("change", "#statusFilter", function() {
             $("#search-form").submit();
         });
-     });   
+     }); 
+ 
+  $("document").ready(function(){
+        $(".box-body").on("change", "#typeFilter", function() {
+            $("#search-form").submit();
+        });
+     });  
  
  $("document").ready(function(){
         $(".box-body").on("change", "#recipientFilter", function() {

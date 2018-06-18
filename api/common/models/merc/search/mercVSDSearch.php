@@ -4,7 +4,7 @@ namespace api\common\models\merc\search;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
-use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList;
+use yii\helpers\ArrayHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -17,7 +17,7 @@ class mercVSDSearch extends MercVsd
     {
         return [
             [['date_doc', 'production_date', 'guid', 'date_from', 'date_to'], 'safe'],
-            [['amount'], 'number'],
+            [['amount','type'], 'number'],
             [['uuid', 'number', 'status', 'product_name', 'unit', 'recipient_name','type', 'consignor'], 'string', 'max' => 255],
         ];
     }
@@ -42,8 +42,6 @@ class mercVSDSearch extends MercVsd
         $guid = mercDicconst::getSetting('enterprise_guid');
         $query = MercVsd::find()->where(['guid' => $guid]);
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -62,6 +60,17 @@ class mercVSDSearch extends MercVsd
 
         ]);
 
+        if($this->type == 2)
+            $query->andWhere("consignor = '$guid'");
+        else
+            $query->andWhere("consignor <> '$guid'");
+
+        if ( !is_null($this->date_from) && !is_null($this->date_to)) {
+            $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from));
+            $end_date = date('Y-m-d 23:59:59',strtotime($this->date_to));
+            $query->andFilterWhere(['between', 'date_doc', $start_date, $end_date]);
+        }
+
         $query->andFilterWhere(['like', 'product_name', $this->product_name])
             ->andFilterWhere(['like', 'recipient_name', $this->product_name]);
 
@@ -70,6 +79,7 @@ class mercVSDSearch extends MercVsd
 
     public function getRecipientList()
     {
-        return [];
+        $guid = mercDicconst::getSetting('enterprise_guid');
+        return ArrayHelper::map(MercVsd::find()->where("consignor <> '$guid'")->groupBy('consignor')->all(), 'consignor', 'recipient_name');
     }
 }

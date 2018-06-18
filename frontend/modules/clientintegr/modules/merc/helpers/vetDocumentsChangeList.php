@@ -59,7 +59,8 @@ class vetDocumentsChangeList extends Model
                 $cache->add('vetDocRaw_'.$item->bsuuid->__toString(), $item->asXML(),60);
 
             $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
-            $recipient = mercApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
+            $recipient = mercApi::getInstance()->getEnterpriseByUuid($item->ns2consignor->ententerprise->bsuuid->__toString());
+            $recipient = $recipient->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
 
             $model = MercVsd::findOne(['uuid' => $item->bsuuid->__toString()]);
 
@@ -76,7 +77,10 @@ class vetDocumentsChangeList extends Model
                 'amount' => $item->ns2batch->ns2volume->__toString(),
                 'unit' => $unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
                 'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
-                'recipient_name' => $recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString(),
+                'recipient_name' =>  $recipient->dtname->__toString().'('.
+                    $recipient->dtaddress->dtaddressView->__toString()
+                    .')',
+                //$recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString(),
                 'guid' => $guid,
                 'consignor' => $item->ns2consignor->ententerprise->bsguid->__toString(),
             ]);

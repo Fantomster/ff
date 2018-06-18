@@ -96,7 +96,7 @@ use yii\web\JsExpression;
     ]);
     ?>
 
-    <?php echo $form->field($model, 'status_id')->dropDownList([1 => 'Неактивно', 2 => 'Активно']); ?>
+    <?php echo $form->field($model, 'status_id')->dropDownList([1 => 'Активно', 0 => 'Не активно']); ?>
     <div class="form-group">
         <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
         <?= Html::a('Вернуться',

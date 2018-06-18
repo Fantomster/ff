@@ -140,11 +140,14 @@ class OrderController extends DefaultController
 
             $res = [];
             foreach ($selected as $page)
-                $res = array_merge($res, $page);
+                if(count($page) > 0)
+                    $res = array_merge($res, $page);
 
             $selected = implode(',', $res);
 
-            $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
+            /*$count = -1 * (strlen($selected) - stripos($selected, ','));
+
+            $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, $count) : $selected;*/
 
             $model = \Yii::$app->db->createCommand("
                 select 
@@ -2232,11 +2235,12 @@ class OrderController extends DefaultController
 
             $res = [];
             foreach ($selected as $page)
-                $res = array_merge($res, $page);
+                if(count($page) > 0)
+                    $res = array_merge($res, $page);
 
             $selected = implode(',', $res);
 
-            $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
+            //$selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
 
             $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
                     FROM `order` 

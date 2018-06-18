@@ -386,8 +386,8 @@ GridView::widget([
 ]);
 ?> 
                         <?= Html::a('Вернуться',
-            [$this->context->getLastUrl().'way=12'],
-            ['class' => 'btn btn-success btn-export']);
+                            Yii::$app->getUrlManager()->createUrl(['client/suppliers']),
+            ['class' => 'btn btn-success btn-export','data-pjax' =>0]);
         ?>
                     </div>
                 </div>    

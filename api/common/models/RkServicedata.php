@@ -4,6 +4,7 @@ namespace api\common\models;
 
 use Yii;
 use common\models\Organization;
+use Yii\db\Query;
 
 /**
  * This is the model class for table "rk_access".
@@ -150,9 +151,17 @@ class RkServicedata extends \yii\db\ActiveRecord {
         return self::find()
             //->where(['status_id' => 2])
             ->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])
-            ->andOnCondition('td >= NOW()')
-            ->andOnCondition('fd <= NOW()')
+            //->andOnCondition('td >= NOW()')
+            //->andOnCondition('fd <= NOW()')
             ->one();
+    }
+    public static function getLicenseUcs($org)
+    {
+        $query = new Query;
+        $query->select('td,status_id,is_deleted,code')->from('db_api.rk_service')->where('id=:id',['id' => $org]);
+        $rows = $query->one();
+        $ret[] = $rows;
+        return $ret;
     }
 
 }

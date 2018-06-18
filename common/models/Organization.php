@@ -1520,7 +1520,12 @@ class Organization extends \yii\db\ActiveRecord
         $result = [];
         $lic = RkServicedata::getLicense();
         if($lic != null)
-            $result['rkws'] = $lic;
+            {
+                $result['rkws'] = $lic;
+                $org=$lic['service_id'];
+                $lic_ucs = RkServicedata::getLicenseUcs($org);
+                $result['rkws_ucs'] = $lic_ucs;
+            }
 
         $lic = iikoService::getLicense();
         if($lic != null)

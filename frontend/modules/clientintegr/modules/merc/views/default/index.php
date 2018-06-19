@@ -405,14 +405,13 @@ $("#ajax-load").on("click", ".save-form", function() {
         }); 
  
  $(document).on("change keyup paste cut", "#product_name", function() {
-        if (!justSubmitted) {
-                $("#search-form").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    $('#product_name').prop('readonly',true);
-                    justSubmitted = false;
-                }, 700);
-            }
+     if (justSubmitted) {
+            clearTimeout(justSubmitted);
+        }
+        justSubmitted = setTimeout(function() {
+            justSubmitted = false;
+            $("#search-form").submit();
+        }, 700);
     });
 JS;
 $this->registerJs($customJs, View::POS_READY);

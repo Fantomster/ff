@@ -104,16 +104,19 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
 
       //  $dataProvider->pagination->pageSize=3;
-        
-        $lic = $this->checkLic();       
-        
-        $vi = $lic ? 'index' : '/default/_nolic';
+
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'licucs' => $licucs,
                         'way' => $way,
             ]);
         } else {
@@ -121,6 +124,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'licucs' => $licucs,
                         'way' => $way,
 
             ]);

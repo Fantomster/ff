@@ -51,6 +51,10 @@ Breadcrumbs::widget([
 <section class="content-header">
 <?= $this->render('/default/_menu.php'); ?>
 
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]);
+    ?>
+
     ГЛОБАЛЬНОЕ СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
 </section>
 <section class="content">

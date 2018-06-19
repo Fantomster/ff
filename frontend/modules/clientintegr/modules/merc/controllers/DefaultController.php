@@ -31,7 +31,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         if(!mercDicconst::checkSettings())
-            return $this->redirect(['/clientintegr/merc/settings']);
+            $this->redirect(['/clientintegr/merc/settings']);
+            return false;
 
         if ($action->actionMethod == 'actionIndex')
             $this->updateVSDList();

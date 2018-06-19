@@ -43,7 +43,7 @@ class iikoDic extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if($insert) {
+        if ($insert) {
             $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
 
@@ -85,28 +85,32 @@ class iikoDic extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrganization() {
+    public function getOrganization()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'org']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getDictype() {
+    public function getDictype()
+    {
         return $this->hasOne(iikoDictype::className(), ['id' => 'dictype_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getDicstatus() {
+    public function getDicstatus()
+    {
         return $this->hasOne(iikoDicstatus::className(), ['id' => 'dicstatus_id']);
     }
 
     /**
      * @return string
      */
-    public function getOrganizationName() {
+    public function getOrganizationName()
+    {
         return $this->organization ? $this->organization->name : 'no';
     }
 
@@ -114,17 +118,19 @@ class iikoDic extends \yii\db\ActiveRecord
      * @param $count
      * @return bool
      */
-    public function updateSuccessSync($count) {
+    public function updateSuccessSync($count)
+    {
         $this->obj_count = $count;
         $this->dicstatus_id = iikoDic::STATUS_SUCCESS;
-        if($this->save()) {
+        if ($this->save()) {
             return true;
         } else {
             return false;
         }
     }
 
-    public static function errorSync($id) {
+    public static function errorSync($id)
+    {
         $model = self::findOne($id);
         $model->dicstatus_id = iikoDic::STATUS_ERROR;
         $model->save();

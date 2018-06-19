@@ -92,16 +92,23 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
             'sort' => ['defaultOrder' => ['id' => SORT_ASC]],
         ]);
 
-        $lic = $this->checkLic();
-        $vi = $lic ? 'index' : '/default/_nolic';
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($vi, [
+            return $this->renderPartial($vi,[
                 'dataProvider' => $dataProvider,
+                'lic' => $lic,
+                'licucs' => $licucs,
             ]);
         } else {
-            return $this->render($vi, [
+            return $this->render($vi,[
                 'dataProvider' => $dataProvider,
+                'lic' => $lic,
+                'licucs' => $licucs,
             ]);
         }
 

@@ -77,5 +77,15 @@ class RkPconst extends \yii\db\ActiveRecord
        return \Yii::$app->db_api;
     }
 
+    public static function getSettingsColumn($organization)
+    {
+        $res = self::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->one();
+        if($res)
+        {
+            return ($res->value)? true:false;
+        }
+
+    }
+
 
 }

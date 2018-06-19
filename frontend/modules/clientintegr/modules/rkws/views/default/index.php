@@ -49,26 +49,13 @@ $this->registerJs($script);
     <?= $this->render('/default/_menu.php'); ?>
     
 </section>
-
 <section class="content-header">
-    
-	<div class="box box-info">            
-            <div class="box-header with-border">
-                            <div class="panel-body">
-                                <div class="box-body table-responsive no-padding">
-                              
-                                <p> Состояние лицензии:<?php echo '<strong>Активна</strong> ID: '.$lic->code.' (с '.date("d-m-Y H:i:s",strtotime($lic->fd)).' по '.date("d-m-Y H:i:s",strtotime($lic->td)).') '; ?>
-                                    
-                                </p>  
-                                
-                            
-                          
-                                </div>
-                            </div>
-            </div>
-        </div>    
-    
-СПРАВОЧНИКИ:                            
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]);
+    ?>
+
+
+    СПРАВОЧНИКИ:
 </section>
 <section class="content-header">
     

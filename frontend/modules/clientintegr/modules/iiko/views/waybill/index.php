@@ -121,7 +121,7 @@ $this->title = 'Интеграция с iiko Office';
                     $wmodel = null;
                 }
                 $order_id = $model->id;
-                return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
+                return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id/*, 'lic' => $lic*/]);
             },
             'headerOptions' => ['class' => 'kartik-sheet-style'],
             'expandOneOnly' => true,

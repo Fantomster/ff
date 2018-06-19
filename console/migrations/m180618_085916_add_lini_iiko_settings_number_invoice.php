@@ -22,7 +22,7 @@ class m180618_085916_add_lini_iiko_settings_number_invoice extends Migration
         $this->insert('iiko_dicconst', [
             'denom' => 'column_number_invoice',
             'def_value' => '1',
-            'comment' => 'Состояние колноки "№ накладной"',
+            'comment' => 'Отображать № накладной в истории заказов',
             'type' => '1',
             'is_active' => '1',
         ]);

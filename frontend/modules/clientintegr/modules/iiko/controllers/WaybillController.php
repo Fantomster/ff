@@ -77,12 +77,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionIndex()
     {
         $way = Yii::$app->request->get('way',0);
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
-        $visible  = iikoPconst::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->one();
         Url::remember();
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-
        // $dataProvider->pagination->pageSize=3;
 
         $lic = iikoService::getLicense();
@@ -91,7 +88,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
-            'visible' =>($visible->value)? true :false,
+            'visible' =>iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
         ];
 

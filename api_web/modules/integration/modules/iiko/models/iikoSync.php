@@ -25,6 +25,9 @@ class iikoSync extends WebApi
      */
     public function run($type)
     {
+        /**
+         * @var $transaction Transaction
+         */
         $model = iikoDictype::findOne($type);
 
         if (empty($model)) {
@@ -36,29 +39,28 @@ class iikoSync extends WebApi
         }
 
         if (method_exists($this, $model->method) === true) {
-            /**
-             * @var $transaction Transaction
-             */
             $transaction = \Yii::$app->get('db_api')->beginTransaction();
             try {
+                //Пробуем пролезть в iko
                 if (!iikoApi::getInstance()->auth()) {
                     throw new BadRequestHttpException('Не удалось авторизоваться в iiko - Office');
                 }
-
+                //Синхронизируем нужное нам и
+                //ответ получим, сколько записей у нас в боевом состоянии
                 $count = $this->{$model->method}();
-                //Убиваем сессию, а то закончатся
+                //Убиваем сессию, а то закончатся на сервере iiko
                 iikoApi::getInstance()->logout();
-
                 //Обновляем данные
                 $dicModel = iikoDic::findOne(['dictype_id' => $model->id, 'org_id' => $this->user->organization->id]);
                 if (!$dicModel->updateSuccessSync($count)) {
                     throw new BadRequestHttpException($dicModel->getFirstErrors());
                 }
-
+                //Сохраняем данные
                 $transaction->commit();
                 return ['success' => true];
             } catch (\Exception $e) {
                 $transaction->rollBack();
+                iikoApi::getInstance()->logout();
                 iikoDic::errorSync($model->id);
                 throw $e;
             }
@@ -102,7 +104,6 @@ class iikoSync extends WebApi
         if (!empty($stores['corporateItemDto'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
             iikoStore::updateAll(['is_active' => 0], ['org_id' => $this->user->organization->id]);
-
             foreach ($stores['corporateItemDto'] as $store) {
                 $model = iikoStore::findOne(['uuid' => $store['id'], 'org_id' => $this->user->organization->id]);
                 //Если нет категории у нас, создаем
@@ -113,17 +114,15 @@ class iikoSync extends WebApi
                     ]);
                 }
                 $model->is_active = 1;
-
-                if(!empty($store['name'])){
+                if (!empty($store['name'])) {
                     $model->denom = $store['name'];
                 }
-                if(!empty($store['code'])){
+                if (!empty($store['code'])) {
                     $model->store_code = $store['code'];
                 }
-                if(!empty($store['type'])){
+                if (!empty($store['type'])) {
                     $model->store_type = $store['type'];
                 }
-
                 //Валидируем сохраняем
                 if (!$model->validate() || !$model->save()) {
                     throw new ValidationException($model->getFirstErrors());
@@ -131,7 +130,7 @@ class iikoSync extends WebApi
             }
         }
         //Обновляем колличество полученных объектов
-        return (int) iikoStore::find()->where(['is_active' => 1, 'org_id' => $this->user->organization->id])->count();
+        return (int)iikoStore::find()->where(['is_active' => 1, 'org_id' => $this->user->organization->id])->count();
     }
 
     /**
@@ -177,7 +176,6 @@ class iikoSync extends WebApi
             //Проставим признак всем категориям, что они не активны
             //поскольку мы не можем отследить изменения на стороне провайдера
             iikoCategory::updateAll(['is_active' => 0], ['org_id' => $this->user->organization->id]);
-
             foreach ($items['categories'] as $uuid => $category) {
                 $model = iikoCategory::findOne(['uuid' => $uuid, 'org_id' => $this->user->organization->id]);
                 //Если нет категории у нас, создаем
@@ -188,26 +186,21 @@ class iikoSync extends WebApi
                     ]);
                 }
                 $model->is_active = 1;
-
                 //Родительская категория если есть
-                if(!empty($category['parentId'])) {
+                if (!empty($category['parentId'])) {
                     $model->parent_uuid = $category['parentId'];
                 }
-
-                if(!empty($category['name'])) {
+                if (!empty($category['name'])) {
                     $model->denom = $category['name'];
                 }
-
-                if(!empty($category['productGroupType'])) {
+                if (!empty($category['productGroupType'])) {
                     $model->group_type = $category['productGroupType'];
                 }
-
                 if (!$model->validate() || !$model->save()) {
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
         }
-
         //Обновляем колличество полученных объектов
         return iikoCategory::find()->where(['is_active' => 1, 'org_id' => $this->user->organization->id])->count();
     }
@@ -224,7 +217,6 @@ class iikoSync extends WebApi
         if (!empty($items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
             iikoProduct::updateAll(['is_active' => 0], ['org_id' => $this->user->organization->id]);
-
             foreach ($items['products'] as $uuid => $item) {
                 $model = iikoProduct::findOne(['uuid' => $uuid, 'org_id' => $this->user->organization->id]);
                 //Если нет категории у нас, создаем
@@ -236,18 +228,25 @@ class iikoSync extends WebApi
                 if (isset($item['parentId'])) {
                     $model->parent_uuid = $item['parentId'];
                 }
-
                 $model->is_active = 1;
-                $model->denom = $item['name'] ?? null;
-                $model->product_type = $item['productType'] ?? null;
-                $model->unit = $item['mainUnit'] ?? null;
-                $model->num = $item['num'] ?? null;
-                $model->cooking_place_type = $item['cookingPlaceType'] ?? null;
-
+                if (!empty($item['name'])) {
+                    $model->denom = $item['name'];
+                }
+                if (!empty($item['productType'])) {
+                    $model->product_type = $item['productType'];
+                }
+                if (!empty($item['mainUnit'])) {
+                    $model->unit = $item['mainUnit'];
+                }
+                if (!empty($item['num'])) {
+                    $model->num = $item['num'];
+                }
+                if (!empty($item['cookingPlaceType'])) {
+                    $model->cooking_place_type = $item['cookingPlaceType'];
+                }
                 if (isset($item['containers'])) {
                     $model->containers = \GuzzleHttp\json_encode($item['containers']);
                 }
-
                 //Валидируем сохраняем
                 if (!$model->validate() || !$model->save()) {
                     throw new ValidationException($model->getErrors());

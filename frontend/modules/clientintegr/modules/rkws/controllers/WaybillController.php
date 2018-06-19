@@ -2,6 +2,8 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use api\common\models\iiko\iikoPconst;
+use api\common\models\RkDicconst;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
@@ -88,9 +90,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex() {
 
-        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+        $way = Yii::$app->request->get('way',0);
        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
+        $visible  = RkDicconst::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->one();
 
         Url::remember();
 
@@ -114,6 +119,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'visible' =>($visible->value)? true :false,
                         'way' => $way,
             ]);
         } else {
@@ -121,6 +127,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                        'visible' =>($visible->value)? true :false,
                         'way' => $way,
 
             ]);

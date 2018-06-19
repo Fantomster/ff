@@ -90,7 +90,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionIndex() {
-echo RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id);
         $way = Yii::$app->request->get('way',0);
        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;

@@ -99,7 +99,7 @@ if (empty($model)) {
         ]
     );
     $timestamp_now=time();
-    //if (!(($lic->status_id==1) && ($timestamp_now<=(time($lic->td))))) {unset($columns[10]['buttons']['export']);}
+    if (!(($lic->status_id==1) && ($timestamp_now<=(time($lic->td))))) {unset($columns[10]['buttons']['export']);}
 
     echo GridView::widget([
         'dataProvider' => new ActiveDataProvider([

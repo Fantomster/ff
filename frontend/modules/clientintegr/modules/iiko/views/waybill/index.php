@@ -112,7 +112,7 @@ $this->title = 'Интеграция с iiko Office';
                 }
                 return GridView::ROW_COLLAPSED;
             },
-            'detail' => function ($model, $key, $index, $column) {
+            'detail' => function ($model, $key, $index, $column) use ($lic) {
                 $wmodel = \api\common\models\iiko\iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
 
                 if ($wmodel) {
@@ -121,7 +121,7 @@ $this->title = 'Интеграция с iiko Office';
                     $wmodel = null;
                 }
                 $order_id = $model->id;
-                return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id/*, 'lic' => $lic*/]);
+                return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
             },
             'headerOptions' => ['class' => 'kartik-sheet-style'],
             'expandOneOnly' => true,

@@ -389,6 +389,10 @@ class mercApi extends Component
             //Пишем лог
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
+            if(isset($result->envBody->envFault)) {
+                throw new BadRequestHttpException();
+            }
+
             if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
                 $result = $result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
                 $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);

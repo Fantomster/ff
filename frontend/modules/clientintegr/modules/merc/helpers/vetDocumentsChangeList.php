@@ -62,7 +62,7 @@ class vetDocumentsChangeList extends Model
             $recipient = mercApi::getInstance()->getEnterpriseByUuid($item->ns2consignor->ententerprise->bsuuid->__toString());
             $recipient = $recipient->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
 
-            $model = MercVsd::findOne(['uuid' => $item->bsuuid->__toString()]);
+            $model = MercVsd::findOne(['uuid' => $item->bsuuid->__toString(), 'guid' => $guid]);
 
             if($model == null)
                 $model = new MercVsd();

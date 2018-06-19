@@ -49,12 +49,21 @@ Modal::widget([
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
+                        <div class="alert alert-success alert-dismissable">
+                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                            <h4>
+                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
+                            </h4>
+                            <?= Yii::$app->session->getFlash('success') ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (Yii::$app->session->hasFlash('error')): ?>
                         <div class="alert alert-danger alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                             <h4>
-                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                                <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
                             </h4>
-                            <?= Yii::$app->session->getFlash('success') ?>
+                            <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
                     <?php
@@ -243,7 +252,7 @@ Modal::widget([
                                             'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
                                             'style' => 'width: 16px'
                                         ]);
-                                        return Html::a($icon, ['view', 'uuid' => $key], $options);
+                                        return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                                     },
                                     'done-partial' => function ($url, $model, $key) {
                                         if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
@@ -262,7 +271,7 @@ Modal::widget([
                                                 'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
                                                 'style' => 'width: 24px'
                                             ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $key], $options);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                                     },
                                     'rejected' => function ($url, $model, $key) {
                                         if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
@@ -281,7 +290,7 @@ Modal::widget([
                                             'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
                                             'style' => 'width: 18px'
                                         ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $key,  'reject' => true], $options);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
                                     },
                                 ]
                             ]

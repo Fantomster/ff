@@ -69,4 +69,13 @@ class MercVsd extends \yii\db\ActiveRecord
             'recipient_name' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']),
         ];
     }
+
+    public static function getType($uuid)
+    {
+        $guid = mercDicconst::getSetting('enterprise_guid');
+
+        $vsd  = self::findOne(['uuid' => $uuid]);
+
+        return ($guid == $vsd->consignor) ? 2 : 1;
+    }
 }

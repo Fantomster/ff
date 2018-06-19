@@ -301,7 +301,7 @@ Modal::widget([
                             ]
                         ],
                     ]);
-                    if($searchModel->type != 2)
+                    if($searchModel->type != 2 && ($searchModel->status == 'CONFIRMED' || $searchModel->status == null))
                     echo '<div class="col-md-12">'.Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']).'</div>';
                     ?>
                     </div>

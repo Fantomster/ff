@@ -91,7 +91,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
-            'visible' =>true,
+            'visible' =>($visible->value)? true :false,
             'way' => $way,
         ];
 

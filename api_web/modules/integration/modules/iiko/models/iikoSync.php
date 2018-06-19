@@ -41,14 +41,13 @@ class iikoSync extends WebApi
              */
             $transaction = \Yii::$app->get('db_api')->beginTransaction();
             try {
-                $api = iikoApi::getInstance();
-                if (!$api->auth()) {
+                if (!iikoApi::getInstance()->auth()) {
                     throw new BadRequestHttpException('Не удалось авторизоваться в iiko - Office');
                 }
 
                 $count = $this->{$model->method}();
                 //Убиваем сессию, а то закончатся
-                $api->logout();
+                iikoApi::getInstance()->logout();
 
                 //Обновляем данные
                 $dicModel = iikoDic::findOne(['dictype_id' => $model->id, 'org_id' => $this->user->organization->id]);

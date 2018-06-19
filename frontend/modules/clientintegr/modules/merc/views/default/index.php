@@ -53,12 +53,21 @@ Modal::widget([
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
+                        <div class="alert alert-success alert-dismissable">
+                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                            <h4>
+                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
+                            </h4>
+                            <?= Yii::$app->session->getFlash('success') ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (Yii::$app->session->hasFlash('error')): ?>
                         <div class="alert alert-danger alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                             <h4>
-                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                                <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
                             </h4>
-                            <?= Yii::$app->session->getFlash('success') ?>
+                            <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
                     <?php
@@ -73,7 +82,20 @@ Modal::widget([
                     'method' => 'get',
                     ]); ?>
                     <div class="col-md-12">
-                        <div class="col-lg-2 col-md-3 col-sm-6">
+                        <div class="col-sm-2">
+                            <div class="form-group field-statusFilter">
+                                <?=
+                                $form->field($searchModel, 'type')
+                                    ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
+                                        [
+                                            1 => ['selected' => true]
+                                        ]
+                                    ])
+                                    ->label(Yii::t('message', 'frontend.views.order.type', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'status')
@@ -82,18 +104,18 @@ Modal::widget([
                                 ?>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-md-3 col-sm-6">
+                        <div class="col-sm-3 col-md-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'recipient')
-                                    ->dropDownList($searchModel->recipentList, ['id' => 'recipientFilter'])
+                                $form->field($searchModel, 'recipient_name')
+                                    ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
                                     ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
-                        <div class="col-lg-5 col-md-6 col-sm-6">
+                        <div class="col-lg-3 col-md-3 col-sm-6">
                             <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                            <div class="form-group" style="width: 300px; height: 44px;">
+                            <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
                                     'model' => $searchModel,
@@ -111,6 +133,28 @@ Modal::widget([
                                 ])
                                 ?>
                             </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group field-statusFilter">
+                            <?=
+                            $form->field($searchModel, "product_name", [
+                                'addon' => [
+                                    'append' => [
+                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                        'options' => [
+                                            'class' => 'append',
+                                        ],
+                                    ],
+                                ],
+                            ])
+                                ->textInput(['prompt' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), 'class' => 'form-control', 'id' => 'product_name'])
+                                ->label(Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), ['class' => 'label search_string', 'style' => 'color:#555'])
+                            ?>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-md-2 col-lg-1">
+                            <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                            <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
                     </div>
                     <?php ActiveForm::end(); ?>
@@ -131,9 +175,9 @@ Modal::widget([
                                 'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
                                 'headerOptions'    =>   ['style' => 'text-align:center;'],
                                 'checkboxOptions' => function($model, $key, $index, $widget){
-                                    $enable = !($model['status_raw'] == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED);
+                                    $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED);
                                     $style = ($enable) ? "visibility:hidden" : "";
-                                    return ['value' => $model['uuid'],'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
+                                    return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
                                 }
                             ],
                             /*[
@@ -156,7 +200,7 @@ Modal::widget([
                                 'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
-                                    return $data['status'];
+                                    return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
                                 },
                             ],
                             [
@@ -172,7 +216,7 @@ Modal::widget([
                                 'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объем']),
                                 'format' => 'raw',
                                 'value' => function ($data) {
-                                    return $data['amount'];
+                                    return $data['amount']." ".$data['unit'];
                                 },
                             ],
                             [
@@ -212,10 +256,10 @@ Modal::widget([
                                             'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
                                             'style' => 'width: 16px'
                                         ]);
-                                        return Html::a($icon, ['view', 'uuid' => $key], $options);
+                                        return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                                     },
                                     'done-partial' => function ($url, $model, $key) {
-                                        if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
                                         $options = [
                                             'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
@@ -231,10 +275,10 @@ Modal::widget([
                                                 'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
                                                 'style' => 'width: 24px'
                                             ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $key], $options);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                                     },
                                     'rejected' => function ($url, $model, $key) {
-                                        if ($model['status_raw'] != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
                                             return "";
                                         $options = [
                                             'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
@@ -250,7 +294,7 @@ Modal::widget([
                                             'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
                                             'style' => 'width: 18px'
                                         ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $key,  'reject' => true], $options);
+                                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
                                     },
                                 ]
                             ]
@@ -315,13 +359,29 @@ $("#ajax-load").on("click", ".save-form", function() {
         $(".box-body").on("change", "#statusFilter", function() {
             $("#search-form").submit();
         });
-     });   
+     }); 
+ 
+  $("document").ready(function(){
+        $(".box-body").on("change", "#typeFilter", function() {
+            $("#search-form").submit();
+        });
+     });  
  
  $("document").ready(function(){
         $(".box-body").on("change", "#recipientFilter", function() {
             $("#search-form").submit();
         });
      });   
+ 
+ $(document).on("click", ".clear_filters", function () {
+           $('#product_name').val(''); 
+           $('#statusFilter').val(''); 
+           $('#typeFilter').val('1');
+           $('#dateFrom').val('');
+           $('#dateTo').val('');
+           $('#recipientFilter').val('');
+           $("#search_form").submit();
+    });
  
  $(".box-body").on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
@@ -332,6 +392,16 @@ $("#ajax-load").on("click", ".save-form", function() {
                 }, 500);
             }
         }); 
+ 
+ $(document).on("change keyup paste cut", "#product_name", function() {
+        if (!justSubmitted) {
+                $("#search-form").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 700);
+            }
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -33,7 +33,7 @@ class m180618_153952_add_column_settings_rkws extends Migration
      */
     public function safeDown()
     {
-        $this->delete('rk_dicconst', ['id' => 12]);
+        $this->delete('rk_dicconst', ['denom' => 'column_number_invoice']);
     }
 
 }

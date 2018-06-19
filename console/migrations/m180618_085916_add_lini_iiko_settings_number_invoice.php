@@ -33,6 +33,6 @@ class m180618_085916_add_lini_iiko_settings_number_invoice extends Migration
      */
     public function safeDown()
     {
-        $this->delete('iiko_dicconst', ['id' => 5]);
+        $this->delete('iiko_dicconst', ['denom' => 'column_number_invoice']);
     }
 }

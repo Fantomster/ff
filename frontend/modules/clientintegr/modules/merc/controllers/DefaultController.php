@@ -23,9 +23,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function beforeAction($action)
     {
-        $license = mercService::getLicense();
+        $lic = mercService::getLicense();
 
-        if (!isset($license) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
+        if (!isset($lic) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
             $this->redirect(['nolic']);
             return false;
         }

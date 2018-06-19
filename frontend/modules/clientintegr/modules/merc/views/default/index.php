@@ -43,6 +43,142 @@ Modal::widget([
     <?=
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
+    <?php
+    $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
+    $timestamp_now=time();
+    ($lic->status_id==1) && ($timestamp_now<=(time($lic->td))) ? $lic_merc=1 : $lic_merc=0;
+    $columns = array (
+            [
+                'class' => 'yii\grid\CheckboxColumn',
+                'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
+                'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
+                'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
+                    $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
+                    $style = ($enable ) ? "visibility:hidden" : "";
+                    return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
+                }
+            ],
+            /*[
+                'attribute' => 'number',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return $data['number'];
+                },
+            ],*/
+            [
+                'attribute' => 'date_doc',
+                'label' => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asDatetime($data['date_doc'], "php:j M Y");
+                },
+            ],
+            [
+                'attribute' => 'status',
+                'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
+                },
+            ],
+            [
+                'attribute' => 'product_name',
+                'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return $data['product_name'];
+                },
+            ],
+            [
+                'attribute' => 'amount',
+                'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return $data['amount']." ".$data['unit'];
+                },
+            ],
+            [
+                'attribute' => 'production_date',
+                'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+                },
+            ],
+            [
+                'attribute' => 'recipient_name',
+                'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отправитель']),
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return $data['recipient_name'];
+                },
+            ],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'contentOptions' => ['style' => 'width: 7%;'],
+                'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;&nbsp;{rejected}',
+                'buttons' => [
+                    'view' => function ($url, $model, $key) use ($lic_merc) {
+                        $options = [
+                            'title' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
+                            'aria-label' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
+                            'data' => [
+                                //'pjax'=>0,
+                                'target' => '#ajax-load',
+                                'toggle' => 'modal',
+                                'backdrop' => 'static'
+                            ],
+                            //'data-pjax' => '0',
+                        ];
+                        $icon = Html::tag('img', '', [
+                            'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
+                            'style' => 'width: 16px'
+                        ]);
+                        return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
+                    },
+                    'done-partial' => function ($url, $model, $key) use ($searchModel) {
+                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                            return "";
+                        $options = [
+                            'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
+                            'aria-label' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
+                            'data' => [
+                                //'pjax'=>0,
+                                'target' => '#ajax-load',
+                                'toggle' => 'modal',
+                                'backdrop' => 'static',
+                            ],
+                        ];
+                        $icon = Html::tag('img', '', [
+                            'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
+                            'style' => 'width: 24px'
+                        ]);
+                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
+                    },
+                    'rejected' => function ($url, $model, $key) use ($searchModel) {
+                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                            return "";
+                        $options = [
+                            'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
+                            'aria-label' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
+                            'data' => [
+                                //'pjax'=>0,
+                                'target' => '#ajax-load',
+                                'toggle' => 'modal',
+                                'backdrop' => 'static',
+                            ],
+                        ];
+                        $icon = Html::tag('img', '', [
+                            'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
+                            'style' => 'width: 18px'
+                        ]);
+                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
+                    },
+                ]
+            ]
+        );
+    if ($lic_merc==0) {unset($columns[7]['buttons']['done-partial']);unset($columns[7]['buttons']['rejected']);}
+    ?>
 </section>
 <section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru'=>'Список ВСД"']) ?>:</h4>
@@ -170,139 +306,12 @@ Modal::widget([
                         'summary' => '',
                         'options' => ['class' => ''],
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
-                        'columns' => [
-                            [
-                                'class' => 'yii\grid\CheckboxColumn',
-                                'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
-                                'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
-                                'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
-                                    $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
-                                    $style = ($enable ) ? "visibility:hidden" : "";
-                                    return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
-                                }
-                            ],
-                            /*[
-                                'attribute' => 'number',
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return $data['number'];
-                                },
-                            ],*/
-                            [
-                                'attribute' => 'date_doc',
-                                'label' => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return Yii::$app->formatter->asDatetime($data['date_doc'], "php:j M Y");
-                                },
-                            ],
-                            [
-                                'attribute' => 'status',
-                                'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
-                                },
-                            ],
-                            [
-                                'attribute' => 'product_name',
-                                'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return $data['product_name'];
-                                },
-                            ],
-                            [
-                                'attribute' => 'amount',
-                                'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объем']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return $data['amount']." ".$data['unit'];
-                                },
-                            ],
-                            [
-                                'attribute' => 'production_date',
-                                'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
-                                },
-                            ],
-                            [
-                                'attribute' => 'recipient_name',
-                                'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return $data['recipient_name'];
-                                },
-                            ],
-                            [
-                                'class' => 'yii\grid\ActionColumn',
-                                'contentOptions' => ['style' => 'width: 7%;'],
-                                'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;&nbsp;{rejected}',
-                                'buttons' => [
-                                    'view' => function ($url, $model, $key) {
-                                        $options = [
-                                            'title' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
-                                            'aria-label' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
-                                            'data' => [
-                                               //'pjax'=>0,
-                                                'target' => '#ajax-load',
-                                                'toggle' => 'modal',
-                                                'backdrop' => 'static',
-                                            ],
-                                            //'data-pjax' => '0',
-                                        ];
-                                        $icon = Html::tag('img', '', [
-                                            'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
-                                            'style' => 'width: 16px'
-                                        ]);
-                                        return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
-                                    },
-                                    'done-partial' => function ($url, $model, $key) use ($searchModel) {
-                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
-                                            return "";
-                                        $options = [
-                                            'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
-                                            'aria-label' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
-                                            'data' => [
-                                                //'pjax'=>0,
-                                                'target' => '#ajax-load',
-                                                'toggle' => 'modal',
-                                                'backdrop' => 'static',
-                                            ],
-                                        ];
-                                         $icon = Html::tag('img', '', [
-                                                'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
-                                                'style' => 'width: 24px'
-                                            ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
-                                    },
-                                    'rejected' => function ($url, $model, $key) use ($searchModel) {
-                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
-                                            return "";
-                                        $options = [
-                                            'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
-                                            'aria-label' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
-                                            'data' => [
-                                                //'pjax'=>0,
-                                                'target' => '#ajax-load',
-                                                'toggle' => 'modal',
-                                                'backdrop' => 'static',
-                                            ],
-                                        ];
-                                        $icon = Html::tag('img', '', [
-                                            'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
-                                            'style' => 'width: 18px'
-                                        ]);
-                                        return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
-                                    },
-                                ]
-                            ]
-                        ],
+                        'columns' => $columns
                     ]);
-                    if($searchModel->type != 2 && ($searchModel->status == 'CONFIRMED' || $searchModel->status == null))
-                    echo '<div class="col-md-12">'.Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']).'</div>';
+                    if ($lic_merc==1) {
+                        if ($searchModel->type != 2 && ($searchModel->status == 'CONFIRMED' || $searchModel->status == null))
+                            echo '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']) . '</div>';
+                    }
                     ?>
                     </div>
                     <?php Pjax::end(); ?>

@@ -160,6 +160,7 @@ Modal::widget([
                     <?php ActiveForm::end(); ?>
                     <div class="col-md-12">
                     <?php
+                    $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
                     echo GridView::widget([
                         'id' => 'vetDocumentsList',
                         'dataProvider' => $dataProvider,
@@ -172,11 +173,11 @@ Modal::widget([
                         'columns' => [
                             [
                                 'class' => 'yii\grid\CheckboxColumn',
-                                'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
-                                'headerOptions'    =>   ['style' => 'text-align:center;'],
-                                'checkboxOptions' => function($model, $key, $index, $widget){
-                                    $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED);
-                                    $style = ($enable) ? "visibility:hidden" : "";
+                                'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
+                                'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
+                                'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
+                                    $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
+                                    $style = ($enable ) ? "visibility:hidden" : "";
                                     return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
                                 }
                             ],
@@ -258,8 +259,8 @@ Modal::widget([
                                         ]);
                                         return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                                     },
-                                    'done-partial' => function ($url, $model, $key) {
-                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                    'done-partial' => function ($url, $model, $key) use ($searchModel) {
+                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                                             return "";
                                         $options = [
                                             'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']),
@@ -277,8 +278,8 @@ Modal::widget([
                                             ]);
                                         return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                                     },
-                                    'rejected' => function ($url, $model, $key) {
-                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED)
+                                    'rejected' => function ($url, $model, $key) use ($searchModel) {
+                                        if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                                             return "";
                                         $options = [
                                             'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
@@ -300,6 +301,7 @@ Modal::widget([
                             ]
                         ],
                     ]);
+                    if($searchModel->type != 2)
                     echo '<div class="col-md-12">'.Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']).'</div>';
                     ?>
                     </div>
@@ -398,6 +400,7 @@ $("#ajax-load").on("click", ".save-form", function() {
                 $("#search-form").submit();
                 justSubmitted = true;
                 setTimeout(function() {
+                    $('#product_name').prop('readonly',true);
                     justSubmitted = false;
                 }, 700);
             }

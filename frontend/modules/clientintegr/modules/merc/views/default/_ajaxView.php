@@ -200,7 +200,8 @@ use yii\helpers\Html;
         </div>
 </div>
 <div class="modal-footer">
-    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED) {
+    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED
+        && (\api\common\models\merc\MercVsd::getType($document->UUID) == 1)) {
             echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
                 Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
                     //'pjax'=>0,

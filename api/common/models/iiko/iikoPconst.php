@@ -69,4 +69,14 @@ class iikoPconst extends \yii\db\ActiveRecord
     {
         return $this->hasOne(IikoDicconst::className(), ['id' => 'const_id']);
     }
+
+    public static function getSettingsColumn($organization)
+    {
+        $res = self::find()->where(['org' => $organization])->andWhere(['const_id' => 5])->one();
+        if($res)
+        {
+            return ($res->value)? true:false;
+        }
+
+    }
 }

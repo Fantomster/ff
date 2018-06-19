@@ -1550,8 +1550,13 @@ class Organization extends \yii\db\ActiveRecord
         if($lic == null)
             return 0;
 
-        $guid = mercDicconst::getSetting('enterprise_guid');
-        return MercVsd::find()->where(['guid' => $guid, 'status' => 'CONFIRMED'])->andWhere("consignor <> '$guid'")->count();
+        try {
+            $guid = mercDicconst::getSetting('enterprise_guid');
+            return MercVsd::find()->where(['guid' => $guid, 'status' => 'CONFIRMED'])->andWhere("consignor <> '$guid'")->count();
+        }catch (\Exception $e)
+        {
+            return 0;
+        }
     }
 
     public function getOrganizationManagersExportColumns(): array

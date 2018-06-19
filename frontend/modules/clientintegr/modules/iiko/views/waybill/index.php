@@ -34,7 +34,101 @@ $this->title = 'Интеграция с iiko Office';
     <?=
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
-    ЗАВЕРШЕННЫЕ ЗАКАЗЫ
+    <?php
+    $columns = array(
+        [
+            'attribute' => 'id',
+            'contentOptions' => function($data) {
+                return ["id" => "way".$data->id];
+            }
+        ],
+        [
+            'attribute'=>'invoice_relation',
+            'format'=>'raw',
+            'visible'=>$visible,
+            'header'=>'№ Накладной',
+            'value'=>function($data){
+                return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
+            }
+        ],
+        [
+            'attribute' => 'vendor.name',
+            'value' => 'vendor.name',
+            'label' => 'Поставщик',
+            //'headerOptions' => ['class'=>'sorting',],
+        ],
+        [
+            'format' => 'raw',
+            'attribute' => 'status',
+            'value' => function ($data) {
+                $statusClass = 'done';
+
+                return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';
+            },
+            'label' => 'Статус Заказа',
+        ],
+        [
+            'attribute' => 'updated_at',
+            'label' => 'Обновлено',
+            'format' => 'date',
+        ],
+        [
+            'attribute' => 'positionCount',
+            'label' => 'Кол-во позиций',
+            'format'=>'raw',
+            'value' => function ($data) {
+                return $data->positionCount .
+                    '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
+                    'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
+                    'data-toggle="popover"  data-trigger="focus" data-url="'.
+                    Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
+                    '/getpopover" role="button" tabindex="0" '.
+                    'data-original-title="" title="" data-model="'.$data->id.'"> '.
+                    '<i class="fa fa-info-circle"></i></a>';
+            }
+        ],
+        [
+            'attribute' => 'total_price',
+            'label' => 'Итоговая сумма',
+            'format' => 'raw',
+        ],
+        [
+            'value' => function ($data) {
+                $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $data->id]);
+                if (isset($nacl->status)) {
+                    return $nacl->status->denom;
+                } else {
+                    return 'Не сформирована';
+                }
+            },
+            'label' => 'Статус накладной',
+        ],
+        [
+            'class' => 'kartik\grid\ExpandRowColumn',
+            'width' => '50px',
+            'value'=>function ($model, $key, $index, $column) use ($way) {
+                if ($model->id == $way) {
+                    return GridView::ROW_EXPANDED;
+                }
+                return GridView::ROW_COLLAPSED;
+            },
+            'detail' => function ($model, $key, $index, $column) {
+                $wmodel = \api\common\models\iiko\iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
+
+                if ($wmodel) {
+                    $wmodel = \api\common\models\iiko\iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id]);
+                } else {
+                    $wmodel = null;
+                }
+                $order_id = $model->id;
+                return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id/*, 'lic' => $lic*/]);
+            },
+            'headerOptions' => ['class' => 'kartik-sheet-style'],
+            'expandOneOnly' => true,
+        ]
+    );
+    ?>
+    ЗАВЕРШЁННЫЕ ЗАКАЗЫ
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -47,98 +141,7 @@ $this->title = 'Интеграция с iiko Office';
                             'dataProvider' => $dataProvider,
                             'pjax' => true,
                             'filterPosition' => false,
-                            'columns' => [
-                                [
-                                    'attribute' => 'id',
-                                    'contentOptions' => function($data) {
-                                        return ["id" => "way".$data->id];
-                                    }
-                                ],
-                                [
-                                      'attribute'=>'invoice_relation',
-                                      'format'=>'raw',
-                                    'visible'=>$visible,
-                                    'header'=>'№ Накладной',
-                                        'value'=>function($data){
-                                            return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
-                                        }
-                                ],
-                                [
-                                    'attribute' => 'vendor.name',
-                                    'value' => 'vendor.name',
-                                    'label' => 'Поставщик',
-                                    //'headerOptions' => ['class'=>'sorting',],
-                                ],
-                                [
-                                    'format' => 'raw',
-                                    'attribute' => 'status',
-                                    'value' => function ($data) {
-                                        $statusClass = 'done';
-
-                                        return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';
-                                    },
-                                    'label' => 'Статус Заказа',
-                                ],
-                                [
-                                    'attribute' => 'updated_at',
-                                    'label' => 'Обновлено',
-                                    'format' => 'date',
-                                ],
-                                [
-                                    'attribute' => 'positionCount',
-                                    'label' => 'Кол-во позиций',
-                                    'format'=>'raw',
-                                    'value' => function ($data) {
-                                        return $data->positionCount .
-                                            '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
-                                            'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
-                                            'data-toggle="popover"  data-trigger="focus" data-url="'.
-                                            Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
-                                            '/getpopover" role="button" tabindex="0" '.
-                                            'data-original-title="" title="" data-model="'.$data->id.'"> '.
-                                            '<i class="fa fa-info-circle"></i></a>';
-                                    }
-                                ],
-                                [
-                                    'attribute' => 'total_price',
-                                    'label' => 'Итоговая сумма',
-                                    'format' => 'raw',
-                                ],
-                                [
-                                    'value' => function ($data) {
-                                        $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $data->id]);
-                                        if (isset($nacl->status)) {
-                                            return $nacl->status->denom;
-                                        } else {
-                                            return 'Не сформирована';
-                                        }
-                                    },
-                                    'label' => 'Статус накладной',
-                                ],
-                                [
-                                    'class' => 'kartik\grid\ExpandRowColumn',
-                                    'width' => '50px',
-                                    'value'=>function ($model, $key, $index, $column) use ($way) {
-                                        if ($model->id == $way) {
-                                            return GridView::ROW_EXPANDED;
-                                        }
-                                        return GridView::ROW_COLLAPSED;
-                                    },
-                                    'detail' => function ($model, $key, $index, $column) {
-                                        $wmodel = \api\common\models\iiko\iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
-
-                                        if ($wmodel) {
-                                            $wmodel = \api\common\models\iiko\iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id]);
-                                        } else {
-                                            $wmodel = null;
-                                        }
-                                        $order_id = $model->id;
-                                        return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id]);
-                                    },
-                                    'headerOptions' => ['class' => 'kartik-sheet-style'],
-                                    'expandOneOnly' => true,
-                                ],
-                            ],
+                            'columns' => $columns,
                             'options' => ['class' => 'table-responsive'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
@@ -180,7 +183,7 @@ $js = <<< JS
                 if(result.value)
                 {
                     swal({
-                        title: 'Идет оптравка',
+                        title: 'Идёт оптравка',
                         text: 'Подождите пока закончится выгрузка...',
                         onOpen: () => {
                             swal.showLoading();

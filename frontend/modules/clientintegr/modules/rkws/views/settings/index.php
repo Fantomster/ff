@@ -52,6 +52,9 @@ use api\common\models\RkWaybill;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]);
+    ?>
     Настройки
 </section>
 <section class="content">

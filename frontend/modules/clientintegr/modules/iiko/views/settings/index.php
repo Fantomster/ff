@@ -25,6 +25,9 @@ use kartik\grid\GridView;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic]);
+    ?>
     Настройки
 </section>
 <section class="content">

@@ -79,7 +79,7 @@ if(isset($licenses['mercury'])) {
                                 print 'по '.$licenses['rkws_ucs']->td;
                             } else {
                                 print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
-                                print "Пожалуйста, обратитесь к вашему дилеру UCS.</p>";
+                                print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>";
                             }
                             ?>
 

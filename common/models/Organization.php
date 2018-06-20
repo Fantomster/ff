@@ -3,8 +3,11 @@
 namespace common\models;
 
 use api\common\models\iiko\iikoService;
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
+use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use Mpdf\Tag\Q;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -1538,6 +1541,23 @@ class Organization extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return integer
+     */
+    public function getVsdCount()
+    {
+        $lic = mercService::getLicense();
+        if($lic == null)
+            return 0;
+
+        try {
+            $guid = mercDicconst::getSetting('enterprise_guid');
+            return MercVsd::find()->where(['guid' => $guid, 'status' => 'CONFIRMED'])->andWhere("consignor <> '$guid'")->count();
+        }catch (\Exception $e)
+        {
+            return 0;
+        }
+    }
 
     public function getOrganizationManagersExportColumns(): array
     {

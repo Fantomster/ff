@@ -18,6 +18,7 @@ use Yii;
  */
 class iikoPconst extends \yii\db\ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -68,5 +69,20 @@ class iikoPconst extends \yii\db\ActiveRecord
     public function getConst()
     {
         return $this->hasOne(IikoDicconst::className(), ['id' => 'const_id']);
+    }
+
+    public static function getSettingsColumn($organization)
+    {
+        $res = self::find()
+            ->select('*')
+            ->join('LEFT JOIN', 'iiko_dicconst', '`iiko_dicconst`.`denom` = "column_number_invoice"')
+            ->where(['org' => $organization])
+            ->andWhere('`iiko_pconst`.`const_id` = `iiko_dicconst`.`id`')
+            ->one();
+        if($res)
+        {
+            return ($res->value == 1)? true:false;
+        }
+
     }
 }

@@ -2,6 +2,9 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use api\common\models\iiko\iikoPconst;
+use api\common\models\RkDicconst;
+use api\common\models\RkPconst;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
@@ -87,8 +90,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionIndex() {
-
-        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+        $way = Yii::$app->request->get('way',0);
        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
 
@@ -104,16 +106,20 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
 
       //  $dataProvider->pagination->pageSize=3;
-        
-        $lic = $this->checkLic();       
-        
-        $vi = $lic ? 'index' : '/default/_nolic';
+
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                'visible' =>RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
+                        'licucs' => $licucs,
                         'way' => $way,
             ]);
         } else {
@@ -121,6 +127,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                    'visible' =>RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
+                        'licucs' => $licucs,
                         'way' => $way,
 
             ]);

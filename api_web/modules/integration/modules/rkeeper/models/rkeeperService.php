@@ -15,7 +15,6 @@ use yii\web\BadRequestHttpException;
 
 class rkeeperService extends WebApi implements ServiceInterface
 {
-
     /**
      * Название сервиса
      * @return string
@@ -34,6 +33,10 @@ class rkeeperService extends WebApi implements ServiceInterface
         return RkService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
+    /**
+     * Статус лицензии сервиса
+     * @return bool
+     */
     public function getLicenseMixCartActive()
     {
         $license = $this->getLicenseMixCart();
@@ -47,6 +50,7 @@ class rkeeperService extends WebApi implements ServiceInterface
 
     /**
      * Настройки
+     * @return array
      */
     public function getSettings()
     {
@@ -81,12 +85,18 @@ class rkeeperService extends WebApi implements ServiceInterface
         return $result;
     }
 
+    /**
+     * Установка настроек
+     * @param $params
+     * @return array|mixed
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
     public function setSettings($params)
     {
         if (empty($params)) {
             throw new BadRequestHttpException('Empty params settings');
         }
-
         foreach ($params as $key => $value) {
             if ($model = RkDicconst::findOne(['denom' => $key])) {
                 $pmodel = RkPconst::findOne(['const_id' => $model->id, 'org' => $this->user->organization->id]);
@@ -96,18 +106,14 @@ class rkeeperService extends WebApi implements ServiceInterface
                         'org' => $this->user->organization->id
                     ]);
                 }
-
                 $pmodel->value = (string)$value;
-
                 if (!$pmodel->validate() || !$pmodel->save()) {
                     throw new ValidationException($pmodel->getFirstErrors());
                 }
-
             } else {
                 throw new BadRequestHttpException('Not found ' . $key . ' param!!!');
             }
         }
-
         return $this->getSettings();
     }
 
@@ -126,7 +132,6 @@ class rkeeperService extends WebApi implements ServiceInterface
                 }
             }
         }
-
         return [
             'waiting' => (int)RkWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
             'not_formed' => $result

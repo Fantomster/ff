@@ -15,7 +15,6 @@ class iikoStore extends WebApi
     public function list($param)
     {
         $query = iikoStore_AR::find()->where(['org_id' => $this->user->organization->id]);
-
         if (isset($param['search'])) {
             if (isset($param['search']['name'])) {
                 $query->andWhere(['like', 'denom', ':d', [':d' => $param['search']['name']]]);
@@ -24,16 +23,13 @@ class iikoStore extends WebApi
                 $query->andWhere(['is_active' => $param['search']['is_active']]);
             }
         }
-
         $models = $query->all();
-
         $result = [];
         if (!empty($models)) {
             foreach ($models as $model) {
                 $result[] = $this->prepareStore($model);
             }
         }
-
         return $result;
     }
 

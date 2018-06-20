@@ -1,6 +1,9 @@
 # yii console command
 /yii
 
+# yii console command
+/vagrant/nginx/log/backend-access.log
+
 # ignore local configs
 *.local.php
 

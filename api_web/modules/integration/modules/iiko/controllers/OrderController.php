@@ -11,7 +11,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/order/list",
-     *     tags={"Integration/iiko"},
+     *     tags={"Integration/iiko/order"},
      *     summary="Список завершенных заказов",
      *     description="Список завершенных заказов",
      *     produces={"application/json"},
@@ -25,7 +25,6 @@ class OrderController extends WebApiController
      *                  property="request",
      *                  default={
      *                              "search": {
-     *                                  "user_id": 1,
      *                                  "order_id": 1,
      *                                  "num_code": 7777,
      *                                  "store_denom": "Не указано",
@@ -79,10 +78,9 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('IikoWebApi')->getCompletedOrdersList($this->request);
     }
 
-
     /**
-     * @SWG\Post(path="/integration/iiko/order/order-waybills-list",
-     *     tags={"Integration/iiko"},
+     * @SWG\Post(path="/integration/iiko/order/waybills-list",
+     *     tags={"Integration/iiko/order"},
      *     summary="Список Накладных к заказу",
      *     description="Список Накладных к заказу",
      *     produces={"application/json"},
@@ -123,7 +121,7 @@ class OrderController extends WebApiController
      *     )
      * )
      */
-    public function actionOrderWaybillsList()
+    public function actionWaybillsList()
     {
         $this->response = $this->container->get('IikoWebApi')->getOrderWaybillsList($this->request);
     }

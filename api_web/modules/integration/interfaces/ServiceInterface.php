@@ -17,10 +17,16 @@ interface ServiceInterface
     public function getLicenseMixCart();
 
     /**
+     * @return bool
+     */
+    public function getLicenseMixCartActive();
+
+    /**
      * Настройки
      * @return mixed
      */
     public function getSettings();
+    public function setSettings($params);
 
     /**
      * Список опций, отображаемых на главной странице интеграции

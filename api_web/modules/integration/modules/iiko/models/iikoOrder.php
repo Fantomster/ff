@@ -58,20 +58,21 @@ class iikoOrder extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        $order_id = (int)$post['order_id'];
+        $order_id = isset($post['order_id']) ? (int)$post['order_id'] : null;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
-        if (!$ord) {
-            throw new BadRequestHttpException('No order with ID ' . $order_id);
-        }
-
         if (isset($post['waybill_id'])){
-
+            $model = iikoWaybill::findOne(['id' => $post['waybill_id']]);
+        }else{
+            $model = new iikoWaybill();
         }
-        $model = new iikoWaybill();
-        $model->order_id = $order_id;
+        if($order_id){
+            $model->order_id = $order_id;
+        }
         $model->status_id = 1;
-        $model->org = $ord->client_id;
+        if(isset($ord->client_id)){
+            $model->org = $ord->client_id;
+        }
         $model->agent_uuid = $post['agent_uuid'] ?? '';
         $model->num_code = $post['num_code'] ?? null;
         $model->text_code = $post['text_code'] ?? '';

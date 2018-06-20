@@ -175,7 +175,7 @@ class OrderController extends WebApiController
      */
     public function actionCreateWaybill()
     {
-        $this->response = $this->container->get('IikoWebApi')->createWaybill($this->request);
+        $this->response = $this->container->get('IikoWebApi')->handleWaybill($this->request);
     }
 
 

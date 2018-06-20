@@ -4,10 +4,12 @@ namespace api_web\modules\integration\modules\iiko\models;
 
 use api\common\models\iiko\iikoWaybill;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
 use common\models\Order;
 use common\models\search\OrderSearch;
 use Yii;
+use yii\web\BadRequestHttpException;
 
 class iikoOrder extends WebApi
 {
@@ -49,17 +51,40 @@ class iikoOrder extends WebApi
 
 
     /**
-     * iiko: Создание накладной
+     * iiko: Создание накладной к заказу
      * @param array $post
      * @return array
      * @throws \Exception
      */
     public function createWaybill(array $post): array
     {
-        if(!isset($post['search']['user_id'])){
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_six', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
+        $order_id = $post['order_id'];
+        $ord = \common\models\Order::findOne(['id' => $order_id]);
+
+        if (!$ord) {
+            throw new BadRequestHttpException('No order with ID ' . $order_id);
         }
-        $arr = (new OrderSearch())->searchWaybillWebApi($post);
-        return $arr;
+
+        $model = new iikoWaybill();
+        $model->order_id = $order_id;
+        $model->status_id = 1;
+        $model->org = $ord->client_id;
+        $model->agent_uuid = $post['agent_uuid'] ?? '';
+        $model->num_code = $post['num_code'] ?? null;
+        $model->text_code = $post['text_code'] ?? '';
+        $model->store_id = $post['store_id'] ?? null;
+        $model->doc_date = $post['doc_date'] ?? '';
+        $model->note = $post['note'] ?? '';
+        try{
+            $model->validate();
+        }catch (ValidationException $e){
+            throw new BadRequestHttpException($e->getMessage());
+        }
+        $model->save();
+
+        return [
+            'success' => true,
+            'waybill_id' => $model->id
+        ];
     }
 }

@@ -36,7 +36,7 @@ class IikoWebApi extends WebApi
 
 
     /**
-     * iiko: Создание накладной
+     * iiko: Создание накладной к заказу
      * @param array $post
      * @return array
      * @throws BadRequestHttpException

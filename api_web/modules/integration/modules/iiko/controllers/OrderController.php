@@ -130,8 +130,8 @@ class OrderController extends WebApiController
     /**
      * @SWG\Post(path="/integration/iiko/order/create-waybill",
      *     tags={"Integration/iiko/order"},
-     *     summary="Создание накладной",
-     *     description="Создание накладной",
+     *     summary="Создание накладной к заказу",
+     *     description="Создание накладной к заказу",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -142,7 +142,7 @@ class OrderController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                              "org": 1,
+     *                              "order_id": 1,
      *                              "num_code": 2222,
      *                              "text_code": "Не указано",
      *                              "agent_uuid": "91e0dd93-0923-4509-9435-6cc6224768af",

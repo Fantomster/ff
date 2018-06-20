@@ -46,36 +46,37 @@ class iikoWaybillDataSearch extends iikoWaybillData
      */
     public function search($params)
     {
-        $dbname = explode("=", Yii::$app->db->dsn);
-        $dbname = $dbname[2];
         $query = iikoWaybillData::find()
             ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
             ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
-           // ->leftJoin($dbname.'.catalog_base_goods', 'catalog_base_goods.id = product_id')
             ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
+
+        foreach ($query as $key=>$value)
+        {
+            $data = $value->attributes;
+            $data['fproductnameProduct'] = $value->fproductnameProduct;
+            $arr[$key] = $data;
+        }
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'allModels' => $query,
 
         ]);
 
-       /* $dataProvider->setSort([
+       $dataProvider->setSort([
             'attributes' => [
                 'product_id'=>[
                     'asc' => ['catalog_base_goods.id' => SORT_ASC],
                     'desc' => ['catalog_base_goods.id' => SORT_DESC],
                 ],
-                'fproductnameProduct' => [
-                    'desc' => ['catalog_base_goods.product' => SORT_DESC],
-                    'asc' => ['catalog_base_goods.product' => SORT_ASC],
-                ]
+                'fproductnameProduct'
             ],
             'defaultOrder' => [
                 'fproductnameProduct' => SORT_ASC
             ],
-        ]);*/
+        ]);
 
         $this->load($params);
 

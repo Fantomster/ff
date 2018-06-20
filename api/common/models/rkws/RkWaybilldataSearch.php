@@ -4,8 +4,8 @@ namespace api\common\models\rkws;
 
 use Yii;
 use yii\base\Model;
-use yii\data\ActiveDataProvider;
 use api\common\models\RkWaybilldata;
+use yii\data\ArrayDataProvider;
 
 /**
  * RkWaybilldataSearch represents the model behind the search form of `\api\common\models\RkWaybilldata`.
@@ -42,26 +42,29 @@ class RkWaybilldataSearch extends RkWaybilldata
      */
     public function search($params)
     {
-        $dbname = explode("=", Yii::$app->db->dsn);
-        $dbname = $dbname[2];
+        $arr = [];
 
         $query = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => Yii::$app->request->get('waybill_id')])
-            ->leftJoin('rk_product', 'rk_product.id = product_rid')
-            ->leftJoin($dbname.'.catalog_base_goods', 'catalog_base_goods.id = product_id');
+            ->leftJoin('rk_product', 'rk_product.id = product_rid')->all();
+
+        foreach ($query as $key=>$value)
+        {
+            $data = $value->attributes;
+            $data['fproductnameProduct'] = $value->fproductnameProduct;
+            $arr[$key] = $data;
+        }
+        //die(print_r($arr));
 
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $query,
         ]);
 
         $dataProvider->setSort([
                 'attributes' => [
                     'product_id',
-                    'fproductnameProduct' => [
-                        'desc' => ['catalog_base_goods.product' => SORT_DESC],
-                        'asc' => ['catalog_base_goods.product' => SORT_ASC],
-                    ]
+                    'fproductnameProduct'
                 ],
                 'defaultOrder' => [
                     'fproductnameProduct' => SORT_ASC

@@ -134,6 +134,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 $cache = \Yii::$app->cache;
                 $cache->delete('vetDocRaw_' . $uuid);
                 $cache->delete('vetDoc_' . $uuid);
+                Yii::$app->session->setFlash('success', 'ВСД успешно обработан');
 
                 if (Yii::$app->request->isAjax)
                     return true;
@@ -171,8 +172,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
-
-        Yii::$app->session->setFlash('success', 'ВСД успешно обработан');
 
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [

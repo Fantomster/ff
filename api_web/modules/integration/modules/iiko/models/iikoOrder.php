@@ -58,7 +58,7 @@ class iikoOrder extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        $order_id = $post['order_id'];
+        $order_id = (int)$post['order_id'];
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
         if (!$ord) {
@@ -78,12 +78,10 @@ class iikoOrder extends WebApi
         $model->store_id = $post['store_id'] ?? null;
         $model->doc_date = $post['doc_date'] ?? '';
         $model->note = $post['note'] ?? '';
-        try{
-            $model->validate();
-        }catch (ValidationException $e){
-            throw new BadRequestHttpException($e->getMessage());
+
+        if (!$model->validate() || !$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
         }
-        $model->save();
 
         return [
             'success' => true,

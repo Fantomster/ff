@@ -1,10 +1,11 @@
 <?php
 
-namespace api_web\modules\integration\modules\iiko\models;
+namespace api_web\modules\integration\modules\rkeeper\models;
 
-use api\common\models\iiko\iikoDicconst;
-use api\common\models\iiko\iikoPconst;
-use api\common\models\iiko\iikoWaybill;
+use api\common\models\RkDicconst;
+use api\common\models\RkPconst;
+use api\common\models\RkService;
+use api\common\models\RkWaybill;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
@@ -12,7 +13,7 @@ use common\models\Order;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
-class iikoService extends WebApi implements ServiceInterface
+class rkeeperService extends WebApi implements ServiceInterface
 {
 
     /**
@@ -21,23 +22,25 @@ class iikoService extends WebApi implements ServiceInterface
      */
     public function getServiceName()
     {
-        return 'iiko';
+        return 'R-Keeper';
     }
 
     /**
      * Информация о лицензии MixCart
-     * @return \api\common\models\iiko\iikoService|array|null|\yii\db\ActiveRecord
+     * @return RkService
      */
     public function getLicenseMixCart()
     {
-        return \api\common\models\iiko\iikoService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
+        return RkService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
     public function getLicenseMixCartActive()
     {
         $license = $this->getLicenseMixCart();
-        if ($license->status_id == 1) {
-            return true;
+        if ($license) {
+            if ($license->status_id == 1) {
+                return true;
+            }
         }
         return false;
     }
@@ -48,9 +51,9 @@ class iikoService extends WebApi implements ServiceInterface
     public function getSettings()
     {
         $query = (new Query())->select(['denom', 'comment', 'type', 'value'])
-            ->from(iikoDicconst::tableName())
-            ->leftJoin(iikoPconst::tableName(), iikoDicconst::tableName() . '.id = ' . iikoPconst::tableName() . '.const_id')
-            ->orderBy(iikoDicconst::tableName() . '.id')
+            ->from(RkDicconst::tableName())
+            ->leftJoin(RkPconst::tableName(), RkDicconst::tableName() . '.id = ' . RkPconst::tableName() . '.const_id')
+            ->orderBy(RkDicconst::tableName() . '.id')
             ->all(\Yii::$app->db_api);
 
         $result = [];
@@ -70,6 +73,8 @@ class iikoService extends WebApi implements ServiceInterface
                 case 3:
                     $r['value'] = str_pad('', strlen($row['value']), '*');
                     break;
+                default:
+                    $r['value'] = $row['value'];
             }
             $result[] = $r;
         }
@@ -78,22 +83,21 @@ class iikoService extends WebApi implements ServiceInterface
 
     public function setSettings($params)
     {
-
         if (empty($params)) {
             throw new BadRequestHttpException('Empty params settings');
         }
 
         foreach ($params as $key => $value) {
-            if ($model = iikoDicconst::findOne(['denom' => $key])) {
-                $pmodel = iikoPconst::findOne(['const_id' => $model->id, 'org' => $this->user->organization->id]);
+            if ($model = RkDicconst::findOne(['denom' => $key])) {
+                $pmodel = RkPconst::findOne(['const_id' => $model->id, 'org' => $this->user->organization->id]);
                 if (empty($pmodel)) {
-                    $pmodel = new iikoPconst([
+                    $pmodel = new RkPconst([
                         'const_id' => $model->id,
                         'org' => $this->user->organization->id
                     ]);
                 }
 
-                $pmodel->value = $value;
+                $pmodel->value = (string)$value;
 
                 if (!$pmodel->validate() || !$pmodel->save()) {
                     throw new ValidationException($pmodel->getFirstErrors());
@@ -117,14 +121,14 @@ class iikoService extends WebApi implements ServiceInterface
         $orders = Order::find()->where(['status' => Order::STATUS_DONE, 'client_id' => $this->user->organization->id])->all();
         if (!empty($orders)) {
             foreach ($orders as $order) {
-                if (!iikoWaybill::find()->where(['order_id' => $order->id])->exists()) {
+                if (!RkWaybill::find()->where(['order_id' => $order->id])->exists()) {
                     $result++;
                 }
             }
         }
 
         return [
-            'waiting' => (int)iikoWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
+            'waiting' => (int)RkWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
             'not_formed' => $result
         ];
     }

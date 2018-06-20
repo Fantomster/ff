@@ -5,7 +5,7 @@ namespace api_web\classes;
 use api\common\models\iiko\iikoWaybill;
 use api_web\components\WebApi;
 use api_web\modules\integration\interfaces\ServiceInterface;
-use common\models\search\OrderSearch;
+use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use yii\base\Exception;
 use Yii;
 
@@ -13,7 +13,8 @@ class IntegrationWebApi extends WebApi
 {
 
     private static $service = [
-        \api_web\modules\integration\modules\iiko\models\iikoService::class
+        \api_web\modules\integration\modules\iiko\models\iikoService::class,
+        rkeeperService::class
     ];
 
     /**
@@ -34,12 +35,17 @@ class IntegrationWebApi extends WebApi
                 throw new Exception(get_class($service) . ' not implements ServiceInterface');
             }
 
+            $license = $this->prepareLicense($service->getLicenseMixCart());
+            $license['status'] = $service->getLicenseMixCartActive() === true ? 'Активна' : "Не активна";
+
             $result[] = [
                 'service' => $service->getServiceName(),
                 'image' => \Yii::$app->params['web'] . 'images/' . $service->getServiceName() . '.jpg',
-                'license' => $this->prepareLicense($service->getLicenseMixCart()),
+                'license' => $license,
                 'options' => $service->getOptions()
             ];
+
+
         }
         return ['services' => $result];
     }
@@ -53,14 +59,12 @@ class IntegrationWebApi extends WebApi
     {
         if (!empty($model)) {
             return [
-                "status" => $model->status_id == 2 ? 'Активна' : "Не активна",
                 "from" => date('d.m.Y', strtotime($model->fd)),
                 "to" => date('d.m.Y', strtotime($model->td)),
                 "number" => $model->id
             ];
         }
         return [
-            "status" => "Не активна",
             "from" => null,
             "to" => null,
             "number" => null

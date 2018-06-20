@@ -83,7 +83,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
     public function getCorr() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        return RkAgent::find()->andWhere('rid = :corr_rid and acc = :acc', [':corr_rid' => $this->corr_rid, ':acc' => Yii::$app->user->identity->organization_id])->one();
+        $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
+        return RkAgent::find()->andWhere('rid = :corr_rid and acc = :acc', [':corr_rid' => $this->corr_rid, ':acc' => $acc])->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
@@ -91,7 +92,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
     public function getStore() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        return RkStoretree::find()->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => Yii::$app->user->identity->organization_id])->one();
+        $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
+        return RkStoretree::find()->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => $acc])->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }

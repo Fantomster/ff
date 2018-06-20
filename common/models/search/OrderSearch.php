@@ -427,7 +427,7 @@ class OrderSearch extends Order
        }
 
        if($storeDenom){
-           $query->leftJoin('db_api.iiko_store', $dbName . '.iiko_waybill.store_id=' . $dbName . '.iiko_store.id');
+           $query->leftJoin($dbName . '.iiko_store', $dbName . '.iiko_waybill.store_id=' . $dbName . '.iiko_store.id');
            $query->andWhere([$dbName . '.iiko_store.denom' => $storeDenom]);
        }
        $count = $query->count();

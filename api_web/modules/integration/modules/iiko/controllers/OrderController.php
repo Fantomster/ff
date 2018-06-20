@@ -127,5 +127,54 @@ class OrderController extends WebApiController
     }
 
 
-
+    /**
+     * @SWG\Post(path="/integration/iiko/order/create-waybill",
+     *     tags={"Integration/iiko/order"},
+     *     summary="Создание накладной",
+     *     description="Создание накладной",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "org": 1,
+     *                              "num_code": 2222,
+     *                              "text_code": "Не указано",
+     *                              "agent_uuid": "91e0dd93-0923-4509-9435-6cc6224768af",
+     *                              "store_id": 777,
+     *                              "doc_date": "2018-06-23 09:00:00",
+     *                              "note": "New waybill"
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true,
+     *                "waybill_id": 2222,
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCreateWaybill()
+    {
+        $this->response = $this->container->get('IikoWebApi')->createWaybill($this->request);
+    }
 }

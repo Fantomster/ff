@@ -12,10 +12,10 @@ class RkeeperWebApi extends WebApi
      * @param array $post
      * @return array
      */
-   /* public function getOrderWaybillsList(array $post): array
+    public function getOrderWaybillsList(array $post): array
     {
-        return (new iikoOrder())->getOrderWaybillsList($post);
-    }*/
+        return (new rkeeperOrder())->getOrderWaybillsList($post);
+    }
 
     /**
      * rkeeper: Завершенные заказы

@@ -510,7 +510,7 @@ class OrderSearch extends Order
         }
 
         if($storeDenom){
-            $query->leftJoin($dbName . '.rk_store', $dbName . '.rk_waybill.store_id=' . $dbName . '.rk_store.id');
+            $query->leftJoin($dbName . '.rk_store', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_store.rid');
             $query->andWhere([$dbName . '.rk_store.denom' => $storeDenom]);
         }
 

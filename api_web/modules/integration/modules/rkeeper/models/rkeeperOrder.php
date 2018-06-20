@@ -2,7 +2,7 @@
 
 namespace api_web\modules\integration\modules\rkeeper\models;
 
-use api\common\models\iiko\iikoWaybill;
+use api\common\models\RkWaybill;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
@@ -19,22 +19,22 @@ class rkeeperOrder extends WebApi
      * @return array
      * @throws \Exception
      */
-    /*public function getOrderWaybillsList(array $post)
+    public function getOrderWaybillsList(array $post)
     {
         $orderID = $post['order_id'];
-        $iikoWaybill = iikoWaybill::find()->where(['order_id' => $orderID])->andWhere('status_id > 1')->all();
+        $rkWaybill = RkWaybill::find()->where(['order_id' => $orderID])->andWhere('status_id > 1')->all();
         $arr = [];
         $i = 0;
-        foreach ($iikoWaybill as $item) {
+        foreach ($rkWaybill as $item) {
             $arr[$i]['num_code'] = $item->num_code;
-            $arr[$i]['agent_denom'] = $item->agent->denom ?? 'Не указано';
+            $arr[$i]['agent_denom'] = $item->corr->denom ?? 'Не указано';
             $arr[$i]['store_denom'] = $item->store->denom ?? 'Не указано';
             $arr[$i]['doc_date'] = \Yii::$app->formatter->format($item->doc_date, 'date');
             $arr[$i]['status_denom'] = $item->status->denom;
             $i++;
         }
         return $arr;
-    }*/
+    }
 
     /**
      * rkeeper: Завершенные заказы

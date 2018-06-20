@@ -75,4 +75,52 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('RkeeperWebApi')->getCompletedOrdersList($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/rkeeper/order/waybills-list",
+     *     tags={"Integration/rkeeper/order"},
+     *     summary="Список Накладных к заказу",
+     *     description="Список Накладных к заказу",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "order_id": 1
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "num_code": 2222,
+     *                "agent_denom": "Не указано",
+     *                "store_denom": "Не указано",
+     *                "doc_date": "23 июня 2018 г.",
+     *                "status_denom": "Выгружена"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionWaybillsList()
+    {
+        $this->response = $this->container->get('RkeeperWebApi')->getOrderWaybillsList($this->request);
+    }
+
 }

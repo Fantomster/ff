@@ -7,6 +7,7 @@ use api\common\models\merc\mercService;
 use api\common\models\RkServicedata;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
@@ -99,6 +100,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public $resourceCategory = 'org-picture';
     public $manager_ids;
+    public $gln_code;
 
     /**
      * @inheritdoc
@@ -130,6 +132,7 @@ class Organization extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
+            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
         ];
@@ -218,6 +221,18 @@ class Organization extends \yii\db\ActiveRecord
     public function getRelationUserOrganization()
     {
         return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
+    }
+
+
+    public function getEdiOrganization(): ActiveQuery
+    {
+        return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
+    }
+
+
+    public function getGlnCode()
+    {
+        return $this->ediOrganization->gln_code;
     }
 
 
@@ -1505,7 +1520,12 @@ class Organization extends \yii\db\ActiveRecord
         $result = [];
         $lic = RkServicedata::getLicense();
         if($lic != null)
-            $result['rkws'] = $lic;
+            {
+                $result['rkws'] = $lic;
+                $org=$lic['service_id'];
+                $lic_ucs = RkServicedata::getLicenseUcs($org);
+                $result['rkws_ucs'] = $lic_ucs;
+            }
 
         $lic = iikoService::getLicense();
         if($lic != null)
@@ -1516,6 +1536,29 @@ class Organization extends \yii\db\ActiveRecord
             $result['mercury'] = $lic;
 
         return $result;
+    }
+
+
+    public function getOrganizationManagersExportColumns(): array
+    {
+        return [
+            [
+                'label' => Yii::t('app', 'common.models.number', ['ru' => 'Номер']),
+                'value' => 'id',
+            ],
+            [
+                'label' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru' => 'ФИО']),
+                'value' => 'profile.full_name',
+            ],
+            [
+                'label' => Yii::t('app', 'franchise.views.organization.contact_email', ['ru' => 'Email контактного лица']),
+                'value' => 'email',
+            ],
+            [
+                'label' => Yii::t('app', 'common.models.phone_two', ['ru' => 'Телефон']),
+                'value' => 'profile.phone',
+            ],
+        ];
     }
 
 }

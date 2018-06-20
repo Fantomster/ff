@@ -39,7 +39,11 @@ Modal::widget([
     ])
     ?>
 </section>
-
+<section class="content-header">
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic]);
+    ?>
+</section>
 <section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru'=>'Список ВСД"']) ?>:</h4>
 </section>

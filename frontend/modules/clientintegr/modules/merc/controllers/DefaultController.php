@@ -33,11 +33,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if(!mercDicconst::checkSettings())
             return $this->redirect(['/clientintegr/merc/settings']);
 
+        $lic = mercService::getLicense();
         $searchModel  = new vetDocumentsList();
         $searchModel->load(Yii::$app->request->get());
         $dataProvider = $searchModel->getArrayDataProvider();
         $params = ['searchModel' => $searchModel,
-            'dataProvider' => $dataProvider];
+            'dataProvider' => $dataProvider,
+            'lic' => $lic];
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
         } else {

@@ -232,10 +232,10 @@ class UserWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function getAllOrganization(): array
+    public function getAllOrganization($searchString = null, $showEmpty = false): array
     {
-        $list_organisation = $this->user->getAllOrganization();
-        if (empty($list_organisation)) {
+        $list_organisation = $this->user->getAllOrganization($searchString);
+        if (empty($list_organisation) && !$showEmpty) {
             throw new BadRequestHttpException('Нет доступных организаций');
         }
 
@@ -645,6 +645,8 @@ class UserWebApi extends \api_web\components\WebApi
         return [
             'id' => (int)$model->vendor->id,
             'name' => $model->vendor->name ?? "",
+            'contact_name' => $model->vendor->contact_name ?? "",
+            'inn' => $model->vendor->inn ?? null,
             'cat_id' => (int)$model->cat_id,
             'email' => $model->vendor->email ?? "",
             'phone' => $model->vendor->phone ?? "",

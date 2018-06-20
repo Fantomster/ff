@@ -36,6 +36,7 @@ yii\widgets\Pjax::begin(['id' => 'emails-pjax-container']);
 
 echo \kartik\grid\GridView::widget([
     'dataProvider' => $additional_email,
+    'emptyText' => Yii::t('app', 'No results found'),
     'columns' => [
         'email:email',
         [

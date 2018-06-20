@@ -91,6 +91,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'koef' => Yii::t('app', 'Коэфф.'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
         ];
     }
 
@@ -146,8 +147,12 @@ class iikoWaybillData extends \yii\db\ActiveRecord
 
     public function getFproductname()
     {
-        $prod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id]);
-        return $prod;
+        return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
+    }
+
+    public function getFproductnameProduct()
+    {
+        return $this->fproductname->product;
     }
 
     /**

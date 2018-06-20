@@ -74,12 +74,6 @@ $this->registerJs(
                 
                 if (clicked.hasClass("create")) {
                     var vendor_id = clicked.data("id")
-                    if($("input[data-vendor_id=\'" + vendor_id +"\']").val() == "")
-                    {
-                        swal({title: "'.Yii::t('message', 'frontend.views.order.order_create_one', ['ru' => 'Заказ не оформлен']).'",
-                         text: "'.Yii::t('message', 'frontend.views.order.order_create_one_get_delivery_date', ['ru' => 'Укажите дату доставки']).'", type: "error"});
-                        return false;
-                    }
                 
                     title = "' . Yii::t('message', 'frontend.views.order.order_create_two', ['ru' => 'Создание заказа']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.will_be_send', ['ru' => 'Заказ будет оформлен и направлен поставщику. Продолжить?']) . ' ";
@@ -419,6 +413,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     ]);
                                     ?>
                                     <?php
+                                    $lang = (Yii::$app->language == 'md') ? 'ro' : Yii::$app->language;
                                     $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_'.$cart['id']);
                                     echo DatePicker::widget([
                                         'name' => '',
@@ -430,6 +425,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         ],
                                         'type' => DatePicker::TYPE_COMPONENT_APPEND,
                                         'layout' => '{picker}{input}{remove}',
+                                        'language' => $lang,
                                         'pluginOptions' => [
                                             'daysOfWeekDisabled' => $cart['vendor']['disabled_delivery_days'],
                                             'format' => 'dd.mm.yyyy',

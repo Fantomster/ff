@@ -3,15 +3,19 @@
 namespace backend\controllers;
 
 use backend\models\TestVendorsSearch;
+use common\models\EdiOrganization;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
 use common\models\guides\Guide;
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\TestVendors;
+use common\models\User;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
+use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -42,7 +46,7 @@ class OrganizationController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating'],
+                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -164,11 +168,21 @@ class OrganizationController extends Controller {
     public function actionUpdate($id) {
         $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
+        $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
+        if(!$ediModel){
+            $ediModel = new EdiOrganization();
+            $ediModel->organization_id = $id;
+            $ediModel->save();
+        }
         $franchiseeList = ArrayHelper::map(Franchisee::find()->all(),'id','legal_entity');
-        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
+            if(strlen($ediModel->pass) < 20){
+                $ediModel->pass = md5($ediModel->pass);
+            }
+            $ediModel->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
+            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList', 'ediModel'));
         }
     }
 
@@ -214,6 +228,47 @@ class OrganizationController extends Controller {
             $model = new FranchiseeAssociate();
         }
         return $model;
+    }
+
+
+    /**
+     * Edit notifications.
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionNotifications(int $id)
+    {
+        Yii::$app->language = 'ru';
+        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id='.$id)->all();
+        if (count(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post();
+            $emails = $post['Email'];
+            foreach ($emails as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                if(isset($post['User'][$userId]['subscribe'])){
+                    $user->subscribe = $post['User'][$userId]['subscribe'];
+                    $user->save();
+                }
+                $emailNotification = $user->emailNotification;
+                foreach ($fields as $key => $value){
+                    $emailNotification->$key = $value;
+                }
+                $emailNotification->save();
+                unset($user);
+            }
+            $sms = $post['Sms'];
+            foreach ($sms as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                $smsNotification = $user->smsNotification;
+                foreach ($fields as $key => $value){
+                    $smsNotification->$key = $value;
+                }
+                $smsNotification->save();
+                unset($user);
+            }
+            return $this->redirect(['view', 'id' => $id]);
+        }
+        return $this->render('notifications', compact('users'));
     }
 
 }

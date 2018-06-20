@@ -2,9 +2,13 @@
 
 namespace api\modules\v1\modules\odinsrest\controllers;
 
+use api\common\models\one_s\OneSGood;
+use api\common\models\one_s\OneSStore;
+use api\common\models\one_s\OneSСontragent;
 use Yii;
+use yii\db\Expression;
 use yii\web\Controller;
-use api\common\models\ApiAccess;
+use api\common\models\one_s\OneSRestAccess;
 use api\common\models\ApiSession;
 use api\common\models\ApiActions;
 use common\models\CatalogBaseGoods;
@@ -69,7 +73,7 @@ class DefaultController extends Controller
 
     /**
      * Hello
-     * @param string $name
+     * @param string $name1
      * @return string
      * @soap
      */
@@ -83,14 +87,13 @@ class DefaultController extends Controller
     /**
      * Get waybills
      * @param string $sessionId
-     * @param string $nonce
      * @return mixed
      * @soap
      */
-    public function getWaybills($sessionId, $nonce)
+    public function getWaybills($sessionId)
     {
 
-        if ($this->check_session($sessionId, $nonce)) {
+        if ($this->check_session($sessionId)) {
 
             return "OK";
 
@@ -114,16 +117,135 @@ class DefaultController extends Controller
 
     }
 
+
+    /**
+     * Send goods list
+     * @param string $sessionId
+     * @param string $body
+     * @return string
+     * @soap
+     */
+    public function sendGoodsList(String $sessionId, String $body): String
+    {
+        return $this->handleData($sessionId, $body, 1);
+    }
+
+
+    /**
+     * Send stores list
+     * @param string $sessionId
+     * @param string $body
+     * @return string
+     * @soap
+     */
+    public function sendStoresList(String $sessionId, String $body): String
+    {
+        return $this->handleData($sessionId, $body, 2);
+    }
+
+
+    /**
+     * Send contragents list
+     * @param string $sessionId
+     * @param string $body
+     * @return string
+     * @soap
+     */
+    public function sendContragentsList(String $sessionId, String $body): String
+    {
+        return $this->handleData($sessionId, $body, 3);
+    }
+    
+    
+    private function handleData(String $sessionId, String $body, int $type): String
+    {
+        $res = $this->check_session($sessionId);
+        if ($res) {
+            $content = json_decode($body);
+            $positions = $content->data ?? null;
+            if(is_iterable($positions)){
+                switch ($type){
+                    case 1:
+                        $modelName = OneSGood::className();
+                        break;
+                    case 2:
+                        $modelName = OneSStore::className();
+                        break;
+                    case 3:
+                        $modelName = OneSСontragent::className();
+                        break;
+                    default:
+                        $modelName = OneSGood::className();
+                }
+                $i = 0;
+                $returnArray = [];
+                foreach ($positions as $position){
+                    if(!$position->is_changed)continue;
+                    $oneSPosition = $modelName::findOne(['org_id'=>$res, 'cid'=>$position->cid]);
+                    if(!$oneSPosition){
+                        $oneSPosition = new $modelName();
+                    }
+                    $oneSPosition->name = $position->name;
+                    $oneSPosition->cid = $position->cid;
+                    $oneSPosition->org_id = $res;
+                    switch ($type){
+                        case 1:
+                            $oneSPosition->parent_id = $position->parent_id;
+                            $oneSPosition->measure = $position->measure;
+                            break;
+                        case 2:
+                            $oneSPosition->address = $position->address;
+                            break;
+                        case 3:
+                            $oneSPosition->inn = $position->inn;
+                            break;
+                        default:
+                            $oneSPosition->parent_id = $position->parent_id;
+                            $oneSPosition->measure = $position->measure;
+                    }
+                    $oneSPosition->updated_at = new Expression('NOW()');
+                    if ($oneSPosition->validate()) {
+                        $oneSPosition->save();
+                    } else {
+                        // validation failed: $errors is an array containing error messages
+                        $errors = $oneSPosition->errors;
+                        $errorsString = "<pre>" . print_r($errors, 1) . "</pre>";
+                        Yii::error($errorsString);
+                        return 'Saving failture';
+                    }
+                    $i++;
+                    $returnArray[$i]['cid'] = $oneSPosition->cid;
+                    $returnArray[$i]['updated_at'] = date('Y-m-d h:i:s');
+                }
+                $arr = [
+                    'updated_count' => $i,
+                    'data' => $returnArray
+                ];
+                $decodedResponse = \GuzzleHttp\json_encode($arr);
+                $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
+                return $decodedResponse;
+            }else{
+                $this->save_action(__FUNCTION__, $sessionId, 0, 'No new goods', $this->ip);
+                return 'No positions has been uploaded.';
+            }
+
+
+        } else {
+            $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);
+            return 'Session error. Active session is not found.';
+        }
+    }
+
+
     /**
      * Close session
      * @param string $sessionId
-     * @param string $nonce
      * @return mixed result
      * @soap
      */
-    public function CloseSession($sessionId, $nonce)
+    public function closeSession(String $sessionId)
     {
-        if ($this->check_session($sessionId, $nonce)) {
+        if ($this->check_session($sessionId)) {
             $sess = ApiSession::find()->where('token = :token and now() between fd and td',
                 [':token' => $sessionId])->one();
 
@@ -144,78 +266,52 @@ class DefaultController extends Controller
 
     /**
      * Soap authorization open session
+     * @param string $login
+     * @param string $pass
      * @return mixed result of auth
      * @soap
      */
-    public function OpenSession()
+    public function openSession(String $login, String $pass)
     {
+        $this->username = $login;
+        $this->password = $pass;
+        if (!$acc = OneSRestAccess::find()->where('login = :username and now() between fd and td', [':username' => $this->username])->one()) {
+            $this->save_action(__FUNCTION__, 0, 0, 'Wrong login', $this->ip);
+            return 'Auth error. Login is not found.';
+        };
 
-       if(!isset($this->username))  $this->username =  (isset($_SERVER['PHP_AUTH_USER'])) ? $_SERVER['PHP_AUTH_USER'] : "";
+        if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
 
-       if (!isset($this->password)) $this->password =  (isset($_SERVER['PHP_AUTH_PW'])) ? $_SERVER['PHP_AUTH_PW'] : "";
+            $sessionId = Yii::$app->getSecurity()->generateRandomString();
+            $oldsess = ApiSession::find()->orderBy('fid DESC')->one();
+            $sess = new ApiSession();
 
-       if (empty($this->username) || empty($this->password)) {
-            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-            header('HTTP/1.0 401 Unauthorized');
-            exit();
-        } else {
-        if ($this->username == "cyborg" && $this->password == "testpass") {
-            return "Welcome to MixCart integration, Cyborg";
-        } else {
-            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-            header('HTTP/1.0 401 Unauthorized');
-            exit();
-        }
-
-        }
-
-        /*
-
-        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) {
-            header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-            header('HTTP/1.0 401 Unauthorized');
-            header('Warning: WSS security in not provided in SOAP header');
-            $this->save_action(__FUNCTION__, 0, 0, 'Auth error HTTP/1.0 401 Unauthorized', $this->ip);
-        } else {
-            if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td', [':username' => $this->username])->one()) {
-                $this->save_action(__FUNCTION__, 0, 0, 'Wrong login', $this->ip);
-                return 'Auth error. Login is not found.';
-            };
-
-            if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
-
-                $sessionId = Yii::$app->getSecurity()->generateRandomString();
-                $oldsess = ApiSession::find()->orderBy('fid DESC')->one();
-                $sess = new ApiSession();
-
-                if ($oldsess) {
-                    $sess->fid = $oldsess->fid + 1;
-                } else {
-                    $sess->fid = 1;
-                }
-
-                $sess->token = $sessionId;
-                $sess->acc = $acc->fid;
-                $sess->nonce = $this->nonce;
-                $sess->fd = gmdate('Y-m-d H:i:s');
-                $sess->td = gmdate('Y-m-d H:i:s', strtotime('+1 day'));
-                $sess->ver = 1;
-                $sess->status = 1;
-                $sess->ip = $this->ip;
-                $sess->extimefrom = gmdate('Y-m-d H:i:s');
-
-                if (!$sess->save()) {
-                    return $sess->errors;
-                } else {
-                    $this->save_action(__FUNCTION__, $sess->token, 1, 'OK', $this->ip);
-                    return 'OK_SOPENED:' . $sess->token;
-                }
+            if ($oldsess) {
+                $sess->fid = $oldsess->fid + 1;
             } else {
-                $this->save_action(__FUNCTION__, 0, 0, 'Wrong password', $this->ip);
-                return 'Auth error. Password is not correct.';
+                $sess->fid = 1;
             }
+
+            $sess->token = $sessionId;
+            $sess->acc = $acc->org;
+            $sess->nonce = $this->nonce;
+            $sess->fd = gmdate('Y-m-d H:i:s');
+            $sess->td = gmdate('Y-m-d H:i:s', strtotime('+1 day'));
+            $sess->ver = 1;
+            $sess->status = 1;
+            $sess->ip = $this->ip;
+            $sess->extimefrom = gmdate('Y-m-d H:i:s');
+
+            if (!$sess->save()) {
+                return $sess->errors;
+            } else {
+                $this->save_action(__FUNCTION__, $sess->token, 1, 'OK', $this->ip);
+                return $sess->token;
+            }
+        } else {
+            $this->save_action(__FUNCTION__, 0, 0, 'Wrong password', $this->ip);
+            return 'Auth error. Password is not correct.';
         }
-        */
     }
 
     /**
@@ -224,14 +320,11 @@ class DefaultController extends Controller
      */
     public function security($header)
     {
-
-
         if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
         {
             header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
             header('HTTP/1.0 401 Unauthorized');
-         //   $this->save_action(__FUNCTION__, 0, 0, 'Auth error HTTP/1.0 401 Unauthorized', $this->ip);
-
+            $this->save_action(__FUNCTION__, 0, 0, 'Auth error HTTP/1.0 401 Unauthorized', $this->ip);
         } else {
             $this->username = $header->UsernameToken->Username;
             $this->password = $header->UsernameToken->Password;
@@ -239,19 +332,19 @@ class DefaultController extends Controller
             $this->extimefrom = $header->UsernameToken->Created;
             return $header;
         }
-
     }
 
     /**
      * @param $session
      * @param $nonce
-     * @return bool
+     * @return int
      */
-    public function check_session($session, $nonce)
+    public function check_session(String $session)
     {
-        if (ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
-            [':token' => $session, ':nonce' => $nonce])->exists()) {
-            return true;
+        $apiSession = ApiSession::find()->where('token = :token and now() between fd and td',
+            [':token' => $session])->one();
+        if ($apiSession) {
+            return $apiSession->acc ?? false;
         } else {
             return false;
         }

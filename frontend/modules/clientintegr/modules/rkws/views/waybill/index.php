@@ -71,7 +71,11 @@ $this->registerCss("
 
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    ЗАВЕРШЕННЫЕ ЗАКАЗЫ
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]);
+    ?>
+
+    ЗАВЕРШЁННЫЕ ЗАКАЗЫ
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -161,6 +165,15 @@ $this->registerCss("
                                                         return ["id" => "way".$data->id];
                                                     }
                                                 ],
+                                            [
+                                                'attribute'=>'invoice_relation',
+                                                'format'=>'raw',
+                                                'visible'=>$visible,
+                                                'header'=>'№ Накладной',
+                                                'value'=>function($data){
+                                                    return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
+                                                }
+                                            ],
                                                 [
                                                     'attribute' => 'vendor.name',
                                                     'value' => 'vendor.name',

@@ -72,6 +72,10 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int franchisee manager role
      */
     const ROLE_FRANCHISEE_MANAGER = 14;
+    /**
+     * @var int franchisee manager role
+     */
+    const ROLE_ONE_S_INTEGRATION = 15;
 
     
     public static function getManagerRole($organization_type) {
@@ -137,7 +141,7 @@ class Role extends \amnah\yii2\user\models\Role {
     {
         $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
         $roleID = $rel->role_id;
-        if($roleID==self::ROLE_RESTAURANT_MANAGER || $roleID==self::ROLE_RESTAURANT_EMPLOYEE){
+        if($roleID==self::ROLE_RESTAURANT_MANAGER || $roleID==self::ROLE_RESTAURANT_EMPLOYEE || $roleID==self::ROLE_ONE_S_INTEGRATION){
             return Organization::TYPE_RESTAURANT;
         }else{
             return Organization::TYPE_SUPPLIER;

@@ -6,6 +6,7 @@ use Yii;
 use yii\web\Controller;
 use api\common\models\RkDicSearch;
 use api\common\models\RkDic;
+use common\models\Organization;
 
 // use yii\mongosoft\soapserver\Action;
 
@@ -31,24 +32,27 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new RkDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         
-        $lic = $this->checkLic();       
-        
-        $vi = $lic ? 'index' : '/default/_nolic';
-        $li = $lic ? $lic->service : null;
-                
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi,[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $li,
+            'lic' => $lic,
+            'licucs' => $licucs,
         ]);
         } else {
             return $this->render($vi,[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $li,
+            'lic' => $lic,
+            'licucs' => $licucs,
         ]);
-        }   
+        }
         
     }
       
@@ -125,19 +129,55 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     // $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
     $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
     $t = strtotime(date('Y-m-d H:i:s',time()));
+    /*print "<pre>";
+    var_dump($lic);
+    print "</pre>";
+    die();*/
     
     if ($lic) {
-       if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
-       $res = $lic; 
-    } else { 
+       /*if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) {*/
+       $res = $lic;
+       /* print "<pre>";
+        var_dump($lic);
+        print "</pre>";
+        die();*/
+    /*} else {
        $res = 0; 
-    }
+    }*/
     } else 
        $res = 0; 
     
     
     return $res ? $res : null;
         
+    }
+
+    protected function checkLicMc() {
+
+        // $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
+        $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
+        $t = strtotime(date('Y-m-d H:i:s',time()));
+        /*print "<pre>";
+        var_dump($lic);
+        print "</pre>";
+        die();*/
+
+        if ($lic) {
+            /*if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) {*/
+            $res = $lic;
+            /* print "<pre>";
+             var_dump($lic);
+             print "</pre>";
+             die();*/
+            /*} else {
+               $res = 0;
+            }*/
+        } else
+            $res = 0;
+
+
+        return $res ? $res : null;
+
     }
   
     public function security($header) {

@@ -2,10 +2,11 @@
 
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
+use api\common\models\iiko\iikoPconst;
+use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
-use yii\data\ActiveDataProvider;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
@@ -16,6 +17,7 @@ use api\common\models\iiko\iikoWaybill;
 use api\common\models\iiko\iikoWaybillData;
 use yii\web\Response;
 use yii\helpers\Url;
+use api\common\models\iikoWaybillDataSearch;
 
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -74,13 +76,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
-
+        $way = Yii::$app->request->get('way',0);
         Url::remember();
-
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-
        // $dataProvider->pagination->pageSize=3;
 
         $lic = iikoService::getLicense();
@@ -89,6 +88,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
+            'visible' =>iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
         ];
 
@@ -103,14 +103,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      * @param $waybill_id
      * @return string
      */
-    public function actionMap($waybill_id)
+    public function actionMap()
     {
-        $records = iikoWaybillData::find()
-            ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
-            ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
-            ->where(['waybill_id' => $waybill_id]);
-
-        $model = iikoWaybill::findOne($waybill_id);
+        $model = iikoWaybill::findOne(Yii::$app->request->get('waybill_id'));
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
@@ -126,14 +121,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $isAndroid = true;
         }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $records,
-            'sort' => [
-                'defaultOrder' => [
-                    'munit' => SORT_ASC
-                ]
-            ],
-        ]);
+        $searchModel = new iikoWaybillDataSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
 
         $lic = iikoService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';

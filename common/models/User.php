@@ -8,6 +8,7 @@
 
 namespace common\models;
 
+use api\common\models\one_s\OneSRestAccess;
 use api_web\classes\UserWebApi;
 use common\components\Mailer;
 use common\models\notifications\EmailBlacklist;
@@ -16,6 +17,7 @@ use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
 use yii\data\ArrayDataProvider;
+use yii\db\Exception;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
@@ -56,8 +58,9 @@ class User extends \amnah\yii2\user\models\User {
             [['newPassword'], 'filter', 'filter' => 'trim'],
             [['newPassword'], 'required', 'on' => ['register', 'reset', 'acceptInvite', 'manageNew']],
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
-            [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
+            [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('app', 'Passwords do not match')],
             // email rules invite client
+            [['email'], 'required', 'message' => Yii::t('message', 'frontend.views.vendor.enter_email', ['ru'=>'Введите E-mail'])],
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru'=>'Введите эл.почту партнера'])],
             [['email'], 'unique', 'on' => ['sendInviteFromVendor2'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
             [['email'],'validateClient', 'on'=>'sendInviteFromActiveVendor'],      // account page
@@ -181,6 +184,9 @@ class User extends \amnah\yii2\user\models\User {
                     }
 
             }
+        }
+        if(!$insert && $this->role_id == Role::ROLE_ONE_S_INTEGRATION){
+            $this->createOneSIntegrationAccount($this->email, $this->password, $this->organization_id);
         }
         parent::afterSave($insert, $changedAttributes);
     }
@@ -548,7 +554,8 @@ class User extends \amnah\yii2\user\models\User {
             Role::ROLE_SUPPLIER_EMPLOYEE,
             Role::ROLE_FRANCHISEE_OWNER,
             Role::ROLE_FRANCHISEE_OPERATOR,
-            Role::ROLE_FRANCHISEE_ACCOUNTANT
+            Role::ROLE_FRANCHISEE_ACCOUNTANT,
+            Role::ROLE_ONE_S_INTEGRATION,
         ];
     }
 
@@ -611,6 +618,44 @@ class User extends \amnah\yii2\user\models\User {
         }else{
             return self::createRelationUserOrganization($userID, $organizationID, $roleID);
         }
+    }
+
+
+    /**
+     * Creating 1C integration account
+     */
+    public function createOneSIntegrationAccount(String $email, String $pass, int $organizationID): bool
+    {
+        try{
+            $apiAccess = OneSRestAccess::findOne(['login' => $email, 'org' => $organizationID]);
+            if(!$apiAccess){
+                $apiAccess = new OneSRestAccess();
+                $apiAccess->login = $email;
+                $apiAccess->fid = $this->id;
+                $apiAccess->password = $pass;
+                $apiAccess->org = $organizationID;
+                $apiAccess->fd = new Expression('NOW()');
+                $apiAccess->td = new Expression('NOW() + INTERVAL 15 YEAR');
+                $apiAccess->is_active = 1;
+                $apiAccess->ver = 1;
+                $apiAccess->loadDefaultValues();
+                if ($apiAccess->validate()) {
+                    $apiAccess->save();
+                } else {
+                    // validation failed: $errors is an array containing error messages
+                    $errors = $apiAccess->errors;
+                    Yii::error("<pre>" . print_r($errors, 1) . "</pre>");
+                }
+
+            }else{
+                $apiAccess->password = $pass;
+                $apiAccess->save();
+            }
+        }catch (Exception $e){
+            Yii::error($e->getMessage());
+            return false;
+        }
+        return true;
     }
 
 
@@ -805,27 +850,40 @@ class User extends \amnah\yii2\user\models\User {
      * Список организаций доступных для пользователя
      * @return array
      */
-    public function getAllOrganization(): array
+    public function getAllOrganization($searchString = null): array
     {
         $userID = $this->id;
         if($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
             $org = Organization::findOne(['id'=>$this->organization_id]);
-            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id])->orWhere(['organization.parent_id'=>$this->organization_id]);
+            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id]);
+            if($searchString){
+                $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
+            }
+            $orgArray = $orgArray->orWhere(['organization.parent_id'=>$this->organization_id]);
             if($org && $org->parent_id != null){
                 $orgArray = $orgArray->orWhere(['organization.id'=>$org->parent_id])->orWhere(['organization.parent_id'=>$org->parent_id]);
             }
-            return $orgArray->orderBy('organization.name')->all();
+            if($searchString){
+                $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
+            }
+            $orgArray = $orgArray->orderBy('organization.name')->all();
+            return $orgArray;
         }else{
-            return Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID])->orderBy('organization.name')->all();
+            $orgArray = Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID]);
+            if($searchString){
+                $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
+            }
+            $orgArray = $orgArray->orderBy('organization.name')->all();
+            return $orgArray;
         }
 
     }
 
 
-    public function getAllOrganizationsDataProvider(): ArrayDataProvider
+    public function getAllOrganizationsDataProvider($searchString = null, $showEmpty = false): ArrayDataProvider
     {
         $dataProvider = new ArrayDataProvider([
-            'allModels' => (new UserWebApi())->getAllOrganization(),
+            'allModels' => (new UserWebApi())->getAllOrganization($searchString, $showEmpty),
             'pagination' => [
                 'pageSize' => 4,
             ],

@@ -67,6 +67,7 @@ class ClientController extends DefaultController {
                         // Allow restaurant managers
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
                             Role::getFranchiseeEditorRoles(),
@@ -96,6 +97,7 @@ class ClientController extends DefaultController {
                         // Allow restaurant managers
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
@@ -199,11 +201,9 @@ class ClientController extends DefaultController {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-
-                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER) {
+                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
                         $user->role_id = $this->currentUser->role_id;
                     }
-
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
@@ -1151,7 +1151,7 @@ class ClientController extends DefaultController {
                 $article = trim($arrCatalogs['dataItem']['article']);
                 $units = trim($arrCatalogs['dataItem']['units']);
                 $price = trim(str_replace(',', '.', $arrCatalogs['dataItem']['price']));
-                $ed = trim($arrCatalogs['dataItem']['ed']);
+                $ed = trim(str_replace('.', ',', $arrCatalogs['dataItem']['ed']));
                 $note = trim($arrCatalogs['dataItem']['note']);
                 array_push($articleArray, (string) $article);
                 if (
@@ -1236,7 +1236,7 @@ class ClientController extends DefaultController {
                     $article = trim($arrCatalogs['dataItem']['article']);
                     $units = trim($arrCatalogs['dataItem']['units']);
                     $price = trim($arrCatalogs['dataItem']['price']);
-                    $ed = trim($arrCatalogs['dataItem']['ed']);
+                    $ed = trim(str_replace('.', ',', $arrCatalogs['dataItem']['ed']));
                     $note = trim($arrCatalogs['dataItem']['note']);
                     //сравниваем массивы каталога и пришедший массив
                     //Если пришедший ID п есть в массиве каталога

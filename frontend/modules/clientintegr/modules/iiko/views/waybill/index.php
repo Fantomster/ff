@@ -30,6 +30,9 @@ $this->title = 'Интеграция с iiko Office';
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic]);
+    ?>
     ЗАВЕРШЕННЫЕ ЗАКАЗЫ
 </section>
 <section class="content">
@@ -49,6 +52,15 @@ $this->title = 'Интеграция с iiko Office';
                                     'contentOptions' => function($data) {
                                         return ["id" => "way".$data->id];
                                     }
+                                ],
+                                [
+                                      'attribute'=>'invoice_relation',
+                                      'format'=>'raw',
+                                    'visible'=>$visible,
+                                    'header'=>'№ Накладной',
+                                        'value'=>function($data){
+                                            return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
+                                        }
                                 ],
                                 [
                                     'attribute' => 'vendor.name',

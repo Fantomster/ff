@@ -51,6 +51,8 @@ class OrderController extends WebApiController
      *              "delivery_price": 0,
      *              "min_order_price": 3191,
      *              "total_price_without_discount": 22,
+     *              "create_user": "User Name",
+     *              "accept_user": "User Name",
      *              "items": {
      *                  {
      *                      "id": 2,

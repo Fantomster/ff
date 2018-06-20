@@ -559,7 +559,8 @@ class OrganizationController extends DefaultController {
             $showButton = true;
             $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
         }
-        return $this->render("show-".$type, compact('organization','dataProvider', 'searchModel', 'managersDataProvider', 'catalog', 'showButton', 'currencyData'));
+        $exportColumns = (new Organization())->getOrganizationManagersExportColumns();
+        return $this->render("show-".$type, compact('organization','dataProvider', 'searchModel', 'managersDataProvider', 'catalog', 'showButton', 'currencyData', 'exportColumns'));
     }
 
 

@@ -106,12 +106,12 @@ Breadcrumbs::widget([
 $columns = array(
     'product_id',
     [
-        'attribute' => 'product_id',
+        'header' => 'Наименование F-keeper',
+        'format' => 'raw',
+        'attribute' => 'fproductname',
         'value' => function ($model) {
             return $model->fproductname->product;
         },
-        'format' => 'raw',
-        'label' => 'Наименование F-keeper',
     ],
     [
         'attribute' => 'product_id',

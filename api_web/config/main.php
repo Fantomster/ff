@@ -67,6 +67,9 @@ return [
                 'default' => 'api_web\controllers\UserController',
             ],
         ],
+        'integration' => [
+            'class' => 'api_web\modules\integration\Module',
+        ]
     ],
     'params' => $params,
 ];

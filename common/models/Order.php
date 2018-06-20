@@ -93,7 +93,7 @@ class Order extends \yii\db\ActiveRecord
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'invoice_number', 'invoice_date'], 'safe'],
+            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -143,6 +143,16 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'accepted_by_id']);
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEdiOrder()
+    {
+        return $this->hasOne(EdiOrder::className(), ['order_id' => 'id']);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -212,9 +222,9 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return int
      */
-    public function getOrderChatUnreadCount()
+    public function getOrderChatUnreadCount($r_id)
     {
-        return count($this->getOrderChat()->where(['viewed' => 0])->all());
+        return OrderChat::find()->where(['order_id' => $this->id, 'viewed' => 0, 'recipient_id' => $r_id])->count();
     }
 
     /**
@@ -494,24 +504,24 @@ class Order extends \yii\db\ActiveRecord
                 }
         }
 
-        //dd($changedAttributes['status']);
-        if ($this->status != self::STATUS_FORMING && !$insert && key_exists('total_price', $changedAttributes)) {
-            //dd($changedAttributes);
+        if ($this->status != self::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == self::STATUS_DONE)) {
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
-            if ($client->gln_code && $vendor->gln_code) {
+            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code)  && isset($vendor->ediOrganization->login)  && isset($vendor->ediOrganization->pass) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $eComIntegration = new EComIntegration();
+                $login = $vendor->ediOrganization->login;
+                $pass = $vendor->ediOrganization->pass;
                 if($this->status == self::STATUS_DONE){
-                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, true);
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass, true);
                 }else{
-                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client);
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass);
                 }
                 if (!$result) {
-                    throw new BadRequestHttpException("EDI Server error");
+                    Yii::error(Yii::t('app', 'common.models.order.edi_error'));
                 }
             }
-            if (!$client->gln_code && $vendor->gln_code) {
+            if ((!isset($client->ediOrganization->gln_code) || empty($client->ediOrganization->gln_code)) && isset($vendor->ediOrganization->gln_code)) {
                 throw new BadRequestHttpException($errorText);
             }
         }
@@ -535,10 +545,15 @@ class Order extends \yii\db\ActiveRecord
     {
         if ($user instanceof User) {
 
-            $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                "/order/view",
-                "id" => $this->id
-            ]);
+            if (Yii::$app instanceof Yii\console\Application){
+                return Yii::$app->params['url'] . "/order/view" . $this->id;
+            }else{
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view/",
+                    "id" => $this->id
+                ]);
+            }
+
 
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([

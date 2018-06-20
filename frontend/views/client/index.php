@@ -257,8 +257,16 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                             'contentOptions'   =>   ['class' => 'small_cell_supp'],
                             'label' => Yii::t('message', 'frontend.views.order.vendor', ['ru'=>'Поставщик']),
                             'format' => 'raw',
-                            'value' => function($data) {
-                                return Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
+                            'value' => function ($data) {
+                                $text = "<div class='col-md-9'>";
+                                $text .= Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
+                                $text .= "</div><div class='col-md-3'>";
+                                if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0) {
+                                    $alt = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
+                                    $text .= Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt]);
+                                }
+                                $text .= "</div>";
+                                return $text;
                             },
                         ] : [
                             'attribute' => 'client.name',

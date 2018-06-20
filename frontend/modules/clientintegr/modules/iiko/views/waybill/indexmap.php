@@ -79,14 +79,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                             'filterPosition' => false,
                             'columns' => [
                                 'product_id',
-                                [
-                                    'attribute' => 'product_id',
-                                    'value' => function ($model) {
-                                        return $model->fproductname->product;
-                                    },
-                                    'format' => 'raw',
-                                    'label' => 'Наименование F-keeper',
-                                ],
+                                'fproductnameProduct',
                                 [
                                     'attribute' => 'product_id',
                                     'value' => function ($model) {

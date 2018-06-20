@@ -45,6 +45,7 @@ class SettingsController extends DefaultController {
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
@@ -58,12 +59,13 @@ class SettingsController extends DefaultController {
         ];
     }
 
-
-    public function actionTest()
-    {
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesList(Yii::$app->params['e_com']['login'], Yii::$app->params['e_com']['pass']);
-        echo "success";
+    public function actionTest(){
+        echo Yii::getVersion();
+//        $eComIntegration = new EComIntegration();
+//        $eComIntegration->handleFilesList();
+//        sleep(3);
+//        $eComIntegration = new EComIntegration();
+//        $eComIntegration->handleFilesListQueue();
     }
 
 

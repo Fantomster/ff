@@ -28,8 +28,12 @@ class ApiHelper  {
     if (!$sess) {
                  echo "SendCurl. Session is not found :((";
                     // !! Потом переписать эту дебажную хрень по всему файлу на DebugHelper
-                 file_put_contents('runtime/logs/rk.log',PHP_EOL.'2222'.PHP_EOL,FILE_APPEND);
-                 exit;
+        try{
+            @file_put_contents('runtime/logs/rk.log',PHP_EOL.'2222'.PHP_EOL,FILE_APPEND);
+        }catch (yii\base\Exception $e){
+            Yii::error($e->getMessage());
+        }
+        exit;
     }
     
     
@@ -37,8 +41,12 @@ class ApiHelper  {
     
         if (empty($cook)) {
                    echo "SendCurl.Session is not found :(";
-                   file_put_contents('runtime/logs/rk.log',PHP_EOL.'33333'.PHP_EOL,FILE_APPEND); 
-                   exit;
+            try{
+                   file_put_contents('runtime/logs/rk.log',PHP_EOL.'33333'.PHP_EOL,FILE_APPEND);
+            }catch (yii\base\Exception $e){
+                Yii::error($e->getMessage());
+            }
+            exit;
         }
     
     $headers = array(

@@ -275,6 +275,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             'responsive' => false,
                             'hover' => true,
                             'resizableColumns' => false,
+                            'summary' => Yii::t('message', 'frontend.views.request.showed_three') . " {begin} - {end} " . Yii::t('app', 'из') . " {totalCount} " . Yii::t('app', 'записей'),
                         ]);
                         ?> 
                         <?php Pjax::end(); ?>

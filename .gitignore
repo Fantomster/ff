@@ -79,3 +79,4 @@ Vagrantfile
 
 /api_web/web/index-test.php
 /api_web/web/index.php
+/api_web/config/.gitignore

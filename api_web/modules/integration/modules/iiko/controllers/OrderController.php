@@ -128,4 +128,58 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('IikoWebApi')->getOrderWaybillsList($this->request);
     }
 
+
+    /**
+     * @SWG\Post(path="/integration/iiko/order/order-waybills-list",
+     *     tags={"Integration/iiko"},
+     *     summary="Список Накладных к заказу",
+     *     description="Список Накладных к заказу",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "org": 1,
+     *                              "num_code": 2222,
+     *                              "text_code": "Не указано",
+     *                              "agent_uuid": "91e0dd93-0923-4509-9435-6cc6224768af",
+     *                              "store_id": 777,
+     *                              "doc_date": "23 июня 2018 г.",
+     *                              "note": "New waybill"
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "num_code": 2222,
+     *                "agent_denom": "Не указано",
+     *                "store_denom": "Не указано",
+     *                "doc_date": "23 июня 2018 г.",
+     *                "status_denom": "Выгружена"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCreateWaybill()
+    {
+        $this->response = $this->container->get('IikoWebApi')->createWaybill($this->request);
+    }
 }

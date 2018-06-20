@@ -415,16 +415,15 @@ class OrderSearch extends Order
        if($actualDelivery){
            $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
        }
-
-       if($numCode){
-           $query->leftJoin('db_api.iiko_waybill', 'db_api.iiko_waybill.order_id=order.id');
-           $query->andWhere(['db_api.iiko_waybill.num_code' => $numCode]);
-       }
-
        if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
            $dbName =  $match[1];
        } else {
            $dbName = 'db_api';
+       }
+
+       if($numCode){
+           $query->leftJoin($dbName . '.iiko_waybill', $dbName . '.iiko_waybill.order_id=order.id');
+           $query->andWhere([$dbName . '.iiko_waybill.num_code' => $numCode]);
        }
 
        if($storeDenom){

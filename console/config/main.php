@@ -20,6 +20,9 @@ return [
                 ],
             ],
         ],
+        'urlManager' => [
+            'baseUrl' => 'http://example.com/'
+        ]
     ],
     'aliases' => [
           '@baseUrl'=>'https://mixcart.ru'

@@ -26,6 +26,9 @@ class AuthHelper extends Object {
     
     public function init() {
 
+        if (Yii::$app instanceof Yii\console\Application)
+        return;
+
         if (Yii::$app->user->isGuest)
             return;
 
@@ -63,9 +66,6 @@ class AuthHelper extends Object {
 
     public function checkAuthBool() {
     
-        if (Yii::$app->request->isPjax) {
-            //return $this->renderPartial('index');
-        } else {
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
         <PARAM name="object_id" val="199990046"/>
@@ -81,17 +81,17 @@ class AuthHelper extends Object {
      //   throw new Exception(print_r($res,true));
         
       if ($res['respcode']['code'] == '0') {
-              file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
-              file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:SUCCESS'.PHP_EOL, FILE_APPEND);   
-              file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
+              file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);
+              file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:SUCCESS'.PHP_EOL, FILE_APPEND);
+              file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND);
           return true;
       } else {
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
-            file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:FAILED'.PHP_EOL, FILE_APPEND);   
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:FAILED'.PHP_EOL, FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND);
       return false;
             }
-    }
+
     }  
  
     public function sendAuth() {
@@ -165,8 +165,8 @@ class AuthHelper extends Object {
     $objectinfo = $array['Error']['@attributes']  ;
     
     if ($cook && $respcode === '0') { 
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
-            file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':SENDAUTH OK RECEIVED'.PHP_EOL, FILE_APPEND);   
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':SENDAUTH OK RECEIVED'.PHP_EOL, FILE_APPEND);
          
         
     $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status = 1')->one();
@@ -197,7 +197,7 @@ class AuthHelper extends Object {
                 if ($sess->save(false) &&  $newsess->save(false)) {
     
                     $transaction->commit();
-                    file_put_contents('runtime/logs/auth.log',PHP_EOL.'NEW SESSION IS CREATED (ID:'.$newsess->id.')'.PHP_EOL,FILE_APPEND); 
+                    file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'NEW SESSION IS CREATED (ID:'.$newsess->id.')'.PHP_EOL,FILE_APPEND);
                 } else {
     
                     var_dump($sess->getErrors());
@@ -219,11 +219,11 @@ class AuthHelper extends Object {
                 var_dump($newsess->getErrors());
                 exit;
         } else {
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.'================='.PHP_EOL,FILE_APPEND);    
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.print_r($objectinfo, true).PHP_EOL,FILE_APPEND);    
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.'================='.PHP_EOL,FILE_APPEND);    
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.print_r($respcode, true).PHP_EOL,FILE_APPEND);                
-            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'================='.PHP_EOL,FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.print_r($objectinfo, true).PHP_EOL,FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'================='.PHP_EOL,FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.print_r($respcode, true).PHP_EOL,FILE_APPEND);
+            file_put_contents(Yii::getAlias('@app').'/runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND);
                
         }
 

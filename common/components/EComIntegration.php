@@ -325,10 +325,14 @@ class EComIntegration
         $supplierGLN = $simpleXMLElement->SUPPLIER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN]);
         if (!$ediOrganization) {
+            mail('otpixto@yandex.ru', '1', '1');
+            Yii::error('error 1');
             return false;
         }
         $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
         if (!$organization || $organization->type_id != Organization::TYPE_SUPPLIER) {
+            mail('otpixto@yandex.ru', '1', '2');
+            Yii::error('error 1');
             return false;
         }
         $baseCatalog = $organization->baseCatalog;

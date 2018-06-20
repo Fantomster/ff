@@ -14,7 +14,6 @@ use yii\web\BadRequestHttpException;
 
 class iikoService extends WebApi implements ServiceInterface
 {
-
     /**
      * Название сервиса
      * @return string
@@ -33,6 +32,10 @@ class iikoService extends WebApi implements ServiceInterface
         return \api\common\models\iiko\iikoService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
+    /**
+     * Статус лицензии сервиса
+     * @return bool
+     */
     public function getLicenseMixCartActive()
     {
         $license = $this->getLicenseMixCart();
@@ -70,19 +73,26 @@ class iikoService extends WebApi implements ServiceInterface
                 case 3:
                     $r['value'] = str_pad('', strlen($row['value']), '*');
                     break;
+                default:
+                    $r['value'] = (string)$row['value'];
             }
             $result[] = $r;
         }
         return $result;
     }
 
+    /**
+     * Установка настроек
+     * @param $params
+     * @return array|mixed
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
     public function setSettings($params)
     {
-
         if (empty($params)) {
             throw new BadRequestHttpException('Empty params settings');
         }
-
         foreach ($params as $key => $value) {
             if ($model = iikoDicconst::findOne(['denom' => $key])) {
                 $pmodel = iikoPconst::findOne(['const_id' => $model->id, 'org' => $this->user->organization->id]);
@@ -92,18 +102,14 @@ class iikoService extends WebApi implements ServiceInterface
                         'org' => $this->user->organization->id
                     ]);
                 }
-
-                $pmodel->value = $value;
-
+                $pmodel->value = (string)$value;
                 if (!$pmodel->validate() || !$pmodel->save()) {
                     throw new ValidationException($pmodel->getFirstErrors());
                 }
-
             } else {
                 throw new BadRequestHttpException('Not found ' . $key . ' param!!!');
             }
         }
-
         return $this->getSettings();
     }
 
@@ -122,7 +128,6 @@ class iikoService extends WebApi implements ServiceInterface
                 }
             }
         }
-
         return [
             'waiting' => (int)iikoWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
             'not_formed' => $result

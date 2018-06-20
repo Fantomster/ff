@@ -36,14 +36,14 @@ class IikoWebApi extends WebApi
 
 
     /**
-     * iiko: Создание накладной к заказу
+     * iiko: Создание или обновление накладной к заказу
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function createWaybill(array $post): array
+    public function handleWaybill(array $post): array
     {
-        return (new iikoOrder())->createWaybill($post);
+        return (new iikoOrder())->handleWaybill($post);
     }
 }

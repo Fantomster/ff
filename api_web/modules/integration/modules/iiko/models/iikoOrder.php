@@ -51,12 +51,12 @@ class iikoOrder extends WebApi
 
 
     /**
-     * iiko: Создание накладной к заказу
+     * iiko: Создание или обновление накладной к заказу
      * @param array $post
      * @return array
      * @throws \Exception
      */
-    public function createWaybill(array $post): array
+    public function handleWaybill(array $post): array
     {
         $order_id = $post['order_id'];
         $ord = \common\models\Order::findOne(['id' => $order_id]);
@@ -65,6 +65,9 @@ class iikoOrder extends WebApi
             throw new BadRequestHttpException('No order with ID ' . $order_id);
         }
 
+        if (isset($post['waybill_id'])){
+
+        }
         $model = new iikoWaybill();
         $model->order_id = $order_id;
         $model->status_id = 1;

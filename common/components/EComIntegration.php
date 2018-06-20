@@ -440,8 +440,16 @@ class EComIntegration
         $catalog->created_at = new Expression('NOW()');
         $catalog->updated_at = new Expression('NOW()');
         $catalog->currency_id = $currency->id ?? 1;
+        try{
+            $catalog->validate();
+        }catch (Exception $e){
+            Yii::error($e->getMessage());
+        }
         $catalog->save();
         $catalogID = $catalog->id;
+        if (!$catalogID){
+            Yii::error($e->getMessage());
+        }
 
         $rel = new RelationSuppRest();
         $rel->rest_org_id = $rest->id;

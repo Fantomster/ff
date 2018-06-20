@@ -33,4 +33,17 @@ class IikoWebApi extends WebApi
     {
         return (new iikoOrder())->getCompletedOrdersList($post);
     }
+
+
+    /**
+     * iiko: Создание накладной
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function createWaybill(array $post): array
+    {
+        return (new iikoOrder())->createWaybill($post);
+    }
 }

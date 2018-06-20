@@ -86,4 +86,20 @@ class iikoOrder extends WebApi implements ServiceInterface
         $arr = (new OrderSearch())->searchWaybillWebApi($post);
         return $arr;
     }
+
+
+    /**
+     * iiko: Создание накладной
+     * @param array $post
+     * @return array
+     * @throws \Exception
+     */
+    public function createWaybill(array $post): array
+    {
+        if(!isset($post['search']['user_id'])){
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_six', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
+        }
+        $arr = (new OrderSearch())->searchWaybillWebApi($post);
+        return $arr;
+    }
 }

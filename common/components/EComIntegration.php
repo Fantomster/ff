@@ -448,7 +448,7 @@ class EComIntegration
         $catalog->save();
         $catalogID = $catalog->id;
         if (!$catalogID){
-            Yii::error($e->getMessage());
+            Yii::error('cat_id is null');
         }
 
         $rel = new RelationSuppRest();

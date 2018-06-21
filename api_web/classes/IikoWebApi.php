@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\iiko\models\iikoAgent;
 use api_web\modules\integration\modules\iiko\models\iikoOrder;
+use api_web\modules\integration\modules\iiko\models\iikoSync;
 
 class IikoWebApi extends WebApi
 {
@@ -47,5 +48,16 @@ class IikoWebApi extends WebApi
     public function getAgentsList(array $post): array
     {
         return (new iikoAgent())->getAgentsList($post);
+    }
+
+
+    /**
+     * iiko: Создание сопоставлений номенклатуры накладной с продуктами MixCart
+     * @param array $post
+     * @return array
+     */
+    public function handleWaybillData(array $post): array
+    {
+        return (new iikoSync())->handleWaybillData($post);
     }
 }

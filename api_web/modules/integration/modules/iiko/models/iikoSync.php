@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\iiko\models;
 
+use api\common\models\iiko\iikoWaybillData;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use api\common\models\iiko\iikoAgent;
@@ -255,5 +256,41 @@ class iikoSync extends WebApi
         }
         //Обновляем колличество полученных объектов
         return iikoProduct::find()->where(['is_active' => 1, 'org_id' => $this->user->organization->id])->count();
+    }
+
+
+    /**
+     * iiko: Создание сопоставлений номенклатуры накладной с продуктами MixCart
+     * @param array $post
+     * @return array
+     */
+    public function handleWaybillData(array $post): array
+    {
+        $waybillData = new iikoWaybillData();
+        $waybillData->waybill_id = $post['waybill_id'];
+        $waybillData->product_id = $post['product_id'];
+        $waybillData->product_rid = $post['product_rid'];
+        $waybillData->munit = $post['munit'];
+        $waybillData->org = $post['org'];
+        $waybillData->vat = $post['vat'];
+        $waybillData->vat_included = $post['vat_included'];
+        $sum = 0 + str_replace(',', '.', $post['sum']);
+        $waybillData->sum = $sum;
+        $quant = 0 + str_replace(',', '.', $post['quant']);
+        $waybillData->quant = $quant;
+        $waybillData->defsum = $post['defsum'];
+        $waybillData->defquant = $post['defquant'];
+        $koef = 0 + str_replace(',', '.', $post['koef']);
+        $waybillData->koef = $koef;
+        $waybillData->linked_at = $post['linked_at'];
+
+        if (!$waybillData->validate() || !$waybillData->save()) {
+            throw new ValidationException($waybillData->getFirstErrors());
+        }
+
+        return [
+                 "success" => true,
+                 "waybill_data_id" => $waybillData->id
+        ];
     }
 }

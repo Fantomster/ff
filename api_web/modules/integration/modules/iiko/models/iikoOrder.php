@@ -82,16 +82,16 @@ class iikoOrder extends WebApi
         $order_id = isset($post['order_id']) ? (int)$post['order_id'] : null;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
-        if (isset($post['waybill_id'])){
+        if (isset($post['waybill_id'])) {
             $model = iikoWaybill::findOne(['id' => $post['waybill_id']]);
-        }else{
+        } else {
             $model = new iikoWaybill();
         }
-        if($order_id){
+        if ($order_id) {
             $model->order_id = $order_id;
         }
         $model->status_id = 1;
-        if(isset($ord->client_id)){
+        if (isset($ord->client_id)) {
             $model->org = $ord->client_id;
         }
         $model->agent_uuid = $post['agent_uuid'] ?? '';
@@ -158,7 +158,7 @@ class iikoOrder extends WebApi
             'koef' => $model->koef,
             'sum_without_nds' => $model->sum,
             'sum' => round($model->sum + ($model->sum * $model->vat / 10000), 2),
-            'nds' => ceil($model->vat/100),
+            'nds' => ceil($model->vat / 100),
         ];
     }
 }

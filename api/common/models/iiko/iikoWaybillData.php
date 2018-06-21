@@ -109,7 +109,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
                     $this->koef = round($this->quant / $this->defquant, 10);
                 }
             } else { // Создание
-            //    $this->koef = 1;
+                //    $this->koef = 1;
             }
             return true;
         } else {
@@ -158,7 +158,8 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProduct() {
+    public function getProduct()
+    {
         return $this->hasOne(iikoProduct::className(), ['id' => 'product_rid']);
     }
 }

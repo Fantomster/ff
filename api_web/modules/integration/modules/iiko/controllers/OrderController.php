@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\iiko\controllers;
 
 use api_web\components\WebApiController;
+use api_web\modules\integration\modules\iiko\models\iikoOrder;
 
 class OrderController extends WebApiController
 {

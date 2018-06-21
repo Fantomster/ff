@@ -78,6 +78,74 @@ class OrderController extends WebApiController
 
 
     /**
+     * @SWG\Post(path="/integration/iiko/order/waybill-get",
+     *     tags={"Integration/iiko/order"},
+     *     summary="Информация о накладной",
+     *     description="Информация о накладной",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "waybill_id":1
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                       {
+     *                          "waybill_id": 2,
+     *                          "order_id": 3899,
+     *                          "num_code": 2222,
+     *                          "agent_denom": "Не указано",
+     *                          "store_denom": "Не указано",
+     *                          "doc_date": "23 июня 2018 г.",
+     *                          "status_denom": "Выгружена",
+     *                          "data": {
+     *                              {
+     *                                  "mixcart_product_id": 4822,
+     *                                  "mixcart_product_name": "Продукт 39",
+     *                                  "mixcart_product_ed": "кг",
+     *                                  "iiko_product_id": 1,
+     *                                  "iiko_product_name": "Бананы",
+     *                                  "iiko_product_ed": "кг",
+     *                                  "order_position_count": 9999999.999,
+     *                                  "iiko_position_count": 9999999.999,
+     *                                  "koef": 1,
+     *                                  "sum_without_nds": 333299999.97,
+     *                                  "sum": 333299999.97,
+     *                                  "nds": 0
+     *                              }
+     *                          }
+     *                      }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionWaybillGet()
+    {
+        $this->response = (new iikoOrder())->getWaybill($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/integration/iiko/order/waybills-list",
      *     tags={"Integration/iiko/order"},
      *     summary="Список Накладных к заказу",
@@ -102,6 +170,7 @@ class OrderController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
+     *                "waybill_id": 2,
      *                "num_code": 2222,
      *                "agent_denom": "Не указано",
      *                "store_denom": "Не указано",

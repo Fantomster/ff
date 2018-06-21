@@ -105,7 +105,7 @@ class Logger
             }
             self::update([
                 'user_id' => $user->id,
-                'organization_id' => $user->organization->id
+                'organization_id' => $user->organization->id ?? null
             ]);
         }
     }

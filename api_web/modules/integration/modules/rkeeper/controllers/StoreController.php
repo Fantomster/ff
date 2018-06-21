@@ -7,8 +7,8 @@ use api_web\components\WebApiController;
 class StoreController extends WebApiController
 {
     /**
-     * @SWG\Post(path="/integration/rkeeper/order/list",
-     *     tags={"Integration/rkeeper/order"},
+     * @SWG\Post(path="/integration/rkeeper/store/list",
+     *     tags={"Integration/rkeeper/store"},
      *     summary="Справочник складов",
      *     description="Справочник складов",
      *     produces={"application/json"},
@@ -21,7 +21,7 @@ class StoreController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                                  "view_type": 1,
+     *                                  "view_type":1
      *                    }
      *              )
      *         )
@@ -37,15 +37,16 @@ class StoreController extends WebApiController
      *                          "name":"Склад 1",
      *                          "type": 0,
      *                          "level": 0,
-     *                          "items" :
-     *                          {
+     *                          "items" : {
+     *                              {
      *                              "id": 33252,
      *                              "rid": 11,
      *                              "name":"Длительного хранения",
      *                              "type": 2,
-     *                              "level": 1,
-     *                          },
-     *                      },
+     *                              "level": 1
+     *                              }
+     *                          }
+     *                      }
      *              }
      *          )
      *     ),
@@ -61,6 +62,6 @@ class StoreController extends WebApiController
      */
     public function actionList()
     {
-        $this->response = $this->container->get('RkeeperWebApi')->geStoreList($this->request);
+        $this->response = $this->container->get('RkeeperWebApi')->getStoreList($this->request);
     }
 }

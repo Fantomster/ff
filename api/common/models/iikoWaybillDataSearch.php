@@ -62,6 +62,7 @@ class iikoWaybillDataSearch extends iikoWaybillData
         // add conditions that should always apply here
 
         $dataProvider = new ArrayDataProvider([
+            'key' => 'id',
             'allModels' => $query,
 
         ]);

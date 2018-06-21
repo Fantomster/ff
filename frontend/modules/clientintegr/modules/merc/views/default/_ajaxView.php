@@ -8,7 +8,7 @@ use api\common\models\merc\mercService;
 <?php
 $lic = mercService::getLicense();
 $timestamp_now=time();
-($lic->status_id==1) && ($timestamp_now<=(time($lic->td))) ? $lic_merc=1 : $lic_merc=0;
+($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

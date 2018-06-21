@@ -42,14 +42,38 @@ $licenses = $user->organization->getLicenseList();
 //print "</pre>";
 $timestamp_now=time();
 if(isset($licenses['rkws'])) {
-    ($licenses['rkws']->status_id == 1) && ($timestamp_now <= (time($licenses['rkws']->td))) ? $rk_us = 1 : $rk_us = 0;
-    ($licenses['rkws_ucs']->status_id==1) && ($timestamp_now<=(time($licenses['rkws_ucs']->td))) ? $rk_lic=1 : $rk_lic=0;
+    $sub0 = explode(' ',$licenses['rkws']->td);
+    $sub1 = explode('-',$sub0[0]);
+    $licenses['rkws']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+    if ($licenses['rkws']->status_id==0) $rk_us=0;
+    if (($licenses['rkws']->status_id==1) and ($timestamp_now<=(strtotime($licenses['rkws']->td)))) $rk_us=3;
+    if (($licenses['rkws']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['rkws']->td)))) $rk_us=2;
+    if (($licenses['rkws']->status_id==1) and ($timestamp_now>(strtotime($licenses['rkws']->td)))) $rk_us=1;
+    $sub0 = explode(' ',$licenses['rkws_ucs']->td);
+    $sub1 = explode('-',$sub0[0]);
+    $licenses['rkws_ucs']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+    if ($licenses['rkws_ucs']->status_id==0) $rk_lic=0;
+    if (($licenses['rkws_ucs']->status_id==1) and ($timestamp_now<=(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=3;
+    if (($licenses['rkws_ucs']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=2;
+    if (($licenses['rkws_ucs']->status_id==1) and ($timestamp_now>(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=1;
 }
 if(isset($licenses['iiko'])) {
-    ($licenses['iiko']->status_id==1) && ($timestamp_now<=(time($licenses['iiko']->td))) ? $lic_iiko=1 : $lic_iiko=0;
+    $sub0 = explode(' ',$licenses['iiko']->td);
+    $sub1 = explode('-',$sub0[0]);
+    $licenses['iiko']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+    if ($licenses['iiko']->status_id==0) $lic_iiko=0;
+    if (($licenses['iiko']->status_id==1) and ($timestamp_now<=(strtotime($licenses['iiko']->td)))) $lic_iiko=3;
+    if (($licenses['iiko']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['iiko']->td)))) $lic_iiko=2;
+    if (($licenses['iiko']->status_id==1) and ($timestamp_now>(strtotime($licenses['iiko']->td)))) $lic_iiko=1;
 }
 if(isset($licenses['mercury'])) {
-    ($licenses['mercury']->status_id==1) && ($timestamp_now<=(time($licenses['mercury']->td))) ? $lic_merc=1 : $lic_merc=0;
+    $sub0 = explode(' ',$licenses['mercury']->td);
+    $sub1 = explode('-',$sub0[0]);
+    $licenses['mercury']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+    if ($licenses['mercury']->status_id==0) $lic_merc=0;
+    if (($licenses['mercury']->status_id==1) and ($timestamp_now<=(strtotime($licenses['mercury']->td)))) $lic_merc=3;
+    if (($licenses['mercury']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['mercury']->td)))) $lic_merc=2;
+    if (($licenses['mercury']->status_id==1) and ($timestamp_now>(strtotime($licenses['mercury']->td)))) $lic_merc=1;
 }
 ?>
 <section class="content">
@@ -67,19 +91,26 @@ if(isset($licenses['mercury'])) {
                             <p class="small">Интеграция с R-keeper STORE HOUSE через White Server (облачная версия)</p>
                         </div>
                         <div class="col-md-3 text-left">
-                            <?php if ($rk_us==1) {
-                                print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
-                                print 'по '.$licenses['rkws']->td."</br>";
-                            } else {
-                                print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
-                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
+                            <?php
+                            switch($rk_us) {
+                                case 0: print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                    print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                case 1: print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с ".$licenses['rkws']->td.".</br>";
+                                    print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                case 2: print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по ".$licenses['rkws']->td."). </br>";
+                                    print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                case 3: print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>(по ".$licenses['rkws']->td."). </br>";
+                                    print "</p></br>"; break;
                             }
-                            if ($rk_lic==1) {
-                                print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
-                                print 'по '.$licenses['rkws_ucs']->td;
-                            } else {
-                                print "<p class=\"small\"> Лицензия MixCart: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
-                                print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>";
+                            switch($rk_lic) {
+                                case 0: print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                    print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>"; break;
+                                case 1: print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с ".$licenses['rkws_ucs']->td.".</br>";
+                                    print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>"; break;
+                                case 2: print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по ".$licenses['rkws_ucs']->td."). </br>";
+                                    print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>"; break;
+                                case 3: print "<p class=\"small\"> Лицензия UCS: ID ".$licenses['rkws_ucs']->code." <strong><span style=\"color:#6ea262\">Активна </span></strong>(по ".$licenses['rkws_ucs']->td."). </br>";
+                                    print "</p></br>"; break;
                             }
                             ?>
 
@@ -100,13 +131,17 @@ if(isset($licenses['mercury'])) {
                             <p class="small">Интеграция с iiko Office</p>
                         </div>
                         <div class="col-md-3 text-left">
-                            <?php if ($lic_iiko==1) {
-                                print "<p class=\"small\"> Лицензия IIKO: ID ".$licenses['iiko']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
-                                print 'по '.$licenses['iiko']->td."</br>";
-                            } else {
-                                print "<p class=\"small\"> Лицензия IIKO: ID ".$licenses['iiko']->id." <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
-                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
-                            }
+                            <?php
+                                switch($lic_iiko) {
+                                    case 0: print "<p class=\"small\"> Лицензия IIKO: ID ".$licenses['iiko']->id." <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 1: print "<p class=\"small\"> Лицензия IIKO: ID ".$licenses['iiko']->id." <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с ".$licenses['iiko']->td.".</br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 2: print "<p class=\"small\"> Лицензия IIKO: ID ".$licenses['iiko']->id." <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по ".$licenses['iiko']->td."). </br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 3: print "<p class=\"small\"> Лицензия IIKO: ID ".$licenses['iiko']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>(по ".$licenses['iiko']->td."). </br>";
+                                        print "</p></br>"; break;
+                                }
                             ?>
                         </div>
                         <div class="col-md-2 text-right">
@@ -140,13 +175,17 @@ if(isset($licenses['mercury'])) {
                             <p class="small"><?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?></p>
                         </div>
                         <div class="col-md-3 text-left">
-                            <?php if ($lic_merc==1) {
-                                print "<p class=\"small\"> Лицензия ВЕТИС Меркурий: ID ".$licenses['mercury']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>";
-                                print 'по '.$licenses['mercury']->td."</br>";
-                            } else {
-                                print "<p class=\"small\"> Лицензия ВЕТИС Меркурий: ID ".$licenses['mercury']->id." <strong><span style=\"color:#dd4b39\">Не активна. </span></strong></br>";
-                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
-                            }
+                            <?php
+                                switch($lic_merc) {
+                                    case 0: print "<p class=\"small\"> Лицензия ВЕТИС Меркурий: ID ".$licenses['mercury']->id." <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 1: print "<p class=\"small\"> Лицензия ВЕТИС Меркурий: ID ".$licenses['mercury']->id." <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с ".$licenses['mercury']->td.".</br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 2: print "<p class=\"small\"> Лицензия ВЕТИС Меркурий: ID ".$licenses['mercury']->id." <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по ".$licenses['mercury']->td."). </br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 3: print "<p class=\"small\"> Лицензия ВЕТИС Меркурий: ID ".$licenses['mercury']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>(по ".$licenses['mercury']->td."). </br>";
+                                        print "</p></br>"; break;
+                                }
                             ?>
                         </div>
                         <div class="col-md-2 text-right">

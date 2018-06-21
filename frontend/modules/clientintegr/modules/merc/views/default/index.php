@@ -46,7 +46,7 @@ Modal::widget([
     <?php
     $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
     $timestamp_now=time();
-    ($lic->status_id==1) && ($timestamp_now<=(time($lic->td))) ? $lic_merc=1 : $lic_merc=0;
+    ($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
     $columns = array (
             [
                 'class' => 'yii\grid\CheckboxColumn',

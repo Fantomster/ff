@@ -70,4 +70,51 @@ class AgentController extends WebApiController
     {
         $this->response = $this->container->get('IikoWebApi')->getAgentsList($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/integration/iiko/agent/update",
+     *     tags={"Integration/iiko/agent"},
+     *     summary="Обновление данных для связи контрагента",
+     *     description="Обновление данных для связи контрагента",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "agent_id": 1,
+     *                              "vendor_id": 256,
+     *                              "store_id": 1
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true,
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdate()
+    {
+        $this->response = $this->container->get('IikoWebApi')->updateAgentData($this->request);
+    }
 }

@@ -26,7 +26,7 @@ class OrderController extends WebApiController
      *                              "search": {
      *                                  "order_id": 1,
      *                                  "num_code": 7777,
-     *                                  "store_denom": "Не указано",
+     *                                  "store_id": 1,
      *                                  "vendor_id": 555,
      *                                  "actual_delivery": "2018-06-23 09:00:00"
      *                              },

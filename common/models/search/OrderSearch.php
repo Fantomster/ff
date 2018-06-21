@@ -394,7 +394,7 @@ class OrderSearch extends Order
        $userID = $post['search']['user_id'];
        $orderID = $post['search']['order_id'] ?? null;
        $numCode = $post['search']['num_code'] ?? null;
-       $storeDenom = $post['search']['store_denom'] ?? null;
+       $storeID = $post['search']['store_id'] ?? null;
        $vendorID = $post['search']['vendor_id'] ?? null;
        $actualDelivery = $post['search']['actual_delivery'] ?? null;
 
@@ -425,9 +425,9 @@ class OrderSearch extends Order
            $query->andWhere([$dbName . '.iiko_waybill.num_code' => $numCode]);
        }
 
-       if($storeDenom){
+       if($storeID){
            $query->leftJoin($dbName . '.iiko_store', $dbName . '.iiko_waybill.id=' . $dbName . '.iiko_store.id');
-           $query->andWhere([$dbName . '.iiko_store.denom' => $storeDenom]);
+           $query->andWhere([$dbName . '.iiko_store.id' => $storeID]);
        }
        $count = $query->count();
        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();

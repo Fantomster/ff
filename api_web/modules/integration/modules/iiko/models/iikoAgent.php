@@ -10,6 +10,7 @@ use common\models\Order;
 use common\models\search\OrderSearch;
 use Yii;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 
 class iikoAgent extends WebApi
 {
@@ -51,4 +52,28 @@ class iikoAgent extends WebApi
         ];
         return $arr;
     }
+
+
+    /**
+     * iiko: Обновление данных для связи контрагента
+     * @param array $post
+     * @return array
+     * @throws \Exception
+     */
+    public function updateAgentData(array $post): array
+    {
+        $agent = \api\common\models\iiko\iikoAgent::findOne(['id' => $post['agent_id']]);
+        if(!$agent){
+            throw new HttpException('No such agent');
+        }
+        $agent->vendor_id = (int)$post['vendor_id'];
+        $agent->store_id = (int)$post['store_id'];
+        if (!$agent->validate() || !$agent->save()) {
+            throw new ValidationException($agent->getFirstErrors());
+        }
+        return [
+          "success" => true
+        ];
+    }
+
 }

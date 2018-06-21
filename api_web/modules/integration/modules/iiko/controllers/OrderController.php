@@ -3,8 +3,6 @@
 namespace api_web\modules\integration\modules\iiko\controllers;
 
 use api_web\components\WebApiController;
-use api_web\modules\integration\modules\iiko\models\iikoOrder;
-use api_web\modules\integration\modules\iiko\models\iikoService;
 
 class OrderController extends WebApiController
 {
@@ -77,6 +75,7 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('IikoWebApi')->getCompletedOrdersList($this->request);
     }
+
 
     /**
      * @SWG\Post(path="/integration/iiko/order/waybills-list",

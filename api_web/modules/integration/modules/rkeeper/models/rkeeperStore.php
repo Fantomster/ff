@@ -15,7 +15,7 @@ class rkeeperStore extends WebApi
      */
     public function getStoreList(array $post)
     {
-        $acc = User::findOne($this->user->id)->organization_id;
+        $acc = $this->user->organization_id;
         $view_type = $post['view_type'];
         $stores = RkStoretree::find()->andWhere('acc = :acc and active = 1', [':acc' => $acc])->addOrderBy('root, lft')->asArray()->all();
         $arr = [];

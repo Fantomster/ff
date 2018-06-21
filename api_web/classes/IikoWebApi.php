@@ -52,6 +52,17 @@ class IikoWebApi extends WebApi
 
 
     /**
+     * iiko: Обновление данных для связи контрагента
+     * @param array $post
+     * @return array
+     */
+    public function updateAgentData(array $post): array
+    {
+        return (new iikoAgent())->updateAgentData($post);
+    }
+
+
+    /**
      * iiko: Создание сопоставлений номенклатуры накладной с продуктами MixCart
      * @param array $post
      * @return array

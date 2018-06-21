@@ -188,6 +188,9 @@ class vetDocumentDone extends Component
 
     public function getDate($date_raw)
     {
+        if(isset($date_raw->ns2informalDate))
+            return '<vet:informalDate>'.$date_raw->ns2informalDate.'</vet:informalDate>';
+
         $first_date = '<vet:firstDate>
         <base:year>'.$date_raw->ns2firstDate->bsyear.'</base:year>
         <base:month>'.$date_raw->ns2firstDate->bsmonth.'</base:month>

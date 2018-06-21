@@ -325,14 +325,12 @@ class EComIntegration
         $supplierGLN = $simpleXMLElement->SUPPLIER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN]);
         if (!$ediOrganization) {
-            mail('otpixto@yandex.ru', '1', '1');
-            Yii::error('error 1');
+            Yii::error('No EDI organization');
             return false;
         }
         $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
         if (!$organization || $organization->type_id != Organization::TYPE_SUPPLIER) {
-            mail('otpixto@yandex.ru', '1', '2');
-            Yii::error('error 1');
+            Yii::error('No such organization');
             return false;
         }
         $baseCatalog = $organization->baseCatalog;
@@ -440,16 +438,8 @@ class EComIntegration
         $catalog->created_at = new Expression('NOW()');
         $catalog->updated_at = new Expression('NOW()');
         $catalog->currency_id = $currency->id ?? 1;
-        try{
-            $catalog->validate();
-        }catch (Exception $e){
-            Yii::error($e->getMessage());
-        }
         $catalog->save();
         $catalogID = $catalog->id;
-        if (!$catalogID){
-            Yii::error('cat_id is null');
-        }
 
         $rel = new RelationSuppRest();
         $rel->rest_org_id = $rest->id;

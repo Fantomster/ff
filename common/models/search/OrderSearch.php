@@ -420,14 +420,13 @@ class OrderSearch extends Order
        } else {
            $dbName = 'db_api';
        }
-
+       $query->leftJoin($dbName . '.iiko_waybill', $dbName . '.iiko_waybill.order_id=order.id');
        if($numCode){
-           $query->leftJoin($dbName . '.iiko_waybill', $dbName . '.iiko_waybill.order_id=order.id');
            $query->andWhere([$dbName . '.iiko_waybill.num_code' => $numCode]);
        }
 
        if($storeDenom){
-           $query->leftJoin($dbName . '.iiko_store', $dbName . '.iiko_waybill.store_rid=' . $dbName . '.iiko_store.rid');
+           $query->leftJoin($dbName . '.iiko_store', $dbName . '.iiko_waybill.id=' . $dbName . '.iiko_store.id');
            $query->andWhere([$dbName . '.iiko_store.denom' => $storeDenom]);
        }
        $count = $query->count();

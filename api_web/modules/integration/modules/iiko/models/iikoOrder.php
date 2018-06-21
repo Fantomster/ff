@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\iiko\models;
 
 use api\common\models\iiko\iikoWaybill;
+use api\common\models\iiko\iikoWaybillData;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
@@ -21,19 +22,15 @@ class iikoOrder extends WebApi
      */
     public function getOrderWaybillsList(array $post)
     {
-        $orderID = $post['order_id'];
-        $iikoWaybill = iikoWaybill::find()->where(['order_id' => $orderID])->andWhere('status_id > 1')->all();
-        $arr = [];
-        $i = 0;
-        foreach ($iikoWaybill as $item) {
-            $arr[$i]['num_code'] = $item->num_code;
-            $arr[$i]['agent_denom'] = $item->agent->denom ?? 'Не указано';
-            $arr[$i]['store_denom'] = $item->store->denom ?? 'Не указано';
-            $arr[$i]['doc_date'] = \Yii::$app->formatter->format($item->doc_date, 'date');
-            $arr[$i]['status_denom'] = $item->status->denom;
-            $i++;
+        $orderID = (int)$post['order_id'];
+        $iikoWaybill = iikoWaybill::find()->where(['order_id' => $orderID])->all();
+        $result = [];
+        if (!empty($iikoWaybill)) {
+            foreach ($iikoWaybill as $item) {
+                $result[] = $this->prepareWaybill($item);
+            }
         }
-        return $arr;
+        return $result;
     }
 
     /**
@@ -49,6 +46,30 @@ class iikoOrder extends WebApi
         return $arr;
     }
 
+    /**
+     * Информация о накладной
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getWaybill($post)
+    {
+        if (!$post['waybill_id']) {
+            throw new BadRequestHttpException('Empty waybill_id');
+        }
+
+        $model = iikoWaybill::findOne((int)$post['waybill_id']);
+        if (empty($model)) {
+            throw new BadRequestHttpException('Not found WayBill!');
+        }
+
+        $access = Order::findOne(['id' => $model->order_id, 'client_id' => $this->user->organization->id]);
+        if (empty($access)) {
+            throw new BadRequestHttpException('Not found order!!!');
+        }
+
+        return $this->prepareWaybill($model, true);
+    }
 
     /**
      * iiko: Создание или обновление накладной к заказу
@@ -58,20 +79,21 @@ class iikoOrder extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        $order_id = (int)$post['order_id'];
+        $order_id = isset($post['order_id']) ? (int)$post['order_id'] : null;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
-        if (!$ord) {
-            throw new BadRequestHttpException('No order with ID ' . $order_id);
+        if (isset($post['waybill_id'])) {
+            $model = iikoWaybill::findOne(['id' => $post['waybill_id']]);
+        } else {
+            $model = new iikoWaybill();
         }
-
-        if (isset($post['waybill_id'])){
-
+        if ($order_id) {
+            $model->order_id = $order_id;
         }
-        $model = new iikoWaybill();
-        $model->order_id = $order_id;
         $model->status_id = 1;
-        $model->org = $ord->client_id;
+        if (isset($ord->client_id)) {
+            $model->org = $ord->client_id;
+        }
         $model->agent_uuid = $post['agent_uuid'] ?? '';
         $model->num_code = $post['num_code'] ?? null;
         $model->text_code = $post['text_code'] ?? '';
@@ -86,6 +108,57 @@ class iikoOrder extends WebApi
         return [
             'success' => true,
             'waybill_id' => $model->id
+        ];
+    }
+
+    /**
+     * @param iikoWaybill $item
+     * @param bool $data
+     * @return array
+     */
+    private function prepareWaybill(iikoWaybill $item, $data = false)
+    {
+        $result = [
+            'waybill_id' => $item->id,
+            'order_id' => $item->order->id,
+            'num_code' => $item->num_code,
+            'agent_denom' => $item->agent->denom ?? 'Не указано',
+            'store_denom' => $item->store->denom ?? 'Не указано',
+            'doc_date' => \Yii::$app->formatter->format($item->doc_date, 'date'),
+            'status_denom' => $item->status->denom
+        ];
+
+        if ($data === true) {
+            $result['data'] = [];
+            if (!empty($item->waybillData)) {
+                foreach ($item->waybillData as $modelData) {
+                    $result['data'][] = $this->prepareWaybillData($modelData);
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param iikoWaybillData $model
+     * @return array
+     */
+    private function prepareWaybillData(iikoWaybillData $model)
+    {
+        return [
+            'mixcart_product_id' => $model->product_id,
+            'mixcart_product_name' => $model->fproductname->product,
+            'mixcart_product_ed' => $model->fproductname->ed,
+            'iiko_product_id' => $model->product_rid ?? null,
+            'iiko_product_name' => $model->product->denom ?? null,
+            'iiko_product_ed' => $model->product->unit ?? null,
+            'order_position_count' => round($model->waybill->order->getOrderContent()->where(['product_id' => $model->product_id])->one()->quantity, 3),
+            'iiko_position_count' => round($model->quant, 3),
+            'koef' => $model->koef,
+            'sum_without_nds' => $model->sum,
+            'sum' => round($model->sum + ($model->sum * $model->vat / 10000), 2),
+            'nds' => ceil($model->vat / 100),
         ];
     }
 }

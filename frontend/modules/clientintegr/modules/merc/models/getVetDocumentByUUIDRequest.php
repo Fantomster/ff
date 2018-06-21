@@ -426,7 +426,8 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
     public function getDate($date_raw)
     {
-       //var_dump($date_raw->ns2firstDate); die();
+        if(isset($date_raw->ns2informalDate))
+            return $date_raw->ns2informalDate;
         $first_date =  $date_raw->ns2firstDate->bsyear
             .'-'.$date_raw->ns2firstDate->bsmonth
             .'-'.$date_raw->ns2firstDate->bsday;

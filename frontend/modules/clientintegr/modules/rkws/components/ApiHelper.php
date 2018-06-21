@@ -71,16 +71,16 @@ class ApiHelper  {
 
     $data = curl_exec($ch); 
     $info = curl_getinfo($ch);
-    
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
-    file_put_contents('runtime/logs/rk.log', PHP_EOL.date("Y-m-d H:i:s").PHP_EOL, FILE_APPEND);
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($xml,true).PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($url,true).PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($data,true).PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($info,true).PHP_EOL,FILE_APPEND);
-    file_put_contents('runtime/logs/rk.log',PHP_EOL.'^^^^^^^^^^^^^^'.PHP_EOL,FILE_APPEND);
+
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log', PHP_EOL.date("Y-m-d H:i:s").PHP_EOL, FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.print_r($xml,true).PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.print_r($url,true).PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.print_r($data,true).PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.print_r($info,true).PHP_EOL,FILE_APPEND);
+    file_put_contents(Yii::getAlias('@app').'/runtime/logs/rk.log',PHP_EOL.'^^^^^^^^^^^^^^'.PHP_EOL,FILE_APPEND);
        
     $myXML   = simplexml_load_string($data);
     

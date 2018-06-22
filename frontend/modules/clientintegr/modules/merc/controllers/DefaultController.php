@@ -90,7 +90,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         try {
             $api = mercApi::getInstance();
-            $api->getVetDocumentDone($uuid);
+
+            if(!$api->getVetDocumentDone($uuid))
+                throw new \Exception('Done error');
 
             $cache = \Yii::$app->cache;
             $cache->delete('vetDocRaw_' . $uuid);
@@ -111,6 +113,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
+        $this->updateVSDList();
             if (Yii::$app->request->isAjax) {
                 return true;
             } else {
@@ -129,12 +132,15 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercApi::getInstance();
-                $api->getVetDocumentDone($uuid, $model->attributes);
+
+                if(!$api->getVetDocumentDone($uuid, $model->attributes))
+                    throw new \Exception('Done error');
 
                 $cache = \Yii::$app->cache;
                 $cache->delete('vetDocRaw_' . $uuid);
                 $cache->delete('vetDoc_' . $uuid);
                 Yii::$app->session->setFlash('success', 'ВСД успешно обработан');
+                $this->updateVSDList();
 
                 if (Yii::$app->request->isAjax)
                     return true;
@@ -194,7 +200,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $api = mercApi::getInstance();
             foreach ($selected as $id) {
                 $uuid = MercVsd::findOne(['id' => $id])->uuid;
-                $api->getVetDocumentDone($uuid);
+                if(!$api->getVetDocumentDone($uuid))
+                    throw new \Exception('Done error');
 
                 $cache = \Yii::$app->cache;
                 $cache->delete('vetDocRaw_' . $uuid);
@@ -215,7 +222,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->redirect(['index']);
         }
 
-        //Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
+        Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
+        $this->updateVSDList();
         return $this->redirect(['index']);
     }
 

@@ -563,6 +563,12 @@ class mercApi extends Component
             //Пишем лог
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
+            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                $result = true;
+            }
+            else
+                $result = false;
+
 
         }catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);

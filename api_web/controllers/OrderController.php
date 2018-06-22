@@ -955,6 +955,9 @@ class OrderController extends WebApiController
         if (is_array($result)) {
             $this->response = $result;
         } else {
+            header('Access-Control-Allow-Origin:*');
+            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers:Content-Type, Authorization');
             exit($result);
         }
     }

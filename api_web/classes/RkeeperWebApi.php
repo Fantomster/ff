@@ -29,14 +29,14 @@ class RkeeperWebApi extends WebApi
     }
 
     /**
-     * rkeeper: Создание накладной к заказу
+     * iiko: Создание или обновление накладной к заказу
      * @param array $post
      * @return array
      */
-   /* public function createWaybill(array $post): array
+    public function handleWaybill(array $post): array
     {
-        return (new iikoOrder())->createWaybill($post);
-    }*/
+        return (new rkeeperOrder())->handleWaybill($post);
+    }
 
     /**
      * rkeeper: Справочник складов

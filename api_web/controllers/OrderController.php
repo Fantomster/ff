@@ -955,6 +955,10 @@ class OrderController extends WebApiController
         if (is_array($result)) {
             $this->response = $result;
         } else {
+            $headers = \Yii::$app->response->headers;
+            $headers->add('Access-Control-Allow-Origin', '*');
+            $headers->add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            $headers->add('Access-Control-Allow-Headers', 'Content-Type, Authorization');
             exit($result);
         }
     }

@@ -191,8 +191,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
         try {
             $selected = explode(',', $selected);
-            foreach ($selected as $uuid) {
-                $api = mercApi::getInstance();
+            $api = mercApi::getInstance();
+            foreach ($selected as $id) {
+                $uuid = MercVsd::findOne(['id' => $id])->uuid;
                 $api->getVetDocumentDone($uuid);
 
                 $cache = \Yii::$app->cache;
@@ -214,7 +215,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->redirect(['index']);
         }
 
-        Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
+        //Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
         return $this->redirect(['index']);
     }
 
@@ -224,6 +225,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $transaction = Yii::$app->db_api->beginTransaction();
         try {
             $vsd = new vetDocumentsChangeList();
+            $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*5);
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
             $transaction->commit();

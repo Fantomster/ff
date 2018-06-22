@@ -79,6 +79,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             'quant' => 'Количество',
             'product_id' => 'ID в F-keeper',
             'koef' => 'Коэфф.',
+            'fproductnameProduct'=>'Наименование продукции'
         ];
     }
 
@@ -112,14 +113,15 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
-    public function getFproductname() {
+    public function getFproductname()
+    {
 
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        $rprod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id])->one();
+        return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
+    }
 
-        return $rprod;
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    public function getFproductnameProduct()
+    {
+        return $this->fproductname->product;
     }
 
     public function beforeSave($insert) {

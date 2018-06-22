@@ -164,6 +164,12 @@ class DefaultController extends \frontend\controllers\DefaultController {
         $vrem = date("Y-m-d H:i:s");
         $query0 = "update `rk_actions` set `created` = '".$vrem."' where `id` = '1'";
         $a = Yii::$app->db_api->createCommand($query0)->execute();
+        $query0 = "select `td` from `rk_service` where `code` = '199990046'";
+        $a = Yii::$app->db_api->createCommand($query0)->queryScalar();
+        if($a=='0001-01-05 00:00:00') {
+            $query0 = "update `rk_service` set `td` = '2100-01-01 00:00:00' where `code` = '199990046'";
+            $a = Yii::$app->db_api->createCommand($query0)->execute();
+        }
 
         $this->redirect('index');
 

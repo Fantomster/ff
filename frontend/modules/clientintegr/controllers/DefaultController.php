@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\controllers;
 use Yii;
 use yii\web\Controller;
 use common\models\Organization;
+use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -153,7 +154,19 @@ class DefaultController extends \frontend\controllers\DefaultController {
                      
         }
 
-  }  
-  
+  }
+
+    public function actionGetws() {
+
+        $res = new ServiceHelper();
+        $res->getObjects();
+
+        $vrem = date("Y-m-d H:i:s");
+        $query0 = "update `rk_actions` set `created` = '".$vrem."' where `id` = '1'";
+        $a = Yii::$app->db_api->createCommand($query0)->execute();
+
+        $this->redirect('index');
+
+    }
    
 }

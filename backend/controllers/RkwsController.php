@@ -66,10 +66,14 @@ class RkwsController extends Controller {
     public function actionIndex() {
         $searchModel = new \api\common\models\RkServiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $query0 = "select `created` from `rk_actions` where `id` = '1'";
+        $a = Yii::$app->db_api->createCommand($query0)->queryScalar();
+        $data_last_license = $a;
 
         return $this->render('index', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
+                    'data_last_license' => $data_last_license,
         ]);
     }
 

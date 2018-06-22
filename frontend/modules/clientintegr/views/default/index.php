@@ -10,6 +10,7 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
+use backend\controllers\RkwsController;
 
 
 ?>
@@ -81,6 +82,9 @@ if(isset($licenses['mercury'])) {
     	<div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Партнёры по интеграции</h3>
+            </div>
+            <div class="box-body" align="right">
+                <?= Html::a('<i class="fa"></i> Обновить', ['getws'], ['class' => 'btn btn-md fk-button']) ?>
             </div>
             <?php if(isset($licenses['rkws'])): ?>
             <div class="box-body">

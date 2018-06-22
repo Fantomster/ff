@@ -3,8 +3,7 @@
 namespace api_web\modules\integration\modules\rkeeper\controllers;
 
 use api_web\components\WebApiController;
-use api_web\modules\integration\modules\iiko\models\iikoProduct;
-use api_web\modules\integration\modules\iikoProduct\models\rkeeperProduct;
+use api_web\modules\integration\modules\rkeeper\models\rkeeperProduct;
 
 class ProductController extends WebApiController
 {

@@ -188,6 +188,7 @@ Modal::widget([
         <div class="box-header with-border">
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
+                    <?php Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]); ?>
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
                         <div class="alert alert-success alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
@@ -207,7 +208,6 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?php
-                    Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
                     $form = ActiveForm::begin([
                     'options' => [
                     'data-pjax' => true,
@@ -355,13 +355,11 @@ $("#ajax-load").on("click", ".save-form", function() {
             form.serialize()
             )
             .done(function(result) {
-            $.pjax.reload({container: "#pjax-vsd-list",timeout:30000});
+            $.pjax.reload("#pjax-vsd-list", {timeout:30000});
             if(result != true)    
                 form.replaceWith(result);
             else
-                //$("#ajax-load").modal('hide');
                 $("#ajax-load .close").click();
-                //$('#ajax-load').modal().hide();
         });
         return false;
     });

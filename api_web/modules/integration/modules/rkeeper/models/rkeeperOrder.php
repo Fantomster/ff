@@ -22,7 +22,7 @@ class rkeeperOrder extends WebApi
     public function getOrderWaybillsList(array $post)
     {
         $orderID = $post['order_id'];
-        $rkWaybill = RkWaybill::find()->where(['order_id' => $orderID])->andWhere('status_id > 1')->all();
+        $rkWaybill = RkWaybill::find()->where(['order_id' => $orderID])->all();
         $arr = [];
         $i = 0;
         foreach ($rkWaybill as $item) {

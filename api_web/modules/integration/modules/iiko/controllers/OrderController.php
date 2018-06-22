@@ -190,7 +190,7 @@ class OrderController extends WebApiController
      *     )
      * )
      */
-    public function actionWaybillGet()
+    public function actionGetWaybill()
     {
         $this->response = (new iikoOrder())->getWaybill($this->request);
     }

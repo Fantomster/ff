@@ -13,7 +13,9 @@ use common\models\Role;
 use common\models\Catalog;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 use yii\web\UploadedFile;
 
 /**
@@ -28,6 +30,7 @@ class VendorWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
+     * @throws ValidationException
      */
     public function create(array $post)
     {
@@ -45,7 +48,14 @@ class VendorWebApi extends \api_web\components\WebApi
         }
         $relationSuppRest = new RelationSuppRest();
         if($vendorID){
+            $validator = new NumberValidator();
+            if (!$validator->validate($vendorID, $error)) {
+                throw new ValidationException(['Field vendor_id mast be integer']);
+            }
             $organization = Organization::findOne(['id'=>$vendorID]);
+            if(!$organization){
+                throw new BadRequestHttpException('No such organization');
+            }
         }else{
             $organization = new Organization();
         }
@@ -166,16 +176,14 @@ class VendorWebApi extends \api_web\components\WebApi
                     $result['message'] =
                         Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
                         $organization->name .
-                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
-                        $email;
+                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
                 } else {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
                 return $result;
-
             } catch (\Exception $e) {
                 $transaction->rollback();
-                throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
+                throw $e;
             }
         }
     }

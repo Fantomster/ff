@@ -28,6 +28,7 @@ use yii\helpers\Html;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
+use yii\db\Query;
 
 /**
  *  Controller for restaurant 
@@ -205,12 +206,15 @@ class ClientController extends DefaultController {
                         $user->role_id = $this->currentUser->role_id;
                     }
                     $user->setRegisterAttributes($user->role_id)->save();
+                    $profile->email = $post['User']['email'];
                     $profile->setUser($user->id)->save();
+                    $userid = $user->id;
+                    //$query = "update `profile` set `email`='".$post['User']['email']."' where `user_id`=".$userid;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
                     User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
-
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
+                    //Yii::$app->db->createCommand($query)->queryScalar();
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 else {
@@ -258,7 +262,8 @@ class ClientController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
-                $profile->load($post);
+                //$profile->load($post);
+
 
                 if ($user->validate() && $profile->validate()) {
 

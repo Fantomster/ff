@@ -38,7 +38,7 @@ class ClientController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update', 'managers', 'delete'],
+                        'actions' => ['index', 'view', 'update', 'managers', 'postavs', 'restors', 'delete'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -72,6 +72,34 @@ class ClientController extends Controller {
         return $this->render('managers', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Возвращает список всех сотрудников поставщиков.
+     * @return mixed
+     */
+    public function actionPostavs() {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE);
+
+        return $this->render('postavs', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Возвращает список всех сотрудников ресторанов.
+     * @return mixed
+     */
+    public function actionRestors() {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE);
+
+        return $this->render('restors', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

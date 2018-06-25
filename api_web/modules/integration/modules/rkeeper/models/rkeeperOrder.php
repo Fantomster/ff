@@ -84,8 +84,8 @@ class rkeeperOrder extends WebApi
             'waybill_id' => $item->id,
             'order_id' => $item->order->id,
             'num_code' => $item->num_code,
-            'agent_denom' => $item->agent->denom ?? 'Не указано',
-            'store_denom' => $item->store->denom ?? 'Не указано',
+            'agent_denom' => $item->corr->denom ?? 'Не указано',
+            'store_denom' => $item->store->name ?? 'Не указано',
             'doc_date' => \Yii::$app->formatter->format($item->doc_date, 'date'),
             'status_denom' => $item->status->denom
         ];

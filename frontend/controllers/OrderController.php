@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use api_web\classes\CartWebApi;
+use api_web\classes\RkeeperWebApi;
 use common\models\Cart;
 use common\models\search\OrderProductsSearch;
 use Yii;

@@ -10,7 +10,7 @@ class StoreController extends WebApiController
      * @SWG\Post(path="/integration/rkeeper/store/list",
      *     tags={"Integration/rkeeper/store"},
      *     summary="Справочник складов",
-     *     description="Справочник складов",
+     *     description="Справочник складов, view_type - 1 плоский вид, 0 - дерево",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

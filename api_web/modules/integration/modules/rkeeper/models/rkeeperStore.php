@@ -27,10 +27,11 @@ class rkeeperStore extends WebApi
                 $item['name'] = $row['name'];
                 $item['type'] = $row['type'];
                 $item['level'] = $row['lvl'];
+                $arr[]=$item;
             }
-        } else
-            $arr = $this->parseStoriesForTree($stores, $pos, 0);
-
+        } else {
+            $arr = $this->parseStoriesForTree($stores, 0);
+        }
         return $arr;
     }
 
@@ -42,23 +43,34 @@ class rkeeperStore extends WebApi
      * @return array
      * @throws \Exception
      */
-    private function parseStoriesForTree($stores, &$pos, $level)
+    private function parseStoriesForTree($stores, $pos)
     {
-        $arr = [];
-        if ($stores[$pos + 1]['level'] == $level)
-            return $arr;
-        for ($i = $pos + 1; $i <= count($stores); $i++) {
-            $item['id'] = $stores[$i]['id'];
-            $item['rid'] = $stores[$i]['rid'];
-            $item['name'] = $stores[$i]['name'];
-            $item['type'] = $stores[$i]['type'];
-            $item['level'] = $stores[$i]['lvl'];
-            $items = $this->parseStoriesForTree($stores, $i, $stores[$i]['lvl']);
-            if (!empty($items))
-                $item['items'] = $items;
-            $arr[] = $item;
-        }
 
+        $arr = [];
+        $prev = $pos -1;
+        $lft = ($pos == 0) ? 0 : $stores[$prev]['lft'];
+        $rgt = ($pos == 0) ? $stores[0]['rgt'] : $stores[$prev]['rgt'];
+        $level = ($pos == 0) ? 0 : ($stores[$prev]['lvl']+1);
+        for ($i = $pos; $i < count($stores); $i++) {
+            if($stores[$i]['lvl'] == $level && ($stores[$i]['lft'] > $lft && $stores[$i]['lft'] < $rgt))
+                {
+                    $item = [];
+                    $item['id'] = $stores[$i]['id'];
+                    $item['rid'] = $stores[$i]['rid'];
+                    $item['name'] = $stores[$i]['name'];
+                    $item['type'] = $stores[$i]['type'];
+                    $item['level'] = $stores[$i]['lvl'];
+                    if(isset($stores[$i+1])) {
+                        if ($stores[$i + 1]['lvl'] > $level) {
+                            $items = $this->parseStoriesForTree($stores, $i + 1);
+                            if (!empty($items)) {
+                                $item['items'] = $items;
+                            }
+                        }
+                    }
+                    $arr[] = $item;
+                }
+        }
         return $arr;
     }
 }

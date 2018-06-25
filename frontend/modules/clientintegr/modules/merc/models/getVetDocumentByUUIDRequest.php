@@ -426,17 +426,47 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
     public function getDate($date_raw)
     {
+
         if(isset($date_raw->ns2informalDate))
-            return $date_raw->ns2informalDate;
-        $first_date =  $date_raw->ns2firstDate->bsyear
-            .'-'.$date_raw->ns2firstDate->bsmonth
-            .'-'.$date_raw->ns2firstDate->bsday;
-        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
+            return $date_raw->ns2informalDate->__toString();
+
+
+        $first_date = '';
+        if(isset($date_raw->ns2firstDate->bsyear))
+            $first_date .= $date_raw->ns2firstDate->bsyear;
+
+        if(isset($date_raw->ns2firstDate->bsmonth))
+            $first_date .= '-'.$date_raw->ns2firstDate->bsmonth;
+
+        if(isset($date_raw->ns2firstDate->bsday))
+            $first_date .= '-'.$date_raw->ns2firstDate->bsday;
+
+        if (isset($date_raw->ns2firstDate->bshour)){
+            $first_date .= " ";
+            if (strlen($date_raw->ns2firstDate->bshour)==1)
+                $first_date .= "0";
+            $first_date .= $date_raw->ns2firstDate->bshour.":00:00";
+        }
 
         if($date_raw->ns2secondDate)
         {
-            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
-            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
+            $second_date = '';
+            if(isset($date_raw->ns2secondDate->bsyear))
+                $second_date .= $date_raw->ns2secondDate->bsyear;
+
+            if(isset($date_raw->ns2firstDate->bsmonth))
+                $second_date .= '-'.$date_raw->ns2secondDate->bsmonth;
+
+            if(isset($date_raw->ns2firstDate->bsday))
+                $second_date .= '-'.$date_raw->ns2secondDate->bsday;
+
+            if (isset($date_raw->ns2firstDate->bshour)){
+                $second_date .= " ";
+                if (strlen($date_raw->ns2secondDate->bshour)==1)
+                    $second_date .= "0";
+                $second_date .= $date_raw->ns2secondDate->bshour.":00:00";
+            }
+
             return 'с '.$first_date.' до '.$second_date;
         }
 

@@ -22,7 +22,7 @@ class m180618_153952_add_column_settings_rkws extends Migration
         $this->insert('rk_dicconst', [
             'denom' => 'column_number_invoice',
             'def_value' => '1',
-            'comment' => 'Отображать № накладной в истории заказов',
+            'comment' => 'Состояние колонки "№ накладной"',
             'type' => '1',
             'is_active' => '1',
         ]);

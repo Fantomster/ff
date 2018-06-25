@@ -10,6 +10,7 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
+use backend\controllers\RkwsController;
 
 
 ?>
@@ -75,12 +76,24 @@ if(isset($licenses['mercury'])) {
     if (($licenses['mercury']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['mercury']->td)))) $lic_merc=2;
     if (($licenses['mercury']->status_id==1) and ($timestamp_now>(strtotime($licenses['mercury']->td)))) $lic_merc=1;
 }
+if(isset($licenses['odinsobsh'])) {
+    $sub0 = explode(' ',$licenses['odinsobsh']->td);
+    $sub1 = explode('-',$sub0[0]);
+    $licenses['odinsobsh']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+    if ($licenses['odinsobsh']->status_id==0) $lic_odinsobsh=0;
+    if (($licenses['odinsobsh']->status_id==1) and ($timestamp_now<=(strtotime($licenses['odinsobsh']->td)))) $lic_odinsobsh=3;
+    if (($licenses['odinsobsh']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['odinsobsh']->td)))) $lic_odinsobsh=2;
+    if (($licenses['odinsobsh']->status_id==1) and ($timestamp_now>(strtotime($licenses['odinsobsh']->td)))) $lic_odinsobsh=1;
+}
 ?>
 <section class="content">
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Партнёры по интеграции</h3>
+            </div>
+            <div class="box-body" align="right">
+                <?= Html::a('<i class="fa"></i> Обновить', ['getws'], ['class' => 'btn btn-md fk-button']) ?>
             </div>
             <?php if(isset($licenses['rkws'])): ?>
             <div class="box-body">
@@ -151,6 +164,35 @@ if(isset($licenses['mercury'])) {
                 </div>
             </div>
             <?php endif; ?>
+            <?php  if(isset($licenses['odinsobsh'])): ?>
+                <div class="box-body">
+                    <div class="hpanel">
+                        <div class="panel-body">
+                            <div class="col-md-7 text-left">
+                                <?= Html::a('<h4 class="m-b-xs text-info">1C Общепит</h4>', ['odinsobsh/default']) ?>
+                                <p class="small">Интеграция с 1С Общепит</p>
+                            </div>
+                            <div class="col-md-3 text-left">
+                                <?php
+                                switch($lic_odinsobsh) {
+                                    case 0: print "<p class=\"small\"> Лицензия 1C Общепит: ID ".$licenses['odinsobsh']->id." <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 1: print "<p class=\"small\"> Лицензия Общепит: ID ".$licenses['odinsobsh']->id." <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с ".$licenses['odinsobsh']->td.".</br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 2: print "<p class=\"small\"> Лицензия Общепит: ID ".$licenses['odinsobsh']->id." <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по ".$licenses['odinsobsh']->td."). </br>";
+                                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>"; break;
+                                    case 3: print "<p class=\"small\"> Лицензия Общепит: ID ".$licenses['odinsobsh']->id." <strong><span style=\"color:#6ea262\">Активна </span></strong>(по ".$licenses['odinsobsh']->td."). </br>";
+                                        print "</p></br>"; break;
+                                }
+                                ?>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php  endif; ?>
             <?php // if(isset($licenses['email'])): ?>
             <div class="box-body">
                 <div class="hpanel" >

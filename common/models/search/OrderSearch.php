@@ -509,8 +509,8 @@ class OrderSearch extends Order
         }
 
         if($storeDenom){
-            $query->leftJoin($dbName . '.rk_store', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_store.rid');
-            $query->andWhere([$dbName . '.rk_store.denom' => $storeDenom]);
+            $query->leftJoin($dbName . '.rk_storetree', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_storetree.rid');
+            $query->andWhere([$dbName . '.rk_storetree.rid' => $storeDenom]);
         }
 
         $count = $query->count();

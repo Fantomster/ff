@@ -375,11 +375,9 @@ class iikoApi
         $info = curl_getinfo($ch);
         $info1 = curl_getinfo($ch, CURLINFO_HEADER_OUT);
         if($info['http_code'] !== 200) {
-            //  print_r($response);
+            print_r($response);
             //print_r(['r' => $response,'header' => $header, 'info' => $info1]);
-            \Yii::error('error: ' . print_r($info, 1), 'iiko_api');
-            \Yii::error('error: ' . print_r($response, 1), 'iiko_response');
-            \Yii::error('error: ' . print_r($body, 1), 'iiko_body');
+            //\Yii::info('error: ' . print_r($info, 1), 'iiko_api');
             return false;
         }
 

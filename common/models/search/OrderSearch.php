@@ -426,8 +426,7 @@ class OrderSearch extends Order
        }
 
        if($storeID){
-           $query->leftJoin($dbName . '.iiko_store', $dbName . '.iiko_waybill.id=' . $dbName . '.iiko_store.id');
-           $query->andWhere([$dbName . '.iiko_store.id' => $storeID]);
+           $query->andWhere([$dbName . '.iiko_waybill.store_id' => $storeID]);
        }
        $count = $query->count();
        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();

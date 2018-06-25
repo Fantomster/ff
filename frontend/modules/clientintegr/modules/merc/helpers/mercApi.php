@@ -25,11 +25,10 @@ class mercApi extends Component
     private $service_id = 'mercury-g2b.service';
     private $vetisLogin = '';
     private $_client;
-    private $wsdl;
     private $enterpriseGuid;
 
-    private $wsdls = [
-        'mercury' => [
+    private $wsdls;
+        /*'mercury' => [
             'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ApplicationManagementService',
             'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ApplicationManagementService_v1.4_pilot.wsdl',
         ],
@@ -49,7 +48,7 @@ class mercApi extends Component
             'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/ikar/services/IkarService',
             'wsdl' => 'http://api.vetrf.ru/schema/platform/ikar/services/IkarService_v1.4_pilot.wsdl',
         ],
-    ];
+    ];*/
 
     protected static $_instance;
 
@@ -57,14 +56,15 @@ class mercApi extends Component
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
-            self::$_instance->wsdl = \Yii::$app->params['mercury_wsdl'];
+            self::$_instance->wsdls = Yii::$app->params['merc_settings'];
             self::$_instance->login = mercDicconst::getSetting('auth_login');
             self::$_instance->pass = mercDicconst::getSetting('auth_password');
             self::$_instance->apiKey = mercDicconst::getSetting('api_key');
             self::$_instance->issuerID = mercDicconst::getSetting('issuer_id');
             self::$_instance->vetisLogin = mercDicconst::getSetting('vetis_login');
             self::$_instance->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        }
+            self::$_instance->wsdls = Yii::$app->params['merc_settings'];
+    }
         return self::$_instance;
     }
 
@@ -83,7 +83,7 @@ class mercApi extends Component
                 //'soap_version' => SOAP_1_1,
             ]);
 
-        return $$this->_client;
+        return $this->_client;
     }
 
     private function getLocalTransactionId($method)

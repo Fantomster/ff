@@ -27,7 +27,7 @@ class rkeeperOrder extends WebApi
         foreach ($rkWaybill as $item) {
             $arr[$i]['num_code'] = $item->num_code;
             $arr[$i]['agent_denom'] = $item->corr->denom ?? 'Не указано';
-            $arr[$i]['store_denom'] = $item->store->denom ?? 'Не указано';
+            $arr[$i]['store_denom'] = $item->store->name ?? 'Не указано';
             $arr[$i]['doc_date'] = \Yii::$app->formatter->format($item->doc_date, 'date');
             $arr[$i]['status_denom'] = (isset($item->status)) ? $item->status->denom : 'Не готова к выгрузке';
             $i++;

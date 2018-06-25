@@ -113,7 +113,6 @@ class OrderController extends DefaultController
                             'ajax-select-vendor',
                             'complete-obsolete',
                             'pjax-cart',
-                            'test'
                         ],
                         'allow' => true,
                         // Allow restaurant managers

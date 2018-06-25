@@ -3,10 +3,12 @@
 namespace common\models;
 
 use api\common\models\iiko\iikoService;
+use api\common\models\one_s\OneSService;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use backend\controllers\OdinsobshController;
 use Mpdf\Tag\Q;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -1537,6 +1539,10 @@ class Organization extends \yii\db\ActiveRecord
         $lic = mercService::getLicense();
         if($lic != null)
             $result['mercury'] = $lic;
+
+        $lic = OneSService::getLicense();
+        if($lic != null)
+            $result['odinsobsh'] = $lic;
 
         return $result;
     }

@@ -29,7 +29,7 @@ class rkeeperOrder extends WebApi
             $arr[$i]['agent_denom'] = $item->corr->denom ?? 'Не указано';
             $arr[$i]['store_denom'] = $item->store->denom ?? 'Не указано';
             $arr[$i]['doc_date'] = \Yii::$app->formatter->format($item->doc_date, 'date');
-            $arr[$i]['status_denom'] = $item->status->denom;
+            $arr[$i]['status_denom'] = (isset($item->status)) ? $item->status->denom : 'Не готова к выгрузке';
             $i++;
         }
         return $arr;

@@ -83,6 +83,8 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex() {
 
+        ini_set('memory_limit', '512M');
+
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
 
         $records =  AllMaps::find()->select('*')->andWhere('org_id = :org',["org" => $organization])

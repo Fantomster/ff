@@ -2362,10 +2362,4 @@ class OrderController extends DefaultController
 
         $session->set('selected', $list);
     }
-
-    public function actionTest()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        return (new RkeeperWebApi())->getStoreList(['view_type' => 0]);
-    }
 }

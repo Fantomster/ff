@@ -60,10 +60,12 @@ class rkeeperStore extends WebApi
                     $item['name'] = $stores[$i]['name'];
                     $item['type'] = $stores[$i]['type'];
                     $item['level'] = $stores[$i]['lvl'];
-                    if($stores[$i+1]['lvl'] > $level) {
-                        $items = $this->parseStoriesForTree($stores, $i + 1);
-                        if (!empty($items)) {
-                            $item['items'] = $items;
+                    if(isset($stores[$i+1])) {
+                        if ($stores[$i + 1]['lvl'] > $level) {
+                            $items = $this->parseStoriesForTree($stores, $i + 1);
+                            if (!empty($items)) {
+                                $item['items'] = $items;
+                            }
                         }
                     }
                     $arr[] = $item;

@@ -134,6 +134,14 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Менеджеры MixCart',
                                     'url' => ['/client/managers'],
                                 ],
+                                [
+                                    'label' => 'Сотрудники поставщиков',
+                                    'url' => ['/client/postavs'],
+                                ],/*
+                                [
+                                    'label' => 'Сотрудники ресторанов',
+                                    'url' => ['/client/restors'],
+                                ],*/
                             ],
                         ],
                         [

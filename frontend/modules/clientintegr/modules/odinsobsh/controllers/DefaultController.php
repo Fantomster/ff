@@ -81,7 +81,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionAgentView()
     {
-       $dataProvider = new ActiveDataProvider([
+        $dataProvider = new ActiveDataProvider([
             'query' => OneSContragent::find()->where(['org_id' => $this->organisation_id])
         ]);
 

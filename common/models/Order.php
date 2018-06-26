@@ -43,6 +43,7 @@ use yii\web\BadRequestHttpException;
  * @property string $rawPrice
  * @property User[] $recipientsList
  * @property Currency $currency
+ * @property OrderAttachment[] $attachments
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -604,4 +605,11 @@ class Order extends \yii\db\ActiveRecord
         return $this->total_price . " " . $this->currency->symbol;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttachments()
+    {
+        return $this->hasMany(OrderAttachment::className(), ['order_id' => 'id']);
+    }
 }

@@ -34,7 +34,7 @@ class OrderAttachment extends \yii\db\ActiveRecord
             [['order_id', 'file'], 'required'],
             [['order_id'], 'integer'],
             [['created_at'], 'safe'],
-            [['file'], 'string', 'max' => 255],
+            [['file'], 'file', 'extensions' => 'jpg, jpeg, png, pdf', 'maxSize' => 52428800, 'tooBig' => Yii::t('app', 'common.models.order_attachment.file', ['ru'=>'Размер файла не должен превышать 50 Мб'])],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
         ];
     }

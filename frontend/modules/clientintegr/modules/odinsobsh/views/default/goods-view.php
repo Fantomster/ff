@@ -75,7 +75,7 @@ $this->title = 'Интеграция с iiko Office';
                             ],
                         ]);
                         ?>
-                        <?= Html::a('Вернуться', ['/clientintegr/iiko/default'], ['class' => 'btn btn-success btn-export'])?>
+                        <?= Html::a('Вернуться', ['/clientintegr/odinsobsh/default'], ['class' => 'btn btn-success btn-export'])?>
                     </div>
                 </div>
             </div>

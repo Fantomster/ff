@@ -6,7 +6,6 @@ use api\common\models\iiko\iikoWaybill;
 use api\common\models\iiko\iikoWaybillData;
 use api\common\models\iiko\search\iikoDicSearch;
 use api\common\models\iiko\iikoService;
-use api\common\models\one_s\OneSContragent;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSService;
 use api\common\models\one_s\OneSStore;
@@ -15,11 +14,25 @@ use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
 use yii\httpclient\Response;
 use yii\data\ActiveDataProvider;
+use api\common\models\one_s\OneSContragent;
+use common\models\User;
 
 class DefaultController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
     public $enableCsrfValidation = false;
     protected $authenticated = false;
+    public $organisation_id;
+
+    public function beforeAction($action)
+    {
+        $this->organisation_id = User::findOne(Yii::$app->user->id)->organization_id;
+
+        if(empty($this->organisation_id)) {
+            return false;
+        }
+
+        return parent::beforeAction($action);
+    }
 
     public function actionIndex()
     {

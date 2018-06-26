@@ -443,7 +443,7 @@ class OrderSearch extends Order
            }
            $arr['orders'][$i]['order_id'] = $order->id;
            $arr['orders'][$i]['vendor'] = $order->vendor->name;
-           $arr['orders'][$i]['delivery_date'] = Yii::$app->formatter->format($order->actual_delivery, 'date');
+           $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
            $arr['orders'][$i]['position_count'] = $order->positionCount;
            $arr['orders'][$i]['total_price'] = $order->total_price;
            $arr['orders'][$i]['currency_id'] = $order->currency_id;
@@ -527,7 +527,7 @@ class OrderSearch extends Order
             }
             $arr['orders'][$i]['order_id'] = $order->id;
             $arr['orders'][$i]['vendor'] = $order->vendor->name;
-            $arr['orders'][$i]['delivery_date'] = Yii::$app->formatter->format($order->actual_delivery, 'date');
+            $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
             $arr['orders'][$i]['position_count'] = $order->positionCount;
             $arr['orders'][$i]['total_price'] = $order->total_price;
             $arr['orders'][$i]['currency_id'] = $order->currency_id;

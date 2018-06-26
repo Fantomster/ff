@@ -11,6 +11,7 @@ use common\models\Organization;
  * @property integer $id
  * @property integer $fid
  * @property integer $org
+ * @property integer $status_id
  * @property string $login
  * @property string $password
  * @property string $token

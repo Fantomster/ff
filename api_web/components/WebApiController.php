@@ -144,8 +144,8 @@ class WebApiController extends \yii\rest\Controller
                 }
             }
 
-            //Logger::getInstance()::setUser($this->user);
-            //Logger::getInstance()::request($this->request);
+            Logger::getInstance()::setUser($this->user);
+            Logger::getInstance()::request($this->request);
 
             if (isset($this->request)) {
                 return true;

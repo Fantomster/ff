@@ -13,7 +13,9 @@ use common\models\Role;
 use common\models\Catalog;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 use yii\web\UploadedFile;
 
 /**
@@ -28,6 +30,7 @@ class VendorWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
+     * @throws ValidationException
      */
     public function create(array $post)
     {
@@ -35,6 +38,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
+        $vendorID = $post['user']['vendor_id'] ?? null;
         $check = RestaurantChecker::checkEmail($email);
 
         if ($check['eventType'] != 5) {
@@ -43,7 +47,19 @@ class VendorWebApi extends \api_web\components\WebApi
             $user = new User();
         }
         $relationSuppRest = new RelationSuppRest();
-        $organization = new Organization();
+        if($vendorID){
+            $validator = new NumberValidator();
+            if (!$validator->validate($vendorID, $error)) {
+                throw new ValidationException(['Field vendor_id mast be integer']);
+            }
+            $organization = Organization::findOne(['id'=>$vendorID]);
+            if(!$organization){
+                throw new BadRequestHttpException('No such organization');
+            }
+        }else{
+            $organization = new Organization();
+        }
+
         $profile = new Profile();
         $profile->scenario = "invite";
 
@@ -85,13 +101,15 @@ class VendorWebApi extends \api_web\components\WebApi
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    $organization->name = $org;
+                    if(!$vendorID) {
+                        $organization->name = $org;
+                    }
 
-                    if (!empty($post['user']['inn'])) {
+                    if (!empty($post['user']['inn']) && !$vendorID) {
                         $organization->inn = $post['user']['inn'];
                     }
 
-                    if (!empty($post['user']['contact_name'])) {
+                    if (!empty($post['user']['contact_name']) && !$vendorID) {
                         $organization->contact_name = $post['user']['contact_name'];
                     }
 
@@ -158,16 +176,14 @@ class VendorWebApi extends \api_web\components\WebApi
                     $result['message'] =
                         Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
                         $organization->name .
-                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
-                        $email;
+                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
                 } else {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
                 return $result;
-
             } catch (\Exception $e) {
                 $transaction->rollback();
-                throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
+                throw $e;
             }
         }
     }
@@ -380,7 +396,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('Vendor not allow editing.');
         }
 
-         /**
+        /**
          * Поехало обновление картинки
          */
         $vendor->scenario = "settings";

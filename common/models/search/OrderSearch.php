@@ -380,6 +380,87 @@ class OrderSearch extends Order
         return $dataProvider;
     }
 
+
+    /**
+     * Creates data array applied for waybill controller (Integration)
+     *
+     * @param array $post
+     *
+     * @return array
+     */
+   public function searchWaybillWebApi(array $post): array
+   {
+       $arr = [];
+       $userID = $post['search']['user_id'];
+       $orderID = $post['search']['order_id'] ?? null;
+       $numCode = $post['search']['num_code'] ?? null;
+       $storeID = $post['search']['store_id'] ?? null;
+       $vendorID = $post['search']['vendor_id'] ?? null;
+       $actualDelivery = $post['search']['actual_delivery'] ?? null;
+
+       $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+       $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+
+       $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+               ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
+
+       if($orderID){
+           $query->andWhere(['order.id'=>$orderID]);
+       }
+
+       if($vendorID){
+           $query->andWhere(['order.vendor_id'=>$vendorID]);
+       }
+
+       if($actualDelivery){
+           $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
+       }
+       if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
+           $dbName =  $match[1];
+       } else {
+           $dbName = 'db_api';
+       }
+       $query->leftJoin($dbName . '.iiko_waybill', $dbName . '.iiko_waybill.order_id=order.id');
+       if($numCode){
+           $query->andWhere([$dbName . '.iiko_waybill.num_code' => $numCode]);
+       }
+
+       if($storeID){
+           $query->andWhere([$dbName . '.iiko_waybill.store_id' => $storeID]);
+       }
+       $count = $query->count();
+       $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
+       $i=0;
+       foreach ($ordersArray as $order){
+           $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $order->id]);
+
+           if (isset($nacl->status)) {
+               $status = $nacl->status->id;
+               $statusText = $nacl->status->denom;
+           } else {
+               $status = 1;
+               $statusText = 'Не сформирована';
+           }
+           $arr['orders'][$i]['order_id'] = $order->id;
+           $arr['orders'][$i]['vendor'] = $order->vendor->name;
+           $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
+           $arr['orders'][$i]['position_count'] = $order->positionCount;
+           $arr['orders'][$i]['total_price'] = $order->total_price;
+           $arr['orders'][$i]['currency_id'] = $order->currency_id;
+           $arr['orders'][$i]['currency'] = $order->currency->iso_code;
+           $arr['orders'][$i]['status'] = $status;
+           $arr['orders'][$i]['status_text'] = $statusText;
+           $i++;
+       }
+
+       $arr['pagination'] = [
+           'page' => $page,
+           'total_page' => ceil($count / $pageSize),
+           'page_size' => $pageSize
+        ];
+       return $arr;
+   }
+
     /**
      * Creates data provider instance with search query applied for waybill controller (Integration)
      *
@@ -387,24 +468,81 @@ class OrderSearch extends Order
      *
      * @return ActiveDataProvider
      */
-    /*
-   public function searchWaybill($params) {
+    public function searchWaybillRkeeperWebApi(array $post): array
+    {
+        $arr = [];
+        $userID = $post['search']['user_id'];
+        $orderID = $post['search']['order_id'] ?? null;
+        $numCode = $post['search']['num_code'] ?? null;
+        $storeDenom = $post['search']['store_denom'] ?? null;
+        $vendorID = $post['search']['vendor_id'] ?? null;
+        $actualDelivery = $post['search']['actual_delivery'] ?? null;
 
-       $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
-               ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id]);
+        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-       $this->load($params);
+        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+            ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
 
-       $dataProvider = new ActiveDataProvider([
-           'query' => $query,
-           'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
-       ]);
+        if($orderID){
+            $query->andWhere(['order.id'=>$orderID]);
+        }
 
-       var_dump('Bugaga', $params);
-      // die();
+        if($vendorID){
+            $query->andWhere(['order.vendor_id'=>$vendorID]);
+        }
 
-       return $dataProvider;
+        if($actualDelivery){
+            $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
+        }
 
-   }*/
+        if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
+            $dbName =  $match[1];
+        } else {
+            $dbName = 'db_api';
+        }
+
+        if($numCode){
+            $query->leftJoin($dbName . '.rk_waybill', $dbName . '.rk_waybill.order_id=order.id');
+            $query->andWhere([$dbName . '.rk_waybill.num_code' => $numCode]);
+        }
+
+        if($storeDenom){
+            $query->leftJoin($dbName . '.rk_storetree', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_storetree.rid');
+            $query->andWhere([$dbName . '.rk_storetree.rid' => $storeDenom]);
+        }
+
+        $count = $query->count();
+        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
+        $i=0;
+        foreach ($ordersArray as $order){
+            $nacl = RkWaybill::findOne(['order_id' => $order->id]);
+
+            if (isset($nacl->status)) {
+                $status = $nacl->status->id;
+                $statusText = $nacl->status->denom;
+            } else {
+                $status = 1;
+                $statusText = 'Не сформирована';
+            }
+            $arr['orders'][$i]['order_id'] = $order->id;
+            $arr['orders'][$i]['vendor'] = $order->vendor->name;
+            $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
+            $arr['orders'][$i]['position_count'] = $order->positionCount;
+            $arr['orders'][$i]['total_price'] = $order->total_price;
+            $arr['orders'][$i]['currency_id'] = $order->currency_id;
+            $arr['orders'][$i]['currency'] = $order->currency->iso_code;
+            $arr['orders'][$i]['status'] = $status;
+            $arr['orders'][$i]['status_text'] = $statusText;
+            $i++;
+        }
+
+        $arr['pagination'] = [
+            'page' => $page,
+            'total_page' => ceil($count / $pageSize),
+            'page_size' => $pageSize
+        ];
+        return $arr;
+    }
 
 }

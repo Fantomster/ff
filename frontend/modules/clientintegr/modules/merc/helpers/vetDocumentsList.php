@@ -33,7 +33,7 @@ class vetDocumentsList extends Model
         self::DOC_STATUS_UTILIZED => 'Погашен',
     ];
 
-    public $status_color = [
+    public static $status_color = [
         self::DOC_STATUS_CONFIRMED => '',
         self::DOC_STATUS_WITHDRAWN => 'cancelled',
         self::DOC_STATUS_UTILIZED => 'done',
@@ -57,6 +57,7 @@ class vetDocumentsList extends Model
     public function createDocumentsList($list) {
         $cache = \Yii::$app->cache;
         $result = [];
+
         foreach ($list as $item)
         {
             if(!$cache->get('vetDocRaw_'.$item->bsuuid->__toString()))
@@ -68,7 +69,7 @@ class vetDocumentsList extends Model
                 'uuid' => $item->bsuuid->__toString(),
                 'number' => $this->getNumber($item->ns2issueSeries, $item->ns2issueNumber),
                 'date_doc' => $item->ns2issueDate,
-                'status' => '<span class="status ' . $this->status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
+                'status' => '<span class="status ' . self::$status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
                 'status_raw' => $item->ns2status->__toString(),
                 'product_name' => $item->ns2batch->ns2productItem->prodname,
                 'amount' => $item->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
@@ -162,13 +163,46 @@ class vetDocumentsList extends Model
 
     public function getDate($date_raw)
     {
-        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday;
-        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
+        if(isset($date_raw->ns2informalDate))
+            return $date_raw->ns2informalDate->__toString();
+
+
+        $first_date = '';
+        if(isset($date_raw->ns2firstDate->bsyear))
+            $first_date .= $date_raw->ns2firstDate->bsyear;
+
+        if(isset($date_raw->ns2firstDate->bsmonth))
+            $first_date .= '-'.$date_raw->ns2firstDate->bsmonth;
+
+        if(isset($date_raw->ns2firstDate->bsday))
+            $first_date .= '-'.$date_raw->ns2firstDate->bsday;
+
+        if (isset($date_raw->ns2firstDate->bshour)){
+            $first_date .= " ";
+            if (strlen($date_raw->ns2firstDate->bshour)==1)
+                $first_date .= "0";
+            $first_date .= $date_raw->ns2firstDate->bshour.":00:00";
+        }
 
         if($date_raw->ns2secondDate)
         {
-            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
-            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
+            $second_date = '';
+            if(isset($date_raw->ns2secondDate->bsyear))
+                $second_date .= $date_raw->ns2secondDate->bsyear;
+
+            if(isset($date_raw->ns2firstDate->bsmonth))
+                $second_date .= '-'.$date_raw->ns2secondDate->bsmonth;
+
+            if(isset($date_raw->ns2firstDate->bsday))
+                $second_date .= '-'.$date_raw->ns2secondDate->bsday;
+
+            if (isset($date_raw->ns2firstDate->bshour)){
+                $second_date .= " ";
+                if (strlen($date_raw->ns2secondDate->bshour)==1)
+                    $second_date .= "0";
+                $second_date .= $date_raw->ns2secondDate->bshour.":00:00";
+            }
+
             return 'с '.$first_date.' до '.$second_date;
         }
 

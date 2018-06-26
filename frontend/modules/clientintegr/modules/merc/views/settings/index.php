@@ -36,20 +36,9 @@ Modal::widget([
     ])
     ?>
 </section>
-<section class="content-header">
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <div class="panel-body">
-                <div class="box-body table-responsive no-padding">
-                    <p>
-                        <?= Yii::t('message', 'frontend.client.integration.mercury.lic_status', ['ru'=>'Состояние лицензии']) ?>:
-                        <?php echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') '; ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<?=
+$this->render('/default/_license_no_active.php', ['lic' => $lic]);
+?>
 <section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.settings', ['ru'=>'Настройки']) ?>:</h4>
 </section>

@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentChangeListRequest;
 use Yii;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
@@ -24,11 +25,10 @@ class mercApi extends Component
     private $service_id = 'mercury-g2b.service';
     private $vetisLogin = '';
     private $_client;
-    private $wsdl;
     private $enterpriseGuid;
 
-    private $wsdls = [
-        'mercury' => [
+    private $wsdls;
+        /*'mercury' => [
             'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ApplicationManagementService',
             'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ApplicationManagementService_v1.4_pilot.wsdl',
         ],
@@ -48,7 +48,7 @@ class mercApi extends Component
             'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/ikar/services/IkarService',
             'wsdl' => 'http://api.vetrf.ru/schema/platform/ikar/services/IkarService_v1.4_pilot.wsdl',
         ],
-    ];
+    ];*/
 
     protected static $_instance;
 
@@ -56,14 +56,15 @@ class mercApi extends Component
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
-            self::$_instance->wsdl = \Yii::$app->params['mercury_wsdl'];
+            self::$_instance->wsdls = Yii::$app->params['merc_settings'];
             self::$_instance->login = mercDicconst::getSetting('auth_login');
             self::$_instance->pass = mercDicconst::getSetting('auth_password');
             self::$_instance->apiKey = mercDicconst::getSetting('api_key');
             self::$_instance->issuerID = mercDicconst::getSetting('issuer_id');
             self::$_instance->vetisLogin = mercDicconst::getSetting('vetis_login');
             self::$_instance->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        }
+            self::$_instance->wsdls = Yii::$app->params['merc_settings'];
+    }
         return self::$_instance;
     }
 
@@ -82,7 +83,7 @@ class mercApi extends Component
                 //'soap_version' => SOAP_1_1,
             ]);
 
-        return $$this->_client;
+        return $this->_client;
     }
 
     private function getLocalTransactionId($method)
@@ -151,6 +152,72 @@ class mercApi extends Component
             $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
 
             $result = $this->parseResponse($response);
+
+            //Пишем лог
+            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+
+
+        }catch (\SoapFault $e) {
+            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
+        }
+        return $result;
+    }
+
+    public function getVetDocumentChangeList($date_start)
+    {
+        $client = $this->getSoapClient('mercury');
+        $result = null;
+
+        try {
+            //Готовим запрос
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+            $application = new application();
+            $application->serviceId = $this->service_id;
+            $application->issuerId = $this->issuerID;
+            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            //Проставляем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+            //Формируем тело запроса
+            $vetDoc = new getVetDocumentChangeListRequest();
+            $vetDoc->date_end = time();
+            $vetDoc->date_start = $date_start;
+            $vetDoc->localTransactionId = $localTransactionId;
+            $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
+            $vetDoc->setInitiator($this->vetisLogin);
+            $application->addData($vetDoc);
+            $request->setApplication($application);
+
+            /*var_dump(htmlentities($request->getXML()));
+            die();*/
+
+            //Делаем запрос
+            $request = $request->getXML();
+            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
+
+           /* var_dump(htmlentities($response));
+            die();*/
+
+            $result = $this->parseResponse($response);
+
+            if(isset($result->envBody->envFault)) {
+                throw new BadRequestHttpException();
+            }
+
+            $app_id = $result->envBody->submitApplicationResponse->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep(1);
+                //Получаем результат запроса
+                $response = $this->getReceiveApplicationResult($app_id);
+
+                $result = $this->parseResponse($response);
+
+                $status = $result->envBody->receiveApplicationResultResponse->application->status->__toString();
+            }
+            while ($status == 'IN_PROCESS');
 
             //Пишем лог
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
@@ -322,6 +389,10 @@ class mercApi extends Component
             //Пишем лог
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
+            if(isset($result->envBody->envFault)) {
+                throw new BadRequestHttpException();
+            }
+
             if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
                 $result = $result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
                 $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);
@@ -491,6 +562,12 @@ class mercApi extends Component
 
             //Пишем лог
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+
+            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                $result = true;
+            }
+            else
+                $result = false;
 
 
         }catch (\SoapFault $e) {

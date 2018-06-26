@@ -158,6 +158,7 @@ $gridColumns = [
     <div class="catalog-index">
         <div class="box-header with-border">
             <div class="box-title pull-left">
+                <?php print "<p>Последнее обновление списка лицензий UCS: <strong>".$data_last_license."</strong></p>"; ?>
 <?= Html::a('<i class="fa fa-sign-in"></i> Обновить доступы', ['getws'], ['class' => 'btn btn-md fk-button']) ?>
             </div>
         </div>

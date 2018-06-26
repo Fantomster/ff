@@ -18,7 +18,7 @@ use common\models\Organization;
  *
  *
  */
-class OneSСontragent extends \yii\db\ActiveRecord
+class OneSContragent extends \yii\db\ActiveRecord
 {
 
 

@@ -3,8 +3,13 @@
 namespace common\models;
 
 use api\common\models\iiko\iikoService;
+use api\common\models\one_s\OneSService;
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
+use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use backend\controllers\OdinsobshController;
+use Mpdf\Tag\Q;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -1520,7 +1525,12 @@ class Organization extends \yii\db\ActiveRecord
         $result = [];
         $lic = RkServicedata::getLicense();
         if($lic != null)
-            $result['rkws'] = $lic;
+            {
+                $result['rkws'] = $lic;
+                $org=$lic['service_id'];
+                $lic_ucs = RkServicedata::getLicenseUcs($org);
+                $result['rkws_ucs'] = $lic_ucs;
+            }
 
         $lic = iikoService::getLicense();
         if($lic != null)
@@ -1530,9 +1540,30 @@ class Organization extends \yii\db\ActiveRecord
         if($lic != null)
             $result['mercury'] = $lic;
 
+        $lic = OneSService::getLicense();
+        if($lic != null)
+            $result['odinsobsh'] = $lic;
+
         return $result;
     }
 
+    /**
+     * @return integer
+     */
+    public function getVsdCount()
+    {
+        $lic = mercService::getLicense();
+        if($lic == null)
+            return 0;
+
+        try {
+            $guid = mercDicconst::getSetting('enterprise_guid');
+            return MercVsd::find()->where(['guid' => $guid, 'status' => 'CONFIRMED'])->andWhere("consignor <> '$guid'")->count();
+        }catch (\Exception $e)
+        {
+            return 0;
+        }
+    }
 
     public function getOrganizationManagersExportColumns(): array
     {

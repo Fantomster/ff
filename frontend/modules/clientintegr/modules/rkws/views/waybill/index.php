@@ -71,7 +71,125 @@ $this->registerCss("
 
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    ЗАВЕРШЕННЫЕ ЗАКАЗЫ
+    <?=
+    $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]);
+    ?>
+    <?php
+    $columns = array (
+        [
+            'attribute' => 'id',
+            'contentOptions' => function($data) {
+                return ["id" => "way".$data->id];
+            }
+        ],
+        [
+            'attribute'=>'invoice_relation',
+            'format'=>'raw',
+            'visible'=>$visible,
+            'header'=>'№ Накладной',
+            'value'=>function($data){
+                return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
+            }
+        ],
+        [
+            'attribute' => 'vendor.name',
+            'value' => 'vendor.name',
+            'label' => 'Поставщик',
+            //'headerOptions' => ['class'=>'sorting',],
+        ],
+        /*
+         [
+             'format' => 'raw',
+             'attribute' => 'status',
+             'value' => function($data) {
+                          $statusClass = 'done';
+
+             return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';
+                        },
+              'label' => 'Статус Заказа',
+           ],
+        */
+
+        [
+            'attribute' => 'updated_at',
+            'label' => 'Обновлено',
+            'format'=>'date',
+        ],
+        [
+            'format'=>'date',
+            'value' => function($data) {
+
+                $fdate = $data->actual_delivery ? $data->actual_delivery :
+                    ( $data->requested_delivery ? $data->requested_delivery :
+                        $data->updated_at);
+
+                return $fdate;
+            },
+            'label' => 'Финальная дата',
+        ],
+        [
+            'attribute' => 'positionCount',
+            'label' => 'Кол-во позиций',
+            'format'=>'raw',
+            'value' => function ($data) {
+                return $data->positionCount .
+                    '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
+                    'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
+                    'data-toggle="popover"  data-trigger="focus" data-url="'.
+                    Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
+                    '/getpopover" role="button" tabindex="0" '.
+                    'data-original-title="" title="" data-model="'.$data->id.'"> '.
+                    '<i class="fa fa-info-circle"></i></a>';
+            }
+        ],
+        [
+            'attribute' => 'total_price',
+            'label' => 'Итоговая сумма',
+            'format'=>'raw',
+        ],
+        [
+            'value' => function($data) {
+
+                $nacl = RkWaybill::findOne(['order_id' => $data->id]);
+
+                //    var_dump($nacl->id);
+                if (isset($nacl->status)) {
+                    return $nacl->status->denom;
+                }  else {
+                    return 'Не сформирована';
+                }
+
+
+            },
+            'label' => 'Статус накладной',
+        ],
+        [
+            'class'=>'kartik\grid\ExpandRowColumn',
+            'width'=>'50px',
+            'value'=>function ($model, $key, $index, $column) use ($way) {
+                if ($model->id == $way) {
+                    return GridView::ROW_EXPANDED;
+                }
+                return GridView::ROW_COLLAPSED;
+            },
+            'detail'=>function ($model, $key, $index, $column) use ($lic, $licucs) {
+                $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id])->one();
+
+                if ($wmodel) {
+                    $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id]);
+                } else {
+                    $wmodel = null;
+                }
+                $order_id = $model->id;
+                return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'order_id'=>$order_id, 'lic' => $lic, 'licucs' => $licucs]);
+            },
+            'headerOptions'=>['class'=>'kartik-sheet-style'],
+            'expandOneOnly'=>true,
+        ]
+    );
+    ?>
+
+    ЗАВЕРШЁННЫЕ ЗАКАЗЫ
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -154,109 +272,7 @@ $this->registerCss("
                                           'pjaxSettings' => ['options' => ['id' => 'waybill_grid1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                     //    'filterModel' => $searchModel,
-                                        'columns' => [
-                                                [
-                                                    'attribute' => 'id',
-                                                    'contentOptions' => function($data) {
-                                                        return ["id" => "way".$data->id];
-                                                    }
-                                                ],
-                                                [
-                                                    'attribute' => 'vendor.name',
-                                                    'value' => 'vendor.name',
-                                                    'label' => 'Поставщик',
-                                                    //'headerOptions' => ['class'=>'sorting',],
-                                                ],
-                                               /*
-                                                [
-                                                    'format' => 'raw',
-                                                    'attribute' => 'status',
-                                                    'value' => function($data) {
-                                                                 $statusClass = 'done';
-                                    
-                                                    return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';  
-                                                               },
-                                                     'label' => 'Статус Заказа',
-                                                  ],
-                                               */
-
-                                                [
-                                                    'attribute' => 'updated_at',
-                                                    'label' => 'Обновлено',   
-                                                    'format'=>'date',
-                                                ],
-                                                [
-                                                    'format'=>'date',
-                                                    'value' => function($data) {
-
-                                                     $fdate = $data->actual_delivery ? $data->actual_delivery :
-                                                            ( $data->requested_delivery ? $data->requested_delivery :
-                                                              $data->updated_at);
-
-                                                        return $fdate;
-                                                    },
-                                                    'label' => 'Финальная дата',
-                                                ],
-                                                [
-                                                    'attribute' => 'positionCount',
-                                                    'label' => 'Кол-во позиций',   
-                                                    'format'=>'raw',
-                                                    'value' => function ($data) {
-                                                    return $data->positionCount .
-                                                        '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
-                                                        'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
-                                                        'data-toggle="popover"  data-trigger="focus" data-url="'.
-                                                        Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
-                                                        '/getpopover" role="button" tabindex="0" '.
-                                                        'data-original-title="" title="" data-model="'.$data->id.'"> '.
-                                                        '<i class="fa fa-info-circle"></i></a>';
-                                                    }
-                                                ],                       
-                                                [
-                                                    'attribute' => 'total_price',
-                                                    'label' => 'Итоговая сумма',   
-                                                    'format'=>'raw',
-                                                ],
-                                                [
-                                                    'value' => function($data) {
-                                                                   
-                                                     $nacl = RkWaybill::findOne(['order_id' => $data->id]); 
-                                                     
-                                                 //    var_dump($nacl->id);
-                                                            if (isset($nacl->status)) {
-                                                                return $nacl->status->denom;
-                                                            }  else {
-                                                                return 'Не сформирована';
-                                                            }
-
-
-                                                               },
-                                                     'label' => 'Статус накладной', 
-                                                ],                       
-                                                [
-                                                    'class'=>'kartik\grid\ExpandRowColumn',
-                                                    'width'=>'50px',
-                                                    'value'=>function ($model, $key, $index, $column) use ($way) {
-                                                                if ($model->id == $way) {
-                                                                    return GridView::ROW_EXPANDED;
-                                                                }
-                                                                return GridView::ROW_COLLAPSED;
-                                                             },
-                                                    'detail'=>function ($model, $key, $index, $column) {
-                                                              $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id])->one();
-                                                              
-                                                              if ($wmodel) {
-                                                                  $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id]);
-                                                              } else {
-                                                                  $wmodel = null;
-                                                              }
-                                                              $order_id = $model->id;
-                                                    return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'order_id'=>$order_id]);
-                                                              },
-                                                    'headerOptions'=>['class'=>'kartik-sheet-style'], 
-                                                    'expandOneOnly'=>true,
-                                                ],
-                                                ],
+                                        'columns' => $columns,
                                         /* 'rowOptions' => function ($data, $key, $index, $grid) {
                                           return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
                                           }, */

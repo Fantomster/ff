@@ -508,7 +508,7 @@ class Order extends \yii\db\ActiveRecord
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
-            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code)  && isset($vendor->ediOrganization->login)  && isset($vendor->ediOrganization->pass) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
+            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $eComIntegration = new EComIntegration();
                 $login = $vendor->ediOrganization->login;
                 $pass = $vendor->ediOrganization->pass;

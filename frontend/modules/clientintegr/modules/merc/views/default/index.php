@@ -208,6 +208,7 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?php
+                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
                         'options' => [
                             'data-pjax' => true,

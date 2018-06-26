@@ -13,15 +13,15 @@ use yii\helpers\Html;
             <div class="hpanel">
                 <div class="panel-body">
                     <div class="col-md-8 text-left">
-                        <?= Html::a('Главная', ['/clientintegr/iiko/default'], ['class' => 'btn btn-md fk-button']); ?>
+                        <?= Html::a('Главная', ['/clientintegr/odinsobsh/default'], ['class' => 'btn btn-md fk-button']); ?>
                         <!--      <?= Html::a('Доступы', ['access/index'], ['class' => 'btn btn-md fk-button']); ?>
                             <?= Html::a('Контрагенты', ['agent/index'], ['class' => 'btn btn-md fk-button']); ?>
                             <?= Html::a('Склады', ['store/index'], ['class' => 'btn btn-md fk-button']); ?>
                             <?= Html::a('Номенклатура', ['getgoods/index'], ['class' => 'btn btn-md fk-button']); ?>
-                            
+
                             <?= Html::a('Проверка', ['srequest/check'], ['class' => 'btn btn-md fk-button']); ?>
                        -->
-                        <?= Html::a('Приходные накладные', ['waybill/index'], ['class' => 'btn btn-md fk-button']); ?>
+                        <?= Html::a('Приходные накладные', [''], ['class' => 'btn btn-md fk-button', 'disabled'=>'disabled']); ?>
                         <?= Html::a('Настройки интеграции', ['settings/index'], ['class' => 'btn btn-md fk-button']); ?>
 
                         <!--    <?= Html::a('Задачи', ['#'], ['class' => 'btn btn-md fk-button']); ?>

@@ -49,12 +49,10 @@ $this->title = 'Интеграция с iiko Office';
                             'pjax' => false,
                             'columns' => [
                                 'id',
-                                'denom',
-                                'store_code',
-                                'store_type',
-                                'is_active',
-                                'created_at',
-                                'updated_at'
+                                'cid',
+                                'name',
+                                'address',
+                                'updated_at',
                             ],
                             'filterPosition' => false,
                             'options' => ['class' => 'table-responsive'],

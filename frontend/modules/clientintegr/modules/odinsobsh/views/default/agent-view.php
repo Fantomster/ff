@@ -49,11 +49,10 @@ $this->title = 'Интеграция с 1С Общепит';
                             'pjax' => false,
                             'columns' => [
                                 'id',
-                                'denom',
-                                'comment',
-                                'is_active',
-                                'created_at',
-                                'updated_at'
+                                'cid',
+                                'name',
+                                'inn',
+                                'updated_at',
                             ],
                             'filterPosition' => false,
                             'options' => ['class' => 'table-responsive'],

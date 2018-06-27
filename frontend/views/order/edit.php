@@ -33,6 +33,8 @@ $urlViewOrder = Url::to(['/order/view', 'id' => $order->id]);
 $edit = true;
 $refreshUrl = Url::to(['/order/edit', "id" => $order->id]);
 
+$attachment = new common\models\OrderAttachment;
+
 $arr = [
     Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохраненные изменения!']),
     Yii::t('message', 'frontend.views.order.var2', ['ru' => 'Вы изменили заказ, но не сохранили изменения!']),
@@ -264,19 +266,20 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order', 'canRepeatOrder'));
                         ?>
                     </div>
-                    <div style="display: block;">
+                    <div style="display: block;padding-top: 20px;">
                         <?= ''
 //                        FileUploadUI::widget([
-//                            //'model' => $model,
-//                            'name' => 'testtest',
-//                            'attribute' => 'image',
-//                            'url' => ['media/upload', 'id' => 1],
+//                            //'model' => $attachment,
+//                            //'attribute' => 'file',
+//                            'name' => 'attachment',
+//                            'url' => ['order/upload-attachment', 'id' => $order->id],
 //                            'gallery' => false,
-//                            'fieldOptions' => [
-//                                'accept' => 'image/*'
-//                            ],
 //                            'clientOptions' => [
-//                                'maxFileSize' => 2000000
+//                                'maxFileSize' => 52428800,
+//                                'disableImagePreview' => true,
+//                                'disableAudioPreview' => true,
+//                                'disableVideoPreview' => true,
+//                                'acceptFileTypes' => new \yii\web\JsExpression('/(\.|\/)(gif|jpe?g|png|bmp|pdf)$/i'),
 //                            ],
 //                            // ...
 //                            'clientEvents' => [
@@ -292,15 +295,24 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
 //                        ]);
                         ?>
                     </div>
-                    <!-- /.table-responsive -->
+                    <?php
+                    echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru' => 'Сохранить']) . ' </span>', [
+                        'class' => 'btn btn-success pull-right btnSave',
+                        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru' => 'Сохраняем...']),
+                    ]);
+                    echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_two', ['ru' => 'Повторить заказ']), ['order/repeat', 'id' => $order->id], [
+                                'class' => 'btn btn-default pull-right',
+                                'style' => 'margin-right: 7px;'
+                            ]) : "";
+                    ?>
                 </div>
                 <!-- /.box-body -->
-<?php //Pjax::end();  ?>
+                <?php //Pjax::end();    ?>
             </div>
 
         </div>
         <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp" id="actionButtons">
-        <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
+            <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
         </div>
         <?php
         echo Html::beginForm(Url::to(['/order/ajax-refresh-buttons']), 'post', ['id' => 'actionButtonsForm']);
@@ -347,8 +359,8 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                 </div>
                 <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
                 <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
-<?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
-<?= Html::endForm() ?>
+                <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
+                <?= Html::endForm() ?>
             </div>
         </div>
     </div>

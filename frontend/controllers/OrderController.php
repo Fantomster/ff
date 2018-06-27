@@ -23,6 +23,7 @@ use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use common\models\ManagerAssociate;
 use common\models\OrderChat;
+use common\models\OrderAttachment;
 use common\models\guides\Guide;
 use common\models\search\GuideSearch;
 use common\models\guides\GuideProduct;
@@ -113,7 +114,8 @@ class OrderController extends DefaultController {
                             'ajax-select-vendor',
                             'complete-obsolete',
                             'pjax-cart',
-                            'test'
+                            'test',
+                            'upload-attachment',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2303,9 +2305,41 @@ class OrderController extends DefaultController {
         $session->set('selected', $list);
     }
 
-    public function actionTest()
-    {
+    public function actionTest() {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        return (new rkeeperOrder())->getCompletedOrdersList(['search' => ['store_rid' =>1178]]);
+        return (new rkeeperOrder())->getCompletedOrdersList(['search' => ['store_rid' => 1178]]);
     }
+
+    public function actionUploadAttachment($id) {
+        $user = $this->currentUser;
+        $order = Order::findOne(['id' => $id]);
+        if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            return '';
+        }
+
+        $attachment = new OrderAttachment;
+        $uploadedFile = \yii\web\UploadedFile::getInstanceByName('attachment');
+        //$uploadedFile->load(Yii::$app->request->post());
+        
+        $attachment->order_id = $id;
+        $attachment->file = $uploadedFile;
+
+        if ($attachment && $attachment->validate() && isset($attachment->dirtyAttributes['file']) && $attachment->file) {
+            $attachment->save();
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ['files' => [
+                    [
+                        'name' => $uploadedFile->name,
+                        'size' => $uploadedFile->size,
+                        'url' => $attachment->getUploadUrl(),
+                        'deleteUrl' => 'wtf',
+                        'deleteType' => 'POST',
+                    ],
+                ],
+            ];
+        }
+
+        return '';
+    }
+
 }

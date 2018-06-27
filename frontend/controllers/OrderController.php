@@ -1302,10 +1302,16 @@ class OrderController extends DefaultController
         $user = $this->currentUser;
         $user->organization->markViewed($id);
 
+        $editableOrders = [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_DONE,
+                ];
         if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
-            $order = $this->findOrder([Order::tableName() . '.id' => $id], Yii::$app->user->can('manage'));
+            $order = $this->findOrder([Order::tableName() . '.id' => $id, Order::tableName() . '.status' => $editableOrders], Yii::$app->user->can('manage'));
         } else {
-            $order = Order::findOne(['id' => $id]);
+            $order = Order::findOne(['id' => $id, Order::tableName() . '.status' => $editableOrders]);
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {

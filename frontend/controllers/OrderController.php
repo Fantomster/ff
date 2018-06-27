@@ -1328,6 +1328,8 @@ class OrderController extends DefaultController
         $message = "";
         $orderChanged = 0;
         $currencySymbol = $order->currency->symbol;
+        $changed = [];
+        $deleted = [];
 
         if (Yii::$app->request->post()) {
             $content = Yii::$app->request->post('OrderContent');
@@ -1365,13 +1367,16 @@ class OrderController extends DefaultController
                                 $prodFromCat->baseProduct->price = $product->price;
                                 $prodFromCat->save();
                                 $prodFromCat->baseProduct->save();
+                                $changed[$product->id] = $product;
                             }
                         }
                     }
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
+                        $changed[$product->id] = $product;
                     }
                     if ($product->quantity == 0) {
+                        $deleted[$product->id] = $product;
                         $product->delete();
                     } else {
                         $product->save();
@@ -1430,13 +1435,13 @@ class OrderController extends DefaultController
                 $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_three', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
                 $order->calculateTotalPrice();
                 $order->save();
-                $this->sendOrderChange($order->client, $order);
+                $this->sendOrderChange($order->client, $order, $changed, $deleted);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_four', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
-                $this->sendOrderChange($order->vendor, $order);
+                $this->sendOrderChange($order->vendor, $order, $changed, $deleted);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -1880,8 +1885,10 @@ class OrderController extends DefaultController
      *
      * @param Organization $senderOrg
      * @param Order $order
+     * @param OrderContent[] $changed
+     * @param OrderContent[] $deleted
      */
-    private function sendOrderChange($senderOrg, $order)
+    private function sendOrderChange($senderOrg, $order, $changed = [], $deleted = [])
     {
         /** @var Mailer $mailer */
         /** @var Message $message */

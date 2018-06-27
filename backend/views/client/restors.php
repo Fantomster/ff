@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use kartik\export\ExportMenu;
 use yii\widgets\Pjax;
+use common\models\Job;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\UserSearch */
@@ -30,14 +31,23 @@ $gridColumns = [
         },
         'label' => 'Название организации',
     ],
-/*    [
+    [
         'format' => 'raw',
         'attribute' => 'job',
-        'value' => 'Должность' function ($data) {
-            return Html::a($data['job']['name_job'], ['job/view', 'id' => $data['job_id']]);
+        'value' => function ($data) {
+            if ($data['profile']['job_id']) {
+                $jn = Job::find()
+                    ->select(['name_job'])
+                    ->where(['id' => $data['profile']['job_id']])
+                    ->one();
+                return $jn->name_job;
+            } else {
+                return 'Не указана';
+            }
         },
         'label' => 'Должность сотрудника',
-    ],*/
+        'filter' => common\models\Job::getListRestor(),
+    ],
     [
         'format' => 'raw',
         'attribute' => 'full_name',

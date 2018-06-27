@@ -15,6 +15,7 @@ use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
+use common\models\Job;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\db\Exception;
@@ -33,12 +34,14 @@ use yii\web\BadRequestHttpException;
  * @property integer $send_demo_message
  * @property string $first_logged_at
  * @property string $language
+ * @property integer $job_id
  *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
  * @property ManagerAssociate $associated
  * @property EmailNotification $emailNotification
  * @property SmsNotification $smsNotification
+ * @property Job $job
  */
 class User extends \amnah\yii2\user\models\User {
 
@@ -73,6 +76,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
+            [['job_id'], 'integer'],
             [['organization_id', 'type', 'subscribe', 'send_manager_message', 'send_week_message', 'send_demo_message'], 'integer'],
             [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];

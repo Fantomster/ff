@@ -716,9 +716,32 @@ class Products
 
     );
 
-    function __construct($url='http://api.vetrf.ru/schema/platform/services/ProductService_v1.4_pilot.wsdl')
+    private static function getClassmap()
     {
-        $this->soapClient = new SoapClient($url,array("classmap"=>self::$classmap,"trace" => true,"exceptions" => true));
+        $classmap = [];
+        foreach (self::$classmap as $key => $value) {
+            if (!isset($classmap[$key])) {
+                $classmap[$key] = __NAMESPACE__ . '\\' . $value;
+            }
+        }
+        return $classmap;
+    }
+
+
+    function __construct($params = ['url' => 'http://api.vetrf.ru/schema/platform/services/2.0-last/EnterpriseService_v2.0_pilot.wsdl',
+        'login' => '',
+        'password' => '',
+        'exceptions' => true,
+        'trace' => true])
+    {
+        $this->soapClient = new \SoapClient($params['url'],
+            [   "classmap"=>self::getClassmap(),
+                'login' => $params['login'],
+                'password' =>  $params['password'],
+                'exceptions' =>  $params['login'],
+                'trace' =>  $params['trace'],
+                'exceptions' =>  $params['exceptions']
+            ]);
     }
 
     function GetProductByGuid(getProductByGuidRequest $getProductByGuidRequest)

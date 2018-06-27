@@ -128,35 +128,20 @@ $js = <<<JS
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
             target = $(this).data("target");
-            $(target).val(0);
-            var form = $("#editOrder");
+//            var form = $("#editOrder");
             swal({
                 title: "$arr[4]",
                 text: "$arr[5]",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "$arr[6]",
-                cancelButtonText: "$arr[7]",
-                showLoaderOnConfirm: true,
-                preConfirm: function () {
-                    return new Promise(function (resolve, reject) {
-                        $.post(
-                            form.attr("action"),
-                            form.serialize()
-                        ).done(function (result) {
-                            if (result) {
-                                dataEdited = 0;
-                                resolve(result);
-                            } else {
-                                resolve(false);
-                            }
-                        });
-                    })
-                },
+                cancelButtonText: "$arr[7]"
             }).then(function(result) {
                 if (result.dismiss === "cancel") {
                     swal.close();
                 } else {
+                    $(target).val(0);
+                    $(target).closest('tr').hide();
                     swal({title: "$arr[8]", type: "success"});
                 }
             });        

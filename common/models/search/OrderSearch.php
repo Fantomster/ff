@@ -423,6 +423,9 @@ class OrderSearch extends Order
        foreach ($ordersArray as $order){
            $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $order->id]);
 
+           if($nacl === null)
+               continue;
+
            if (isset($nacl->status)) {
                $status = $nacl->status->id;
                $statusText = $nacl->status->denom;
@@ -500,6 +503,9 @@ class OrderSearch extends Order
         $i=0;
         foreach ($ordersArray as $order){
             $nacl = RkWaybill::findOne(['order_id' => $order->id]);
+
+            if($nacl === null)
+                continue;
 
             if (isset($nacl->status)) {
                 $status = $nacl->status->id;

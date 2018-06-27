@@ -6,8 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\search\mercDicconstSearch;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\models\ActivityLocationList;
 use Yii;
 

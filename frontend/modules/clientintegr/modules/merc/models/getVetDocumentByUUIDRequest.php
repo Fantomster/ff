@@ -9,6 +9,7 @@
 namespace frontend\modules\clientintegr\modules\merc\models;
 
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 
 class getVetDocumentByUUIDRequest extends BaseRequest
@@ -285,14 +286,14 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $sub_product = $sub_product_raw->soapBody->wsgetSubProductByGuidResponse->prosubProduct->proname->__toString();
 
-        $unit = mercApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
+        $unit = dictsApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
 
         $country_raw = mercApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
 
         $country = $country_raw->soapenvBody->wsgetCountryByGuidResponse->ikarcountry->ikarfullName->__toString();
 
-        $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
-        $purpose = $purpose_raw->soapBody->wsgetPurposeByGuidResponse ->compurpose->comname->__toString();
+        $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
+        $purpose = $purpose->purpose->name;
 
         $producer = null;
 
@@ -328,7 +329,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Объем',
-                'value' => $doc->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
+                'value' => $doc->ns2batch->ns2volume." ".$unit->unit->mname,
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',

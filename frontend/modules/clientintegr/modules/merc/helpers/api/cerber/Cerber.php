@@ -6,7 +6,7 @@
  * Time: 18:35
  */
 
-namespace frontend\modules\clientintegr\modules\merc\models;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\cerber;
 
 class GenericEntity{
 var $uuid;//UUID

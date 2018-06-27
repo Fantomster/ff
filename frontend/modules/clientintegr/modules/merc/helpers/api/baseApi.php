@@ -22,18 +22,18 @@ class baseApi extends Component
 
     public static function getInstance()
     {
-        if (self::$_instance === null) {
-            self::$_instance = new static();
-            self::$_instance->wsdls = Yii::$app->params['merc_settings'];
-            self::$_instance->login = mercDicconst::getSetting('auth_login');
-            self::$_instance->pass = mercDicconst::getSetting('auth_password');
-            self::$_instance->apiKey = mercDicconst::getSetting('api_key');
-            self::$_instance->issuerID = mercDicconst::getSetting('issuer_id');
-            self::$_instance->vetisLogin = mercDicconst::getSetting('vetis_login');
-            self::$_instance->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-            self::$_instance->wsdls = Yii::$app->params['merc_settings'];
+        if (self::$_instance[static::class] === null) {
+            self::$_instance[static::class] = new static();
+            self::$_instance[static::class]->wsdls = Yii::$app->params['merc_settings'];
+            self::$_instance[static::class]->login = mercDicconst::getSetting('auth_login');
+            self::$_instance[static::class]->pass = mercDicconst::getSetting('auth_password');
+            self::$_instance[static::class]->apiKey = mercDicconst::getSetting('api_key');
+            self::$_instance[static::class]->issuerID = mercDicconst::getSetting('issuer_id');
+            self::$_instance[static::class]->vetisLogin = mercDicconst::getSetting('vetis_login');
+            self::$_instance[static::class]->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+            self::$_instance[static::class]->wsdls = Yii::$app->params['merc_settings'];
         }
-        return self::$_instance;
+        return self::$_instance[static::class];
     }
 
     protected function getSoapClient($system)

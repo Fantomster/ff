@@ -1,12 +1,8 @@
 <?php
-namespace frontend\modules\clientintegr\modules\merc\helpers\api;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\cerber;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use Yii;
-use frontend\modules\clientintegr\modules\merc\helpers\requests\BusinessEntity;
-use frontend\modules\clientintegr\modules\merc\models\Cerber;
-use frontend\modules\clientintegr\modules\merc\models\getActivityLocationListRequest;
-use frontend\modules\clientintegr\modules\merc\models\getBusinessEntityByUuidRequest;
-use frontend\modules\clientintegr\modules\merc\models\getEnterpriseByUuidRequest;
 
 class cerberApi extends baseApi
 {
@@ -30,12 +26,8 @@ class cerberApi extends baseApi
         $cache = Yii::$app->cache;
         $enterprise = $cache->get('Enterprise_'.$UUID);
 
-        if(!($enterprise === false)) {
-           /* echo "<pre>";
-            print_r($enterprise);
-            echo "</pre>";
-            die();*/
-            return $enterprise;}
+        if(!($enterprise === false))
+            return $enterprise;
 
         $client = $this->getSoapClient('vetis');
         $request = new getEnterpriseByUuidRequest();

@@ -4,9 +4,9 @@ namespace frontend\modules\clientintegr\modules\merc\helpers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\base\Model;
-use yii\data\ArrayDataProvider;
 
 class vetDocumentsChangeList extends Model
 {
@@ -59,7 +59,7 @@ class vetDocumentsChangeList extends Model
             if(!$cache->get('vetDocRaw_'.$item->bsuuid->__toString()))
                 $cache->add('vetDocRaw_'.$item->bsuuid->__toString(), $item->asXML(),60);
 
-            $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
+            $unit = dictsApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
             $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->ns2consignor->ententerprise->bsuuid->__toString());
             $recipient = $recipient->enterprise;
             $model = MercVsd::findOne(['uuid' => $item->bsuuid->__toString(), 'guid' => $guid]);
@@ -75,7 +75,7 @@ class vetDocumentsChangeList extends Model
                 'type' => $item->ns2type->__toString(),
                 'product_name' => $item->ns2batch->ns2productItem->prodname->__toString(),
                 'amount' => $item->ns2batch->ns2volume->__toString(),
-                'unit' => $unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
+                'unit' => $unit->unit->name,
                 'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
                 'recipient_name' =>  $recipient->name.'('.
                     $recipient->address->addressView

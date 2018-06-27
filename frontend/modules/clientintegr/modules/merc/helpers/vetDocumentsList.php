@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dictsApi;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
 
@@ -64,7 +65,7 @@ class vetDocumentsList extends Model
             if(!$cache->get('vetDocRaw_'.$item->bsuuid->__toString()))
                 $cache->add('vetDocRaw_'.$item->bsuuid->__toString(), $item->asXML(),60);
 
-            $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
+            $unit = dictsApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
             $recipient = cerberApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
             $result[] = [
                 'uuid' => $item->bsuuid->__toString(),
@@ -73,7 +74,7 @@ class vetDocumentsList extends Model
                 'status' => '<span class="status ' . self::$status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
                 'status_raw' => $item->ns2status->__toString(),
                 'product_name' => $item->ns2batch->ns2productItem->prodname,
-                'amount' => $item->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
+                'amount' => $item->ns2batch->ns2volume." ".$unit->unit->name,
                 'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
                 'recipient_name' => $recipient->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity->dtname->__toString(),
             ];

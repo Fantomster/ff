@@ -42,6 +42,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex()
     {
+        Yii::$app->cache->flush();
         $lic = mercService::getLicense();
         $searchModel = new mercVSDSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);

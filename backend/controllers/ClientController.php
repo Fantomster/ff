@@ -14,6 +14,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
+use common\models\Job;
 
 /**
  * UserController implements the CRUD actions for User model.

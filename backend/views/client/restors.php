@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use kartik\export\ExportMenu;
 use yii\widgets\Pjax;
+use common\models\Job;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\UserSearch */
@@ -30,13 +31,22 @@ $gridColumns = [
         },
         'label' => 'Название организации',
     ],
-/*    [
+    /*[
         'format' => 'raw',
         'attribute' => 'job',
-        'value' => 'Должность' function ($data) {
-            return Html::a($data['job']['name_job'], ['job/view', 'id' => $data['job_id']]);
+        'value' => function ($data) {
+            if ($data['profile']['job_id']) {
+                $jn = Job::find()
+                    ->select(['name_job'])
+                    ->where(['id' => $data['profile']['job_id']])
+                    ->one();
+                return $jn->name_job;
+            } else {
+                return 'Не указана';
+            }
         },
         'label' => 'Должность сотрудника',
+        'filter' => common\models\Job::getListRestor(),
     ],*/
     [
         'format' => 'raw',
@@ -124,8 +134,11 @@ $gridColumns = [
         'columns' => $gridColumns,
         'target' => ExportMenu::TARGET_SELF,
         'exportConfig' => [
-            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_HTML => false,
+            ExportMenu::FORMAT_TEXT => false,
             ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_CSV => false,
             ExportMenu::FORMAT_EXCEL_X => [
                 'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
                 'icon' => 'floppy-remove',
@@ -135,7 +148,7 @@ $gridColumns = [
                 'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
                 'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'extension' => 'xlsx',
-                'writer' => 'Excel2007'
+                'writer' => 'Xlsx'
             ],
         ],
         'batchSize' => 200,

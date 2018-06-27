@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
 use Yii;
 use yii\base\Model;
@@ -415,31 +416,33 @@ class OrderSearch extends Order
        if($actualDelivery){
            $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
        }
-       if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
-           $dbName =  $match[1];
-       } else {
-           $dbName = 'db_api';
-       }
-       $query->leftJoin($dbName . '.iiko_waybill', $dbName . '.iiko_waybill.order_id=order.id');
-       if($numCode){
-           $query->andWhere([$dbName . '.iiko_waybill.num_code' => $numCode]);
-       }
-
-       if($storeID){
-           $query->andWhere([$dbName . '.iiko_waybill.store_id' => $storeID]);
-       }
+      
        $count = $query->count();
        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
        $i=0;
        foreach ($ordersArray as $order){
            $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $order->id]);
-
+           
            if (isset($nacl->status)) {
                $status = $nacl->status->id;
                $statusText = $nacl->status->denom;
            } else {
                $status = 1;
                $statusText = 'Не сформирована';
+           }
+
+           if($numCode){
+               if($nacl === null)
+                   continue;
+               if($nacl->num_code != $numCode)
+                   continue;
+           }
+
+           if($storeID){
+               if($nacl === null)
+                   continue;
+               if($nacl->store_rid != $storeID)
+                   continue;
            }
            $arr['orders'][$i]['order_id'] = $order->id;
            $arr['orders'][$i]['vendor'] = $order->vendor->name;
@@ -496,22 +499,6 @@ class OrderSearch extends Order
             $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
         }
 
-        if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
-            $dbName =  $match[1];
-        } else {
-            $dbName = 'db_api';
-        }
-
-        if($numCode){
-            $query->leftJoin($dbName . '.rk_waybill', $dbName . '.rk_waybill.order_id=order.id');
-            $query->andWhere([$dbName . '.rk_waybill.num_code' => $numCode]);
-        }
-
-        if($storeRID){
-            $query->leftJoin($dbName . '.rk_storetree', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_storetree.rid');
-            $query->andWhere([$dbName . '.rk_storetree.rid' => $storeRID]);
-        }
-
         $count = $query->count();
         $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
         $i=0;
@@ -525,6 +512,21 @@ class OrderSearch extends Order
                 $status = 1;
                 $statusText = 'Не сформирована';
             }
+
+            if($numCode){
+                if($nacl === null)
+                    continue;
+                if($nacl->num_code != $numCode)
+                    continue;
+            }
+
+            if($storeRID){
+                if($nacl === null)
+                    continue;
+                if($nacl->store_rid != $storeRID)
+                    continue;
+            }
+
             $arr['orders'][$i]['order_id'] = $order->id;
             $arr['orders'][$i]['vendor'] = $order->vendor->name;
             $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));

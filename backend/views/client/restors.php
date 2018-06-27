@@ -31,7 +31,7 @@ $gridColumns = [
         },
         'label' => 'Название организации',
     ],
-    /*[
+    [
         'format' => 'raw',
         'attribute' => 'job',
         'value' => function ($data) {
@@ -47,7 +47,7 @@ $gridColumns = [
         },
         'label' => 'Должность сотрудника',
         'filter' => common\models\Job::getListRestor(),
-    ],*/
+    ],
     [
         'format' => 'raw',
         'attribute' => 'full_name',

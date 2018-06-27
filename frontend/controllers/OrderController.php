@@ -4,6 +4,8 @@ namespace frontend\controllers;
 
 use api_web\classes\CartWebApi;
 use api_web\classes\RkeeperWebApi;
+use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
+use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
 use common\models\Cart;
 use common\models\search\OrderProductsSearch;
 use Yii;
@@ -111,6 +113,7 @@ class OrderController extends DefaultController {
                             'ajax-select-vendor',
                             'complete-obsolete',
                             'pjax-cart',
+                            'test'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2300,4 +2303,9 @@ class OrderController extends DefaultController {
         $session->set('selected', $list);
     }
 
+    public function actionTest()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return (new rkeeperOrder())->getCompletedOrdersList(['search' => ['store_rid' =>1178]]);
+    }
 }

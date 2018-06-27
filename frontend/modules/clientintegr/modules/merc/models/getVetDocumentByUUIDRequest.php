@@ -10,6 +10,8 @@ namespace frontend\modules\clientintegr\modules\merc\models;
 
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\product\productApi;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 
 class getVetDocumentByUUIDRequest extends BaseRequest
@@ -279,18 +281,18 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $owner = $owner_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
 
-        $product_raw = mercApi::getInstance()->getProductByGuid($doc->ns2batch->ns2product->bsguid->__toString());
-        $product = $product_raw->soapBody->wsgetProductByGuidResponse->proproduct->proname->__toString();
+        $product_raw = productApi::getInstance()->getProductByGuid($doc->ns2batch->ns2product->bsguid->__toString());
+        $product = $product_raw->product->name;
 
-        $sub_product_raw = mercApi::getInstance()->getSubProductByGuid($doc->ns2batch->ns2subProduct->bsguid->__toString());
+        $sub_product_raw = productApi::getInstance()->getSubProductByGuid($doc->ns2batch->ns2subProduct->bsguid->__toString());
 
-        $sub_product = $sub_product_raw->soapBody->wsgetSubProductByGuidResponse->prosubProduct->proname->__toString();
+        $sub_product = $sub_product_raw->subProduct->name;
 
         $unit = dictsApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
 
-        $country_raw = mercApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
+        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
 
-        $country = $country_raw->soapenvBody->wsgetCountryByGuidResponse->ikarcountry->ikarfullName->__toString();
+        $country = $country_raw->country->fullName;
 
         $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
         $purpose = $purpose->purpose->name;

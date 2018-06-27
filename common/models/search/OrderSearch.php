@@ -474,7 +474,7 @@ class OrderSearch extends Order
         $userID = $post['search']['user_id'];
         $orderID = $post['search']['order_id'] ?? null;
         $numCode = $post['search']['num_code'] ?? null;
-        $storeDenom = $post['search']['store_denom'] ?? null;
+        $storeRID = $post['search']['store_rid'] ?? null;
         $vendorID = $post['search']['vendor_id'] ?? null;
         $actualDelivery = $post['search']['actual_delivery'] ?? null;
 
@@ -507,9 +507,9 @@ class OrderSearch extends Order
             $query->andWhere([$dbName . '.rk_waybill.num_code' => $numCode]);
         }
 
-        if($storeDenom){
+        if($storeRID){
             $query->leftJoin($dbName . '.rk_storetree', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_storetree.rid');
-            $query->andWhere([$dbName . '.rk_storetree.rid' => $storeDenom]);
+            $query->andWhere([$dbName . '.rk_storetree.rid' => $storeRID]);
         }
 
         $count = $query->count();

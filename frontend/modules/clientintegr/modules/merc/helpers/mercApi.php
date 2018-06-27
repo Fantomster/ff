@@ -2,6 +2,9 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
+use frontend\modules\clientintegr\modules\merc\helpers\requests\BusinessEntity;
+use frontend\modules\clientintegr\modules\merc\models\Cerber;
+use frontend\modules\clientintegr\modules\merc\models\getActivityLocationListRequest;
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentChangeListRequest;
 use Yii;
@@ -28,27 +31,6 @@ class mercApi extends Component
     private $enterpriseGuid;
 
     private $wsdls;
-        /*'mercury' => [
-            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ApplicationManagementService',
-            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ApplicationManagementService_v1.4_pilot.wsdl',
-        ],
-        'dicts' => [
-            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/DictionaryService',
-            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/DictionaryService_v1.4_pilot.wsdl',
-        ],
-        'vetis' => [
-            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/2.0/EnterpriseService',
-            'wsdl' => 'http://api.vetrf.ru/schema/platform/cerberus/services/EnterpriseService_v1.4_pilot.wsdl',
-        ],
-        'product' => [
-            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/services/ProductService',
-            'wsdl' => 'http://api.vetrf.ru/schema/platform/services/ProductService_v1.4_pilot.wsdl',
-        ],
-        'ikar' => [
-            'Endpoint_URL' => 'https://api2.vetrf.ru:8002/platform/ikar/services/IkarService',
-            'wsdl' => 'http://api.vetrf.ru/schema/platform/ikar/services/IkarService_v1.4_pilot.wsdl',
-        ],
-    ];*/
 
     protected static $_instance;
 
@@ -72,15 +54,10 @@ class mercApi extends Component
     {
         if ($this->_client === null)
             return new \SoapClient($this->wsdls[$system]['wsdl'],[
-               /* 'use' => SOAP_LITERAL,
-                'style' => SOAP_DOCUMENT,
-                'location' => self::Endpoint_URL,
-                'uri' => 'https://api2.vetrf.ru',*/
                 'login' => $this->login,
                 'password' => $this->pass,
                 'exceptions' => 1,
                 'trace' => 1,
-                //'soap_version' => SOAP_1_1,
             ]);
 
         return $this->_client;
@@ -283,7 +260,7 @@ class mercApi extends Component
         return $unit;
     }
 
-    public function getBusinessEntityByUuid ($UUID)
+    /*public function getBusinessEntityByUuid ($UUID)
     {
         $cache = Yii::$app->cache;
 
@@ -308,9 +285,9 @@ class mercApi extends Component
         if($business != null && !isset($business->soapBody->soapFault))
         $cache->add('Business_'.$UUID, $business->asXML(), 60*60*24);
         return $business;
-    }
+    }*/
 
-    public function getEnterpriseByUuid ($UUID)
+  /*  public function getEnterpriseByUuid ($UUID)
     {
         $cache = Yii::$app->cache;
         $enterprise = $cache->get('Enterprise_'.$UUID);
@@ -334,7 +311,7 @@ class mercApi extends Component
         if($enterprise != null && !isset($enterprise->soapBody->soapFault))
         $cache->add('Enterprise_'.$UUID, $enterprise->asXML(), 60*60*24);
         return $enterprise;
-    }
+    }*/
 
     public function getVetDocumentByUUID($UUID)
     {
@@ -576,7 +553,7 @@ class mercApi extends Component
         return $result;
     }
 
-    public function getActivityLocationList ()
+   /* public function getActivityLocationList ()
     {
         $client = $this->getSoapClient('vetis');
         $xml = '<?xml version = "1.0" encoding = "UTF-8"?>
@@ -599,4 +576,5 @@ class mercApi extends Component
 
         return $list;
     }
+   */
 }

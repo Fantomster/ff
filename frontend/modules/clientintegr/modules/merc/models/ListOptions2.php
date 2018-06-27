@@ -9,7 +9,7 @@
 namespace frontend\modules\clientintegr\modules\merc\models;
 
 
-class ListOptions
+class ListOptions2
 {
     public $count;
     public $offset;

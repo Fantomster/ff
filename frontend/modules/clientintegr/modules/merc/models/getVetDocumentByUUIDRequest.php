@@ -8,6 +8,7 @@
 
 namespace frontend\modules\clientintegr\modules\merc\models;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 
 class getVetDocumentByUUIDRequest extends BaseRequest
@@ -230,8 +231,8 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         $this->type = $doc->ns2type->__toString();
         $this->status = $doc->ns2status->__toString();
 
-        $consingtor_buisness = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignor->entbusinessEntity->bsuuid->__toString());
-        $consingtor_enterprise = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2consignor->ententerprise->bsuuid->__toString());
+        $consingtor_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignor->entbusinessEntity->bsuuid->__toString());
+        $consingtor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->ns2consignor->ententerprise->bsuuid->__toString());
 
         $enterprise = $consingtor_enterprise->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
         $businessEntity = $consingtor_buisness->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
@@ -247,8 +248,8 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ]
         ];
 
-        $cconsignee_buisness = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignee->entbusinessEntity->bsuuid->__toString());
-        $consignee_enterprise = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2consignee->ententerprise->bsuuid->__toString());
+        $cconsignee_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignee->entbusinessEntity->bsuuid->__toString());
+        $consignee_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->ns2consignee->ententerprise->bsuuid->__toString());
 
         $enterprise = $consignee_enterprise->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
         $businessEntity = $cconsignee_buisness->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
@@ -265,14 +266,14 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         ];
 
         if(isset($doc->ns2broker)) {
-            $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->bsuuid->__toString());
+            $broker_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->bsuuid->__toString());
             $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
             $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
                 'value' => $broker->dtname->__toString() . ', ИНН:' . $broker->dtinn->__toString(),
             ];
         }
 
-        $owner_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2batch->ns2owner->bsuuid->__toString());
+        $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2batch->ns2owner->bsuuid->__toString());
 
 
         $owner = $owner_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
@@ -296,7 +297,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         $producer = null;
 
         if(isset($doc->ns2batch->ns2producerList->entproducer)) {
-            $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
+            $producer_raw = cerberApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
 
             if(isset($producer_raw->soapBody))
                 $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;

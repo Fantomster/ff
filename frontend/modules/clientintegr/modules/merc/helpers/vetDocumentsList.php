@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
 
@@ -64,7 +65,7 @@ class vetDocumentsList extends Model
                 $cache->add('vetDocRaw_'.$item->bsuuid->__toString(), $item->asXML(),60);
 
             $unit = mercApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
-            $recipient = mercApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
+            $recipient = cerberApi::getInstance()->getBusinessEntityByUuid($item->ns2consignor->entbusinessEntity->bsuuid->__toString());
             $result[] = [
                 'uuid' => $item->bsuuid->__toString(),
                 'number' => $this->getNumber($item->ns2issueSeries, $item->ns2issueNumber),

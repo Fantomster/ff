@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use api\common\models\iiko\iikoWaybill;
 use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
 use Yii;
@@ -416,12 +417,29 @@ class OrderSearch extends Order
        if($actualDelivery){
            $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
        }
+
+       if($numCode || $storeID)
+       {
+           $orders = ArrayHelper::getColumn($query->all(),'id');
+           $waybills = iikoWaybill::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
+           if($numCode){
+               $waybills->andWhere("num_code = $numCode");
+           }
+
+           if($storeID){
+               $waybills->andWhere("store_id = $storeID");
+           }
+           $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
+           if(empty($waybills))
+               $waybills[] = 0;
+           $query->andWhere('id IN ('.implode(',', $waybills) . ')');
+       }
       
        $count = $query->count();
        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
        $i=0;
        foreach ($ordersArray as $order){
-           $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $order->id]);
+           $nacl = iikoWaybill::findOne(['order_id' => $order->id]);
            
            if (isset($nacl->status)) {
                $status = $nacl->status->id;
@@ -430,20 +448,7 @@ class OrderSearch extends Order
                $status = 1;
                $statusText = 'Не сформирована';
            }
-
-           if($numCode){
-               if($nacl === null)
-                   continue;
-               if($nacl->num_code != $numCode)
-                   continue;
-           }
-
-           if($storeID){
-               if($nacl === null)
-                   continue;
-               if($nacl->store_rid != $storeID)
-                   continue;
-           }
+           
            $arr['orders'][$i]['order_id'] = $order->id;
            $arr['orders'][$i]['vendor'] = $order->vendor->name;
            $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
@@ -495,10 +500,27 @@ class OrderSearch extends Order
             $query->andWhere(['order.vendor_id'=>$vendorID]);
         }
 
+
         if($actualDelivery){
             $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
         }
 
+        if($numCode || $storeRID)
+        {
+            $orders = ArrayHelper::getColumn($query->all(),'id');
+            $waybills = RkWaybill::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
+            if($numCode){
+                $waybills->andWhere("num_code = $numCode");
+            }
+
+            if($storeRID){
+                $waybills->andWhere("store_rid = $storeRID");
+            }
+            $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
+            if(empty($waybills))
+                $waybills[] = 0;
+            $query->andWhere('id IN ('.implode(',', $waybills) . ')');
+        }
         $count = $query->count();
         $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
         $i=0;
@@ -511,20 +533,6 @@ class OrderSearch extends Order
             } else {
                 $status = 1;
                 $statusText = 'Не сформирована';
-            }
-
-            if($numCode){
-                if($nacl === null)
-                    continue;
-                if($nacl->num_code != $numCode)
-                    continue;
-            }
-
-            if($storeRID){
-                if($nacl === null)
-                    continue;
-                if($nacl->store_rid != $storeRID)
-                    continue;
             }
 
             $arr['orders'][$i]['order_id'] = $order->id;

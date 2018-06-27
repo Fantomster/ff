@@ -61,7 +61,7 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
             [
                 'format' => 'raw',
                 'label' => '<i>Юридическое название франшизы</i>',
-                'value' => isset($model->franchisee) ? Html::a($model->franchisee->legal_entity, ['franchisee/view', 'id'=>$model->franchisee->id]) : '-',
+                'value' => isset($model->franchisee) ? Html::a($model->franchisee->legal_entity, ['franchisee/view', 'id' => $model->franchisee->id]) : '-',
             ],
             [
                 'attribute' => 'franchisee.signed',
@@ -89,12 +89,11 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
                     return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
                 }
             ],
-            'step',
             [
                 'attribute' => 'is_work',
                 'label' => 'Поставщик работает в системе',
                 'value' => function ($data) use ($model) {
-                    if($data->is_work == 1) {
+                    if ($data->is_work == 1) {
                         return 'Да';
                     } else {
                         return 'Нет';
@@ -102,6 +101,15 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
                 },
                 'visible' => ($model->type_id == Organization::TYPE_SUPPLIER)
             ],
+            [
+                'attribute' => 'blacklisted',
+                'label' => 'Статус',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return $data->getStatus();
+                }
+            ],
+            'gln_code',
             [
                 'format' => 'raw',
                 'label' => 'Работники',

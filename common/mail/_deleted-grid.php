@@ -3,9 +3,12 @@
 //use kartik\grid\GridView;
 use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\data\ArrayDataProvider;
 
+$dataProvider = new ArrayDataProvider([
+    'allModels' => $deleted
+]);
 $dataProvider->sort = false;
-$discountTypes = $order->discountDropDown();
 $currencySymbol = $order->currency->symbol;
 
 if (!Yii::$app instanceof Yii\console\Application) {
@@ -36,10 +39,7 @@ if (!Yii::$app instanceof Yii\console\Application) {
                 'value' => 'quantity',
                 'label' => Yii::t('app', 'common.mail.view_grid.amount', ['ru' => 'Количество']),
                 'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
-                'contentOptions' => function($data) use ($changed) {
-                    $bgColor = isset($changed[$data->id]) ? 'background-color: #84bf76;' : '';
-                    return ['style' => 'border-top: 1px solid #ddd;' . $bgColor];
-                },
+                'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
             ],
             ['format' => 'raw',
                 'attribute' => 'price',
@@ -48,10 +48,7 @@ if (!Yii::$app instanceof Yii\console\Application) {
                 },
                 'label' => Yii::t('app', 'common.mail.view_grid.price', ['ru' => 'Цена']),
                 'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
-                'contentOptions' => function($data) use ($changed) {
-                    $bgColor = isset($changed[$data->id]) ? 'background-color: #84bf76;' : '';
-                    return ['style' => 'border-top: 1px solid #ddd;' . $bgColor];
-                },
+                'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
             ],
             [
                 'format' => 'raw',
@@ -61,10 +58,7 @@ if (!Yii::$app instanceof Yii\console\Application) {
                 },
                 'label' => Yii::t('app', 'common.mail.view_grid.sum', ['ru' => 'Сумма']),
                 'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
-                'contentOptions' => function($data) use ($changed) {
-                    $bgColor = isset($changed[$data->id]) ? 'background-color: #84bf76;' : '';
-                    return ['style' => 'border-top: 1px solid #ddd;' . $bgColor];
-                },
+                'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
             ],
         ],
     ]);

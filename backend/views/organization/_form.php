@@ -310,6 +310,8 @@ function changeFields(fields, results) {
 
     <?= $form->field($model, 'contact_name')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'blacklisted')->dropDownList(common\models\Organization::getStatusList())->label('Статус') ?>
+
     <?= $form->field($ediModel, 'gln_code')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($ediModel, 'login')->textInput(['maxlength' => true]) ?>

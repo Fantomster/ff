@@ -65,6 +65,15 @@ $gridColumns = [
             return '';
         }
     ],
+    [
+        'attribute' => 'blacklisted',
+        'label' => 'Статус',
+        'format' => 'raw',
+        'filter' => common\models\Organization::getStatusList(),
+        'value' => function ($data) {
+            return $data->getStatus();
+        }
+    ],
 //    'website',
     // 'created_at',
     // 'updated_at',

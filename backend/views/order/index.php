@@ -102,8 +102,11 @@ $gridColumns = [
         'batchSize' => 200,
         'timeout' => 0,
         'exportConfig' => [
-            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_HTML => false,
+            ExportMenu::FORMAT_TEXT => false,
             ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_CSV => false,
             ExportMenu::FORMAT_EXCEL_X => [
                 'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
                 'icon' => 'floppy-remove',
@@ -113,7 +116,7 @@ $gridColumns = [
                 'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
                 'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'extension' => 'xlsx',
-                'writer' => 'Excel2007'
+                'writer' => 'Xlsx'
             ],
         ],
     ]);

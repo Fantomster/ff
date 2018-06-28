@@ -127,8 +127,7 @@ class OrganizationController extends DefaultController {
     {
         if(Yii::$app->request->isAjax)
         {
-            $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
-            $emailNotification = EmailNotification::findOne(RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$organization])->id);
+            $emailNotification = EmailNotification::findOne(RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id);
             if($emailNotification)
             {
                 $emailNotification->order_created = ($emailNotification->order_created)? 0: 1;

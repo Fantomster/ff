@@ -189,18 +189,34 @@ class ClientController extends Controller {
      * @return mixed
      */
     public function actionDelete($id) {
-        $model = User::findOne(['id' => $id, 'role_id' => Role::ROLE_FKEEPER_MANAGER]);
+        $model = User::findOne(['id' => $id/*, 'role_id' => Role::ROLE_FKEEPER_MANAGER*/]);
 
         if (empty($model)) {
             throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин!']));
         }
 
+        $role = $model->role_id;
         $model->role_id = Role::ROLE_USER;
         $model->organization_id = null;
         $model->status = User::STATUS_INACTIVE;
         $model->save();
 
-        return $this->redirect(['managers']);
+        switch ($role) {
+            case Role::ROLE_RESTAURANT_MANAGER:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_RESTAURANT_EMPLOYEE:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_SUPPLIER_MANAGER:
+                return $this->redirect(['postavs']);
+                break;
+            case Role::ROLE_SUPPLIER_EMPLOYEE:
+                return $this->redirect(['postavs']);
+                break;
+            default:
+                return $this->redirect(['managers']);
+        }
     }
 
     /**

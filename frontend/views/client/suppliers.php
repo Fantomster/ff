@@ -324,6 +324,8 @@ $gridColumnsCatalog = [
                 'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
             ]);
 */
+           /* Временно отключена кнопка глобального сопоставления - до внедрения Rabbit и нового интерфейса сопоставления
+           /*
             $result .= Html::beginTag('span', ['class'=>'text-right dropdown']);
             $result .= Html::button(' <i class="fa fa-paperclip m-r-xs"></i></button>',
                 ['type'=>'button', 'class'=>'btn btn-default btn-sm', 'data-toggle'=>'dropdown']);
@@ -336,7 +338,7 @@ $gridColumnsCatalog = [
             ]);
             $result .= Html::endTag('span');
 
-
+*/
             //Кнопка удаления
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                 'class' => 'btn btn-danger btn-sm del',

@@ -1,5 +1,5 @@
 <?php
-namespace frontend\modules\clientintegr\modules\merc\helpers\api\product;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\products;
 
 /**
  * Class GenericEntity

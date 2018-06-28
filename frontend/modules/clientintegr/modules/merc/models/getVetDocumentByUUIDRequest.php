@@ -8,12 +8,11 @@
 
 namespace frontend\modules\clientintegr\modules\merc\models;
 
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\product\productApi;
-use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 
 class getVetDocumentByUUIDRequest extends BaseRequest
 {
@@ -228,13 +227,13 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             return $doc;
         }
 
-        echo "<pre>";
+        /*echo "<pre>";
         var_dump($doc);
         echo"</pre>";
-die();
+die();*/
         $this->issueSeries = (isset($doc->issueSeries)) ? $doc->nissueSeries : null;
         $this->issueNumber = (isset($doc->issueNumber)) ? $doc->issueNumber : null;
-        $this->issueDate = $doc->issueDate->;
+        $this->issueDate = $doc->issueDate;
         $this->form = $doc->vetDForm;
         $this->type = $doc->vetDType;
         $this->status = $doc->vetDStatus;
@@ -269,7 +268,7 @@ die();
                     .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->name->__toString().', ИНН:'.$businessEntity->inn,
+                'value' => $businessEntity->name.', ИНН:'.$businessEntity->inn,
             ]
         ];
 
@@ -281,10 +280,10 @@ die();
             ];
         }
 
-        $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->owner->uuid);
-
-
-        $owner = $owner_raw->businessEntity;
+        if(isset($doc->certifiedConsignment->batch->owner)) {
+            $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->owner->uuid);
+            $owner = $owner_raw->businessEntity;
+        }
 
         $product_raw = productApi::getInstance()->getProductByGuid($doc->certifiedConsignment->batch->product->guid);
         $product = $product_raw->product->name;
@@ -295,7 +294,7 @@ die();
 
         $unit = dictsApi::getInstance()->getUnitByGuid($doc->certifiedConsignment->batch->unit->guid);
 
-        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->certifiedConsignment->batch->countryOfOrigin->guid);
+        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->certifiedConsignment->batch->origin->country->guid);
 
         $country = $country_raw->country->fullName;
 
@@ -353,7 +352,7 @@ die();
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => isset($doc->certifiedConsignment->batch->perishable) ? (($doc->certifiedConsignment->batch->perishable->__toString() == 'true') ? 'Да' : 'Нет') : null,
+                'value' => isset($doc->certifiedConsignment->batch->perishable) ? (($doc->certifiedConsignment->batch->perishable == 'true') ? 'Да' : 'Нет') : null,
             ],
             [
                 'label' => 'Страна происхождения продукции',
@@ -373,7 +372,7 @@ die();
             ],
             [
                 'label' => 'Собственник продукции',
-                'value' =>  $owner->name->__toString().', ИНН:'.$owner->inn->__toString(),
+                'value' =>  $owner->name.', ИНН:'.$owner->inn,
             ],
         ];
         $this->purpose = [
@@ -382,49 +381,49 @@ die();
         ];
 
         $this->transportInfo = isset ($doc->certifiedConsignment->transportInfo) ? ([
-            'type' => $this->transport_types[$doc->certifiedConsignment->transportInfo->transportType->__toString()],
+            'type' => $this->transport_types[$doc->certifiedConsignment->transportInfo->transportType],
             'numbers' => [
                 [
                 'label' => 'Номер контейнера (при автомобильной перевозке)',
-                'number' => isset($doc->ns2transportInfo->shptransportNumber->shpcontainerNumber) ? $doc->ns2transportInfo->shptransportNumber->shpcontainerNumber->__toString() : null,
+                'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->containerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpcontainerNumber : null,
                 ],
                 [
                     'label' => 'Номер вагона',
-                    'number' => isset ($doc->ns2transportInfo->shptransportNumber->shpwagonNumber) ? $doc->ns2transportInfo->shptransportNumber->shpwagonNumber->__toString() : null,
+                    'number' => isset ($doc->certifiedConsignment->transportInfo->transportNumber->wagonNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpwagonNumber : null,
                 ],
                 [
                     'label' => 'Номер автомобиля',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpvehicleNumber) ? $doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpvehicleNumber : null,
                 ],
                 [
                     'label' => 'Номер прицепа (полуприцепа)',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shptrailerNumber) ? $doc->ns2transportInfo->shptransportNumber->shptrailerNumber->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->trailerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shptrailerNumber : null,
                 ],
                 [
                     'label' => 'Название судна (или номер контейнера)',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpshipName) ? $doc->ns2transportInfo->shptransportNumber->shpshipName->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->shipName) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpshipName : null,
                 ],
                 [
                     'label' => 'Номер авиарейса',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpflightNumber) ? $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->flightNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpflightNumber : null,
                 ]
             ]
         ]) : null;
-        $this->transportStorageType = isset($doc->ns2transportStorageType) ? $doc->ns2transportStorageType->__toString() : null;
-        $this->cargoReloadingPointList = isset($this->cargoReloadingPointList) ? $this->cargoReloadingPointList->__toString() : null;
-        $this->waybillSeries = isset($doc->ns2waybillSeries) ? $doc->ns2waybillSeries->__toString() : null;
-        $this->waybillNumber = isset($doc->ns2waybillNumber) ? $doc->ns2waybillNumber->__toString() : null;
-        $this->waybillDate = isset($doc->ns2waybillDate) ? $doc->ns2waybillDate->__toString() : null;
-        $this->cargoExpertized = isset($doc->ns2cargoExpertized) ? $doc->ns2cargoExpertized->__toString() : null;
-        $this->expertiseInfo = $doc->ns2expertiseInfo->__toString();
+        $this->transportStorageType = isset($doc->certifiedConsignment->transportStorageType) ? $doc->certifiedConsignment->transportStorageType : null;
+        $this->cargoReloadingPointList = isset($doc->certifiedConsignment->cargoReloadingPointList) ? $doc->certifiedConsignment->cargoReloadingPointList : null;
+        $this->waybillSeries = isset($doc->referencedDocumen->issueSeries) ? $doc->referencedDocumen->issueSeries : null;
+        $this->waybillNumber = isset($doc->referencedDocumen->issueNumber) ? $doc->referencedDocumen->isueNumber : null;
+        $this->waybillDate = isset($doc->referencedDocumen->issueDate) ? $doc->referencedDocumen->issueDate : null;
+        $this->cargoExpertized = isset($doc->authentication->cargoExpertized) ? $doc->authentication->cargoExpertized : null;
+        $this->expertiseInfo = $doc->authentication->cargoInspected;
         $this->confirmedBy = [
             ['label' => 'ФИО',
-                'value' => $doc->ns2confirmedBy->argcfio->__toString()],
+                'value' => $doc->authentication->statusChange->specifiedPerson->fio],
             ['label' => 'Должность',
-                'value' => $doc->ns2confirmedBy->argcpost->__toString()]
+                'value' => $doc->authentication->statusChange->specifiedPerson->post]
         ];
-        $this->locationProsperity = $doc->ns2locationProsperity->__toString();
-        $this->specialMarks = isset($doc->ns2specialMarks) ? $doc->ns2specialMarks->__toString() : null;
+        $this->locationProsperity = $doc->authentication->locationProsperity;
+        $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;
 
         $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
 

@@ -1,5 +1,5 @@
 <?php
-namespace frontend\modules\clientintegr\modules\merc\helpers\api\product;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\products;
 
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use Yii;
@@ -18,7 +18,7 @@ class productApi extends baseApi
         $product = $cache->get('Product_'.$GUID);
 
         if(!($product === false))
-            return $this->parseResponse($product, true);
+            return $product;
 
         $client = $this->getSoapClient('product');
         $request = new getProductByGuidRequest();

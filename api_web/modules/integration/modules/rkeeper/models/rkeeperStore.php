@@ -20,6 +20,9 @@ class rkeeperStore extends WebApi
         $stores = RkStoretree::find()->andWhere('acc = :acc and active = 1', [':acc' => $acc])->addOrderBy('root, lft')->asArray()->all();
         $arr = [];
 
+        if(empty($stores))
+            return [];
+
         if ($view_type == 1) {
             foreach ($stores as $row) {
                 $item['id'] = $row['id'];
@@ -60,10 +63,12 @@ class rkeeperStore extends WebApi
                     $item['name'] = $stores[$i]['name'];
                     $item['type'] = $stores[$i]['type'];
                     $item['level'] = $stores[$i]['lvl'];
-                    if($stores[$i+1]['lvl'] > $level) {
-                        $items = $this->parseStoriesForTree($stores, $i + 1);
-                        if (!empty($items)) {
-                            $item['items'] = $items;
+                    if(isset($stores[$i+1])) {
+                        if ($stores[$i + 1]['lvl'] > $level) {
+                            $items = $this->parseStoriesForTree($stores, $i + 1);
+                            if (!empty($items)) {
+                                $item['items'] = $items;
+                            }
                         }
                     }
                     $arr[] = $item;

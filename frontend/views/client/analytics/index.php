@@ -127,8 +127,8 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
                     '2' => Yii::t('message', 'frontend.views.client.anal.client_waiting', ['ru'=>'Ожидание от заказчика']),
                     '3' => Yii::t('message', 'frontend.views.client.anal.in_process', ['ru'=>'Выполняется']),
                     '4' => Yii::t('message', 'frontend.views.client.anal.ready', ['ru'=>'Завершен']),
-                    '5' => Yii::t('message', 'frontend.views.client.anal.client_cancel', ['ru'=>'Отменен заказчиком']),
-                    '6' => Yii::t('message', 'frontend.views.client.anal.vendor_cancel', ['ru'=>'Отменен поставщиком']),
+                    '5' => Yii::t('message', 'frontend.views.client.anal.vendor_cancel', ['ru'=>'Отменен поставщиком']),
+                    '6' => Yii::t('message', 'frontend.views.client.anal.client_cancel', ['ru'=>'Отменен заказчиком']),
                         ], ['prompt' => Yii::t('message', 'frontend.views.client.anal.all_two', ['ru'=>'Все']), 'class' => 'form-control', 'id' => 'filter_status'])
                 ?>         
             </div>

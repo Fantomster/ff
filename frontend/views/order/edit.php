@@ -1,14 +1,14 @@
 <?php
 
-use yii\widgets\Pjax;
 use common\models\Order;
 use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 use yii\bootstrap\Modal;
+use dosamigos\fileupload\FileUploadUI;
 
-$this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru'=>'Редактирование заказа №']) . $order->id;
+$this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru' => 'Редактирование заказа №']) . $order->id;
 
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
@@ -22,7 +22,7 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
                 Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
-if($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Organization::TYPE_FRANCHISEE){
+if ($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Organization::TYPE_FRANCHISEE) {
     $quantityEditable = true;
     $priceEditable = true;
 }
@@ -33,22 +33,24 @@ $urlViewOrder = Url::to(['/order/view', 'id' => $order->id]);
 $edit = true;
 $refreshUrl = Url::to(['/order/edit', "id" => $order->id]);
 
+$attachment = new common\models\OrderAttachment;
+
 $arr = [
-    Yii::t('message', 'frontend.views.order.var1', ['ru'=>'Несохраненные изменения!']),
-    Yii::t('message', 'frontend.views.order.var2', ['ru'=>'Вы изменили заказ, но не сохранили изменения!']),
-    Yii::t('message', 'frontend.views.order.var3', ['ru'=>'Уйти']),
-    Yii::t('message', 'frontend.views.order.var4', ['ru'=>'Остаться']),
-    Yii::t('message', 'frontend.views.order.var5', ['ru'=>'Удаление позиции из заказа']),
-    Yii::t('message', 'frontend.views.order.var6', ['ru'=>'Товар будет удален из заказа. Продолжить?']),
-    Yii::t('message', 'frontend.views.order.var7', ['ru'=>'Да, удалить']),
-    Yii::t('message', 'frontend.views.order.var8', ['ru'=>'Отмена']),
-    Yii::t('message', 'frontend.views.order.var9', ['ru'=>'Товар удален из заказа!']),
-    Yii::t('message', 'frontend.views.order.var10', ['ru'=>'Действительно отменить заказ?']),
-    Yii::t('message', 'frontend.views.order.var11', ['ru'=>'Комментарий']),
-    Yii::t('message', 'frontend.views.order.var12', ['ru'=>'Нет']),
-    Yii::t('message', 'frontend.views.order.var13', ['ru'=>'Да']),
-    Yii::t('message', 'frontend.views.order.var14', ['ru'=>'Ошибка!']),
-    Yii::t('message', 'frontend.views.order.var15', ['ru'=>'Попробуйте еще раз']),
+    Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохраненные изменения!']),
+    Yii::t('message', 'frontend.views.order.var2', ['ru' => 'Вы изменили заказ, но не сохранили изменения!']),
+    Yii::t('message', 'frontend.views.order.var3', ['ru' => 'Уйти']),
+    Yii::t('message', 'frontend.views.order.var4', ['ru' => 'Остаться']),
+    Yii::t('message', 'frontend.views.order.var5', ['ru' => 'Удаление позиции из заказа']),
+    Yii::t('message', 'frontend.views.order.var6', ['ru' => 'Товар будет удален из заказа. Продолжить?']),
+    Yii::t('message', 'frontend.views.order.var7', ['ru' => 'Да, удалить']),
+    Yii::t('message', 'frontend.views.order.var8', ['ru' => 'Отмена']),
+    Yii::t('message', 'frontend.views.order.var9', ['ru' => 'Товар удален из заказа!']),
+    Yii::t('message', 'frontend.views.order.var10', ['ru' => 'Действительно отменить заказ?']),
+    Yii::t('message', 'frontend.views.order.var11', ['ru' => 'Комментарий']),
+    Yii::t('message', 'frontend.views.order.var12', ['ru' => 'Нет']),
+    Yii::t('message', 'frontend.views.order.var13', ['ru' => 'Да']),
+    Yii::t('message', 'frontend.views.order.var14', ['ru' => 'Ошибка!']),
+    Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте еще раз']),
 ];
 
 $js = <<<JS
@@ -128,35 +130,20 @@ $js = <<<JS
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
             target = $(this).data("target");
-            $(target).val(0);
-            var form = $("#editOrder");
+//            var form = $("#editOrder");
             swal({
                 title: "$arr[4]",
                 text: "$arr[5]",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "$arr[6]",
-                cancelButtonText: "$arr[7]",
-                showLoaderOnConfirm: true,
-                preConfirm: function () {
-                    return new Promise(function (resolve, reject) {
-                        $.post(
-                            form.attr("action"),
-                            form.serialize()
-                        ).done(function (result) {
-                            if (result) {
-                                dataEdited = 0;
-                                resolve(result);
-                            } else {
-                                resolve(false);
-                            }
-                        });
-                    })
-                },
+                cancelButtonText: "$arr[7]"
             }).then(function(result) {
                 if (result.dismiss === "cancel") {
                     swal.close();
                 } else {
+                    $(target).val(0);
+                    $(target).closest('tr').hide();
                     swal({title: "$arr[8]", type: "success"});
                 }
             });        
@@ -235,20 +222,20 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.views.order.order_five', ['ru'=>'Заказ №']) ?><?= $order->id ?>
+        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.views.order.order_five', ['ru' => 'Заказ №']) ?><?= $order->id ?>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
         'links' => [
             [
-                'label' => Yii::t('message', 'frontend.views.order.orders_history', ['ru'=>'История заказов']),
+                'label' => Yii::t('message', 'frontend.views.order.orders_history', ['ru' => 'История заказов']),
                 'url' => ['order/index'],
             ],
-            Yii::t('message', 'frontend.views.order.order_number', ['ru'=>'Заказ №']) . $order->id,
+            Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . $order->id,
         ],
     ])
     ?>
@@ -258,19 +245,19 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
         <div class="col-md-8" id="toPrint">
             <div class="box box-info">
                 <div class="box-header">
-                    <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru'=>'Заказ']) ?> №<?= $order->id ?></h4><hr>
+                    <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru' => 'Заказ']) ?> №<?= $order->id ?></h4><hr>
                     <?=
                     (($order->status != Order::STATUS_CANCELLED && $order->status != Order::STATUS_REJECTED && !isset($order->vendor->ediOrganization->gln_code)) || ($order->status == Order::STATUS_DONE && isset($order->vendor->ediOrganization->gln_code))) ?
-                    Html::a('<span><i class="icon fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']) . ' </span>',
-                        Url::to(['order/ajax-show-products', 'order_id' => $order->id]), [
+                            Html::a('<span><i class="icon fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru' => 'Добавить в заказ']) . ' </span>', Url::to(['order/ajax-show-products', 'order_id' => $order->id]), [
                                 'class' => 'btn btn-success pull-right btnAdd',
-                    'data' => [
-                    'target' => '#showProducts',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                    ],
-                    'title' => Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']),
-                    ]): "" ?>
+                                'data' => [
+                                    'target' => '#showProducts',
+                                    'toggle' => 'modal',
+                                    'backdrop' => 'static',
+                                ],
+                                'title' => Yii::t('message', 'frontend.views.order.add_to_order', ['ru' => 'Добавить в заказ']),
+                            ]) : ""
+                    ?>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
@@ -279,10 +266,48 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order', 'canRepeatOrder'));
                         ?>
                     </div>
-                    <!-- /.table-responsive -->
+                    <div style="display: block;padding-top: 20px;">
+                        <?= ''
+//                        FileUploadUI::widget([
+//                            //'model' => $attachment,
+//                            //'attribute' => 'file',
+//                            'name' => 'attachment',
+//                            'url' => ['order/upload-attachment', 'id' => $order->id],
+//                            'gallery' => false,
+//                            'clientOptions' => [
+//                                'maxFileSize' => 52428800,
+//                                'disableImagePreview' => true,
+//                                'disableAudioPreview' => true,
+//                                'disableVideoPreview' => true,
+//                                'acceptFileTypes' => new \yii\web\JsExpression('/(\.|\/)(gif|jpe?g|png|bmp|pdf)$/i'),
+//                            ],
+//                            // ...
+//                            'clientEvents' => [
+//                                'fileuploaddone' => 'function(e, data) {
+//                                console.log(e);
+//                                console.log(data);
+//                            }',
+//                                'fileuploadfail' => 'function(e, data) {
+//                                console.log(e);
+//                                console.log(data);
+//                            }',
+//                            ],
+//                        ]);
+                        ?>
+                    </div>
+                    <?php
+                    echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru' => 'Сохранить']) . ' </span>', [
+                        'class' => 'btn btn-success pull-right btnSave',
+                        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru' => 'Сохраняем...']),
+                    ]);
+                    echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_two', ['ru' => 'Повторить заказ']), ['order/repeat', 'id' => $order->id], [
+                                'class' => 'btn btn-default pull-right',
+                                'style' => 'margin-right: 7px;'
+                            ]) : "";
+                    ?>
                 </div>
                 <!-- /.box-body -->
-                <?php //Pjax::end(); ?>
+                <?php //Pjax::end();    ?>
             </div>
 
         </div>
@@ -326,7 +351,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         Html::textInput('message', null, [
                             'id' => 'message-field',
                             'class' => 'message',
-                            'placeholder' => Yii::t('message', 'frontend.views.order.send_message_two', ['ru'=>'Отправить сообщение'])
+                            'placeholder' => Yii::t('message', 'frontend.views.order.send_message_two', ['ru' => 'Отправить сообщение'])
                         ])
                         ?>    
                         <button type="submit"><img src="/img/message.png"></button>

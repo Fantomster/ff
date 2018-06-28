@@ -123,6 +123,14 @@ class RkWaybill extends \yii\db\ActiveRecord {
         // return Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
         return $fdate;
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getWaybillData()
+    {
+        return $this->hasMany(RkWaybilldata::className(), ['waybill_id' => 'id']);
+    }
     
     public function beforeSave($insert)
     {

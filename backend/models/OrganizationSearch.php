@@ -17,7 +17,7 @@ class OrganizationSearch extends Organization {
      */
     public function rules() {
         return [
-            [['id', 'type_id', 'step'], 'integer'],
+            [['id', 'type_id', 'step', 'blacklisted'], 'integer'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'created_at', 'updated_at', 'white_list', 'partnership', 'locality'], 'safe'],
         ];
     }
@@ -63,6 +63,7 @@ class OrganizationSearch extends Organization {
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'step' => $this->step,
+            'blacklisted' => $this->blacklisted,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])

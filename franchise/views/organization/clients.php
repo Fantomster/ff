@@ -15,8 +15,8 @@ use common\assets\CroppieAsset;
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
-
-$this->registerJs('
+if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
+    $this->registerJs('
     $("document").ready(function(){
         $("#clientInfo").data("bs.modal", null);
         var justSubmitted = false;
@@ -46,6 +46,7 @@ $this->registerJs('
                 document.location = $(this).find("a").attr("href");
                 return false;
             }
+            
             var url = $(this).parent("tr").data("url");
             if (url !== undefined && !$(this).find("a").hasClass("f-delete")) {
                 $("#clientInfo").modal({backdrop:"static",toggle:"modal"}).load(url);
@@ -53,7 +54,7 @@ $this->registerJs('
         });
         $("body").on("click", ".f-delete", function(e){
             e.preventDefault();
-            if(!confirm("'. Yii::t('app', 'franchise.views.organization.shure', ['ru'=>'Вы уверены, что хотите удалить ресторан?']) .'")){
+            if(!confirm("' . Yii::t('app', 'franchise.views.organization.shure', ['ru' => 'Вы уверены, что хотите удалить ресторан?']) . '")){
                 return false;
             }
             var url = $(this).attr("url");
@@ -64,11 +65,28 @@ $this->registerJs('
               obj.parent("td").parent("tr").fadeOut("fast", function() {});
             });
         });
-    });
-        ');
-$this->registerCss("
+    });');
+    $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
+}else{
+    $this->registerJs('
+        $(".allows").click(function(){
+           $.ajax({
+                url:location.href,
+                data:{id_org:$(this).val()},
+                type:"POST",
+                success:function(response){
+                    console.log("ok!!!");
+                },
+                error:function(){
+                    console.log("Error!!!");
+                }
+           });
+            
+        });
+    ');
+}
 ?>
 
 
@@ -325,12 +343,14 @@ $this->registerCss("
                             ],
                             [
                                 'format' => 'raw',
+                                'visible'=>(preg_match('~/organization/clients~',$_SERVER['REQUEST_URI'])),
                                 'value' => function ($data) {
                                     return Html::a('<i class="fa fa-signal"></i>', ['analytics/client-stats', 'id' => $data["id"]], ['class' => 'stats']);
                                 },
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
+                                'visible'=>(preg_match('~/organization/clients~',$_SERVER['REQUEST_URI'])),
                                 'template' => '{delete}',
                                 'buttons' => [
                                     'delete' => function ($url, $data) {
@@ -339,6 +359,16 @@ $this->registerCss("
                                             null, ['data-pjax' => '0', 'class' => 'f-delete', 'url' => Url::to(['organization/delete', 'id' => $data["franchisee_associate_id"]])]);
                                     },
                                 ],
+                            ],
+                            [
+                                'visible'=>(preg_match('~/organization/notifications~',$_SERVER['REQUEST_URI'])),
+                                'header' => 'Уведомлять о новых заказах(да/нет)',
+                                'cssClass'=>'allows',
+                                'class' => 'yii\grid\CheckboxColumn', 'checkboxOptions' => function($model, $key, $index, $column) {
+                                    $organization = \common\models\Organization::findOne(\common\models\User::findOne(Yii::$app->user->id)->organization_id);
+                                    $notif = (\common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$organization])->id))?\common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$organization])->id)->order_created: null;
+                                    return $notif ? ['checked' => "checked", 'value'=>$model['id']] : ['value'=>$model['id']];
+                            },
                             ],
                         ],
                         'rowOptions' => function ($model, $key, $index, $grid) {

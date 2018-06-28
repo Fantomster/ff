@@ -2,10 +2,13 @@
 
 namespace franchise\controllers;
 
+use app\models\FranchiseNotifications;
 use common\models\Currency;
 use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\Order;
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
 use yii\helpers\VarDumper;
@@ -118,6 +121,28 @@ class OrganizationController extends DefaultController {
         } else {
             return $this->render('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         }
+    }
+
+    public function actionNotifications()
+    {
+        if(Yii::$app->request->isAjax)
+        {
+            $emailNotification = EmailNotification::findOne(RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id);
+            if($emailNotification)
+            {
+                $emailNotification->order_created = ($emailNotification->order_created)? 0: 1;
+            }
+
+            if($emailNotification->save())
+            {
+                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return [
+                    'msg'=>'OK'
+                ];
+            }
+
+        }
+        return $this->actionClients();
     }
 
 

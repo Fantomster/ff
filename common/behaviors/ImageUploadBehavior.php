@@ -145,6 +145,7 @@ class ImageUploadBehavior extends UploadBehavior {
         $url = $this->getThumbUploadPath($this->attribute, $profile);
         $resourceName = $this->getResourceName($url);
         $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
+        //return $resultUrl;
         return str_replace("fkeeper.s3.amazonaws.com", "upload.mixcart.ru", $resultUrl); //wtf hardcode, to be fixed
     }
 
@@ -234,7 +235,7 @@ class ImageUploadBehavior extends UploadBehavior {
         }
     }
     
-    public function beforeDelete() {
-        return true;
-    }
+//    public function beforeDelete() {
+//        return true;
+//    }
 }

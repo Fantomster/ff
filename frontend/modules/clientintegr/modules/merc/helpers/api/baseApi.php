@@ -2,6 +2,12 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\Ikar;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
+use frontend\modules\clientintegr\modules\merc\helpers\api\product\Products;
+use Mpdf\Tag\I;
 use Yii;
 use api\common\models\merc\mercDicconst;
 use yii\base\Component;
@@ -12,7 +18,7 @@ class baseApi extends Component
     protected $pass;
     protected $apiKey;
     protected $issuerID;
-    protected $service_id = 'mercury-g2b.service';
+    protected $service_id = 'mercury-g2b.service:2.0';
     protected $vetisLogin = '';
     protected $_client;
     protected $enterpriseGuid;
@@ -39,12 +45,43 @@ class baseApi extends Component
     protected function getSoapClient($system)
     {
         if ($this->_client === null)
-            return new \SoapClient($this->wsdls[$system]['wsdl'],[
-                'login' => $this->login,
-                'password' => $this->pass,
-                'exceptions' => 1,
-                'trace' => 1,
-            ]);
+            switch ($system) {
+            case 'mercury': $this->_client = (new Mercury(
+                    ['url' => $this->wsdls[$system]['wsdl'],
+                    'login' => $this->login,
+                    'password' => $this->pass,
+                    'exceptions' => 1,
+                    'trace' => 1]))->soapClient;
+                break;
+            case 'cerber': $this->_client = (new Cerber(
+                    ['url' => $this->wsdls[$system]['wsdl'],
+                        'login' => $this->login,
+                        'password' => $this->pass,
+                        'exceptions' => 1,
+                        'trace' => 1]))->soapClient;
+                break;
+            case 'dicts': $this->_client = (new Dicts(
+                    ['url' => $this->wsdls[$system]['wsdl'],
+                        'login' => $this->login,
+                        'password' => $this->pass,
+                        'exceptions' => 1,
+                        'trace' => 1]))->soapClient;
+                break;
+            case 'ikar': $this->_client = (new Ikar(
+                    ['url' => $this->wsdls[$system]['wsdl'],
+                        'login' => $this->login,
+                        'password' => $this->pass,
+                        'exceptions' => 1,
+                        'trace' => 1]))->soapClient;
+                break;
+            case 'product': $this->_client = (new Products(
+                    ['url' => $this->wsdls[$system]['wsdl'],
+                        'login' => $this->login,
+                        'password' => $this->pass,
+                        'exceptions' => 1,
+                        'trace' => 1]))->soapClient;
+                break;
+        }
 
         return $this->_client;
     }

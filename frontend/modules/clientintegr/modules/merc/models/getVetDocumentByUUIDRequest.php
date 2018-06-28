@@ -11,6 +11,7 @@ namespace frontend\modules\clientintegr\modules\merc\models;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\product\productApi;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 
@@ -219,7 +220,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
         $this->UUID = $UUID;
 
-        $doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
+        $doc = mercuryApi::getInstance()->getVetDocumentByUUID($UUID);
          //var_dump($raw_doc);
           //  $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
@@ -227,87 +228,88 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             return $doc;
         }
 
-        $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
-        $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
-        $this->issueDate = $doc->ns2issueDate->__toString();
-        $this->form = $doc->ns2form->__toString();
-        $this->type = $doc->ns2type->__toString();
-        $this->status = $doc->ns2status->__toString();
+        echo "<pre>";
+        var_dump($doc);
+        echo"</pre>";
+die();
+        $this->issueSeries = (isset($doc->issueSeries)) ? $doc->nissueSeries : null;
+        $this->issueNumber = (isset($doc->issueNumber)) ? $doc->issueNumber : null;
+        $this->issueDate = $doc->issueDate->;
+        $this->form = $doc->vetDForm;
+        $this->type = $doc->vetDType;
+        $this->status = $doc->vetDStatus;
 
-        $consingtor_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignor->entbusinessEntity->bsuuid->__toString());
-        $consingtor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->ns2consignor->ententerprise->bsuuid->__toString());
+        $consingtor_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignor->businessEntity->uuid);
+        $consingtor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignor->enterprise->uuid);
 
-        $enterprise = $consingtor_enterprise->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
-        $businessEntity = $consingtor_buisness->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        $enterprise = $consingtor_enterprise->enterprise;
+        $businessEntity = $consingtor_buisness->businessEntity;
 
         $this->consignor = [
             [ 'label' => 'Название предприятия',
-              'value' => $enterprise->dtname->__toString().'('.
-                  $enterprise->dtaddress->dtaddressView->__toString()
+              'value' => $enterprise->name.'('.
+                  $enterprise->address->addressView
                   .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtinn->__toString(),
+                'value' => $businessEntity->name.', ИНН:'.$businessEntity->inn,
             ]
         ];
 
-        $cconsignee_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignee->entbusinessEntity->bsuuid->__toString());
-        $consignee_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->ns2consignee->ententerprise->bsuuid->__toString());
+        $cconsignee_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignee->businessEntity->uuid);
+        $consignee_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignee->enterprise->uuid);
 
-        $enterprise = $consignee_enterprise->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
-        $businessEntity = $cconsignee_buisness->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        $enterprise = $consignee_enterprise->enterprise;
+        $businessEntity = $cconsignee_buisness->businessEntity;
 
         $this->consignee = [
             [ 'label' => 'Название предприятия',
-                'value' => $enterprise->dtname->__toString().'('.
-                    $enterprise->dtaddress->dtaddressView->__toString()
+                'value' => $enterprise->name.'('.
+                    $enterprise->address->addressView
                     .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtinn->__toString(),
+                'value' => $businessEntity->name->__toString().', ИНН:'.$businessEntity->inn,
             ]
         ];
 
-        if(isset($doc->ns2broker)) {
-            $broker_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->bsuuid->__toString());
-            $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        if(isset($doc->certifiedConsignment->broker)) {
+            $broker_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->broker->uuid);
+            $broker = $broker_raw->businessEntity;
             $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
-                'value' => $broker->dtname->__toString() . ', ИНН:' . $broker->dtinn->__toString(),
+                'value' => $broker->name . ', ИНН:' . $broker->inn,
             ];
         }
 
-        $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->ns2batch->ns2owner->bsuuid->__toString());
+        $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->owner->uuid);
 
 
-        $owner = $owner_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        $owner = $owner_raw->businessEntity;
 
-        $product_raw = productApi::getInstance()->getProductByGuid($doc->ns2batch->ns2product->bsguid->__toString());
+        $product_raw = productApi::getInstance()->getProductByGuid($doc->certifiedConsignment->batch->product->guid);
         $product = $product_raw->product->name;
 
-        $sub_product_raw = productApi::getInstance()->getSubProductByGuid($doc->ns2batch->ns2subProduct->bsguid->__toString());
+        $sub_product_raw = productApi::getInstance()->getSubProductByGuid($doc->certifiedConsignment->batch->subProduct->guid);
 
         $sub_product = $sub_product_raw->subProduct->name;
 
-        $unit = dictsApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
+        $unit = dictsApi::getInstance()->getUnitByGuid($doc->certifiedConsignment->batch->unit->guid);
 
-        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
+        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->certifiedConsignment->batch->countryOfOrigin->guid);
 
         $country = $country_raw->country->fullName;
 
-        $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
+        $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->authentication->purpose->guid);
         $purpose = $purpose->purpose->name;
 
         $producer = null;
 
-        if(isset($doc->ns2batch->ns2producerList->entproducer)) {
-            $producer_raw = cerberApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
+        if(isset($doc->certifiedConsignment->batch->producerList->producer)) {
+            $producer_raw = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->batch->producerList->producer->enterprise->uuid);
+            $producer = $producer_raw->enterprise;
 
-            if(isset($producer_raw->soapBody))
-                $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
-            else
-                $producer = $producer_raw->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
-            $producer = $producer->dtname->__toString() . '(' .
-                $producer->dtaddress->dtaddressView->__toString()
+            $producer = $producer->name . '(' .
+                $producer->address->addressView
                 . ')';
         }
 
@@ -315,7 +317,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         [
             [
                 'label' => 'Тип продукции',
-                'value' => $this->product_types[$doc->ns2batch->ns2productType->__toString()],
+                'value' => $this->product_types[$doc->certifiedConsignment->batch->productType],
             ],
             [
                 'label' => 'Продукция',
@@ -327,31 +329,31 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Наименование произведенной продукции в номенклатуре производителя',
-                'value' => isset($doc->ns2batch->ns2productItem->prodname) ? $doc->ns2batch->ns2productItem->prodname->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->productItem->name) ? $doc->certifiedConsignment->batch->productItem->name : null,
             ],
             [
                 'label' => 'Объем',
-                'value' => $doc->ns2batch->ns2volume." ".$unit->unit->mname,
+                'value' => $doc->certifiedConsignment->batch->volume." ".$unit->unit->mname,
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
-                'value' => isset($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->packingList) ? $doc->certifiedConsignment->batch->packingList->packingForm->name : null,
             ],
             [
                 'label' => 'Общее количество единиц упаковки для производственной партии',
-                'value' => isset($doc->ns2batch->ns2packingAmount) ? $doc->ns2batch->ns2packingAmount->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->packingAmount) ? $doc->certifiedConsignment->batch->packingAmount : null,
             ],
             [
                 'label' => 'Дата выработки продукции',
-                'value' => $this->getDate($doc->ns2batch->ns2dateOfProduction),
+                'value' => $this->getDate($doc->certifiedConsignment->batch->dateOfProduction),
             ],
             [
                 'label' => 'Дата окончания срока годности продукции',
-                'value' => isset($doc->ns2batch->ns2expiryDate) ? $this->getDate($doc->ns2batch->ns2expiryDate) : null,
+                'value' => isset($doc->certifiedConsignment->batch->expiryDate) ? $this->getDate($doc->certifiedConsignment->batch->expiryDate) : null,
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => isset($doc->ns2batch->ns2perishable) ? (($doc->ns2batch->ns2perishable->__toString() == 'true') ? 'Да' : 'Нет') : null,
+                'value' => isset($doc->certifiedConsignment->batch->perishable) ? (($doc->certifiedConsignment->batch->perishable->__toString() == 'true') ? 'Да' : 'Нет') : null,
             ],
             [
                 'label' => 'Страна происхождения продукции',
@@ -363,15 +365,15 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список маркировки, доступный для данного производителя',
-                'value' => isset($doc->ns2batch->ns2productMarkingList) ? $doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->productMarkingList) ? $doc->certifiedConsignment->batch->productMarkingList->productMarking : null,
             ],
             [
                 'label' => 'Является ли продукция некачественной',
-                'value' => ($doc->ns2batch->ns2lowGradeCargo->__toString() == 'true') ? 'Да' : 'Нет',
+                'value' => ($doc->certifiedConsignment->batch->lowGradeCargo == 'true') ? 'Да' : 'Нет',
             ],
             [
                 'label' => 'Собственник продукции',
-                'value' =>  $owner->dtname->__toString().', ИНН:'.$owner->dtinn->__toString(),
+                'value' =>  $owner->name->__toString().', ИНН:'.$owner->inn->__toString(),
             ],
         ];
         $this->purpose = [
@@ -379,8 +381,8 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             'value' => $purpose,
         ];
 
-        $this->transportInfo = isset ($doc->ns2transportInfo) ? ([
-            'type' => $this->transport_types[$doc->ns2transportInfo->shptransportType->__toString()],
+        $this->transportInfo = isset ($doc->certifiedConsignment->transportInfo) ? ([
+            'type' => $this->transport_types[$doc->certifiedConsignment->transportInfo->transportType->__toString()],
             'numbers' => [
                 [
                 'label' => 'Номер контейнера (при автомобильной перевозке)',

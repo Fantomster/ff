@@ -6,6 +6,9 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocument;
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use yii\base\Model;
 
 class vetDocumentsChangeList extends Model
@@ -54,34 +57,38 @@ class vetDocumentsChangeList extends Model
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
         $guid = mercDicconst::getSetting('enterprise_guid');
+
         foreach ($list as $item)
         {
-            if(!$cache->get('vetDocRaw_'.$item->bsuuid->__toString()))
-                $cache->add('vetDocRaw_'.$item->bsuuid->__toString(), $item->asXML(),60);
+            if($item->vetDType == getVetDocumentByUUIDRequest::DOC_TYPE_PRODUCTIVE)
+                continue;
 
-            $unit = dictsApi::getInstance()->getUnitByGuid($item->ns2batch->ns2unit->bsguid);
-            $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->ns2consignor->ententerprise->bsuuid->__toString());
+            if(!$cache->get('vetDocRaw_'.$item->uuid))
+                $cache->add('vetDocRaw_'.$item->uuid, $item,60);
+
+            $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
+            $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
             $recipient = $recipient->enterprise;
-            $model = MercVsd::findOne(['uuid' => $item->bsuuid->__toString(), 'guid' => $guid]);
+            $model = MercVsd::findOne(['uuid' => $item->uuid, 'guid' => $guid]);
 
             if($model == null)
                 $model = new MercVsd();
 
             $model->setAttributes([
-                'uuid' => $item->bsuuid->__toString(),
-                'number' => $this->getNumber($item->ns2issueSeries, $item->ns2issueNumber),
-                'date_doc' => $item->ns2issueDate->__toString(),
-                'status' => $item->ns2status->__toString(),
-                'type' => $item->ns2type->__toString(),
-                'product_name' => $item->ns2batch->ns2productItem->prodname->__toString(),
-                'amount' => $item->ns2batch->ns2volume->__toString(),
+                'uuid' => $item->uuid,
+                'number' => $this->getNumber($item->issueSeries, $item->issueNumber),
+                'date_doc' => $item->issueDate,
+                'status' => $item->vetDStatus,
+                'type' => $item->vetDType,
+                'product_name' => $item->certifiedConsignment->batch->productItem->name,
+                'amount' => $item->certifiedConsignment->batch->volume,
                 'unit' => $unit->unit->name,
-                'production_date' => $this->getDate($item->ns2batch->ns2dateOfProduction),
+                'production_date' => $this->getDate($item->certifiedConsignment->batch->dateOfProduction),
                 'recipient_name' =>  $recipient->name.'('.
                     $recipient->address->addressView
                     .')',
                 'guid' => $guid,
-                'consignor' => $item->ns2consignor->ententerprise->bsguid->__toString(),
+                'consignor' => $item->certifiedConsignment->consignor->enterprise->guid,
             ]);
 
             if(!$model->save()) {
@@ -108,23 +115,23 @@ class vetDocumentsChangeList extends Model
 
     public function updateData($last_visit)
     {
-        $api = mercApi::getInstance();
+        $api = mercuryApi::getInstance();
 
         $result = $api->getVetDocumentChangeList($last_visit);
 
         if(!empty($result))
-            $this->updateDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+            $this->updateDocumentsList($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument);
     }
 
     public function getDate($date_raw)
     {
-        $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday;
-        $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
+        $first_date =  $date_raw->firstDate->year.'-'.$date_raw->firstDate->month.'-'.$date_raw->firstDate->day;
+        $first_date .= (isset($date_raw->firstDate->hour)) ? ' '.$date_raw->firstDate->hour.":00:00" : "";
 
-        if($date_raw->ns2secondDate)
+        if($date_raw->secondDate)
         {
-            $second_date = $date_raw->ns2secondDate->bsyear.'-'.$date_raw->ns2secondDate->bsmonth.'-'.$date_raw->ns2secondDate->bsday.' '.$date_raw->ns2secondDate->hour.":00:00";
-            $second_date .= (isset($date_raw->ns2secondDate->hour)) ? ' '.$date_raw->ns2secondDate->hour.":00:00" : "";
+            $second_date = $date_raw->secondDate->year.'-'.$date_raw->secondDate->month.'-'.$date_raw->secondDate->day.' '.$date_raw->secondDate->hour.":00:00";
+            $second_date .= (isset($date_raw->secondDate->hour)) ? ' '.$date_raw->secondDate->hour.":00:00" : "";
             return 'с '.$first_date.' до '.$second_date;
         }
 

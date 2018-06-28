@@ -1,13 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 26.06.2018
- * Time: 18:35
- */
-
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\cerber;
 
+/**
+ * Class GenericEntity
+ * @package frontend\modules\clientintegr\modules\merc\helpers\api\cerber
+ * v 2.0
+ */
 class GenericEntity{
 var $uuid;//UUID
 }
@@ -955,12 +953,13 @@ private static function getClassmap()
         return $classmap;
     }
 
- function __construct($params = ['url' => 'http://api.vetrf.ru/schema/platform/services/2.0-last/EnterpriseService_v2.0_pilot.wsdl',
+ function __construct($params = ['url' => '',
         'login' => '',
         'password' => '',
         'exceptions' => true,
         'trace' => true])
     {
+        if(!empty($params['url']))
         $this->soapClient = new \SoapClient($params['url'],
             [   "classmap"=>self::getClassmap(),
                 'login' => $params['login'],

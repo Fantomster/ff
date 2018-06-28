@@ -231,17 +231,17 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     private function updateVSDList()
     {
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
-        $transaction = Yii::$app->db_api->beginTransaction();
-        try {
+        //$transaction = Yii::$app->db_api->beginTransaction();
+       //try {
             $vsd = new vetDocumentsChangeList();
             $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*5);
             $vsd->updateData($visit);
-            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
-            $transaction->commit();
-        }catch (\Exception $e)
+            //MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
+            //$transaction->commit();
+        /*}catch (\Exception $e)
         {
-            $transaction->rollback();
+           // $transaction->rollback();
             var_dump($e->getMessage());
-        }
+        }*/
     }
 }

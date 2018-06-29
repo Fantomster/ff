@@ -173,6 +173,7 @@ class StreetList{
     var $street;//Street
 }
 class Enterprise{
+    var $guid;//UUID
     var $name;//String255
     var $englishName;//String255
     var $type;//EnterpriseType
@@ -207,6 +208,7 @@ class BusinessMember{
     var $globalID;//GLNType
 }
 class BusinessEntity{
+    var $guid;//UUID
     var $type;//BusinessEntityType
     var $name;//String255
     var $incorporationForm;//IncorporationForm
@@ -411,6 +413,20 @@ class Consignment{
     var $sourceStockEntry;//StockEntry
     var $id;//ID
     var $partOf;//IDREF
+
+    var $productType;
+    var $product;
+    var $subProduct;
+    var $productItem;
+    var $volume;
+    var $unit;
+    var $dateOfProduction;
+    var $expiryDate;
+    var $batchID;
+    var $perishable;
+    var $origin;
+    var $lowGradeCargo;
+    var $packageList;
 }
 class RawBatch{
     var $sourceStockEntry;//StockEntry
@@ -691,6 +707,8 @@ class MercuryApplicationRequest{
     var $sessionToken;//OTPToken
 }
 class ProcessIncomingConsignmentRequest{
+    var $localTransactionId;//Identifier
+    var $initiator;//User
     var $delivery;//Delivery
     var $deliveryFacts;//DeliveryFactList
     var $discrepancyReport;//DiscrepancyReport

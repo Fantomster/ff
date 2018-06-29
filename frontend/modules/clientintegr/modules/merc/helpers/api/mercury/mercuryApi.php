@@ -72,6 +72,35 @@ class mercuryApi extends baseApi
         return $result;
     }
 
+    private function addEventLog($response, $method, $localTransactionId, $request_xml, $response_xml)
+    {
+        //Пишем лог
+        $log = new mercLog();
+        $log->applicationId = $response->application->applicationId;
+        $log->status = $response->application->status;
+        $log->action = $method;
+        $log->localTransactionId = $localTransactionId;
+        $log->request = $request_xml;
+        $log->response = $response_xml;
+
+        if ($log->status == mercLog::REJECTED) {
+            $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
+        }
+
+        if (!$log->save())
+            var_dump($log->getErrors());
+    }
+
+    public function getReceiveApplicationResult($applicationId)
+    {
+        $client = $this->getSoapClient('mercury');
+        $request = new receiveApplicationResultRequest();
+        $request->apiKey = $this->apiKey;
+        $request->issuerId = $this->issuerID;
+        $request->applicationId = $applicationId;
+        return $client->receiveApplicationResult($request);
+    }
+
     public function getVetDocumentChangeList($date_start)
     {
         $result = null;
@@ -134,35 +163,6 @@ class mercuryApi extends baseApi
         return $result;
     }
 
-    public function getReceiveApplicationResult($applicationId)
-    {
-        $client = $this->getSoapClient('mercury');
-        $request = new receiveApplicationResultRequest();
-        $request->apiKey = $this->apiKey;
-        $request->issuerId = $this->issuerID;
-        $request->applicationId = $applicationId;
-        return $client->receiveApplicationResult($request);
-    }
-
-    private function addEventLog($response, $method, $localTransactionId, $request_xml, $response_xml)
-    {
-        //Пишем лог
-        $log = new mercLog();
-        $log->applicationId = $response->application->applicationId;
-        $log->status = $response->application->status;
-        $log->action = $method;
-        $log->localTransactionId = $localTransactionId;
-        $log->request = $request_xml;
-        $log->response = $response_xml;
-
-        if ($log->status == mercLog::REJECTED) {
-            $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
-        }
-
-        if (!$log->save())
-            var_dump($log->getErrors());
-    }
-
     public function getVetDocumentByUUID($UUID)
     {
         $cache = Yii::$app->cache;
@@ -176,15 +176,13 @@ class mercuryApi extends baseApi
         $doc = null;
 
         try {
-                //Генерируем id запроса
-                $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+            //Генерируем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
 
-                //Готовим запрос
-                $client = $this->getSoapClient('mercury');
+            //Готовим запрос
+            $client = $this->getSoapClient('mercury');
 
             $request = new submitApplicationRequest();
-            $request->apiKey = $this->apiKey;
-
             $request->application = new Application();
             $request->application->serviceId = $this->service_id;
             $request->application->issuerId = $this->issuerID;
@@ -240,11 +238,14 @@ class mercuryApi extends baseApi
 
     public function getVetDocumentDone($UUID, $rejectedData = null)
     {
-        $client = $this->getSoapClient('mercury');
         $result = null;
 
         try {
+            //Генерируем id запроса
+            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
             //Готовим запрос
+            $client = $this->getSoapClient('mercury');
             $request = new submitApplicationRequest();
             $request->apiKey = $this->apiKey;
             $application = new application();

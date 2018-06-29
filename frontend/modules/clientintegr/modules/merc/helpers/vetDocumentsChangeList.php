@@ -119,7 +119,7 @@ class vetDocumentsChangeList extends Model
 
         $result = $api->getVetDocumentChangeList($last_visit);
 
-        if(!empty($result))
+        if(isset($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument))
             $this->updateDocumentsList($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument);
     }
 

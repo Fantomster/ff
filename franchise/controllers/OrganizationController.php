@@ -2,7 +2,6 @@
 
 namespace franchise\controllers;
 
-use app\models\FranchiseNotifications;
 use common\models\Currency;
 use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
@@ -126,32 +125,32 @@ class OrganizationController extends DefaultController {
 
     public function actionNotifications()
     {
-        $model = new RelationUserOrganization();
         $query = (new \yii\db\Query())
-            ->select(['organization.id', 'organization.name', 'organization.contact_name', 'organization.email', 'organization.phone'])
+            ->select(['organization.id', 'organization.name', 'organization.contact_name', 'organization.email', 'organization.phone', 'email_notification.order_created'])
             ->from('organization')
             ->join('LEFT JOIN', 'franchisee_associate', 'organization.id = franchisee_associate.organization_id')
+            ->join('LEFT JOIN', 'relation_user_organization', 'organization.id = relation_user_organization.organization_id')
+            ->join('LEFT JOIN', 'email_notification', 'relation_user_organization.id = email_notification.rel_user_org_id')
             ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
             ->orderBy(['organization.id' => SORT_ASC]);
-
         if(Yii::$app->request->isAjax)
         {
-            $emailNotification = EmailNotification::findOne(['rel_user_org_id'=>$model::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id]);
-            if($emailNotification)
+            $rel_user_org_id = RelationUserOrganization::findOne(['organization_id'=>Yii::$app->request->post('id_org')])->id;
+            $emailNotifications = EmailNotification::findAll(['rel_user_org_id'=>$rel_user_org_id]);
+            //die(print_r($emailNotifications));
+            foreach($emailNotifications as $emailNotification)
             {
-                $emailNotification->order_created = ($emailNotification->order_created)? 0: 1;
-            }
+                $emailNotification->order_created = Yii::$app->request->post('order_created');
 
-            if($emailNotification->save())
-            {
-                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return [
-                    'msg'=>'OK'
-                ];
+                if($emailNotification->save())
+                {
+                    \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                    return [
+                        'msg'=>'OK'
+                    ];
+                }
             }
-
         }
-//die(print_r($query));
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [

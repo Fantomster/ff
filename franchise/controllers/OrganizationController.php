@@ -151,7 +151,7 @@ class OrganizationController extends DefaultController {
             }
 
         }
-
+//die(print_r($query));
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [

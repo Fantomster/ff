@@ -136,7 +136,7 @@ class OrganizationController extends DefaultController {
         if(Yii::$app->request->isAjax)
         {
             $rel_user_org_id = RelationUserOrganization::findOne(['organization_id'=>Yii::$app->request->post('id_org')])->id;
-            $emailNotifications = EmailNotification::findAll(['rel_user_org_id'=>$rel_user_org_id]);
+            $emailNotifications = EmailNotification::find(['rel_user_org_id'=>$rel_user_org_id]);
             //die(print_r($emailNotifications));
             foreach($emailNotifications as $emailNotification)
             {

@@ -2,6 +2,8 @@
 
 namespace common\models\search;
 
+use api\common\models\iiko\iikoWaybill;
+use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
 use Yii;
 use yii\base\Model;
@@ -415,25 +417,30 @@ class OrderSearch extends Order
        if($actualDelivery){
            $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
        }
-       if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
-           $dbName =  $match[1];
-       } else {
-           $dbName = 'db_api';
-       }
-       $query->leftJoin($dbName . '.iiko_waybill', $dbName . '.iiko_waybill.order_id=order.id');
-       if($numCode){
-           $query->andWhere([$dbName . '.iiko_waybill.num_code' => $numCode]);
-       }
 
-       if($storeID){
-           $query->andWhere([$dbName . '.iiko_waybill.store_id' => $storeID]);
+       if($numCode || $storeID)
+       {
+           $orders = ArrayHelper::getColumn($query->all(),'id');
+           $waybills = iikoWaybill::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
+           if($numCode){
+               $waybills->andWhere("num_code = $numCode");
+           }
+
+           if($storeID){
+               $waybills->andWhere("store_id = $storeID");
+           }
+           $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
+           if(empty($waybills))
+               $waybills[] = 0;
+           $query->andWhere('id IN ('.implode(',', $waybills) . ')');
        }
+      
        $count = $query->count();
        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
        $i=0;
        foreach ($ordersArray as $order){
-           $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $order->id]);
-
+           $nacl = iikoWaybill::findOne(['order_id' => $order->id]);
+           
            if (isset($nacl->status)) {
                $status = $nacl->status->id;
                $statusText = $nacl->status->denom;
@@ -441,6 +448,7 @@ class OrderSearch extends Order
                $status = 1;
                $statusText = 'Не сформирована';
            }
+           
            $arr['orders'][$i]['order_id'] = $order->id;
            $arr['orders'][$i]['vendor'] = $order->vendor->name;
            $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
@@ -474,7 +482,7 @@ class OrderSearch extends Order
         $userID = $post['search']['user_id'];
         $orderID = $post['search']['order_id'] ?? null;
         $numCode = $post['search']['num_code'] ?? null;
-        $storeDenom = $post['search']['store_denom'] ?? null;
+        $storeRID = $post['search']['store_rid'] ?? null;
         $vendorID = $post['search']['vendor_id'] ?? null;
         $actualDelivery = $post['search']['actual_delivery'] ?? null;
 
@@ -492,26 +500,27 @@ class OrderSearch extends Order
             $query->andWhere(['order.vendor_id'=>$vendorID]);
         }
 
+
         if($actualDelivery){
             $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
         }
 
-        if (preg_match('/' . 'dbname' . '=([^;]*)/', Yii::$app->db_api->dsn, $match)) {
-            $dbName =  $match[1];
-        } else {
-            $dbName = 'db_api';
-        }
+        if($numCode || $storeRID)
+        {
+            $orders = ArrayHelper::getColumn($query->all(),'id');
+            $waybills = RkWaybill::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
+            if($numCode){
+                $waybills->andWhere("num_code = $numCode");
+            }
 
-        if($numCode){
-            $query->leftJoin($dbName . '.rk_waybill', $dbName . '.rk_waybill.order_id=order.id');
-            $query->andWhere([$dbName . '.rk_waybill.num_code' => $numCode]);
+            if($storeRID){
+                $waybills->andWhere("store_rid = $storeRID");
+            }
+            $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
+            if(empty($waybills))
+                $waybills[] = 0;
+            $query->andWhere('id IN ('.implode(',', $waybills) . ')');
         }
-
-        if($storeDenom){
-            $query->leftJoin($dbName . '.rk_storetree', $dbName . '.rk_waybill.store_rid=' . $dbName . '.rk_storetree.rid');
-            $query->andWhere([$dbName . '.rk_storetree.rid' => $storeDenom]);
-        }
-
         $count = $query->count();
         $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
         $i=0;
@@ -525,6 +534,7 @@ class OrderSearch extends Order
                 $status = 1;
                 $statusText = 'Не сформирована';
             }
+
             $arr['orders'][$i]['order_id'] = $order->id;
             $arr['orders'][$i]['vendor'] = $order->vendor->name;
             $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));

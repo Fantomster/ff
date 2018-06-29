@@ -95,6 +95,9 @@ class Organization extends \yii\db\ActiveRecord
     const ES_UPDATED = 1;
     const ES_DELETED = 2;
     const MAX_RATING = 31;
+    const STATUS_WHITELISTED = 0;
+    const STATUS_BLACKISTED = 1;
+    const STATUS_UNSORTED = 2;
 
     const RELATION_INVITED = 1; //есть связь с поставщиком invite_on
     const RELATION_INVITE_IN_PROGRESS = 2; //поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
@@ -1587,4 +1590,27 @@ class Organization extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getStatus() {
+        
+        switch ($this->blacklisted) {
+            case self::STATUS_WHITELISTED:
+                $result = 'Разрешено';
+                break;
+            case self::STATUS_BLACKISTED:
+                $result = 'Заблокировано';
+                break;
+            case self::STATUS_UNSORTED:
+                $result = 'Неотсортировано';
+                break;
+        }
+        return $result;
+    }
+    
+    public static function  getStatusList() {
+        return [
+            self::STATUS_WHITELISTED => 'Разрешено',
+            self::STATUS_BLACKISTED => 'Заблокировано',
+            self::STATUS_UNSORTED => 'Неотсортировано',
+        ];
+    }
 }

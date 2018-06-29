@@ -2,12 +2,16 @@
 
 namespace franchise\controllers;
 
+use app\models\FranchiseNotifications;
 use common\models\Currency;
 use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\Order;
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -118,6 +122,44 @@ class OrganizationController extends DefaultController {
         } else {
             return $this->render('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns', 'currencyData'));
         }
+    }
+
+    public function actionNotifications()
+    {
+        $model = new RelationUserOrganization();
+        $query = (new \yii\db\Query())
+            ->select(['organization.id', 'organization.name', 'organization.contact_name', 'organization.email', 'organization.phone'])
+            ->from('organization')
+            ->join('LEFT JOIN', 'franchisee_associate', 'organization.id = franchisee_associate.organization_id')
+            ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
+            ->orderBy(['organization.id' => SORT_ASC]);
+
+        if(Yii::$app->request->isAjax)
+        {
+            $emailNotification = EmailNotification::findOne(['rel_user_org_id'=>$model::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id]);
+            if($emailNotification)
+            {
+                $emailNotification->order_created = ($emailNotification->order_created)? 0: 1;
+            }
+
+            if($emailNotification->save())
+            {
+                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return [
+                    'msg'=>'OK'
+                ];
+            }
+
+        }
+//die(print_r($query));
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        return $this->render('notofications_clients',['dataProvider'=>$dataProvider]);
     }
 
 

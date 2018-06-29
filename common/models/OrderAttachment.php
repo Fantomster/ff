@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use common\behaviors\UploadBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "order_attachment".
@@ -14,9 +15,14 @@ use common\behaviors\UploadBehavior;
  * @property string $created_at
  *
  * @property Order $order
+ * @property integer $size
+ * @property string $url
  */
 class OrderAttachment extends \yii\db\ActiveRecord
 {
+    
+    public $resourceCategory = 'bill';
+    
     /**
      * {@inheritdoc}
      */
@@ -34,7 +40,7 @@ class OrderAttachment extends \yii\db\ActiveRecord
             [['order_id', 'file'], 'required'],
             [['order_id'], 'integer'],
             [['created_at'], 'safe'],
-            [['file'], 'string', 'max' => 255],
+            [['file'], 'file', 'extensions' => 'gif, jpg, jpeg, png, bmp, pdf', 'maxSize' => 52428800, 'tooBig' => Yii::t('app', 'common.models.order_attachment.file', ['ru'=>'Размер файла не должен превышать 50 Мб'])],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
         ];
     }
@@ -73,5 +79,34 @@ class OrderAttachment extends \yii\db\ActiveRecord
     public function getOrder()
     {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
+    }
+    
+    public function getFile() {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        $size = $this->getSize();
+        header('Content-Disposition: inline; filename=' . $this->file);
+        //header("Content-type:application/pdf");
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . $size);
+        flush();
+        readfile($this->getRawUploadUrl('file'));
+    }
+    
+    function getSize() {
+        $url = $this->getRawUploadUrl('file');
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 0);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        curl_exec($ch);
+        $fileSize = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+        curl_close($ch);
+        if ($fileSize) {
+            return $fileSize;
+        }
     }
 }

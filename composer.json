@@ -76,7 +76,9 @@
         "yiisoft/yii2-jui": "~2.0.0",
         "yiisoft/yii2-redis": "^2.0",
         "yiisoft/yii2-swiftmailer": "*",
-        "kartik-v/yii2-dropdown-x": "*"
+        "kartik-v/yii2-dropdown-x": "*",
+        "loveorigami/yii2-magnific-popup": "@dev",
+        "yii2assets/yii2-pdfjs": ">=1.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

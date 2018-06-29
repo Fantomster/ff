@@ -128,11 +128,11 @@ class OrganizationController extends DefaultController {
     {
         $model = new RelationUserOrganization();
         $query = (new \yii\db\Query())
-            ->select(['org.id', 'org.name', 'org.contact_name', 'org.email', 'org.phone'])
+            ->select(['organization.id', 'organization.name', 'organization.contact_name', 'organization.email', 'organization.phone'])
             ->from('organization')
-            ->join('LEFT JOIN', 'franchisee_associate', 'org.id = fa.organization_id')
-            ->where(['franchisee_id'=>$this->currentFranchisee->id, 'org.type_id'=>1])
-            ->orderBy(['org.id' => SORT_ASC]);
+            ->join('LEFT JOIN', 'franchisee_associate', 'organization.id = franchisee_associate.organization_id')
+            ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
+            ->orderBy(['organization.id' => SORT_ASC]);
 
         if(Yii::$app->request->isAjax)
         {

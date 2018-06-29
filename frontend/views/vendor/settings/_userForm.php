@@ -31,7 +31,7 @@ $form = ActiveForm::begin([
     <input type="email" name="fake_email" style="position: absolute; top: -100%;">
     <input type="password" name="fake_pwd" style="position: absolute; top: -100%;">
 
-    <?= $form->field($user, 'email') ?>
+    <?= $form->field($user, 'email')->textInput(['disabled' => $user->isNewRecord ? false : true]) ?>
 
     <?= $form->field($user, 'newPassword')->passwordInput() ?>
 

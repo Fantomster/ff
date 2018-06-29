@@ -108,7 +108,7 @@ kartik\select2\Select2Asset::register($this);
                                     'class' => 'yii\grid\CheckboxColumn', 'checkboxOptions' => function($model, $key, $index, $column) {
                                     if(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model->organization->id]))
                                     {
-                                        $var = \common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model->organization->id])->id);
+                                        $var = \common\models\notifications\EmailNotification::findOne(['rel_user_org_id'=>\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model->organization->id])->id]);
                                         $notif = $var ? $var->order_created: 0;
                                     }else{
                                         $notif = null;

@@ -366,7 +366,7 @@ if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
                                 'cssClass'=>'allows',
                                 'class' => 'yii\grid\CheckboxColumn', 'checkboxOptions' => function($model, $key, $index, $column) {
                         //print_r($model['id']);
-                                    if($model['id'])
+                                    if(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']]))
                                     {
                                         $var = \common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']])->id);
                                         $notif = $var ? $var->order_created: 0;

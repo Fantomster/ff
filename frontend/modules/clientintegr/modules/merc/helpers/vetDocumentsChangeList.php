@@ -114,7 +114,11 @@ class vetDocumentsChangeList extends Model
         $result = $api->getVetDocumentChangeList($last_visit);
 
         if(!empty($result))
-            $this->updateDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+            if($result->envBody)
+                $this->updateDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+            else
+                $this->updateDocumentsList($result->soapBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+
     }
 
     public function getDate($date_raw)

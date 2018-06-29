@@ -104,7 +104,7 @@ class mercApi extends Component
         return new \SimpleXMLElement($xml->asXML());
     }
 
-    public function getVetDocumentList($status)
+    public function getVetDocumentList($status = null)
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
@@ -123,7 +123,8 @@ class mercApi extends Component
 
             //Формируем тело запроса
             $vetDoc = new getVetDocumentListRequest();
-            $vetDoc->status = $status;
+            if(isset($status))
+                $vetDoc->status = $status;
             $vetDoc->localTransactionId = $localTransactionId;
             $vetDoc->setEnterpriseGuid($this->enterpriseGuid);
             $vetDoc->setInitiator($this->vetisLogin);
@@ -142,19 +143,38 @@ class mercApi extends Component
 
             $result = $this->parseResponse($response);
 
-            if(isset($result->envBody->envFault)) {
-                throw new BadRequestHttpException();
+            if(isset($result->envBody)) {
+                if (isset($result->envBody->envFault)) {
+                    throw new BadRequestHttpException();
+                }
             }
+            else
+                if (isset($result->soapBody->envFault)) {
+                    throw new BadRequestHttpException();
+                }
 
-            //timeout перед запросом результата
-            sleep(2);
-            //Получаем результат запроса
-            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
+            $app_id = $result->envBody->submitApplicationResponse->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep(1);
+                //Получаем результат запроса
+                $response = $this->getReceiveApplicationResult($app_id);
 
-            $result = $this->parseResponse($response);
+                $result = $this->parseResponse($response);
+
+                if(isset($result->envBody))
+                    $status = $result->envBody->receiveApplicationResultResponse->application->status->__toString();
+                else
+                    $status = $result->soapBody->receiveApplicationResultResponse->application->status->__toString();
+            }
+            while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+            if(isset($result->envBody))
+                $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+            else
+                $this->addEventLog($result->soapBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+
 
 
         }catch (\SoapFault $e) {
@@ -202,9 +222,15 @@ class mercApi extends Component
 
             $result = $this->parseResponse($response);
 
-            if(isset($result->envBody->envFault)) {
-                throw new BadRequestHttpException();
+            if(isset($result->envBody)) {
+                if (isset($result->envBody->envFault)) {
+                    throw new BadRequestHttpException();
+                }
             }
+            else
+                if (isset($result->soapBody->envFault)) {
+                    throw new BadRequestHttpException();
+                }
 
             $app_id = $result->envBody->submitApplicationResponse->application->applicationId;
             do {
@@ -383,9 +409,15 @@ class mercApi extends Component
 
             $result = $this->parseResponse($response);
 
-            if(isset($result->envBody->envFault)) {
-                throw new BadRequestHttpException();
+            if(isset($result->envBody)) {
+                if (isset($result->envBody->envFault)) {
+                    throw new BadRequestHttpException();
+                }
             }
+            else
+                if (isset($result->soapBody->envFault)) {
+                    throw new BadRequestHttpException();
+                }
 
             $app_id = $result->envBody->submitApplicationResponse->application->applicationId;
             do {

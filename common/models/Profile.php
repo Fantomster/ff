@@ -87,4 +87,14 @@ class Profile extends \amnah\yii2\user\models\Profile {
     public function getMiniAvatarUrl() {
         return $this->avatar ? $this->getThumbUploadUrl('avatar', 'mini') : self::DEFAULT_AVATAR;
     }
+
+    public static function emailallowDropdown()
+    {
+        static $ea_dropdown;
+        if ($ea_dropdown === null) {
+            $ea_dropdown[1] = 'Согласен';
+            $ea_dropdown[2] = 'Не согласен';
+        }
+        return $ea_dropdown;
+    }
 }

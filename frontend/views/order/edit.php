@@ -82,6 +82,7 @@ $js = <<<JS
         });
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
+            $("#cancelChanges").show();
         });
         
         $(document).on("click", "a", function(e) {
@@ -123,10 +124,14 @@ $js = <<<JS
         });
         $('.content').on('click', '.btnSave', function(e) {
             e.preventDefault();
+            $("#cancelChanges").hide();
             var form = $("#editOrder");
             $(".btnSave").button("loading");
             form.submit();
             saving = true;
+        });
+        $(document).on('click', '#cancelChanges', function (e) {
+            document.location = '$urlViewOrder';
         });
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
@@ -145,6 +150,8 @@ $js = <<<JS
                 } else {
                     $(target).val(0);
                     $(target).closest('tr').hide();
+                    $("#cancelChanges").show();
+                    dataEdited = 1;
                     swal({title: "$arr[8]", type: "success"});
                 }
             });        
@@ -347,6 +354,11 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         'class' => 'btn btn-success pull-right btnSave',
                         'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru' => 'Сохраняем...']),
                     ]);
+                    echo Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.client.settings.cancel', ['ru' => 'Отменить изменения']), [
+                        'class' => 'btn btn-gray pull-right', 
+                        'id' => 'cancelChanges', 
+                        'style' => 'margin-right: 7px;display:none;',
+                        ]);
                     echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_two', ['ru' => 'Повторить заказ']), ['order/repeat', 'id' => $order->id], [
                                 'class' => 'btn btn-default pull-right',
                                 'style' => 'margin-right: 7px;'

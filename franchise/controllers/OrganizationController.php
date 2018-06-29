@@ -127,7 +127,13 @@ class OrganizationController extends DefaultController {
     public function actionNotifications()
     {
         $model = new RelationUserOrganization();
-        $query = $model::find()->where(['user_id'=>Yii::$app->user->id]);
+        $query = (new \yii\db\Query())
+            ->select(['organization.id', 'organization.name', 'organization.contact_name', 'organization.email', 'organization.phone'])
+            ->from('organization')
+            ->join('LEFT JOIN', 'franchisee_associate', 'organization.id = franchisee_associate.organization_id')
+            ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
+            ->orderBy(['organization.id' => SORT_ASC]);
+
         if(Yii::$app->request->isAjax)
         {
             $emailNotification = EmailNotification::findOne(['rel_user_org_id'=>$model::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id]);
@@ -145,7 +151,7 @@ class OrganizationController extends DefaultController {
             }
 
         }
-
+//die(print_r($query));
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [

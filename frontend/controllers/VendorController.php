@@ -319,9 +319,10 @@ class VendorController extends DefaultController
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
+            $email = $user->email;
             if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 $profile->load($post);
-
+                
                 if ($user->validate() && $profile->validate()) {
 
                     if (!in_array($user->role_id, User::getAllowedRoles($oldRole))) {
@@ -329,7 +330,7 @@ class VendorController extends DefaultController
                     } elseif ($user->role_id == Role::ROLE_SUPPLIER_EMPLOYEE && $oldRole == Role::ROLE_SUPPLIER_MANAGER && $user->organization->managersCount == 1) {
                         $user->role_id = $oldRole;
                     }
-
+                    $user->email = $email;
                     $user->save();
                     $profile->save();
                     User::updateRelationUserOrganization($user->id, $currentUserOrganizationID, $post['User']['role_id']);

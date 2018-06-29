@@ -365,7 +365,14 @@ if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
                                 'header' => 'Уведомлять о новых заказах(да/нет)',
                                 'cssClass'=>'allows',
                                 'class' => 'yii\grid\CheckboxColumn', 'checkboxOptions' => function($model, $key, $index, $column) {
-                                    $notif = (\common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']])->id))?\common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']])->id)->order_created: null;
+                        //print_r($model['id']);
+                                    if($model['id'])
+                                    {
+                                        $var = \common\models\notifications\EmailNotification::findOne(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']])->id);
+                                        $notif = $var ? $var->order_created: 0;
+                                    }else{
+                                        $notif = null;
+                                    }
                                     return $notif ? ['checked' => "checked", 'value'=>$model['id']] : ['value'=>$model['id']];
                             },
                             ],

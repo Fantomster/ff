@@ -78,7 +78,7 @@
         "yiisoft/yii2-swiftmailer": "*",
         "kartik-v/yii2-dropdown-x": "*",
         "loveorigami/yii2-magnific-popup": "@dev",
-        "newerton/yii2-fancybox-3": "@dev"
+        "yii2assets/yii2-pdfjs": ">=1.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

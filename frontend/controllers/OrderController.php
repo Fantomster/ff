@@ -34,6 +34,7 @@ use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
+use yii\helpers\Url;
 
 class OrderController extends DefaultController {
 
@@ -116,6 +117,8 @@ class OrderController extends DefaultController {
                             'pjax-cart',
                             'test',
                             'upload-attachment',
+                            'get-attachment',
+                            'delete-attachment',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2324,22 +2327,41 @@ class OrderController extends DefaultController {
         $attachment->order_id = $id;
         $attachment->file = $uploadedFile;
 
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if ($attachment && $attachment->validate() && isset($attachment->dirtyAttributes['file']) && $attachment->file) {
             $attachment->save();
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ['files' => [
                     [
                         'name' => $uploadedFile->name,
                         'size' => $uploadedFile->size,
-                        'url' => $attachment->getUploadUrl(),
-                        'deleteUrl' => 'wtf',
+                        'url' => Url::to(['order/get-attachment', 'id' => $attachment->id]),
+                        'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
                         'deleteType' => 'POST',
                     ],
                 ],
             ];
         }
 
-        return '';
+        $files = [];
+        foreach ($order->attachments as $attachment) {
+            $files[] = [
+                'name' => $attachment->file,
+                'size' => $attachment->size,
+                'url' => Url::to(['order/get-attachment', 'id' => $attachment->id]),
+                'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
+                'deleteType' => 'POST',
+            ];
+        }
+        return ['files' => $files];
     }
 
+    public function actionGetAttachment($id) {
+        $attachment = OrderAttachment::findOne(['id' => $id]);
+        $attachment->getFile();
+    }
+
+    public function actionDeleteAttachment($id) {
+        $attachment = OrderAttachment::findOne(['id' => $id]);
+        return $attachment->delete();
+    }
 }

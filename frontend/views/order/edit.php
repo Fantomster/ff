@@ -204,9 +204,40 @@ $js = <<<JS
         $(".modal-body").html("");
         window.location.replace(window.location.protocol + "//" + window.location.host + "$refreshUrl");
     });
+    $(document).on("click", ".name a", function(e) {
+        
+        //alert($(this).attr("download").split(".").pop());
+        if($(this).attr("download").split(".").pop() === 'pdf'){
+//            $.magnificPopup.open({
+//                items: {
+//                    src: 
+//                            '<button title="Close (Esc)" type="button" class="mfp-close">×</button>' +
+//                            '<figure>' +
+//                                '<embed class="mfp-img" src="'+$(this).attr("href")+'" style="max-height: 938px;">' +
+//                            '</figure>'
+//                },
+//                type: 'inline' 
+//            });
+        } else {
+            e.preventDefault();
+            $.magnificPopup.open({
+                items: {
+                    src: 
+                            '<button title="Close (Esc)" type="button" class="mfp-close">×</button>' +
+                            '<figure>' +
+                                '<img class="mfp-img" src="'+$(this).attr("href")+'" style="max-height: 938px;">' +
+                            '</figure>'
+                },
+                type: 'inline' 
+            });
+        }
+    });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);
+lo\widgets\magnific\MagnificPopupAsset::register($this);
+//branchonline\lightbox\LightboxAsset::register($this);
+//newerton\fancybox3\FancyBoxAsset::register($this);
 
 $canRepeatOrder = false;
 if ($organizationType == Organization::TYPE_RESTAURANT) {
@@ -267,35 +298,34 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         ?>
                     </div>
                     <div style="display: block;padding-top: 20px;">
-                        <?= ''
-//                        FileUploadUI::widget([
-//                            //'model' => $attachment,
-//                            //'attribute' => 'file',
-//                            'name' => 'attachment',
-//                            'url' => ['order/upload-attachment', 'id' => $order->id],
-//                            'gallery' => false,
-//                            'clientOptions' => [
-//                                'maxFileSize' => 52428800,
-//                                'disableImagePreview' => true,
-//                                'disableAudioPreview' => true,
-//                                'disableVideoPreview' => true,
-//                                'acceptFileTypes' => new \yii\web\JsExpression('/(\.|\/)(gif|jpe?g|png|bmp|pdf)$/i'),
-//                            ],
-//                            // ...
+                        <?=
+                        FileUploadUI::widget([
+                            'name' => 'attachment',
+                            'url' => ['order/upload-attachment', 'id' => $order->id],
+                            'gallery' => false,
+                            'load' => true,
+                            'formView' => '/order/upload/_uploadForm',
+                            'downloadTemplateView' => '/order/upload/_downloadTemplate',
 //                            'clientEvents' => [
-//                                'fileuploaddone' => 'function(e, data) {
-//                                console.log(e);
-//                                console.log(data);
-//                            }',
-//                                'fileuploadfail' => 'function(e, data) {
-//                                console.log(e);
-//                                console.log(data);
-//                            }',
+//                                'fileuploadfinished' => 'function(e, data) {
+//                                    $(".name a").magnificPopup({
+//                                        type:"image"
+//                                    });
+//                                }',
 //                            ],
-//                        ]);
+                            'clientOptions' => [
+                                'maxFileSize' => 52428800,
+                                'disableImagePreview' => true,
+                                'disableAudioPreview' => true,
+                                'disableVideoPreview' => true,
+                                'autoUpload' => true,
+                                'acceptFileTypes' => new \yii\web\JsExpression('/(\.|\/)(gif|jpe?g|png|bmp|pdf)$/i'),
+                            ],
+                        ]);
                         ?>
                     </div>
                     <?php
+                    
                     echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru' => 'Сохранить']) . ' </span>', [
                         'class' => 'btn btn-success pull-right btnSave',
                         'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru' => 'Сохраняем...']),
@@ -374,3 +404,8 @@ Modal::widget([
     'header' => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
 ])
 ?>
+<div id="dialogtest" style="display: none;">
+    <div>
+        <iframe id="frametest"></iframe>
+    </div>
+</div>

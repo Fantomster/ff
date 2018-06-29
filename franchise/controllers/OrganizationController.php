@@ -132,7 +132,7 @@ class OrganizationController extends DefaultController {
             ->join('LEFT JOIN', 'relation_user_organization', 'organization.id = relation_user_organization.organization_id')
             ->join('LEFT JOIN', 'email_notification', 'relation_user_organization.id = email_notification.rel_user_org_id')
             ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
-            ->groupBy('org.id')
+            ->groupBy('organization.id')
             ->orderBy(['organization.id' => SORT_ASC]);
         if(Yii::$app->request->isAjax)
         {

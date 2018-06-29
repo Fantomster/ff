@@ -30,6 +30,7 @@ $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $urlViewOrder = Url::to(['/order/view', 'id' => $order->id]);
+$showPdfUrl = Url::to(['/order/show-pdf']);
 $edit = true;
 $refreshUrl = Url::to(['/order/edit', "id" => $order->id]);
 
@@ -81,6 +82,7 @@ $js = <<<JS
         });
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
+            $("#cancelChanges").show();
         });
         
         $(document).on("click", "a", function(e) {
@@ -122,10 +124,14 @@ $js = <<<JS
         });
         $('.content').on('click', '.btnSave', function(e) {
             e.preventDefault();
+            $("#cancelChanges").hide();
             var form = $("#editOrder");
             $(".btnSave").button("loading");
             form.submit();
             saving = true;
+        });
+        $(document).on('click', '#cancelChanges', function (e) {
+            document.location = '$urlViewOrder';
         });
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
@@ -144,6 +150,8 @@ $js = <<<JS
                 } else {
                     $(target).val(0);
                     $(target).closest('tr').hide();
+                    $("#cancelChanges").show();
+                    dataEdited = 1;
                     swal({title: "$arr[8]", type: "success"});
                 }
             });        
@@ -208,16 +216,7 @@ $js = <<<JS
         
         //alert($(this).attr("download").split(".").pop());
         if($(this).attr("download").split(".").pop() === 'pdf'){
-//            $.magnificPopup.open({
-//                items: {
-//                    src: 
-//                            '<button title="Close (Esc)" type="button" class="mfp-close">×</button>' +
-//                            '<figure>' +
-//                                '<embed class="mfp-img" src="'+$(this).attr("href")+'" style="max-height: 938px;">' +
-//                            '</figure>'
-//                },
-//                type: 'inline' 
-//            });
+            //
         } else {
             e.preventDefault();
             $.magnificPopup.open({
@@ -236,8 +235,34 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);
 lo\widgets\magnific\MagnificPopupAsset::register($this);
-//branchonline\lightbox\LightboxAsset::register($this);
-//newerton\fancybox3\FancyBoxAsset::register($this);
+
+/*
+ //            $.magnificPopup.open({
+//                items: {
+//                    src: 
+//                            '<button title="Close (Esc)" type="button" class="mfp-close">×</button>' +
+//                            '<figure>' +
+//                                '<embed class="mfp-img" src="'+$(this).attr("href")+'" style="max-height: 938px;">' +
+//                            '</figure>'
+//                },
+//                type: 'inline' 
+//            });
+            e.preventDefault();
+            $.get('$showPdfUrl' + '?url=' + $(this).attr("href"), function(result) {
+                    alert(result);
+                    $("#popupPdf").html(result);
+                    $(this).magnificPopup({
+                        alignTop: true,
+                        overflowY: 'scroll',
+                        items: {
+                            src: '#popupPdf',
+                            type: 'inline'
+                        }
+                    }).magnificPopup('open');
+            });
+
+  
+ */
 
 $canRepeatOrder = false;
 if ($organizationType == Organization::TYPE_RESTAURANT) {
@@ -325,11 +350,15 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         ?>
                     </div>
                     <?php
-                    
                     echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru' => 'Сохранить']) . ' </span>', [
                         'class' => 'btn btn-success pull-right btnSave',
                         'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru' => 'Сохраняем...']),
                     ]);
+                    echo Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.client.settings.cancel', ['ru' => 'Отменить изменения']), [
+                        'class' => 'btn btn-gray pull-right', 
+                        'id' => 'cancelChanges', 
+                        'style' => 'margin-right: 7px;display:none;',
+                        ]);
                     echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_two', ['ru' => 'Повторить заказ']), ['order/repeat', 'id' => $order->id], [
                                 'class' => 'btn btn-default pull-right',
                                 'style' => 'margin-right: 7px;'
@@ -337,7 +366,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                     ?>
                 </div>
                 <!-- /.box-body -->
-                <?php //Pjax::end();    ?>
+                <?php //Pjax::end();     ?>
             </div>
 
         </div>
@@ -404,8 +433,7 @@ Modal::widget([
     'header' => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
 ])
 ?>
-<div id="dialogtest" style="display: none;">
-    <div>
-        <iframe id="frametest"></iframe>
-    </div>
+
+<div id="popupPdf" class="white-popup mfp-hide">
+    
 </div>

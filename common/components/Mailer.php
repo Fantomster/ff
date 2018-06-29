@@ -18,6 +18,10 @@ use common\models\notifications\EmailBlacklist;
 class Mailer extends \yashop\ses\Mailer {
     public function beforeSend($message) {
         $result = parent::beforeSend($message);
+        
+        if (substr($message->getTo(), -4) === "_bak") {
+            return false;
+        }
         //check blacklist
         if (EmailBlacklist::find()->where(['email' => $message->getTo()])->exists()) {
             return false;

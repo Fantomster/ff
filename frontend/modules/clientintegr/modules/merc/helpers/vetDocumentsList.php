@@ -33,7 +33,7 @@ class vetDocumentsList extends Model
         self::DOC_STATUS_UTILIZED => 'Погашен',
     ];
 
-    public $status_color = [
+    public static $status_color = [
         self::DOC_STATUS_CONFIRMED => '',
         self::DOC_STATUS_WITHDRAWN => 'cancelled',
         self::DOC_STATUS_UTILIZED => 'done',
@@ -57,6 +57,7 @@ class vetDocumentsList extends Model
     public function createDocumentsList($list) {
         $cache = \Yii::$app->cache;
         $result = [];
+
         foreach ($list as $item)
         {
             if(!$cache->get('vetDocRaw_'.$item->bsuuid->__toString()))
@@ -68,7 +69,7 @@ class vetDocumentsList extends Model
                 'uuid' => $item->bsuuid->__toString(),
                 'number' => $this->getNumber($item->ns2issueSeries, $item->ns2issueNumber),
                 'date_doc' => $item->ns2issueDate,
-                'status' => '<span class="status ' . $this->status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
+                'status' => '<span class="status ' . self::$status_color[$item->ns2status->__toString()] . '">'.self::$statuses[$item->ns2status->__toString()].'</span>',
                 'status_raw' => $item->ns2status->__toString(),
                 'product_name' => $item->ns2batch->ns2productItem->prodname,
                 'amount' => $item->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),

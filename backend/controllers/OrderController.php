@@ -6,6 +6,7 @@ use common\models\search\OrderContentSearch;
 use Yii;
 use common\models\Order;
 use common\models\Role;
+use common\models\OrderAttachment;
 use backend\models\OrderSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -37,7 +38,7 @@ class OrderController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'edit-bill', 'get-attachment'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -84,6 +85,24 @@ class OrderController extends Controller
         ]);
     }
 
+    public function actionEditBill($id, $attachment_id = null) {
+        $order = $this->findModel($id);
+        $currentAttachment = null;
+        if (!empty($attachment_id)) {
+            $currentAttachment = OrderAttachment::findOne(['id' => $attachment_id, 'order_id' => $id]);
+        }
+        if (Yii::$app->request->isPjax) {
+            return $this->renderAjax('edit-bill', compact('order', 'currentAttachment'));
+        } else {
+            return $this->render('edit-bill', compact('order', 'currentAttachment'));
+        }
+    }
+    
+    public function actionGetAttachment($id) {
+        $attachment = OrderAttachment::findOne(['id' => $id]);
+        $attachment->getFile();
+    }
+    
 //    /**
 //     * Creates a new Order model.
 //     * If creation is successful, the browser will be redirected to the 'view' page.

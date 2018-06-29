@@ -723,13 +723,15 @@ class ClientWebApi extends WebApi
                 'organization_id' => $this->user->organization->id
             ]);
 
-            if ($user->organization->id == $this->user->organization->id) {
+            if (isset($user->organization->id) && $user->organization->id == $this->user->organization->id) {
                 $user->organization_id = null;
                 $user->save();
             }
 
-            if (!$relation->delete()) {
-                throw new ValidationException($relation->getFirstErrors());
+            if (!empty($relation)) {
+                if (!$relation->delete()) {
+                    throw new ValidationException($relation->getFirstErrors());
+                }
             }
 
             $transaction->commit();

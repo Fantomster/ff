@@ -2,14 +2,18 @@
 
 namespace api_web\modules\integration\modules\iiko\models;
 
+use api\common\models\iiko\iikoDicconst;
+use api\common\models\iiko\iikoPconst;
 use api\common\models\iiko\iikoWaybill;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
 use common\models\Order;
+use yii\db\Query;
+use yii\web\BadRequestHttpException;
 
 class iikoService extends WebApi implements ServiceInterface
 {
-
     /**
      * Название сервиса
      * @return string
@@ -29,11 +33,84 @@ class iikoService extends WebApi implements ServiceInterface
     }
 
     /**
+     * Статус лицензии сервиса
+     * @return bool
+     */
+    public function getLicenseMixCartActive()
+    {
+        $license = $this->getLicenseMixCart();
+        if ($license->status_id == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Настройки
      */
     public function getSettings()
     {
-        // TODO: Implement getSettings() method.
+        $query = (new Query())->select(['denom', 'comment', 'type', 'value'])
+            ->from(iikoDicconst::tableName())
+            ->leftJoin(iikoPconst::tableName(), iikoDicconst::tableName() . '.id = ' . iikoPconst::tableName() . '.const_id')
+            ->orderBy(iikoDicconst::tableName() . '.id')
+            ->all(\Yii::$app->db_api);
+
+        $result = [];
+        foreach ($query as $row) {
+            $r = [
+                'name' => (string)$row['denom'],
+                'comment' => (string)$row['comment'],
+                'type' => (int)$row['type'],
+            ];
+            switch ($row['type']) {
+                case 1:
+                    $r['value'] = (int)$row['value'];
+                    break;
+                case 2:
+                    $r['value'] = (string)$row['value'];
+                    break;
+                case 3:
+                    $r['value'] = str_pad('', strlen($row['value']), '*');
+                    break;
+                default:
+                    $r['value'] = (string)$row['value'];
+            }
+            $result[] = $r;
+        }
+        return $result;
+    }
+
+    /**
+     * Установка настроек
+     * @param $params
+     * @return array|mixed
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function setSettings($params)
+    {
+        if (empty($params)) {
+            throw new BadRequestHttpException('Empty params settings');
+        }
+        foreach ($params as $key => $value) {
+            if ($model = iikoDicconst::findOne(['denom' => $key])) {
+                $pmodel = iikoPconst::findOne(['const_id' => $model->id, 'org' => $this->user->organization->id]);
+                if (empty($pmodel)) {
+                    $pmodel = new iikoPconst([
+                        'const_id' => $model->id,
+                        'org' => $this->user->organization->id
+                    ]);
+                }
+                $pmodel->value = (string)$value;
+                if (!$pmodel->validate() || !$pmodel->save()) {
+                    throw new ValidationException($pmodel->getFirstErrors());
+                }
+            } else {
+                throw new BadRequestHttpException('Not found ' . $key . ' param!!!');
+            }
+        }
+        return $this->getSettings();
     }
 
     /**
@@ -51,9 +128,8 @@ class iikoService extends WebApi implements ServiceInterface
                 }
             }
         }
-
         return [
-            'waiting' => (int) iikoWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
+            'waiting' => (int)iikoWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
             'not_formed' => $result
         ];
     }

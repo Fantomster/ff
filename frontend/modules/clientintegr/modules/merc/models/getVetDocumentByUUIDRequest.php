@@ -223,7 +223,6 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             return $doc;
         }
 
-
         $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
         $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
         $this->issueDate = $doc->ns2issueDate->__toString();
@@ -332,7 +331,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
-                'value' => isset($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
+                'value' => !empty($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
             ],
             [
                 'label' => 'Общее количество единиц упаковки для производственной партии',
@@ -427,6 +426,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
 
     public function getDate($date_raw)
     {
+
         if(isset($date_raw->ns2informalDate))
             return $date_raw->ns2informalDate->__toString();
 

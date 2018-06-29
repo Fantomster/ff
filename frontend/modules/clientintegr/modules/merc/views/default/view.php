@@ -3,6 +3,13 @@
 use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
 use yii\helpers\Html;
+use api\common\models\merc\mercService;
+
+?>
+<?php
+$lic = mercService::getLicense();
+$timestamp_now=time();
+($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
 ?>
 <section class="content-header">
     <h1>
@@ -37,12 +44,21 @@ use yii\helpers\Html;
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
+                        <div class="alert alert-success alert-dismissable">
+                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                            <h4>
+                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
+                            </h4>
+                            <?= Yii::$app->session->getFlash('success') ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (Yii::$app->session->hasFlash('error')): ?>
                         <div class="alert alert-danger alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                             <h4>
-                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                                <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
                             </h4>
-                            <?= Yii::$app->session->getFlash('success') ?>
+                            <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
                     <h4>Сведения о ВСД: </h4>
@@ -212,13 +228,17 @@ use yii\helpers\Html;
                         'model' => $document,
                         'attributes' => $attributes,
                     ]) ?>
-                    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED): ?>
+                    <?php
+                    if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED
+                    && (\api\common\models\merc\MercVsd::getType($document->UUID) == 1) && ($lic_merc==1)) { ?>
                         <div class="col-md-12">
-                            <?php  echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                            Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
-                            Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']); ?>
+                            <?php
+                            echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
+                            Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
+                            Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']);
+                            ?>
                         </div>
-                    <?php endif; ?>
+                    <?php } ?>
                 </div>
             </div>
         </div>

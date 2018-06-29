@@ -167,11 +167,11 @@ class EComIntegration
                 $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
                 $this->updateQueue($ediFilesQueueID, self::STATUS_HANDLED, '');
             } else {
-                $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file');
+                $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 1');
             }
         } catch (Exception $e) {
             Yii::error($e);
-            $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file');
+            $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
             $transaction->rollback();
             return false;
         }
@@ -325,10 +325,12 @@ class EComIntegration
         $supplierGLN = $simpleXMLElement->SUPPLIER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN]);
         if (!$ediOrganization) {
+            Yii::error('No EDI organization');
             return false;
         }
         $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
         if (!$organization || $organization->type_id != Organization::TYPE_SUPPLIER) {
+            Yii::error('No such organization');
             return false;
         }
         $baseCatalog = $organization->baseCatalog;
@@ -336,7 +338,7 @@ class EComIntegration
             $baseCatalog = new Catalog();
             $baseCatalog->type = Catalog::BASE_CATALOG;
             $baseCatalog->supp_org_id = $organization->id;
-            $baseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);;
+            $baseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
             $baseCatalog->created_at = new Expression('NOW()');
         }
         $currency = Currency::findOne(['iso_code' => $simpleXMLElement->CURRENCY]);

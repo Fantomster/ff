@@ -9,6 +9,7 @@ use common\models\User;
 use common\models\Role;
 use common\models\Profile;
 use common\models\Organization;
+use common\models\Job;
 
 /**
  * UserSearch represents the model behind the search form about `common\models\User`.
@@ -20,6 +21,12 @@ class UserSearch extends User {
     public $phone;
     public $org_name;
     public $org_type_id;
+    public $sms_allow;
+    public $gender;
+    public $email_allow;
+    public $email;
+    public $job;
+    public $job_name;
 
     /**
      * @inheritdoc
@@ -33,8 +40,8 @@ class UserSearch extends User {
      */
     public function rules() {
         return [
-            [['id', 'status', 'organization_id'], 'integer'],
-            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id'], 'safe'],
+            [['id', 'status', 'organization_id', 'sms_allow', 'gender', 'email_allow', 'job'], 'integer'],
+            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id', 'job_name'], 'safe'],
         ];
     }
 
@@ -60,6 +67,7 @@ class UserSearch extends User {
         $profileTable = Profile::tableName();
         $roleTable = Role::tableName();
         $organizationTable = Organization::tableName();
+        $jobTable = Job::tableName();
 
         $query = User::find();
         $query->joinWith(['role', 'profile', 'organization']);
@@ -98,6 +106,22 @@ class UserSearch extends User {
             'asc' => ["$organizationTable.type_id" => SORT_ASC],
             'desc' => ["$organizationTable.type_id" => SORT_DESC],
         ];
+        $dataProvider->sort->attributes['gender'] = [
+            'asc' => ["$profileTable.gender" => SORT_ASC],
+            'desc' => ["$profileTable.gender" => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['job'] = [
+            'asc' => ["$jobTable.name_job" => SORT_ASC],
+            'desc' => ["$jobTable.name_job" => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['sms_allow'] = [
+            'asc' => ["$profileTable.sms_allow" => SORT_ASC],
+            'desc' => ["$profileTable.sms_allow" => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['email_allow'] = [
+            'asc' => ["$profileTable.email_allow" => SORT_ASC],
+            'desc' => ["$profileTable.email_allow" => SORT_DESC],
+        ];
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -117,7 +141,11 @@ class UserSearch extends User {
                 ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
                 ->andFilterWhere(['like', "$organizationTable.type_id", $this->org_type_id])
                 ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
-                ->andFilterWhere(['like', "$profileTable.phone", $this->phone]);
+                ->andFilterWhere(['like', "$profileTable.sms_allow", $this->sms_allow])
+                ->andFilterWhere(['like', "$profileTable.phone", $this->phone])
+                ->andFilterWhere(['like', "$profileTable.gender", $this->gender])
+                ->andFilterWhere(['like', "$profileTable.job_id", $this->job])
+                ->andFilterWhere(['like', "$jobTable.name_job", $this->job_name]);
 
         return $dataProvider;
     }

@@ -162,16 +162,16 @@ class SiteController extends Controller {
 
     public function actionGetFile($id) {
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
-        $file = '_prufy_billi_yapfiles.ru.gif';
-        $size = $this->getRemoteFileSize('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/_prufy_billi_yapfiles.ru.gif');
-        header('Content-Type: image/gif');
+        $file = '38f12ccb98e2fa8a8e3b7c9885695db5.gif';
+        $size = $this->getRemoteFileSize('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/38f12ccb98e2fa8a8e3b7c9885695db5.gif');
+//        header('Content-Type: image/gif');
         header('Content-Disposition: attachment; filename=' . $file);
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
         header('Content-Length: ' . $size);
         flush();
-        readfile('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/_prufy_billi_yapfiles.ru.gif');
+        readfile('https://s3-eu-west-1.amazonaws.com/fkeeper/bill/38f12ccb98e2fa8a8e3b7c9885695db5.gif');
     }
 
 }

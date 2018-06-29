@@ -2,16 +2,18 @@
 
 namespace api_web\classes;
 
-use api\common\models\iiko\iikoWaybill;
 use api_web\components\WebApi;
 use api_web\modules\integration\interfaces\ServiceInterface;
+use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
+use api_web\modules\integration\modules\iiko\models\iikoService;
 use yii\base\Exception;
 
 class IntegrationWebApi extends WebApi
 {
 
     private static $service = [
-        \api_web\modules\integration\modules\iiko\models\iikoService::class
+        iikoService::class,
+        rkeeperService::class
     ];
 
     /**
@@ -32,12 +34,17 @@ class IntegrationWebApi extends WebApi
                 throw new Exception(get_class($service) . ' not implements ServiceInterface');
             }
 
+            $license = $this->prepareLicense($service->getLicenseMixCart());
+            $license['status'] = $service->getLicenseMixCartActive() === true ? 'Активна' : "Не активна";
+
             $result[] = [
                 'service' => $service->getServiceName(),
                 'image' => \Yii::$app->params['web'] . 'images/' . $service->getServiceName() . '.jpg',
-                'license' => $this->prepareLicense($service->getLicenseMixCart()),
+                'license' => $license,
                 'options' => $service->getOptions()
             ];
+
+
         }
         return ['services' => $result];
     }
@@ -51,42 +58,15 @@ class IntegrationWebApi extends WebApi
     {
         if (!empty($model)) {
             return [
-                "status" => $model->status_id == 2 ? 'Активна' : "Не активна",
                 "from" => date('d.m.Y', strtotime($model->fd)),
                 "to" => date('d.m.Y', strtotime($model->td)),
                 "number" => $model->id
             ];
         }
         return [
-            "status" => "Не активна",
             "from" => null,
             "to" => null,
             "number" => null
         ];
-    }
-
-
-    /**
-     * iiko: Список Накладных к заказу
-     * @param array $post
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws \Exception
-     */
-    public function getOrderWaybillsList(array $post): array
-    {
-        $orderID = $post['order_id'];
-        $iikoWaybill = iikoWaybill::find()->where(['order_id' => $orderID])->andWhere('status_id > 1')->all();
-        $arr = [];
-        $i = 0;
-        foreach ($iikoWaybill as $item){
-            $arr[$i]['num_code'] = $item->num_code;
-            $arr[$i]['agent_denom'] = $item->agent->denom ?? 'Не указано';
-            $arr[$i]['store_denom'] = $item->store->denom ?? 'Не указано';
-            $arr[$i]['doc_date'] = \Yii::$app->formatter->format($item->doc_date, 'date');
-            $arr[$i]['status_denom'] = $item->status->denom;
-            $i++;
-        }
-        return $arr;
     }
 }

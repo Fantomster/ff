@@ -238,7 +238,20 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         $url = $this->getUploadPath($attribute);
         $resourceName = $this->getResourceName($url);
         $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
+        //return $resultUrl;
         return str_replace("fkeeper.s3.amazonaws.com", "upload.mixcart.ru", $resultUrl); //wtf hardcode, to be fixed
+    }
+
+    /**
+     * Returns file url for the attribute.
+     * @param string $attribute
+     * @return string|null
+     */
+    public function getRawUploadUrl($attribute) {
+        $url = $this->getUploadPath($attribute);
+        $resourceName = $this->getResourceName($url);
+        $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
+        return $resultUrl;
     }
 
     private $_resourceNames = [];    
@@ -325,5 +338,11 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         $path = $this->getUploadPath($attribute, $old);
         $this->resourceManager->delete($this->getResourceName($path));
     }
-
+    
+    public function beforeDelete() {
+        $attribute = $this->attribute;
+        if ($this->unlinkOnDelete && $attribute) {
+            $this->delete($attribute);
+        }
+    }
 }

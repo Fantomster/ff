@@ -22,7 +22,7 @@ class m180618_153952_add_column_settings_rkws extends Migration
         $this->insert('rk_dicconst', [
             'denom' => 'column_number_invoice',
             'def_value' => '1',
-            'comment' => 'Состояние колноки "№ накладной"',
+            'comment' => 'Состояние колонки "№ накладной"',
             'type' => '1',
             'is_active' => '1',
         ]);
@@ -33,7 +33,7 @@ class m180618_153952_add_column_settings_rkws extends Migration
      */
     public function safeDown()
     {
-        $this->delete('rk_dicconst', ['id' => 12]);
+        $this->delete('rk_dicconst', ['denom' => 'column_number_invoice']);
     }
 
 }

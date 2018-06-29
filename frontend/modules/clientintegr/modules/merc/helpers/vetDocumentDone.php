@@ -78,12 +78,12 @@ class vetDocumentDone extends Component
                            <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
                         </vet:productItem>
                         <vet:volume>'.(($this->type == self::RETURN_ALL) ? 0 :
-                (isset($this->rejected_data['volume']) ? abs($this->rejected_data['volume']) : $doc->ns2batch->ns2volume)).'</vet:volume>
+                (isset($this->rejected_data['volume']) ? $this->mb_abs($this->rejected_data['volume']) : $doc->ns2batch->ns2volume)).'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>';
 
-                        if(isset($doc->ns2batch->ns2packingList))
+                        if(!empty($doc->ns2batch->ns2packingList))
                         $xml .= '<vet:packingList>
                            <com:packingForm>
                               <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
@@ -93,11 +93,12 @@ class vetDocumentDone extends Component
                         $xml .= '<vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
                         <vet:dateOfProduction>'.
                           $this->getDate($doc->ns2batch->ns2dateOfProduction)
-                        .'</vet:dateOfProduction>
-                        <vet:expiryDate>'.
+                        .'</vet:dateOfProduction>';
+                        if(isset($doc->ns2batch->ns2expiryDate))
+                        $xml .='<vet:expiryDate>'.
                             $this->getDate($doc->ns2batch->ns2expiryDate)
-                        .'</vet:expiryDate>
-                        <vet:perishable>'.$doc->ns2batch->ns2perishable->__toString().'</vet:perishable>
+                        .'</vet:expiryDate>';
+                        $xml .='<vet:perishable>'.$doc->ns2batch->ns2perishable->__toString().'</vet:perishable>
                         <vet:countryOfOrigin>
                            <base:uuid>'.$doc->ns2batch->ns2countryOfOrigin->bsuuid->__toString().'</base:uuid>
                         </vet:countryOfOrigin>';
@@ -188,6 +189,9 @@ class vetDocumentDone extends Component
 
     public function getDate($date_raw)
     {
+        if(isset($date_raw->ns2informalDate))
+            return '<vet:informalDate>'.$date_raw->ns2informalDate.'</vet:informalDate>';
+
         $first_date = '<vet:firstDate>
         <base:year>'.$date_raw->ns2firstDate->bsyear.'</base:year>
         <base:month>'.$date_raw->ns2firstDate->bsmonth.'</base:month>
@@ -251,12 +255,12 @@ class vetDocumentDone extends Component
                         <vet:productItem>
                            <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
                         </vet:productItem>
-                        <vet:volume>'.(($this->type == self::RETURN_ALL) ? 0 : abs($doc->ns2batch->ns2volume - $this->rejected_data['volume'])).'</vet:volume>
+                        <vet:volume>'.(($this->type == self::RETURN_ALL) ? $doc->ns2batch->ns2volume : $this->mb_abs($doc->ns2batch->ns2volume - $this->rejected_data['volume'])).'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>';
 
-                        if(isset($doc->ns2batch->ns2packingList))
+                        if(!empty($doc->ns2batch->ns2packingList))
                             $xml .= '<vet:packingList>
                            <com:packingForm>
                               <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
@@ -266,11 +270,12 @@ class vetDocumentDone extends Component
                         $xml .= '<vet:packingAmount>'.$doc->ns2batch->ns2packingAmount->__toString().'</vet:packingAmount>
                         <vet:dateOfProduction>'.
                           $this->getDate($doc->ns2batch->ns2dateOfProduction)
-                        .'</vet:dateOfProduction>
-                        <vet:expiryDate>'.
+                        .'</vet:dateOfProduction>';
+                        if(isset($doc->ns2batch->ns2expiryDate))
+                        $xml .= '<vet:expiryDate>'.
                             $this->getDate($doc->ns2batch->ns2expiryDate)
-                        .'</vet:expiryDate>
-                        <vet:perishable>'.$doc->ns2batch->ns2perishable->__toString().'</vet:perishable>
+                        .'</vet:expiryDate>';
+                        $xml .= '<vet:perishable>'.$doc->ns2batch->ns2perishable->__toString().'</vet:perishable>
                         <vet:countryOfOrigin>
                            <base:uuid>'.$doc->ns2batch->ns2countryOfOrigin->bsuuid->__toString().'</base:uuid>
                         </vet:countryOfOrigin>';
@@ -349,5 +354,10 @@ class vetDocumentDone extends Component
                   </merc:returnedDelivery>';
 
                  return $xml;
+    }
+
+    private function mb_abs($number)
+    {
+        return str_replace('-','',$number);
     }
 }

@@ -4,8 +4,14 @@ use yii\helpers\Html;
 
 //echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') ';
 $timestamp_now=time();
-($lic->status_id==1) && ($timestamp_now<=(time($lic->td))) ? $lic_merc=1 : $lic_merc=0;
-if ($lic_merc==0) {
+$sub0 = explode(' ',$lic->td);
+$sub1 = explode('-',$sub0[0]);
+$lic->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+if ($lic->status_id==0) $lic_merc=0;
+if (($lic->status_id==1) and ($timestamp_now<=(strtotime($lic->td)))) $lic_merc=3;
+if (($lic->status_id==1) and (($timestamp_now+14*86400)>(strtotime($lic->td)))) $lic_merc=2;
+if (($lic->status_id==1) and ($timestamp_now>(strtotime($lic->td)))) $lic_merc=1;
+if ($lic_merc!=3) {
     ?>
     <div class="box box-info">
         <div class="box-header with-border">
@@ -14,8 +20,14 @@ if ($lic_merc==0) {
                     <p>
                         Состояние лицензии:
                         <?php
-                        print " Лицензия ВЕТИС Меркурий: ID ".$lic->id." <strong><span style=\"color:#dd4b39\">Не активна. </span></strong>";
-                        print "Пожалуйста, обратитесь к вашему менеджеру MixCart.";
+                        switch($lic_merc) {
+                            case 0: print "Лицензия ВЕТИС Меркурий: ID ".$lic->id." <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart."; break;
+                            case 1: print "Лицензия ВЕТИС Меркурий: ID ".$lic->id." <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с ".$lic->td.".</br>";
+                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart."; break;
+                            case 2: print "Лицензия ВЕТИС Меркурий: ID ".$lic->id." <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по ".$lic->td."). </br>";
+                                print "Пожалуйста, обратитесь к вашему менеджеру MixCart."; break;
+                        }
                         ?>
                     </p>
                 </div>

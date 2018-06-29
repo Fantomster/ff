@@ -158,6 +158,7 @@ $gridColumns = [
     <div class="catalog-index">
         <div class="box-header with-border">
             <div class="box-title pull-left">
+                <?php print "<p>Последнее обновление списка лицензий UCS: <strong>".$data_last_license."</strong></p>"; ?>
 <?= Html::a('<i class="fa fa-sign-in"></i> Обновить доступы', ['getws'], ['class' => 'btn btn-md fk-button']) ?>
             </div>
         </div>
@@ -173,8 +174,11 @@ echo ExportMenu::widget([
     'batchSize' => 200,
     'timeout' => 0,
     'exportConfig' => [
-        ExportMenu::FORMAT_PDF => false,
+        ExportMenu::FORMAT_HTML => false,
+        ExportMenu::FORMAT_TEXT => false,
         ExportMenu::FORMAT_EXCEL => false,
+        ExportMenu::FORMAT_PDF => false,
+        ExportMenu::FORMAT_CSV => false,
         ExportMenu::FORMAT_EXCEL_X => [
             'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
             'icon' => 'floppy-remove',
@@ -184,7 +188,7 @@ echo ExportMenu::widget([
             'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
             'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'extension' => 'xlsx',
-            'writer' => 'Excel2007'
+            'writer' => 'Xlsx'
         ],
     ],
 ]);

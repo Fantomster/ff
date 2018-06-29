@@ -123,8 +123,8 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
                         '2' => Yii::t('message', 'frontend.views.vendor.customer_wait', ['ru' => 'Ожидание от заказчика']),
                         '3' => Yii::t('message', 'frontend.views.vendor.in_process', ['ru' => 'Выполняется']),
                         '4' => Yii::t('message', 'frontend.views.vendor.complete', ['ru' => 'Завершен']),
-                        '5' => Yii::t('message', 'frontend.views.vendor.canc_by_cust', ['ru' => 'Отменен заказчиком']),
-                        '6' => Yii::t('message', 'frontend.views.vendor.canc_by_vendor', ['ru' => 'Отменен поставщиком']),
+                        '5' => Yii::t('message', 'frontend.views.vendor.canc_by_vendor', ['ru' => 'Отменен поставщиком']),
+                        '6' => Yii::t('message', 'frontend.views.vendor.canc_by_cust', ['ru' => 'Отменен заказчиком']),
                     ], ['prompt' => Yii::t('message', 'frontend.views.vendor.all_four', ['ru' => 'Все']), 'class' => 'form-control', 'id' => 'filter_status',
                         'options' => [\Yii::$app->request->get('filter_status') => ["Selected" => true]]])
                     ?>

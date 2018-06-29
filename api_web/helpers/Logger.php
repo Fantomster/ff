@@ -54,14 +54,12 @@ class Logger
      */
     public static function request($request)
     {
-        if (!empty(self::get()['request_at'])) {
-            throw new \Exception('Request already recorded.', 999);
+        if (empty(self::get()['request_at']) || self::get()['request_at'] == '0000-00-00 00:00:00') {
+            self::update([
+                'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
+                'request_at' => new Expression('NOW()')
+            ]);
         }
-
-        self::update([
-            'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
-            'request_at' => new Expression('NOW()')
-        ]);
     }
 
     /**
@@ -105,7 +103,7 @@ class Logger
             }
             self::update([
                 'user_id' => $user->id,
-                'organization_id' => $user->organization->id
+                'organization_id' => $user->organization->id ?? null
             ]);
         }
     }

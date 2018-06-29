@@ -23,7 +23,7 @@ class rejectedForm extends Model {
     {
         return [
             [['volume', 'reason', 'description'], 'required'],
-            [['volume'], 'number'],
+            [['volume'], 'double'],
             [['reason', 'description'], 'string', 'max' => 255],
             [['uuid'], 'safe']
         ];

@@ -214,6 +214,7 @@ class ClientController extends DefaultController {
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
                     User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
+                    $user->wipeNotifications();
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     //Yii::$app->db->createCommand($query)->queryScalar();
                     return $this->renderAjax('settings/_success', ['message' => $message]);

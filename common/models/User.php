@@ -938,4 +938,25 @@ class User extends \amnah\yii2\user\models\User {
         return $result;
     }
 
+    public function wipeNotifications() {
+        $toBeWiped = [
+            'order_created' => false,
+            'order_canceled' => false,
+            'order_changed' => false,
+            'order_processing' => false,
+            'order_done' => false,
+            'request_accept' => false,
+            'receive_employee_email' => false,
+        ];
+        $allEmailNotifications = EmailNotification::findAll(['user_id' => $this->id]);
+        foreach ($allEmailNotifications as $emailNotification) {
+            $emailNotification->load(['EmailNotification' => $toBeWiped]);
+            $emailNotification->save();
+        }
+        $allSmsNotifications = SmsNotification::findAll(['user_id' => $this->id]);
+        foreach ($allSmsNotifications as $smsNotification) {
+            $smsNotification->load(['SmsNotification' => $toBeWiped]);
+            $smsNotification->save();
+        }
+    }
 }

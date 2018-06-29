@@ -277,7 +277,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         //ajax
         if ($model->load($post) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
+            $test = ActiveForm::validate($model);
+            return $test;
         }
 
         if ($model->load($post) && $model->validate()) {

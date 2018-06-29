@@ -111,18 +111,32 @@ class vetDocumentsChangeList extends Model
     {
         $api = mercApi::getInstance();
 
-        $result = $api->getVetDocumentChangeList($last_visit);
+        if(isset($last_visit))
+            $result = $api->getVetDocumentChangeList($last_visit);
+        else
+            $result = $api->getVetDocumentList();
 
         if(!empty($result))
-            if($result->envBody)
-                $this->updateDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+            if(isset($last_visit)) {
+                if (isset($result->envBody))
+                    $this->updateDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+                else
+                    $this->updateDocumentsList($result->soapBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+            }
             else
-                $this->updateDocumentsList($result->soapBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentChangesListResponse->ns2vetDocumentList->ns2vetDocument);
+            {
+                if (isset($result->envBody))
+                    $this->updateDocumentsList($result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentListResponse->ns2vetDocumentList->ns2vetDocument);
+                else
+                    $this->updateDocumentsList($result->soapBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentListResponse->ns2vetDocumentList->ns2vetDocument);
 
-    }
+            }
+        }
 
     public function getDate($date_raw)
     {
+        if(isset($date_raw->ns2informalDate))
+            return $date_raw->ns2informalDate;
         $first_date =  $date_raw->ns2firstDate->bsyear.'-'.$date_raw->ns2firstDate->bsmonth.'-'.$date_raw->ns2firstDate->bsday;
         $first_date .= (isset($date_raw->ns2firstDate->hour)) ? ' '.$date_raw->ns2firstDate->hour.":00:00" : "";
 

@@ -11,6 +11,7 @@ use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -125,9 +126,11 @@ class OrganizationController extends DefaultController {
 
     public function actionNotifications()
     {
+        $model = new RelationUserOrganization();
+        $query = $model::find()->where(['user_id'=>Yii::$app->user->id]);
         if(Yii::$app->request->isAjax)
         {
-            $emailNotification = EmailNotification::findOne(RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id);
+            $emailNotification = EmailNotification::findOne(['rel_user_org_id'=>$model::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>Yii::$app->request->post('id_org')])->id]);
             if($emailNotification)
             {
                 $emailNotification->order_created = ($emailNotification->order_created)? 0: 1;
@@ -142,7 +145,15 @@ class OrganizationController extends DefaultController {
             }
 
         }
-        return $this->actionClients();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        return $this->render('notofications_clients',['dataProvider'=>$dataProvider]);
     }
 
 

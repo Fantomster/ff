@@ -70,6 +70,9 @@ class OrderController extends DefaultController {
                             'ajax-show-products',
                             'ajax-add-to-order',
                             'save-selected-orders',
+                            'upload-attachment',
+                            'get-attachment',
+                            'delete-attachment',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -116,9 +119,6 @@ class OrderController extends DefaultController {
                             'complete-obsolete',
                             'pjax-cart',
                             'test',
-                            'upload-attachment',
-                            'get-attachment',
-                            'delete-attachment',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2334,7 +2334,7 @@ class OrderController extends DefaultController {
                     [
                         'name' => $uploadedFile->name,
                         'size' => $uploadedFile->size,
-                        'url' => Url::to(['order/get-attachment', 'id' => $attachment->id]),
+                        'url' => Url::to(['order/get-attachment', 'id' => $attachment->id], true),
                         'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
                         'deleteType' => 'POST',
                     ],
@@ -2347,7 +2347,7 @@ class OrderController extends DefaultController {
             $files[] = [
                 'name' => $attachment->file,
                 'size' => $attachment->size,
-                'url' => Url::to(['order/get-attachment', 'id' => $attachment->id]),
+                'url' => Url::to(['order/get-attachment', 'id' => $attachment->id], true),
                 'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
                 'deleteType' => 'POST',
             ];
@@ -2364,4 +2364,5 @@ class OrderController extends DefaultController {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         return $attachment->delete();
     }
+    
 }

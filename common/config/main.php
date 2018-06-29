@@ -148,7 +148,6 @@ return [
             'baseUrl' => '//app.mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-
             'rules' => [
                 'product/<id:\d+>' => 'site/product',
                 'restaurant/<id:\d+>' => 'site/restaurant',
@@ -245,6 +244,9 @@ return [
         // enter other module properties if needed
         // for advanced/personalized configuration
         // (refer module properties available below)
-        ]
+        ],
+        'pdfjs' => [
+            'class' => '\yii2assets\pdfjs\Module',
+        ],
     ],
 ];

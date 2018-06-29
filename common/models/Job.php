@@ -6,7 +6,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
- * This is the model class for table "job".
+ * This is the model class for table "jobs".
  *
  * @property integer $id
  * @property string $name_job
@@ -65,7 +65,7 @@ class Job extends \yii\db\ActiveRecord
                 ->where(['organization_type_id' => 2])
                 ->asArray()
                 ->all();
-
+        $models[]=['id'=>'0','name_allow'=>'Не указано'];
         return 
 //        ArrayHelper::merge(
 //                        [null => null], 
@@ -84,7 +84,7 @@ class Job extends \yii\db\ActiveRecord
             ->where(['organization_type_id' => 1])
             ->asArray()
             ->all();
-
+        $models[]=['id'=>'0','name_allow'=>'Не указано'];
         return
 //        ArrayHelper::merge(
 //                        [null => null],

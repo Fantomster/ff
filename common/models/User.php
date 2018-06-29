@@ -35,6 +35,7 @@ use yii\web\BadRequestHttpException;
  * @property string $first_logged_at
  * @property string $language
  * @property integer $job_id
+ * @property string $email
  *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
@@ -936,6 +937,11 @@ class User extends \amnah\yii2\user\models\User {
             ];
         }
         return $result;
+    }
+
+    public function getEmail()
+    {
+        return $this->email;
     }
 
 }

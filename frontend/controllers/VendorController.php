@@ -274,6 +274,7 @@ class VendorController extends DefaultController
                     }
 
                     $user->setRegisterAttributes($user->role_id)->save();
+                    $profile->email = $user->getEmail();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
@@ -287,6 +288,7 @@ class VendorController extends DefaultController
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
                         $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
                         if($success){
+
                             $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                             $existingUser->setRole($post['User']['role_id'])->save();
                             $message = Yii::t('app', 'Пользователь добавлен!');
@@ -319,9 +321,10 @@ class VendorController extends DefaultController
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
+            $email = $user->email;
             if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 $profile->load($post);
-
+                
                 if ($user->validate() && $profile->validate()) {
 
                     if (!in_array($user->role_id, User::getAllowedRoles($oldRole))) {
@@ -329,8 +332,9 @@ class VendorController extends DefaultController
                     } elseif ($user->role_id == Role::ROLE_SUPPLIER_EMPLOYEE && $oldRole == Role::ROLE_SUPPLIER_MANAGER && $user->organization->managersCount == 1) {
                         $user->role_id = $oldRole;
                     }
-
+                    $user->email = $email;
                     $user->save();
+                    $profile->email = $user->getEmail();
                     $profile->save();
                     User::updateRelationUserOrganization($user->id, $currentUserOrganizationID, $post['User']['role_id']);
 
@@ -1397,6 +1401,7 @@ class VendorController extends DefaultController
                             try {
                                 $user->organization_id = $rel2[0]->organization_id;
                                 $user->role_id = $rel2[0]->role_id;
+                                $profile->email = $user->getEmail();
                                 $user->save();
                                 User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
                                 Yii::$app->user->logout();

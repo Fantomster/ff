@@ -82,7 +82,7 @@ class ClientController extends Controller {
      */
     public function actionPostavs() {
         $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE]);
 
         return $this->render('postavs', [
             'searchModel' => $searchModel,
@@ -96,7 +96,7 @@ class ClientController extends Controller {
      */
     public function actionRestors() {
         $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_ONE_S_INTEGRATION]);
 
         return $this->render('restors', [
             'searchModel' => $searchModel,
@@ -172,6 +172,7 @@ class ClientController extends Controller {
                     throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.moon_three', ['ru'=>'Добавление пользователей в эту организацию отключено во имя Луны!']));
                 }
                 $user->save();
+                $profile->email = $user->getEmail();
                 $profile->save();
                 return $this->redirect(['client/view', 'id' => $user->id]);
             } else {
@@ -206,6 +207,9 @@ class ClientController extends Controller {
                 return $this->redirect(['restors']);
                 break;
             case Role::ROLE_RESTAURANT_EMPLOYEE:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_ONE_S_INTEGRATION:
                 return $this->redirect(['restors']);
                 break;
             case Role::ROLE_SUPPLIER_MANAGER:

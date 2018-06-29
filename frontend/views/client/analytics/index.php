@@ -8,8 +8,9 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 use dosamigos\chartjs\ChartJs;
+use kartik\form\ActiveForm;
 
-$this->title = Yii::t('message', 'frontend.views.client.anal.anal', ['ru'=>'Аналитика']);
+$this->title = Yii::t('message', 'frontend.views.client.anal.anal', ['ru' => 'Аналитика']);
 $this->registerCss('
 .box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {
     border-left: 0px;
@@ -51,340 +52,419 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 }
 ');
 ?>
-<section class="content-header">
-    <h1>
-        <i class="fa fa-signal"></i> <?= Yii::t('message', 'frontend.views.client.anal.anal_two.', ['ru'=>'Аналитика']) ?>
-        <small><?= Yii::t('message', 'frontend.views.client.anal.anal_three', ['ru'=>'Аналитика в одном месте']) ?></small>
-    </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
-        'links' => [
-            Yii::t('message', 'frontend.views.client.anal.anal_four', ['ru'=>'Аналитика'])
-        ],
-    ])
-    ?>
-    <?php
-    $json_vendors_labels = json_encode($vendors_labels);
-    $json_vendors_total_price = json_encode($vendors_total_price);
-    $json_vendors_colors = json_encode($vendors_colors);
-    ?>
-</section>
-<section class="content">
-    <div class="box box-info">
-        <!-- /.box-header -->
-        <div class="box-body order-history">
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box bg-total-price">
-                    <div class="info-box-content">
-                        <span class="info-box-number"><?= $header_info_zakaz; ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.total', ['ru'=>'Всего заказов']) ?></span>
+    <section class="content-header">
+        <h1>
+            <i class="fa fa-signal"></i> <?= Yii::t('message', 'frontend.views.client.anal.anal_two.', ['ru' => 'Аналитика']) ?>
+            <small><?= Yii::t('message', 'frontend.views.client.anal.anal_three', ['ru' => 'Аналитика в одном месте']) ?></small>
+        </h1>
+        <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
+            ],
+            'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
+            'links' => [
+                Yii::t('message', 'frontend.views.client.anal.anal_four', ['ru' => 'Аналитика'])
+            ],
+        ])
+        ?>
+        <?php
+        $json_vendors_labels = json_encode($vendors_labels);
+        $json_vendors_total_price = json_encode($vendors_total_price);
+        $json_vendors_colors = json_encode($vendors_colors);
+        ?>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+            <!-- /.box-header -->
+            <div class="box-body order-history">
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-total-price">
+                        <div class="info-box-content">
+                            <span class="info-box-number"><?= $header_info_zakaz; ?></span>
+                            <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.total', ['ru' => 'Всего заказов']) ?></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box bg-total-price">
-                    <div class="info-box-content">
-                        <span class="info-box-number"><?= $header_info_purchases; ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.total_buy', ['ru'=>'Всего Закупок']) ?></span>
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-total-price">
+                        <div class="info-box-content">
+                            <span class="info-box-number"><?= $header_info_purchases; ?></span>
+                            <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.total_buy', ['ru' => 'Всего Закупок']) ?></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box bg-total-price">
-                    <div class="info-box-content">
-                        <span class="info-box-number"><?= $header_info_suppliers ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.total_vendors', ['ru'=>'Всего поставщиков']) ?></span>
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-total-price">
+                        <div class="info-box-content">
+                            <span class="info-box-number"><?= $header_info_suppliers ?></span>
+                            <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.total_vendors', ['ru' => 'Всего поставщиков']) ?></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box bg-total-price">
-                    <div class="info-box-content">
-                        <span class="info-box-number"><?= $header_info_items; ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.positions', ['ru'=>'Позиций']) ?></span>
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-total-price">
+                        <div class="info-box-content">
+                            <span class="info-box-number"><?= $header_info_items; ?></span>
+                            <span class="info-box-text"><?= Yii::t('message', 'frontend.views.client.anal.positions', ['ru' => 'Позиций']) ?></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-2 col-md-3 col-sm-6">
-                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.vendor', ['ru'=>'Поставщик']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-<?= Html::dropDownList('filter_supplier', null, $filter_get_supplier, ['prompt' => Yii::t('message', 'frontend.views.client.anal.all', ['ru'=>'Все поставщики']), 'class' => 'form-control', 'id' => 'filter_supplier'])
-?>        
-            </div>
-            <div class="col-lg-2 col-md-3 col-sm-6">
-                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.employee', ['ru'=>'Сотрудник']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-<?= Html::dropDownList('filter_employee', null, $filter_get_employee, ['prompt' => Yii::t('message', 'frontend.views.client.anal.all_employees', ['ru'=>'Все сотрудники']), 'class' => 'form-control', 'id' => 'filter_employee'])
-?>        
-            </div>
-            <div class="col-lg-2 col-md-3 col-sm-6">
-                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.status', ['ru'=>'Статус заказа']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                <?=
-                Html::dropDownList('filter_status', null, [
-                    '1' => Yii::t('message', 'frontend.views.client.anal.waiting', ['ru'=>'Ожидание от поставщика']),
-                    '2' => Yii::t('message', 'frontend.views.client.anal.client_waiting', ['ru'=>'Ожидание от заказчика']),
-                    '3' => Yii::t('message', 'frontend.views.client.anal.in_process', ['ru'=>'Выполняется']),
-                    '4' => Yii::t('message', 'frontend.views.client.anal.ready', ['ru'=>'Завершен']),
-                    '5' => Yii::t('message', 'frontend.views.client.anal.vendor_cancel', ['ru'=>'Отменен поставщиком']),
-                    '6' => Yii::t('message', 'frontend.views.client.anal.client_cancel', ['ru'=>'Отменен заказчиком']),
-                        ], ['prompt' => Yii::t('message', 'frontend.views.client.anal.all_two', ['ru'=>'Все']), 'class' => 'form-control', 'id' => 'filter_status'])
-                ?>         
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-4">
-                <?php
-                $layout = <<< HTML
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.vendor', ['ru' => 'Поставщик']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <?= Html::dropDownList('filter_supplier', null, $filter_get_supplier, ['prompt' => Yii::t('message', 'frontend.views.client.anal.all', ['ru' => 'Все поставщики']), 'class' => 'form-control', 'id' => 'filter_supplier'])
+                    ?>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.employee', ['ru' => 'Сотрудник']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <?= Html::dropDownList('filter_employee', null, $filter_get_employee, ['prompt' => Yii::t('message', 'frontend.views.client.anal.all_employees', ['ru' => 'Все сотрудники']), 'class' => 'form-control', 'id' => 'filter_employee'])
+                    ?>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.status', ['ru' => 'Статус заказа']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <?=
+                    Html::dropDownList('filter_status', null, [
+                        '1' => Yii::t('message', 'frontend.views.client.anal.waiting', ['ru' => 'Ожидание от поставщика']),
+                        '2' => Yii::t('message', 'frontend.views.client.anal.client_waiting', ['ru' => 'Ожидание от заказчика']),
+                        '3' => Yii::t('message', 'frontend.views.client.anal.in_process', ['ru' => 'Выполняется']),
+                        '4' => Yii::t('message', 'frontend.views.client.anal.ready', ['ru' => 'Завершен']),
+                        '5' => Yii::t('message', 'frontend.views.client.anal.client_cancel', ['ru' => 'Отменен заказчиком']),
+                        '6' => Yii::t('message', 'frontend.views.client.anal.vendor_cancel', ['ru' => 'Отменен поставщиком']),
+                    ], ['prompt' => Yii::t('message', 'frontend.views.client.anal.all_two', ['ru' => 'Все']), 'class' => 'form-control', 'id' => 'filter_status'])
+                    ?>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4">
+                    <?php
+                    $layout = <<< HTML
                 {input1}
                 {separator}
                 {input2}
 HTML;
-                ?>
-                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.date', ['ru'=>'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                <?=
-                DatePicker::widget([
-                    'name' => 'filter_from_date',
-                    'id' => 'filter-date',
-                    'value' => $filter_from_date,
-                    'type' => DatePicker::TYPE_RANGE,
-                    'name2' => 'filter_to_date',
-                    'value2' => $filter_to_date,
-                    'separator' => '-',
-                    'layout' => $layout,
-                    'pluginOptions' => [
-                        'autoclose' => true,
-                        'format' => 'dd-mm-yyyy',
-                        'todayHighlight' => true,
-                        'endDate' => "0d",
-                    ],
-                    'removeButton' => false,
-                ]);
-                ?>
-            </div>
-            <div class="col-lg-1 col-md-1 col-sm-6" id="alCurrencies">
-                <?php if (count($currencyList) > 0): ?>
-                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                    <?=
-                    Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
                     ?>
-                <?php endif; ?>
-            </div>
-            <div class="col-lg-1 col-md-1 col-sm-2">
-    <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
-            </div>
-        </div>
-    </div>
-<?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
-    <div class="row">
-        <div class="col-md-6">
-            <!-- AREA CHART -->
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.value', ['ru'=>'Объем заказов']) ?></h3>
-
-                    <div class="box-tools pull-right">
-
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body" style="display: block;">
-                    <div class="chart" style="position:relative;height:286px;width:100%;min-height: 286px;">
-                        <?=
-                        ChartJs::widget([
-                            'type' => 'line',
-                            'options' => [
-                                'maintainAspectRatio' => false,
-                                'responsive' => true,
-                                'height' => '282px',
-                            ],
-                            'data' => [
-                                'labels' => $arr_create_at,
-                                'datasets' => [
-                                    [
-                                        'label' => Yii::t('message', 'frontend.views.client.anal.value_orders', ['ru'=>"Объем заказов"]),
-                                        'fillColor' => "rgba(0,0,0,.05)",
-                                        'borderColor' => "#84bf76",
-                                        'data' => $arr_price,
-                                    ]
-                                ],
-                            ],
-                        ]);
-                        ?>
-                    </div>
-                </div>
-                <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
-        </div>
-        <div class="col-md-6">
-            <!-- AREA CHART -->
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.orders', ['ru'=>'Заказы по поставщикам']) ?></h3>
-
-                    <div class="box-tools pull-right">
-
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body" style="display: block;">
-                    <div class="chart" style="position:relative;height:286px;width:100%;min-height: 286px;">
-                        <?=
-                        ChartJs::widget([
-                            'type' => 'bar',
-                            'options' => [
-                                'maintainAspectRatio' => false,
-                                'responsive' => true,
-                                'height' => '282px',
-                            ],
-                            'data' => [
-                                'labels' => $chart_bar_label,
-                                'datasets' => [
-                                    [
-                                        'label' => Yii::t('message', 'frontend.views.client.anal.orders_vendors', ['ru'=>"Заказы по поставщикам"]),
-                                        'data' => $chart_bar_value,
-                                    ]
-                                ],
-                            ],
-                        ]);
-                        ?>
-                    </div>
-                </div>
-                <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
-        </div>
-        <div class="col-md-6">
-            <!-- AREA CHART -->
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.vendor_value', ['ru'=>'Объем по поставщикам']) ?></h3>
-
-                    <div class="box-tools pull-right">
-
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body" style="display: block;">
-                    <script>
-                        var json_vendors_labels_source = <?= $json_vendors_labels ?>;
-                        var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
-                        var json_vendors_colors_source = <?= $json_vendors_colors ?>;
-                    </script>
-                    <div class="col-lg-6 col-md-12 col-sm-12" style="max-height: 352px; overflow-y: scroll">
-                        <ul class="alUl">
-                        <?php foreach ($vendors_colors as $id=>$color): ?>
-                            <li class="alLi" color-id="<?= $id ?>"><span class="alColor" style="background-color: <?= $color ?>"></span><span class="alLabel"><?= $vendors_labels[$id] ?></span></li>
-                        <?php endforeach; ?>
-                        </ul>
-                    </div>
-
-                    <div class="col-lg-6 col-md-12 col-sm-12">
-                    <div id="alWrapper" style="position:relative;width:80%;min-height: 286px;margin: auto;">
-                        <?=
-                        ChartJs::widget([
-                            'type' => 'pie',
-                            'clientOptions' => [
-                                'legend' => false
-                            ],
-                            'options' => [
-                                'height' => 282,
-                                'width' => 282,
-                            ],
-                            'data' => [
-                                'labels' => $vendors_labels,
-                                'datasets' => [
-                                    [
-                                        'data' => $vendors_total_price,
-                                        'backgroundColor' => $vendors_colors,
-                                        'hoverBackgroundColor' => $vendors_colors,
-                                    ]
-                                ],
-                            ],
-                        ]);
-                        ?>
-                    </div>
-                    </div>
-                </div>
-                <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
-        </div>
-        <div class="col-md-6">
-            <!-- AREA CHART -->
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.stat', ['ru'=>'Статистика по товарам']) ?></h3>
-
-                    <div class="box-tools pull-right">
-
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body" style="display: block;">
-                    <?php //Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
-                    <?php
-                    $columns = [
-                        [
-                            'attribute' => 'product_id',
-                            'label' => Yii::t('message', 'frontend.views.client.anal.good', ['ru'=>'Товар']),
-                            'format' => 'raw',
-                            'value' => function ($data) {
-                                return Html::decode(Html::decode(\common\models\CatalogBaseGoods::find()->where(['id' => $data['product_id']])->one()->product));
-                            },
-                            'contentOptions' => ['style' => 'vertical-align:middle;'],
-                        ],
-                        [
-                            'attribute' => 'quantity',
-                            'label' => Yii::t('message', 'frontend.views.client.anal.quantity', ['ru'=>'Кол-во']),
-                            'value' => function ($data) {
-                                return number_format($data['quantity'], 2, '.', '');
-                            },
-                            'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
-                        ],
-                        [
-                            'attribute' => 'price',
-                            'format' => 'raw',
-                            'label' => Yii::t('message', 'frontend.views.client.anal.total_two', ['ru'=>'Итого']),
-                            'value' => function ($data) {
-                                return (float) $data['price'] . ' ' . $data['iso_code'];
-                            },
-                            'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
-                        ]
-                    ];
-                    ?>
+                    <?= Html::label(Yii::t('message', 'frontend.views.client.anal.date', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <?=
-                    GridView::widget([
-                        'dataProvider' => $dataProvider,
-                        'filterPosition' => false,
-                        'columns' => $columns,
-                        'tableOptions' => ['class' => 'table no-margin'],
-                        'options' => ['class' => 'table-responsive'],
-                        'bordered' => false,
-                        'striped' => false,
-                        'condensed' => false,
-                        'resizableColumns' => false,
-                        'responsive' => false,
-                        'hover' => true,
-                        'summary' => false,
+                    DatePicker::widget([
+                        'name' => 'filter_from_date',
+                        'id' => 'filter-date',
+                        'value' => $filter_from_date,
+                        'type' => DatePicker::TYPE_RANGE,
+                        'name2' => 'filter_to_date',
+                        'value2' => $filter_to_date,
+                        'separator' => '-',
+                        'layout' => $layout,
+                        'pluginOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-mm-yyyy',
+                            'todayHighlight' => true,
+                            'endDate' => "0d",
+                        ],
+                        'removeButton' => false,
                     ]);
-                    ?> 
-    <?php //Pjax::end(); ?>
+                    ?>
                 </div>
-                <!-- /.box-body -->
+                <div class="col-lg-1 col-md-1 col-sm-6" id="alCurrencies">
+                    <?php if (count($currencyList) > 0): ?>
+                        <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?=
+                        Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
+                        ?>
+                    <?php endif; ?>
+                </div>
+                <div class="col-lg-1 col-md-1 col-sm-2">
+                    <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
+                </div>
             </div>
-            <!-- /.box -->
         </div>
-    </div>
-    <?php
-    $arr_create_at = json_encode($arr_create_at);
-    $arr_price = json_encode($arr_price);
-    $value = Yii::t('message', 'frontend.views.client.anal.sell_value', ['ru'=>"Объем продаж"]);
-    ?>
+        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
+        <div class="row">
+            <div class="col-md-6">
+                <!-- AREA CHART -->
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.value', ['ru' => 'Объем заказов']) ?></h3>
 
-    <?php
-    $customJs = <<< JS
+                        <div class="box-tools pull-right">
+
+                            </button>
+                        </div>
+                    </div>
+                    <div class="box-body" style="display: block;">
+                        <div class="chart" style="position:relative;height:286px;width:100%;min-height: 286px;">
+                            <?=
+                            ChartJs::widget([
+                                'type' => 'line',
+                                'options' => [
+                                    'maintainAspectRatio' => false,
+                                    'responsive' => true,
+                                    'height' => '282px',
+                                ],
+                                'data' => [
+                                    'labels' => $arr_create_at,
+                                    'datasets' => [
+                                        [
+                                            'label' => Yii::t('message', 'frontend.views.client.anal.value_orders', ['ru' => "Объем заказов"]),
+                                            'fillColor' => "rgba(0,0,0,.05)",
+                                            'borderColor' => "#84bf76",
+                                            'data' => $arr_price,
+                                        ]
+                                    ],
+                                ],
+                            ]);
+                            ?>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <div class="col-md-6">
+                <!-- AREA CHART -->
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.orders', ['ru' => 'Заказы по поставщикам']) ?></h3>
+
+                        <div class="box-tools pull-right">
+
+                            </button>
+                        </div>
+                    </div>
+                    <div class="box-body" style="display: block;">
+                        <div class="chart" style="position:relative;height:286px;width:100%;min-height: 286px;">
+                            <?=
+                            ChartJs::widget([
+                                'type' => 'bar',
+                                'options' => [
+                                    'maintainAspectRatio' => false,
+                                    'responsive' => true,
+                                    'height' => '282px',
+                                ],
+                                'data' => [
+                                    'labels' => $chart_bar_label,
+                                    'datasets' => [
+                                        [
+                                            'label' => Yii::t('message', 'frontend.views.client.anal.orders_vendors', ['ru' => "Заказы по поставщикам"]),
+                                            'data' => $chart_bar_value,
+                                        ]
+                                    ],
+                                ],
+                            ]);
+                            ?>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <div class="col-md-6">
+                <!-- AREA CHART -->
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.vendor_value', ['ru' => 'Объем по поставщикам']) ?></h3>
+
+                        <div class="box-tools pull-right">
+
+                            </button>
+                        </div>
+                    </div>
+                    <div class="box-body" style="display: block;">
+                        <script>
+                            var json_vendors_labels_source = <?= $json_vendors_labels ?>;
+                            var json_vendors_total_price_source = <?= $json_vendors_total_price ?>;
+                            var json_vendors_colors_source = <?= $json_vendors_colors ?>;
+                        </script>
+                        <div class="col-lg-6 col-md-12 col-sm-12" style="max-height: 352px; overflow-y: scroll">
+                            <ul class="alUl">
+                                <?php foreach ($vendors_colors as $id => $color): ?>
+                                    <li class="alLi" color-id="<?= $id ?>"><span class="alColor"
+                                                                                 style="background-color: <?= $color ?>"></span><span
+                                                class="alLabel"><?= $vendors_labels[$id] ?></span></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+
+                        <div class="col-lg-6 col-md-12 col-sm-12">
+                            <div id="alWrapper" style="position:relative;width:80%; min-height: 336px; margin: auto;">
+                                <?=
+                                ChartJs::widget([
+                                    'type' => 'pie',
+                                    'clientOptions' => [
+                                        'legend' => false
+                                    ],
+                                    'options' => [
+                                        'height' => 282,
+                                        'width' => 282,
+                                    ],
+                                    'data' => [
+                                        'labels' => $vendors_labels,
+                                        'datasets' => [
+                                            [
+                                                'data' => $vendors_total_price,
+                                                'backgroundColor' => $vendors_colors,
+                                                'hoverBackgroundColor' => $vendors_colors,
+                                            ]
+                                        ],
+                                    ],
+                                ]);
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <div class="col-md-6">
+                <!-- AREA CHART -->
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.anal.stat', ['ru' => 'Статистика по товарам']) ?></h3>
+
+                        <div class="box-tools pull-right">
+
+                            </button>
+                        </div>
+                    </div>
+                    <div class="box-body" style="display: block;">
+                        <?php //Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
+                        <?php
+                        $columns = [
+                            [
+                                'attribute' => 'product_id',
+                                'label' => Yii::t('message', 'frontend.views.client.anal.good', ['ru' => 'Товар']),
+                                'format' => 'raw',
+                                'value' => function ($data) {
+                                    return Html::decode(Html::decode(\common\models\CatalogBaseGoods::find()->where(['id' => $data['product_id']])->one()->product));
+                                },
+                                'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            ],
+                            [
+                                'attribute' => 'quantity',
+                                'label' => Yii::t('message', 'frontend.views.client.anal.quantity', ['ru' => 'Кол-во']),
+                                'value' => function ($data) {
+                                    return number_format($data['quantity'], 2, '.', '');
+                                },
+                                'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
+                            ],
+                            [
+                                'attribute' => 'price',
+                                'format' => 'raw',
+                                'label' => Yii::t('message', 'frontend.views.client.anal.total_two', ['ru' => 'Итого']),
+                                'value' => function ($data) {
+                                    return (float)$data['price'] . ' ' . $data['iso_code'];
+                                },
+                                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
+                            ]
+                        ];
+                        ?>
+                        <?=
+                        GridView::widget([
+                            'dataProvider' => $dataProvider,
+                            'filterPosition' => false,
+                            'columns' => $columns,
+                            'tableOptions' => ['class' => 'table no-margin'],
+                            'options' => ['class' => 'table-responsive'],
+                            'bordered' => false,
+                            'striped' => false,
+                            'condensed' => false,
+                            'resizableColumns' => false,
+                            'responsive' => false,
+                            'hover' => true,
+                            'summary' => false,
+                        ]);
+                        ?>
+                        <?php //Pjax::end(); ?>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?= Yii::t('app', 'frontend.analytics.price_changes', ['ru' => 'Статистика изменения цен']) ?></h3>
+                    </div>
+                    <div class="box-body" style="display: block;">
+
+                        <?php
+                        $form = ActiveForm::begin([
+                            'method' => 'post',
+                            'action' => Url::to(['client/price-stat'])
+                        ]);
+                        ?>
+
+                        <div class="row">
+                            <div class="col-lg-3 col-md-3 col-sm-12">
+                                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.vendor', ['ru' => 'Поставщик']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                                <?= Html::dropDownList('supplier', null, $filter_get_supplier, ['prompt' => Yii::t('message', 'frontend.views.client.anal.all', ['ru' => 'Все поставщики']), 'class' => 'form-control'])
+                                ?>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-md-offset-1 col-sm-12">
+                                <?= Html::label(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru' => 'БИЗНЕСЫ']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                                <?=
+                                Html::dropDownList('business', null, $businessArray, ['prompt' => Yii::t('app', 'Все', ['ru' => 'Все']), 'class' => 'form-control'])
+                                ?>
+                            </div>
+
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <?= Html::label('', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                                <?=
+                                Html::checkbox('show_not_changed_price', true, ['label' => Yii::t('app', 'frontend.views.client.anal.show.not_changed_price', ['ru' => 'Показывать позиции, где цена не менялась'])])
+                                ?>
+                            </div>
+                        </div>
+                        <hr>
+
+                            <?=
+                            DatePicker::widget([
+                                'name' => 'filter_from_date_price_stat',
+                                'id' => 'filter-date-price-stat',
+                                'value' => $filter_from_date_two,
+                                'type' => DatePicker::TYPE_RANGE,
+                                'name2' => 'filter_to_date_price_stat',
+                                'value2' => $filter_to_date,
+                                'separator' => '-',
+                                'layout' => $layout,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'dd-mm-yyyy',
+                                    'todayHighlight' => true,
+                                    'endDate' => "0d",
+                                ],
+                                'removeButton' => false,
+                            ]);
+                            ?>
+
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-4">
+                                <?= Html::submitButton(Yii::t('app', 'franchise.views.site.download_three', ['ru' => 'Скачать']) . " (XLS)", ['id' => 'priceStat', 'class' => 'form-control clear_filters btn btn-outline-success teaser']) ?>
+                            </div>
+                        </div>
+
+                        <?php
+                        ActiveForm::end();
+                        ?>
+
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+
+        </div>
+
+        <?php
+        $arr_create_at = json_encode($arr_create_at);
+        $arr_price = json_encode($arr_price);
+        $value = Yii::t('message', 'frontend.views.client.anal.sell_value', ['ru' => "Объем продаж"]);
+        ?>
+
+        <?php
+        $customJs = <<< JS
     
     
 // Get context with jQuery - using jQuery's .get() method.
@@ -478,11 +558,11 @@ var barChartDemo = new Chart(ctx).Bar(barChartData, {
   ToolTipTitle: false
 });
 JS;
-    //$this->registerJs($customJs, View::POS_READY);
-    ?>
+        //$this->registerJs($customJs, View::POS_READY);
+        ?>
 
-<?php Pjax::end(); ?>
-</section>
+        <?php Pjax::end(); ?>
+    </section>
 <?php
 $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Currency;
 use common\models\ManagerAssociate;
+use common\models\OrderContent;
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
@@ -92,7 +93,8 @@ class ClientController extends DefaultController {
                             'support',
                             'view-catalog',
                             'view-supplier',
-                            'payments'
+                            'payments',
+                            'price-stat'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -1395,6 +1397,12 @@ class ClientController extends DefaultController {
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
+        $relations = RelationUserOrganization::find()->where(['relation_user_organization.user_id' => Yii::$app->user->id])->leftJoin('organization', 'organization.id = relation_user_organization.organization_id')->andWhere(['organization.type_id' => Organization::TYPE_RESTAURANT])->all();
+        $businessArray = [];
+        foreach ($relations as $relation){
+            $businessArray[$relation->organization_id] = $relation->organization->name;
+        }
+
         $header_info_zakaz = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id])->andWhere(['not in', 'status', [Order::STATUS_FORMING]])->count();
         empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
@@ -1418,6 +1426,7 @@ class ClientController extends DefaultController {
                                     where(['organization_id' => $currentUser->organization_id])])->all(), 'user_id', 'full_name');
         $filter_status = "";
         $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
+        $filter_from_date_two = date("d-m-Y", strtotime(" -1 weeks"));
         $filter_to_date = date("d-m-Y");
         $where = "";
 
@@ -1578,11 +1587,11 @@ class ClientController extends DefaultController {
         $organizationId = $currentUser->organization_id;
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('analytics/index', compact(
-                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label', 'organizationId'
+                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label', 'organizationId', 'businessArray', 'filter_from_date_two'
             ));
         } else {
             return $this->render('analytics/index', compact(
-                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label', 'organizationId'
+                                    'currencyList', 'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label', 'organizationId', 'businessArray', 'filter_from_date_two'
             ));
         }
     }
@@ -1843,6 +1852,346 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
             return $result;
         }
+    }
+
+
+    public function actionPriceStat()
+    {
+        $post = Yii::$app->request->post();
+        $supplierID = $post['supplier'];
+        $businessId = $post['business'];
+        $showNotChangedPrice = $post['show_not_changed_price'] ?? false;
+        $dateFrom = date('Y-m-d', strtotime($post['filter_from_date_price_stat']));
+        $dateTo = date('Y-m-d', strtotime($post['filter_to_date_price_stat'] . " + 1 days"));
+
+        $orderContent = OrderContent::find()->joinWith('order')->where(['order.status' => Order::STATUS_DONE])->andWhere(['between', 'order.created_at', $dateFrom, $dateTo]);
+
+        $businessArray = [];
+        if(empty($businessId)){
+            $relations = RelationUserOrganization::find()->where(['relation_user_organization.user_id' => Yii::$app->user->id])->leftJoin('organization', 'organization.id = relation_user_organization.organization_id')->andWhere(['organization.type_id' => Organization::TYPE_RESTAURANT])->all();
+
+            foreach ($relations as $relation){
+                $businessArray[] = $relation->organization_id;
+            }
+            $orderContent->andWhere(['in', 'order.client_id', $businessArray]);
+        }else{
+            $orderContent->andWhere(['order.client_id' => $businessId]);
+            $businessArray[] = $businessId;
+        }
+
+        if(empty($supplierID)){
+            $suppliers = Organization::find()->
+            where(['in', 'id', RelationSuppRest::find()->select('supp_org_id')->where(['invite' => '1'])->andWhere(['in', 'rest_org_id', $businessArray])])->all();
+            $suppliersArray = [];
+            foreach ($suppliers as $supplier){
+                $suppliersArray[] = $supplier->id;
+            }
+            $orderContent->andWhere(['in', 'order.vendor_id', $suppliersArray]);
+            $vendorText = Yii::t('app', 'Все поставщики');
+        }else{
+            $orderContent->andWhere(['order.vendor_id' => $supplierID]);
+            $organization = Organization::findOne(['id' => $supplierID]);
+            if($organization){
+                $vendorText = $organization->name;
+            }
+        }
+        $orderContent = $orderContent->orderBy('order.updated_at')->all();
+        $arr = [];
+        $dateArray = [];
+        foreach ($orderContent as $item){
+            if(!$showNotChangedPrice && $item->price == $item->plan_price)continue;
+            $businessName = $item->order->client->name;
+            $date = date('d.m.Y', strtotime($item->order->updated_at));
+            $dateArray[$date] = $date;
+            $planPrice = $item->plan_price;
+            $price = $item->price;
+            $arr[$businessName][$date][$price][$planPrice]['orders_count'] = isset($arr[$businessName][$date][$price][$planPrice]['orders_count']) ?
+                ++$arr[$businessName][$date][$price][$planPrice]['orders_count'] : 1;
+            if(isset($arr[$businessName][$date][$price][$planPrice]['quantity'])){
+                $quantity = $arr[$businessName][$date][$price][$planPrice]['quantity'] + $item->quantity;
+            }else{
+                $quantity = $item->quantity;
+            }
+
+            $arr[$businessName][$date][$price][$planPrice]['quantity'] = $quantity;
+            $arr[$businessName][$date][$price][$planPrice]['plan_price'] = $item->plan_price;
+            $arr[$businessName][$date][$price][$planPrice]['price'] = $item->price;
+            $priceDiff = (float)$item->price - (float)$item->plan_price;
+            $arr[$businessName][$date][$price][$planPrice]['price_diff'] = (float)$priceDiff;
+            $arr[$businessName][$date][$price][$planPrice]['ed'] = $item->product->ed;
+            $arr[$businessName][$date][$price][$planPrice]['vendor_name'] = $item->order->vendor->name;
+            $arr[$businessName][$date][$price][$planPrice]['product'] = $item->product_name;
+            $totalPriceDiff = (float)$priceDiff * (float)$quantity;
+            $totalPriceDiff = round($totalPriceDiff, 2);
+            $arr[$businessName][$date][$price][$planPrice]['total_price_diff'] = (float)$totalPriceDiff;
+        }
+
+        $objPHPExcel = new \PHPExcel();
+
+        $objPHPExcel->getProperties()->setCreator("MixCart")
+            ->setLastModifiedBy("MixCart")
+            ->setTitle("price_stat_" . date('d_m_Y'));
+        $sheet = 0;
+        $objPHPExcel->setActiveSheetIndex($sheet);
+        $width = 20;
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth($width);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth($width);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(80);
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A1:N1');
+        $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
+            ->setCellValue('A1', Yii::t('app', 'Отчет об отклонениях цены по поставщику') . " " .
+                $vendorText . " " . Yii::t('app', 'за период с') . " " . date('d.m.Y', strtotime($post['filter_from_date_price_stat'])) . " " . Yii::t('app', 'по') . " " . date('d.m.Y', strtotime($post['filter_to_date_price_stat'])));
+        $objPHPExcel->getActiveSheet()->getStyle('A1:N1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(18);
+        $objPHPExcel->getActiveSheet()->setCellValue('A2', Yii::t('message', 'frontend.views.user.default.business', ['ru' => 'БИЗНЕС']));
+        $objPHPExcel->getActiveSheet()->setCellValue('B3', Yii::t('app', 'Поставщик'));
+        $objPHPExcel->getActiveSheet()->setCellValue('C3', Yii::t('app', 'frontend.views.order.view_grid.good.', ['ru' => 'Товар']));
+        $objPHPExcel->getActiveSheet()->getRowDimension(2)->setRowHeight(18);
+        $objPHPExcel->getActiveSheet()->getRowDimension(3)->setRowHeight(18);
+
+        $begin = 3;
+        $dateRowsArray = [];
+        foreach ($dateArray as $date){
+            $dateRowsArray[$date] = $begin;
+            $end = $begin + 5;
+            $objPHPExcel->getActiveSheet()->mergeCellsByColumnAndRow($begin, 2, $end, 2);
+            $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow($begin, 2, $end, 2)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin, 2, $date);
+
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin, 3, Yii::t('app', 'frontend.views.client.index.orders'));
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin + 1, 3, Yii::t('app', 'Кол-во'));
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin + 2, 3, Yii::t('app', 'План/ед.'));
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin + 3, 3, Yii::t('app', 'Факт/ед.'));
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin + 4, 3, Yii::t('app', 'Отклонение/ед.'));
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($begin + 5, 3, Yii::t('app', 'Отклонение итого'));
+            $begin = $end + 1;
+        }
+        $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(0, 3, $begin, 3)->getFont()->setBold(true);
+        $businessBegin = 4;
+        $goodRowBegin = 5;
+
+        $allBusinessArray = [];
+        foreach ($arr as $businessName => $secondArr){
+            if($businessName == 'day_all_business_total_price_diff')continue;
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, $businessBegin, $businessName);
+            $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(0, $businessBegin)->getFont()->setBold(true);
+            foreach ($secondArr as $date => $thirdArray){
+                $dayTotalPriceDiff = 0;
+                if(!is_iterable($thirdArray))continue;
+                foreach ($thirdArray as $fourthArray){
+                    if(!is_iterable($fourthArray))continue;
+                    foreach ($fourthArray as $fifthArray){
+                        $goodBegin = $dateRowsArray[$date];
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, $goodRowBegin, $fifthArray['vendor_name']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(2, $goodRowBegin, $fifthArray['product']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['orders_count']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['quantity'] . " " . $fifthArray['ed']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['plan_price']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['price']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['price_diff']);
+                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $fifthArray['total_price_diff']);
+                        $dayTotalPriceDiff += $fifthArray['total_price_diff'];
+                        $goodRowBegin++;
+                        $businessBegin++;
+                    }
+                }
+                $allBusinessArray[$date] = (isset($allBusinessArray[$date])) ? ($allBusinessArray[$date] + $dayTotalPriceDiff) : $dayTotalPriceDiff;
+                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $dayTotalPriceDiff);
+                $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow($goodBegin, $goodRowBegin)->getFont()->setBold(true);
+            }
+            $goodRowBegin++;
+            $businessBegin++;
+        }
+
+        $goodRowBegin--;
+        foreach ($dateRowsArray as $date => $col){
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(($col + 5), $goodRowBegin, $allBusinessArray[$date]);
+            $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(($col + 5), $goodRowBegin)->getFont()->setBold(true);
+        }
+
+        header('Content-Type: application/vnd.ms-excel');
+        $filename = "price_stat_" . date('d_m_Y') . ".xls";
+        header('Content-Disposition: attachment;filename=' . $filename . ' ');
+        header('Cache-Control: max-age=0');
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+        exit;
+
+        $sheet = 0;
+        $objPHPExcel->setActiveSheetIndex($sheet);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(8);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth($width);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth($width);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A1:H1');
+        $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
+            ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
+        $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A2:H2');
+        $objPHPExcel->getActiveSheet()->setCellValue('A2', Yii::t('app', 'от') . " " . Yii::$app->formatter->asDate($order->created_at, "dd.MM.yyyy, HH:mm"));
+        $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);;
+        $objPHPExcel->getActiveSheet()->getRowDimension(2)->setRowHeight(18);
+
+        $requestedDelivery = isset($order->requested_delivery) ? " " . Yii::$app->formatter->asDate($order->requested_delivery, 'dd.MM.yyyy') . " " . Yii::t('app', 'frontend.excel.year') : "";
+        $objPHPExcel->getActiveSheet()->mergeCells('A3:H3');
+        $objPHPExcel->getActiveSheet()->setCellValue('A3', Yii::t('app', 'common.mail.bill.delivery_date') . $requestedDelivery);
+        $objPHPExcel->getActiveSheet()->getStyle('A3:H3')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getRowDimension(3)->setRowHeight(18);
+
+        $objPHPExcel->getActiveSheet()->getRowDimension(4)->setRowHeight(5);
+        $objPHPExcel->getActiveSheet()->getStyle('A5:H5')->getBorders()
+            ->getTop()
+            ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+        $objPHPExcel->getActiveSheet()->mergeCells('A6:D6');
+        $objPHPExcel->getActiveSheet()->setCellValue('A6', Yii::t('message', 'frontend.views.order.customer'));
+        $objPHPExcel->getActiveSheet()->getStyle('A6:D6')->applyFromArray(['font' => ['bold' => true]]);
+        $objPHPExcel->getActiveSheet()->mergeCells('E6:H6');
+        $objPHPExcel->getActiveSheet()->setCellValue('E6', Yii::t('app', 'Поставщик'));
+        $objPHPExcel->getActiveSheet()->getStyle('E6:H6')->applyFromArray(['font' => ['bold' => true]]);
+        $objPHPExcel->getActiveSheet()->getRowDimension(6)->setRowHeight(22);
+
+        $clientName = (!empty($order->client->legal_entity)) ? $order->client->name . " (" . $order->client->legal_entity . ")" : $order->client->name;
+        $vendorName = (!empty($order->vendor->legal_entity)) ? $order->vendor->name . " (" . $order->vendor->legal_entity . ")" : $order->vendor->name;
+        $objPHPExcel->getActiveSheet()->mergeCells('A7:D7');
+        $objPHPExcel->getActiveSheet()->setCellValue('A7', $clientName);
+        $objPHPExcel->getActiveSheet()->getStyle('A7:D7')->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
+        $objPHPExcel->getActiveSheet()->mergeCells('E7:H7');
+        $objPHPExcel->getActiveSheet()->setCellValue('E7', $vendorName);
+        $objPHPExcel->getActiveSheet()->getStyle('E7:H7')->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_TOP);
+        $objPHPExcel->getActiveSheet()->getRowDimension(7)->setRowHeight(25);
+
+        $acceptedName = isset($order->acceptedBy->profile->full_name) ? $order->acceptedBy->profile->full_name : '';
+        $this->fillCellData($objPHPExcel, 8, Yii::t('message', 'frontend.views.order.phone_four') . " " . $order->client->phone, Yii::t('message', 'frontend.views.order.phone_four') . " " . $order->vendor->phone);
+        $this->fillCellData($objPHPExcel, 9, 'E-mail: ' . $order->client->email, 'E-mail: ' . $order->vendor->email);
+        $this->fillCellData($objPHPExcel, 10, Yii::t('app', 'Заказ создал:') . " " . $order->createdBy->profile->full_name, Yii::t('app', 'Заказ принял:') . " " . $acceptedName);
+        $this->fillCellData($objPHPExcel, 11, Yii::t('message', 'market.views.site.supplier.address') . " " . $order->client->locality . " " . $order->client->address, Yii::t('message', 'market.views.site.supplier.address') . " " . $order->vendor->locality . " " . $order->vendor->address);
+        $objPHPExcel->getActiveSheet()->getStyle('A11')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getStyle('D11')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getRowDimension(11)->setRowHeight(50);
+
+        $objPHPExcel->getActiveSheet()->getStyle('A13:H13')->getBorders()
+            ->getTop()
+            ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+        $objPHPExcel->getActiveSheet()->setCellValue('A14', Yii::t('app', 'Комментарий к заказу:'));
+        $objPHPExcel->getActiveSheet()->getStyle('A14')->applyFromArray(['font' => ['bold' => true]]);
+        $objPHPExcel->getActiveSheet()->mergeCells('A15:H15');
+        $objPHPExcel->getActiveSheet()->setCellValue('A15', $order->comment);
+        $objPHPExcel->getActiveSheet()->getStyle('A15')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getRowDimension(14)->setRowHeight(20);
+        $objPHPExcel->getActiveSheet()->getRowDimension(15)->setRowHeight(30);
+
+        $objPHPExcel->getActiveSheet()->getStyle('B17')->getAlignment()->setWrapText(true);
+        $objPHPExcel->getActiveSheet()->getStyle('C17')->getAlignment()->setWrapText(true);
+
+        $this->fillCellHeaderData($objPHPExcel, 'A', '№ п/п');
+        $this->fillCellHeaderData($objPHPExcel, 'B', 'Наименование товара');
+        $this->fillCellHeaderData($objPHPExcel, 'C', 'Комментарий');
+        $this->fillCellHeaderData($objPHPExcel, 'D', 'Артикул');
+        $this->fillCellHeaderData($objPHPExcel, 'E', 'Ед. измерения');
+        $this->fillCellHeaderData($objPHPExcel, 'F', 'Кол-во');
+
+        $objPHPExcel->getActiveSheet()->getStyle('A17:H17')->applyFromArray($styleArray);
+
+        $objPHPExcel->getActiveSheet()->setCellValue("G17", Yii::t('message', 'frontend.views.order.grid_price') . " " . $order->currency->iso_code);
+        $objPHPExcel->getActiveSheet()->getStyle("G17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getStyle("G17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        $this->fillCellHeaderData($objPHPExcel, 'H', 'frontend.widgets.cart.views.sum_two');
+
+        $objPHPExcel->getActiveSheet()->getRowDimension(17)->setRowHeight(25);
+
+        $row = 18;
+        $goods = $order->orderContent;
+        $i = 0;
+        foreach ($goods as $good) {
+            $i++;
+            $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
+            $objPHPExcel->getActiveSheet()->setCellValue("A$row", ($row - 17));
+            $objPHPExcel->getActiveSheet()->getStyle("A$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+            $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode($good->product_name));
+            $objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setWrapText(true);
+
+            $objPHPExcel->getActiveSheet()->setCellValue('C' . $row, Html::decode($good->comment));
+            $objPHPExcel->getActiveSheet()->getStyle('C' . $row)->getAlignment()->setWrapText(true);
+            $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('D' . $row, $good->article, \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("D$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+            $objPHPExcel->getActiveSheet()->setCellValue('E' . $row, Yii::t('app', $good->product->ed));
+            $objPHPExcel->getActiveSheet()->getStyle("E$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('F' . $row, number_format($good->quantity, 3, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("F$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('G' . $row, number_format($good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("G$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('H' . $row, number_format($good->quantity * $good->price, 2, '.', ''), \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->getStyle("H$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            $objPHPExcel->getActiveSheet()->getStyle("A$row:H$row")->applyFromArray($styleArray);
+
+            $objPHPExcel->getActiveSheet()->getStyle("B$row")->getAlignment()->setWrapText(true);
+            $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setWrapText(true);
+
+            $height = 19;
+            $product_name_length = mb_strlen($good->product_name);
+            $comment_length = mb_strlen($good->comment);
+            if ($product_name_length > $width || $comment_length > $width) {
+                if ($product_name_length > $comment_length) {
+                    $i = ceil((float)$product_name_length / $width);
+                } else {
+                    $i = ceil((float)$comment_length / $width);
+                }
+                $height *= $i;
+            }
+            $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight($height);
+            $row++;
+        }
+
+        $objPHPExcel->getActiveSheet()->getStyle("A1:H$row")->applyFromArray(['font' => ['size' => 11]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->applyFromArray(['font' => ['bold' => true, 'size' => 18]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A2:H3')->applyFromArray(['font' => ['size' => 14]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A6:H6')->applyFromArray(['font' => ['size' => 16]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A7:H11')->applyFromArray(['font' => ['size' => 14]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A14:H14')->applyFromArray(['font' => ['size' => 16]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A15:H15')->applyFromArray(['font' => ['size' => 12]]);
+        $objPHPExcel->getActiveSheet()->getStyle('A2:H3')->applyFromArray(['font' => ['size' => 14]]);
+
+        $row += 2;
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Скидка:'), " " . $order->getFormattedDiscount());
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Стоимость доставки:'), " " . $order->calculateDelivery() . " " . $order->currency->iso_code);
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('app', 'Итого:'), " " . $order->getTotalPriceWithOutDiscount() . " " . $order->currency->iso_code);
+        $row = $this->fillCellBottomData($objPHPExcel, $row, Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
+
+        $objPHPExcel->getActiveSheet()->getSheetView()->setZoomScale(70);
+        // Set Orientation, size and scaling
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToPage(true);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(0);
+
+        header('Content-Type: application/vnd.ms-excel');
+        $filename = "order_" . $id . ".xls";
+        header('Content-Disposition: attachment;filename=' . $filename . ' ');
+        header('Cache-Control: max-age=0');
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+        exit;
     }
 
 }

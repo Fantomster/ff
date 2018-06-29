@@ -70,6 +70,9 @@ class OrderController extends DefaultController {
                             'ajax-show-products',
                             'ajax-add-to-order',
                             'save-selected-orders',
+                            'upload-attachment',
+                            'get-attachment',
+                            'delete-attachment',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -116,9 +119,6 @@ class OrderController extends DefaultController {
                             'complete-obsolete',
                             'pjax-cart',
                             'test',
-                            'upload-attachment',
-                            'get-attachment',
-                            'delete-attachment',
                         ],
                         'allow' => true,
                         // Allow restaurant managers

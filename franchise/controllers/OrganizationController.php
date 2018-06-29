@@ -132,11 +132,12 @@ class OrganizationController extends DefaultController {
             ->join('LEFT JOIN', 'relation_user_organization', 'organization.id = relation_user_organization.organization_id')
             ->join('LEFT JOIN', 'email_notification', 'relation_user_organization.id = email_notification.rel_user_org_id')
             ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
+            ->groupBy('org.id')
             ->orderBy(['organization.id' => SORT_ASC]);
         if(Yii::$app->request->isAjax)
         {
             $rel_user_org_id = RelationUserOrganization::findOne(['organization_id'=>Yii::$app->request->post('id_org')])->id;
-            $emailNotifications = EmailNotification::find(['rel_user_org_id'=>$rel_user_org_id]);
+            $emailNotifications = EmailNotification::findAll(['rel_user_org_id'=>$rel_user_org_id]);
             //die(print_r($emailNotifications));
             foreach($emailNotifications as $emailNotification)
             {

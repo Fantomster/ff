@@ -73,7 +73,6 @@ class OrderController extends DefaultController {
                             'upload-attachment',
                             'get-attachment',
                             'delete-attachment',
-                            'show-pdf',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2335,7 +2334,7 @@ class OrderController extends DefaultController {
                     [
                         'name' => $uploadedFile->name,
                         'size' => $uploadedFile->size,
-                        'url' => Url::to(['order/get-attachment', 'id' => $attachment->id]),
+                        'url' => Url::to(['order/get-attachment', 'id' => $attachment->id], true),
                         'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
                         'deleteType' => 'POST',
                     ],
@@ -2348,7 +2347,7 @@ class OrderController extends DefaultController {
             $files[] = [
                 'name' => $attachment->file,
                 'size' => $attachment->size,
-                'url' => Url::to(['order/get-attachment', 'id' => $attachment->id]),
+                'url' => Url::to(['order/get-attachment', 'id' => $attachment->id], true),
                 'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
                 'deleteType' => 'POST',
             ];
@@ -2366,7 +2365,4 @@ class OrderController extends DefaultController {
         return $attachment->delete();
     }
     
-    public function actionShowPdf($url) {
-        return $this->renderAjax('upload/_showPdf', compact('url'));
-    }
 }

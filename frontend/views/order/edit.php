@@ -209,29 +209,7 @@ $js = <<<JS
         
         //alert($(this).attr("download").split(".").pop());
         if($(this).attr("download").split(".").pop() === 'pdf'){
-//            $.magnificPopup.open({
-//                items: {
-//                    src: 
-//                            '<button title="Close (Esc)" type="button" class="mfp-close">×</button>' +
-//                            '<figure>' +
-//                                '<embed class="mfp-img" src="'+$(this).attr("href")+'" style="max-height: 938px;">' +
-//                            '</figure>'
-//                },
-//                type: 'inline' 
-//            });
-//            $.get({
-//                url: '$showPdfUrl' + '?url=' + $(this).attr("href"),
-//                success: function(result) {
-//                    $(this).magnificPopup({
-//                        alignTop: true,
-//                        overflowY: 'scroll',
-//                        items: {
-//                            src: result,
-//                            type: 'inline'
-//                        }
-//                    }).magnificPopup('open');
-//                },
-//            });
+            //
         } else {
             e.preventDefault();
             $.magnificPopup.open({
@@ -250,8 +228,34 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);
 lo\widgets\magnific\MagnificPopupAsset::register($this);
-//branchonline\lightbox\LightboxAsset::register($this);
-//newerton\fancybox3\FancyBoxAsset::register($this);
+
+/*
+ //            $.magnificPopup.open({
+//                items: {
+//                    src: 
+//                            '<button title="Close (Esc)" type="button" class="mfp-close">×</button>' +
+//                            '<figure>' +
+//                                '<embed class="mfp-img" src="'+$(this).attr("href")+'" style="max-height: 938px;">' +
+//                            '</figure>'
+//                },
+//                type: 'inline' 
+//            });
+            e.preventDefault();
+            $.get('$showPdfUrl' + '?url=' + $(this).attr("href"), function(result) {
+                    alert(result);
+                    $("#popupPdf").html(result);
+                    $(this).magnificPopup({
+                        alignTop: true,
+                        overflowY: 'scroll',
+                        items: {
+                            src: '#popupPdf',
+                            type: 'inline'
+                        }
+                    }).magnificPopup('open');
+            });
+
+  
+ */
 
 $canRepeatOrder = false;
 if ($organizationType == Organization::TYPE_RESTAURANT) {
@@ -417,8 +421,7 @@ Modal::widget([
     'header' => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
 ])
 ?>
-<div id="dialogtest" style="display: none;">
-    <div>
-        <iframe id="frametest"></iframe>
-    </div>
+
+<div id="popupPdf" class="white-popup mfp-hide">
+    
 </div>

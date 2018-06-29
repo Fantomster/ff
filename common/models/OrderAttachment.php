@@ -85,7 +85,7 @@ class OrderAttachment extends \yii\db\ActiveRecord
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
         $size = $this->getSize();
         header('Content-Disposition: inline; filename=' . $this->file);
-        header("Content-type:application/pdf");
+        //header("Content-type:application/pdf");
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');

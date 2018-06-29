@@ -73,6 +73,7 @@ class OrderController extends DefaultController {
                             'upload-attachment',
                             'get-attachment',
                             'delete-attachment',
+                            'show-pdf',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2363,5 +2364,9 @@ class OrderController extends DefaultController {
     public function actionDeleteAttachment($id) {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         return $attachment->delete();
+    }
+    
+    public function actionShowPdf($url) {
+        return $this->renderAjax('upload/_showPdf', compact('url'));
     }
 }

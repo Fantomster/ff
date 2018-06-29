@@ -30,6 +30,7 @@ $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $urlViewOrder = Url::to(['/order/view', 'id' => $order->id]);
+$showPdfUrl = Url::to(['/order/show-pdf']);
 $edit = true;
 $refreshUrl = Url::to(['/order/edit', "id" => $order->id]);
 
@@ -218,6 +219,19 @@ $js = <<<JS
 //                },
 //                type: 'inline' 
 //            });
+//            $.get({
+//                url: '$showPdfUrl' + '?url=' + $(this).attr("href"),
+//                success: function(result) {
+//                    $(this).magnificPopup({
+//                        alignTop: true,
+//                        overflowY: 'scroll',
+//                        items: {
+//                            src: result,
+//                            type: 'inline'
+//                        }
+//                    }).magnificPopup('open');
+//                },
+//            });
         } else {
             e.preventDefault();
             $.magnificPopup.open({
@@ -325,7 +339,6 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         ?>
                     </div>
                     <?php
-                    
                     echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru' => 'Сохранить']) . ' </span>', [
                         'class' => 'btn btn-success pull-right btnSave',
                         'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru' => 'Сохраняем...']),
@@ -337,7 +350,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                     ?>
                 </div>
                 <!-- /.box-body -->
-                <?php //Pjax::end();    ?>
+                <?php //Pjax::end();     ?>
             </div>
 
         </div>

@@ -331,7 +331,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
-                'value' => isset($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
+                'value' => !empty($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
             ],
             [
                 'label' => 'Общее количество единиц упаковки для производственной партии',

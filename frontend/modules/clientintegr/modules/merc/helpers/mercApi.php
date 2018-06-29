@@ -215,12 +215,19 @@ class mercApi extends Component
 
                 $result = $this->parseResponse($response);
 
-                $status = $result->envBody->receiveApplicationResultResponse->application->status->__toString();
+                if(isset($result->envBody))
+                    $status = $result->envBody->receiveApplicationResultResponse->application->status->__toString();
+                else
+                    $status = $result->soapBody->receiveApplicationResultResponse->application->status->__toString();
             }
             while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+            if(isset($result->envBody))
+                $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+            else
+                $this->addEventLog($result->soapBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+
 
 
         }catch (\SoapFault $e) {
@@ -380,7 +387,29 @@ class mercApi extends Component
                 throw new BadRequestHttpException();
             }
 
-            //timeout перед запросом результата
+            $app_id = $result->envBody->submitApplicationResponse->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep(2);
+                //Получаем результат запроса
+                $response = $this->getReceiveApplicationResult($app_id);
+
+                $result = $this->parseResponse($response);
+
+                if(isset($result->envBody))
+                    $status = $result->envBody->receiveApplicationResultResponse->application->status->__toString();
+                else
+                    $status = $result->soapBody->receiveApplicationResultResponse->application->status->__toString();
+            }
+            while ($status == 'IN_PROCESS');
+
+            //Пишем лог
+            if(isset($result->envBody))
+                $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+            else
+                $this->addEventLog($result->soapBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+
+            /*//timeout перед запросом результата
             sleep(2);
             //Получаем результат запроса
             $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
@@ -391,14 +420,23 @@ class mercApi extends Component
 
             if(isset($result->envBody->envFault)) {
                 throw new BadRequestHttpException();
-            }
+            }*/
 
-            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
-                $result = $result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
-                $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);
+            if(isset($result->envBody)) {
+                if ($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                    $result = $result->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+                    $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);
+                } else
+                    $result = null;
             }
             else
-                $result = null;
+            {
+                if ($result->soapBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                    $result = $result->soapBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+                    $cache->add('vetDocRaw_' . $UUID, $result->asXML(), 60 * 5);
+                } else
+                    $result = null;
+            }
 
         }catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
@@ -561,13 +599,24 @@ class mercApi extends Component
             $result = $this->parseResponse($response);
 
             //Пишем лог
+            if(isset($result->envBody))
             $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
+            else
+            $this->addEventLog($result->soapBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
 
-            if($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
-                $result = true;
+            if(isset($result->envBody)) {
+                if ($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                    $result = true;
+                } else
+                    $result = false;
             }
             else
-                $result = false;
+            {
+                if ($result->soapBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
+                    $result = true;
+                } else
+                    $result = false;
+            }
 
 
         }catch (\SoapFault $e) {

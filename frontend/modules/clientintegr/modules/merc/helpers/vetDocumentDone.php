@@ -83,7 +83,7 @@ class vetDocumentDone extends Component
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>';
 
-                        if(isset($doc->ns2batch->ns2packingList))
+                        if(!empty($doc->ns2batch->ns2packingList))
                         $xml .= '<vet:packingList>
                            <com:packingForm>
                               <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>
@@ -260,7 +260,7 @@ class vetDocumentDone extends Component
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>';
 
-                        if(isset($doc->ns2batch->ns2packingList))
+                        if(!empty($doc->ns2batch->ns2packingList))
                             $xml .= '<vet:packingList>
                            <com:packingForm>
                               <base:uuid>'.$doc->ns2batch->ns2packingList->argcpackingForm->bsuuid->__toString().'</base:uuid>

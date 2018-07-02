@@ -404,6 +404,18 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['currency_id'] = $order->currency->id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
+        $result['discount_type'] =  null;
+
+        if($order->discount_type == Order::DISCOUNT_FIXED) {
+            $result['discount_type'] = 'FIXED';
+        }
+
+        if($order->discount_type == Order::DISCOUNT_PERCENT) {
+            $result['discount_type'] = 'PERCENT';
+        }
+
+        $result['discount_type_id'] = $order->discount_type ?? null;
+
         $result['status_id'] = $order->status;
         $result['status_text'] = $order->statusText;
         $result['position_count'] = (int)$order->positionCount;

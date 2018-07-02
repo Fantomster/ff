@@ -123,9 +123,25 @@ class ChatWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = [];
+
+        /**
+         * @var $model OrderChat
+         */
         foreach ($dataProvider->models as $model) {
-            $result[] = $this->prepareMessage($model);
+            $message = $this->prepareMessage($model);
+
+            if($message['is_my_message'] === false && $message['viewed'] === false) {
+                $model->viewed = true;
+                $model->save();
+            }
+
+            $result[] = $message;
         }
+
+        /**
+         * Отправка уведомлений в FCM
+         */
+        Notice::init('Chat')->updateCountMessageAndDialog($this->user->organization->id, $order);
 
         $return = [
             'result' => $result,
@@ -183,7 +199,7 @@ class ChatWebApi extends WebApi
         }
 
         //Отправляем нотификацию
-        Notice::init('Chat')->addMessage($recipient_id, $order);
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_id, $order);
 
         return $this->getDialogMessages(['dialog_id' => $order->id]);
     }

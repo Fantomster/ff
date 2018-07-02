@@ -91,4 +91,17 @@ class Job extends \yii\db\ActiveRecord
             ArrayHelper::map($models, 'id', 'name_job');
         // );
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getJobById($id)
+    {
+        $query = Job::find()
+            ->select(['name_job'])
+            ->where(['id' => $id])
+            ->asArray()
+            ->one();
+        return $query;
+    }
 }

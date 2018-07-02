@@ -277,6 +277,7 @@ class VendorController extends DefaultController
                     //$profile->email = $user->getEmail();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
+                    $user->wipeNotifications();
                     $this->currentUser->sendEmployeeConfirmation($user);
                     User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
 

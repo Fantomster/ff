@@ -30,7 +30,7 @@ class ChatNotice
      * @param $recipient_id
      * @param Order $order
      */
-    public function addMessage($recipient_id, Order $order)
+    public function updateCountMessageAndDialog($recipient_id, Order $order)
     {
         $chat_web_api = new ChatWebApi();
 

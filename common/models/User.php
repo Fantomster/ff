@@ -940,9 +940,49 @@ class User extends \amnah\yii2\user\models\User {
         return $result;
     }
 
-    public function getEmail()
-    {
-        return $this->email;
+    public function wipeNotifications() {
+        $toBeWiped = [
+            'order_created' => 0,
+            'order_canceled' => 0,
+            'order_changed' => 0,
+            'order_processing' => 0,
+            'order_done' => 0,
+            'request_accept' => 0,
+            'receive_employee_email' => 0,
+        ];
+        $allEmailNotifications = EmailNotification::findAll(['user_id' => $this->id]);
+        foreach ($allEmailNotifications as $emailNotification) {
+            $emailNotification->load(['EmailNotification' => $toBeWiped]);
+            $emailNotification->save();
+            $test = 1;
+        }
+        $allSmsNotifications = SmsNotification::findAll(['user_id' => $this->id]);
+        foreach ($allSmsNotifications as $smsNotification) {
+            $smsNotification->load(['SmsNotification' => $toBeWiped]);
+            $smsNotification->save();
+        }
     }
-
+    
+    public function setNotifications() {
+        $toBeSet = [
+            'order_created' => 1,
+            'order_canceled' => 1,
+            'order_changed' => 1,
+            'order_processing' => 1,
+            'order_done' => 1,
+            'request_accept' => 1,
+            'receive_employee_email' => 1,
+        ];
+        $allEmailNotifications = EmailNotification::findAll(['user_id' => $this->id]);
+        foreach ($allEmailNotifications as $emailNotification) {
+            $emailNotification->load(['EmailNotification' => $toBeSet]);
+            $emailNotification->save();
+            $test = 1;
+        }
+        $allSmsNotifications = SmsNotification::findAll(['user_id' => $this->id]);
+        foreach ($allSmsNotifications as $smsNotification) {
+            $smsNotification->load(['SmsNotification' => $toBeSet]);
+            $smsNotification->save();
+        }
+    }
 }

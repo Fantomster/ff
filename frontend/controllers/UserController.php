@@ -190,7 +190,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function actionConfirm($token) {
         /** @var \amnah\yii2\user\models\UserToken $userToken */
-        /** @var \amnah\yii2\user\models\User $user */
+        /** @var common\models\User $user */
         // search for userToken
         $success = false;
         $email = "";
@@ -202,6 +202,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             //   for example, user registered another account before confirming change of email
             $user = $this->module->model("User");
             $user = $user::findOne($userToken->user_id);
+            $user->setNotifications();
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;

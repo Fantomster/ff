@@ -906,8 +906,9 @@ class OrderWebApi extends \api_web\components\WebApi
         $pdf->filename = 'mixcart_order_' . $post['order_id'] . '.pdf';
         ob_start();
         $pdf->render();
-        $content = base64_encode(ob_get_clean());
-        return $content;
+        $content = ob_get_clean();
+        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        return  ($base64 ? base64_encode($content) : $content);
     }
 
     /**

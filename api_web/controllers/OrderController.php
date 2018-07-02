@@ -928,7 +928,7 @@ class OrderController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={"order_id":1}
+     *                  default={"order_id":1, "base64_encode":1}
      *              )
      *         )
      *     ),

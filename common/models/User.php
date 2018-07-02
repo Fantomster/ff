@@ -961,4 +961,27 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->save();
         }
     }
+    
+    public function setNotifications() {
+        $toBeSet = [
+            'order_created' => 1,
+            'order_canceled' => 1,
+            'order_changed' => 1,
+            'order_processing' => 1,
+            'order_done' => 1,
+            'request_accept' => 1,
+            'receive_employee_email' => 1,
+        ];
+        $allEmailNotifications = EmailNotification::findAll(['user_id' => $this->id]);
+        foreach ($allEmailNotifications as $emailNotification) {
+            $emailNotification->load(['EmailNotification' => $toBeSet]);
+            $emailNotification->save();
+            $test = 1;
+        }
+        $allSmsNotifications = SmsNotification::findAll(['user_id' => $this->id]);
+        foreach ($allSmsNotifications as $smsNotification) {
+            $smsNotification->load(['SmsNotification' => $toBeSet]);
+            $smsNotification->save();
+        }
+    }
 }

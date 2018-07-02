@@ -7,7 +7,9 @@ use yii\widgets\DetailView;
 /* @var $model common\models\User */
 
 $this->title = $model->profile->full_name;
-$this->params['breadcrumbs'][] = ['label' => $_SESSION["clients_name"], 'url' => $_SESSION["clients"]];
+$clients = !empty(Yii::$app->session->get('clients')) ? Yii::$app->session->get('clients') : 'index';
+$clientsName = !empty(Yii::$app->session->get('clients_name')) ? Yii::$app->session->get('clients_name') : 'Пользователи';
+$this->params['breadcrumbs'][] = ['label' => $clientsName, 'url' => [$clients]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-view">
@@ -27,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]);
     }
     print " ";
-    echo Html::a('Вернуться к просмотру списка', [$this->params['breadcrumbs'][0]['url']], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
+    echo Html::a('Вернуться к просмотру списка', [$clients], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
     ?>
 
     <?=

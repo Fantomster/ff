@@ -200,7 +200,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $allow_roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER];
 
-            if (in_array($this->user->role_id, $allow_roles) || RelationUserOrganization::checkRelationExisting($this->user)) {
+            if (in_array($this->user->role_id, $allow_roles) || RelationUserOrganization::find()->where(['user_id' => $this->user->id])->count() > 1) {
                 if (!in_array($this->user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER])) {
                     $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -215,12 +215,11 @@ class UserWebApi extends \api_web\components\WebApi
             } else if (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
                 $this->user->organization_id = $organization->id;
             } else {
-                throw new \Exception('access denied');
+                throw new \Exception('access denied role_id = ' . $this->user->role_id . '. Allow roles: ' . implode(', ', $allow_roles));
             }
 
             $result = $this->user->save();
             $transaction->commit();
-
             return $result;
         } catch (\Exception $e) {
             $transaction->rollBack();

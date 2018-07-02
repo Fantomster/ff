@@ -18,9 +18,10 @@ kartik\select2\Select2Asset::register($this);
 
     $this->registerJs('
         $(".allows").click(function(){
+        var order_created = ($(this).is(":checked"))? 1 : 0;
            $.ajax({
                 url:location.href,
-                data:{id_org:$(this).val()},
+                data:{id_org:$(this).val(), order_created:order_created},
                 type:"POST",
                 success:function(response){
                     console.log("ok!!!");
@@ -103,18 +104,12 @@ kartik\select2\Select2Asset::register($this);
                                     'header' => 'Контакты',
                                 ],
                                 [
+
                                     'header' => 'Уведомлять о новых заказах(да/нет)',
                                     'cssClass'=>'allows',
                                     'class' => 'yii\grid\CheckboxColumn', 'checkboxOptions' => function($model, $key, $index, $column) {
-                                    if(\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']]))
-                                    {
-                                        $var = \common\models\notifications\EmailNotification::findOne(['rel_user_org_id'=>\common\models\RelationUserOrganization::findOne(['user_id'=>Yii::$app->user->id,'organization_id'=>$model['id']])->id]);
-                                        $notif = $var ? $var->order_created: 0;
-                                    }else{
-                                        $notif = null;
-                                    }
-                                    return $notif ? ['checked' => "checked", 'value'=>$model['id']] : ['value'=>$model['id']];
-                                },
+                                        return $model['order_created'] ? ['checked' => "checked", 'value'=>$model['id']] : ['value'=>$model['id']];
+                                    },
                                 ],
                             ],
                         ]);

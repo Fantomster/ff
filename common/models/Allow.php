@@ -71,7 +71,8 @@ class Allow extends \yii\db\ActiveRecord
                 ->asArray()
                 ->all();
 
-        return 
+        $models[]=['id'=>0,'name_allow'=>'Не указано'];
+        return
 //        ArrayHelper::merge(
 //                        [null => null], 
                 ArrayHelper::map($models, 'id', 'name_allow');

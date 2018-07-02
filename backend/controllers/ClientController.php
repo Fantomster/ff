@@ -59,6 +59,8 @@ class ClientController extends Controller {
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $exceptionArray = Role::getExceptionArray();
+        $_SESSION["clients"] = 'index';
+        $_SESSION["clients_name"] = 'Пользователи';
         return $this->render('index', compact('searchModel', 'dataProvider', 'exceptionArray'));
     }
 
@@ -69,7 +71,8 @@ class ClientController extends Controller {
     public function actionManagers() {
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_FKEEPER_MANAGER);
-
+        $_SESSION["clients"] = 'managers';
+        $_SESSION["clients_name"] = 'Менеджеры MixCart';
         return $this->render('managers', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
@@ -82,7 +85,9 @@ class ClientController extends Controller {
      */
     public function actionPostavs() {
         $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE]);
+        $_SESSION["clients"] = 'postavs';
+        $_SESSION["clients_name"] = 'Сотрудники поставщиков';
 
         return $this->render('postavs', [
             'searchModel' => $searchModel,
@@ -96,8 +101,9 @@ class ClientController extends Controller {
      */
     public function actionRestors() {
         $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE);
-
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_ONE_S_INTEGRATION]);
+        $_SESSION["clients"] = 'restors';
+        $_SESSION["clients_name"] = 'Сотрудники ресторанов';
         return $this->render('restors', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -171,7 +177,19 @@ class ClientController extends Controller {
                 if (($user->organization_id == 1) && (Yii::$app->user->identity->id !== 76)) {
                     throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.moon_three', ['ru'=>'Добавление пользователей в эту организацию отключено во имя Луны!']));
                 }
+
+                /*print "<pre>";
+                print_r($user);
+                print "</pre>";
+                print "</br></br>";
+                print "<pre>";
+                print_r($profile);
+                print "</pre>";
+                die();*/
+                //print $profile->email_allow;
+                //print '  Ghbitk'; die();
                 $user->save();
+                $profile->email = $user->getEmail();
                 $profile->save();
                 return $this->redirect(['client/view', 'id' => $user->id]);
             } else {
@@ -206,6 +224,9 @@ class ClientController extends Controller {
                 return $this->redirect(['restors']);
                 break;
             case Role::ROLE_RESTAURANT_EMPLOYEE:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_ONE_S_INTEGRATION:
                 return $this->redirect(['restors']);
                 break;
             case Role::ROLE_SUPPLIER_MANAGER:

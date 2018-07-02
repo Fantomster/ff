@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model common\models\User */
 
 $this->title = $model->profile->full_name;
-$this->params['breadcrumbs'][] = ['label' => 'Пользователи', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $_SESSION["clients_name"], 'url' => $_SESSION["clients"]];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-view">
@@ -26,6 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]);
     }
+    print " ";
+    echo Html::a('Вернуться к просмотру списка', [$this->params['breadcrumbs'][0]['url']], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
     ?>
 
     <?=
@@ -38,7 +40,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => $model->role->name,
                 'label' => 'Роль',
             ],
-            'status',
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    switch($data->status) {
+                        case 0: return 'Не активен';
+                            break;
+                        case 1: return 'Активен';
+                            break;
+                        case 2: return 'Ожидается подтверждение E-mail';
+                            break;
+                    }
+                },
+                'label' => 'Статус',
+            ],
             [
                 'format' => 'raw',
                 'attribute' => 'email',
@@ -114,6 +129,60 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => isset($model->organization) ? Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]) : 'Отсутствует',
                 'label' => 'Организация',
+            ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    switch($data->profile->gender) {
+                        case 0: return 'Не указан';
+                            break;
+                        case 1: return 'Мужской';
+                            break;
+                        case 2: return 'Женский';
+                            break;
+                    }
+                },
+                'label' => 'Пол',
+            ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    if($data->profile->job_id==0) return 'Не указана'; else return \common\models\Job::getJobById($data->profile->job_id)['name_job'];
+                },
+                'label' => 'Должность',
+            ],
+            [
+                'format' => 'raw',
+                'value' => $model->profile->phone,
+                'label' => 'Телефон',
+            ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    switch($data->profile->sms_allow) {
+                        case 0: return 'Не указано';
+                            break;
+                        case 1: return 'Согласен';
+                            break;
+                        case 2: return 'Не согласен';
+                            break;
+                    }
+                },
+                'label' => 'Согласие на смс-рассылки',
+            ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    switch($data->profile->email_allow) {
+                        case 0: return 'Не указано';
+                            break;
+                        case 1: return 'Согласен';
+                            break;
+                        case 2: return 'Не согласен';
+                            break;
+                    }
+                },
+                'label' => 'Согласие на Email-рассылки',
             ],
         ],
     ])

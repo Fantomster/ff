@@ -95,9 +95,7 @@ use api\common\models\RkDicconst;
     ?>
 
     <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
-        <?php
-        $org = 3768;
-        echo $form->field($model, 'store_rid')->widget(TreeViewInput::classname(),
+        <?php echo $form->field($model, 'store_rid')->widget(TreeViewInput::classname(),
             [
                 'name' => 'store_rid',
                 'value' => 'true', // preselected values

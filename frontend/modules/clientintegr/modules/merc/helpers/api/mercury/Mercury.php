@@ -381,6 +381,7 @@ class ActivityLocationList{
     var $location;//BusinessMember
 }
 class VetDocument{
+    var $UUID; //UUID
     var $vetDForm;//VetDocumentForm
     var $vetDType;//VetDocumentType
     var $vetDStatus;//VetDocumentStatus

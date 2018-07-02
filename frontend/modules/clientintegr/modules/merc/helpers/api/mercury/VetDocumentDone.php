@@ -43,6 +43,7 @@ class VetDocumentDone extends Component
     {
 
         $this->doc = (new \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest())->getDocumentByUUID($this->UUID, true);
+
         $data = new ProcessIncomingConsignmentRequest();
         $date = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.\Yii::$app->formatter->asTime('now', 'HH:mm:ss');
 
@@ -63,7 +64,7 @@ class VetDocumentDone extends Component
         $consigment->productType = $this->doc->certifiedConsignment->batch->productType;
         $consigment->product = $this->doc->certifiedConsignment->batch->product;
         $consigment->subProduct = $this->doc->certifiedConsignment->batch->subProduct;
-        $consigment->productItem =  new//$this->doc->certifiedConsignment->batch->productItem;
+        $consigment->productItem =  $this->doc->certifiedConsignment->batch->productItem;
 
         $volume = $this->doc->certifiedConsignment->batch->volume;
         $consigment->volume = (($this->type == self::RETURN_ALL) ? 0 : (isset($this->rejected_data['volume']) ? $this->mb_abs($this->rejected_data['volume']) : $volume));
@@ -96,7 +97,14 @@ class VetDocumentDone extends Component
         $data->delivery->transportInfo = $this->doc->certifiedConsignment->transportInfo;
         $data->delivery->transportStorageType = $this->doc->certifiedConsignment->transportStorageType;
 
-        $data->delivery->accompanyingForms = $this->doc->certifiedConsignment->accompanyingForms;
+        $accompanyingForms = new ConsignmentDocumentList();
+        if(isset($this->doc->delivery->accompanyingForms->waybill))
+        $accompanyingForms->waybill = $this->doc->delivery->accompanyingForms->waybill;
+        if(isset($this->doc->delivery->accompanyingForms->relatedDocument))
+        $accompanyingForms->relatedDocument = $this->doc->delivery->accompanyingForms->relatedDocument;
+        $accompanyingForms->vetCertificate = new VetDocument();
+        $accompanyingForms->vetCertificate->uuid = $this->UUID;
+        $data->delivery->accompanyingForms = $accompanyingForms;
         
         /*$user = new User();
         $user->login = $this->login;*/

@@ -7,7 +7,7 @@ class m180629_144608_update2_email_table_profile extends Migration
 
     public function safeUp()
     {
-        $rows =  (new \yii\db\Query())->select(['id','user_id'])->from('profile')->all();
+        /*$rows =  (new \yii\db\Query())->select(['id','user_id'])->from('profile')->all();
         foreach ($rows as $row) {
             $id = $row['id'];
             $user_id = $row['user_id'];
@@ -17,7 +17,7 @@ class m180629_144608_update2_email_table_profile extends Migration
                 ['email' => $email],
                 ['id' =>$id]
             );
-        }
+        }*/
     }
 
     public function safeDown()

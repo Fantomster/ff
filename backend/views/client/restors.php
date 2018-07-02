@@ -83,9 +83,9 @@ $gridColumns = [
         'label' => 'Телефон',
     ],
     [
-        'attribute' => 'sms_allow',
+        'attribute' => 'sms_subscribe',
         'value' => function ($data) {
-            switch ($data['profile']['sms_allow']) {
+            switch ($data['sms_subscribe']) {
                 case 1:
                     $sms_allow = 'Согласен';
                     break;
@@ -103,9 +103,9 @@ $gridColumns = [
     ],
     'email',
     [
-        'attribute' => 'email_allow',
+        'attribute' => 'subscribe',
         'value' => function ($data) {
-            switch ($data['profile']['email_allow']) {
+            switch ($data['subscribe']) {
                 case 1:
                     $email_allow = 'Согласен';
                     break;
@@ -122,7 +122,18 @@ $gridColumns = [
         'label' => 'Email-рассылки',
         'filter' => common\models\Allow::getList(),
     ],
+    [
+        'attribute' => 'language',
+        'value' => 'language',
+        'label' => 'Язык',
+    ],
     ['class' => 'yii\grid\ActionColumn'],
+    [
+        'attribute' => 'access_token',
+        'value' => 'access_token',
+        'label' => 'Токен',
+        'contentOptions'=>['style'=>'white-space: normal; max-width: 5px; overflow:hidden; text-overflow:clip;']
+    ],
 ];
 ?>
 <div class="user-index">

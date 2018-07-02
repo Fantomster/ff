@@ -29,6 +29,7 @@ use yii\web\BadRequestHttpException;
  *
  * @property integer $organization_id
  * @property integer $subscribe
+ * @property integer $sms_subscribe
  * @property integer $send_manager_message
  * @property integer $send_week_message
  * @property integer $send_demo_message
@@ -77,7 +78,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
-            [['organization_id', 'type', 'subscribe', 'send_manager_message', 'send_week_message', 'send_demo_message'], 'integer'],
+            [['organization_id', 'type', 'subscribe', 'sms_subscribe', 'send_manager_message', 'send_week_message', 'send_demo_message'], 'integer'],
             [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
         ];
 

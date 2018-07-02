@@ -274,7 +274,7 @@ class VendorController extends DefaultController
                     }
 
                     $user->setRegisterAttributes($user->role_id)->save();
-                    $profile->email = $user->getEmail();
+                    //$profile->email = $user->getEmail();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
@@ -334,7 +334,7 @@ class VendorController extends DefaultController
                     }
                     $user->email = $email;
                     $user->save();
-                    $profile->email = $user->getEmail();
+                    //$profile->email = $user->getEmail();
                     $profile->save();
                     User::updateRelationUserOrganization($user->id, $currentUserOrganizationID, $post['User']['role_id']);
 
@@ -1401,7 +1401,7 @@ class VendorController extends DefaultController
                             try {
                                 $user->organization_id = $rel2[0]->organization_id;
                                 $user->role_id = $rel2[0]->role_id;
-                                $profile->email = $user->getEmail();
+                                //$profile->email = $user->getEmail();
                                 $user->save();
                                 User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
                                 Yii::$app->user->logout();

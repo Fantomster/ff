@@ -14,10 +14,8 @@ use yii\helpers\ArrayHelper;
  *
  * @property string $phone
  * @property string $sms_allow
- * @property string $email_allow
- * @property string $avatar
- * @property string $email
- * @property string $gender
+  * @property string $avatar
+  * @property string $gender
  * 
  * @property string $avatarUrl
  * @property string $miniAvatarUrl
@@ -66,10 +64,8 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['phone'], 'required', 'on' => ['invite'], 'message' => Yii::t('app', 'common.models.plefse_phone', ['ru'=>'Пожалуйста, введите номер телефона'])];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];
         $rules[] = [['sms_allow'], 'default', 'value' => 0];
-        $rules[] = [['email_allow'], 'default', 'value' => 0];
         $rules[] = [['gender'], 'default', 'value' => 0];
         $rules[] = [['job_id'], 'default', 'value' => 0];
-        $rules[] = [['email'], 'default', 'value' => null];
 
         return $rules;
     }

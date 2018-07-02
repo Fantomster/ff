@@ -47,17 +47,17 @@ class Allow extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProfilesAtEmailAllow()
+    public function getUsersAtEmailAllow()
     {
-        return $this->hasMany(Profile::className(), ['email_allow' => 'id']);
+        return $this->hasMany(User::className(), ['subscribe' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProfilesAtSmsAllow()
+    public function getUsersAtSmsAllow()
     {
-        return $this->hasMany(Profile::className(), ['sms_allow' => 'id']);
+        return $this->hasMany(User::className(), ['sms_subscribe' => 'id']);
     }
     
     /**

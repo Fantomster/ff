@@ -207,10 +207,9 @@ class ClientController extends DefaultController {
                         $user->role_id = $this->currentUser->role_id;
                     }
                     $user->setRegisterAttributes($user->role_id)->save();
-                    $profile->email = $post['User']['email'];
+                    //$profile->email = $post['User']['email'];
                     $profile->setUser($user->id)->save();
                     $userid = $user->id;
-                    //$query = "update `profile` set `email`='".$post['User']['email']."' where `user_id`=".$userid;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
                     User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
@@ -269,7 +268,7 @@ class ClientController extends DefaultController {
                     $user->email = $email;
                     $user->role_id = $post['User']['role_id'];
                     $user->save();
-                    $profile->email = $user->getEmail();
+//                    $profile->email = $user->getEmail();
                     $profile->save();
                     User::updateRelationUserOrganization($user->id, $this->currentUser->organization_id, $post['User']['role_id']);
 

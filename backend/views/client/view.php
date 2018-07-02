@@ -159,7 +159,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    switch($data->profile->sms_allow) {
+                    switch($data->sms_subscribe) {
                         case 0: return 'Не указано';
                             break;
                         case 1: return 'Согласен';
@@ -173,7 +173,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    switch($data->profile->email_allow) {
+                    switch($data->subscribe) {
                         case 0: return 'Не указано';
                             break;
                         case 1: return 'Согласен';
@@ -184,6 +184,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'label' => 'Согласие на Email-рассылки',
             ],
+            'access_token',
         ],
     ])
     ?>

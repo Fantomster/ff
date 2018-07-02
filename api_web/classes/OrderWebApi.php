@@ -272,7 +272,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->product_id = $productModel['id'];
             $orderContent->quantity = (new CartWebApi())->recalculationQuantity($productModel, $product['quantity'] ?? 1);
             $orderContent->comment = $product['comment'] ?? '';
-            $orderContent->price = $productModel['price'];
+            $orderContent->price = $product['price'] ?? $productModel['price'];
             $orderContent->initial_quantity = $orderContent->quantity;
             $orderContent->product_name = $productModel['product'];
             $orderContent->units = $productModel['units'];

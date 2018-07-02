@@ -5,14 +5,54 @@ use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\grid\GridView;
 use yii\widgets\Pjax;
-?>
-<?php
+
+\common\assets\SweetAlertAsset::register($this);
+
+$deleteBusinessTitle = Yii::t('message', 'frontend.controllers.user.business_delete_question', ['ru' => "Действительно удалить бизнес?"]);
+$cancelText = Yii::t('message', 'frontend.controllers.user.business_cancel_btn', ['ru' => "Отмена"]);
+$confirmText = Yii::t('message', 'frontend.controllers.user.business_confirm_btn', ['ru' => "Удалить"]);
+$errorText = Yii::t('message', 'frontend.controllers.user.business_error', ['ru' => "Ошибка!"]);
+
 $js = <<<JS
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });
     $(document).on("focusout", "#searchString", function() {
         $('#searchForm').submit();
+    });
+    $(document).on("click", ".deleteBusiness", function(e) {
+        e.preventDefault();
+        var clicked = $(this);
+        swal({
+            title: "$deleteBusinessTitle",
+            type: "warning",
+            showCancelButton: true,
+            cancelButtonText: "$cancelText",
+            confirmButtonText: "$confirmText",
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false,
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        clicked.data("url")
+                    ).done(function (result) {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            if (result.value.type == "success") {
+                swal(result.value);
+            } else if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({title: "$errorText", text: result.value.message, type: "error"});
+            }
+        });
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
@@ -21,11 +61,11 @@ $grid = [
         'label' => false,
         'format' => 'raw',
         'value' => function ($data) {
-            $rel = \common\models\RelationUserOrganization::findOne(['organization_id'=>$data['id'], 'user_id'=>Yii::$app->user->id]);
-            if($rel){
-                $role = \common\models\Role::findOne(['id'=>$rel->role_id]);
+            $rel = \common\models\RelationUserOrganization::findOne(['organization_id' => $data['id'], 'user_id' => Yii::$app->user->id]);
+            if ($rel) {
+                $role = \common\models\Role::findOne(['id' => $rel->role_id]);
                 $roleName = " (" . Yii::t('app', $role->name) . ") ";
-            }else{
+            } else {
                 $roleName = '';
             }
             if ($data['type_id'] == \common\models\Organization::TYPE_RESTAURANT) {
@@ -42,15 +82,32 @@ $grid = [
 
                 return Html::a('<i class="fa fa-toggle-on"  style="margin-top:8px;"></i>', '#', [
                             'class' => 'disabled pull-right',
-                            'style' => 'font-size:26px;color:#84bf76;padding-right:25px;'
+                            'style' => 'font-size:26px;color:#84bf76;padding-right:10px;'
                 ]);
             }
             return Html::a('<i class="fa fa-toggle-on" style="transform: scale(-1, 1);margin-top:8px;"></i>', '#', [
                         'class' => 'change-net-org pull-right',
-                        'style' => 'font-size:26px;color:#ccc;padding-right:25px;',
+                        'style' => 'font-size:26px;color:#ccc;padding-right:10px;',
                         'data' => ['id' => $data['id']],
             ]);
         },
+        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
+    ],
+    [
+        'label' => false,
+        'format' => 'raw',
+        'value' => function ($data) {
+            if ($data['id'] != \common\models\User::findIdentity(Yii::$app->user->id)->organization_id) {
+
+                return Html::a('<i class="glyphicon glyphicon-trash"></i>', '#', [
+                            'class' => 'btn btn-danger deleteBusiness',
+                            'data-url' => Url::to(['']),
+                ]);
+            } else {
+                return '';
+            }
+        },
+        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
     ],
 ];
 ?>
@@ -94,33 +151,33 @@ $grid = [
                         <br />
                         <?php
                         $form = ActiveForm::begin([
-                            'method' => 'get',
-                            'options' => [
-                                'id' => 'searchForm',
-                                'class' => "navbar-form no-padding no-margin",
-                                'role' => 'search',
-                            ],
+                                    'method' => 'get',
+                                    'options' => [
+                                        'id' => 'searchForm',
+                                        'class' => "navbar-form no-padding no-margin",
+                                        'role' => 'search',
+                                    ],
                         ]);
                         ?>
                         <?=
-                        $form->field($searchModel, 'searchString', [
-                            'addon' => [
-                                'append' => [
-                                    'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
-                                    'options' => [
-                                        'class' => 'append',
+                                $form->field($searchModel, 'searchString', [
+                                    'addon' => [
+                                        'append' => [
+                                            'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
+                                            'options' => [
+                                                'class' => 'append',
+                                            ],
+                                        ],
                                     ],
-                                ],
-                            ],
-                            'options' => [
-                                'class' => "margin-right-15 form-group",
-                            ],
-                        ])
-                            ->textInput([
-                                'id' => 'searchString',
-                                'class' => 'form-control',
-                                'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru'=>'Поиск'])])
-                            ->label(false)
+                                    'options' => [
+                                        'class' => "margin-right-15 form-group",
+                                    ],
+                                ])
+                                ->textInput([
+                                    'id' => 'searchString',
+                                    'class' => 'form-control',
+                                    'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru' => 'Поиск'])])
+                                ->label(false)
                         ?>
                         <?php ActiveForm::end(); ?>
 

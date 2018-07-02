@@ -78,7 +78,7 @@ class vetDocumentDone extends Component
                            <prod:name>'.$doc->ns2batch->ns2productItem->prodname->__toString().'</prod:name>
                         </vet:productItem>
                         <vet:volume>'.(($this->type == self::RETURN_ALL) ? 0 :
-                (isset($this->rejected_data['volume']) ? $this->mb_abs($this->rejected_data['volume']) : $doc->ns2batch->ns2volume)).'</vet:volume>
+                ($this->type != self::ACCEPT_ALL) ? $this->mb_abs($this->rejected_data['volume']) : $doc->ns2batch->ns2volume).'</vet:volume>
                         <vet:unit>
                            <base:uuid>'.$doc->ns2batch->ns2unit->bsuuid.'</base:uuid>
                         </vet:unit>';
@@ -194,8 +194,8 @@ class vetDocumentDone extends Component
 
         $first_date = '<vet:firstDate>
         <base:year>'.$date_raw->ns2firstDate->bsyear.'</base:year>
-        <base:month>'.$date_raw->ns2firstDate->bsmonth.'</base:month>
-        <base:day>'.$date_raw->ns2firstDate->bsday.'</base:day>';
+        <base:month>'.$date_raw->ns2firstDate->bsmonth.'</base:month>';
+        $first_date .= (isset($date_raw->ns2firstDate->bsday)) ? '<base:day>'.$date_raw->ns2firstDate->bsday.'</base:day>' : "";
         $first_date .= (isset($date_raw->ns2firstDate->bshour)) ? '<base:hour>'.$date_raw->ns2firstDate->bshour."</base:hour>" : "";
         $first_date .= '</vet:firstDate>';
         if($date_raw->ns2secondDate)
@@ -204,6 +204,7 @@ class vetDocumentDone extends Component
             <base:year>'.$date_raw->ns2secondDate->bsyear.'</base:year>
             <base:month>'.$date_raw->ns2secondDate->bsmonth.'</base:month>
             <base:day>'.$date_raw->ns2secondDate->bsday.'</base:day>';
+            $first_date .= (isset($date_raw->ns2secondDate->bsday)) ? '<base:day>'.$date_raw->ns2secondDate->bsday.'</base:day>' : "";
             $second_date .= (isset($date_raw->ns2secondDate->bshour)) ? '<base:hour>'.$date_raw->ns2secondDate->bshour."</base:hour>" : "";
             $second_date .= '</vet:secondDate>';
             return $first_date.' '.$second_date;

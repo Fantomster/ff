@@ -4,7 +4,6 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
 use api\common\models\merc\mercLog;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -183,6 +182,8 @@ class mercuryApi extends baseApi
             $client = $this->getSoapClient('mercury');
 
             $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
+
             $request->application = new Application();
             $request->application->serviceId = $this->service_id;
             $request->application->issuerId = $this->issuerID;
@@ -217,13 +218,13 @@ class mercuryApi extends baseApi
 
                 $status = $result->application->status;
 
-                if ($status == 'COMPLETED') {
-                    $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
-                    $cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
-                } else
-                    $result = null;
-
             } while ($status == 'IN_PROCESS');
+
+            if ($status == 'COMPLETED') {
+                $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
+                $cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
+            } else
+                $result = null;
 
             //Пишем лог
             $client = $this->getSoapClient('mercury');
@@ -246,60 +247,69 @@ class mercuryApi extends baseApi
 
             //Готовим запрос
             $client = $this->getSoapClient('mercury');
+
             $request = new submitApplicationRequest();
             $request->apiKey = $this->apiKey;
-            $application = new application();
-            $application->serviceId = $this->service_id;
-            $application->issuerId = $this->issuerID;
-            $application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
 
-            //Проставляем id запроса
-            $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+            $request->application = new Application();
+            $request->application->serviceId = $this->service_id;
+            $request->application->issuerId = $this->issuerID;
+            $request->application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+            $appData = new ApplicationDataWrapper();
 
             //Формируем тело запроса
-            $vetDoc = new vetDocumentDone();
-            $vetDoc->login = $this->vetisLogin;
-            $vetDoc->UUID = $UUID;
-            $vetDoc->rejected_data = $rejectedData;
+            $config['login'] = $this->vetisLogin;
+            $config['UUID'] = $UUID;
 
-            if ($rejectedData == null)
-                $vetDoc->type = vetDocumentDone::ACCEPT_ALL;
+            if($rejectedData == null)
+                $config['type'] = vetDocumentDone::ACCEPT_ALL;
             else
-                $vetDoc->type = $rejectedData['decision'];
+                $config['type'] = $rejectedData['decision'];
 
-            $vetDoc->doc = (new getVetDocumentByUUIDRequest())->getDocumentByUUID($UUID, true);
-            $vetDoc->localTransactionId = $localTransactionId;
-            $application->addData($vetDoc);
-            $request->setApplication($application);
+            $config['rejected_data'] = $rejectedData;
+            $config['localTransactionId'] = $localTransactionId;
 
-            /*var_dump(htmlentities($request->getXML()));
-            die();*/
+            $vetDoc = new VetDocumentDone();
+            $vetDoc->init($config);
+            $appData->any['ns3:processIncomingConsignmentRequest'] = $vetDoc->getProcessIncomingConsignmentRequest();
+
+            $request->application->data = $appData;
+
             //Делаем запрос
-            $request = $request->getXML();
 
-            $response = $client->__doRequest($request, $this->wsdls['mercury']['Endpoint_URL'], 'submitApplicationRequest', SOAP_1_1);
 
-            $result = $this->parseResponse($response);
 
-            if (isset($result->envBody->envFault)) {
-                echo "Bad request";
-                die();
-            }
+            $result = $client->submitApplicationRequest($request);
 
-            //timeout перед запросом результата
-            sleep(2);
-            //Получаем результат запроса
-            $response = $this->getReceiveApplicationResult($result->envBody->submitApplicationResponse->application->applicationId);
-            $result = $this->parseResponse($response);
+            /*echo "<pre>";
+            var_dump($request);
+            echo htmlentities($client->__getLastRequest());
+            echo "</pre>";
+            die();
+*/
+            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+
+            $app_id = $result->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep(1);
+                //Получаем результат запроса
+                $result = $this->getReceiveApplicationResult($app_id);
+
+                $status = $result->application->status;
+
+            } while ($status == 'IN_PROCESS');
+
+            if ($status == 'COMPLETED') {
+                $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
+                Yii::$app->cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
+            } else
+                $result = null;
 
             //Пишем лог
-            $this->addEventLog($result->envBody->receiveApplicationResultResponse, __FUNCTION__, $localTransactionId, $request, $response);
-
-            if ($result->envBody->receiveApplicationResultResponse->application->status->__toString() == 'COMPLETED') {
-                $result = true;
-            } else
-                $result = false;
-
+            $client = $this->getSoapClient('mercury');
+            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
 
         } catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);

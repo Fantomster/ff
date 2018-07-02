@@ -473,6 +473,7 @@ class VetDocumentList{
     var $vetDocument;//VetDocument
 }
 class DiscrepancyReport{
+    var $issueDate;
     var $reason;//DiscrepancyReason
     var $description;//string
 }

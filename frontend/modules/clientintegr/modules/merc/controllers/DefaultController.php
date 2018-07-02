@@ -88,6 +88,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionDone($uuid)
     {
+        $start = Yii::$app->params['merc_settings']['start_date'];
+
+        if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null)
+            Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
+        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+
         try {
             $api = mercApi::getInstance();
 
@@ -123,6 +129,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionDonePartial($uuid, $reject = false)
     {
+        $start = Yii::$app->params['merc_settings']['start_date'];
+
+        if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null)
+            Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
+        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+
         $model = new rejectedForm();
         if($reject)
             $model->decision = vetDocumentDone::RETURN_ALL;
@@ -198,8 +210,15 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         try {
             $selected = explode(',', $selected);
             $api = mercApi::getInstance();
+            $start = Yii::$app->params['merc_settings']['start_date'];
+            $error = false;
             foreach ($selected as $id) {
                 $uuid = MercVsd::findOne(['id' => $id])->uuid;
+
+                if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null) {
+                    Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до ' . Yii::$app->formatter->asDatetime($start, "php:j M Y") . ' необходимо перейти в систему Меркурий');
+                $error = true;
+                }
                 if(!$api->getVetDocumentDone($uuid))
                     throw new \Exception('Done error');
 
@@ -222,6 +241,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->redirect(['index']);
         }
 
+        if(!$error)
         Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
         $this->updateVSDList();
         return $this->redirect(['index']);

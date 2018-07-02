@@ -941,18 +941,19 @@ class User extends \amnah\yii2\user\models\User {
 
     public function wipeNotifications() {
         $toBeWiped = [
-            'order_created' => false,
-            'order_canceled' => false,
-            'order_changed' => false,
-            'order_processing' => false,
-            'order_done' => false,
-            'request_accept' => false,
-            'receive_employee_email' => false,
+            'order_created' => 0,
+            'order_canceled' => 0,
+            'order_changed' => 0,
+            'order_processing' => 0,
+            'order_done' => 0,
+            'request_accept' => 0,
+            'receive_employee_email' => 0,
         ];
         $allEmailNotifications = EmailNotification::findAll(['user_id' => $this->id]);
         foreach ($allEmailNotifications as $emailNotification) {
             $emailNotification->load(['EmailNotification' => $toBeWiped]);
             $emailNotification->save();
+            $test = 1;
         }
         $allSmsNotifications = SmsNotification::findAll(['user_id' => $this->id]);
         foreach ($allSmsNotifications as $smsNotification) {

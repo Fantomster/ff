@@ -35,7 +35,24 @@ $gridColumns = [
         'value' => 'profile.phone',
         'label' => 'Телефон',
     ],
-    'status',
+    [
+        'attribute' => 'status',
+        'value' => function ($data) {
+            switch ($data['status']) {
+                case 0:
+                    return 'Не активен';
+                    break;
+                case 1:
+                    return 'Активен';
+                    break;
+                case 2:
+                    return 'Ожидается подтверждение E-mail';
+                    break;
+            }
+            return $status;
+        },
+        'label' => 'Статус',
+    ],
     'email',
     [
         'format' => 'raw',

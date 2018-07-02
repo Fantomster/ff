@@ -178,18 +178,8 @@ class ClientController extends Controller {
                     throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.moon_three', ['ru'=>'Добавление пользователей в эту организацию отключено во имя Луны!']));
                 }
 
-                /*print "<pre>";
-                print_r($user);
-                print "</pre>";
-                print "</br></br>";
-                print "<pre>";
-                print_r($profile);
-                print "</pre>";
-                die();*/
-                //print $profile->email_allow;
-                //print '  Ghbitk'; die();
                 $user->save();
-                $profile->email = $user->getEmail();
+                //$profile->email = $user->getEmail();
                 $profile->save();
                 return $this->redirect(['client/view', 'id' => $user->id]);
             } else {

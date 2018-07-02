@@ -45,7 +45,7 @@ use kartik\checkbox\CheckboxX;
     //$form->field($profile, 'job_id')
     ?>
 
-    <?= $form->field($profile, 'email') ?>
+    <?php //echo $form->field($profile, 'email') ?>
 
     <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
         'jsOptions' => [
@@ -59,11 +59,11 @@ use kartik\checkbox\CheckboxX;
     ]) ?>
 
     <?=
-    $form->field($profile, 'email_allow')->dropDownList(common\models\Allow::getList());
+    $form->field($user, 'subscribe')->dropDownList(common\models\Allow::getList());
     ?>
 
     <?=
-    $form->field($profile, 'sms_allow')->dropDownList(common\models\Allow::getList());
+    $form->field($user, 'sms_subscribe')->dropDownList(common\models\Allow::getList());
     ?>
 
 

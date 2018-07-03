@@ -67,8 +67,9 @@ class vetDocumentsChangeList extends Model
                 $cache->add('vetDocRaw_'.$item->uuid, $item,60);
 
             $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
+            $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
             $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
-            $recipient = $recipient->enterprise;
+
             $model = MercVsd::findOne(['uuid' => $item->uuid, 'guid' => $guid]);
 
             if($model == null)
@@ -78,17 +79,33 @@ class vetDocumentsChangeList extends Model
                 'uuid' => $item->uuid,
                 'number' => $this->getNumber($item->issueSeries, $item->issueNumber),
                 'date_doc' => $item->issueDate,
-                'status' => $item->vetDStatus,
                 'type' => $item->vetDType,
+                'form' => $item->vetDForm,
+                'status' => $item->vetDStatus,
+                'recipient_name' => $recipient->enterprise->name.'('. $recipient->enterprise->address->addressView .')',
+                'recipient_guid' => $recipient->enterprise->guid,
+                'sender_guid' => $sender->enterprise->guid,
+                'sender_name' =>  $sender->enterprise->name.'('. $sender->enterprise->address->addressView .')',
+                'finalized' => $item->finalized,
+                'last_update_date' => $this->getDate($item->lastUpdateDate),
+                'vehicle_number' => $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber,
+                'trailer_number' => $item->certifiedConsignment->transportInfo->transportNumber->trailerNumber,
+                'container_number' => $item->certifiedConsignment->transportInfo->transportNumber->containerNumber,
+                'transport_storage_type' => $item->certifiedConsignment->transportStorageType,
+                'product_type' => $item->certifiedConsignment->batch->productType,
                 'product_name' => $item->certifiedConsignment->batch->productItem->name,
                 'amount' => $item->certifiedConsignment->batch->volume,
                 'unit' => $unit->unit->name,
+                'gtin' => $item->certifiedConsignment->batch->productItem->globalID,
+                'article' => $item->certifiedConsignment->batch->productItem->code,
                 'production_date' => $this->getDate($item->certifiedConsignment->batch->dateOfProduction),
-                'recipient_name' =>  $recipient->name.'('.
-                    $recipient->address->addressView
-                    .')',
-                'guid' => $guid,
-                'consignor' => $item->certifiedConsignment->consignor->enterprise->guid,
+                'expiry_date' => $this->getDate($item->certifiedConsignment->batch->expiryDate),
+                'batch_id' => $item->certifiedConsignment->batch->batchID,
+                'perishable' => $item->certifiedConsignment->batch->perishable,
+                'producer_name' => $item->certifiedConsignment->batch->origin->producer->enterprise->name,
+                'producer_guid' => $item->certifiedConsignment->batch->origin->producer->enterprise->guid,
+                'low_grade_cargo' => $item->certifiedConsignment->batch->lowGradeCargo,
+                'raw_data' => serialize($item)
             ]);
 
             if(!$model->save()) {

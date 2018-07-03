@@ -37,6 +37,7 @@ use Yii;
  * @property string $producer_name
  * @property string $producer_guid
  * @property string $low_grade_cargo
+ * @property string $raw_data
  */
 class MercVsd extends \yii\db\ActiveRecord
 {
@@ -62,7 +63,7 @@ class MercVsd extends \yii\db\ActiveRecord
     public function rules()
     {
              return [
-                 [['date_doc', 'last_update_date'], 'safe'],
+                 [['date_doc', 'last_update_date', 'raw_data'], 'safe'],
                  [['finalized', 'product_type', 'perishable'], 'integer'],
                  [['amount'], 'number'],
                  [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid', 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'producer_name', 'producer_guid', 'low_grade_cargo'], 'string', 'max' => 255],
@@ -115,6 +116,6 @@ class MercVsd extends \yii\db\ActiveRecord
 
         $vsd  = self::findOne(['uuid' => $uuid]);
 
-        return ($guid == $vsd->consignor) ? 2 : 1;
+        return ($guid == $vsd->sender_guid) ? 2 : 1;
     }
 }

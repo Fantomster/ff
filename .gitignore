@@ -83,3 +83,6 @@ Vagrantfile
 /api_web/web/index-test.php
 /api_web/web/index.php
 /api_web/config/.gitignore
+backend/web/upload/temp/
+franchise/web/runtime/
+franchise/web/upload/temp/

@@ -2013,7 +2013,7 @@ class OrderController extends DefaultController {
      * @param Organization $senderOrg
      * @param Order $order
      */
-    private function sendOrderCanceled($senderOrg, $order) {
+    public function sendOrderCanceled($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;

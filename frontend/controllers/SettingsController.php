@@ -60,12 +60,11 @@ class SettingsController extends DefaultController {
     }
 
     public function actionTest(){
-        echo Yii::getVersion();
-//        $eComIntegration = new EComIntegration();
-//        $eComIntegration->handleFilesList();
-//        sleep(3);
-//        $eComIntegration = new EComIntegration();
-//        $eComIntegration->handleFilesListQueue();
+        $eComIntegration = new EComIntegration();
+        $eComIntegration->handleFilesList();
+        sleep(3);
+        $eComIntegration = new EComIntegration();
+        $eComIntegration->handleFilesListQueue();
     }
 
 

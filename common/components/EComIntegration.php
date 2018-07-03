@@ -40,7 +40,8 @@ class EComIntegration
 
     public function handleFilesList(): void
     {
-        $ediOrganizations = EdiOrganization::find()->where(['not', ['gln_code' => null]])->andWhere(['not', ['login' => null]])->andWhere(['not', ['pass' => null]])->all();
+        $ediOrganizations = EdiOrganization::find()->where(['not', ['gln_code' => null]])->andWhere(['not', ['login' => null]])
+            ->andWhere(['not', ['pass' => null]])->all();
         if (is_iterable($ediOrganizations)) {
             foreach ($ediOrganizations as $ediOrganization) {
                 $login = $ediOrganization['login'];
@@ -185,7 +186,7 @@ class EComIntegration
     }
 
 
-    private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $isAlcohol = false)
+    private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, bool $isAlcohol = false): bool
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
@@ -221,13 +222,15 @@ class EComIntegration
             $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
             $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
         }
-
         $summ = 0;
         $ordContArr = [];
+        $totalCount = 0;
+        $totalPrice = 0;
         foreach ($order->orderContent as $orderContent) {
             $index = $orderContent->id;
             $ordContArr[] = $orderContent->id;
             if (!isset($arr[$index]['BARCODE'])){
+                if(!isset($orderContent->ediOrderContent))continue;
                 $index = $orderContent->ediOrderContent->barcode;
                 $ordContArr[] = $index;
             }
@@ -235,10 +238,12 @@ class EComIntegration
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
             if (!$good) continue;
             $barcodeArray[] = $good->barcode;
+            $totalCount+=$arr[$index]['ACCEPTEDQUANTITY'];
+            $totalPrice+=$arr[$index]['PRICE'];
 
             $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
             if (!$ordCont) continue;
-            if (!in_array($index, $positionsArray)) {
+            if (!in_array($index, $positionsArray) || $arr[$index]['ACCEPTEDQUANTITY'] == 0 || $arr[$index]['PRICE'] == 0) {
                 $ordCont->delete();
                 $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
             } else {
@@ -306,6 +311,10 @@ class EComIntegration
             $ediOrder->save();
         }
 
+        if($totalCount == 0 || $totalPrice == 0){
+            OrderController::sendOrderCanceled($order->client, $order);
+            return true;
+        }
 
         $user = User::findOne(['id' => $order->created_by_id]);
         if ($message != '') {

@@ -89,7 +89,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionDone($uuid)
     {
-        //try {
+        try {
             $api = mercuryApi::getInstance();
 
             if(!$api->getVetDocumentDone($uuid))
@@ -99,7 +99,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $cache->delete('vetDocRaw_' . $uuid);
             $cache->delete('vetDoc_' . $uuid);
 
-        /*} catch (\Error $e)
+        } catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -111,7 +111,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }*/
+        }
 
         Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
         $this->updateVSDList();

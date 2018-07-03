@@ -150,10 +150,11 @@ class VetDocumentDone extends Component
         $retuned = new Delivery();
         $retuned->deliveryDate = $date;
 
-        $consignor = $this->doc->certifiedConsignment->consignee;
+        $consignor = new Consignee
+            //clone $this->doc->certifiedConsignment->consignee;
         $retuned->consignor = $consignor;
 
-        $consignee = $this->doc->certifiedConsignment->consignor;
+        $consignee = clone $this->doc->certifiedConsignment->consignor;
         $retuned->consignee = $consignee;
 
         $consigment = new Consignment();

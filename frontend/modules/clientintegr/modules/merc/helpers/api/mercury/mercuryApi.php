@@ -276,18 +276,8 @@ class mercuryApi extends baseApi
 
             $request->application->data = $appData;
 
-            //Делаем запрос
-
-
-
             $result = $client->submitApplicationRequest($request);
 
-            /*echo "<pre>";
-            var_dump($request);
-            echo htmlentities($client->__getLastRequest());
-            echo "</pre>";
-            die();
-*/
             $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
 
             $app_id = $result->application->applicationId;

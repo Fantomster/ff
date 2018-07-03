@@ -8,10 +8,11 @@ use yii\widgets\Pjax;
 
 \common\assets\SweetAlertAsset::register($this);
 
-$deleteBusinessTitle = Yii::t('message', 'frontend.controllers.user.business_delete_question', ['ru' => "Действительно удалить бизнес?"]);
-$cancelText = Yii::t('message', 'frontend.controllers.user.business_cancel_btn', ['ru' => "Отмена"]);
-$confirmText = Yii::t('message', 'frontend.controllers.user.business_confirm_btn', ['ru' => "Удалить"]);
-$errorText = Yii::t('message', 'frontend.controllers.user.business_error', ['ru' => "Ошибка!"]);
+$deleteBusinessTitle = Yii::t('app', 'frontend.controllers.user.business_delete_question', ['ru' => "Действительно удалить бизнес?"]);
+$cancelText = Yii::t('app', 'frontend.controllers.user.business_cancel_btn', ['ru' => "Отмена"]);
+$confirmText = Yii::t('app', 'frontend.controllers.user.business_confirm_btn', ['ru' => "Удалить"]);
+$errorTitle = Yii::t('app', 'frontend.controllers.user.business_error_title', ['ru' => "Ошибка!"]);
+$errorText = Yii::t('app', 'frontend.controllers.user.business_error_text', ['ru' => "Произошла неизвестная ошибка."]);
 
 $js = <<<JS
     $(document).on("click", ".btnSubmit", function() {
@@ -50,7 +51,7 @@ $js = <<<JS
             } else if (result.dismiss === "cancel") {
                 swal.close();
             } else {
-                swal({title: "$errorText", text: result.value.message, type: "error"});
+                swal({title: "$errorTitle", text: "$errorText", type: "error"});
             }
         });
     });

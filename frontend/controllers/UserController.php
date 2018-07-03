@@ -414,13 +414,24 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     }
 
     public function actionDeleteBusiness($id) {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization_id;
         $organizationToDelete = Organization::findOne(['id' => $id]);
         
+        $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id']);
+        
+        if (empty($relationUserOrg) && !(in_array($relationUserOrg->role_id, [
+            Role::ROLE_ADMIN,
+            Role::ROLE_FKEEPER_MANAGER,
+            Role::ROLE_RESTAURANT_MANAGER,
+            Role::ROLE_SUPPLIER_MANAGER
+            ]))) {
+            return false;
+        }
+        
         if ($currentOrganization->setPrimary() && $organizationToDelete->delete()) {
-            return ["title" => Yii::t('message', 'frontend.controllers.user.business_deleted', ['ru' => "Бизнес успешно удален!"]), "type" => "success"];
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ["title" => Yii::t('app', 'frontend.controllers.user.business_deleted', ['ru' => "Бизнес успешно удален!"]), "type" => "success"];
         }
     }
 

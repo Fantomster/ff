@@ -33,14 +33,14 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function get($post)
     {
-        if(!empty($post['email'])) {
+        if (!empty($post['email'])) {
             $model = User::findOne(['email' => $post['email']]);
         } else {
             $user_id = $post['id'] ?? $this->user->id;
             $model = User::findOne($user_id);
         }
 
-        if(empty($model)) {
+        if (empty($model)) {
             throw new BadRequestHttpException('User not found');
         }
 

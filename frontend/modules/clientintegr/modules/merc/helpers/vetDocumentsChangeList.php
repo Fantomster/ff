@@ -29,7 +29,7 @@ class vetDocumentsChangeList extends Model
             $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
             $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
 
-            $model = MercVsd::findOne(['uuid' => $item->uuid, 'guid' => $guid]);
+            $model = MercVsd::findOne(['uuid' => $item->uuid]);
 
             if($model == null)
                 $model = new MercVsd();
@@ -78,9 +78,15 @@ class vetDocumentsChangeList extends Model
     {
         $api = mercuryApi::getInstance();
 
-        $result = $api->getVetDocumentChangeList($last_visit);
+        if(isset($last_visit))
+            $result = $api->getVetDocumentChangeList($last_visit);
+        else
+            $result = $api->getVetDocumentList();
 
         if(isset($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument))
             $this->updateDocumentsList($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument);
+
+        if(isset($result->application->result->any['getVetDocumentListResponse']->vetDocumentList->vetDocument))
+            $this->updateDocumentsList($result->application->result->any['getVetDocumentListResponse']->vetDocumentList->vetDocument);
     }
 }

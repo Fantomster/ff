@@ -106,11 +106,11 @@ Modal::widget([
             },
         ],
         [
-            'attribute' => 'recipient_name',
+            'attribute' => 'sender_name',
             'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отправитель']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['recipient_name'];
+                return $data['sender_name'];
             },
         ],
         [

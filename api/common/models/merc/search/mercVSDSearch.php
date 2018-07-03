@@ -47,7 +47,7 @@ class mercVSDSearch extends MercVsd
         ]);
 
         if (!($this->load($params) && $this->validate())) {
-            $query->andWhere("consignor <> '$guid' and status = 'CONFIRMED'");
+            $query->andWhere("recipient_guid = '$guid' and status = 'CONFIRMED'");
             return $dataProvider;
         }
 
@@ -61,9 +61,9 @@ class mercVSDSearch extends MercVsd
         ]);
 
         if($this->type == 2)
-            $query->andWhere("consignor = '$guid'");
+            $query->andWhere("recipient_guid = '$guid'");
         else
-            $query->andWhere("consignor <> '$guid'");
+            $query->andWhere("sender_guid = '$guid'");
 
         if ( !empty($this->date_from) && !empty($this->date_to)) {
             $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from));
@@ -79,6 +79,9 @@ class mercVSDSearch extends MercVsd
     public function getRecipientList()
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
-        return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("consignor <> '$guid'")->groupBy('consignor')->all(), 'consignor', 'recipient_name'));
+        if($this->type == 1)
+            return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("recipient_guid = '$guid'")->groupBy('sender_guid')->all(), 'sender_guid', 'sender_name'));
+        else
+            return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("sender_guid = '$guid'")->groupBy('recipient_guid')->all(), 'recipient_guid', 'recipient_name'));
     }
 }

@@ -13,8 +13,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
+use yii\base\Model;
 
-class getVetDocumentByUUIDRequest extends BaseRequest
+class getVetDocumentByUUIDRequest extends Model
 {
     public $UUID;
     public $issueSeries;
@@ -158,54 +159,6 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             'locationProsperity' => 'Благополучие местности',
             'specialMarks' => 'Особые отметки',
         ];
-    }
-
-    public function getSoap_namespaces()
-    {
-        return $this->soap_namespaces;
-    }
-
-    public function setInitiator($login)
-    {
-        $this->initiator = new initiator();
-        $this->initiator->login = $login;
-        $this->soap_namespaces[] = $this->initiator->soap_namespaces;
-    }
-
-    public function setEnterpriseGuid($GUID)
-    {
-        $this->enterpriseGuid = $GUID;
-        $this->soap_namespaces[] = 'xmlns:ent="http://api.vetrf.ru/schema/cdm/cerberus/enterprise"';
-    }
-
-    public function getEnterpriseGuid()
-    {
-        return $this->enterpriseGuid;
-    }
-
-    public function getInitiator()
-    {
-        return $this->initiator;
-    }
-
-    public function getXML()
-    {
-        $xml = '<merc:getVetDocumentByUuidRequest>'.PHP_EOL.
-    '<merc:localTransactionId>' . $this->localTransactionId . '</merc:localTransactionId>'.PHP_EOL;
-        if (isset($this->initiator))
-            $xml .= $this->initiator->getXML();
-
-       /* $xml .= '<base:listOptions>'.PHP_EOL.
-            '<base:count>10</base:count>'.PHP_EOL.
-            '<base:offset>0</base:offset>'.PHP_EOL.
-        '</base:listOptions>'.PHP_EOL.
-        '<vet:vetDocumentType>INCOMING</vet:vetDocumentType>'.PHP_EOL.
-        '<vet:vetDocumentStatus>UTILIZED</vet:vetDocumentStatus>'.PHP_EOL;*/
-        $xml .= '<base:uuid>'.$this->UUID.'</base:uuid>';
-        $xml .= '<ent:enterpriseGuid>'.$this->enterpriseGuid.'</ent:enterpriseGuid>'.PHP_EOL.
-        '</merc:getVetDocumentByUuidRequest>';
-
-        return $xml;
     }
 
     public function getDocumentByUUID($UUID, $raw = false)

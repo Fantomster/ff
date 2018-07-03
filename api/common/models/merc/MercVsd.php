@@ -62,13 +62,13 @@ class MercVsd extends \yii\db\ActiveRecord
      */
     public function rules()
     {
-             return [
-                 [['date_doc', 'last_update_date', 'raw_data'], 'safe'],
-                 [['finalized', 'product_type', 'perishable'], 'integer'],
-                 [['amount'], 'number'],
-                 [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid', 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'producer_name', 'producer_guid', 'low_grade_cargo'], 'string', 'max' => 255],
-                 [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
-             ];
+        return [
+            [['date_doc', 'last_update_date', 'raw_data'], 'safe'],
+            [['finalized', 'product_type', 'perishable'], 'integer'],
+            [['amount'], 'number'],
+            [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid', 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'producer_name', 'producer_guid', 'low_grade_cargo'], 'string', 'max' => 255],
+            [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
+        ];
     }
 
     /**
@@ -114,8 +114,53 @@ class MercVsd extends \yii\db\ActiveRecord
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
 
-        $vsd  = self::findOne(['uuid' => $uuid]);
+        $vsd = self::findOne(['uuid' => $uuid]);
 
         return ($guid == $vsd->sender_guid) ? 2 : 1;
+    }
+
+    public static function getNumber($series, $number)
+    {
+        if (empty($number) && empty($series))
+            return null;
+
+        $res = '';
+        if (isset($series))
+            $res = $series . ' ';
+
+        if (isset($number))
+            $res .= $number;
+
+        return $res;
+    }
+
+    public static function getDate($date_raw)
+    {
+        if (isset($date_raw))
+            return null;
+
+        if (isset($date_raw->informalDate))
+            return $date_raw->informalDate;
+
+        $first_date = $date_raw->firstDate->year . '-' . $date_raw->firstDate->month;
+
+        if (isset($date_raw->firstDate->day))
+            $first_date .= '-' . $date_raw->firstDate->day;
+
+        if (isset($date_raw->firstDate->hour))
+            $first_date .= $date_raw->firstDate->hour . ":00:00";
+
+        if ($date_raw->secondDate) {
+            $second_date = $date_raw->secondDate->year . '-' . $date_raw->secondDate->month;
+
+            if (isset($date_raw->secondDate->day))
+                $second_date .= '-' . $date_raw->secondDate->day;
+
+            if (isset($date_raw->secondDate->hour))
+                $second_date .= $date_raw->secondDate->hour . ":00:00";
+            return 'с ' . $first_date . ' до ' . $second_date;
+        }
+
+        return $first_date;
     }
 }

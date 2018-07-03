@@ -9,37 +9,6 @@ use yii\data\ArrayDataProvider;
 
 class vetDocumentsList extends Model
 {
-    const DOC_TYPE_INCOMMING = 'INCOMING';
-    const DOC_TYPE_OUTGOING = 'OUTGOING';
-    const DOC_TYPE_PRODUCTIVE = 'PRODUCTIVE';
-    const DOC_TYPE_RETURNABLE = 'RETURNABLE';
-    const DOC_TYPE_TRANSPORT = 'TRANSPORT';
-
-    public $types = [
-        self::DOC_TYPE_INCOMMING => 'Входящий ВСД',
-        self::DOC_TYPE_OUTGOING => 'Исходящий ВСД',
-        self::DOC_TYPE_PRODUCTIVE => 'Производственный ВСД',
-        self::DOC_TYPE_RETURNABLE => 'Возвратный ВСД',
-        self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
-    ];
-
-    const DOC_STATUS_ALL = null;
-    const DOC_STATUS_CONFIRMED = 'CONFIRMED';
-    const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
-    const DOC_STATUS_UTILIZED = 'UTILIZED';
-
-    public static $statuses = [
-        self::DOC_STATUS_ALL => 'Все',
-        self::DOC_STATUS_CONFIRMED => 'Оформлен',
-        self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
-        self::DOC_STATUS_UTILIZED => 'Погашен',
-    ];
-
-    public static $status_color = [
-        self::DOC_STATUS_CONFIRMED => '',
-        self::DOC_STATUS_WITHDRAWN => 'cancelled',
-        self::DOC_STATUS_UTILIZED => 'done',
-    ];
 
     public $recipentList = [null => 'Все'];
     public $status;

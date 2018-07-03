@@ -12,6 +12,54 @@ use api_web\components\WebApiController;
 class UserController extends WebApiController
 {
     /**
+     * @SWG\Post(path="/user/get",
+     *     tags={"User"},
+     *     summary="Информация о пользователе",
+     *     description="Информация о пользователе",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={"id":1, "email":"neo@neo.com"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={
+     *                   "id": 5,
+     *                   "email": "mail@yandex.ru",
+     *                   "phone": "+79999999999",
+     *                   "name": "Годный Старец",
+     *                   "role_id": 3,
+     *                   "role": "Руководитель"
+     *               }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     */
+    public function actionGet()
+    {
+        $this->response = $this->container->get('UserWebApi')->get($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/user/registration",
      *     tags={"User"},
      *     summary="Регистрация пользователя",

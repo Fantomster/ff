@@ -511,12 +511,17 @@ class Document{
     var $qualifier;//Identifier
 }
 class Waybill{
+    var $issueSeries;//String255
+    var $issueNumber;//String255
+    var $issueDate;//date
+    var $type;//DocumentType
     var $consignor;//BusinessMember
     var $consignee;//BusinessMember
     var $broker;//BusinessEntity
     var $transportInfo;//TransportInfo
     var $transportStorageType;//TransportationStorageType
     var $shipmentRoute;//ShipmentRoute
+
 }
 class TransportInfo{
     var $transportType;//TransportType

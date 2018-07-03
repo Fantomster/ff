@@ -130,9 +130,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         else
             $model->decision = vetDocumentDone::PARTIALLY;
 
-        try {
+       //try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-                $api = mercApi::getInstance();
+                $api = mercuryApi::getInstance();
 
                 if(!$api->getVetDocumentDone($uuid, $model->attributes))
                     throw new \Exception('Done error');
@@ -146,8 +146,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 if (Yii::$app->request->isAjax)
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
-            }
-        } catch (\Error $e)
+           }
+        /*} catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -160,12 +160,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
 
-        try {
+        //try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e)
+        /*}catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', 'Ошибка загрузки формы акта неоответствия ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -178,7 +178,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
 
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [
@@ -198,7 +198,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
         try {
             $selected = explode(',', $selected);
-            $api = mercApi::getInstance();
+            $api = mercuryApi::getInstance();
             foreach ($selected as $id) {
                 $uuid = MercVsd::findOne(['id' => $id])->uuid;
                 if(!$api->getVetDocumentDone($uuid))

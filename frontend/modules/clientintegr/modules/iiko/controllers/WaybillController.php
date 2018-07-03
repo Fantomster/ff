@@ -187,7 +187,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->quant = $model->defquant;
         $model->koef = 1;
 
-        $wayModel = iikoWaybill::findOne($model->waybill_id);
+        $wayModel = iiloWaybill::findOne($model->waybill_id);
         if (!$wayModel) {
             die("Cant find wmodel in map controller cleardata");
         }

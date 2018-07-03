@@ -25,6 +25,35 @@ use api_web\exceptions\ValidationException;
  */
 class UserWebApi extends \api_web\components\WebApi
 {
+
+    /**
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        if (!empty($post['email'])) {
+            $model = User::findOne(['email' => $post['email']]);
+        } else {
+            $user_id = $post['id'] ?? $this->user->id;
+            $model = User::findOne($user_id);
+        }
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('User not found');
+        }
+
+        return [
+            'id' => $model->id,
+            'email' => $model->email,
+            'phone' => $model->profile->phone,
+            'name' => $model->profile->full_name,
+            'role_id' => $model->role->id,
+            'role' => $model->role->name,
+        ];
+    }
+
     /**
      * @param array $post
      * [
@@ -198,15 +227,13 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
             }
 
-            $allow_roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER];
+            $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
 
-            if (in_array($this->user->role_id, $allow_roles) || RelationUserOrganization::find()->where(['user_id' => $this->user->id])->count() > 1) {
+            if ($roleID != null) {
                 if (!in_array($this->user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER])) {
-                    $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                         $this->user->role_id = $roleID ?? Role::ROLE_RESTAURANT_MANAGER;
                     }
-
                     if ($organization->type_id == Organization::TYPE_SUPPLIER) {
                         $this->user->role_id = $roleID ?? Role::ROLE_SUPPLIER_MANAGER;
                     }
@@ -215,7 +242,7 @@ class UserWebApi extends \api_web\components\WebApi
             } else if (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
                 $this->user->organization_id = $organization->id;
             } else {
-                throw new \Exception('access denied role_id = ' . $this->user->role_id . '. Allow roles: ' . implode(', ', $allow_roles));
+                throw new \Exception('access denied.');
             }
 
             $result = $this->user->save();

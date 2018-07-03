@@ -2,7 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
-use api\common\models\iiko\iikoWaybill;
+use api\common\models\one_s\OneSWaybill;
 use api\common\models\iiko\iikoWaybillData;
 use api\common\models\iiko\search\iikoDicSearch;
 use api\common\models\iiko\iikoService;
@@ -91,7 +91,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionTest() {
-        $model = iikoWaybill::findOne(7);
+        $model = oneSWaybill::findOne(7);
         header('Content-type: text/xml');
         echo $model->getXmlDocument();
     }

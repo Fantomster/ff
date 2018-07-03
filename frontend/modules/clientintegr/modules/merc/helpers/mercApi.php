@@ -289,6 +289,9 @@ class mercApi extends Component
 
         if (!$log->save())
             var_dump($log->getErrors());
+
+        if($log->status == mercLog::REJECTED)
+            throw new \Exception($log->id, 600);
     }
 
     public function getUnitByGuid ($GUID)

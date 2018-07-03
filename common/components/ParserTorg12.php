@@ -6,6 +6,7 @@ use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
 use PHPExcel_Shared_Date;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ParserTorg12
 {
@@ -89,7 +90,7 @@ class ParserTorg12
     /**
      * Активный лист документа
      *
-     * @var \PHPExcel_Worksheet
+     * @var \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     private $worksheet;
 
@@ -145,7 +146,7 @@ class ParserTorg12
 
         // читаем файл в формате Excel по форме ТОРГ12
         try {
-            $objPHPExcel = \PHPExcel_IOFactory::load($this->filePath);
+            $objPHPExcel = /*\PHPExcel_IOFactory*/IOFactory::load($this->filePath);
         } catch (\Exception $e) {
             $errorMsg = 'Невозможно прочитать загруженный файл: ' . $e->getMessage();
             throw new ParseTorg12Exception($errorMsg);
@@ -198,9 +199,9 @@ class ParserTorg12
     /**
      * Изменить активный лист
      *
-     * @param \PHPExcel_Worksheet $worksheet
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet
      */
-    private function setWorksheet(\PHPExcel_Worksheet $worksheet)
+    private function setWorksheet(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet)
     {
         $this->worksheet = $worksheet;
         $this->rowsToProcess = [];
@@ -448,7 +449,7 @@ class ParserTorg12
     private function parseHeaderForRekviz()
     {
 
-        $checkSellRekviz = function ($col, $row, $attribute) { //функция для нахождения единственной ячейки, где хранится правильное наимнование поставщика
+        $checkSellRekviz = function ($col, $row, $attribute) { //функция для нахождения единственной ячейки, где хранится правильное наименование поставщика
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
             $has=0;
             for ($i=0;$i<count($attribute);$i++){
@@ -512,7 +513,11 @@ class ParserTorg12
         $postav=mb_strtolower($this->settingsRow['postav'][0]);
         foreach($this->invoice->tmpMassivsInns as $tmp) { //цикл по всем значениям массива ячеек, где встречалось слово ИНН
             $row=$tmp[0]; $col=$tmp[1];
-            $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col-1, $row)->getValue()); //ячейка слева
+            if ($col!=0) {
+                $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col-1, $row)->getValue()); //ячейка слева
+            } else {
+                $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //ячейка слева
+            }
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //ячейка из массива
             $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col+1, $row)->getValue()); //ячейка справа
             $cellValue=trim($cellValue); //убираем пробелы
@@ -564,6 +569,7 @@ class ParserTorg12
                 }
             }
             if ($sovpad_poln==1) $valueFromCell=$cellValueNext; else $valueFromCell=$cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
+            //print $valueFromCell."</br>";
             $temp1 = explode(',',$valueFromCell); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
             $valueFromCell = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $temp1[0]); //заменяем в наименовании поставщика полное название типа организации кратким названием
             $this->invoice->namePostav = ltrim(mb_strtoupper($valueFromCell)); //убираем пробелы и переводми  наименование поставщика в верхний регистр

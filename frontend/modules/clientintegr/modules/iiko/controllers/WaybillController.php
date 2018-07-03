@@ -226,9 +226,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $data = $command->queryAll();
             $out['results'] = array_values($data);
        */
-            $sql = "( select id, denom as `text` from iiko_product where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-                " union ( select id, denom as `text` from iiko_product  where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-                "union ( select id, denom as `text` from iiko_product where  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            $sql = "( select id, denom as `text` from iiko_product where is_active = 1 and org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
+                " union ( select id, denom as `text` from iiko_product  where is_active = 1 and  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
+                "union ( select id, denom as `text` from iiko_product where is_active = 1 and  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
                 "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;

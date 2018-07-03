@@ -66,7 +66,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e) {
+      }catch (\Error $e) {
             Yii::$app->session->setFlash('error', 'Ошибка загрузки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -109,7 +109,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $cache->delete('vetDocRaw_' . $uuid);
             $cache->delete('vetDoc_' . $uuid);
 
-        } catch (\Error $e)
+       } catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам

@@ -99,7 +99,6 @@ class mercApi extends Component
         }
         else
         $xmlString = $response;
-
         $xml = simplexml_load_string($xmlString);
         return new \SimpleXMLElement($xml->asXML());
     }
@@ -584,7 +583,7 @@ class mercApi extends Component
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
-
+        
         try {
             //Готовим запрос
             $request = new submitApplicationRequest();

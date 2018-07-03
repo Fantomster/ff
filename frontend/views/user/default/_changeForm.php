@@ -12,7 +12,9 @@ $deleteBusinessTitle = Yii::t('app', 'frontend.controllers.user.business_delete_
 $cancelText = Yii::t('app', 'frontend.controllers.user.business_cancel_btn', ['ru' => "Отмена"]);
 $confirmText = Yii::t('app', 'frontend.controllers.user.business_confirm_btn', ['ru' => "Удалить"]);
 $errorTitle = Yii::t('app', 'frontend.controllers.user.business_error_title', ['ru' => "Ошибка!"]);
-$errorText = Yii::t('app', 'frontend.controllers.user.business_error_text', ['ru' => "Произошла неизвестная ошибка."]);
+$errorText = Yii::t('app', 'frontend.controllers.user.business_error_text', ['ru' => "Произошла неизвестная ошибка"]);
+
+$changeFormUrl = Url::to(['/user/default/change-form']);
 
 $js = <<<JS
     $(document).on("click", ".btnSubmit", function() {
@@ -42,14 +44,16 @@ $js = <<<JS
                         } else {
                             resolve(false);
                         }
-                    });
+                    }).fail(function(result) {
+                        });
                 })
             },
         }).then(function (result) {
-            if (result.value.type == "success") {
-                swal(result.value);
-            } else if (result.dismiss === "cancel") {
+            if (result.dismiss === "cancel") {
                 swal.close();
+            } else if (result.value.type == "success") {
+                $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "$changeFormUrl"});
+                swal(result.value);
             } else {
                 swal({title: "$errorTitle", text: "$errorText", type: "error"});
             }
@@ -102,7 +106,8 @@ $grid = [
 
                 return Html::a('<i class="glyphicon glyphicon-trash"></i>', '#', [
                             'class' => 'btn btn-danger deleteBusiness',
-                            'data-url' => Url::to(['']),
+                            'data-url' => Url::to(['/user/delete-business', 'id' => $data['id']]),
+                            'data-pjax' => 0,
                 ]);
             } else {
                 return '';

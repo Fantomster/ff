@@ -53,7 +53,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         'allow' => false,
                     ],
                     [
-                        'actions' => ['ajax-invite-friend', 'business', 'change-form', 'change', 'create'],
+                        'actions' => ['ajax-invite-friend', 'business', 'change-form', 'change', 'create', 'delete-business'],
                         'allow' => true,
                         'roles' => ['@'],
                     ]
@@ -415,7 +415,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
     public function actionDeleteBusiness($id) {
         $user = User::findIdentity(Yii::$app->user->id);
-        $currentOrganization = $user->organization_id;
+        $currentOrganization = $user->organization;
         $organizationToDelete = Organization::findOne(['id' => $id]);
         
         $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id']);
@@ -429,7 +429,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             return false;
         }
         
-        if ($currentOrganization->setPrimary() && $organizationToDelete->delete()) {
+        if ($currentOrganization->setPrimary() && $organizationToDelete->wipeBusiness()) {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => Yii::t('app', 'frontend.controllers.user.business_deleted', ['ru' => "Бизнес успешно удален!"]), "type" => "success"];
         }

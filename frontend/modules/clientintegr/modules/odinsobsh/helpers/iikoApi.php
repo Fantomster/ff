@@ -3,7 +3,7 @@
 namespace frontend\modules\clientintegr\modules\iiko\helpers;
 
 use api\common\models\iiko\iikoDicconst;
-use api\common\models\iiko\iikoWaybill;
+use api\common\models\iiko\oneSWaybill;
 use yii\helpers\ArrayHelper;
 
 class iikoApi
@@ -123,10 +123,10 @@ class iikoApi
     }
 
     /**
-     * @param iikoWaybill $model
+     * @param oneSWaybill $model
      * @return mixed
      */
-    public function sendWaybill(iikoWaybill $model) {
+    public function sendWaybill(oneSWaybill $model) {
         $url = '/documents/import/incomingInvoice';
         return $this->sendXml($url, $model->getXmlDocument());
     }

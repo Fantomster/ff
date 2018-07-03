@@ -102,7 +102,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
             'format' => 'raw',
             'value' => function ($data) {
-                return Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+                return $data['production_date'];
             },
         ],
         [

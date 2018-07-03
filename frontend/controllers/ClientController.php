@@ -207,13 +207,13 @@ class ClientController extends DefaultController {
                         $user->role_id = $this->currentUser->role_id;
                     }
                     $user->setRegisterAttributes($user->role_id)->save();
-                    $profile->email = $post['User']['email'];
+                    //$profile->email = $post['User']['email'];
                     $profile->setUser($user->id)->save();
                     $userid = $user->id;
-                    //$query = "update `profile` set `email`='".$post['User']['email']."' where `user_id`=".$userid;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
                     User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
+                    $user->wipeNotifications();
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     //Yii::$app->db->createCommand($query)->queryScalar();
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -260,14 +260,16 @@ class ClientController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
+            $email = $user->email;
             if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 //$profile->load($post);
 
 
                 if ($user->validate() && $profile->validate()) {
-
+                    $user->email = $email;
                     $user->role_id = $post['User']['role_id'];
                     $user->save();
+//                    $profile->email = $user->getEmail();
                     $profile->save();
                     User::updateRelationUserOrganization($user->id, $this->currentUser->organization_id, $post['User']['role_id']);
 
@@ -303,6 +305,7 @@ class ClientController extends DefaultController {
                         if (count($rel2) > 1) {
                             $user->organization_id = $rel2[0]->organization_id;
                             $user->role_id = $rel2[0]->role_id;
+                            $profile->email = $user->getEmail();
                             $user->save();
                             User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
                             Yii::$app->user->logout();
@@ -466,6 +469,7 @@ class ClientController extends DefaultController {
                             $user->save();
                             $profile->setUser($user->id);
                             $profile->sms_allow = Profile::SMS_ALLOW;
+                            $profile->email = $user->getEmail();
                             $profile->save();
                             $organization->save();
                             $user->setOrganization($organization)->save();
@@ -671,6 +675,7 @@ class ClientController extends DefaultController {
                             $user->save();
                             $profile->setUser($user->id);
                             $profile->sms_allow = Profile::SMS_ALLOW;
+                            $profile->email = $user->getEmail();
                             $profile->save();
                             $organization->save();
                             $user->setOrganization($organization)->save();

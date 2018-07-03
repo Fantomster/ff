@@ -331,6 +331,25 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                     ])->label(false);
                     ?>
 
+                    <?=
+                    $form->field($user, 'sms_subscribe')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $user,
+                        'attribute' => 'sms_subscribe',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => Yii::t('message', 'frontend.views.settings.notifications.allow_sms', ['ru'=>'Информационные рассылки по sms']),
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+
                     <?php if ($user->role_id == \common\models\Role::ROLE_SUPPLIER_MANAGER) {
                         echo $form->field($smsNotification, 'receive_employee_sms')->widget(CheckboxX::classname(), [
                             'autoLabel' => true,

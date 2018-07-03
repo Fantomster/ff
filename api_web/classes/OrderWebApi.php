@@ -272,7 +272,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->product_id = $productModel['id'];
             $orderContent->quantity = (new CartWebApi())->recalculationQuantity($productModel, $product['quantity'] ?? 1);
             $orderContent->comment = $product['comment'] ?? '';
-            $orderContent->price = $productModel['price'];
+            $orderContent->price = $product['price'] ?? $productModel['price'];
             $orderContent->initial_quantity = $orderContent->quantity;
             $orderContent->product_name = $productModel['product'];
             $orderContent->units = $productModel['units'];
@@ -404,6 +404,18 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['currency_id'] = $order->currency->id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
+        $result['discount_type'] =  null;
+
+        if($order->discount_type == Order::DISCOUNT_FIXED) {
+            $result['discount_type'] = 'FIXED';
+        }
+
+        if($order->discount_type == Order::DISCOUNT_PERCENT) {
+            $result['discount_type'] = 'PERCENT';
+        }
+
+        $result['discount_type_id'] = $order->discount_type ?? null;
+
         $result['status_id'] = $order->status;
         $result['status_text'] = $order->statusText;
         $result['position_count'] = (int)$order->positionCount;
@@ -894,8 +906,9 @@ class OrderWebApi extends \api_web\components\WebApi
         $pdf->filename = 'mixcart_order_' . $post['order_id'] . '.pdf';
         ob_start();
         $pdf->render();
-        $content = base64_encode(ob_get_clean());
-        return $content;
+        $content = ob_get_clean();
+        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        return  ($base64 ? base64_encode($content) : $content);
     }
 
     /**
@@ -921,6 +934,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['brand'] = ($model->product->brand ? $model->product->brand : '');
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
+        $item['units'] = $model->product->units;
         $item['currency'] = $model->product->catalog->currency->symbol;
         $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);

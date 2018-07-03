@@ -98,6 +98,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
                     $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+                    $profile->email = $user->getEmail();
                     if ($profile->setUser($user->id)->save() && $organization->save() && $user->setOrganization($organization, true)->save()) {
                         $transaction->commit();
                         $this->afterRegister($user);
@@ -152,6 +153,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
                     $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+                    $profile->email = $user->getEmail();
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
@@ -188,7 +190,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function actionConfirm($token) {
         /** @var \amnah\yii2\user\models\UserToken $userToken */
-        /** @var \amnah\yii2\user\models\User $user */
+        /** @var common\models\User $user */
         // search for userToken
         $success = false;
         $email = "";
@@ -200,6 +202,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             //   for example, user registered another account before confirming change of email
             $user = $this->module->model("User");
             $user = $user::findOne($userToken->user_id);
+            $user->setNotifications();
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;
@@ -245,6 +248,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         if ($user->load(Yii::$app->request->post()) && $user->validate() && $profile->validate() && $organization->validate()) {
             $user->status = $user::STATUS_ACTIVE;
             $user->save();
+            $profile->email = $user->getEmail();
             $profile->save();
             $organization->save();
             // delete userToken and set success = true

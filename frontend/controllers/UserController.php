@@ -56,7 +56,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         'actions' => ['ajax-invite-friend', 'business', 'change-form', 'change', 'create', 'delete-business'],
                         'allow' => true,
                         'roles' => ['@'],
-                    ]
+                    ],
+                    [
+                        'actions' => ['confirm-additional-email',],
+                        'allow' => true,
+                    ],
                 ],
                 'denyCallback' => function($rule, $action) {
                     $this->redirect(['/site/index']);
@@ -221,6 +225,24 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         $invalidToken = true;
         return $this->render("reset", compact("invalidToken"));
+    }
+
+    public function actionConfirmAdditionalEmail($token) {
+        $additionalEmail = \common\models\AdditionalEmail::findOne(['token' => $token]);
+        if (empty($additionalEmail)) {
+            $success = false;
+        } else {
+            $additionalEmail->order_created = 1;
+            $additionalEmail->order_canceled = 1;
+            $additionalEmail->order_changed = 1;
+            $additionalEmail->order_processing = 1;
+            $additionalEmail->order_done = 1;
+            $additionalEmail->confirmed = 1;
+            $additionalEmail->token = null;
+            $additionalEmail->save();
+            $success = true;
+        }
+        return $this->render('additional-email', compact("success"));
     }
 
     /**
@@ -417,18 +439,18 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization;
         $organizationToDelete = Organization::findOne(['id' => $id]);
-        
+
         $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id']);
-        
+
         if (empty($relationUserOrg) && !(in_array($relationUserOrg->role_id, [
-            Role::ROLE_ADMIN,
-            Role::ROLE_FKEEPER_MANAGER,
-            Role::ROLE_RESTAURANT_MANAGER,
-            Role::ROLE_SUPPLIER_MANAGER
-            ]))) {
+                    Role::ROLE_ADMIN,
+                    Role::ROLE_FKEEPER_MANAGER,
+                    Role::ROLE_RESTAURANT_MANAGER,
+                    Role::ROLE_SUPPLIER_MANAGER
+                ]))) {
             return false;
         }
-        
+
         if ($currentOrganization->setPrimary() && $organizationToDelete->wipeBusiness()) {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return ["title" => Yii::t('app', 'frontend.controllers.user.business_deleted', ['ru' => "Бизнес успешно удален!"]), "type" => "success"];

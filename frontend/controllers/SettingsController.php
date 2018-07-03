@@ -145,7 +145,7 @@ class SettingsController extends DefaultController {
                 throw new \Exception('Ajax only');
             }
             if ($model = AdditionalEmail::findOne($id)) {
-                return $model->delete();
+                $model->delete();
             } else {
                 throw new \Exception('Model not found.');
             }
@@ -169,6 +169,7 @@ class SettingsController extends DefaultController {
                 $model->organization_id = $this->currentUser->organization->id;
                 if ($model->validate()) {
                     $model->save();
+                    $model->sendConfirmationEmail();
                 } else {
                     throw new \Exception($model->getFirstErrors());
                 }
@@ -188,7 +189,7 @@ class SettingsController extends DefaultController {
                 throw new \Exception('Ajax only');
             }
             if ($id = Yii::$app->request->post('id', null)) {
-                $model = AdditionalEmail::findOne($id);
+                $model = AdditionalEmail::findOne(['id' => $id, 'confirmed' => true]);
                 $attribute = Yii::$app->request->post('attribute', null);
                 $model->$attribute = Yii::$app->request->post('value', 0);
                 if ($model->validate()) {

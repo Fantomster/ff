@@ -25,6 +25,35 @@ use api_web\exceptions\ValidationException;
  */
 class UserWebApi extends \api_web\components\WebApi
 {
+
+    /**
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        if(!empty($post['email'])) {
+            $model = User::findOne(['email' => $post['email']]);
+        } else {
+            $user_id = $post['id'] ?? $this->user->id;
+            $model = User::findOne($user_id);
+        }
+
+        if(empty($model)) {
+            throw new BadRequestHttpException('User not found');
+        }
+
+        return [
+            'id' => $model->id,
+            'email' => $model->email,
+            'phone' => $model->profile->phone,
+            'name' => $model->profile->full_name,
+            'role_id' => $model->role->id,
+            'role' => $model->role->name,
+        ];
+    }
+
     /**
      * @param array $post
      * [

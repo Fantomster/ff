@@ -47,7 +47,7 @@ class mercuryApi extends baseApi
 
             $result = $client->submitApplicationRequest($request);
 
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+            $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
             do {
@@ -63,7 +63,7 @@ class mercuryApi extends baseApi
 
             //Пишем лог
             $client = $this->getSoapClient('mercury');
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+            $this->addEventLog($result, __FUNCTION__, $localTransactionId,  $reuest_xml, $client->__getLastResponse());
 
         } catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
@@ -138,7 +138,7 @@ class mercuryApi extends baseApi
 
             $result = $client->submitApplicationRequest($request);
 
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+            $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
             do {
@@ -151,8 +151,7 @@ class mercuryApi extends baseApi
             } while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            $client = $this->getSoapClient('mercury');
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+            $this->addEventLog($result, __FUNCTION__, $localTransactionId,  $reuest_xml, $client->__getLastResponse());
 
 
         } catch (\SoapFault $e) {
@@ -207,7 +206,7 @@ class mercuryApi extends baseApi
             //Делаем запрос
             $result = $client->submitApplicationRequest($request);
 
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+            $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
             do {
@@ -220,15 +219,14 @@ class mercuryApi extends baseApi
 
             } while ($status == 'IN_PROCESS');
 
+            //Пишем лог
+            $this->addEventLog($result, __FUNCTION__, $localTransactionId,  $reuest_xml, $client->__getLastResponse());
+
             if ($status == 'COMPLETED') {
                 $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
                 $cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
             } else
                 $result = null;
-
-            //Пишем лог
-            $client = $this->getSoapClient('mercury');
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
 
         } catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
@@ -278,7 +276,7 @@ class mercuryApi extends baseApi
 
             $result = $client->submitApplicationRequest($request);
 
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
+            $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
             do {
@@ -291,15 +289,14 @@ class mercuryApi extends baseApi
 
             } while ($status == 'IN_PROCESS');
 
+            //Пишем лог
+            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
             if ($status == 'COMPLETED') {
                 $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
                 Yii::$app->cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
             } else
                 $result = null;
-
-            //Пишем лог
-            $client = $this->getSoapClient('mercury');
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $client->__getLastRequest(), $client->__getLastResponse());
 
         } catch (\SoapFault $e) {
             var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);

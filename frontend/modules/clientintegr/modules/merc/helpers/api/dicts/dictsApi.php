@@ -43,7 +43,7 @@ class dictsApi extends baseApi
         $request = new getUnitByGuidRequest();
         $request->guid = $GUID;
         //var_dump($client->soapClient); die();
-        $result = $client->getUnitByGuid($request);
+        $result = $client->GetUnitByGuid($request);
 
         if(isset($result))
             $cache->add('Unit_'.$GUID, $result, 60*60*24*7);

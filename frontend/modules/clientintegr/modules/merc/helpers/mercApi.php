@@ -99,7 +99,6 @@ class mercApi extends Component
         }
         else
         $xmlString = $response;
-
         $xml = simplexml_load_string($xmlString);
         return new \SimpleXMLElement($xml->asXML());
     }
@@ -289,6 +288,9 @@ class mercApi extends Component
 
         if (!$log->save())
             var_dump($log->getErrors());
+
+        if($log->status == mercLog::REJECTED)
+            throw new \Exception($log->id, 600);
     }
 
     public function getUnitByGuid ($GUID)
@@ -581,7 +583,7 @@ class mercApi extends Component
     {
         $client = $this->getSoapClient('mercury');
         $result = null;
-
+        
         try {
             //Готовим запрос
             $request = new submitApplicationRequest();

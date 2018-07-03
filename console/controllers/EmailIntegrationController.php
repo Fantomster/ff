@@ -52,6 +52,22 @@ class EmailIntegrationController extends Controller
         $temp_file[10] = '/app/console/runtime/testnac23.xls';
         $temp_file[11] = '/app/console/runtime/testnac24.xls';
         $temp_file[12] = '/app/console/runtime/testnac25.xlsx';
+        $temp_file[13] = '/app/console/runtime/testnac26.xlsx';
+        $temp_file[14] = '/app/console/runtime/testnac27.xlsx';
+        $temp_file[15] = '/app/console/runtime/testnac28.xlsx';
+        $temp_file[16] = '/app/console/runtime/ЕКТД 22007.xls';
+        $temp_file[17] = '/app/console/runtime/ЕКТД 22010.xls';
+        $temp_file[18] = '/app/console/runtime/ЕКТД 22015.xls';
+        $temp_file[19] = '/app/console/runtime/ЕКТД 22016.xls';
+        $temp_file[20] = '/app/console/runtime/ЕКТД 22017.xls';
+        $temp_file[21] = '/app/console/runtime/ЕКТД 22018.xls';
+        $temp_file[22] = '/app/console/runtime/ЕКТД 22028.xls';
+        $temp_file[23] = '/app/console/runtime/ЕКТД 22029.xls';
+        $temp_file[24] = '/app/console/runtime/ЕКТД 22030.xls';
+        $temp_file[25] = '/app/console/runtime/ЕКТД 22031.xls';
+        $temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
+        $temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
+        $temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
 
 
         $i =1;

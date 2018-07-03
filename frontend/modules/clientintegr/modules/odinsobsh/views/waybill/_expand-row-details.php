@@ -20,14 +20,14 @@ if (empty($model)) {
         [
             'attribute' => 'agent_uuid',
             'value' => function ($model) {
-                return (!empty($model->agent->denom)) ? $model->agent->denom : 'Не указано';
+                return (!empty($model->agent->name)) ? $model->agent->name : 'Не указано';
 
             },
         ],
         [
             'attribute' => 'store_id',
             'value' => function ($model) {
-                return (!empty($model->store->denom)) ? $model->store->denom : 'Не указано';
+                return (!empty($model->store->name)) ? $model->store->name : 'Не указано';
 
             },
         ],

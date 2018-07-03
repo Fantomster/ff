@@ -89,9 +89,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $start = Yii::$app->params['merc_settings']['start_date'];
 
-        if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null)
+        if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null) {
             Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
-        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index'])); }
 
         try {
             $api = mercApi::getInstance();
@@ -129,9 +129,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $start = Yii::$app->params['merc_settings']['start_date'];
 
-        if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null)
+        if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null) {
             Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
-        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index'])); }
 
         $model = new rejectedForm();
         if($reject)

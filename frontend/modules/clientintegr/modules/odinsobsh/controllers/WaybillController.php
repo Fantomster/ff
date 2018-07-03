@@ -299,7 +299,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             echo "Can't find order";
             die();
         }
-        //dd(Yii::$app->request->post());
 
         $model = new OneSWaybill();
         $model->order_id = $order_id;
@@ -313,6 +312,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
             return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
+            $model->num_code = $order_id;
             return $this->render('create', [
                 'model' => $model,
             ]);

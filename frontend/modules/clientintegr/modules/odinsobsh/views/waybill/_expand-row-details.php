@@ -63,9 +63,6 @@ if (empty($model)) {
                 'map' => function ($model, $key, $index) {
                     return true;
                 },
-                'export' => function ($model, $key, $index) {
-                    return ($model->status_id == 1 && $model->readytoexport) ? true : false;
-                },
             ],
             'buttons' => [
 
@@ -78,21 +75,6 @@ if (empty($model)) {
                     $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/map', 'waybill_id' => $model->id]);
                     return \yii\helpers\Html::a('<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax' => "0"]);
-                },
-                'export' => function ($url, $model) use ($order_id) {
-                    return \yii\helpers\Html::a(
-                        Html::tag('i','',[
-                            'class' => 'fa fa-upload ',
-                            'aria-hidden' => true
-                        ]),
-                        '#',
-                        [
-                            'class' => 'export-waybill',
-                            'title' => Yii::t('backend', 'Выгрузить'),
-                            'data-pjax' => "1",
-                            'data-id' => $model->id,
-                            'data-oid' => $order_id,
-                        ]);
                 },
             ]
         ]

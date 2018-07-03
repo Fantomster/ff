@@ -61,8 +61,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->render('/default/_nolic');
     }
 
-(ID Ошибки), возможно сервер ВЕТИС “Меркурий” перегружен, попробуйте повторить запрос чуть позже. Если ошибка повторяется, пожалуйста сообщите нам info@mixcart.ru
-
     public function actionView($uuid)
     {
         try {
@@ -277,8 +275,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     private function updateVSDList()
     {
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
-        //$transaction = Yii::$app->db_api->beginTransaction();
-        //try {
+        $transaction = Yii::$app->db_api->beginTransaction();
+        try {
 
             $vsd = new vetDocumentsChangeList();
             if(isset($visit))
@@ -286,11 +284,11 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
-            //$transaction->commit();
-       /* }catch (\Exception $e)
+            $transaction->commit();
+        }catch (\Exception $e)
         {
             $transaction->rollback();
             //var_dump($e->getMessage());
-        }*/
+        }
     }
 }

@@ -64,10 +64,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionView($uuid)
     {
         Yii::$app->cache->flush();
-        //try {
+        try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        /*}catch (\Error $e) {
+        }catch (\Error $e) {
             Yii::$app->session->setFlash('error', 'Ошибка загрузки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -78,7 +78,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->redirect(['index']);
-        }*/
+        }
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -130,7 +130,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         else
             $model->decision = vetDocumentDone::PARTIALLY;
 
-       //try {
+       try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
 
@@ -147,7 +147,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
            }
-        /*} catch (\Error $e)
+        } catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', 'Ошибка обработки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -160,12 +160,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }*/
+        }
 
-        //try {
+        try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        /*}catch (\Error $e)
+        }catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', 'Ошибка загрузки формы акта неоответствия ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
@@ -178,7 +178,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }*/
+        }
 
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [
@@ -231,17 +231,17 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     private function updateVSDList()
     {
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
-        //$transaction = Yii::$app->db_api->beginTransaction();
-       //try {
+        $transaction = Yii::$app->db_api->beginTransaction();
+       try {
             $vsd = new vetDocumentsChangeList();
             $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*5);
             $vsd->updateData($visit);
-            //MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
-            //$transaction->commit();
-        /*}catch (\Exception $e)
+            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
+            $transaction->commit();
+        }catch (\Exception $e)
         {
-           // $transaction->rollback();
+           $transaction->rollback();
             var_dump($e->getMessage());
-        }*/
+        }
     }
 }

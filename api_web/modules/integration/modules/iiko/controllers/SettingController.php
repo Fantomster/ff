@@ -55,7 +55,7 @@ class SettingController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={}
+     *                  default={"taxVat":0, "auth_login":"admin"}
      *              )
      *         )
      *     ),

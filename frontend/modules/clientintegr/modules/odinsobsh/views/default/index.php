@@ -54,14 +54,6 @@ use kartik\grid\GridView;
                         'updated_at',
                         'obj_count',
                         [
-                            'attribute' => 'dicstatus_id',
-                            'value' => function ($model) {
-                                return $model->dicstatus->denom;
-                            },
-                            'format' => 'raw',
-                            'contentOptions' => ['style' => 'width: 10%;']
-                        ],
-                        [
                             'class' => 'yii\grid\ActionColumn',
                             'contentOptions' => ['style' => 'width: 6%;'],
                             'template' => '{view}&nbsp;&nbsp;&nbsp;{get}',

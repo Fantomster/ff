@@ -5,13 +5,13 @@ namespace api\common\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use api\common\models\iiko\iikoWaybillData;
+use api\common\models\one_s\OneSWaybillData;
 use yii\data\ArrayDataProvider;
 
 /**
- * iikoWaybillDataSearch represents the model behind the search form of `api\common\models\iiko\iikoWaybillData`.
+ * OneSWaybillDataSearch represents the model behind the search form of `api\common\models\one_s\OneSWaybillData`.
  */
-class iikoWaybillDataSearch extends iikoWaybillData
+class OneSWaybillDataSearch extends OneSWaybillData
 {
 
     public $fproductnameProduct;
@@ -47,9 +47,9 @@ class iikoWaybillDataSearch extends iikoWaybillData
      */
     public function search($params)
     {
-        $query = iikoWaybillData::find()
-            ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
-            ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
+        $query = OneSWaybillData::find()
+            ->select('one_s_waybill_data.*, one_s_good.name as pdenom')
+            ->leftJoin('one_s_good', 'one_s_good.id = product_rid')
             ->where(['waybill_id' => Yii::$app->request->get('waybill_id')])->all();
 
         foreach ($query as $key=>$value)

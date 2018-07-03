@@ -2,7 +2,9 @@
 
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
-use api\common\models\iiko\iikoPconst;
+use api\common\models\one_s\OneSGood;
+use api\common\models\one_s\OneSPconst;
+use api\common\models\OneSWaybillDataSearch;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
@@ -11,10 +13,10 @@ use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use yii\web\NotFoundHttpException;
-use api\common\models\iiko\iikoProduct;
-use api\common\models\iiko\iikoService;
-use api\common\models\iiko\iikoWaybill;
-use api\common\models\iiko\iikoWaybillData;
+use api\common\models\one_s\OneSProduct;
+use api\common\models\one_s\OneSService;
+use api\common\models\one_s\OneSWaybill;
+use api\common\models\one_s\OneSWaybillData;
 use yii\web\Response;
 use yii\helpers\Url;
 use api\common\models\iikoWaybillDataSearch;
@@ -30,17 +32,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return ArrayHelper::merge(parent::actions(), [
             'edit' => [
                 'class' => EditableColumnAction::className(),
-                'modelClass' => iikoWaybillData::className(),
+                'modelClass' => OneSWaybillData::className(),
                 'outputValue' => function ($model, $attribute) {
                     $value = $model->$attribute;
                     if ($attribute === 'pdenom') {
                         if (is_numeric($model->pdenom)) {
-                            $rkProd = iikoProduct::findOne(['id' => $value]);
+                            $rkProd = OneSGood::findOne(['id' => $value]);
                             $model->product_rid = $rkProd->id;
-                            $model->munit = $rkProd->unit;
-                            $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                            $model->munit = $rkProd->measure;
+                            //$model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                             $model->save(false);
-                            return $rkProd->denom;
+                            return $rkProd->name;
                             return '';
                         }
                     }
@@ -52,12 +54,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             ],
             'change-coefficient' => [
                 'class' => EditableColumnAction::className(),
-                'modelClass' => iikoWaybillData::className(),
+                'modelClass' => OneSWaybillData::className(),
                 'outputValue' => function ($model, $attribute) {
                     if ($attribute === 'vat') {
                         return $model->$attribute / 100;
                     } else {
-                        $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                        //$model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                         $model->save(false);
                         return round($model->$attribute, 6);
                     }
@@ -83,13 +85,13 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
        // $dataProvider->pagination->pageSize=3;
 
 
-        $lic = iikoService::getLicense();
+        $lic = OneSService::getLicense();
         $view = $lic ? 'index' : '/default/_nolic';
         $params = [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
-            'visible' =>iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
+            //'visible' =>OneSPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
         ];
 
@@ -106,7 +108,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionMap()
     {
-        $model = iikoWaybill::findOne(Yii::$app->request->get('waybill_id'));
+        $model = OneSWaybill::findOne(Yii::$app->request->get('waybill_id'));
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
@@ -122,11 +124,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $isAndroid = true;
         }
 
-        $searchModel = new iikoWaybillDataSearch();
+        $searchModel = new OneSWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
 
-        $lic = iikoService::getLicense();
+        $lic = OneSService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $params = [
             'dataProvider' => $dataProvider,
@@ -152,17 +154,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $wbill_id = $arr[1];
         $is_checked = $arr[0];
 
-        $wmodel = iikoWaybill::findOne($wbill_id);
+        $wmodel = oneSWaybill::findOne($wbill_id);
 
         if (!$wmodel) {
             die('Waybill model is not found');
         }
 
         if ($is_checked) { // Добавляем НДС
-            $sql = "UPDATE iiko_waybill_data SET sum=round(sum/(vat/10000+1),2) WHERE waybill_id = :w_id";
+            $sql = "UPDATE one_s_waybill_data SET sum=round(sum/(vat/10000+1),2) WHERE waybill_id = :w_id";
             $vat = 1;
         } else { // Убираем НДС
-            $sql = "UPDATE iiko_waybill_data SET sum=defsum WHERE waybill_id = :w_id";
+            $sql = "UPDATE one_s_waybill_data SET sum=defsum WHERE waybill_id = :w_id";
             $vat = 0;
 
         }
@@ -187,7 +189,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->quant = $model->defquant;
         $model->koef = 1;
 
-        $wayModel = iikoWaybill::findOne($model->waybill_id);
+        $wayModel = oneSWaybill::findOne($model->waybill_id);
         if (!$wayModel) {
             die("Cant find wmodel in map controller cleardata");
         }
@@ -226,9 +228,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $data = $command->queryAll();
             $out['results'] = array_values($data);
        */
-            $sql = "( select id, denom as `text` from iiko_product where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-                " union ( select id, denom as `text` from iiko_product  where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-                "union ( select id, denom as `text` from iiko_product where  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            $sql = "( select id, name as `text` from one_s_good where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and name = '".$term."' )".
+                " union ( select id, name as `text` from one_s_good  where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and name like '".$term."%' limit 10 )".
+                "union ( select id, name as `text` from one_s_good where  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and name like '%".$term."%' limit 5 )".
                 "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
@@ -249,10 +251,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $out['results'] = [];
         if (!is_null($term)) {
             $query = new \yii\db\Query;
-            $query->select(['id' => 'uuid', 'text' => 'denom'])
-                ->from('iiko_agent')
+            $query->select(['id' => 'id', 'text' => 'name'])
+                ->from('one_s_contragent')
                 ->where('org_id = :acc', [':acc' => $org])
-                ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
+                ->andwhere("name like :name ", [':name' => '%' . $term . '%'])
                 ->limit(20);
 
             $command = $query->createCommand();
@@ -270,7 +272,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $lic = iikoService::getLicense();
+        $lic = OneSService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             if ($model->getErrors()) {
@@ -298,7 +300,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             die();
         }
 
-        $model = new iikoWaybill();
+        $model = new OneSWaybill();
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;
@@ -310,6 +312,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
             return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
+            $model->num_code = $order_id;
             return $this->render('create', [
                 'model' => $model,
             ]);
@@ -332,7 +335,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             exit;
         */
 
-        $api = iikoApi::getInstance();
+        $api = OneSApi::getInstance();
         try {
             if (!Yii::$app->request->isAjax) {
                 throw new \Exception('Only ajax method');
@@ -369,7 +372,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($waybill_id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+            ->createCommand('UPDATE one_s_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->id]);
     }
@@ -380,7 +383,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findDataModel($id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+            ->createCommand('UPDATE one_s_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
 
@@ -417,12 +420,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     /**
      * @param $id
-     * @return iikoWaybill
+     * @return oneSWaybill
      * @throws NotFoundHttpException
      */
     protected function findModel($id)
     {
-        if (($model = iikoWaybill::findOne($id)) !== null) {
+        if (($model = oneSWaybill::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -431,12 +434,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     /**
      * @param $id
-     * @return iikoWaybillData
+     * @return OneSWaybillData
      * @throws NotFoundHttpException
      */
     protected function findDataModel($id)
     {
-        $model = iikoWaybillData::findOne($id);
+        $model = OneSWaybillData::findOne($id);
         if (!empty($model)) {
             return $model;
         } else {

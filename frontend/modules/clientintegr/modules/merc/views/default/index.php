@@ -79,7 +79,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status ' . getVetDocumentByUUIDRequest::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
+                return '<span class="status ' . getVetDocumentByUUIDRequest::$status_color[$data['status']] . '">'.getVetDocumentByUUIDRequest::$statuses[$data['status']].'</span>';
             },
         ],
         [
@@ -138,7 +138,7 @@ Modal::widget([
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
                 'done-partial' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                    if ($model->status != getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
@@ -157,7 +157,7 @@ Modal::widget([
                     return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                 },
                 'rejected' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                    if ($model->status != getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),

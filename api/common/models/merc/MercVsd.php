@@ -136,7 +136,7 @@ class MercVsd extends \yii\db\ActiveRecord
 
     public static function getDate($date_raw)
     {
-        if (isset($date_raw))
+        if (!isset($date_raw))
             return null;
 
         if (isset($date_raw->informalDate))
@@ -148,7 +148,7 @@ class MercVsd extends \yii\db\ActiveRecord
             $first_date .= '-' . $date_raw->firstDate->day;
 
         if (isset($date_raw->firstDate->hour))
-            $first_date .= $date_raw->firstDate->hour . ":00:00";
+            $first_date .= " ".$date_raw->firstDate->hour . ":00:00";
 
         if ($date_raw->secondDate) {
             $second_date = $date_raw->secondDate->year . '-' . $date_raw->secondDate->month;
@@ -157,7 +157,7 @@ class MercVsd extends \yii\db\ActiveRecord
                 $second_date .= '-' . $date_raw->secondDate->day;
 
             if (isset($date_raw->secondDate->hour))
-                $second_date .= $date_raw->secondDate->hour . ":00:00";
+                $second_date .= " ".$date_raw->secondDate->hour . ":00:00";
             return 'с ' . $first_date . ' до ' . $second_date;
         }
 

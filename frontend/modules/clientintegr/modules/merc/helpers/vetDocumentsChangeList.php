@@ -28,6 +28,7 @@ class vetDocumentsChangeList extends Model
             $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
             $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
             $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
+            $producer = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->batch->origin->producer->enterprise->uuid);
 
             $model = MercVsd::findOne(['uuid' => $item->uuid]);
 
@@ -46,7 +47,7 @@ class vetDocumentsChangeList extends Model
                 'sender_guid' => $sender->enterprise->guid,
                 'sender_name' =>  $sender->enterprise->name.'('. $sender->enterprise->address->addressView .')',
                 'finalized' => $item->finalized,
-                'last_update_date' => MercVsd::getDate($item->lastUpdateDate),
+                'last_update_date' => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s',strtotime($item->lastUpdateDate)) : null,
                 'vehicle_number' => $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber,
                 'trailer_number' => $item->certifiedConsignment->transportInfo->transportNumber->trailerNumber,
                 'container_number' => $item->certifiedConsignment->transportInfo->transportNumber->containerNumber,
@@ -61,7 +62,7 @@ class vetDocumentsChangeList extends Model
                 'expiry_date' => MercVsd::getDate($item->certifiedConsignment->batch->expiryDate),
                 'batch_id' => $item->certifiedConsignment->batch->batchID,
                 'perishable' =>  (int)$item->certifiedConsignment->batch->perishable,
-                'producer_name' => $item->certifiedConsignment->batch->origin->producer->enterprise->name,
+                'producer_name' => $producer->enterprise->name.'('. $producer->enterprise->address->addressView .')',
                 'producer_guid' => $item->certifiedConsignment->batch->origin->producer->enterprise->guid,
                 'low_grade_cargo' =>  (int)$item->certifiedConsignment->batch->lowGradeCargo,
                 'raw_data' => serialize($item)

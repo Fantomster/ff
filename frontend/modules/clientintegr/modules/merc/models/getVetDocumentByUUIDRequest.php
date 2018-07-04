@@ -74,6 +74,12 @@ class getVetDocumentByUUIDRequest extends Model
         self::DOC_STATUS_UTILIZED => 'Погашен',
     ];
 
+    public static $status_color = [
+        self::DOC_STATUS_CONFIRMED => '',
+        self::DOC_STATUS_WITHDRAWN => 'cancelled',
+        self::DOC_STATUS_UTILIZED => 'done',
+    ];
+
     public $forms = [
         'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
         'LIC1' => 'Форма 1 ветеринарного свидетельства',

@@ -26,7 +26,7 @@ class cerberApi extends baseApi
         $cache = Yii::$app->cache;
         $enterprise = $cache->get('Enterprise_'.$UUID);
         if($UUID == null){
-            var_dump(2); die();}
+            return null;}
         if(!($enterprise === false))
             return $enterprise;
 

@@ -53,8 +53,25 @@ class OrderNotice
                 'user' => $user->id,
                 'organization' => $client->id
             ], [
-                'cart_count' => (int)$client->getCartCount(),
-                'last_add_cart_user_name' => $user->profile->full_name
+                'cart_count' => (int)$client->getCartCount()
+            ]);
+        }
+        return true;
+    }
+
+    /**
+     * @param User $userSend
+     * @return bool
+     */
+    public function sendLastUserCartAdd(User $userSend) {
+        $client = $userSend->organization;
+        $clientUsers = $client->users;
+        foreach ($clientUsers as $user) {
+            FireBase::getInstance()->update([
+                'user' => $user->id,
+                'organization' => $client->id
+            ], [
+                'last_add_cart_user_name' => $userSend->profile->full_name
             ]);
         }
         return true;

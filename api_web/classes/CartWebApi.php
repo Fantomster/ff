@@ -75,6 +75,7 @@ class CartWebApi extends \api_web\components\WebApi
             $this->setPosition($cart, $product, $post['quantity']);
             //Сообщение в очередь, Изменение количества товара в корзине
             Notice::init('Order')->sendOrderToTurnClient($client);
+            Notice::init('Order')->sendLastUserCartAdd($this->user);
 
             $transaction->commit();
         } catch (\Exception $e) {

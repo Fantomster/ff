@@ -157,7 +157,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
                     $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
-                    $profile->email = $user->getEmail();
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization, true)->save();

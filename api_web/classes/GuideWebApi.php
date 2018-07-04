@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\definitions\Order;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
@@ -61,7 +62,7 @@ class GuideWebApi extends \api_web\components\WebApi
              * Фильтр по поставщику
              */
             if (isset($post['search']['vendors']) && !empty($post['search']['vendors'])) {
-                if(!is_array($post['search']['vendors'])) {
+                if (!is_array($post['search']['vendors'])) {
                     $post['search']['vendors'] = [$post['search']['vendors']];
                 }
                 $search->vendors = $post['search']['vendors'];
@@ -146,7 +147,7 @@ class GuideWebApi extends \api_web\components\WebApi
     public function getInfo(array $post)
     {
         if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
 
         $this->isMyGuide($post['guide_id']);
@@ -163,7 +164,7 @@ class GuideWebApi extends \api_web\components\WebApi
     public function getProducts(array $post)
     {
         if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
 
         $this->isMyGuide($post['guide_id']);
@@ -246,10 +247,10 @@ class GuideWebApi extends \api_web\components\WebApi
     public function create(array $post)
     {
         if (empty($post['name'])) {
-            throw new BadRequestHttpException("ERROR: Empty name");
+            throw new BadRequestHttpException("empty_param|name");
         }
         if (empty($post['color'])) {
-            throw new BadRequestHttpException("ERROR: Empty color");
+            throw new BadRequestHttpException("empty_param|color");
         }
 
         $client = $this->user->organization;
@@ -283,6 +284,40 @@ class GuideWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Создание шаблона из заказа
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function createFromOrder(array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException("empty_param|order_id");
+        }
+
+        $order = \common\models\Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        }
+
+        if(empty($order->orderContent)) {
+            throw new BadRequestHttpException("Not found products in order_content!");
+        }
+
+        $request = [
+            'name' => 'Шаблон по заказу №' . $order->id . ' ' . date('d/m/Y'),
+            'color' => Guide::$COLORS[rand(0, (count(Guide::$COLORS) - 1))],
+            'products' => []
+        ];
+
+        foreach ($order->orderContent as $orderContent) {
+            $request['products'][] = $orderContent->product_id;
+        }
+
+        return $this->create($request);
+    }
+
+    /**
      * Удалить шаблон
      * @param array $params
      * @throws BadRequestHttpException
@@ -290,7 +325,7 @@ class GuideWebApi extends \api_web\components\WebApi
     public function delete(array $params)
     {
         if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
         $this->isMyGuide($params['guide_id']);
         $model = Guide::findOne($params['guide_id']);
@@ -309,10 +344,10 @@ class GuideWebApi extends \api_web\components\WebApi
     public function rename(array $params)
     {
         if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
         if (empty($params['name'])) {
-            throw new BadRequestHttpException("ERROR: Empty name");
+            throw new BadRequestHttpException("empty_param|name");
         }
 
         $this->isMyGuide($params['guide_id']);
@@ -338,10 +373,10 @@ class GuideWebApi extends \api_web\components\WebApi
     public function changeColorGuide(array $params)
     {
         if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
         if (empty($params['color'])) {
-            throw new BadRequestHttpException("ERROR: Empty color");
+            throw new BadRequestHttpException("empty_param|color");
         }
 
         $this->isMyGuide($params['guide_id']);
@@ -367,7 +402,7 @@ class GuideWebApi extends \api_web\components\WebApi
     {
 
         if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
 
         $this->isMyGuide($post['guide_id']);
@@ -407,11 +442,11 @@ class GuideWebApi extends \api_web\components\WebApi
     {
         set_time_limit(60 * 3);
         if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty guide_id");
+            throw new BadRequestHttpException("empty_param|guide_id");
         }
 
         if (empty($params['products'])) {
-            throw new BadRequestHttpException("ERROR: Empty products");
+            throw new BadRequestHttpException("empty_param|products");
         }
 
         $this->isMyGuide($params['guide_id']);

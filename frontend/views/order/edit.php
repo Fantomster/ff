@@ -231,6 +231,11 @@ $js = <<<JS
             });
         }
     });
+    $(document).on("change", ".quantity, .price", function(e) {
+        value = $(this).val();
+        $(this).val(value.replace(",", "."));
+    });
+
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);

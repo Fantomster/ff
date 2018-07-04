@@ -197,7 +197,7 @@ class VendorWebApi extends \api_web\components\WebApi
     public function search(array $post)
     {
         if (empty($post['email'])) {
-            throw new BadRequestHttpException('Empty search attribute email');
+            throw new BadRequestHttpException('empty_param|search attribute email');
         }
 
         $result = [];
@@ -244,12 +244,12 @@ class VendorWebApi extends \api_web\components\WebApi
     public function update(array $post)
     {
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty attribute id');
+            throw new BadRequestHttpException('empty_param|id');
         }
         //Поиск поставщика в системе
         $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('Vendor not found');
+            throw new BadRequestHttpException('vendor_not_found');
         }
 
         //Если запрос от ресторана
@@ -375,16 +375,16 @@ class VendorWebApi extends \api_web\components\WebApi
     public function uploadLogo(array $post)
     {
         if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('Empty attribute vendor_id');
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
 
         $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
-            throw new BadRequestHttpException('Vendor not found');
+            throw new BadRequestHttpException('vendor_not_found');
         }
 
         if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('Empty image_source');
+            throw new BadRequestHttpException('empty_param|image_source');
         }
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {

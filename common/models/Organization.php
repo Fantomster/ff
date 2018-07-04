@@ -287,7 +287,7 @@ class Organization extends \yii\db\ActiveRecord {
      *
      * @return array
      */
-    public function getSuppliers($category_id = '', $all = true) {
+    public function getSuppliers($category_id = '', $all = true, $notMap=true) {
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
@@ -302,9 +302,48 @@ class Organization extends \yii\db\ActiveRecord {
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
-        $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
-                                ->asArray()
-                                ->all(), 'id', 'name');
+        if($notMap){
+            $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
+                ->asArray()
+                ->all(), 'id', 'name');
+        }else{
+            $vendors = $query->orderBy(['organization.name' => SORT_ASC])
+                ->asArray()
+                ->all();
+        }
+
+        if ($all) {
+            $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+        }
+        ksort($vendors);
+        return $vendors;
+    }
+
+    public function getSuppliersTorg12($category_id = '', $all = true, $notMap=true) {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
+            return [];
+        }
+        $query = RelationSuppRest::find()
+            ->select(['organization.id', 'organization.name as text'])
+            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+            ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
+//        if (!$all) {
+        $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
+//        }
+        $query->andWhere(['relation_supp_rest.deleted' => false]);
+        if ($category_id) {
+            $query = $query->andWhere(['relation_category.category_id' => $category_id]);
+        }
+        if($notMap){
+            $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
+                ->asArray()
+                ->all(), 'id', 'name');
+        }else{
+            $vendors = $query->orderBy(['organization.name' => SORT_ASC])
+                ->asArray()
+                ->all();
+        }
+
         if ($all) {
             $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
@@ -1479,8 +1518,9 @@ class Organization extends \yii\db\ActiveRecord {
 
         try {
             $guid = mercDicconst::getSetting('enterprise_guid');
-            return MercVsd::find()->where(['guid' => $guid, 'status' => 'CONFIRMED'])->andWhere("consignor <> '$guid'")->count();
-        } catch (\Exception $e) {
+            return MercVsd::find()->where(['recipient_guid' => $guid, 'status' => 'CONFIRMED'])->count();
+        }catch (\Exception $e)
+        {
             return 0;
         }
     }

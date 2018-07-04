@@ -1,6 +1,7 @@
 <?php
 
 use kartik\grid\GridView;
+use kartik\widgets\Select2;
 
 $this->title = 'Список накладных';
 
@@ -9,6 +10,8 @@ function renderButton($id)
 {
     return \yii\helpers\Html::tag('a', 'Задать', [
         'class' => 'actions_icon view-relations',
+        'data-toggle'=>"modal",
+        'data-target'=>"#myModal",
         'data-invoice_id' => $id,
         'style' => 'cursor:pointer;align:center;color:red;',
         'href' => '#'
@@ -16,7 +19,7 @@ function renderButton($id)
 }
 
 ?>
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <style>
     .actions_icon {
         margin-right: 5px;
@@ -210,17 +213,49 @@ if(!empty($integration)) {
     }
 }
 
+\yii\bootstrap\Modal::begin([
+    'header' => '<h2>Выбрать поставщика</h2>',
+    'options'=>[
+        'tabindex' => false,
+        'id'=>'modal',
+    ],
+]);
+echo "<select style='width:100%;' class='search_post'></select>";
 
+\yii\bootstrap\Modal::end();
 ob_start();
-?>
-    $('.view-relations').click(function () {
 
-        var vendors = {};
+
+?>
+
+    $('.view-relations').click(function () {
         var $invoice_id = $(this).data('invoice_id');
         var td = $(this).parents('tr').find('td:last-child');
         var this_ = $(this);
 
-        swal({
+        $('#modal').modal('show');
+        var post = new Promise(function (resolve) {
+            $.post('<?= $url ?>/get-suppliers', function (data) {
+                $('.search_post').select2({
+                    data:data,
+                    placeholder:'Выбирите постащика',
+                    allowClear:true
+                }).on("select2:select", function(result){
+                    $('#modal').modal('hide');
+                    $.get('<?= $url ?>/get-orders', {
+                        OrderSearch: {vendor_search_id: result.params.data.id, vendor_id: result.params.data.id},
+                        invoice_id: $invoice_id
+                    }, function (data) {
+                        $('#invoice-orders').html(data);
+                        $('.orders').show();
+                        $(this_).data('vendor_id', result.params.data.id);
+                        $(this_).html(result.params.data.text);
+                    });
+                });
+            });
+        })
+
+        /*swal({
                 input: 'select',
                 confirmButtonText: 'Выбрать',
                 cancelButtonText: 'Отмена',
@@ -241,11 +276,11 @@ ob_start();
                 }, function (data) {
                     $('#invoice-orders').html(data);
                     $('.orders').show();
-                    $(this_).data('vendor_id', result.value);
+                        $(this_).data('vendor_id', result.value);
                     $(this_).html(vendors[result.value]);
                 });
             }
-        });
+        });*/
     });
 
     $('.box-body').on('click', '.clear_radio', function () {
@@ -336,6 +371,13 @@ ob_start();
             'error'
         )
     }
+
+
+
 <?php
 $this->registerJs(ob_get_clean());
+$this->registerJsFile(
+    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js',
+    ['depends' => [\yii\web\JqueryAsset::className()]]
+);
 ?>

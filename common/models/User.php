@@ -421,7 +421,7 @@ class User extends \amnah\yii2\user\models\User {
 
     /**
      * Send email invite to restaurant
-     * @param User $client
+     * @param string $email
      * @return int
      */
     public function sendInviteToFriend($email) {

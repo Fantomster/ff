@@ -285,7 +285,7 @@ $form = ActiveForm::begin([
     data-toggle="tooltip" 
     title="' . Yii::t('message', 'frontend.views.vendor.price_for_one', ['ru'=>'Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)']) . ' ">
     </span></span></div>{error}'])->
-                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.price_two', ['ru'=>'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ'])])
+                                            textInput(['placeholder' => Yii::t('message', 'frontend.views.vendor.price_two', ['ru'=>'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ']), 'class' => 'decimal_number form-control'])
                                     ?>
                                     <label class="control-label" for=""><?= Yii::t('message', 'frontend.views.vendor.measure', ['ru'=>'Ед измерения']) ?></label>
                                     <?php

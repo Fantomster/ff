@@ -38,47 +38,60 @@ echo \kartik\grid\GridView::widget([
     'dataProvider' => $additional_email,
     'emptyText' => Yii::t('app', 'No results found'),
     'columns' => [
-        'email:email',
+        [
+            'attribute' => 'email',
+            'header' => $labels['email'],
+            'format' => 'raw',
+            'value' => function ($data) {
+                $options = $data->confirmed ? [] : [
+                    'style' => 'font-style:italic;', 
+                    'data-toggle' => 'tooltip', 
+                    'data-placement' => 'bottom',
+                    'title' => Yii::t('app', 'frontend.views.settings.email_not_confirmed', ['ru'=>'Почта не подтверждена'])];
+                return Html::a($data->email, 'mailto:'.$data->email, $options);
+            },
+        ],
+        //'email:email',
         [
             'header' => $labels['order_created'],
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
-                return ['checked' => $model->order_created, 'data-id' => $model->id, 'data-column' => 'order_created'];
+                return ['checked' => $model->order_created, 'data-id' => $model->id, 'data-column' => 'order_created', 'disabled' => !$model->confirmed];
             }
         ],
         [
             'header' => $labels['order_canceled'],
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
-                return ['checked' => $model->order_canceled, 'data-id' => $model->id, 'data-column' => 'order_canceled'];
+                return ['checked' => $model->order_canceled, 'data-id' => $model->id, 'data-column' => 'order_canceled', 'disabled' => !$model->confirmed];
             }
         ],
         [
             'header' => $labels['order_changed'],
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
-                return ['checked' => $model->order_changed, 'data-id' => $model->id, 'data-column' => 'order_changed'];
+                return ['checked' => $model->order_changed, 'data-id' => $model->id, 'data-column' => 'order_changed', 'disabled' => !$model->confirmed];
             }
         ],
         [
             'header' => $labels['order_processing'],
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
-                return ['checked' => $model->order_processing, 'data-id' => $model->id, 'data-column' => 'order_processing'];
+                return ['checked' => $model->order_processing, 'data-id' => $model->id, 'data-column' => 'order_processing', 'disabled' => !$model->confirmed];
             }
         ],
         [
             'header' => $labels['order_done'],
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
-                return ['checked' => $model->order_done, 'data-id' => $model->id, 'data-column' => 'order_done'];
+                return ['checked' => $model->order_done, 'data-id' => $model->id, 'data-column' => 'order_done', 'disabled' => !$model->confirmed];
             }
         ],
         [
             'header' =>  $labels['request_accept'],
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
-                return ['checked' => $model->request_accept, 'data-id' => $model->id, 'data-column' => 'request_accept'];
+                return ['checked' => $model->request_accept, 'data-id' => $model->id, 'data-column' => 'request_accept', 'disabled' => !$model->confirmed];
             }
         ],
         [
@@ -89,7 +102,7 @@ echo \kartik\grid\GridView::widget([
                 'delete' => function ($model) {
                     return Html::a('<i class="glyphicon glyphicon-trash"></i>', '#delete', [
                         'data-pjax' => 1,
-                        'onclick' => 'deleteEmail(' . $model . ')'
+                        'onclick' => 'deleteEmail(' . $model . ');return false;'
                     ]);
                 }
             ],
@@ -153,8 +166,7 @@ addEmail= function () {
         swal({
             type: 'success',
             title: '" . Yii::t('message', 'frontend.views.settings.ready', ['ru'=>'Готово']) . "',
-            html: '" . Yii::t('message', 'frontend.views.settings.new_email', ['ru'=>'Добавлен новый email']) . ": ' + result.value,
-            timer: 1500
+            html: '" . Yii::t('app', 'frontend.views.settings.new_email_confirm', ['ru'=>'На новый email выслано письмо для подтверждения:']) . ": ' + result.value
           }).catch(swal.noop);
       }
     }).catch(swal.noop);
@@ -181,15 +193,14 @@ deleteEmail= function (id) {
             });
         })
       },
-    }).then(function () {
+    }).then(function (result) {
         if(result.dismiss){
             swal.hide();
         } else {
           swal({
             type: 'success',
             title: '" . Yii::t('message', 'frontend.views.settings.ready_two', ['ru'=>'Готово']) . "',
-            html: '" . Yii::t('message', 'frontend.views.settings.email_deleted', ['ru'=>'Email удален из списка получаетелей']) . "',
-            timer: 1500
+            html: '" . Yii::t('message', 'frontend.views.settings.email_deleted', ['ru'=>'Email удален из списка получаетелей']) . "'
           }).catch(swal.noop)
         }
     }).catch(swal.noop);

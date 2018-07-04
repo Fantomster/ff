@@ -9,6 +9,7 @@ use yii\web\View;
 use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\widgets\DatePicker;
+use api\common\models\merc\MercVsd;
 ?>
 
 <?=
@@ -53,7 +54,7 @@ Modal::widget([
             'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
             'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
             'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
-                $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
+                $enable = !($model->status == MercVsd::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
                 $style = ($enable ) ? "visibility:hidden" : "";
                 return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
             }
@@ -78,7 +79,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
+                return '<span class="status ' . MercVsd::$status_color[$data['status']] . '">'.MercVsd::$statuses[$data['status']].'</span>';
             },
         ],
         [
@@ -102,15 +103,23 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['production_date'];
+            $res = $data['production_date'];
+            try{
+                $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+            }
+            catch (Exception $e)
+            {
+                $res = $data['production_date'];
+            }
+                return $res;
             },
         ],
         [
-            'attribute' => 'recipient_name',
+            'attribute' => 'sender_name',
             'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отправитель']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['recipient_name'];
+                return $data['sender_name'];
             },
         ],
         [
@@ -137,7 +146,7 @@ Modal::widget([
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
                 'done-partial' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                    if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
@@ -156,7 +165,7 @@ Modal::widget([
                     return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                 },
                 'rejected' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                    if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
@@ -208,7 +217,7 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?php
-                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED;
+                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
                         'options' => [
                             'data-pjax' => true,
@@ -236,7 +245,7 @@ Modal::widget([
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'status')
-                                    ->dropDownList(\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['id' => 'statusFilter'])
+                                    ->dropDownList(MercVsd::$statuses, ['id' => 'statusFilter'])
                                     ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
@@ -244,7 +253,7 @@ Modal::widget([
                         <div class="col-sm-3 col-md-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'recipient_name')
+                                $form->field($searchModel, 'sender_name')
                                     ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
                                     ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>

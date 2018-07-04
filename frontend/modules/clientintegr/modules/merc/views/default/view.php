@@ -4,6 +4,7 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
 use yii\helpers\Html;
 use api\common\models\merc\mercService;
+use api\common\models\merc\MercVsd;
 
 ?>
 <?php
@@ -68,12 +69,12 @@ $timestamp_now=time();
                             [
                                 'attribute' => 'status',
                                 'format' => 'raw',
-                                'value' => $document->statuses[$document->status],
+                                'value' => MercVsd::$statuses[$document->status],
                             ],
                             [
                                 'label' => 'Номер',
                                 'format' => 'raw',
-                                'value' => $document->getNumber(),
+                                'value' => MercVsd::getNumber($document->issueSeries, $document->issueNumber),
                             ],
                             [
                                 'attribute' => 'issueDate',
@@ -83,12 +84,12 @@ $timestamp_now=time();
                             [
                                 'attribute' => 'form',
                                 'format' => 'raw',
-                                'value' => $document->forms[$document->form],
+                                'value' => MercVsd::$forms[$document->form],
                             ],
                             [
                                 'attribute' => 'type',
                                 'format' => 'raw',
-                                'value' => $document->types[$document->type],
+                                'value' => MercVsd::$types[$document->type],
                             ],
                         ],
                     ]) ?>
@@ -197,7 +198,7 @@ $timestamp_now=time();
                     if(isset($document->transportStorageType))
                         $attributes[] = [
                                 'attribute' => 'transportStorageType',
-                                'value' => $document->storage_types[$document->transportStorageType]
+                                'value' => MercVsd::$storage_types[$document->transportStorageType]
                         ];
 
                     if(isset($document->cargoExpertized))
@@ -206,11 +207,11 @@ $timestamp_now=time();
                             'value' => ($document->cargoExpertized == 'true') ? 'Да' : 'Нет',
                         ];
 
-                    if(isset($document->expertiseInfo))
+                    /*if(isset($document->expertiseInfo))
                         $attributes[] = [
                             'attribute' => 'expertiseInfo',
                             'value' => (empty($document->expertiseInfo)) ? null : $document->expertiseInfo,
-                        ];
+                        ];*/
 
                     if(isset($document->locationProsperity))
                         $attributes[] = [
@@ -229,7 +230,7 @@ $timestamp_now=time();
                         'attributes' => $attributes,
                     ]) ?>
                     <?php
-                    if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED
+                    if ($document->status == MercVsd::DOC_STATUS_CONFIRMED
                     && (\api\common\models\merc\MercVsd::getType($document->UUID) == 1) && ($lic_merc==1)) { ?>
                         <div class="col-md-12">
                             <?php

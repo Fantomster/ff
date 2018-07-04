@@ -217,6 +217,66 @@ class GuideController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/guide/create-from-order",
+     *     tags={"Guide"},
+     *     summary="Создание шаблона из заказа",
+     *     description="Создание нового шаблона из заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                       "order_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                   "id": 1,
+     *                   "name": "Название шаблона",
+     *                   "color": "FFEECC",
+     *                   "products": {
+     *                       {
+     *                           "id": 470371,
+     *                           "product": "name",
+     *                           "catalog_id": 2770,
+     *                           "price": 678,
+     *                           "discount_price": 0,
+     *                           "rating": 0,
+     *                           "supplier": "kjghkjgkj",
+     *                           "brand": "",
+     *                           "article": "1",
+     *                           "ed": "432",
+     *                           "units": 1,
+     *                           "currency": "RUB",
+     *                           "image": "url_to_image",
+     *                           "in_basket": 0
+     *                       }
+     *                   }
+     *               }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionCreateFromOrder()
+    {
+        $this->response = $this->container->get('GuideWebApi')->createFromOrder($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/guide/delete",
      *     tags={"Guide"},
      *     summary="Удалить шаблон",

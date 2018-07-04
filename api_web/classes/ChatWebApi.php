@@ -101,7 +101,7 @@ class ChatWebApi extends WebApi
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
         if (empty($post['dialog_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty dialog_id");
+            throw new BadRequestHttpException("empty_param|dialog_id");
         }
 
         $client = $this->user->organization;

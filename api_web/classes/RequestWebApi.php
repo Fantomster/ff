@@ -182,12 +182,12 @@ class RequestWebApi extends WebApi
         }
 
         if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('Empty request_id');
+            throw new BadRequestHttpException('empty_param|request_id');
         }
 
         $model = Request::find()->where(['id' => (int)$post['request_id']])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('Not found request');
+            throw new BadRequestHttpException('request_not_found');
         }
 
         $this->checkAccess($model);
@@ -230,12 +230,12 @@ class RequestWebApi extends WebApi
     public function getRequest(array $post)
     {
         if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('Empty request_id');
+            throw new BadRequestHttpException('empty_param|request_id');
         }
 
         $model = Request::find()->where(['id' => (int)$post['request_id']])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('Not found request');
+            throw new BadRequestHttpException('request_not_found');
         }
 
         $this->checkAccess($model);
@@ -257,15 +257,15 @@ class RequestWebApi extends WebApi
         }
 
         if (empty($post['category_id'])) {
-            throw new BadRequestHttpException('Empty category_id');
+            throw new BadRequestHttpException('empty_param|category_id');
         }
 
         if (empty($post['product'])) {
-            throw new BadRequestHttpException('Empty product');
+            throw new BadRequestHttpException('empty_param|product');
         }
 
         if (empty($post['amount'])) {
-            throw new BadRequestHttpException('Empty amount');
+            throw new BadRequestHttpException('empty_param|amount');
         }
 
         $issetCategory = false;
@@ -277,7 +277,7 @@ class RequestWebApi extends WebApi
         }
 
         if ($issetCategory === false) {
-            throw new BadRequestHttpException('Такой категории не существует');
+            throw new BadRequestHttpException('category_not_found');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -319,12 +319,12 @@ class RequestWebApi extends WebApi
     public function close(array $post)
     {
         if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('Empty request_id');
+            throw new BadRequestHttpException('empty_param|request_id');
         }
 
         $model = Request::findOne((int)$post['request_id']);
         if (empty($model)) {
-            throw new BadRequestHttpException('Not found request');
+            throw new BadRequestHttpException('request_not_found');
         }
 
         $this->checkAccess($model);
@@ -348,11 +348,11 @@ class RequestWebApi extends WebApi
         }
 
         if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('Empty request_id');
+            throw new BadRequestHttpException('empty_param|request_id');
         }
 
         if (empty($post['price'])) {
-            throw new BadRequestHttpException('Empty price');
+            throw new BadRequestHttpException('empty_param|price');
         }
 
         $request = Request::findOne((int)$post['request_id']);
@@ -411,11 +411,11 @@ class RequestWebApi extends WebApi
         }
 
         if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('Empty request_id');
+            throw new BadRequestHttpException('empty_param|request_id');
         }
 
         if (empty($post['callback_id'])) {
-            throw new BadRequestHttpException('Empty callback_id');
+            throw new BadRequestHttpException('empty_param|callback_id');
         }
 
         $request = Request::findOne((int)$post['request_id']);

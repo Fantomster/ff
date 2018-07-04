@@ -13,7 +13,7 @@ class NotificationWebApi extends WebApi
     public function get(array $post)
     {
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty id');
+            throw new BadRequestHttpException('empty_param|id');
         }
 
         $path = $this->getPath();
@@ -30,7 +30,7 @@ class NotificationWebApi extends WebApi
     public function push(array $post)
     {
         if (empty($post['body'])) {
-            throw new BadRequestHttpException('Empty body');
+            throw new BadRequestHttpException('empty_param|body');
         }
 
         $path = $this->getPath();
@@ -42,15 +42,15 @@ class NotificationWebApi extends WebApi
     public function pushAnyUser(array $post)
     {
         if (empty($post['body'])) {
-            throw new BadRequestHttpException('Empty body');
+            throw new BadRequestHttpException('empty_param|body');
         }
 
         if (empty($post['user_id'])) {
-            throw new BadRequestHttpException('Empty user_id');
+            throw new BadRequestHttpException('empty_param|user_id');
         }
 
         if (!User::findOne($post['user_id'])) {
-            throw new BadRequestHttpException('User not found!!!');
+            throw new BadRequestHttpException('user_not_found');
         }
 
         $path = [
@@ -65,7 +65,7 @@ class NotificationWebApi extends WebApi
     public function delete(array $post)
     {
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty id');
+            throw new BadRequestHttpException('empty_param|id');
         }
 
         $path = $this->getPath();

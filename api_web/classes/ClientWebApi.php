@@ -32,7 +32,7 @@ class ClientWebApi extends WebApi
     public function detail()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         return WebApiHelper::prepareOrganization($this->user->organization);
@@ -48,12 +48,12 @@ class ClientWebApi extends WebApi
     public function detailUpdate(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
         //Поиск ресторана в системе
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('Client not found');
+            throw new BadRequestHttpException('client_not_found');
         }
 
         //прошли все проверки, будем обновлять
@@ -146,17 +146,17 @@ class ClientWebApi extends WebApi
     public function detailUpdateLogo(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('Empty image_source');
+            throw new BadRequestHttpException('empty_param|image_source');
         }
 
         //Поиск ресторана в системе
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('Client not found');
+            throw new BadRequestHttpException('client_not_found');
         }
 
         //прошли все проверки, будем обновлять
@@ -188,11 +188,11 @@ class ClientWebApi extends WebApi
     public function additionalEmailCreate(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (!isset($post['email'])) {
-            throw new BadRequestHttpException('Empty email');
+            throw new BadRequestHttpException('empty_param|email');
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -238,7 +238,7 @@ class ClientWebApi extends WebApi
     public function notificationList()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
         $result = [];
 
@@ -308,12 +308,12 @@ class ClientWebApi extends WebApi
     public function notificationUpdate(array $posts)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         foreach ($posts as $post) {
             if (!isset($post['id'])) {
-                throw new BadRequestHttpException('Empty id');
+                throw new BadRequestHttpException('empty_param|id');
             }
 
             $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
@@ -379,11 +379,11 @@ class ClientWebApi extends WebApi
     public function additionalEmailDelete(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (!isset($post['id'])) {
-            throw new BadRequestHttpException('Empty id');
+            throw new BadRequestHttpException('empty_param|id');
         }
 
         $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
@@ -414,11 +414,11 @@ class ClientWebApi extends WebApi
     public function employeeGet(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty id.');
+            throw new BadRequestHttpException('empty_param|id.');
         }
         return $this->prepareEmployee($this->userGet($post['id']));
     }
@@ -432,11 +432,11 @@ class ClientWebApi extends WebApi
     public function employeeSearch(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (empty($post['email'])) {
-            throw new BadRequestHttpException('Empty email.');
+            throw new BadRequestHttpException('empty_param|email.');
         }
 
         $model = User::findOne(['email' => $post['email']]);
@@ -456,7 +456,7 @@ class ClientWebApi extends WebApi
     public function employeeRoles()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
@@ -481,7 +481,7 @@ class ClientWebApi extends WebApi
     public function employeeList(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -541,11 +541,11 @@ class ClientWebApi extends WebApi
     public function employeeAdd(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (empty($post['email'])) {
-            throw new BadRequestHttpException('Empty email.');
+            throw new BadRequestHttpException('empty_param|email.');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -554,16 +554,16 @@ class ClientWebApi extends WebApi
              * Проверка полей
              */
             if (empty($post['name'])) {
-                throw new BadRequestHttpException('Empty name.');
+                throw new BadRequestHttpException('empty_param|name');
             }
             if (empty($post['email'])) {
-                throw new BadRequestHttpException('Empty email.');
+                throw new BadRequestHttpException('empty_param|email');
             }
             if (empty($post['phone'])) {
-                throw new BadRequestHttpException('Empty phone.');
+                throw new BadRequestHttpException('empty_param|phone');
             }
             if (empty($post['role_id']) or !isset($post['role_id'])) {
-                throw new BadRequestHttpException('Empty role_id.');
+                throw new BadRequestHttpException('empty_param|role_id');
             }
 
             //Интуем роль
@@ -630,11 +630,11 @@ class ClientWebApi extends WebApi
     public function employeeUpdate(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty id.');
+            throw new BadRequestHttpException('empty_param|id.');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -707,11 +707,11 @@ class ClientWebApi extends WebApi
     public function employeeDelete(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('This method is forbidden for the vendor.');
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty id.');
+            throw new BadRequestHttpException('empty_param|id');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -772,7 +772,7 @@ class ClientWebApi extends WebApi
         $model = User::findOne($id);
 
         if (empty($model)) {
-            throw new BadRequestHttpException('User not found id.');
+            throw new BadRequestHttpException('user_not_found');
         }
 
         $organizations = ArrayHelper::map($model->getAllOrganization(), 'id', 'id');

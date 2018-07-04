@@ -42,7 +42,7 @@ class OrderWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
@@ -232,13 +232,13 @@ class OrderWebApi extends \api_web\components\WebApi
     public function addComment(array $post)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         $order = Order::findOne($post['order_id']);
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Order not found");
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (!$this->accessAllow($order)) {
@@ -266,17 +266,17 @@ class OrderWebApi extends \api_web\components\WebApi
     public function addProductComment(array $post)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         if (empty($post['product_id'])) {
-            throw new BadRequestHttpException('Empty param product_id');
+            throw new BadRequestHttpException('empty_param|product_id');
         }
 
         $order = Order::findOne($post['order_id']);
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Order not found");
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (!$this->accessAllow($order)) {
@@ -313,13 +313,13 @@ class OrderWebApi extends \api_web\components\WebApi
     public function getInfo(array $post)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         $order = Order::find()->where(['id' => $post['order_id']])->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Order not found");
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (!$this->accessAllow($order)) {
@@ -737,7 +737,7 @@ class OrderWebApi extends \api_web\components\WebApi
     public function cancel(array $post)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         $query = Order::find()->where(['id' => $post['order_id']]);
@@ -749,7 +749,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = $query->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Order not found");
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if ($order->status == Order::STATUS_CANCELLED) {
@@ -791,13 +791,13 @@ class OrderWebApi extends \api_web\components\WebApi
     public function repeat(array $post)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Order not found");
+            throw new BadRequestHttpException("order_not_found");
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -832,7 +832,7 @@ class OrderWebApi extends \api_web\components\WebApi
     public function complete(array $post)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         $query = Order::find()->where(['id' => $post['order_id']]);
@@ -844,7 +844,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = $query->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Order not found");
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if ($order->status == Order::STATUS_DONE) {
@@ -879,12 +879,12 @@ class OrderWebApi extends \api_web\components\WebApi
     public function saveToPdf(array $post, OrderController $c)
     {
         if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('Empty param order_id');
+            throw new BadRequestHttpException('empty_param|order_id');
         }
 
         $order = Order::findOne(['id' => $post['order_id']]);
         if (empty($order)) {
-            throw new BadRequestHttpException('Order not found');
+            throw new BadRequestHttpException('order_not_found');
         }
 
         $user = $this->user;

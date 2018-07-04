@@ -53,10 +53,10 @@ class CartWebApi extends \api_web\components\WebApi
     private function addItem(array $post)
     {
         if (!isset($post['quantity'])) {
-            throw new BadRequestHttpException("ERROR: Empty quantity");
+            throw new BadRequestHttpException("empty_param|quantity");
         }
         if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty product_id");
+            throw new BadRequestHttpException("empty_param|product_id");
         }
         /**
          * @var Organization $client
@@ -183,7 +183,7 @@ class CartWebApi extends \api_web\components\WebApi
             $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {
-                    throw new BadRequestHttpException("ERROR: Empty id");
+                    throw new BadRequestHttpException("empty_param|id");
                 }
                 $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
@@ -317,7 +317,7 @@ class CartWebApi extends \api_web\components\WebApi
     public function productComment(array $post)
     {
         if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty product_id");
+            throw new BadRequestHttpException("empty_param|product_id");
         }
 
         /**

@@ -98,12 +98,6 @@ class getVetDocumentByUUIDRequest extends Model
     public function getDocumentByUUID($UUID, $raw = false)
     {
         $cache = \Yii::$app->cache;
-        /*$attributes = $cache->get('vetDoc_'.$UUID);
-        if($attributes && !$raw) {
-            $this->setAttributes($attributes);
-                return;
-        }*/
-
         $this->UUID = $UUID;
 
         $doc = mercuryApi::getInstance()->getVetDocumentByUUID($UUID);

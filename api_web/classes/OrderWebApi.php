@@ -993,7 +993,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     'count_product' => $model->getProductCount(null, $this->user->organization_id),
                 ];
             } else {
-                if(!isset($return[$model->id])) {
+                if (!isset($return[$model->id])) {
                     $return[$model->id] = [
                         'id' => $model->id,
                         'name' => $model->name,

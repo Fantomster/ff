@@ -15,6 +15,7 @@ $this->title = Yii::t('message', 'frontend.views.order.order_four', ['ru' => 'З
 $urlExport = Url::to(['/order/export-to-xls']);
 $urlReport = Url::to(['/order/grid-report']);
 $urlSaveSelected = Url::to(['/order/save-selected-orders']);
+$urlGetVSDList = Url::to(['/order/ajax-get-vsd-list']);
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;

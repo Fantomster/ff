@@ -256,6 +256,8 @@ $this->registerJs(
             });
 
             $(document).on("change", ".quantity", function(e) {
+                var value = $(this).val();
+                $(this).val(value.replace(",", "."));
                 var url = $(this).closest(".block_wrap_bask_tover").find(".block_right").data("url");
                 var form = $("#cartForm");
                 var block = $(this).closest(".block_wrap_bask_tover").find(".block_right");
@@ -274,8 +276,7 @@ $this->registerJs(
             });
             
             $(document).on("change", ".quantity", function(e) {
-                value = $(this).val();
-                $(this).val(value.replace(",", "."));
+                
             });
 
         });'

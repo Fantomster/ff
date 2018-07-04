@@ -73,15 +73,17 @@ class WebApiErrorHandler extends ErrorHandler
      */
     private function prepareMessage($msg)
     {
-        if (strstr($msg,'|') !== false) {
-            $msg = explode('|', $msg);
-            $message = @\Yii::t('api_web', $msg[0]);
-            unset($msg[0]);
-            $return = vsprintf($message, $msg);
-        } else {
-            $return = @\Yii::t('api_web', $msg);
+        try {
+            if (strstr($msg, '|') !== false) {
+                $msg = explode('|', $msg);
+                $message = \Yii::t('api_web', $msg[0]);
+                unset($msg[0]);
+                return vsprintf($message, $msg);
+            } else {
+                return \Yii::t('api_web', $msg);
+            }
+        } catch (\Exception $e) {
         }
-        return $return;
     }
 
     /**

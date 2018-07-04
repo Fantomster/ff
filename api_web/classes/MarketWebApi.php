@@ -417,8 +417,7 @@ class MarketWebApi extends WebApi
      * @param $id
      * @return string
      */
-    private
-    function getCategoryImage($id)
+    public function getCategoryImage($id)
     {
         if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
             return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);

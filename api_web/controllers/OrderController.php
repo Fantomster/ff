@@ -348,6 +348,58 @@ class OrderController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/order/categories",
+     *     tags={"Order"},
+     *     summary="Список категорий товаров",
+     *     description="Получить список категорий товаров",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object"
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default=
+     *              {
+     *                  {"id": 1,
+     *                  "name": "МЯСО",
+     *                  "image": "https://market.mixcart.ru/fmarket/images/image-category/1.jpg",
+     *                  "subcategories": {
+     *                      {
+     *                          "id": 2,
+     *                          "name": "Баранина",
+     *                          "image": "https://market.mixcart.ru/fmarket/images/image-category/1.jpg"
+     *                      }
+     *                  }}
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCategories()
+    {
+        $this->response = $this->container->get('OrderWebApi')->categories($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/order/comment",
      *     tags={"Order"},
      *     summary="Комментарий к заказу",

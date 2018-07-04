@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\search\OrderCatalogSearch;
 use market\components\ImagesHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -17,22 +18,25 @@ use common\behaviors\SluggableBehavior;
  * @property string $description
  * @property string $keywords
  * @property integer $parent
- * 
+ *
  * @property MpCategory $parentCategory
  */
-class MpCategory extends \yii\db\ActiveRecord {
+class MpCategory extends \yii\db\ActiveRecord
+{
 
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'mp_category';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['name'], 'required'],
             [['parent'], 'integer'],
@@ -41,7 +45,8 @@ class MpCategory extends \yii\db\ActiveRecord {
         ];
     }
 
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'slug' => [
                 'class' => SluggableBehavior::className(),
@@ -62,14 +67,14 @@ class MpCategory extends \yii\db\ActiveRecord {
     {
         return [
             'id' => 'ID',
-            'name' => Yii::t('app', 'common.models.category_mp', ['ru'=>'Категория']) . ' (MP)',
+            'name' => Yii::t('app', 'common.models.category_mp', ['ru' => 'Категория']) . ' (MP)',
             'parent' => 'Parent',
         ];
     }
 
     public function __get($name)
     {
-        if($name == 'name') {
+        if ($name == 'name') {
             return Yii::t('app', $this->getAttribute($name));
         }
 
@@ -79,28 +84,90 @@ class MpCategory extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getChild() {
+    public function getChild()
+    {
         return $this->hasMany(MpCategory::className(), ['parent' => 'id']);
     }
 
-    public static function getCountProduct($id) {
-        return CatalogBaseGoods::find()->where(["category_id" => $id])->count();
+    /**
+     * @param null $vendor_id
+     * @param null $client_id
+     * @return int
+     */
+    public function getProductCount($vendor_id = null, $client_id = null)
+    {
+        $searchModel = new OrderCatalogSearch();
+        $searchModel->searchCategory = [$this->id];
+
+        if (!empty($vendor_id)) {
+            $searchModel->selectedVendor = $vendor_id;
+        }
+
+        if (!empty($client_id)) {
+            $client = Organization::findOne($client_id);
+            $vendors = $client->getSuppliers('', false);
+            $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
+            $searchModel->client = $client;
+            $searchModel->catalogs = $catalogs;
+        }
+
+        $dataProvider = $searchModel->search(['page' => 1, 'pageSize' => 0]);
+
+        return (int)$dataProvider->totalCount;
     }
 
-    public static function getCategory($id) {
+    /**
+     * @param null $vendor_id
+     * @param null $client_id
+     * @return int
+     */
+    public static function getProductCountWithOutCategory($vendor_id = null, $client_id = null)
+    {
+        $searchModel = new OrderCatalogSearch();
+        $searchModel->searchCategory = 0;
+
+        if (!empty($vendor_id)) {
+            $searchModel->selectedVendor = $vendor_id;
+        }
+
+        if (!empty($client_id)) {
+            $client = Organization::findOne($client_id);
+            $vendors = $client->getSuppliers('', false);
+            $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
+            $searchModel->client = $client;
+            $searchModel->catalogs = $catalogs;
+        }
+
+        $dataProvider = $searchModel->search(['page' => 1, 'pageSize' => 0]);
+        return (int)$dataProvider->totalCount;
+    }
+
+    /**
+     * @param $id
+     * @return int|string
+     */
+    public static function getCountProduct($id)
+    {
+        return (int)CatalogBaseGoods::find()->where(["category_id" => $id])->count();
+    }
+
+    public static function getCategory($id)
+    {
         $cat = Yii::t('app', MpCategory::find()->where(["id" => $id])->one()->name);
         return $cat;
     }
-    
-    public static function allCategory() {
+
+    public static function allCategory()
+    {
         $mp_ed = ArrayHelper::map(MpCategory::find()->all(), 'id', 'name');
-        foreach ($mp_ed as &$item){
+        foreach ($mp_ed as &$item) {
             $item = Yii::t('app', $item);
         }
         return $mp_ed;
     }
 
-    public function getParentCategory() {
+    public function getParentCategory()
+    {
         return MpCategory::find()->where(["id" => $this->parent])->one();
     }
 }

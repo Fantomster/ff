@@ -6,7 +6,9 @@ use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
+use common\models\MpCategory;
 use common\models\OrderContent;
+use common\models\RelationSuppRest;
 use common\models\Role;
 use common\models\search\OrderCatalogSearch;
 use common\models\search\OrderContentSearch;
@@ -404,13 +406,13 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['currency_id'] = $order->currency->id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
-        $result['discount_type'] =  null;
+        $result['discount_type'] = null;
 
-        if($order->discount_type == Order::DISCOUNT_FIXED) {
+        if ($order->discount_type == Order::DISCOUNT_FIXED) {
             $result['discount_type'] = 'FIXED';
         }
 
-        if($order->discount_type == Order::DISCOUNT_PERCENT) {
+        if ($order->discount_type == Order::DISCOUNT_PERCENT) {
             $result['discount_type'] = 'PERCENT';
         }
 
@@ -908,7 +910,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $pdf->render();
         $content = ob_get_clean();
         $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
-        return  ($base64 ? base64_encode($content) : $content);
+        return ($base64 ? base64_encode($content) : $content);
     }
 
     /**
@@ -939,6 +941,74 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;
+    }
+
+    /**
+     * Список доступных категорий
+     * @return array
+     */
+    public function categories()
+    {
+
+        $suppliers = RelationSuppRest::find()
+            ->select('supp_org_id')
+            ->where(['rest_org_id' => $this->user->organization_id, 'status' => 1])
+            ->column();
+
+        $query = (new Query())
+            ->distinct()
+            ->select([
+                'COALESCE(category_id, 0) as category_id'
+            ])
+            ->from('catalog_base_goods')
+            ->leftJoin('mp_category', 'mp_category.id = category_id')
+            ->where(['in', 'supp_org_id', $suppliers])
+            ->column();
+
+        $return = [];
+        foreach ($query as $id) {
+
+            if ($id == 0) {
+                $return[9999] = [
+                    'id' => (int)$id,
+                    'name' => 'Без категории',
+                    'count_product' => MpCategory::getProductCountWithOutCategory(null, $this->user->organization_id)
+                ];
+                continue;
+            }
+
+            $model = MpCategory::findOne($id);
+            if (!empty($model->parent)) {
+                if (!isset($return[$model->parentCategory->id])) {
+                    $return[$model->parentCategory->id] = [
+                        'id' => $model->parentCategory->id,
+                        'name' => $model->parentCategory->name,
+                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->parentCategory->id)
+                    ];
+                }
+                $return[$model->parentCategory->id]['subcategories'][] = [
+                    'id' => $model->id,
+                    'name' => $model->name,
+                    'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
+                    'count_product' => $model->getProductCount(null, $this->user->organization_id),
+                ];
+            } else {
+                if(!isset($return[$model->id])) {
+                    $return[$model->id] = [
+                        'id' => $model->id,
+                        'name' => $model->name,
+                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id)
+                    ];
+                }
+            }
+        }
+
+        //Сортируем по ключу
+        ksort($return);
+        //Убиваем ключи сортировки
+        $return = array_values($return);
+
+        return $return;
     }
 
     /**

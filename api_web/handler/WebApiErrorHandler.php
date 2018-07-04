@@ -83,6 +83,7 @@ class WebApiErrorHandler extends ErrorHandler
                 return \Yii::t('api_web', $msg);
             }
         } catch (\Exception $e) {
+            return $msg;
         }
     }
 

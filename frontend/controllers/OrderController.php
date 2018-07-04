@@ -2,6 +2,9 @@
 
 namespace frontend\controllers;
 
+use api\common\models\merc\mercDicconst;
+use api\common\models\merc\MercVsd;
+use api\common\models\merc\search\mercVSDSearch;
 use api_web\classes\CartWebApi;
 use api_web\classes\RkeeperWebApi;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
@@ -73,6 +76,7 @@ class OrderController extends DefaultController {
                             'upload-attachment',
                             'get-attachment',
                             'delete-attachment',
+                            'ajax-get-vsd-list'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -521,6 +525,14 @@ class OrderController extends DefaultController {
             }
         endif;
     }
+
+
+    public function actionAjaxGetVsdList() {
+        $guid = mercDicconst::getSetting('enterprise_guid');
+        $mercVSDs = MercVsd::find()->where("guid = '$guid'")->groupBy('consignor')->asArray()->all();
+        return $this->renderPartial('_vds_list', compact('mercVSDs'));
+    }
+
 
     public function actionEditGuide(int $id) {
         $client = $this->currentUser->organization;

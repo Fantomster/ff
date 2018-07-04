@@ -277,6 +277,10 @@ class mercuryApi extends baseApi
 
         if (!$log->save())
             var_dump($log->getErrors());
+
+        if ($log->status == mercLog::REJECTED) {
+            throw new \Exception($log->id);
+        }
     }
 
     public function getReceiveApplicationResult($applicationId)

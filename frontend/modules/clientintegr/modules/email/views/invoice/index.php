@@ -1,6 +1,7 @@
 <?php
 
 use kartik\grid\GridView;
+use kartik\widgets\Select2;
 
 $this->title = 'Список накладных';
 
@@ -9,6 +10,8 @@ function renderButton($id)
 {
     return \yii\helpers\Html::tag('a', 'Задать', [
         'class' => 'actions_icon view-relations',
+        'data-toggle'=>"modal",
+        'data-target'=>"#myModal",
         'data-invoice_id' => $id,
         'style' => 'cursor:pointer;align:center;color:red;',
         'href' => '#'
@@ -16,7 +19,7 @@ function renderButton($id)
 }
 
 ?>
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <style>
     .actions_icon {
         margin-right: 5px;
@@ -63,6 +66,7 @@ function renderButton($id)
                         echo GridView::widget([
                             // 'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
                             'dataProvider' => $dataProvider,
+                            'filterModel' => $searchMOdel,
                             'summary' => false,
                             'striped' => false,
                             'condensed' => true,
@@ -75,6 +79,11 @@ function renderButton($id)
                                     'header' =>
                                         'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
                                     'format' => 'raw',
+                                    'attribute' => 'number',
+                                    'filterInputOptions' => [
+                                        'class'       => 'form-control',
+                                        'placeholder' => '№ накладной'
+                                    ],
                                     'value' => function ($data) {
                                         if ($data->order_id) return '';
                                         return \yii\helpers\Html::input('radio', 'invoice_id', $data->id, ['class' => 'invoice_radio']);
@@ -85,17 +94,66 @@ function renderButton($id)
                                 [
                                         'format'=>'raw',
                                         'header'=>'Номер накладной',
+                                        'attribute' => 'name_postav',
+                                        'filterInputOptions' => [
+                                            'class'       => 'form-control',
+                                            'placeholder' => 'Наименование поставщика'
+                                        ],
                                         'value'=>function($data){
-                                            return (!empty($data->order_id))?\yii\helpers\Html::a($data->number,['/clientintegr/iiko/waybill/index','way'=>$data->order_id]):$data->number;
+
+                                            $user = Yii::$app->user->identity;
+                                            $licenses = $user->organization->getLicenseList();
+                                             $timestamp_now=time();
+                                                if(isset($licenses['rkws'])) {
+                                                    $sub0 = explode(' ',$licenses['rkws']->td);
+                                                    $sub1 = explode('-',$sub0[0]);
+                                                    $licenses['rkws']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+                                                    if ($licenses['rkws']->status_id==0) $rk_us=0;
+                                                    if (($licenses['rkws']->status_id==1) and ($timestamp_now<=(strtotime($licenses['rkws']->td)))) $link='rkws';
+
+                                                    /*$sub0 = explode(' ',$licenses['rkws_ucs']->td);
+                                                    $sub1 = explode('-',$sub0[0]);
+                                                    $licenses['rkws_ucs']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+                                                    if ($licenses['rkws_ucs']->status_id==0) $rk_lic=0;
+                                                    if (($licenses['rkws_ucs']->status_id==1) and ($timestamp_now<=(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=3;
+                                                    if (($licenses['rkws_ucs']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=2;
+                                                    if (($licenses['rkws_ucs']->status_id==1) and ($timestamp_now>(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=1;*/
+                                                }
+                                                if(isset($licenses['iiko'])) {
+                                                    $sub0 = explode(' ',$licenses['iiko']->td);
+                                                    $sub1 = explode('-',$sub0[0]);
+                                                    $licenses['iiko']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+                                                    if ($licenses['iiko']->status_id==0) $lic_iiko=0;
+                                                    if (($licenses['iiko']->status_id==1) and ($timestamp_now<=(strtotime($licenses['iiko']->td)))) $link='iiko';
+                                                }
+                                                if(!isset($link))
+                                                {
+                                                    return $data->number;
+                                                }else{
+                                                    return (!empty($data->order_id))?\yii\helpers\Html::a($data->number,['/clientintegr/'.$link.'/waybill/index','way'=>$data->order_id]):$data->number;
+                                                }
+
+
                                         }
                                 ],
                                 [
                                     'attribute' => 'date',
+                                    'format'=>'raw',
+                                    'filterInputOptions' => [
+                                        'class'       => 'form-control',
+                                        'placeholder' => 'Дата'
+                                    ],
                                     'value' => function($row){
                                         return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
                                     }
                                 ],
-                                'name_postav',
+                                [
+                                    'format'=>'raw',
+                                    'header'=>'Наименование поставщика',
+                                    'value'=>function($data){
+                                        return $data->name_postav;
+                                    }
+                                ],
                                 [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {
@@ -210,17 +268,49 @@ if(!empty($integration)) {
     }
 }
 
+\yii\bootstrap\Modal::begin([
+    'header' => '<h2>Выбрать поставщика</h2>',
+    'options'=>[
+        'tabindex' => false,
+        'id'=>'modal',
+    ],
+]);
+echo "<select style='width:100%;' class='search_post'></select>";
 
+\yii\bootstrap\Modal::end();
 ob_start();
-?>
-    $('.view-relations').click(function () {
 
-        var vendors = {};
+
+?>
+
+    $('.view-relations').click(function () {
         var $invoice_id = $(this).data('invoice_id');
         var td = $(this).parents('tr').find('td:last-child');
         var this_ = $(this);
 
-        swal({
+        $('#modal').modal('show');
+        var post = new Promise(function (resolve) {
+            $.post('<?= $url ?>/get-suppliers', function (data) {
+                $('.search_post').select2({
+                    data:data,
+                    placeholder:'Выберите поставщика',
+                    allowClear:true
+                }).on("select2:select", function(result){
+                    $('#modal').modal('hide');
+                    $.get('<?= $url ?>/get-orders', {
+                        OrderSearch: {vendor_search_id: result.params.data.id, vendor_id: result.params.data.id},
+                        invoice_id: $invoice_id
+                    }, function (data) {
+                        $('#invoice-orders').html(data);
+                        $('.orders').show();
+                        $(this_).data('vendor_id', result.params.data.id);
+                        $(this_).html(result.params.data.text);
+                    });
+                });
+            });
+        })
+
+        /*swal({
                 input: 'select',
                 confirmButtonText: 'Выбрать',
                 cancelButtonText: 'Отмена',
@@ -241,11 +331,11 @@ ob_start();
                 }, function (data) {
                     $('#invoice-orders').html(data);
                     $('.orders').show();
-                    $(this_).data('vendor_id', result.value);
+                        $(this_).data('vendor_id', result.value);
                     $(this_).html(vendors[result.value]);
                 });
             }
-        });
+        });*/
     });
 
     $('.box-body').on('click', '.clear_radio', function () {
@@ -336,6 +426,13 @@ ob_start();
             'error'
         )
     }
+
+
+
 <?php
 $this->registerJs(ob_get_clean());
+$this->registerJsFile(
+    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js',
+    ['depends' => [\yii\web\JqueryAsset::className()]]
+);
 ?>

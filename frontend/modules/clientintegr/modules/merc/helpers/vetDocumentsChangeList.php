@@ -60,14 +60,15 @@ class vetDocumentsChangeList extends Model
                 'production_date' => MercVsd::getDate($item->certifiedConsignment->batch->dateOfProduction),
                 'expiry_date' => MercVsd::getDate($item->certifiedConsignment->batch->expiryDate),
                 'batch_id' => $item->certifiedConsignment->batch->batchID,
-                'perishable' => $item->certifiedConsignment->batch->perishable,
+                'perishable' =>  (int)$item->certifiedConsignment->batch->perishable,
                 'producer_name' => $item->certifiedConsignment->batch->origin->producer->enterprise->name,
                 'producer_guid' => $item->certifiedConsignment->batch->origin->producer->enterprise->guid,
-                'low_grade_cargo' => $item->certifiedConsignment->batch->lowGradeCargo,
+                'low_grade_cargo' =>  (int)$item->certifiedConsignment->batch->lowGradeCargo,
                 'raw_data' => serialize($item)
             ]);
 
             if(!$model->save()) {
+                var_dump($model->getErrors());
                 throw new \Exception('VSD save error');
             }
 

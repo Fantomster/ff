@@ -40,7 +40,7 @@ class mercVSDSearch extends MercVsd
     public function search($params)
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
-        $query = MercVsd::find()->where(['guid' => $guid]);
+        $query = MercVsd::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

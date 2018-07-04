@@ -68,7 +68,7 @@ class getVetDocumentByUUIDRequest extends Model
     const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
     const DOC_STATUS_UTILIZED = 'UTILIZED';
 
-    public $statuses = [
+    public static $statuses = [
         self::DOC_STATUS_CONFIRMED => 'Оформлен',
         self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
         self::DOC_STATUS_UTILIZED => 'Погашен',

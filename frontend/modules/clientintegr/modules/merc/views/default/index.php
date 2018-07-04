@@ -9,6 +9,7 @@ use yii\web\View;
 use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\widgets\DatePicker;
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 ?>
 
 <?=
@@ -53,7 +54,7 @@ Modal::widget([
             'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
             'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
             'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
-                $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
+                $enable = !($model->status == getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
                 $style = ($enable ) ? "visibility:hidden" : "";
                 return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
             }
@@ -78,7 +79,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
+                return '<span class="status ' . getVetDocumentByUUIDRequest::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
             },
         ],
         [
@@ -208,7 +209,7 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?php
-                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED;
+                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
                         'options' => [
                             'data-pjax' => true,
@@ -236,7 +237,7 @@ Modal::widget([
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'status')
-                                    ->dropDownList(\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['id' => 'statusFilter'])
+                                    ->dropDownList(getVetDocumentByUUIDRequest::$statuses, ['id' => 'statusFilter'])
                                     ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>

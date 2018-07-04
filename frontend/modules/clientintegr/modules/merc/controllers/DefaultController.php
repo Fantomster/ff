@@ -10,7 +10,7 @@ use api\common\models\merc\search\mercVSDSearch;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
 use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone;
-use frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsChangeList;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsChangeList;
 use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
@@ -63,11 +63,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($uuid)
     {
-        Yii::$app->cache->flush();
-        try {
+        //try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e) {
+        /*}catch (\Error $e) {
             Yii::$app->session->setFlash('error', 'Ошибка загрузки ВСД, возможно сервер ВЕТИС "Меркурий"  перегружен, попробуйте повторить запрос чуть позже<br>
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -78,7 +77,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                   <small>Если ошибка повторяется, пожалуйста, сообщите нам
                   <a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             return $this->redirect(['index']);
-        }
+        }*/
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -233,7 +232,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
         $transaction = Yii::$app->db_api->beginTransaction();
        try {
-            $vsd = new vetDocumentsChangeList();
+            $vsd = new VetDocumentsChangeList();
             $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*5);
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);

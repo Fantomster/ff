@@ -41,6 +41,79 @@ use Yii;
  */
 class MercVsd extends \yii\db\ActiveRecord
 {
+    const DOC_TYPE_INCOMMING = 'INCOMING';
+    const DOC_TYPE_OUTGOING = 'OUTGOING';
+    const DOC_TYPE_PRODUCTIVE = 'PRODUCTIVE';
+    const DOC_TYPE_RETURNABLE = 'RETURNABLE';
+    const DOC_TYPE_TRANSPORT = 'TRANSPORT';
+
+    public static $types = [
+        self::DOC_TYPE_INCOMMING => 'Входящий ВСД',
+        self::DOC_TYPE_OUTGOING => 'Исходящий ВСД',
+        self::DOC_TYPE_PRODUCTIVE => 'Производственный ВСД',
+        self::DOC_TYPE_RETURNABLE => 'Возвратный ВСД',
+        self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
+    ];
+
+    const DOC_STATUS_CONFIRMED = 'CONFIRMED';
+    const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
+    const DOC_STATUS_UTILIZED = 'UTILIZED';
+
+    public static $statuses = [
+        self::DOC_STATUS_CONFIRMED => 'Оформлен',
+        self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
+        self::DOC_STATUS_UTILIZED => 'Погашен',
+    ];
+
+    public static $status_color = [
+        self::DOC_STATUS_CONFIRMED => '',
+        self::DOC_STATUS_WITHDRAWN => 'cancelled',
+        self::DOC_STATUS_UTILIZED => 'done',
+    ];
+
+    public static $forms = [
+        'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
+        'LIC1' => 'Форма 1 ветеринарного свидетельства',
+        'CERTCU2' => 'Форма 2 ветеринарного сертификата ТС',
+        'LIC2' => 'Форма 2 ветеринарного свидетельства',
+        'CERTCU3' => 'Форма 3 ветеринарного сертификата ТС',
+        'LIC3' => 'Форма 3 ветеринарного свидетельства',
+        'NOTE4' => 'Форма 4 ветеринарной справки',
+        'CERT5I' => 'Форма 5i ветеринарного сертификата',
+        'CERT61' => 'Форма 6.1 ветеринарного сертификата',
+        'CERT62' => 'Форма 6.2 ветеринарного сертификата',
+        'CERT63' => 'Форма 6.3 ветеринарного сертификата',
+        'PRODUCTIVE' => 'Производственный сертификат',
+    ];
+
+    public static $transport_types = [
+        1 => 'Автомобильный',
+        2 => 'Железнодорожный',
+        3 => 'Авиатранспортный',
+        4 => 'Морской (контейнер)',
+        5 => 'Морской (трюм)',
+        6 => 'Речной',
+        7 => 'Перегон',
+    ];
+
+    public static $product_types = [
+        1 => 'Мясо и мясопродукты',
+        2 => 'Корма и кормовые добавки',
+        3 => 'Живые животные',
+        4 => 'Лекарственные средства',
+        5 => 'Пищевые продукты',
+        6 => 'Непищевые продукты и другое',
+        7 => 'Рыба и морепродукты',
+        8 => 'Продукция, не требующая разрешения',
+    ];
+
+    public static $storage_types = [
+        'FROZEN' => 'Замороженный',
+        'CHILLED' => 'Охлажденный',
+        'COOLED' => 'Охлаждаемый',
+        'VENTILATED' => 'Вентилируемый'
+    ];
+
     /**
      * {@inheritdoc}
      */

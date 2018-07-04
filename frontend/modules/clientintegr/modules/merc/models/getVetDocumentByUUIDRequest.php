@@ -8,6 +8,7 @@
 
 namespace frontend\modules\clientintegr\modules\merc\models;
 
+use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
@@ -49,79 +50,6 @@ class getVetDocumentByUUIDRequest extends Model
     private $initiator;
     private $enterpriseGuid;
     private $soap_namespaces = ['xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"', ' xmlns:base="http://api.vetrf.ru/schema/cdm/base"'];
-
-    const DOC_TYPE_INCOMMING = 'INCOMING';
-    const DOC_TYPE_OUTGOING = 'OUTGOING';
-    const DOC_TYPE_PRODUCTIVE = 'PRODUCTIVE';
-    const DOC_TYPE_RETURNABLE = 'RETURNABLE';
-    const DOC_TYPE_TRANSPORT = 'TRANSPORT';
-
-    public $types = [
-        self::DOC_TYPE_INCOMMING => 'Входящий ВСД',
-        self::DOC_TYPE_OUTGOING => 'Исходящий ВСД',
-        self::DOC_TYPE_PRODUCTIVE => 'Производственный ВСД',
-        self::DOC_TYPE_RETURNABLE => 'Возвратный ВСД',
-        self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
-    ];
-
-    const DOC_STATUS_CONFIRMED = 'CONFIRMED';
-    const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
-    const DOC_STATUS_UTILIZED = 'UTILIZED';
-
-    public static $statuses = [
-        self::DOC_STATUS_CONFIRMED => 'Оформлен',
-        self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
-        self::DOC_STATUS_UTILIZED => 'Погашен',
-    ];
-
-    public static $status_color = [
-        self::DOC_STATUS_CONFIRMED => '',
-        self::DOC_STATUS_WITHDRAWN => 'cancelled',
-        self::DOC_STATUS_UTILIZED => 'done',
-    ];
-
-    public $forms = [
-        'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
-        'LIC1' => 'Форма 1 ветеринарного свидетельства',
-        'CERTCU2' => 'Форма 2 ветеринарного сертификата ТС',
-        'LIC2' => 'Форма 2 ветеринарного свидетельства',
-        'CERTCU3' => 'Форма 3 ветеринарного сертификата ТС',
-        'LIC3' => 'Форма 3 ветеринарного свидетельства',
-        'NOTE4' => 'Форма 4 ветеринарной справки',
-        'CERT5I' => 'Форма 5i ветеринарного сертификата',
-        'CERT61' => 'Форма 6.1 ветеринарного сертификата',
-        'CERT62' => 'Форма 6.2 ветеринарного сертификата',
-        'CERT63' => 'Форма 6.3 ветеринарного сертификата',
-        'PRODUCTIVE' => 'Производственный сертификат',
-    ];
-
-    public $transport_types = [
-        1 => 'Автомобильный',
-        2 => 'Железнодорожный',
-        3 => 'Авиатранспортный',
-        4 => 'Морской (контейнер)',
-        5 => 'Морской (трюм)',
-        6 => 'Речной',
-        7 => 'Перегон',
-    ];
-
-    public $product_types = [
-        1 => 'Мясо и мясопродукты',
-        2 => 'Корма и кормовые добавки',
-        3 => 'Живые животные',
-        4 => 'Лекарственные средства',
-        5 => 'Пищевые продукты',
-        6 => 'Непищевые продукты и другое',
-        7 => 'Рыба и морепродукты',
-        8 => 'Продукция, не требующая разрешения',
-    ];
-
-    public $storage_types = [
-        'FROZEN' => 'Замороженный',
-        'CHILLED' => 'Охлажденный',
-        'COOLED' => 'Охлаждаемый',
-        'VENTILATED' => 'Вентилируемый'
-    ];
 
     public function rules()
     {
@@ -170,26 +98,20 @@ class getVetDocumentByUUIDRequest extends Model
     public function getDocumentByUUID($UUID, $raw = false)
     {
         $cache = \Yii::$app->cache;
-        $attributes = $cache->get('vetDoc_'.$UUID);
+        /*$attributes = $cache->get('vetDoc_'.$UUID);
         if($attributes && !$raw) {
             $this->setAttributes($attributes);
                 return;
-        }
+        }*/
 
         $this->UUID = $UUID;
 
         $doc = mercuryApi::getInstance()->getVetDocumentByUUID($UUID);
-         //var_dump($raw_doc);
-          //  $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
 
         if($raw) {
             return $doc;
         }
 
-        /*echo "<pre>";
-        var_dump($doc);
-        echo"</pre>";
-die();*/
         $this->issueSeries = (isset($doc->issueSeries)) ? $doc->nissueSeries : null;
         $this->issueNumber = (isset($doc->issueNumber)) ? $doc->issueNumber : null;
         $this->issueDate = $doc->issueDate;
@@ -214,11 +136,11 @@ die();*/
             ]
         ];
 
-        $cconsignee_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignee->businessEntity->uuid);
+        $consignee_business = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignee->businessEntity->uuid);
         $consignee_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignee->enterprise->uuid);
 
         $enterprise = $consignee_enterprise->enterprise;
-        $businessEntity = $cconsignee_buisness->businessEntity;
+        $businessEntity = $consignee_business->businessEntity;
 
         $this->consignee = [
             [ 'label' => 'Название предприятия',
@@ -239,8 +161,8 @@ die();*/
             ];
         }
 
-        if(isset($doc->certifiedConsignment->batch->owner)) {
-            $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->owner->uuid);
+        if(isset($doc->certifiedConsignment->batch->origin->owner)) {
+            $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->origin->uuid);
             $owner = $owner_raw->businessEntity;
         }
 
@@ -255,7 +177,7 @@ die();*/
 
         $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->certifiedConsignment->batch->origin->country->guid);
 
-        $country = $country_raw->country->fullName;
+        $country = $country_raw->country->name;
 
         $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->authentication->purpose->guid);
         $purpose = $purpose->purpose->name;
@@ -275,7 +197,7 @@ die();*/
         [
             [
                 'label' => 'Тип продукции',
-                'value' => $this->product_types[$doc->certifiedConsignment->batch->productType],
+                'value' => MercVsd::$product_types[$doc->certifiedConsignment->batch->productType],
             ],
             [
                 'label' => 'Продукция',
@@ -291,7 +213,7 @@ die();*/
             ],
             [
                 'label' => 'Объем',
-                'value' => $doc->certifiedConsignment->batch->volume." ".$unit->unit->mname,
+                'value' => $doc->certifiedConsignment->batch->volume." ".$unit->unit->name,
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
@@ -303,11 +225,11 @@ die();*/
             ],
             [
                 'label' => 'Дата выработки продукции',
-                'value' => $this->getDate($doc->certifiedConsignment->batch->dateOfProduction),
+                'value' => MercVsd::getDate($doc->certifiedConsignment->batch->dateOfProduction),
             ],
             [
                 'label' => 'Дата окончания срока годности продукции',
-                'value' => isset($doc->certifiedConsignment->batch->expiryDate) ? $this->getDate($doc->certifiedConsignment->batch->expiryDate) : null,
+                'value' => MercVsd::getDate($doc->certifiedConsignment->batch->expiryDate),
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
@@ -331,7 +253,7 @@ die();*/
             ],
             [
                 'label' => 'Собственник продукции',
-                'value' =>  $owner->name.', ИНН:'.$owner->inn,
+                'value' =>  (isset($owner)) ? ($owner->name.', ИНН:'.$owner->inn) : "-",
             ],
         ];
         $this->purpose = [
@@ -340,7 +262,7 @@ die();*/
         ];
 
         $this->transportInfo = isset ($doc->certifiedConsignment->transportInfo) ? ([
-            'type' => $this->transport_types[$doc->certifiedConsignment->transportInfo->transportType],
+            'type' => MercVsd::$transport_types[$doc->certifiedConsignment->transportInfo->transportType],
             'numbers' => [
                 [
                 'label' => 'Номер контейнера (при автомобильной перевозке)',
@@ -370,86 +292,27 @@ die();*/
         ]) : null;
         $this->transportStorageType = isset($doc->certifiedConsignment->transportStorageType) ? $doc->certifiedConsignment->transportStorageType : null;
         $this->cargoReloadingPointList = isset($doc->certifiedConsignment->cargoReloadingPointList) ? $doc->certifiedConsignment->cargoReloadingPointList : null;
-        $this->waybillSeries = isset($doc->referencedDocumen->issueSeries) ? $doc->referencedDocumen->issueSeries : null;
-        $this->waybillNumber = isset($doc->referencedDocumen->issueNumber) ? $doc->referencedDocumen->isueNumber : null;
-        $this->waybillDate = isset($doc->referencedDocumen->issueDate) ? $doc->referencedDocumen->issueDate : null;
+
+        if($doc->referencedDocument->type == 1) {
+            $this->waybillSeries = $doc->referencedDocument->issueSeries;
+            $this->waybillNumber = $doc->referencedDocument->issueNumber;
+            $this->waybillDate = $doc->referencedDocument->issueDate;
+        }
+
         $this->cargoExpertized = isset($doc->authentication->cargoExpertized) ? $doc->authentication->cargoExpertized : null;
         $this->expertiseInfo = $doc->authentication->cargoInspected;
+
         $this->confirmedBy = [
             ['label' => 'ФИО',
-                'value' => $doc->authentication->statusChange->specifiedPerson->fio],
+                'value' => $doc->statusChange->specifiedPerson->fio],
             ['label' => 'Должность',
-                'value' => $doc->authentication->statusChange->specifiedPerson->post]
+                'value' => $doc->statusChange->specifiedPerson->post]
         ];
         $this->locationProsperity = $doc->authentication->locationProsperity;
         $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;
 
         $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
 
-    }
-
-    public function getDate($date_raw)
-    {
-
-        if(isset($date_raw->ns2informalDate))
-            return $date_raw->ns2informalDate->__toString();
-
-
-        $first_date = '';
-        if(isset($date_raw->ns2firstDate->bsyear))
-            $first_date .= $date_raw->ns2firstDate->bsyear;
-
-        if(isset($date_raw->ns2firstDate->bsmonth))
-            $first_date .= '-'.$date_raw->ns2firstDate->bsmonth;
-
-        if(isset($date_raw->ns2firstDate->bsday))
-            $first_date .= '-'.$date_raw->ns2firstDate->bsday;
-
-        if (isset($date_raw->ns2firstDate->bshour)){
-            $first_date .= " ";
-            if (strlen($date_raw->ns2firstDate->bshour)==1)
-                $first_date .= "0";
-            $first_date .= $date_raw->ns2firstDate->bshour.":00:00";
-        }
-
-        if($date_raw->ns2secondDate)
-        {
-            $second_date = '';
-            if(isset($date_raw->ns2secondDate->bsyear))
-                $second_date .= $date_raw->ns2secondDate->bsyear;
-
-            if(isset($date_raw->ns2firstDate->bsmonth))
-                $second_date .= '-'.$date_raw->ns2secondDate->bsmonth;
-
-            if(isset($date_raw->ns2firstDate->bsday))
-                $second_date .= '-'.$date_raw->ns2secondDate->bsday;
-
-            if (isset($date_raw->ns2firstDate->bshour)){
-                $second_date .= " ";
-                if (strlen($date_raw->ns2secondDate->bshour)==1)
-                    $second_date .= "0";
-                $second_date .= $date_raw->ns2secondDate->bshour.":00:00";
-            }
-
-            return 'с '.$first_date.' до '.$second_date;
-        }
-
-        return $first_date;
-    }
-
-    public function getNumber ()
-    {
-        if(empty($this->issueNumber) && empty($this->issueSeries))
-            return null;
-
-        $res = '';
-        if(isset($this->issueSeries))
-            $res =  $this->issueSeries.' ';
-
-        if(isset($this->issueNumber))
-            $res .=  $this->issueNumber;
-
-        return $res;
     }
 
     public function getWaybillNumber ()

@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
 use api\common\models\merc\mercLog;
+use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use Yii;
 
@@ -125,11 +126,10 @@ class mercuryApi extends baseApi
     public function getVetDocumentByUUID($UUID)
     {
         $cache = Yii::$app->cache;
-        $doc = $cache->get('vetDocRaw_' . $UUID);
+        $doc = MercVsd::findOne(['uuid' => $UUID]);
 
-        if (!($doc === false || $doc === null)) {
-            return $doc;
-        }
+        if($doc != null)
+            return unserialize($doc->raw_data);
 
         $result = null;
         $doc = null;

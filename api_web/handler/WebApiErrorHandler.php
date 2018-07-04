@@ -75,11 +75,11 @@ class WebApiErrorHandler extends ErrorHandler
     {
         if (strstr($msg,'|') !== false) {
             $msg = explode('|', $msg);
-            $message = \Yii::t('api_web', $msg[0]);
+            $message = @\Yii::t('api_web', $msg[0]);
             unset($msg[0]);
             $return = vsprintf($message, $msg);
         } else {
-            $return = \Yii::t('api_web', $msg);
+            $return = @\Yii::t('api_web', $msg);
         }
         return $return;
     }

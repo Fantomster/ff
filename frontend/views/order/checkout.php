@@ -272,6 +272,11 @@ $this->registerJs(
                     }
                 });
             });
+            
+            $(document).on("change", ".quantity", function(e) {
+                value = $(this).val();
+                $(this).val(value.replace(",", "."));
+            });
 
         });'
 );

@@ -29,7 +29,7 @@ $form = ActiveForm::begin([
         <?php endif; ?>
         <?php echo $form->errorSummary($model); ?>
         <?php
-        if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone::RETURN_ALL)
+        if($model->decision ==  \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone::RETURN_ALL)
             echo $form->field($model, 'volume')->hiddenInput(['value' => 0])->label(false);
         else
             echo $form->field($model, 'volume')->textInput()->label($model->getAttributeLabel('volume')." (".$volume.")"); ?>

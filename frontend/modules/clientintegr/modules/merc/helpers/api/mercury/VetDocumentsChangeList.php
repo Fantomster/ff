@@ -1,0 +1,94 @@
+<?php
+
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;;
+
+use api\common\models\merc\mercDicconst;
+use api\common\models\merc\MercVsd;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocument;
+use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
+use yii\base\Model;
+
+class VetDocumentsChangeList extends Model
+{
+    public function updateDocumentsList($list) {
+        $cache = \Yii::$app->cache;
+        $guid = mercDicconst::getSetting('enterprise_guid');
+
+        foreach ($list as $item)
+        {
+            if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
+                continue;
+
+            if(!$cache->get('vetDocRaw_'.$item->uuid))
+                $cache->add('vetDocRaw_'.$item->uuid, $item,60);
+
+            $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
+            $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
+            $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
+            $producer = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->batch->origin->producer->enterprise->uuid);
+
+            $model = MercVsd::findOne(['uuid' => $item->uuid]);
+
+            if($model == null)
+                $model = new MercVsd();
+
+            $model->setAttributes([
+                'uuid' => $item->uuid,
+                'number' => MercVsd::getNumber($item->issueSeries, $item->issueNumber),
+                'date_doc' => $item->issueDate,
+                'type' => $item->vetDType,
+                'form' => $item->vetDForm,
+                'status' => $item->vetDStatus,
+                'recipient_name' => $recipient->enterprise->name.'('. $recipient->enterprise->address->addressView .')',
+                'recipient_guid' => $recipient->enterprise->guid,
+                'sender_guid' => $sender->enterprise->guid,
+                'sender_name' =>  $sender->enterprise->name.'('. $sender->enterprise->address->addressView .')',
+                'finalized' => $item->finalized,
+                'last_update_date' => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s',strtotime($item->lastUpdateDate)) : null,
+                'vehicle_number' => $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber,
+                'trailer_number' => $item->certifiedConsignment->transportInfo->transportNumber->trailerNumber,
+                'container_number' => $item->certifiedConsignment->transportInfo->transportNumber->containerNumber,
+                'transport_storage_type' => $item->certifiedConsignment->transportStorageType,
+                'product_type' => $item->certifiedConsignment->batch->productType,
+                'product_name' => $item->certifiedConsignment->batch->productItem->name,
+                'amount' => $item->certifiedConsignment->batch->volume,
+                'unit' => $unit->unit->name,
+                'gtin' => $item->certifiedConsignment->batch->productItem->globalID,
+                'article' => $item->certifiedConsignment->batch->productItem->code,
+                'production_date' => MercVsd::getDate($item->certifiedConsignment->batch->dateOfProduction),
+                'expiry_date' => MercVsd::getDate($item->certifiedConsignment->batch->expiryDate),
+                'batch_id' => $item->certifiedConsignment->batch->batchID,
+                'perishable' =>  (int)$item->certifiedConsignment->batch->perishable,
+                'producer_name' => $producer->enterprise->name.'('. $producer->enterprise->address->addressView .')',
+                'producer_guid' => $item->certifiedConsignment->batch->origin->producer->enterprise->guid,
+                'low_grade_cargo' =>  (int)$item->certifiedConsignment->batch->lowGradeCargo,
+                'raw_data' => serialize($item)
+            ]);
+
+            if(!$model->save()) {
+                var_dump($model->getErrors());
+                throw new \Exception('VSD save error');
+            }
+
+        }
+    }
+
+    public function updateData($last_visit)
+    {
+        $api = mercuryApi::getInstance();
+
+        if(isset($last_visit))
+            $result = $api->getVetDocumentChangeList($last_visit);
+        else
+            $result = $api->getVetDocumentList();
+
+        if(isset($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument))
+            $this->updateDocumentsList($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument);
+
+        if(isset($result->application->result->any['getVetDocumentListResponse']->vetDocumentList->vetDocument))
+            $this->updateDocumentsList($result->application->result->any['getVetDocumentListResponse']->vetDocumentList->vetDocument);
+    }
+}

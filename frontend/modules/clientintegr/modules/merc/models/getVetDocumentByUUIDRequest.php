@@ -8,9 +8,15 @@
 
 namespace frontend\modules\clientintegr\modules\merc\models;
 
-use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
+use api\common\models\merc\MercVsd;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
+use yii\base\Model;
 
-class getVetDocumentByUUIDRequest extends BaseRequest
+class getVetDocumentByUUIDRequest extends Model
 {
     public $UUID;
     public $issueSeries;
@@ -44,73 +50,6 @@ class getVetDocumentByUUIDRequest extends BaseRequest
     private $initiator;
     private $enterpriseGuid;
     private $soap_namespaces = ['xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"', ' xmlns:base="http://api.vetrf.ru/schema/cdm/base"'];
-
-    const DOC_TYPE_INCOMMING = 'INCOMING';
-    const DOC_TYPE_OUTGOING = 'OUTGOING';
-    const DOC_TYPE_PRODUCTIVE = 'PRODUCTIVE';
-    const DOC_TYPE_RETURNABLE = 'RETURNABLE';
-    const DOC_TYPE_TRANSPORT = 'TRANSPORT';
-
-    public $types = [
-        self::DOC_TYPE_INCOMMING => 'Входящий ВСД',
-        self::DOC_TYPE_OUTGOING => 'Исходящий ВСД',
-        self::DOC_TYPE_PRODUCTIVE => 'Производственный ВСД',
-        self::DOC_TYPE_RETURNABLE => 'Возвратный ВСД',
-        self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
-    ];
-
-    const DOC_STATUS_CONFIRMED = 'CONFIRMED';
-    const DOC_STATUS_WITHDRAWN = 'WITHDRAWN';
-    const DOC_STATUS_UTILIZED = 'UTILIZED';
-
-    public $statuses = [
-        self::DOC_STATUS_CONFIRMED => 'Оформлен',
-        self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
-        self::DOC_STATUS_UTILIZED => 'Погашен',
-    ];
-
-    public $forms = [
-        'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
-        'LIC1' => 'Форма 1 ветеринарного свидетельства',
-        'CERTCU2' => 'Форма 2 ветеринарного сертификата ТС',
-        'LIC2' => 'Форма 2 ветеринарного свидетельства',
-        'CERTCU3' => 'Форма 3 ветеринарного сертификата ТС',
-        'LIC3' => 'Форма 3 ветеринарного свидетельства',
-        'NOTE4' => 'Форма 4 ветеринарной справки',
-        'CERT5I' => 'Форма 5i ветеринарного сертификата',
-        'CERT61' => 'Форма 6.1 ветеринарного сертификата',
-        'CERT62' => 'Форма 6.2 ветеринарного сертификата',
-        'CERT63' => 'Форма 6.3 ветеринарного сертификата',
-        'PRODUCTIVE' => 'Производственный сертификат',
-    ];
-
-    public $transport_types = [
-        1 => 'Автомобильный',
-        2 => 'Железнодорожный',
-        3 => 'Авиатранспортный',
-        4 => 'Морской (контейнер)',
-        5 => 'Морской (трюм)',
-        6 => 'Речной',
-        7 => 'Перегон',
-    ];
-
-    public $product_types = [
-        1 => 'Мясо и мясопродукты',
-        2 => 'Корма и кормовые добавки',
-        3 => 'Живые животные',
-        4 => 'Лекарственные средства',
-        5 => 'Пищевые продукты',
-        6 => 'Непищевые продукты и другое',
-        7 => 'Рыба и морепродукты',
-        8 => 'Продукция, не требующая разрешения',
-    ];
-
-    public $storage_types = [
-        'FROZEN' => 'Замороженный',
-        'CHILLED' => 'Охлажденный',
-        'COOLED' => 'Охлаждаемый',
-        'VENTILATED' => 'Вентилируемый'
-    ];
 
     public function rules()
     {
@@ -156,154 +95,95 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         ];
     }
 
-    public function getSoap_namespaces()
-    {
-        return $this->soap_namespaces;
-    }
-
-    public function setInitiator($login)
-    {
-        $this->initiator = new initiator();
-        $this->initiator->login = $login;
-        $this->soap_namespaces[] = $this->initiator->soap_namespaces;
-    }
-
-    public function setEnterpriseGuid($GUID)
-    {
-        $this->enterpriseGuid = $GUID;
-        $this->soap_namespaces[] = 'xmlns:ent="http://api.vetrf.ru/schema/cdm/cerberus/enterprise"';
-    }
-
-    public function getEnterpriseGuid()
-    {
-        return $this->enterpriseGuid;
-    }
-
-    public function getInitiator()
-    {
-        return $this->initiator;
-    }
-
-    public function getXML()
-    {
-        $xml = '<merc:getVetDocumentByUuidRequest>'.PHP_EOL.
-    '<merc:localTransactionId>' . $this->localTransactionId . '</merc:localTransactionId>'.PHP_EOL;
-        if (isset($this->initiator))
-            $xml .= $this->initiator->getXML();
-
-       /* $xml .= '<base:listOptions>'.PHP_EOL.
-            '<base:count>10</base:count>'.PHP_EOL.
-            '<base:offset>0</base:offset>'.PHP_EOL.
-        '</base:listOptions>'.PHP_EOL.
-        '<vet:vetDocumentType>INCOMING</vet:vetDocumentType>'.PHP_EOL.
-        '<vet:vetDocumentStatus>UTILIZED</vet:vetDocumentStatus>'.PHP_EOL;*/
-        $xml .= '<base:uuid>'.$this->UUID.'</base:uuid>';
-        $xml .= '<ent:enterpriseGuid>'.$this->enterpriseGuid.'</ent:enterpriseGuid>'.PHP_EOL.
-        '</merc:getVetDocumentByUuidRequest>';
-
-        return $xml;
-    }
-
     public function getDocumentByUUID($UUID, $raw = false)
     {
         $cache = \Yii::$app->cache;
-        $attributes = $cache->get('vetDoc_'.$UUID);
-        if($attributes && !$raw) {
-            $this->setAttributes($attributes);
-                return;
-        }
-
         $this->UUID = $UUID;
 
-        $doc = mercApi::getInstance()->getVetDocumentByUUID($UUID);
-         //var_dump($raw_doc);
-          //  $doc = $raw_doc->envBody->receiveApplicationResultResponse->application->result->ns1getVetDocumentByUuidResponse->ns2vetDocument;
+        $doc = mercuryApi::getInstance()->getVetDocumentByUUID($UUID);
 
         if($raw) {
             return $doc;
         }
 
-        $this->issueSeries = (isset($doc->ns2issueSeries)) ? $doc->ns2issueSeries->__toString() : null;
-        $this->issueNumber = (isset($doc->ns2issueNumber)) ? $doc->ns2issueNumber->__toString() : null;
-        $this->issueDate = $doc->ns2issueDate->__toString();
-        $this->form = $doc->ns2form->__toString();
-        $this->type = $doc->ns2type->__toString();
-        $this->status = $doc->ns2status->__toString();
+        $this->issueSeries = (isset($doc->issueSeries)) ? $doc->nissueSeries : null;
+        $this->issueNumber = (isset($doc->issueNumber)) ? $doc->issueNumber : null;
+        $this->issueDate = $doc->issueDate;
+        $this->form = $doc->vetDForm;
+        $this->type = $doc->vetDType;
+        $this->status = $doc->vetDStatus;
 
-        $consingtor_buisness = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignor->entbusinessEntity->bsuuid->__toString());
-        $consingtor_enterprise = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2consignor->ententerprise->bsuuid->__toString());
+        $consingtor_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignor->businessEntity->uuid);
+        $consingtor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignor->enterprise->uuid);
 
-        $enterprise = $consingtor_enterprise->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
-        $businessEntity = $consingtor_buisness->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        $enterprise = $consingtor_enterprise->enterprise;
+        $businessEntity = $consingtor_buisness->businessEntity;
 
         $this->consignor = [
             [ 'label' => 'Название предприятия',
-              'value' => $enterprise->dtname->__toString().'('.
-                  $enterprise->dtaddress->dtaddressView->__toString()
+              'value' => $enterprise->name.'('.
+                  $enterprise->address->addressView
                   .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtinn->__toString(),
+                'value' => $businessEntity->name.', ИНН:'.$businessEntity->inn,
             ]
         ];
 
-        $cconsignee_buisness = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2consignee->entbusinessEntity->bsuuid->__toString());
-        $consignee_enterprise = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2consignee->ententerprise->bsuuid->__toString());
+        $consignee_business = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignee->businessEntity->uuid);
+        $consignee_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignee->enterprise->uuid);
 
-        $enterprise = $consignee_enterprise->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
-        $businessEntity = $cconsignee_buisness->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        $enterprise = $consignee_enterprise->enterprise;
+        $businessEntity = $consignee_business->businessEntity;
 
         $this->consignee = [
             [ 'label' => 'Название предприятия',
-                'value' => $enterprise->dtname->__toString().'('.
-                    $enterprise->dtaddress->dtaddressView->__toString()
+                'value' => $enterprise->name.'('.
+                    $enterprise->address->addressView
                     .')',
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->dtname->__toString().', ИНН:'.$businessEntity->dtinn->__toString(),
+                'value' => $businessEntity->name.', ИНН:'.$businessEntity->inn,
             ]
         ];
 
-        if(isset($doc->ns2broker)) {
-            $broker_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2broker->bsuuid->__toString());
-            $broker = $broker_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        if(isset($doc->certifiedConsignment->broker)) {
+            $broker_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->broker->uuid);
+            $broker = $broker_raw->businessEntity;
             $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
-                'value' => $broker->dtname->__toString() . ', ИНН:' . $broker->dtinn->__toString(),
+                'value' => $broker->name . ', ИНН:' . $broker->inn,
             ];
         }
 
-        $owner_raw = mercApi::getInstance()->getBusinessEntityByUuid($doc->ns2batch->ns2owner->bsuuid->__toString());
+        if(isset($doc->certifiedConsignment->batch->origin->owner)) {
+            $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->origin->uuid);
+            $owner = $owner_raw->businessEntity;
+        }
 
+        $product_raw = productApi::getInstance()->getProductByGuid($doc->certifiedConsignment->batch->product->guid);
+        $product = $product_raw->product->name;
 
-        $owner = $owner_raw->soapenvBody->v2getBusinessEntityByUuidResponse->dtbusinessEntity;
+        $sub_product_raw = productApi::getInstance()->getSubProductByGuid($doc->certifiedConsignment->batch->subProduct->guid);
 
-        $product_raw = mercApi::getInstance()->getProductByGuid($doc->ns2batch->ns2product->bsguid->__toString());
-        $product = $product_raw->soapBody->wsgetProductByGuidResponse->proproduct->proname->__toString();
+        $sub_product = $sub_product_raw->subProduct->name;
 
-        $sub_product_raw = mercApi::getInstance()->getSubProductByGuid($doc->ns2batch->ns2subProduct->bsguid->__toString());
+        $unit = dictsApi::getInstance()->getUnitByGuid($doc->certifiedConsignment->batch->unit->guid);
 
-        $sub_product = $sub_product_raw->soapBody->wsgetSubProductByGuidResponse->prosubProduct->proname->__toString();
+        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->certifiedConsignment->batch->origin->country->guid);
 
-        $unit = mercApi::getInstance()->getUnitByGuid($doc->ns2batch->ns2unit->bsguid);
+        $country = $country_raw->country->name;
 
-        $country_raw = mercApi::getInstance()->getCountryByGuid($doc->ns2batch->ns2countryOfOrigin->bsguid->__toString());
-
-        $country = $country_raw->soapenvBody->wsgetCountryByGuidResponse->ikarcountry->ikarfullName->__toString();
-
-        $purpose_raw = mercApi::getInstance()->getPurposeByGuid($doc->ns2purpose->bsguid->__toString());
-        $purpose = $purpose_raw->soapBody->wsgetPurposeByGuidResponse ->compurpose->comname->__toString();
+        $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->authentication->purpose->guid);
+        $purpose = $purpose->purpose->name;
 
         $producer = null;
 
-        if(isset($doc->ns2batch->ns2producerList->entproducer)) {
-            $producer_raw = mercApi::getInstance()->getEnterpriseByUuid($doc->ns2batch->ns2producerList->entproducer->ententerprise->bsuuid->__toString());
+        if(isset($doc->certifiedConsignment->batch->producerList->producer)) {
+            $producer_raw = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->batch->producerList->producer->enterprise->uuid);
+            $producer = $producer_raw->enterprise;
 
-            if(isset($producer_raw->soapBody))
-                $producer = $producer_raw->soapBody->v2getEnterpriseByUuidResponse->dtenterprise;
-            else
-                $producer = $producer_raw->soapenvBody->v2getEnterpriseByUuidResponse->dtenterprise;
-            $producer = $producer->dtname->__toString() . '(' .
-                $producer->dtaddress->dtaddressView->__toString()
+            $producer = $producer->name . '(' .
+                $producer->address->addressView
                 . ')';
         }
 
@@ -311,7 +191,7 @@ class getVetDocumentByUUIDRequest extends BaseRequest
         [
             [
                 'label' => 'Тип продукции',
-                'value' => $this->product_types[$doc->ns2batch->ns2productType->__toString()],
+                'value' => MercVsd::$product_types[$doc->certifiedConsignment->batch->productType],
             ],
             [
                 'label' => 'Продукция',
@@ -323,31 +203,32 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Наименование произведенной продукции в номенклатуре производителя',
-                'value' => isset($doc->ns2batch->ns2productItem->prodname) ? $doc->ns2batch->ns2productItem->prodname->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->productItem->name) ? $doc->certifiedConsignment->batch->productItem->name : null,
             ],
             [
                 'label' => 'Объем',
-                'value' => $doc->ns2batch->ns2volume." ".$unit->soapBody->wsgetUnitByGuidResponse->comunit->comname->__toString(),
+                'value' => $doc->certifiedConsignment->batch->volume." ".$unit->unit->name,
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
-                'value' => !empty($doc->ns2batch->ns2packingList) ? $doc->ns2batch->ns2packingList->argcpackingForm->argcname->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->packingList) ? $doc->certifiedConsignment->batch->packingList->packingForm->name : null,
+
             ],
             [
                 'label' => 'Общее количество единиц упаковки для производственной партии',
-                'value' => isset($doc->ns2batch->ns2packingAmount) ? $doc->ns2batch->ns2packingAmount->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->packingAmount) ? $doc->certifiedConsignment->batch->packingAmount : null,
             ],
             [
                 'label' => 'Дата выработки продукции',
-                'value' => $this->getDate($doc->ns2batch->ns2dateOfProduction),
+                'value' => MercVsd::getDate($doc->certifiedConsignment->batch->dateOfProduction),
             ],
             [
                 'label' => 'Дата окончания срока годности продукции',
-                'value' => isset($doc->ns2batch->ns2expiryDate) ? $this->getDate($doc->ns2batch->ns2expiryDate) : null,
+                'value' => MercVsd::getDate($doc->certifiedConsignment->batch->expiryDate),
             ],
             [
                 'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => isset($doc->ns2batch->ns2perishable) ? (($doc->ns2batch->ns2perishable->__toString() == 'true') ? 'Да' : 'Нет') : null,
+                'value' => isset($doc->certifiedConsignment->batch->perishable) ? (($doc->certifiedConsignment->batch->perishable == 'true') ? 'Да' : 'Нет') : null,
             ],
             [
                 'label' => 'Страна происхождения продукции',
@@ -359,15 +240,15 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             ],
             [
                 'label' => 'Список маркировки, доступный для данного производителя',
-                'value' => isset($doc->ns2batch->ns2productMarkingList) ? $doc->ns2batch->ns2productMarkingList->ns2productMarking->__toString() : null,
+                'value' => isset($doc->certifiedConsignment->batch->productMarkingList) ? $doc->certifiedConsignment->batch->productMarkingList->productMarking : null,
             ],
             [
                 'label' => 'Является ли продукция некачественной',
-                'value' => ($doc->ns2batch->ns2lowGradeCargo->__toString() == 'true') ? 'Да' : 'Нет',
+                'value' => ($doc->certifiedConsignment->batch->lowGradeCargo == 'true') ? 'Да' : 'Нет',
             ],
             [
                 'label' => 'Собственник продукции',
-                'value' =>  $owner->dtname->__toString().', ИНН:'.$owner->dtinn->__toString(),
+                'value' =>  (isset($owner)) ? ($owner->name.', ИНН:'.$owner->inn) : "-",
             ],
         ];
         $this->purpose = [
@@ -375,117 +256,58 @@ class getVetDocumentByUUIDRequest extends BaseRequest
             'value' => $purpose,
         ];
 
-        $this->transportInfo = isset ($doc->ns2transportInfo) ? ([
-            'type' => $this->transport_types[$doc->ns2transportInfo->shptransportType->__toString()],
+        $this->transportInfo = isset ($doc->certifiedConsignment->transportInfo) ? ([
+            'type' => MercVsd::$transport_types[$doc->certifiedConsignment->transportInfo->transportType],
             'numbers' => [
                 [
                 'label' => 'Номер контейнера (при автомобильной перевозке)',
-                'number' => isset($doc->ns2transportInfo->shptransportNumber->shpcontainerNumber) ? $doc->ns2transportInfo->shptransportNumber->shpcontainerNumber->__toString() : null,
+                'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->containerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpcontainerNumber : null,
                 ],
                 [
                     'label' => 'Номер вагона',
-                    'number' => isset ($doc->ns2transportInfo->shptransportNumber->shpwagonNumber) ? $doc->ns2transportInfo->shptransportNumber->shpwagonNumber->__toString() : null,
+                    'number' => isset ($doc->certifiedConsignment->transportInfo->transportNumber->wagonNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpwagonNumber : null,
                 ],
                 [
                     'label' => 'Номер автомобиля',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpvehicleNumber) ? $doc->ns2transportInfo->shptransportNumber->shpvehicleNumber->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpvehicleNumber : null,
                 ],
                 [
                     'label' => 'Номер прицепа (полуприцепа)',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shptrailerNumber) ? $doc->ns2transportInfo->shptransportNumber->shptrailerNumber->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->trailerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shptrailerNumber : null,
                 ],
                 [
                     'label' => 'Название судна (или номер контейнера)',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpshipName) ? $doc->ns2transportInfo->shptransportNumber->shpshipName->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->shipName) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpshipName : null,
                 ],
                 [
                     'label' => 'Номер авиарейса',
-                    'number' => isset($doc->ns2transportInfo->shptransportNumber->shpflightNumber) ? $doc->ns2transportInfo->shptransportNumber->shpflightNumber->__toString() : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->flightNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpflightNumber : null,
                 ]
             ]
         ]) : null;
-        $this->transportStorageType = isset($doc->ns2transportStorageType) ? $doc->ns2transportStorageType->__toString() : null;
-        $this->cargoReloadingPointList = isset($this->cargoReloadingPointList) ? $this->cargoReloadingPointList->__toString() : null;
-        $this->waybillSeries = isset($doc->ns2waybillSeries) ? $doc->ns2waybillSeries->__toString() : null;
-        $this->waybillNumber = isset($doc->ns2waybillNumber) ? $doc->ns2waybillNumber->__toString() : null;
-        $this->waybillDate = isset($doc->ns2waybillDate) ? $doc->ns2waybillDate->__toString() : null;
-        $this->cargoExpertized = isset($doc->ns2cargoExpertized) ? $doc->ns2cargoExpertized->__toString() : null;
-        $this->expertiseInfo = $doc->ns2expertiseInfo->__toString();
+        $this->transportStorageType = isset($doc->certifiedConsignment->transportStorageType) ? $doc->certifiedConsignment->transportStorageType : null;
+        $this->cargoReloadingPointList = isset($doc->certifiedConsignment->cargoReloadingPointList) ? $doc->certifiedConsignment->cargoReloadingPointList : null;
+
+        if($doc->referencedDocument->type == 1) {
+            $this->waybillSeries = $doc->referencedDocument->issueSeries;
+            $this->waybillNumber = $doc->referencedDocument->issueNumber;
+            $this->waybillDate = $doc->referencedDocument->issueDate;
+        }
+
+        $this->cargoExpertized = isset($doc->authentication->cargoExpertized) ? $doc->authentication->cargoExpertized : null;
+        $this->expertiseInfo = $doc->authentication->cargoInspected;
+
         $this->confirmedBy = [
             ['label' => 'ФИО',
-                'value' => $doc->ns2confirmedBy->argcfio->__toString()],
+                'value' => $doc->statusChange->specifiedPerson->fio],
             ['label' => 'Должность',
-                'value' => $doc->ns2confirmedBy->argcpost->__toString()]
+                'value' => $doc->statusChange->specifiedPerson->post]
         ];
-        $this->locationProsperity = $doc->ns2locationProsperity->__toString();
-        $this->specialMarks = isset($doc->ns2specialMarks) ? $doc->ns2specialMarks->__toString() : null;
+        $this->locationProsperity = $doc->authentication->locationProsperity;
+        $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;
 
         $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
 
-    }
-
-    public function getDate($date_raw)
-    {
-
-        if(isset($date_raw->ns2informalDate))
-            return $date_raw->ns2informalDate->__toString();
-
-
-        $first_date = '';
-        if(isset($date_raw->ns2firstDate->bsyear))
-            $first_date .= $date_raw->ns2firstDate->bsyear;
-
-        if(isset($date_raw->ns2firstDate->bsmonth))
-            $first_date .= '-'.$date_raw->ns2firstDate->bsmonth;
-
-        if(isset($date_raw->ns2firstDate->bsday))
-            $first_date .= '-'.$date_raw->ns2firstDate->bsday;
-
-        if (isset($date_raw->ns2firstDate->bshour)){
-            $first_date .= " ";
-            if (strlen($date_raw->ns2firstDate->bshour)==1)
-                $first_date .= "0";
-            $first_date .= $date_raw->ns2firstDate->bshour.":00:00";
-        }
-
-        if($date_raw->ns2secondDate)
-        {
-            $second_date = '';
-            if(isset($date_raw->ns2secondDate->bsyear))
-                $second_date .= $date_raw->ns2secondDate->bsyear;
-
-            if(isset($date_raw->ns2firstDate->bsmonth))
-                $second_date .= '-'.$date_raw->ns2secondDate->bsmonth;
-
-            if(isset($date_raw->ns2firstDate->bsday))
-                $second_date .= '-'.$date_raw->ns2secondDate->bsday;
-
-            if (isset($date_raw->ns2firstDate->bshour)){
-                $second_date .= " ";
-                if (strlen($date_raw->ns2secondDate->bshour)==1)
-                    $second_date .= "0";
-                $second_date .= $date_raw->ns2secondDate->bshour.":00:00";
-            }
-
-            return 'с '.$first_date.' до '.$second_date;
-        }
-
-        return $first_date;
-    }
-
-    public function getNumber ()
-    {
-        if(empty($this->issueNumber) && empty($this->issueSeries))
-            return null;
-
-        $res = '';
-        if(isset($this->issueSeries))
-            $res =  $this->issueSeries.' ';
-
-        if(isset($this->issueNumber))
-            $res .=  $this->issueNumber;
-
-        return $res;
     }
 
     public function getWaybillNumber ()

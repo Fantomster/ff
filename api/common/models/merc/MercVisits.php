@@ -75,8 +75,6 @@ class MercVisits extends \yii\db\ActiveRecord
         $guid = mercDicconst::getSetting('enterprise_guid');
         $visit = MercVisits::findOne(['org' => $org_id, 'guid' => $guid]);
 
-        if(isset($visit))
-            return $visit->last_visit;
-        return null;
+        return $visit->last_visit;
     }
 }

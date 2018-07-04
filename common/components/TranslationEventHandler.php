@@ -12,8 +12,7 @@ use yii\i18n\MissingTranslationEvent;
  */
 class TranslationEventHandler {
 
-
-    public function handleMissingTranslation(MissingTranslationEvent $event)
+    public static function handleMissingTranslation(MissingTranslationEvent $event)
     {
         if (!SourceMessage::findOne(['message' => $event->message])) {
             $sourceMessage = new SourceMessage();

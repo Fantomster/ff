@@ -1558,7 +1558,7 @@ class Organization extends \yii\db\ActiveRecord
 
         try {
             $guid = mercDicconst::getSetting('enterprise_guid');
-            return MercVsd::find()->where(['guid' => $guid, 'status' => 'CONFIRMED'])->andWhere("consignor <> '$guid'")->count();
+            return MercVsd::find()->where(['recipient_guid' => $guid, 'status' => 'CONFIRMED'])->count();
         }catch (\Exception $e)
         {
             return 0;

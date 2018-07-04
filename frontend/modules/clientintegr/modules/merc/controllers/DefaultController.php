@@ -236,7 +236,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $vsd = new vetDocumentsChangeList();
             $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*5);
             $vsd->updateData($visit);
-            //MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
+            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
             $transaction->commit();
         }catch (\Exception $e)
         {

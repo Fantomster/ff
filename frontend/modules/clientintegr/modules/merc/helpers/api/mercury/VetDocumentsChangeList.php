@@ -19,7 +19,7 @@ class VetDocumentsChangeList extends Model
 
         foreach ($list as $item)
         {
-            if($item->vetDType == getVetDocumentByUUIDRequest::DOC_TYPE_PRODUCTIVE)
+            if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
                 continue;
 
             if(!$cache->get('vetDocRaw_'.$item->uuid))
@@ -27,7 +27,7 @@ class VetDocumentsChangeList extends Model
 
             $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
             $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
-            $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
+            $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
             $producer = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->batch->origin->producer->enterprise->uuid);
 
             $model = MercVsd::findOne(['uuid' => $item->uuid]);

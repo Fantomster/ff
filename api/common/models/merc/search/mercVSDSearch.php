@@ -18,7 +18,7 @@ class mercVSDSearch extends MercVsd
         return [
             [['date_doc', 'production_date', 'guid', 'date_from', 'date_to'], 'safe'],
             [['amount','type'], 'number'],
-            [['uuid', 'number', 'status', 'product_name', 'unit', 'recipient_name','type', 'consignor'], 'string', 'max' => 255],
+            [['uuid', 'number', 'status', 'product_name', 'unit', 'sender_name','type', 'sender_guid'], 'string', 'max' => 255],
         ];
     }
 
@@ -61,9 +61,9 @@ class mercVSDSearch extends MercVsd
         ]);
 
         if($this->type == 2)
-            $query->andWhere("recipient_guid = '$guid'");
-        else
             $query->andWhere("sender_guid = '$guid'");
+        else
+            $query->andWhere("recipient_guid = '$guid'");
 
         if ( !empty($this->date_from) && !empty($this->date_to)) {
             $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from));

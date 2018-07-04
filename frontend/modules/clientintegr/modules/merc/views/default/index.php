@@ -253,7 +253,7 @@ Modal::widget([
                         <div class="col-sm-3 col-md-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'recipient_name')
+                                $form->field($searchModel, 'sender_name')
                                     ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
                                     ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>

@@ -31,74 +31,7 @@ use api_web\exceptions\ValidationException;
  */
 class OrderWebApi extends \api_web\components\WebApi
 {
-    /**
-     * Регистрация заказа/ов с корзины
-     * @param array $orders
-     * @return array
-     * @throws \Exception
-     *
-     * public function registration(array $orders)
-     * {
-     * $transaction = \Yii::$app->db->beginTransaction();
-     * try {
-     * $user = $this->user;
-     * $client = $user->organization;
-     *
-     * if (empty($client->getCartCount())) {
-     * throw new BadRequestHttpException("Корзина пуста.");
-     * }
-     *
-     * if (empty($orders['orders'])) {
-     * throw new BadRequestHttpException("Необходимо передать список заказов для оформления.");
-     * }
-     *
-     * $return = [];
-     * foreach ($orders['orders'] as $order_id) {
-     * $order = Order::findOne([
-     * 'id' => $order_id,
-     * 'client_id' => $client->id,
-     * 'status' => Order::STATUS_FORMING
-     * ]);
-     *
-     * if (empty($order)) {
-     * $return[] = [
-     * 'order_id' => $order_id,
-     * 'result' => 'Не найден'
-     * ];
-     * continue;
-     * }
-     *
-     * $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-     * $order->created_by_id = $user->id;
-     * $order->created_at = gmdate("Y-m-d H:i:s");
-     *
-     * if (!$order->validate()) {
-     * throw new ValidationException($order->getFirstErrors());
-     * }
-     *
-     * $return[] = [
-     * 'order_id' => $order->id,
-     * 'result' => $order->save()
-     * ];
-     *
-     * //Сообщение в очередь поставщику, что есть новый заказ
-     * Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
-     * //Емайл и смс о новом заказе
-     * Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
-     * }
-     * //Сообщение в очередь, Изменение количества товара в корзине
-     * Notice::init('Order')->sendOrderToTurnClient($client);
-     * $transaction->commit();
-     * return $return;
-     * } catch (\Exception $e) {
-     * $transaction->rollBack();
-     * throw $e;
-     * }
-     * }
-     */
-
-
-    /**
+     /**
      * Редактирование заказа
      * @param $post
      * @return array
@@ -451,52 +384,6 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
-     *
-     */
-    public function getHistoryCount()
-    {
-        $result = (new Query())->from(Order::tableName())
-            ->select(['status', 'COUNT(status) as count'])
-            ->where([
-                'or',
-                ['client_id' => $this->user->organization->id],
-                ['vendor_id' => $this->user->organization->id],
-            ])
-            ->groupBy('status')
-            ->all();
-
-        $return = [
-            'waiting' => 0,
-            'processing' => 0,
-            'success' => 0,
-            'canceled' => 0
-        ];
-
-        if (!empty($result)) {
-            foreach ($result as $row) {
-                switch ($row['status']) {
-                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                        $return['waiting'] += $row['count'];
-                        break;
-                    case Order::STATUS_PROCESSING:
-                        $return['processing'] += $row['count'];
-                        break;
-                    case Order::STATUS_DONE:
-                        $return['success'] += $row['count'];
-                        break;
-                    case Order::STATUS_CANCELLED:
-                    case Order::STATUS_REJECTED:
-                        $return['canceled'] += $row['count'];
-                        break;
-                }
-            }
-        }
-
-        return $return;
-    }
-
-    /**
      * История заказов
      * @param array $post
      * @return array
@@ -635,6 +522,53 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Количество заказов в разных статусах
+     * @return array
+     */
+    public function getHistoryCount()
+    {
+        $result = (new Query())->from(Order::tableName())
+            ->select(['status', 'COUNT(status) as count'])
+            ->where([
+                'or',
+                ['client_id' => $this->user->organization->id],
+                ['vendor_id' => $this->user->organization->id],
+            ])
+            ->groupBy('status')
+            ->all();
+
+        $return = [
+            'waiting' => 0,
+            'processing' => 0,
+            'success' => 0,
+            'canceled' => 0
+        ];
+
+        if (!empty($result)) {
+            foreach ($result as $row) {
+                switch ($row['status']) {
+                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        $return['waiting'] += $row['count'];
+                        break;
+                    case Order::STATUS_PROCESSING:
+                        $return['processing'] += $row['count'];
+                        break;
+                    case Order::STATUS_DONE:
+                        $return['success'] += $row['count'];
+                        break;
+                    case Order::STATUS_CANCELLED:
+                    case Order::STATUS_REJECTED:
+                        $return['canceled'] += $row['count'];
+                        break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Список доступных для заказа продуктов
      * @param $post
      * @return array
@@ -722,6 +656,74 @@ class OrderWebApi extends \api_web\components\WebApi
                 $return['headers'][$key] = (new CatalogBaseGoods())->getAttributeLabel($key);
             }
         }
+        return $return;
+    }
+
+    /**
+     * Список доступных категорий
+     * @return array
+     */
+    public function categories()
+    {
+
+        $suppliers = RelationSuppRest::find()
+            ->select('supp_org_id')
+            ->where(['rest_org_id' => $this->user->organization_id, 'status' => 1])
+            ->column();
+
+        $query = (new Query())
+            ->distinct()
+            ->select([
+                'COALESCE(category_id, 0) as category_id'
+            ])
+            ->from('catalog_base_goods')
+            ->leftJoin('mp_category', 'mp_category.id = category_id')
+            ->where(['in', 'supp_org_id', $suppliers])
+            ->column();
+
+        $return = [];
+        foreach ($query as $id) {
+
+            if ($id == 0) {
+                $return[9999] = [
+                    'id' => (int)$id,
+                    'name' => 'Без категории',
+                    'count_product' => MpCategory::getProductCountWithOutCategory(null, $this->user->organization_id)
+                ];
+                continue;
+            }
+
+            $model = MpCategory::findOne($id);
+            if (!empty($model->parent)) {
+                if (!isset($return[$model->parentCategory->id])) {
+                    $return[$model->parentCategory->id] = [
+                        'id' => $model->parentCategory->id,
+                        'name' => $model->parentCategory->name,
+                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->parentCategory->id)
+                    ];
+                }
+                $return[$model->parentCategory->id]['subcategories'][] = [
+                    'id' => $model->id,
+                    'name' => $model->name,
+                    'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
+                    'count_product' => $model->getProductCount(null, $this->user->organization_id),
+                ];
+            } else {
+                if (!isset($return[$model->id])) {
+                    $return[$model->id] = [
+                        'id' => $model->id,
+                        'name' => $model->name,
+                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id)
+                    ];
+                }
+            }
+        }
+
+        //Сортируем по ключу
+        ksort($return);
+        //Убиваем ключи сортировки
+        $return = array_values($return);
+
         return $return;
     }
 
@@ -867,6 +869,13 @@ class OrderWebApi extends \api_web\components\WebApi
         }
     }
 
+    /**
+     * Сохранение заказа в PDF
+     * @param array $post
+     * @param OrderController $c
+     * @return string
+     * @throws BadRequestHttpException
+     */
     public function saveToPdf(array $post, OrderController $c)
     {
         if (empty($post['order_id'])) {
@@ -941,74 +950,6 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;
-    }
-
-    /**
-     * Список доступных категорий
-     * @return array
-     */
-    public function categories()
-    {
-
-        $suppliers = RelationSuppRest::find()
-            ->select('supp_org_id')
-            ->where(['rest_org_id' => $this->user->organization_id, 'status' => 1])
-            ->column();
-
-        $query = (new Query())
-            ->distinct()
-            ->select([
-                'COALESCE(category_id, 0) as category_id'
-            ])
-            ->from('catalog_base_goods')
-            ->leftJoin('mp_category', 'mp_category.id = category_id')
-            ->where(['in', 'supp_org_id', $suppliers])
-            ->column();
-
-        $return = [];
-        foreach ($query as $id) {
-
-            if ($id == 0) {
-                $return[9999] = [
-                    'id' => (int)$id,
-                    'name' => 'Без категории',
-                    'count_product' => MpCategory::getProductCountWithOutCategory(null, $this->user->organization_id)
-                ];
-                continue;
-            }
-
-            $model = MpCategory::findOne($id);
-            if (!empty($model->parent)) {
-                if (!isset($return[$model->parentCategory->id])) {
-                    $return[$model->parentCategory->id] = [
-                        'id' => $model->parentCategory->id,
-                        'name' => $model->parentCategory->name,
-                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->parentCategory->id)
-                    ];
-                }
-                $return[$model->parentCategory->id]['subcategories'][] = [
-                    'id' => $model->id,
-                    'name' => $model->name,
-                    'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
-                    'count_product' => $model->getProductCount(null, $this->user->organization_id),
-                ];
-            } else {
-                if (!isset($return[$model->id])) {
-                    $return[$model->id] = [
-                        'id' => $model->id,
-                        'name' => $model->name,
-                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id)
-                    ];
-                }
-            }
-        }
-
-        //Сортируем по ключу
-        ksort($return);
-        //Убиваем ключи сортировки
-        $return = array_values($return);
-
-        return $return;
     }
 
     /**

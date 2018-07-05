@@ -379,12 +379,12 @@ class CronController extends Controller {
     }
 
     public function actionProcessMercVsd() {
-        $result = Yii::$app->db_api->CreateCommand("
-            SELECT count(mvsd.id), mpconst.org
+        $result = \yii\helpers\ArrayHelper::map(Yii::$app->db_api->CreateCommand("
+            SELECT count(mvsd.id) AS vsd_count, mpconst.org AS organization_id
             FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10
             WHERE mvsd.status = 'CONFIRMED'
             GROUP BY mpconst.org;
-        ")->queryAll();
+        ")->queryAll(), 'organization_id', 'vsd_count');
         var_dump($result);
     }
 

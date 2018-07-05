@@ -2210,7 +2210,7 @@ class OrderController extends DefaultController {
         $sql_ext = "SELECT `".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) ."`, `".Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) ."`, ";
         foreach ($orgs as $org) {
             $sql .= "IF(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
-            $sql_ext .= "SUM(`" . $org['client_name'] . "`),";
+            $sql_ext .= "SUM(`" . $org['client_name'] . "`) as '" . $org['client_name'] . "',";
         }
 
         $sql = substr($sql, 0, -1);

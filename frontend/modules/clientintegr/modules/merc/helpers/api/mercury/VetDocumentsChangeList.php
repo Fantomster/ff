@@ -79,16 +79,26 @@ class VetDocumentsChangeList extends Model
     public function updateData($last_visit)
     {
         $api = mercuryApi::getInstance();
+        $listOptions = new ListOptions();
+        $listOptions->count = 100;
+        $listOptions->offset = 0;
 
-        if(isset($last_visit))
-            $result = $api->getVetDocumentChangeList($last_visit);
-        else
-            $result = $api->getVetDocumentList();
+        do {
+            if (isset($last_visit)) {
+                $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
+                $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
+            }
+            else
+                {
+                $result = $api->getVetDocumentList(null, $listOptions);
+                $vetDocumentList = $result->application->result->any['getVetDocumentListResponse']->vetDocumentList;
+            }
 
-        if(isset($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument))
-            $this->updateDocumentsList($result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList->vetDocument);
+            $this->updateDocumentsList($vetDocumentList->vetDocument);
 
-        if(isset($result->application->result->any['getVetDocumentListResponse']->vetDocumentList->vetDocument))
-            $this->updateDocumentsList($result->application->result->any['getVetDocumentListResponse']->vetDocumentList->vetDocument);
+            if($vetDocumentList->count < $vetDocumentList->total)
+                $listOptions->offset += $vetDocumentList->count;
+
+        } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
     }
 }

@@ -68,6 +68,9 @@ class EmailIntegrationController extends Controller
         $temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
         $temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
         $temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
+        $temp_file[29] = '/app/console/runtime/testnac29.xls';
+        $temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
+        $temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
 
 
         $i =1;
@@ -97,6 +100,7 @@ class EmailIntegrationController extends Controller
             print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
             print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
             print_r("=================================".PHP_EOL);
+            //print_r($result[$i-1]['invoice']['rows']);
 
             file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
             file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));

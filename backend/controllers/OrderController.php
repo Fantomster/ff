@@ -103,6 +103,10 @@ class OrderController extends Controller
         $attachment->getFile();
     }
     
+    public function actionOrdersWithAttachments() {
+        return $this->render('orders-with-attachments');
+    }
+    
 //    /**
 //     * Creates a new Order model.
 //     * If creation is successful, the browser will be redirected to the 'view' page.

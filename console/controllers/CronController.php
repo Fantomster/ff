@@ -383,7 +383,7 @@ class CronController extends Controller {
             SELECT count(mvsd.id), mpconst.org
             FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10
             WHERE mvsd.status = 'CONFIRMED'
-            GROUIP BY mpconst.org;
+            GROUP BY mpconst.org;
         ")->queryAll();
         var_dump($result);
     }

@@ -819,7 +819,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
         value = $(this).val();
         $(this).val(value.replace(",", "."));
     });
-        
+    $.pjax.defaults.maxCacheLength = 0;    
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

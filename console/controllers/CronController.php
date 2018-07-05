@@ -379,13 +379,31 @@ class CronController extends Controller {
     }
 
     public function actionProcessMercVsd() {
-        $result = \yii\helpers\ArrayHelper::map(Yii::$app->db_api->CreateCommand("
+        $organizations = \yii\helpers\ArrayHelper::map(Yii::$app->db_api->CreateCommand("
             SELECT count(mvsd.id) AS vsd_count, mpconst.org AS organization_id
             FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10
             WHERE mvsd.status = 'CONFIRMED'
             GROUP BY mpconst.org;
         ")->queryAll(), 'organization_id', 'vsd_count');
-        var_dump($result);
+        var_dump($organizations);
+        $recipients = [];
+        foreach ($organizations as $organization_id => $vsd_count) {
+            $organization = Organization::findOne(['id' => $organization_id]);
+            if (isset($organization)) {
+                $relatedUsers = \common\models\RelationUserOrganization::findAll([
+                    'organization_id' => $organization_id, 
+                    'is_active' => true, 
+                    'role_id' => [\common\models\Role::ROLE_RESTAURANT_MANAGER, \common\models\Role::ROLE_SUPPLIER_MANAGER],
+                    ]);
+                foreach ($relatedUsers as $relatedUser) {
+                    $recipients[] = $relatedUser->user->emailNotification->merc_vsd ? $relatedUser->user->email : null;
+                }
+                foreach ($organization->additionalEmail as $addEmail) {
+                    $recipients[] = $addEmail->merc_vsd ? $addEmail->email : null;
+                }
+            }
+        }
+        var_dump($recipients);
     }
 
 }

@@ -415,7 +415,7 @@ class CronController extends Controller {
                 foreach ($recipients as $recipient) {
                     Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
                     $mailer = Yii::$app->mailer;
-                    $subject = Yii::t('app', 'common.mail.merc_vsd.subject', ['ru' => 'Уведомление о непогашенных ВСД для ' . $organization->name]);
+                    $subject = Yii::t('app', 'common.mail.merc_vsd.subject', ['ru' => 'Уведомление о непогашенных ВСД для ']) . $organization->name;
                     $mailer->compose('merc_vsd', compact("vsd_count"))
                             ->setTo($recipient)
                             ->setSubject($subject)

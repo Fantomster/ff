@@ -42,7 +42,7 @@ class InvoiceController extends Controller
          * @var $user User
          */
         $user = \Yii::$app->user->identity;
-        return $user->organization->getSuppliersTorg12(null, false, false);
+        return $user->organization->getSuppliers(null, false);
     }
 
     public function actionGetOrders()

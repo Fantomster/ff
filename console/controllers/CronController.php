@@ -386,24 +386,43 @@ class CronController extends Controller {
             GROUP BY mpconst.org;
         ")->queryAll(), 'organization_id', 'vsd_count');
         var_dump($organizations);
-        $recipients = [];
+
         foreach ($organizations as $organization_id => $vsd_count) {
             $organization = Organization::findOne(['id' => $organization_id]);
             if (isset($organization)) {
+                $recipients = [];
                 $relatedUsers = \common\models\RelationUserOrganization::findAll([
-                    'organization_id' => $organization_id, 
-                    'is_active' => true, 
-                    'role_id' => [\common\models\Role::ROLE_RESTAURANT_MANAGER, \common\models\Role::ROLE_SUPPLIER_MANAGER],
-                    ]);
+                            'organization_id' => $organization_id,
+                            'is_active' => true,
+                            'role_id' => [
+                                \common\models\Role::ROLE_RESTAURANT_MANAGER,
+                                \common\models\Role::ROLE_SUPPLIER_MANAGER,
+                                \common\models\Role::ROLE_ADMIN,
+                                \common\models\Role::ROLE_FKEEPER_MANAGER,
+                            ],
+                ]);
                 foreach ($relatedUsers as $relatedUser) {
-                    $recipients[] = $relatedUser->user->emailNotification->merc_vsd ? $relatedUser->user->email : null;
+                    if ($relatedUser->user->emailNotification->merc_vsd) {
+                        $recipients[] = $relatedUser->user->email;
+                    }
                 }
                 foreach ($organization->additionalEmail as $addEmail) {
-                    $recipients[] = $addEmail->merc_vsd ? $addEmail->email : null;
+                    if ($addEmail->merc_vsd) {
+                        $recipients[] = $addEmail->email;
+                    }
+                }
+                var_dump($recipients);
+                foreach ($recipients as $recipient) {
+                    Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
+                    $mailer = Yii::$app->mailer;
+                    $subject = Yii::t('app', 'common.mail.merc_vsd.subject', ['ru' => 'Уведомление о непогашенных ВСД для ' . $organization->name]);
+                    $mailer->compose('merc_vsd', compact("vsd_count"))
+                            ->setTo($recipient)
+                            ->setSubject($subject)
+                            ->send();
                 }
             }
         }
-        var_dump($recipients);
     }
 
 }

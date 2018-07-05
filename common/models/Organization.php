@@ -1471,7 +1471,7 @@ class Organization extends \yii\db\ActiveRecord {
         $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org', ['org' => $this->id])->one();
         $t = strtotime(date('Y-m-d H:i:s', time()));
         if ($lic) {
-            if ($t >= strtotime($lic->fd) && $t <= strtotime($lic->td) && $lic->status_id === 2) {
+            if ($t >= strtotime($lic->fd) && $t <= strtotime($lic->td) && $lic->status_id === 1) {
                 $return['rk'] = true;
             }
         }

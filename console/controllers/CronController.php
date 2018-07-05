@@ -360,28 +360,32 @@ class CronController extends Controller {
         Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '%test%' OR name LIKE '%тест%')");
     }
 
-
     //handle EDI integration files
-    public function actionHandleFiles()
-    {
+    public function actionHandleFiles() {
         $eComIntegration = new EComIntegration();
         $eComIntegration->handleFilesList();
     }
 
-
     //handle EDI integration files queue
-    public function actionHandleFilesQueue()
-    {
+    public function actionHandleFilesQueue() {
         $eComIntegration = new EComIntegration();
         $eComIntegration->handleFilesListQueue();
     }
 
-
     //archieve EDI integration files
-    public function actionArchiveFiles()
-    {
+    public function actionArchiveFiles() {
         $eComIntegration = new EComIntegration();
         $eComIntegration->archiveFiles();
+    }
+
+    public function actionProcessMercVsd() {
+        $result = Yii::$app->db_api->CreateCommand("
+            SELECT count(mvsd.id), mpconst.org
+            FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10
+            WHERE mvsd.status = 'CONFIRMED'
+            GROUIP BY mpconst.org;
+        ")->queryAll();
+        var_dump($result);
     }
 
 }

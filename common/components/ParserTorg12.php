@@ -7,6 +7,7 @@ use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
 use PHPExcel_Shared_Date;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ParserTorg12
 {
@@ -288,17 +289,13 @@ class ParserTorg12
                 }
                 $attributeValue = str_replace(",", ".", $attributeValue);
 
-                // var_dump($attributeValue);
-
                 $leftSide = trim(preg_replace("/.от.*/", "", $attributeValue));
                 $rightSide = trim(str_replace($leftSide." от","",$attributeValue));
                 $leftSide = trim(preg_replace("/.*№/", "", $leftSide));
 
-
                 $check = substr($rightSide, 0, strpos($rightSide," "));
-
                 if (is_numeric($check) && (int)$check > 30000) {
-                    $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($check));
+                    $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP/*Date::excelToTimestamp*/($check));
                 } else {
                     // года для распознования даты документа
                     $years = [date('Y', strtotime('-1 year')), date('Y'), date('Y', strtotime('+1 year'))];
@@ -346,12 +343,20 @@ class ParserTorg12
             }
 
             if (in_array($cellValue, $attribute['label'])) {
-
                 // заголовок атрибута в одной ячейке
                 $attributeValue = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $row + $attribute['shift_row'])->getValue());
-
-                if($cellValue == 'дата составления' && (int)$attributeValue)
-                    $attributeValue = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
+                $value_is_string=0;
+                if(strpos($cellValue, ',') !== false) $value_is_string=1;
+                if(strpos($cellValue, ' ') !== false) $value_is_string=1;
+                if(strpos($cellValue, '-') !== false) $value_is_string=1;
+                if ($value_is_string==0) {
+                    if($cellValue == 'дата составления' && (int)$attributeValue)
+                    $attributeValue = date('Y-m-d', /*Date::excelToTimestamp*/PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
+                } else {
+                    $attributeValue = str_replace(",", ".", $attributeValue);
+                    $attributeValue = str_replace("-", ".",$attributeValue);
+                    $attributeValue = str_replace(" ", ".",$attributeValue);
+                }
 
                 $this->firstRow = $row;
                 return $attributeValue;
@@ -569,7 +574,6 @@ class ParserTorg12
                 }
             }
             if ($sovpad_poln==1) $valueFromCell=$cellValueNext; else $valueFromCell=$cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
-            //print $valueFromCell."</br>";
             $temp1 = explode(',',$valueFromCell); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
             $valueFromCell = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $temp1[0]); //заменяем в наименовании поставщика полное название типа организации кратким названием
             $this->invoice->namePostav = ltrim(mb_strtoupper($valueFromCell)); //убираем пробелы и переводми  наименование поставщика в верхний регистр

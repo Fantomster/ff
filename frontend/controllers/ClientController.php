@@ -207,7 +207,6 @@ class ClientController extends DefaultController {
                         $user->role_id = $this->currentUser->role_id;
                     }
                     $user->setRegisterAttributes($user->role_id)->save();
-                    //$profile->email = $post['User']['email'];
                     $profile->setUser($user->id)->save();
                     $userid = $user->id;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
@@ -269,7 +268,6 @@ class ClientController extends DefaultController {
                     $user->email = $email;
                     $user->role_id = $post['User']['role_id'];
                     $user->save();
-//                    $profile->email = $user->getEmail();
                     $profile->save();
                     User::updateRelationUserOrganization($user->id, $this->currentUser->organization_id, $post['User']['role_id']);
 
@@ -305,7 +303,6 @@ class ClientController extends DefaultController {
                         if (count($rel2) > 1) {
                             $user->organization_id = $rel2[0]->organization_id;
                             $user->role_id = $rel2[0]->role_id;
-                            //$profile->email = $user->getEmail();
                             $user->save();
                             User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);
                             Yii::$app->user->logout();
@@ -469,7 +466,6 @@ class ClientController extends DefaultController {
                             $user->save();
                             $profile->setUser($user->id);
                             $profile->sms_allow = Profile::SMS_ALLOW;
-                            //$profile->email = $user->getEmail();
                             $profile->save();
                             $organization->save();
                             $user->setOrganization($organization)->save();
@@ -675,7 +671,6 @@ class ClientController extends DefaultController {
                             $user->save();
                             $profile->setUser($user->id);
                             $profile->sms_allow = Profile::SMS_ALLOW;
-                            //$profile->email = $user->getEmail();
                             $profile->save();
                             $organization->save();
                             $user->setOrganization($organization)->save();

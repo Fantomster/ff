@@ -1995,12 +1995,12 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $businessBegin = 4;
         $goodRowBegin = 5;
         $allBusinessArray = [];
-        //dd($arr);
         foreach ($arr as $businessName => $secondArr){
             if($businessName == 'day_all_business_total_price_diff')continue;
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, $businessBegin, $businessName);
             $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(0, $businessBegin)->getFont()->setBold(true);
             foreach ($secondArr as $thirdArray){
+                $goodIdIterator = 0;
                 $dayTotalPriceDiff = 0;
                 if(!is_iterable($thirdArray))continue;
                 foreach ($thirdArray as $fourthArray){
@@ -2008,8 +2008,11 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                     foreach ($fourthArray as $fifthArray){
                         foreach ($fifthArray as $date => $sixthArray){
                             $goodBegin = $dateRowsArray[$date];
-                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, $goodRowBegin, $sixthArray['vendor_name']);
-                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(2, $goodRowBegin, $sixthArray['product']);
+                            if($goodIdIterator == 0){
+                                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, $goodRowBegin, $sixthArray['vendor_name']);
+                                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(2, $goodRowBegin, $sixthArray['product']);
+                            }
+
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['orders_count']);
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['quantity'] . " " . $sixthArray['ed']);
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['plan_price']);
@@ -2021,6 +2024,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                             $businessBegin++;
                         }
                     }
+                    $goodIdIterator++;
                 }
                 $allBusinessArray[$date] = (isset($allBusinessArray[$date])) ? ($allBusinessArray[$date] + $dayTotalPriceDiff) : $dayTotalPriceDiff;
                 $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $dayTotalPriceDiff);

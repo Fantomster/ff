@@ -17,9 +17,24 @@ SCRIPT;
 $this->registerJs($js);
 
 $guideUrl = Url::to(['order/ajax-show-guide', 'id'=>$guide->id]);
+$guideSessionUrl = Url::to(['order/ajax-add-good-quantity-to-session']);
 
 $this->registerJs('
-    $(document).on("change", "#guideproductssearch-sort", function() {
+    $(document).on("change", ".quantity", function() {
+        var quantity = $(this).val();
+        var name = $(this).prop("name");
+            $.ajax({
+             type: "GET",
+             url: "' . $guideSessionUrl . '",
+             data: {
+                    quantity: quantity,
+                    name: name
+                   }
+   }).done(function() { });
+    });
+    
+    
+        $(document).on("change", "#guideproductssearch-sort", function() {
         var sort = $(this).val();
             $.pjax({
              type: "GET",
@@ -30,8 +45,9 @@ $this->registerJs('
              data: {
                     sort: sort,
                    }
-   }).done(function() { console.log(222); });
+   }).done(function() { });
     });
+    
     
     $(document).on("change", "#searchString", function() {
         var search = $(this).val();
@@ -44,7 +60,7 @@ $this->registerJs('
              data: {
                     search_string: search,
                    }
-   }).done(function() { console.log(222); });
+   }).done(function() {  });
     });
     ', \yii\web\View::POS_READY);
 ?>
@@ -148,12 +164,11 @@ $this->registerJs('
                     ],
                     [
                         'attribute' => 'quantity',
-                        'content' => function($data) {
-                            $units = $data["units"];
+                        'content' => function($data){
                             return TouchSpin::widget([
                                         'name' => 'GuideProduct[' . $data["id"] . ']',
                                         'pluginOptions' => [
-                                            'initval' => 0, //0.100,
+                                            'initval' => $_SESSION['GuideProductCount.' . $data["id"]] ?? 0, //0.100,
                                             'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,
                                             'max' => PHP_INT_MAX,
                                             'step' => (isset($units) && ($units)) ? $units : 1,

@@ -113,11 +113,11 @@ class getVetDocumentByUUIDRequest extends Model
         $this->type = $doc->vetDType;
         $this->status = $doc->vetDStatus;
 
-        $consingtor_buisness = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignor->businessEntity->uuid);
-        $consingtor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignor->enterprise->uuid);
+        $consignor_business = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignor->businessEntity->uuid);
+        $consignor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignor->enterprise->uuid);
 
-        $enterprise = $consingtor_enterprise->enterprise;
-        $businessEntity = $consingtor_buisness->businessEntity;
+        $enterprise = $consignor_enterprise->enterprise;
+        $businessEntity = $consignor_business->businessEntity;
 
         $this->consignor = [
             [ 'label' => 'Название предприятия',
@@ -299,9 +299,9 @@ class getVetDocumentByUUIDRequest extends Model
 
         $this->confirmedBy = [
             ['label' => 'ФИО',
-                'value' => $doc->statusChange->specifiedPerson->fio],
+                'value' => isset($doc->statusChange->specifiedPerson->fio) ? $doc->statusChange->specifiedPerson->fio : "-"],
             ['label' => 'Должность',
-                'value' => $doc->statusChange->specifiedPerson->post]
+                'value' => isset($doc->statusChange->specifiedPerson->post) ? $doc->statusChange->specifiedPerson->post : ""]
         ];
         $this->locationProsperity = $doc->authentication->locationProsperity;
         $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;

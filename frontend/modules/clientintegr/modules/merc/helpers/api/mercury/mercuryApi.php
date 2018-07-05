@@ -218,7 +218,7 @@ class mercuryApi extends baseApi
             $config['UUID'] = $UUID;
 
             if ($rejectedData == null)
-                $config['type'] = vetDocumentDone::ACCEPT_ALL;
+                $config['type'] = VetDocumentDone::ACCEPT_ALL;
             else
                 $config['type'] = $rejectedData['decision'];
 
@@ -251,7 +251,13 @@ class mercuryApi extends baseApi
 
             if ($status == 'COMPLETED') {
                 $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
-                Yii::$app->cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
+                $row = MercVsd::findOne(['uuid' => $UUID]);
+                if($row != null)
+                {
+                    $row->status = $doc->vetDStatus;
+                    $row->raw_data = serialize($doc);
+                    $row->save();
+                }
             } else
                 $result = null;
 

@@ -5,7 +5,7 @@
  */
 
 ?>
-<div style="width: 100%; text-align: center;"><?= Yii::t('app', 'common.mail.merc_vsd.vsd_count', ['ru'=>'Количество непогашенных ВСД']) ?>: <?= $vsd_count ?></div>
+<div style="width: 100%; text-align: center;"><?= Yii::t('app', 'common.mail.merc_vsd.vsd_count', ['ru'=>'Количество непогашенных ВСД'], 'ru') ?>: <?= $vsd_count ?></div>
 <br />
 <div style="width: 100%; text-align: center;">
     <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/clientintegr/merc/default"]); ?>"
@@ -19,5 +19,5 @@
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;"><?= Yii::t('app', 'common.mail.merc_vsd.process_button', ['ru'=>'Перейти к гашению']) ?></a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.merc_vsd.process_button', ['ru'=>'Перейти к гашению'], 'ru') ?></a>
 </div>

@@ -250,7 +250,7 @@ class mercuryApi extends baseApi
             $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
             if ($status == 'COMPLETED') {
-                $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
+                $doc = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
                 $row = MercVsd::findOne(['uuid' => $UUID]);
                 if($row != null)
                 {

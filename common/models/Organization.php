@@ -72,6 +72,7 @@ use common\models\guides\Guide;
  * @property Guide $favorite
  * @property Guide[] $guides
  * @property Catalog $baseCatalog
+ * @property AdditionalEmail[] additionalEmail
  */
 class Organization extends \yii\db\ActiveRecord {
 

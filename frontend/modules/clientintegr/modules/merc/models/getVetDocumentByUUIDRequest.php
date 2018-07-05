@@ -106,7 +106,7 @@ class getVetDocumentByUUIDRequest extends Model
             return $doc;
         }
 
-        $this->issueSeries = (isset($doc->issueSeries)) ? $doc->nissueSeries : null;
+        $this->issueSeries = (isset($doc->issueSeries)) ? $doc->issueSeries : null;
         $this->issueNumber = (isset($doc->issueNumber)) ? $doc->issueNumber : null;
         $this->issueDate = $doc->issueDate;
         $this->form = $doc->vetDForm;
@@ -261,27 +261,27 @@ class getVetDocumentByUUIDRequest extends Model
             'numbers' => [
                 [
                 'label' => 'Номер контейнера (при автомобильной перевозке)',
-                'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->containerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpcontainerNumber : null,
+                'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->containerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->containerNumber : null,
                 ],
                 [
                     'label' => 'Номер вагона',
-                    'number' => isset ($doc->certifiedConsignment->transportInfo->transportNumber->wagonNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpwagonNumber : null,
+                    'number' => isset ($doc->certifiedConsignment->transportInfo->transportNumber->wagonNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->wagonNumber : null,
                 ],
                 [
                     'label' => 'Номер автомобиля',
-                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpvehicleNumber : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber : null,
                 ],
                 [
                     'label' => 'Номер прицепа (полуприцепа)',
-                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->trailerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shptrailerNumber : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->trailerNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->trailerNumber : null,
                 ],
                 [
                     'label' => 'Название судна (или номер контейнера)',
-                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->shipName) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpshipName : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->shipName) ? $doc->certifiedConsignment->transportInfo->transportNumber->shipName : null,
                 ],
                 [
                     'label' => 'Номер авиарейса',
-                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->flightNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->shpflightNumber : null,
+                    'number' => isset($doc->certifiedConsignment->transportInfo->transportNumber->flightNumber) ? $doc->certifiedConsignment->transportInfo->transportNumber->flightNumber : null,
                 ]
             ]
         ]) : null;

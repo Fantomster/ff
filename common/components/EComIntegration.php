@@ -249,7 +249,6 @@ class EComIntegration
             } else {
                 $oldQuantity = (float)$ordCont->quantity;
                 $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
-
                 if ($oldQuantity != $newQuantity) {
                     $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }

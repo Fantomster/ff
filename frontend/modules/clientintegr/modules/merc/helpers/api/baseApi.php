@@ -23,11 +23,11 @@ class baseApi extends Component
     protected $enterpriseGuid;
     protected $wsdls;
 
-    protected static $_instance;
+    protected static $_instance = [];
 
     public static function getInstance()
     {
-        if (self::$_instance[static::class] === null) {
+        if (!array_key_exists(static::class, self::$_instance)) {
             self::$_instance[static::class] = new static();
             self::$_instance[static::class]->wsdls = Yii::$app->params['merc_settings'];
             self::$_instance[static::class]->login = mercDicconst::getSetting('auth_login');

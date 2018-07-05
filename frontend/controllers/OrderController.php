@@ -2275,8 +2275,6 @@ class OrderController extends DefaultController {
         foreach ($report[0] as $key => $data) {
             $last_col = $col;
             $objPHPExcel->getActiveSheet()->setCellValue($col . '1', $key);
-            if ($col > 'B')
-                $objPHPExcel->getActiveSheet()->getStyle($col . '1')->getAlignment()->setTextRotation(90);
             $col++;
             if ($data == null)
                 ;
@@ -2284,7 +2282,6 @@ class OrderController extends DefaultController {
         }
 
         $objPHPExcel->getActiveSheet()->setCellValue($col . '1', Yii::t('message', 'frontend.controllers.order.grid-report.total-count', ['ru' => 'ОБЩЕЕ КОЛИЧЕСТВО']));
-        $objPHPExcel->getActiveSheet()->getStyle($col . '1')->getAlignment()->setTextRotation(90);
         $objPHPExcel->getActiveSheet()->getStyle($col . '1')->getFont()->setBold(true);
 
         for ($i = $row_data; $i <= (count($report) + 2); $i++) {
@@ -2299,6 +2296,13 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getStyle('A2:A' . (count($report) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
         $objPHPExcel->getActiveSheet()->getStyle('A1:' . $col . (count($report) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+
+        $last_col++;
+        $i--;
+
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setPrintArea('A1:'.$last_col.$i);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setScale(60);
 
         header('Content-Type: application/vnd.ms-excel');
         $filename = date("d-m-Y") . "_Grid_report.xls";

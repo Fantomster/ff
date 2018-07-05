@@ -58,6 +58,6 @@ class cerberApi extends baseApi
 
         if(isset($result))
             $cache->add('Business_'.$UUID, $result, 60*60*24);
-        return $business;
+        return $result;
     }
 }

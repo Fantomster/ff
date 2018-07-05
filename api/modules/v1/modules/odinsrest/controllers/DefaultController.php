@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\odinsrest\controllers;
 
+use api\common\models\one_s\OneSContragent;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSStore;
 use api\common\models\one_s\OneSWaybill;
@@ -167,7 +168,7 @@ class DefaultController extends Controller
                         $modelName = OneSStore::className();
                         break;
                     case 3:
-                        $modelName = OneSСontragent::className();
+                        $modelName = OneSContragent::class;
                         break;
                     default:
                         $modelName = OneSGood::className();

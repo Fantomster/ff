@@ -317,7 +317,7 @@ ob_start();
             },
         }).then(function(result){
             console.log(result);
-        */
+        });*/
 
         swal({
                 input: 'select',

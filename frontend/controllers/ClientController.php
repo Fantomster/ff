@@ -1925,28 +1925,30 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 //            $arr[$businessName][$date][$price][$planPrice]['total_price_diff'] = (float)$totalPriceDiff;
 
 
+            $productID = $item->product_id;
 
-            $arr[$businessName][$date][$price][$planPrice]['orders_count'] = isset($arr[$businessName][$date][$price][$planPrice]['orders_count']) ?
-                ++$arr[$businessName][$date][$price][$planPrice]['orders_count'] : 1;
-            if(isset($arr[$businessName][$date][$price][$planPrice]['quantity'])){
-                $quantity = $arr[$businessName][$date][$price][$planPrice]['quantity'] + $item->quantity;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['orders_count'] = isset($arr[$businessName][$productID][$price][$planPrice][$date]['orders_count']) ?
+                ++$arr[$businessName][$productID][$price][$planPrice][$date]['orders_count'] : 1;
+
+            if(isset($arr[$businessName][$productID][$price][$planPrice][$date]['quantity'])){
+                $quantity = $arr[$businessName][$productID][$price][$planPrice][$date]['quantity'] + $item->quantity;
             }else{
                 $quantity = $item->quantity;
             }
 
-            $arr[$businessName][$date][$price][$planPrice]['quantity'] = $quantity;
-            $arr[$businessName][$date][$price][$planPrice]['plan_price'] = $item->plan_price;
-            $arr[$businessName][$date][$price][$planPrice]['price'] = $item->price;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['quantity'] = $quantity;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['plan_price'] = $item->plan_price;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['price'] = $item->price;
             $priceDiff = (float)$item->price - (float)$item->plan_price;
-            $arr[$businessName][$date][$price][$planPrice]['price_diff'] = (float)$priceDiff;
-            $arr[$businessName][$date][$price][$planPrice]['ed'] = $item->product->ed;
-            $arr[$businessName][$date][$price][$planPrice]['vendor_name'] = $item->order->vendor->name;
-            $arr[$businessName][$date][$price][$planPrice]['product'] = $item->product_name;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['price_diff'] = (float)$priceDiff;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['ed'] = $item->product->ed;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['vendor_name'] = $item->order->vendor->name;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['product'] = $item->product_name;
             $totalPriceDiff = (float)$priceDiff * (float)$quantity;
             $totalPriceDiff = round($totalPriceDiff, 2);
-            $arr[$businessName][$date][$price][$planPrice]['total_price_diff'] = (float)$totalPriceDiff;
+            $arr[$businessName][$productID][$price][$planPrice][$date]['total_price_diff'] = (float)$totalPriceDiff;
         }
-        //dd($arr);
+
 
         $objPHPExcel = new \PHPExcel();
 
@@ -1992,30 +1994,32 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(0, 3, $begin, 3)->getFont()->setBold(true);
         $businessBegin = 4;
         $goodRowBegin = 5;
-
         $allBusinessArray = [];
+        //dd($arr);
         foreach ($arr as $businessName => $secondArr){
             if($businessName == 'day_all_business_total_price_diff')continue;
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, $businessBegin, $businessName);
             $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(0, $businessBegin)->getFont()->setBold(true);
-            foreach ($secondArr as $date => $thirdArray){
+            foreach ($secondArr as $thirdArray){
                 $dayTotalPriceDiff = 0;
                 if(!is_iterable($thirdArray))continue;
                 foreach ($thirdArray as $fourthArray){
                     if(!is_iterable($fourthArray))continue;
                     foreach ($fourthArray as $fifthArray){
-                        $goodBegin = $dateRowsArray[$date];
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, $goodRowBegin, $fifthArray['vendor_name']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(2, $goodRowBegin, $fifthArray['product']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['orders_count']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['quantity'] . " " . $fifthArray['ed']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['plan_price']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['price']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $fifthArray['price_diff']);
-                        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $fifthArray['total_price_diff']);
-                        $dayTotalPriceDiff += $fifthArray['total_price_diff'];
-                        $goodRowBegin++;
-                        $businessBegin++;
+                        foreach ($fifthArray as $date => $sixthArray){
+                            $goodBegin = $dateRowsArray[$date];
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, $goodRowBegin, $sixthArray['vendor_name']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(2, $goodRowBegin, $sixthArray['product']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['orders_count']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['quantity'] . " " . $sixthArray['ed']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['plan_price']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['price']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['price_diff']);
+                            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $sixthArray['total_price_diff']);
+                            $dayTotalPriceDiff += $sixthArray['total_price_diff'];
+                            $goodRowBegin++;
+                            $businessBegin++;
+                        }
                     }
                 }
                 $allBusinessArray[$date] = (isset($allBusinessArray[$date])) ? ($allBusinessArray[$date] + $dayTotalPriceDiff) : $dayTotalPriceDiff;

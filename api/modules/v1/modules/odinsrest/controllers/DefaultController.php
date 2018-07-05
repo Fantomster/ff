@@ -188,6 +188,7 @@ class DefaultController extends Controller
                         case 1:
                             $oneSPosition->parent_id = $position->parent_id;
                             $oneSPosition->measure = $position->measure;
+                            $oneSPosition->is_category = $position->is_category ?? 0;
                             break;
                         case 2:
                             $oneSPosition->address = $position->address;

@@ -6,6 +6,7 @@ use Yii;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
 use common\models\Catalog;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "guide_product".
@@ -161,5 +162,13 @@ class GuideProduct extends \yii\db\ActiveRecord
             $currencySymbol = $product->catalog->currency->symbol;
             return $this->price . ' ' . $currencySymbol;
         }
+    }
+
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $this->guide->updated_at = new Expression('NOW()');
+        $this->guide->save();
     }
 }

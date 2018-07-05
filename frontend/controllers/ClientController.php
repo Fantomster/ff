@@ -1904,6 +1904,28 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             $dateArray[$date] = $date;
             $planPrice = $item->plan_price;
             $price = $item->price;
+//            $arr[$businessName][$date][$price][$planPrice]['orders_count'] = isset($arr[$businessName][$date][$price][$planPrice]['orders_count']) ?
+//                ++$arr[$businessName][$date][$price][$planPrice]['orders_count'] : 1;
+//            if(isset($arr[$businessName][$date][$price][$planPrice]['quantity'])){
+//                $quantity = $arr[$businessName][$date][$price][$planPrice]['quantity'] + $item->quantity;
+//            }else{
+//                $quantity = $item->quantity;
+//            }
+//
+//            $arr[$businessName][$date][$price][$planPrice]['quantity'] = $quantity;
+//            $arr[$businessName][$date][$price][$planPrice]['plan_price'] = $item->plan_price;
+//            $arr[$businessName][$date][$price][$planPrice]['price'] = $item->price;
+//            $priceDiff = (float)$item->price - (float)$item->plan_price;
+//            $arr[$businessName][$date][$price][$planPrice]['price_diff'] = (float)$priceDiff;
+//            $arr[$businessName][$date][$price][$planPrice]['ed'] = $item->product->ed;
+//            $arr[$businessName][$date][$price][$planPrice]['vendor_name'] = $item->order->vendor->name;
+//            $arr[$businessName][$date][$price][$planPrice]['product'] = $item->product_name;
+//            $totalPriceDiff = (float)$priceDiff * (float)$quantity;
+//            $totalPriceDiff = round($totalPriceDiff, 2);
+//            $arr[$businessName][$date][$price][$planPrice]['total_price_diff'] = (float)$totalPriceDiff;
+
+
+
             $arr[$businessName][$date][$price][$planPrice]['orders_count'] = isset($arr[$businessName][$date][$price][$planPrice]['orders_count']) ?
                 ++$arr[$businessName][$date][$price][$planPrice]['orders_count'] : 1;
             if(isset($arr[$businessName][$date][$price][$planPrice]['quantity'])){
@@ -1924,6 +1946,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             $totalPriceDiff = round($totalPriceDiff, 2);
             $arr[$businessName][$date][$price][$planPrice]['total_price_diff'] = (float)$totalPriceDiff;
         }
+        //dd($arr);
 
         $objPHPExcel = new \PHPExcel();
 

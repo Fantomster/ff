@@ -5,7 +5,7 @@
  */
 
 ?>
-<p><?= Yii::t('app', 'common.mail.merc_vsd.vsd_count', ['ru'=>'Количество непогашенных ВСД']) ?>: <?= $vsd_count ?></p>
+<div style="width: 100%; text-align: center;"><?= Yii::t('app', 'common.mail.merc_vsd.vsd_count', ['ru'=>'Количество непогашенных ВСД']) ?>: <?= $vsd_count ?></div>
 <br />
 <div style="width: 100%; text-align: center;">
     <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/clientintegr/merc/default"]); ?>"

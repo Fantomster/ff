@@ -122,7 +122,6 @@ class OrderController extends DefaultController {
                             'ajax-select-vendor',
                             'complete-obsolete',
                             'pjax-cart',
-                            'test',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2201,8 +2200,6 @@ class OrderController extends DefaultController {
 
         $selected = implode(',', $res);
 
-        //$selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, -1) : $selected;
-
         $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
                     FROM `order` 
                     left join organization as org on org.id = `order`.client_id
@@ -2210,12 +2207,14 @@ class OrderController extends DefaultController {
 
         $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
         $sql = "SELECT cbg.product as '" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "', cbg.ed as '" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "', ";
-
+        $sql_ext = "SELECT `".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) ."`, `".Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) ."`, ";
         foreach ($orgs as $org) {
             $sql .= "IF(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
+            $sql_ext .= "SUM(`" . $org['client_name'] . "`),";
         }
 
         $sql = substr($sql, 0, -1);
+        $sql_ext = substr($sql_ext, 0, -1);
 
         $sql .= " from `order`
                     left join order_content as oc on oc.order_id = `order`.id
@@ -2223,7 +2222,9 @@ class OrderController extends DefaultController {
                     left join organization as org on org.id = `order`.client_id
                     where `order`.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
 
-        $report = \Yii::$app->db->createCommand($sql)->queryAll();
+        $sql_ext .= " from ( ".$sql." ) ww group by `".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) ."`";
+
+        $report = \Yii::$app->db->createCommand($sql_ext)->queryAll();
 
         $objPHPExcel = new \PHPExcel();
         $sheet = 0;
@@ -2241,7 +2242,6 @@ class OrderController extends DefaultController {
         $start_grid_col = 'C';
         $grid = 1;
         foreach ($orgs as $org) {
-            $sql .= "SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0)) as '" . $org['client_name'] . "'";
 
             if ($org['parent_id'] != 0) {
                 $start_grid_col = $col;
@@ -2318,11 +2318,6 @@ class OrderController extends DefaultController {
         $list[$page] = !empty($selected) ? explode(",", $selected) : [];
 
         $session->set('selected', $list);
-    }
-
-    public function actionTest() {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        return (new rkeeperOrder())->getCompletedOrdersList(['search' => ['store_rid' => 1178]]);
     }
 
     public function actionUploadAttachment($id) {

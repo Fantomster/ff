@@ -76,7 +76,8 @@ class OrderController extends DefaultController {
                             'upload-attachment',
                             'get-attachment',
                             'delete-attachment',
-                            'ajax-get-vsd-list'
+                            'ajax-get-vsd-list',
+                            'ajax-add-good-quantity-to-session'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -671,9 +672,9 @@ class OrderController extends DefaultController {
         $guideDataProvider->pagination = false; //['pageSize' => 8];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params'));
+            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'session'));
         } else {
-            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params'));
+            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'session'));
         }
     }
 
@@ -2374,6 +2375,14 @@ class OrderController extends DefaultController {
     public function actionDeleteAttachment($id) {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         return $attachment->delete();
+    }
+
+
+    public function actionAjaxAddGoodQuantityToSession(){
+        $key = str_replace('GuideProduct[', '', str_replace(']', '', Yii::$app->request->get('name')));
+        $value = Yii::$app->request->get('quantity');
+        $session = Yii::$app->session;
+        $session['GuideProductCount.'.$key] = $value;
     }
     
 }

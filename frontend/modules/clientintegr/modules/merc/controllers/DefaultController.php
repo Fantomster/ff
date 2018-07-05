@@ -62,17 +62,17 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($uuid)
     {
-        try {
+        //try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e) {
+        /*}catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
         catch (\Exception $e){
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }
+        }*/
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -89,13 +89,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
         return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index'])); }
 
-        try {
+       // try {
             $api = mercuryApi::getInstance();
 
             if(!$api->getVetDocumentDone($uuid))
                 throw new \Exception('Done error');
 
-       } catch (\Error $e)
+       /*} catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
@@ -103,7 +103,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         catch (\Exception $e){
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
 
         Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
         $this->updateVSDList();
@@ -128,7 +128,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         else
             $model->decision = VetDocumentDone::PARTIALLY;
 
-       try {
+       //try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
 
@@ -139,7 +139,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
            }
-        } catch (\Error $e)
+        /*} catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
@@ -148,12 +148,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
 
-        try {
+        //try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e)
+        /*}catch (\Error $e)
         {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
@@ -162,7 +162,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
 
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [

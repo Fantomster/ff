@@ -98,7 +98,7 @@ class VetDocumentsChangeList extends Model
 
             if($vetDocumentList->count < $vetDocumentList->total)
                 $listOptions->offset += $vetDocumentList->count;
-           
+
         } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
     }
 }

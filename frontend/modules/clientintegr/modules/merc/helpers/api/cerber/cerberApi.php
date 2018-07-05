@@ -54,6 +54,7 @@ class cerberApi extends baseApi
         $client = $this->getSoapClient('cerber');
         $request = new getBusinessEntityByUuidRequest();
         $request->uuid = $UUID;
+
         $result = $client->GetBusinessEntityByUuid($request);
 
         if(isset($result))

@@ -88,8 +88,13 @@ class Torg12Invoice extends Invoice
      */
     public function getSumWithoutNdsById($id)
     {
-        $result = (new Query())->select('total_sum_withouttax')->from('integration_invoice')->where(['id' => $id])->one();
-        $res = $result['total_sum_withouttax'];
+        $result = (new Query())->select(['invoice_relation','total_price'])->from('order')->where(['id' => $id])->one();
+        if (is_null($result['invoice_relation'])) {
+            $res = $result['total_price'];
+        } else {
+            $result2 = (new Query())->select('total_sum_withouttax')->from('integration_invoice')->where(['id' => $result['invoice_relation']])->one();
+            $res = $result2['total_sum_withouttax'];
+        }
         return $res;
     }
 

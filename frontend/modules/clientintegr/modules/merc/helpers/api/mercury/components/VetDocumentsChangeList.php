@@ -1,21 +1,16 @@
 <?php
 
-namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
-use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocument;
-use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use yii\base\Model;
 
 class VetDocumentsChangeList extends Model
 {
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
-        $guid = mercDicconst::getSetting('enterprise_guid');
 
         foreach ($list as $item)
         {

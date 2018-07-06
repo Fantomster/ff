@@ -34,6 +34,8 @@ use Yii;
  * @property int $low_grade_cargo
  * @property string $vsd_uuid
  * @property string $raw_data
+ * @property string $product_marks
+ * @property string $producer_country
  */
 class MercStockEntry extends \yii\db\ActiveRecord
 {
@@ -49,7 +51,7 @@ class MercStockEntry extends \yii\db\ActiveRecord
     const UPDATED_WHEN_ATTACH = 230;
     const UPDATED_WHEN_ATTACH_AUTOMATIC = 231;
     const UPDATED_WHEN_FORK = 240;
-    const ESTORED_AFTER_DELETE = 250;
+    const RESTORED_AFTER_DELETE = 250;
     const MOVED = 300;
     const DELETED = 400;
     const DELETED_WHEN_MERGE = 410;
@@ -117,7 +119,7 @@ class MercStockEntry extends \yii\db\ActiveRecord
             [['amount'], 'number'],
             [['raw_data'], 'required'],
             [['raw_data'], 'string'],
-            [['guid', 'uuid', 'owner_guid', 'previous', 'next', 'entryNumber', 'product_name', 'article', 'production_date', 'expiry_date', 'batch_id', 'producer_name', 'producer_guid', 'vsd_uuid'], 'string', 'max' => 255],
+            [['guid', 'uuid', 'owner_guid', 'previous', 'next', 'entryNumber', 'product_name', 'article', 'production_date', 'expiry_date', 'batch_id', 'producer_name', 'producer_guid', 'vsd_uuid', 'product_marks', 'producer_country'], 'string', 'max' => 255],
             [['unit', 'gtin'], 'string', 'max' => 50],
             [['guid'], 'unique'],
         ];
@@ -156,6 +158,8 @@ class MercStockEntry extends \yii\db\ActiveRecord
             'low_grade_cargo' => 'Low Grade Cargo',
             'vsd_uuid' => 'Vsd Uuid',
             'raw_data' => 'Raw Data',
+            'producer_country' => 'producer country',
+            'product_marks' => 'product marks',
         ];
     }
 

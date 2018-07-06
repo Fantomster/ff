@@ -2,13 +2,16 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercStockEntry;
-use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ListOptions;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use yii\base\Model;
 
-class StockEntryList extends Model
+class LoadStockEntryList extends Model
 {
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
@@ -22,12 +25,12 @@ class StockEntryList extends Model
 
             $unit = dictsApi::getInstance()->getUnitByGuid($item->batch->unit->guid);
             $producer = isset($item->batch->origin->producer->enterprise->uuid) ? cerberApi::getInstance()->getEnterpriseByUuid($item->batch->origin->producer->enterprise->uuid) : null;
-
+            $country = isset($item->batch->origin->country->guid) ? ikarApi::getInstance()->getCountryByGuid($item->batch->origin->country->guid) : null;
             $model = MercStockEntry::findOne(['guid' => $item->guid]);
 
             if($model == null)
                 $model = new MercStockEntry();
-
+            //var_dump(isset($item->batch->packageList->package->productMarks)); die();
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'guid' => $item->guid,
@@ -35,8 +38,8 @@ class StockEntryList extends Model
                 'active' => (int)$item->active,
                 'last' => (int)$item->last,
                 'status' => $item->status,
-                'create_date' => $item->createDate,
-                'update_date' => $item->updateDate,
+                'create_date' => date('Y-m-d h:i:s',strtotime($item->createDate)),
+                'update_date' => date('Y-m-d h:i:s',strtotime($item->updateDate)),
                 'previous' => $item->previous,
                 'next' => $item->next,
                 'entryNumber' => $item->entryNumber,
@@ -51,15 +54,17 @@ class StockEntryList extends Model
                 'batch_id' => $item->batch->batchID,
                 'perishable' =>  (int)$item->batch->perishable,
                 'producer_name' => isset($producer) ? ($producer->enterprise->name.'('. $producer->enterprise->address->addressView .')') : null,
+                'producer_country' => $country->country->name,
                 'producer_guid' => $item->batch->origin->producer->enterprise->guid,
                 'low_grade_cargo' =>  (int)$item->batch->lowGradeCargo,
                 'vsd_uuid' => $item->vetDocument->uuid,
+                'product_marks' => isset($item->batch->packageList->package->productMarks) ? $item->batch->packageList->package->productMarks_ : "",
                 'raw_data' => serialize($item)
             ]);
 
             if(!$model->save()) {
                 var_dump($model->getErrors());
-                throw new \Exception('VSD save error');
+                throw new \Exception('Stock entry save error');
             }
 
         }

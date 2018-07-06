@@ -46,10 +46,6 @@ class getVetDocumentByUUID extends Model
     public $vetDocumentType;
     public $vetDocumentStatus;
 
-    private $initiator;
-    private $enterpriseGuid;
-    private $soap_namespaces = ['xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"', ' xmlns:base="http://api.vetrf.ru/schema/cdm/base"'];
-
     public function rules()
     {
         return [

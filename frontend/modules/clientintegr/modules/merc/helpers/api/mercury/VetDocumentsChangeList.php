@@ -33,7 +33,7 @@ class VetDocumentsChangeList extends Model
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'number' => (isset($item->issueSeries) && (isset($item->issueNumber))) ? MercVsd::getNumber($item->issueSeries, $item->issueNumber) : null,
-                'date_doc' => $item->issueDate,
+                'date_doc' => date('Y-m-d h:i:s',strtotime($item->issueDate)),
                 'type' => $item->vetDType,
                 'form' => $item->vetDForm,
                 'status' => $item->vetDStatus,

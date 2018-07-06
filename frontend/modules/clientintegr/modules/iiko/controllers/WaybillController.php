@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
 use api\common\models\iiko\iikoPconst;
+use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
@@ -356,10 +357,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
             $transaction->commit();
             $api->logout();
+            iikoLogger::save();
             return ['success' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
             $api->logout();
+            iikoLogger::save();
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

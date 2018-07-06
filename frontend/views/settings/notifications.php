@@ -5,6 +5,8 @@ use yii\widgets\ActiveForm;
 use kartik\checkbox\CheckboxX;
 
 $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', ['ru'=>'Уведомления']);
+
+$mercLicense = $user->organization->getMercLicense();
 ?>
 <section class="content-header">
     <h1>
@@ -190,6 +192,24 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                             'options' => ['style' => '']
                         ]
                     ])->label(false)
+                    ?>
+                    <?= isset($mercLicense) ?
+                    $form->field($emailNotification, 'merc_vsd')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $emailNotification,
+                        'attribute' => 'merc_vsd',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => Yii::t('app', 'frontend.views.settings.vsd_notification', ['ru'=>'Рассылки о непогашенных ВСД']),
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false) : ''
                     ?>
 
                     <?= ''
@@ -394,7 +414,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                             <?= Yii::t('app', 'frontend.views.settings.if_you_wanna_two', ['ru'=>'Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления.']) ?></p><br></div></i></div>
                 </div>
                 <div class="col-md-6">
-                    <?=$this->render('_additional_email', ['additional_email' => $additional_email, 'user' => $user])?>
+                    <?=$this->render('_additional_email', ['additional_email' => $additional_email, 'user' => $user, 'mercLicense' => $mercLicense])?>
                 </div>
             </div>
         </div>

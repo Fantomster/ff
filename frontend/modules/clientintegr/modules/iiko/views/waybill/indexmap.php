@@ -86,7 +86,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                         return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
                                     },
                                     'format' => 'raw',
-                                    'label' => 'Ед. изм. F-keeper',
+                                    'label' => 'Ед. изм. Mixcart',
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -146,7 +146,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'refreshGrid' => true,
                                     'editableOptions' => [
                                         'asPopover' => $isAndroid ? false : true,
-                                        'header' => ':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
+                                        'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</srong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
                                         'formOptions' => [
                                             'action' => Url::toRoute('change-coefficient'),
@@ -176,7 +176,8 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'vAlign' => 'middle',
                                     'format' => ['decimal'],
 
-                                    'pageSummary' => true
+                                    'pageSummary' => true,
+                                    'footer' => 'Всего:',
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -195,7 +196,6 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'vAlign' => 'middle',
                                     // 'width'=>'100px',
                                     'format' => ['decimal', 2],
-
                                     'pageSummary' => true
                                 ],
                                 [
@@ -302,6 +302,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     ]
                                 ],
                             ],
+                            'showFooter' => true,
                             'options' => ['class' => 'table-responsive'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],

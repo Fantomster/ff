@@ -26,7 +26,7 @@ use Yii;
  * @property string $created_at
  * @property string $exported_at
  * @property string $updated_at
- * @property Order $order
+ * @property Order $order;
  */
 class iikoWaybill extends \yii\db\ActiveRecord
 {
@@ -117,7 +117,6 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
                 $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
-
                 foreach ($records as $record) {
                     $wdmodel = new iikoWaybillData();
                     $wdmodel->waybill_id = $this->id;

@@ -81,7 +81,7 @@ $columns = array(
             return $model->product->product;
         },
         'format' => 'raw',
-        'label' => 'Наименование F-keeper',
+        'label' => 'Наименование Mixcart',
     ],
     [
         'attribute' => 'product_id',
@@ -89,7 +89,7 @@ $columns = array(
             return $model->product->ed ? $model->product->ed : 'Не указано';
         },
         'format' => 'raw',
-        'label' => 'Ед. изм. F-keeper',
+        'label' => 'Ед. изм. Mixcart',
     ],
 
     //   'munit_rid',
@@ -181,7 +181,7 @@ $columns = array(
         'refreshGrid' => true,
         'editableOptions'=>[
             'asPopover' => true,
-            'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
+            'header'=>':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</srong>',
             'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
             'formOptions' => [
                 'action' => Url::toRoute('changekoef'),

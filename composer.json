@@ -83,7 +83,8 @@
         "php-amqplib/php-amqplib": "^2.7",
         "vyants/yii2-daemon": "^0.1.0",
         "cboden/ratchet": "^0.4.1",
-        "react/zmq": "^0.4.0"
+        "react/zmq": "^0.4.0",
+        "darkdrim/yii2-simplehtmldom": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

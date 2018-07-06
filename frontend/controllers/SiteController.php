@@ -19,14 +19,12 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class SiteController extends Controller
-{
+class SiteController extends Controller {
 
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -85,8 +83,7 @@ class SiteController extends Controller
     /**
      * @inheritdoc
      */
-    public function actions()
-    {
+    public function actions() {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -94,9 +91,7 @@ class SiteController extends Controller
         ];
     }
 
-
-    public function actionUnsubscribe($token)
-    {
+    public function actionUnsubscribe($token) {
         $user = User::findOne(['access_token' => $token]);
         if ($user) {
 //            $user->subscribe = 0;
@@ -113,8 +108,7 @@ class SiteController extends Controller
      *
      * @return mixed
      */
-    public function actionIndex()
-    {
+    public function actionIndex() {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -131,29 +125,24 @@ class SiteController extends Controller
      *
      * @return mixed
      */
-    public function actionAbout()
-    {
+    public function actionAbout() {
         return $this->render('about');
     }
 
-    public function actionPayment()
-    {
+    public function actionPayment() {
         throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         //return $this->render('payment');
     }
 
-    public function actionContacts()
-    {
+    public function actionContacts() {
         return $this->render('contacts');
     }
 
-    public function actionFaq()
-    {
+    public function actionFaq() {
         return $this->render('faq');
     }
 
-    public function actionRestaurant()
-    {
+    public function actionRestaurant() {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -163,8 +152,7 @@ class SiteController extends Controller
         return $this->render('restaurant', compact("user", "profile", "organization"));
     }
 
-    public function actionSupplier()
-    {
+    public function actionSupplier() {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -174,8 +162,7 @@ class SiteController extends Controller
         return $this->render('supplier', compact("user", "profile", "organization"));
     }
 
-    public function actionCompleteRegistration()
-    {
+    public function actionCompleteRegistration() {
         $this->layout = "main-user";
         $user = Yii::$app->user->identity;
 //        $profile = $user->profile;
@@ -200,8 +187,7 @@ class SiteController extends Controller
         return $this->render("complete-registration", compact("organization"));
     }
 
-    public function actionAjaxCompleteRegistration()
-    {
+    public function actionAjaxCompleteRegistration() {
         $user = Yii::$app->user->identity;
         $profile = new Profile();
         $profile = $user->profile;
@@ -234,8 +220,7 @@ class SiteController extends Controller
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
 
-    public function actionAjaxWizardOff()
-    {
+    public function actionAjaxWizardOff() {
         $user = Yii::$app->user->identity;
         $organization = $user->organization;
         if (Yii::$app->request->isAjax) {
@@ -252,8 +237,7 @@ class SiteController extends Controller
         return false;
     }
 
-    public function actionAjaxTutorialOff()
-    {
+    public function actionAjaxTutorialOff() {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
             $organization = $user->organization;
@@ -263,8 +247,7 @@ class SiteController extends Controller
         return false;
     }
 
-    public function actionAjaxTutorialOn()
-    {
+    public function actionAjaxTutorialOn() {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
             $organization = $user->organization;
@@ -274,8 +257,7 @@ class SiteController extends Controller
         return false;
     }
 
-    public function actionImageBase()
-    {
+    public function actionImageBase() {
         $id = Yii::$app->request->get('id');
         $type = Yii::$app->request->get('type');
         if ($type == 'product') {
@@ -289,19 +271,147 @@ class SiteController extends Controller
         }
     }
 
-    private function isRegistrationComplete($organization)
-    {
+    private function isRegistrationComplete($organization) {
         return ($organization->step != Organization::STEP_SET_INFO);
     }
 
-    private function redirectOrganizationIndex($organization)
-    {
+    private function redirectOrganizationIndex($organization) {
         if ($organization->type_id === Organization::TYPE_RESTAURANT) {
             $this->redirect(['/client/index']);
         }
         if ($organization->type_id === Organization::TYPE_SUPPLIER) {
             $this->redirect(['/vendor/index']);
         }
+    }
+
+    private function getPage($url, $follow, $cookiesIn = '') {
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true, // return web page
+            CURLOPT_HEADER => true, //return headers in addition to content
+            CURLOPT_FOLLOWLOCATION => $follow, // follow redirects
+            CURLOPT_ENCODING => "", // handle all encodings
+            CURLOPT_AUTOREFERER => true, // set referer on redirect
+            CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
+            CURLOPT_TIMEOUT => 120, // timeout on response
+            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_COOKIE => $cookiesIn
+        );
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $options);
+        $rough_content = curl_exec($ch);
+        $err = curl_errno($ch);
+        $errmsg = curl_error($ch);
+        $header = curl_getinfo($ch);
+        curl_close($ch);
+
+        $header_content = substr($rough_content, 0, $header['header_size']);
+        $body_content = trim(str_replace($header_content, '', $rough_content));
+        $pattern = "#Set-Cookie:\\s+(?<cookie>[^=]+=[^;]+)#m";
+        preg_match_all($pattern, $header_content, $matches);
+        $cookiesOut = implode("; ", $matches['cookie']);
+
+        $header['errno'] = $err;
+        $header['errmsg'] = $errmsg;
+        $header['headers'] = $header_content;
+        $header['content'] = $body_content;
+        $header['cookies'] = $cookiesOut;
+        return $header;
+    }
+
+    private function postForm($url, $vars = [], $cookiesIn = '') {
+
+        $options = [
+            CURLOPT_RETURNTRANSFER => true, // return web page
+            CURLOPT_HEADER => true, //return headers in addition to content
+            CURLOPT_FOLLOWLOCATION => false, // follow redirects
+            CURLOPT_POST => true, // handle all encodings
+            CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
+            CURLOPT_TIMEOUT => 120, // timeout on response
+            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_COOKIE => $cookiesIn,
+            CURLOPT_POSTFIELDS => http_build_query($vars),
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $options);
+        $rough_content = curl_exec($ch);
+        $err = curl_errno($ch);
+        $errmsg = curl_error($ch);
+        $header = curl_getinfo($ch);
+        curl_close($ch);
+
+        $header_content = substr($rough_content, 0, $header['header_size']);
+        $body_content = trim(str_replace($header_content, '', $rough_content));
+        $pattern = "#Set-Cookie:\\s+(?<cookie>[^=]+=[^;]+)#m";
+        preg_match_all($pattern, $header_content, $matches);
+        $cookiesOut = implode("; ", $matches['cookie']);
+
+        $header['errno'] = $err;
+        $header['errmsg'] = $errmsg;
+        $header['headers'] = $header_content;
+        $header['content'] = $body_content;
+        $header['cookies'] = $cookiesOut;
+        return $header;
+    }
+
+    public function actionTestAuth() {
+        $link = 'https://t2-mercury.vetrf.ru/hs/';
+
+        $step0 = $this->getPage($link, false);
+
+        $step1 = $this->getPage($step0['redirect_url'], true, $step0['cookies']);
+
+
+        $data = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step1['content']);
+
+        $forms = $data->find('form');
+
+        $inputs = [];
+
+        $action = $forms[0]->action;
+        foreach ($forms[0]->find('input') as $input) {
+            $inputs[$input->name] = $input->value;
+        }
+
+        $step2 = $this->postForm($action, $inputs, $step0['cookies']);
+
+        $authData = ['j_username' => 'ponitkov_ma_180409', 'j_password' => '2wsx2WSX', '_eventId_proceed' => ''];
+
+        $step3 = $this->postForm($step2['redirect_url'], $authData, $step2['cookies']);
+
+        $data2 = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step3['content']);
+
+        $forms2 = $data2->find("form");
+
+        $action2 = html_entity_decode($forms2[0]->action);
+
+        $inputs2 = [];
+
+        foreach ($forms2[0]->find('input') as $input) {
+            $inputs2[$input->name] = $input->value;
+        }
+
+        $step4 = $this->postForm($action2, $inputs2, $step0['cookies']);
+
+        $step5 = $this->getPage($step4['redirect_url'], true, $step4['cookies']);
+
+        $test = [];
+
+        $data3 = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step5['content']);
+        $radios = $data3->find("input[name=commonEnterpriseNumber]");
+
+        foreach ($radios as $radio) {
+            $test[] = $radio->value;
+        }
+
+        return $this->render('test-auth', compact('test'));
     }
 
 }

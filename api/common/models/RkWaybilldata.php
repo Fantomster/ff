@@ -77,7 +77,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             'fid' => 'FID',
             'sum' => 'Сумма б/н',
             'quant' => 'Количество',
-            'product_id' => 'ID в F-keeper',
+            'product_id' => 'ID в Mixcart',
             'koef' => 'Коэфф.',
             'fproductnameProduct'=>'Наименование продукции'
         ];

@@ -78,7 +78,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'waybill_id' => Yii::t('app', 'Waybill ID'),
-            'product_id' => Yii::t('app', 'ID в F-keeper'),
+            'product_id' => Yii::t('app', 'ID в Mixcart'),
             'product_rid' => Yii::t('app', 'Product Rid'),
             'munit' => Yii::t('app', 'Munit'),
             'org' => Yii::t('app', 'Org'),

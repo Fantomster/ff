@@ -1525,6 +1525,10 @@ class Organization extends \yii\db\ActiveRecord {
             return 0;
         }
     }
+    
+    public function getMercLicense() {
+        return mercService::findOne(['org' => $this->id]);
+    }
 
     public function getOrganizationManagersExportColumns(): array {
         return [

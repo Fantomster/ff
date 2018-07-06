@@ -343,9 +343,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     ->limit(20);
             */
 
-            $sql = "( select id, denom as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-            " union ( select id, denom as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-            "union ( select id, denom as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            $sql = "( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
+            " union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
+            "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
             "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;

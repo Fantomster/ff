@@ -260,8 +260,15 @@ class mercuryApi extends baseApi
                 $row = MercVsd::findOne(['uuid' => $UUID]);
                 if($row != null)
                 {
-                    $row->status = $doc->vetDStatus;
-                    $row->raw_data = serialize($doc);
+                    switch ($rejectedData['decision']) {
+                        case  VetDocumentDone::RETURN_ALL :
+                                $doc = $doc[1]; break;
+                        case VetDocumentDone::ACCEPT_ALL : break;
+                        case VetDocumentDone::PARTIALLY : $doc = $doc[0]; break;
+                    }
+
+                $row->raw_data = serialize(is_array($doc) ? $doc[0] : $doc);
+                $row->status = $doc->vetDStatus;
                     $row->save();
                 }
             } else

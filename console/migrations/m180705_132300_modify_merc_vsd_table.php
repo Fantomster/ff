@@ -21,7 +21,7 @@ class m180705_132300_modify_merc_vsd_table extends Migration
         $this->execute("TRUNCATE TABLE `merc_visits`;");
         $this->execute("TRUNCATE TABLE `merc_vsd`;");
         $this->execute( " 
-                            ALTER TABLE `api`.`merc_vsd` 
+                            ALTER TABLE `merc_vsd` 
                             ADD UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC);
                        ");
     }

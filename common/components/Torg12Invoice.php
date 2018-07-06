@@ -3,6 +3,7 @@
 namespace common\components;
 
 use golovchanskiy\parseTorg12\models\Invoice;
+use yii\db\Query;
 
 /**
  * Товарная накладная
@@ -80,5 +81,16 @@ class Torg12Invoice extends Invoice
      * @var string
      */
     public $kppPostav;
+
+    /**
+     * Возвращает по ID накладной сумму без НДС
+     *
+     */
+    public function getSumWithoutNdsById($id)
+    {
+        $result = (new Query())->select('total_sum_withouttax')->from('integration_invoice')->where(['id' => $id])->one();
+        $res = $result['total_sum_withouttax'];
+        return $res;
+    }
 
 }

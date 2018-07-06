@@ -15,6 +15,7 @@ use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
+use common\components\Torg12Invoice;
 
 $this->title = 'Интеграция с iiko Office';
 
@@ -177,7 +178,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'format' => ['decimal'],
 
                                     'pageSummary' => true,
-                                    'footer' => 'Всего:',
+                                    'footer' => 'Итого сумма без НДС:',
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -194,9 +195,9 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     ],
                                     'hAlign' => 'right',
                                     'vAlign' => 'middle',
-                                    // 'width'=>'100px',
                                     'format' => ['decimal', 2],
-                                    'pageSummary' => true
+                                    'pageSummary' => true,
+                                    'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                 ],
                                 [
                                     'attribute' => 'vat',

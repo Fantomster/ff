@@ -2020,9 +2020,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['price_diff']);
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $sixthArray['total_price_diff']);
                             $dayTotalPriceDiff += $sixthArray['total_price_diff'];
-                            $goodRowBegin++;
                             $businessBegin++;
                         }
+                        $goodRowBegin++;
                     }
                     $goodIdIterator++;
                 }

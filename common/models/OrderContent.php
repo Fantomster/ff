@@ -198,6 +198,8 @@ class OrderContent extends \yii\db\ActiveRecord
             if($this->plan_price == 0.00){
                 $this->plan_price = $this->price;
             }
+        }else{
+            $this->plan_price = $this->price;
         }
         return $result;
     }

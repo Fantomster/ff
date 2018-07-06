@@ -24,6 +24,15 @@ class iikoService extends WebApi implements ServiceInterface
     }
 
     /**
+     * id сервиса из таблицы all_service
+     * @return string
+     */
+    public static function getServiceId()
+    {
+        return 2;
+    }
+
+    /**
      * Информация о лицензии MixCart
      * @return \api\common\models\iiko\iikoService|array|null|\yii\db\ActiveRecord
      */

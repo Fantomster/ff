@@ -69,7 +69,7 @@ use kartik\grid\GridView;
                                 'view' => function ($url, $model) {
                                     return \yii\helpers\Html::a(
                                         '<i class="fa fa-eye" aria-hidden="true"></i>',
-                                        Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/' . $model->dictype->contr . '-view']),
+                                        Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/sync/' . $model->dictype->method . '-view']),
                                         [
                                             'title' => Yii::t('backend', 'Просмотр'),
                                             'data-pjax' => "0"

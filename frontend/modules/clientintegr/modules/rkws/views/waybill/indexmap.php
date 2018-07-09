@@ -15,6 +15,7 @@ use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
+use common\components\Torg12Invoice;
 
 
 ?>
@@ -231,7 +232,7 @@ $columns = array(
         'vAlign'=>'middle',
         // 'width'=>'100px',
         'format'=>['decimal'],
-
+        'footer' => 'Итого сумма без НДС:',
         'pageSummary'=>true
     ],
     [
@@ -251,7 +252,7 @@ $columns = array(
         'vAlign'=>'middle',
         // 'width'=>'100px',
         'format'=>['decimal',2],
-
+        'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
         'pageSummary'=>true
     ]);
 
@@ -382,6 +383,7 @@ GridView::widget([
     /* 'rowOptions' => function ($data, $key, $index, $grid) {
       return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
       }, */
+    'showFooter' => true,
     'options' => ['class' => 'table-responsive'],
     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
     'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],

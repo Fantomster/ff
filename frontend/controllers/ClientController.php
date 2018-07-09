@@ -2036,7 +2036,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 
         $goodRowBegin--;
         foreach ($dateRowsArray as $date => $col){
-            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(($col + 5), $goodRowBegin, $allBusinessArray[$date]);
+            if (isset($allBusinessArray[$date])){
+                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(($col + 5), $goodRowBegin, $allBusinessArray[$date]);
+            }
             $objPHPExcel->getActiveSheet()->getStyleByColumnAndRow(($col + 5), $goodRowBegin)->getFont()->setBold(true);
         }
 

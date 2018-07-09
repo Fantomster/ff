@@ -168,6 +168,7 @@ $url = Url::toRoute('waybill/send');
 $js = <<< JS
     $(function () {
         $('.orders-table').on('click', '.export-waybill', function () {
+            console.log('Colonel');
             var url = '$url';
             var id = $(this).data('id');
             var oid = $(this).data('oid');
@@ -183,8 +184,8 @@ $js = <<< JS
                 if(result.value)
                 {
                     swal({
-                        title: 'Идёт оптравка',
-                        text: 'Подождите пока закончится выгрузка...',
+                        title: 'Идёт отправка',
+                        text: 'Подождите, пока закончится выгрузка...',
                         onOpen: () => {
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {

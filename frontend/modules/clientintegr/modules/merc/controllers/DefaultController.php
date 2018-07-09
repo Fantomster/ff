@@ -135,6 +135,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 if(!$api->getVetDocumentDone($uuid, $model->attributes))
                     throw new \Exception('Done error');
 
+                Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
                 if (Yii::$app->request->isAjax)
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
@@ -164,7 +165,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
 
-        Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [
                 'model' => $model,

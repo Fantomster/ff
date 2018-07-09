@@ -372,6 +372,7 @@ $js = <<< JS
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {
                                 console.log(data);
+                                console.log(data.success);
                                 if (data.success === true) {
                                     swal.close();
                                     swal('Готово', '', 'success');
@@ -386,7 +387,8 @@ $js = <<< JS
                                     console.log(data.error);
                                     swal(
                                         'Ошибка',
-                                        'Обратитесь в службу поддержки.',
+                                        data.error,
+                                        //'Обратитесь в службу поддержки.',
                                         'error'
                                     )
                                 }

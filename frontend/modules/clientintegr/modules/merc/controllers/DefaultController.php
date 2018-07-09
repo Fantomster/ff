@@ -164,6 +164,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
 
+        Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('rejected/_ajaxForm', [
                 'model' => $model,
@@ -210,6 +211,20 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
         $this->updateVSDList();
         return $this->redirect(['index']);
+    }
+
+    public function actionAjaxLoadVsd() {
+        if (Yii::$app->request->post()) {
+            $list = Yii::$app->request->post('list');
+
+            $vsd = new VetDocumentsChangeList();
+
+            if($vsd->handUpdateData($list)) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return ["title" => 'ВСД успешно загружены', "type" => "success"];
+            }
+        }
+        return false;
     }
 
     private function updateVSDList()

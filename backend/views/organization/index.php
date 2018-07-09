@@ -12,6 +12,7 @@ use kartik\export\ExportMenu;
 
 $this->title = 'Общий список организаций';
 $this->params['breadcrumbs'][] = $this->title;
+$url = \yii\helpers\Url::to(['organization/ajax-update-status']);
 
 $gridColumns = [
     [
@@ -70,8 +71,20 @@ $gridColumns = [
         'label' => 'Статус',
         'format' => 'raw',
         'filter' => common\models\Organization::getStatusList(),
-        'value' => function ($data) {
-            return $data->getStatus();
+        'value' => function ($model) use($url) {
+            //return $data->getStatus();
+            return \kartik\select2\Select2::widget([
+                'model' => $model,
+                'attribute' => 'blacklisted',
+                'data' => common\models\Organization::getStatusList(),
+                'hideSearch' => true,
+                'options' => [
+                    'id' => 'blacklisted_'.$model->id,
+                    'name' => 'blacklisted_'.$model->id,
+                    'class' => 'alBlacklistClass',
+                    'allowClear' => true
+                ],
+            ]);
         }
     ],
 //    'website',
@@ -126,3 +139,24 @@ $gridColumns = [
     ]);
     ?>
     <?php Pjax::end(); ?></div>
+<?php
+$customJs = <<< JS
+
+$(document).on('change', '.alBlacklistClass', function(e) {
+    var value = $(this).val();
+    var id = $(this).prop('id');
+    $.ajax({
+        url: "$url",
+        type: "POST",
+        data: {'value' : value, 'id' : id},
+        cache: false,
+        failure: function(errMsg) {
+            console.log(errMsg);
+        }
+    });
+})
+
+JS;
+
+$this->registerJs($customJs, \yii\web\View::POS_READY);
+?>

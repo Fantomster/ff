@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Franchisee', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(Yii::t('app', 'Обновить файл для публикации'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <p>
         Файл json для frontend-api <a href="https://static.mixcart.ru/files/franchisee<?= (strpos(Yii::$app->request->hostName, 'test') || strpos(Yii::$app->request->hostName, 'ev') || strpos(Yii::$app->request->hostName, 'ackend')) ? '-dev' : '' ?>.json" target="_blank">https://static.mixcart.ru/files/franchisee<?= (strpos(Yii::$app->request->hostName, 'test') || strpos(Yii::$app->request->hostName, 'ev') || strpos(Yii::$app->request->hostName, 'ackend')) ? '-dev' : '' ?>.json</a>

@@ -38,12 +38,21 @@ $this->title = Yii::t('message', 'frontend.client.integration.mercury.act', ['ru
                 <div class="panel-body">
                     <div class="production-act-defect-create">
                         <?php if (Yii::$app->session->hasFlash('success')): ?>
+                            <div class="alert alert-success alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                <h4>
+                                    <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
+                                </h4>
+                                <?= Yii::$app->session->getFlash('success') ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (Yii::$app->session->hasFlash('error')): ?>
                             <div class="alert alert-danger alert-dismissable">
                                 <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                                 <h4>
-                                    <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                                    <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
                                 </h4>
-                                <?= Yii::$app->session->getFlash('success') ?>
+                                <?= Yii::$app->session->getFlash('error') ?>
                             </div>
                         <?php endif; ?>
                         <?php echo $this->render('_form', [

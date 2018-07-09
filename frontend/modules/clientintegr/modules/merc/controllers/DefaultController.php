@@ -212,6 +212,20 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->redirect(['index']);
     }
 
+    public function actionAjaxLoadVsd() {
+        if (Yii::$app->request->post()) {
+            $list = Yii::$app->request->post('list');
+
+            $vsd = new VetDocumentsChangeList();
+
+            if($vsd->handUpdateData($list)) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return ["title" => 'ВСД успешно загружены', "type" => "success"];
+            }
+        }
+        return false;
+    }
+
     private function updateVSDList()
     {
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);

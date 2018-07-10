@@ -304,6 +304,7 @@ class EComIntegration
         }
         if (!$isDesadv) {
             foreach ($positions as $position) {
+                if($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00)continue;
                 $contID = (int)$position->PRODUCTIDBUYER;
                 if(!$contID){
                     $contID = (int)$position->PRODUCT;

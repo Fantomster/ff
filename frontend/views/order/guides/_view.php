@@ -165,11 +165,12 @@ $this->registerJs('
                     [
                         'attribute' => 'quantity',
                         'content' => function($data){
+                            //dd($data);
                             return TouchSpin::widget([
                                         'name' => 'GuideProduct[' . $data["id"] . ']',
                                         'pluginOptions' => [
-                                            'initval' => $_SESSION['GuideProductCount.' . $data["id"]] ?? 0, //0.100,
-                                            'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,
+                                            'initval' => $_SESSION['GuideProductCount.' . $data["id"]] ?? 0.100,
+                                            'min' => (isset($units) && ($units > 0)) ? $units : 0.001,
                                             'max' => PHP_INT_MAX,
                                             'step' => (isset($units) && ($units)) ? $units : 1,
                                             'decimals' => (empty($units) || (fmod($units, 1) > 0)) ? 3 : 0,

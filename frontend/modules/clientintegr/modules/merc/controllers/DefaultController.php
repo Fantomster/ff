@@ -135,6 +135,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 if(!$api->getVetDocumentDone($uuid, $model->attributes))
                     throw new \Exception('Done error');
 
+                Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
                 if (Yii::$app->request->isAjax)
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
@@ -180,6 +181,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $selected = Yii::$app->request->get('selected');
         $start =  Yii::$app->params['merc_settings']['start_date'];
+        $error = false;
 
         try {
             $selected = explode(',', $selected);
@@ -211,9 +213,27 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->redirect(['index']);
     }
 
+    public function actionAjaxLoadVsd() {
+        if (Yii::$app->request->post()) {
+            $list = Yii::$app->request->post('list');
+
+            $vsd = new VetDocumentsChangeList();
+
+            if($vsd->handUpdateData($list)) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return ["title" => 'ВСД успешно загружены', "type" => "success"];
+            }
+        }
+        return false;
+    }
+
     private function updateVSDList()
     {
-        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
+        $hand_only = mercDicconst::getSetting('hand_load_only');
+        if($hand_only == 1)
+            return true;
+
+        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
         $transaction = Yii::$app->db_api->beginTransaction();
        try {
             $vsd = new VetDocumentsChangeList();

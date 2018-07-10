@@ -11,10 +11,8 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
-use api\common\models\RkAccess;
-use api\common\models\RkWaybill;
 use yii\web\JsExpression;
-use api\common\models\RkDicconst;
+use common\components\Torg12Invoice;
 
 $this->title = 'Интеграция с iiko Office';
 
@@ -63,7 +61,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     $.ajax({
                                         url: "change-vat", // путь к php-обработчику
                                         type: "POST", // метод передачи данных
-                                        data: {key: this.value + "," + "' . $wmodel->id . '"}, // данные, которые передаем на сервер                                                                
+                                        data: {key: this.value + "," + "' . $wmodel->id . '"}, // данные, которые передаём на сервер                                                                
                                         success: function(json){ // функция, которая будет вызвана в случае удачного завершения запроса к серверу
                                             $.pjax.reload({container:"#map_grid1"}); 
                                         }
@@ -74,7 +72,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
-                            'pjax' => true,
+                            'pjax' => false,
                             'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
                             'filterPosition' => false,
                             'columns' => [
@@ -146,7 +144,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'refreshGrid' => true,
                                     'editableOptions' => [
                                         'asPopover' => $isAndroid ? false : true,
-                                        'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</srong>',
+                                        'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
                                         'formOptions' => [
                                             'action' => Url::toRoute('change-coefficient'),
@@ -165,7 +163,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'refreshGrid' => true,
                                     'editableOptions' => [
                                         'asPopover' => $isAndroid ? false : true,
-                                        'header' => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
+                                        'header' => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</strong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
                                         'formOptions' => [
                                             'action' => Url::toRoute('change-coefficient'),
@@ -177,7 +175,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'format' => ['decimal'],
 
                                     'pageSummary' => true,
-                                    'footer' => 'Всего:',
+                                    'footer' => 'Итого сумма без НДС:',
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -185,7 +183,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'refreshGrid' => true,
                                     'editableOptions' => [
                                         'asPopover' => $isAndroid ? false : true,
-                                        'header' => '<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
+                                        'header' => '<strong>Новая сумма равна:&nbsp; &nbsp;</strong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
                                         'formOptions' => [
                                             'action' => Url::toRoute('change-coefficient'),
@@ -194,9 +192,9 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     ],
                                     'hAlign' => 'right',
                                     'vAlign' => 'middle',
-                                    // 'width'=>'100px',
                                     'format' => ['decimal', 2],
-                                    'pageSummary' => true
+                                    'pageSummary' => true,
+                                    'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                 ],
                                 [
                                     'attribute' => 'vat',
@@ -317,13 +315,98 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                             ],
                         ]);
                         ?>
-                        <?= Html::a('Вернуться',
+                        <div class="sendonbutton">
+                        <?php
+                                echo Html::a('Вернуться',
                             [$this->context->getLastUrl().'way='.$wmodel->order_id],
                             ['class' => 'btn btn-success btn-export']);
                         ?>
+                        <?php
+                        echo \yii\helpers\Html::a(
+                        Html::tag('b','Выгрузить накладную',
+                            [
+                            'class' => 'btn btn-success',
+                            'aria-hidden' => true
+                        ]),
+                        '#',
+                        [
+                            'class' => 'export-waybill-btn',
+                            'title' => Yii::t('backend', 'Выгрузить'),
+                            'data-pjax' => "0",
+                            'data-id' => $wmodel->id,
+                            'data-oid' => $wmodel->order_id,
+                        ])
+                 ?>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<?php
+$url = Url::toRoute('waybill/send-by-button');
+$js = <<< JS
+    $(function () {
+        $(' .sendonbutton').on('click', '.export-waybill-btn', function () {
+            $('a .export-waybill-btn').click(function(){ return false;});
+            console.log('Captains Log');
+            var url = '$url';
+            var id = $(this).data('id');
+            var oid = $(this).data('oid');
+            swal({
+                title: 'Выполнить выгрузку накладной?',
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Выгрузить',
+                cancelButtonText: 'Отмена',
+            }).then((result) => {
+                if(result.value)
+                {
+                    swal({
+                        title: 'Идёт отправка',
+                        text: 'Подождите, пока закончится выгрузка...',
+                        onOpen: () => {
+                            swal.showLoading();
+                            $.post(url, {id:id}, function (data) {
+                                console.log(data);
+                                console.log(data.success);
+                                if (data.success === true) {
+                                    swal.close();
+                                    swal('Готово', '', 'success');
+                                    path = document.location.href;
+                                    console.log(path);
+                                    arr = path.split('waybill');
+                                    path = arr[0] + 'waybill/index';
+                                    loc = "document.location.href='"+path+"'";
+                                    console.log(loc);
+                                    setTimeout(loc, 1000);
+                                } else {
+                                    console.log(data.error);
+                                    swal(
+                                        'Ошибка',
+                                        data.error,
+                                        //'Обратитесь в службу поддержки.',
+                                        'error'
+                                    )
+                                }
+                            })
+                            .fail(function() { 
+                               swal(
+                                    'Ошибка',
+                                    'Обратитесь в службу поддержки.',
+                                    'error'
+                                );
+                            });
+                        }
+                    })
+                }
+            })
+        });
+    });
+JS;
+
+$this->registerJs($js);
+?>

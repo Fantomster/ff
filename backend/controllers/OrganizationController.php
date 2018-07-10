@@ -46,7 +46,7 @@ class OrganizationController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications'],
+                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications', 'ajax-update-status'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -269,6 +269,20 @@ class OrganizationController extends Controller {
             return $this->redirect(['view', 'id' => $id]);
         }
         return $this->render('notifications', compact('users'));
+    }
+
+
+    public function actionAjaxUpdateStatus(){
+        if (Yii::$app->request->isAjax) {
+            $status = Yii::$app->request->post('value');
+            $organizationId = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
+            $organization = Organization::findOne(['id' => $organizationId]);
+            $organization->blacklisted = $status;
+            $organization->save();
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
 use api\common\models\iiko\iikoPconst;
+use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
@@ -187,7 +188,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->quant = $model->defquant;
         $model->koef = 1;
 
-        $wayModel = iiloWaybill::findOne($model->waybill_id);
+        $wayModel = iikoWaybill::findOne($model->waybill_id);
         if (!$wayModel) {
             die("Cant find wmodel in map controller cleardata");
         }
@@ -356,10 +357,66 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
             $transaction->commit();
             $api->logout();
+            iikoLogger::save();
             return ['success' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
             $api->logout();
+            iikoLogger::save();
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Отправляем накладную
+     */
+    public function actionSendByButton()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+
+        /**
+        header ("Content-Type:text/xml");
+        $id = Yii::$app->request->get('id');
+        $model = $this->findModel($id);
+        echo $model->getXmlDocument();
+        exit;
+         */
+
+        $api = iikoApi::getInstance();
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new \Exception('Only ajax method');
+            }
+
+            $id = Yii::$app->request->post('id');
+            $model = $this->findModel($id);
+
+            if (!$model) {
+                throw new \Exception('Не удалось найти накладную');
+            }
+
+            if ($model->readytoexport==0) {
+                throw new \Exception('Не все товары сопоставлены!');
+            }
+
+            if ($api->auth()) {
+                if(!$api->sendWaybill($model)) {
+                    throw new \Exception('Ошибка при отправке.');
+                }
+                $model->status_id = 2;
+                $model->save();
+            } else {
+                throw new \Exception('Не удалось авторизоваться');
+            }
+            $transaction->commit();
+            $api->logout();
+            iikoLogger::save();
+            return ['success' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            $api->logout();
+            iikoLogger::save();
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

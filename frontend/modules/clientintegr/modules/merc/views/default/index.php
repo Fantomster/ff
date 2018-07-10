@@ -216,6 +216,17 @@ Modal::widget([
                             <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
+                    <?=
+                                   /* Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
+                                        'class' => 'but_comments comment pull-right',
+                                        'data' => [
+                                            'url' => Url::to(['order/ajax-set-comment', 'vendor_id' => $cart['id']]),
+                                            'toggle' => "tooltip",
+                                            'placement' => "bottom",
+                                            "original-title" => Yii::$app->request->cookies->getValue('order_comment_'.$cart['id'], null),
+                                        ]
+                                    ]);*/
+                    Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
                     <?php
                     $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
@@ -334,6 +345,12 @@ Modal::widget([
 <?php
 $urlDoneAll = Url::to(['done-all']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
+$title = Yii::t('message', 'rontend.client.integration.hand_loading', ['ru' => 'Список ВСД для загрузки']);
+$cancelButtonText = Yii::t('message', 'frontend.views.order.close_three', ['ru' => 'Закрыть']);
+$confirmButtonText = Yii::t('message', 'frontend.views.order.load', ['ru' => 'Загрузить']);
+$error = Yii::t('error', 'frontend.views.order.error_four', ['ru' => 'Ошибка!']);
+$error_text = Yii::t('message', 'frontend.views.order.try_again_four', ['ru' => 'Попробуйте еще раз']);
+$loadUrl = Url::to(['ajax-load-vsd']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".done_all", function(e) {
@@ -421,6 +438,55 @@ $("#ajax-load").on("click", ".save-form", function() {
             $("#search-form").submit();
         }, 700);
     });
+ 
+$(document).on("click", ".hand_loading", function(e) {
+                e.preventDefault();
+                var clicked = $(this);
+                    title = "$title";
+                swal({
+                    title: title,
+                    input: "textarea",
+                    showCancelButton: true,
+                    cancelButtonText: "$cancelButtonText",
+                    confirmButtonText: "$confirmButtonText",
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                    showLoaderOnConfirm: true,
+                    inputValue: "",
+                    onClose: function() {
+                        clicked.blur();
+                        swal.resetDefaults()
+                    },
+                    preConfirm: function (text) {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                "$loadUrl",
+                                {list: text}
+                            ).done(function (result) {
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function (result) {
+                    if (result.value.type == "success") {
+                        clicked.tooltip("hide")
+                            .attr("data-original-title", result.value.comment)
+                            .tooltip("fixTitle")
+                            .blur();
+                        clicked.data("original-title", result.value.comment);
+                        swal(result.value);
+                    } else if (result.dismiss === "cancel") {
+                        swal.close();
+                        $.pjax.reload("#pjax-vsd-list", {timeout:30000});
+                    } else {
+                        swal({title: "$error", text: "$error_text", type: "error"});
+                    }
+                });
+            }); 
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

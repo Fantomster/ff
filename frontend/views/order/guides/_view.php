@@ -203,11 +203,16 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.in_basket_two', ['ru'=>'В корзину']) . ' </span></i>', [
-                                        'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
-                                        'data-id' => $data["cbg_id"],
-                                        'data-cat' => $data["cat_id"],
-                                        'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru'=>'Добавить в корзину']),
+                            if (isset($_SESSION['GuideProductCount.' . $data["id"]]) && $_SESSION['GuideProductCount.' . $data["id"]] > 0 && $_SESSION['GuideProductCount.' . $data["id"]] != '0.000') {
+                                $disabled = '';
+                            } else {
+                                $disabled = ' disabled';
+                            }
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.in_basket_two', ['ru' => 'В корзину']) . ' </span></i>', [
+                                'class' => 'add-to-cart btn btn-md btn-success pull-right' . $disabled,
+                                'data-id' => $data["cbg_id"],
+                                'data-cat' => $data["cat_id"],
+                                'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru' => 'Добавить в корзину']),
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 10%;'],

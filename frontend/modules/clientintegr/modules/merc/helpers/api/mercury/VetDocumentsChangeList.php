@@ -96,4 +96,24 @@ class VetDocumentsChangeList extends Model
 
         } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
     }
+
+    public function handUpdateData($vsd_uuid_list)
+    {
+        $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
+        preg_match_all($mask, $vsd_uuid_list, $list);
+        $list = $list[0];
+        if(count($list) == 0)
+            return false;
+
+        $api = mercuryApi::getInstance();
+
+        foreach ($list as $item)
+        {
+            $vsd = trim($item);
+            $result[] = $api->getVetDocumentByUUID($vsd);
+            $this->updateDocumentsList($result);
+        }
+
+        return true;
+    }
 }

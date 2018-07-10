@@ -109,6 +109,16 @@ if (!Yii::$app->user->isGuest) {
                 }
             }
         }
+        
+        if (message.isRabbit) {
+            if (message.action == 'fullmap') {
+                $('#fmtotal').html(message.total);
+                $('#fmsuccess').html(message.success);
+                $('#fmfailed').html(message.failed);
+                
+                // Check pjax reload
+            }
+        }
 
         $.get(
             '$refreshStatsUrl'

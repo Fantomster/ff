@@ -321,7 +321,7 @@ class ClientWebApi extends WebApi
             if (empty($rel)) {
                 throw new BadRequestHttpException('Relation not found.');
             }
-
+            
             switch ($post['type']) {
                 case 'user_phone':
                     $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
@@ -358,7 +358,6 @@ class ClientWebApi extends WebApi
 
                 if ($model->validate() && $model->save()) {
                     $t->commit();
-                    return $this->notificationList();
                 } else {
                     throw new ValidationException($model->getFirstErrors());
                 }
@@ -367,6 +366,8 @@ class ClientWebApi extends WebApi
                 throw $e;
             }
         }
+
+        return $this->notificationList();
     }
 
     /**

@@ -35,6 +35,9 @@ use common\models\User;
         case \api\common\models\merc\mercDicconst::TYPE_PASSWORD:
             echo $form->field($model, 'value')->passwordInput(['maxlength' => true])->label(false);
         break;
+        case \api\common\models\merc\mercDicconst::TYPE_CHECKBOX:
+            echo $form->field($model, 'value')->checkbox(['label' => 'Только ручная загрузка ВСД']);
+        break;
         default:
             echo $form->field($model, 'value')->textInput(['maxlength' => true])->label(false);
     }

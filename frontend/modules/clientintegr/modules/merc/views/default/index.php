@@ -216,17 +216,7 @@ Modal::widget([
                             <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
-                    <?=
-                                   /* Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
-                                        'class' => 'but_comments comment pull-right',
-                                        'data' => [
-                                            'url' => Url::to(['order/ajax-set-comment', 'vendor_id' => $cart['id']]),
-                                            'toggle' => "tooltip",
-                                            'placement' => "bottom",
-                                            "original-title" => Yii::$app->request->cookies->getValue('order_comment_'.$cart['id'], null),
-                                        ]
-                                    ]);*/
-                    Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
+                    <?= Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
                     <?php
                     $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([

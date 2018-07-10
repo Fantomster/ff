@@ -165,7 +165,7 @@ $this->registerJs('
                     [
                         'attribute' => 'quantity',
                         'content' => function($data){
-                            //dd($data);
+                            $units = $data['units'];
                             return TouchSpin::widget([
                                         'name' => 'GuideProduct[' . $data["id"] . ']',
                                         'pluginOptions' => [

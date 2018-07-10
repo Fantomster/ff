@@ -6,6 +6,7 @@ use api\common\models\iiko\iikoPconst;
 use api\common\models\RkDicconst;
 use api\common\models\RkPconst;
 use api\common\models\rkws\RkWaybilldataSearch;
+use api_web\classes\RkeeperWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
@@ -466,7 +467,39 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $this->redirect('/clientintegr/rkws/waybill/index');
     }
-    
+
+
+    /**
+     * Отправляем накладную по нажатию кнопки при соспоставлении товаров
+     */
+    public function actionSendwsByButton()
+    {
+        /**
+        header ("Content-Type:text/xml");
+        $id = Yii::$app->request->get('id');
+        $model = $this->findModel($id);
+        echo $model->getXmlDocument();
+        exit;
+         */
+
+            $id = Yii::$app->request->post('id');
+            $model = $this->findModel($id);
+            $error='';
+
+
+            if (!$model) $error.= 'Не удалось найти накладную. ';
+
+            if ($model->readytoexport==0) $error.= 'Не все товары сопоставлены! ';
+            if ($error=='') {
+                $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
+                $res->sendWaybill($id);
+                $model = $this->findModel($id);
+                if ($model->status_id!=2) $error.= 'Ошибка при отправке. ';
+            }
+
+        if ($error=='') return 'true'; else return $error;
+    }
+
     protected function checkLic() {
 
         $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();

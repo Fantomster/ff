@@ -350,7 +350,6 @@ $js = <<< JS
     $(function () {
         $(' .sendonbutton').on('click', '.export-waybill-btn', function () {
             $('a .export-waybill-btn').click(function(){ return false;});
-            console.log('Captains Log');
             var url = '$url';
             var id = $(this).data('id');
             var oid = $(this).data('oid');
@@ -371,24 +370,18 @@ $js = <<< JS
                         onOpen: () => {
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {
-                                console.log(data);
-                                console.log(data.success);
                                 if (data.success === true) {
                                     swal.close();
                                     swal('Готово', '', 'success');
                                     path = document.location.href;
-                                    console.log(path);
                                     arr = path.split('waybill');
                                     path = arr[0] + 'waybill/index';
                                     loc = "document.location.href='"+path+"'";
-                                    console.log(loc);
                                     setTimeout(loc, 1000);
                                 } else {
-                                    console.log(data.error);
                                     swal(
                                         'Ошибка',
                                         data.error,
-                                        //'Обратитесь в службу поддержки.',
                                         'error'
                                     )
                                 }

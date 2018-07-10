@@ -357,6 +357,58 @@ class mercuryApi extends baseApi
         return $result;
     }
 
+    public function getStockEntryVersionList($listOptions = null)
+    {
+        $result = null;
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $entryList = new GetStockEntryVersionListRequest();
+        $entryList->localTransactionId = $localTransactionId;
+        $entryList->enterpriseGuid = $this->enterpriseGuid;
+        $entryList->initiator = new User();
+        $entryList->initiator->login = $this->vetisLogin;
+
+        if (isset($listOptions))
+            $entryList->listOptions = $listOptions;
+
+        $entryList->searchPattern = new StockEntrySearchPattern();
+        $entryList->searchPattern->blankFilter = 'NOT_BLANK';
+
+        $appData->any['ns3:getStockEntryVersionListRequest'] = $entryList;
+
+        $request->application->data = $appData;
+
+
+        $result = $client->submitApplicationRequest($request);
+
+        $reuest_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            //var_dump($result);
+
+            $status = $result->application->status;
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $client = $this->getSoapClient('mercury');
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
+        return $result;
+    }
+
     public function getStockEntryChangesList($date_start, $listOptions = null)
     {
         $result = null;

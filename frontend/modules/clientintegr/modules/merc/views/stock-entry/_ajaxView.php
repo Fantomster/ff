@@ -35,172 +35,92 @@ $timestamp_now=time();
                             <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
-                    <h4>Сведения о ВСД: </h4>
+                    <h4>Общие сведения: </h4>
                     <?php echo DetailView::widget([
                         'model' => $document,
                         'attributes' => [
                             [
                                 'attribute' => 'status',
                                 'format' => 'raw',
-                                'value' => Mercvsd::$statuses[$document->status],
+                                'value' => $document->status,
                             ],
                             [
-                                'label' => 'Номер',
+                                'attribute' => 'owner',
                                 'format' => 'raw',
-                                'value' => MercVsd::getNumber($document->issueSeries, $document->issueNumber),
+                                'value' => $document->owner,
                             ],
                             [
-                                'attribute' => 'issueDate',
+                                'attribute' => 'owner_firm',
                                 'format' => 'raw',
-                                'value' => $document->issueDate,
-                            ],
-                            [
-                                'attribute' => 'form',
-                                'format' => 'raw',
-                                'value' => MercVsd::$forms[$document->form],
-                            ],
-                            [
-                                'attribute' => 'type',
-                                'format' => 'raw',
-                                'value' => MercVsd::$types[$document->type],
-                            ],
-                        ],
-                    ]) ?>
-                    <h4>Сведения об отправителе: </h4>
-                    <?php echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => [
-                            [
-                                'label' => $document->consignor[0]['label'],
-                                'value' => $document->consignor[0]['value']
-                            ],
-                            [
-                                'label' => $document->consignor[1]['label'],
-                                'value' => $document->consignor[1]['value']
-                            ],
-                        ],
-                    ]) ?>
-                    <h4>Сведения о получателе: </h4>
-                    <?php echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => [
-                            [
-                                'label' => $document->consignee[0]['label'],
-                                'value' => $document->consignee[0]['value']
-                            ],
-                            [
-                                'label' => $document->consignee[1]['label'],
-                                'value' => $document->consignee[1]['value']
+                                'value' => $document->owner_firm,
                             ],
                         ],
                     ]) ?>
                     <h4>Информация о продукции: </h4>
-                    <?php
-                    $attributes = [];
-
-                    foreach ($document->batch as $row)
-                    {
-                        if(isset($row['value']))
-                            $attributes[] = $row;
-                    }
-
-                    echo DetailView::widget([
+                    <?php echo DetailView::widget([
                         'model' => $document,
-                        'attributes' => $attributes,
-                    ]) ?>
-
-                    <h4>Информация о транспорте: </h4>
-                    <?php
-                    $attributes = [
+                        'attributes' => [
                             [
-                            'label' => 'Тип',
-                            'value' => $document->transportInfo['type']
-                           ]
-                    ];
-
-                    if(isset($document->transportInfo)){
-                        foreach ($document->transportInfo['numbers'] as $row)
-                        {
-                            if(!empty($row['number']))
-                                $attributes[] = [
-                                        'label' => $row['label'],
-                                        'value' => $row['number'],
-                            ];
-                        }
-
-                        echo DetailView::widget([
-                            'model' => $document,
-                            'attributes' => $attributes,
-                        ]); }?>
-                    <h4>Транспортная накладная: </h4>
-                    <?php
-                    $attributes = [
-                        [
-                            'label' => 'Номер',
-                            'value' => $document->getWaybillNumber()
+                                'attribute' => 'entryNumber',
+                                'value' => $document->entryNumber
+                            ],
+                            [
+                                'attribute' => 'createDate',
+                                'value' => $document->createDate
+                            ],
+                            [
+                                'attribute' => 'productType',
+                                'value' => $document->productType
+                            ],
+                            [
+                                'attribute' => 'product',
+                                'value' => $document->product
+                            ],
+                            [
+                                'attribute' => 'subProduct',
+                                'value' => $document->subProduct
+                            ],
+                            [
+                                'attribute' => 'productName',
+                                'value' => $document->productName
+                            ],
+                            [
+                                'attribute' => 'volume',
+                                'value' => $document->volume." ".$document->unit
+                            ],
+                            [
+                                'attribute' => 'dateOfProduction',
+                                'value' => $document->dateOfProduction
+                            ],
+                            [
+                                'attribute' => 'expiryDate',
+                                'value' => $document->expiryDate
+                            ],
                         ],
-
-                        [
-                            'label' => 'Дата',
-                            'value' => $document->waybillDate
-                        ]
-                    ];
-
-                    echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => $attributes,
                     ]) ?>
-
-                    <h4>Кто выписал ВСД: </h4>
-                    <?php
-                    echo DetailView::widget([
+                    <h4>Сведения о происхождении продукции: </h4>
+                    <?php echo DetailView::widget([
                         'model' => $document,
-                        'attributes' => $document->confirmedBy
+                        'attributes' => [
+                            [
+                                'attribute' => 'producer_country',
+                                'value' => $document->producer_country
+                            ],
+                            [
+                                'attribute' => 'producer',
+                                'value' => $document->producer
+                            ],
+                        ],
                     ]) ?>
-
-                    <h4>Прочая информация: </h4>
-                    <?php
-                    $attributes = [];
-
-                    if(isset($document->broker))
-                        $attributes[] = $document->broker;
-
-                    if(isset($document->purpose))
-                    $attributes[] = $document->purpose;
-
-                    if(isset($document->transportStorageType))
-                        $attributes[] = [
-                                'attribute' => 'transportStorageType',
-                                'value' => MercVsd::$storage_types[$document->transportStorageType]
-                        ];
-
-                    if(isset($document->cargoExpertized))
-                        $attributes[] = [
-                            'attribute' => 'cargoExpertized',
-                            'value' => ($document->cargoExpertized == 'true') ? 'Да' : 'Нет',
-                        ];
-
-                    /*if(isset($document->expertiseInfo))
-                        $attributes[] = [
-                            'attribute' => 'expertiseInfo',
-                            'value' => (empty($document->expertiseInfo)) ? null : $document->expertiseInfo,
-                        ];*/
-
-                    if(isset($document->locationProsperity))
-                        $attributes[] = [
-                            'attribute' => 'locationProsperity',
-                            'value' => $document->locationProsperity
-                        ];
-
-                    if(isset($document->specialMarks))
-                        $attributes[] = [
-                            'attribute' => 'specialMarks',
-                            'value' => $document->specialMarks
-                        ];
-
-                    echo DetailView::widget([
+                    <h4>Дополнительная информация о входной продукции: </h4>
+                    <?php echo DetailView::widget([
                         'model' => $document,
-                        'attributes' => $attributes,
+                        'attributes' => [
+                            [
+                                'attribute' => 'uuid_vsd',
+                                'value' => $document->uuid_vsd
+                            ],
+                        ],
                     ]) ?>
             </div>
         </div>

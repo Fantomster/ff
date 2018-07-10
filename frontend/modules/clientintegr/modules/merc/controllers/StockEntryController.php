@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
 use Yii;
 
@@ -55,26 +56,26 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         return $this->render('/default/_nolic');
     }
 
-   /* public function actionView($uuid)
+    public function actionView($uuid)
     {
-        try {
-            $document = new getVetDocumentByUUID();
-            $document->getDocumentByUUID($uuid);
-        }catch (\Error $e) {
+        //try {
+            $document = new getStockEntry();
+            $document->loadStockEntry($uuid);
+        /*}catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
         catch (\Exception $e){
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }
+        }*/
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
         } else {
             return $this->render('view', $params);
         }
-    }*/
+    }
 
     private function updateStockEntryList()
     {
@@ -91,5 +92,13 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         {
            $transaction->rollback();
         }
+    }
+
+    private function getErrorText($e)
+    {
+        if ($e->getCode() == 600)
+            return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №".$e->getMessage().". Если ошибка повторяется обратитесь в техническую службу.";
+        else
+            return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
     }
 }

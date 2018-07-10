@@ -149,7 +149,7 @@ Modal::widget([
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
             'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;&nbsp;{rejected}',
-            /*'buttons' => [
+            'buttons' => [
                 'view' => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
@@ -168,7 +168,7 @@ Modal::widget([
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
-                'done-partial' => function ($url, $model, $key) use ($searchModel) {
+               /* 'done-partial' => function ($url, $model, $key) use ($searchModel) {
                     if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
@@ -205,8 +205,8 @@ Modal::widget([
                         'style' => 'width: 18px'
                     ]);
                     return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
-                },
-            ]*/
+                },*/
+            ]
         ]
     );
     if ($lic_merc==0) {unset($columns[7]['buttons']['done-partial']);unset($columns[7]['buttons']['rejected']);}

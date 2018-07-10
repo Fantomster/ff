@@ -862,6 +862,8 @@ class GetStockEntryListResponse{
     var $stockEntryList;//StockEntryList
 }
 class GetStockEntryVersionListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $guid;//UUID
     var $enterpriseGuid;//UUID

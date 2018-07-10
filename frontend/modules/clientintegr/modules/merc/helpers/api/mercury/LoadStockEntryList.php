@@ -7,9 +7,8 @@ use api\common\models\merc\MercStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ListOptions;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use yii\base\Model;
+use yii\helpers\Json;
 
 class LoadStockEntryList extends Model
 {
@@ -60,6 +59,7 @@ class LoadStockEntryList extends Model
                 'vsd_uuid' => $item->vetDocument->uuid,
                 'product_marks' => isset($item->batch->packageList->package->productMarks) ? $item->batch->packageList->package->productMarks_ : "",
                 'raw_data' => serialize($item)
+                //Json::encode($item)
             ]);
 
             if(!$model->save()) {

@@ -229,6 +229,11 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     private function updateVSDList()
     {
+        $hand_only = mercDicconst::getSetting('hand_load_only');
+
+        if($hand_only == 1)
+            return true;
+
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
         $transaction = Yii::$app->db_api->beginTransaction();
        try {

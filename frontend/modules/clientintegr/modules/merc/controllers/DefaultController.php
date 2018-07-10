@@ -135,6 +135,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 if(!$api->getVetDocumentDone($uuid, $model->attributes))
                     throw new \Exception('Done error');
 
+                Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
                 if (Yii::$app->request->isAjax)
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
@@ -210,6 +211,20 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
         $this->updateVSDList();
         return $this->redirect(['index']);
+    }
+
+    public function actionAjaxLoadVsd() {
+        if (Yii::$app->request->post()) {
+            $list = Yii::$app->request->post('list');
+
+            $vsd = new VetDocumentsChangeList();
+
+            if($vsd->handUpdateData($list)) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return ["title" => 'ВСД успешно загружены', "type" => "success"];
+            }
+        }
+        return false;
     }
 
     private function updateVSDList()

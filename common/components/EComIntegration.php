@@ -124,10 +124,12 @@ class EComIntegration
                 ->one();
             $login = $ediOrganization['login'];
             $pass = $ediOrganization['pass'];
-            foreach ($item as $value) {
-                $fileName = $value['name'];
-                $id = $value['id'];
-                $this->getDoc($client, $fileName, $login, $pass, $id);
+            if($login && $pass){
+                foreach ($item as $value) {
+                    $fileName = $value['name'];
+                    $id = $value['id'];
+                    $this->getDoc($client, $fileName, $login, $pass, $id);
+                }
             }
         }
     }
@@ -189,12 +191,13 @@ class EComIntegration
     {
         $orderID = $simpleXMLElement->NUMBER;
         $order = Order::findOne(['id' => $orderID]);
-        \Yii::$app->language = $order->edi_order->lang ?? 'ru';
         $message = "";
         if (!$order) {
             Yii::error('No such order ID: ' . $orderID);
             return false;
         }
+        \Yii::$app->language = $order->edi_order->lang ?? 'ru';
+        $user = User::findOne(['id' => $order->created_by_id]);
 
         $positions = $simpleXMLElement->HEAD->POSITION;
         $isDesadv = false;
@@ -205,6 +208,8 @@ class EComIntegration
         $positionsArray = [];
         $arr = [];
         $barcodeArray = [];
+        $totalQuantity = 0;
+        $totalPrice = 0;
         foreach ($positions as $position) {
             $contID = (int)$position->PRODUCTIDBUYER;
             if(!$contID){
@@ -220,6 +225,20 @@ class EComIntegration
             $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
             $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
             $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
+            $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
+            $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
+            $arr[$contID]['GTIN'] = $position->GTIN ?? null;
+            $arr[$contID]['UUID'] = $position->UUID ?? null;
+            $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
+            $totalPrice += $arr[$contID]['PRICE'];
+        }
+        if($totalQuantity == 0.00 || $totalPrice == 0.00){
+            OrderController::sendOrderCanceled($order->client, $order);
+            $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
+            OrderController::sendSystemMessage($user, $order->id, $message);
+            $order->status = Order::STATUS_REJECTED;
+            $order->save();
+            return true;
         }
 
         $summ = 0;
@@ -228,8 +247,12 @@ class EComIntegration
             $index = $orderContent->id;
             $ordContArr[] = $orderContent->id;
             if (!isset($arr[$index]['BARCODE'])){
-                $index = $orderContent->ediOrderContent->barcode;
-                $ordContArr[] = $index;
+                if(isset($orderContent->ediOrderContent)){
+                    $index = $orderContent->ediOrderContent->barcode;
+                    $ordContArr[] = $index;
+                }else{
+                    continue;
+                }
             }
             if (!isset($arr[$index]['BARCODE'])) continue;
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
@@ -246,13 +269,23 @@ class EComIntegration
                 $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
 
                 if ($oldQuantity != $newQuantity) {
-                    $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
+                    if($newQuantity == 0){
+                        $ordCont->delete();
+                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                    }else{
+                        $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
+                    }
                 }
 
                 $oldPrice = (float)$ordCont->price;
                 $newPrice = (float)$arr[$index]['PRICE'];
                 if ($oldPrice != $newPrice) {
-                    $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . $newPrice . " руб";
+                    if($newPrice == 0){
+                        $ordCont->delete();
+                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                    }else{
+                        $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . $newPrice . " руб";
+                    }
                 }
                 $summ += $newQuantity * $newPrice;
                 Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id=' . $ordCont->id)->execute();
@@ -262,6 +295,10 @@ class EComIntegration
                 $ediOrderContent->doc_type = $docType;
                 $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
                 $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
+                $ediOrderContent->uuid = $arr[$index]['UUID'];
+                $ediOrderContent->gtin = $arr[$index]['GTIN'];
+                $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'];
+                $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'];
                 $ediOrderContent->save();
             }
         }
@@ -306,8 +343,6 @@ class EComIntegration
             $ediOrder->save();
         }
 
-
-        $user = User::findOne(['id' => $order->created_by_id]);
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
         }

@@ -59,7 +59,9 @@ if (!Yii::$app->user->isGuest) {
     }
             
    socket.on('connect', function(){
+                
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
+        
     });
     socket.on('user$user->id', function (data) {
 
@@ -109,9 +111,11 @@ if (!Yii::$app->user->isGuest) {
                 }
             }
         }
+
         
-        if (message.isRabbit) {
+        if (message.isRabbit == 1) {
             if (message.action == 'fullmap') {
+                
                 $('#fmtotal').html(message.total);
                 $('#fmsuccess').html(message.success);
                 $('#fmfailed').html(message.failed);

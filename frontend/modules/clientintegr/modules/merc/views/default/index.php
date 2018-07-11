@@ -217,15 +217,6 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?=
-                                   /* Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
-                                        'class' => 'but_comments comment pull-right',
-                                        'data' => [
-                                            'url' => Url::to(['order/ajax-set-comment', 'vendor_id' => $cart['id']]),
-                                            'toggle' => "tooltip",
-                                            'placement' => "bottom",
-                                            "original-title" => Yii::$app->request->cookies->getValue('order_comment_'.$cart['id'], null),
-                                        ]
-                                    ]);*/
                     Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
                     <?php
                     $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
@@ -345,9 +336,9 @@ Modal::widget([
 <?php
 $urlDoneAll = Url::to(['done-all']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
-$title = Yii::t('message', 'rontend.client.integration.hand_loading', ['ru' => 'Список ВСД для загрузки']);
+$title = Yii::t('message', 'frontend.client.integration.hand_loading', ['ru' => 'Список ВСД для загрузки']);
 $cancelButtonText = Yii::t('message', 'frontend.views.order.close_three', ['ru' => 'Закрыть']);
-$confirmButtonText = Yii::t('message', 'frontend.views.order.load', ['ru' => 'Загрузить']);
+$confirmButtonText = Yii::t('message', 'frontend.client.integration.load', ['ru' => 'Загрузить']);
 $error = Yii::t('error', 'frontend.views.order.error_four', ['ru' => 'Ошибка!']);
 $error_text = Yii::t('message', 'frontend.views.order.try_again_four', ['ru' => 'Попробуйте еще раз']);
 $loadUrl = Url::to(['ajax-load-vsd']);

@@ -42,9 +42,12 @@ class RabbitHelper
 
         foreach ($clientUsers as $clientUser) {
             $channel = 'user' . $clientUser->id;
+            var_dump($channel);
             \Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
                 'message' => Json::encode([
+                    'isRabbit' => 1,
+                    'channel' => $channel,
                     'action' => $mess['action'],
                     'total'  => $job->total_count,
                     'success' => $job->success_count,

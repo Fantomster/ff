@@ -120,8 +120,8 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
         $helper->getcats();
 
-        return $this->redirect(['index']);
-
+       // return $this->redirect(['index']);
+          return true;
     }
 
     public function actionChvat($id, $vat) {

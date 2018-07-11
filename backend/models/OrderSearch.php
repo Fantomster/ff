@@ -23,8 +23,7 @@ class OrderSearch extends Order {
     /**
      * @inheritdoc
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'discount_type'], 'integer'],
             [['total_price', 'discount'], 'number'],

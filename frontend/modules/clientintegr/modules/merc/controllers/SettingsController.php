@@ -79,7 +79,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
                 foreach ($list->activityLocationList->location as $item)
                 {
-                    $org[$item->enterprise->guid] = $item->enterprise->name. ' ('.$item->enterprise->address->addressView.')';
+                    $org[] = ['value' => $item->enterprise->guid, 'label' => $item->enterprise->name. ' ('.$item->enterprise->address->addressView.')'];
+                    //$org[$item->enterprise->guid] = $item->enterprise->name. ' ('.$item->enterprise->address->addressView.')';
                     //$org[$item->dtenterprise->bsguid->__toString()] = $item->dtenterprise->dtname->__toString(). ' ('.$item->dtenterprise->dtaddress->dtaddressView->__toString().')';
                 }
 

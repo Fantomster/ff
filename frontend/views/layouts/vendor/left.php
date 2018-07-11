@@ -30,6 +30,8 @@ $manager_id = Yii::$app->user->can('manage') ? null : $user->id;
 $newOrdersCount = $user->organization->getNewOrdersCount($manager_id);
 $newClientCount = Yii::$app->user->can('manage') ? $user->organization->getNewClientCount() : 0;
 
+$vsdCount = $user->organization->getVsdCount();
+
 $menuItems = [
     ['label' => Yii::t('message', 'frontend.views.layouts.left.navi', ['ru' => 'НАВИГАЦИЯ']), 'options' => ['class' => 'header']],
     ['label' => Yii::t('message', 'frontend.views.layouts.left.desktop', ['ru' => 'Рабочий стол']), 'icon' => 'home', 'url' => ['/vendor/index']],
@@ -54,6 +56,20 @@ $menuItems = [
         //['label' => 'Мои акции', 'icon' => 'ticket', 'url' => ['vendor/events']],
         // ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
         //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
+    ['label' => Yii::t('message', 'frontend.views.layouts.client.left.mercury', ['ru'=>'ВЕТИС "Меркурий"']),
+        'url' => ['/clientintegr/merc/default'],
+        'options' => ['class' => 'hidden-xs'],
+        'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
+        //'visible' => isset($licenses['mercury'])
+        'items' => [
+            [
+                'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
+                'icon' => 'circle-o',
+                'url' => ['/clientintegr/merc/stock-entry'],
+                //'visible' => in_array($user->role_id,$roles)
+            ],
+        ],
+    ],
 ];
 if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) || Yii::$app->user->can('manage')) {
     $menuItems[] = [

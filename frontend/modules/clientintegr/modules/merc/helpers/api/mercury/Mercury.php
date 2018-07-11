@@ -824,6 +824,8 @@ class GetVetDocumentChangesListResponse{
     var $vetDocumentList;//VetDocumentList
 }
 class GetStockEntryByGuidRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $guid;//UUID
     var $enterpriseGuid;//UUID
 }
@@ -831,6 +833,8 @@ class GetStockEntryByGuidResponse{
     var $stockEntry;//StockEntry
 }
 class GetStockEntryByUuidRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $uuid;//UUID
     var $enterpriseGuid;//UUID
 }
@@ -838,6 +842,8 @@ class GetStockEntryByUuidResponse{
     var $stockEntry;//StockEntry
 }
 class GetStockEntryChangesListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $updateDateInterval;//DateInterval
     var $enterpriseGuid;//UUID
@@ -846,6 +852,8 @@ class GetStockEntryChangesListResponse{
     var $stockEntryList;//StockEntryList
 }
 class GetStockEntryListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $enterpriseGuid;//UUID
     var $searchPattern;//StockEntrySearchPattern
@@ -854,6 +862,8 @@ class GetStockEntryListResponse{
     var $stockEntryList;//StockEntryList
 }
 class GetStockEntryVersionListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $guid;//UUID
     var $enterpriseGuid;//UUID

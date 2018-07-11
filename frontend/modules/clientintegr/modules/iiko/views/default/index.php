@@ -82,7 +82,7 @@ use kartik\grid\GridView;
                                             'class' => 'fa fa-download get-content-sync',
                                             'aria-hidden' => true,
                                             'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/sync/run']),
-                                            'data-id' => $model->id
+                                            'data-id' => $model->dictype->id
                                         ]),
                                         '#',
                                         [

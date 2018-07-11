@@ -35,6 +35,8 @@ class VetDocumentsChangeList extends Model
             if($model == null)
                 $model = new MercVsd();
 
+            var_dump($item->certifiedConsignment->batch->batchID);
+
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'number' => (isset($item->issueSeries) && (isset($item->issueNumber))) ? MercVsd::getNumber($item->issueSeries, $item->issueNumber) : null,
@@ -69,8 +71,7 @@ class VetDocumentsChangeList extends Model
             ]);
 
             if(!$model->save()) {
-                var_dump($model->getErrors());
-                throw new \Exception('VSD save error');
+                Yii::error(serialize($model->getErrors()));
             }
 
         }

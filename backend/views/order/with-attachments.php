@@ -41,7 +41,7 @@ $columns = [
 ];
 ?>
 
-<?php //Pjax::begin(['enablePushState' => true, 'id' => 'orderList', 'timeout' => 5000]); ?> 
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'orderList', 'timeout' => 5000]); ?> 
 <?=
 
 kartik\grid\GridView::widget([
@@ -49,7 +49,8 @@ kartik\grid\GridView::widget([
     'filterModel' => $searchModel,
     'options' => ['style' => 'table-layout:fixed;'],
     'columns' => $columns,
-    'pjax' => true,
+    //'pjax' => true,
+    'id' => 'ordersGrid',
 ])
 ?>
-<?php //Pjax::end(); ?>
+<?php Pjax::end(); ?>

@@ -233,7 +233,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if($hand_only == 1)
             return true;
 
-        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
+        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
         $transaction = Yii::$app->db_api->beginTransaction();
        try {
             $vsd = new VetDocumentsChangeList();

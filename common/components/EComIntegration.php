@@ -227,6 +227,8 @@ class EComIntegration
             $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
             $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
             $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
+            $arr[$contID]['DELIVERYNOTENUMBER'] = $position->DELIVERYNOTENUMBER ?? null;
+            $arr[$contID]['DELIVERYNOTEDATE'] = $position->DELIVERYNOTEDATE ?? null;
             $arr[$contID]['GTIN'] = $position->GTIN ?? null;
             $arr[$contID]['UUID'] = $position->UUID ?? null;
             $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
@@ -299,6 +301,8 @@ class EComIntegration
                 $ediOrderContent->gtin = $arr[$index]['GTIN'];
                 $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'];
                 $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'];
+                $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'];
+                $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'];
                 $ediOrderContent->save();
             }
         }

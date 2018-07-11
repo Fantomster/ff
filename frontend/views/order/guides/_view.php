@@ -11,7 +11,7 @@ $js = <<<SCRIPT
 /* To initialize BS3 tooltips set this below */
 $(function () { 
     $("[data-toggle='tooltip']").tooltip(); 
-});;
+});
 SCRIPT;
 // Register tooltip/popover initialization javascript
 $this->registerJs($js);

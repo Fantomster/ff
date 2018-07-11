@@ -245,6 +245,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }catch (\Exception $e)
         {
            $transaction->rollback();
+            Yii::error($e->getMessage());
         }
     }
 

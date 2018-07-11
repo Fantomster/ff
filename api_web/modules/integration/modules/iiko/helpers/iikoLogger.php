@@ -4,7 +4,6 @@ namespace api_web\modules\integration\modules\iiko\helpers;
 
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use Yii;
-use yii\db\Expression;
 use yii\db\Query;
 use common\models\User;
 use yii\helpers\ArrayHelper;
@@ -72,7 +71,7 @@ class iikoLogger
     {
         self::update([
             'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
-            'request_at' => Yii::$app->formatter->asDatetime(time(),'yyyy-MM-dd HH:i:ss')
+            'request_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
         ]);
     }
 
@@ -84,10 +83,10 @@ class iikoLogger
     {
         self::update([
             'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
-            'response_at' => Yii::$app->formatter->asDatetime(time(),'yyyy-MM-dd HH:i:ss')
+            'response_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
         ]);
 
-        self::saveToFile();
+        self::saveToTurn();
     }
 
     /**
@@ -143,12 +142,11 @@ class iikoLogger
     }
 
     /**
-     * логируем запросы к базе, в файл, чтобы не попасть в транзакцию.
+     * логируем запросы в Redis и Rabbit
      */
-    private static function saveToFile()
+    private static function saveToTurn()
     {
-        $row = \Yii::$app->db_api->createCommand()->insert(self::$tableName, self::$row[self::$guide])->getRawSql() . ';' . PHP_EOL;
-        file_put_contents(Yii::getAlias('@runtime') . '/iiko_log.log', $row, FILE_APPEND);
+        \Yii::$app->get('redis')->append(self::getRedisUserKey(), \json_encode(self::$row[self::$guide]) . '|');
         self::$instance = null;
     }
 
@@ -157,17 +155,24 @@ class iikoLogger
      */
     public static function save()
     {
-        $file = Yii::getAlias('@runtime') . '/iiko_log.log';
-        if (file_exists($file)) {
-            $sql = file($file);
-            if (!empty($sql)) {
-                $sql_raw = '';
-                foreach ($sql as $insert) {
-                    $sql_raw .= $insert;
+        $item = \Yii::$app->get('redis')->get(self::getRedisUserKey());
+        if (!empty($item)) {
+            $item = explode('|', $item);
+            foreach ($item as $row) {
+                if (!empty($row)) {
+                    \Yii::$app->get('db_api')->createCommand()->insert(self::$tableName, \json_decode($row, true))->execute();
                 }
-                \Yii::$app->db_api->createCommand($sql_raw)->execute();
             }
-            unlink($file);
+            \Yii::$app->get('redis')->del(self::getRedisUserKey());
         }
+    }
+
+    /**
+     * Генерируем ключ для сохранения логов в редис
+     * @return string
+     */
+    private static function getRedisUserKey()
+    {
+        return 'iiko_logger_' . \Yii::$app->user->id;
     }
 }

@@ -17,13 +17,12 @@ use common\components\AccessRule;
 /**
  * OrderController implements the CRUD actions for Order model.
  */
-class OrderController extends Controller
-{
+class OrderController extends Controller {
+
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -38,7 +37,7 @@ class OrderController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'edit-bill', 'get-attachment'],
+                        'actions' => ['index', 'view', 'edit', 'get-attachment', 'with-attachments'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -54,15 +53,14 @@ class OrderController extends Controller
      * Lists all Order models.
      * @return mixed
      */
-    public function actionIndex()
-    {
+    public function actionIndex() {
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         //$dataProvider->sort = ['defaultOrder' => ['created_at' => SORT_DESC]];
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -71,8 +69,7 @@ class OrderController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id)
-    {
+    public function actionView($id) {
         $model = $this->findModel($id);
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -80,33 +77,47 @@ class OrderController extends Controller
         $dataProvider = $searchModel->search($params);
 
         return $this->render('view', [
-            'model' => $model,
-            'dataProvider' => $dataProvider
+                    'model' => $model,
+                    'dataProvider' => $dataProvider
         ]);
     }
 
-    public function actionEditBill($id, $attachment_id = null) {
+    public function actionEdit($id, $attachment_id = null) {
         $order = $this->findModel($id);
         $currentAttachment = null;
         if (!empty($attachment_id)) {
             $currentAttachment = OrderAttachment::findOne(['id' => $attachment_id, 'order_id' => $id]);
         }
         if (Yii::$app->request->isPjax) {
-            return $this->renderAjax('edit-bill', compact('order', 'currentAttachment'));
+            return $this->renderAjax('edit', compact('order', 'currentAttachment'));
         } else {
-            return $this->render('edit-bill', compact('order', 'currentAttachment'));
+            return $this->render('edit', compact('order', 'currentAttachment'));
         }
     }
-    
+
     public function actionGetAttachment($id) {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         $attachment->getFile();
     }
-    
-    public function actionOrdersWithAttachments() {
-        return $this->render('orders-with-attachments');
+
+    public function actionWithAttachments() {
+        $searchModel = new \backend\models\OrderWithAttachmentsSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        //$dataProvider->sort = ['defaultOrder' => ['created_at' => SORT_DESC]];
+
+//        if (Yii::$app->request->isPjax) {
+//            return $this->renderAjax('with-attachments', [
+//                        'searchModel' => $searchModel,
+//                        'dataProvider' => $dataProvider,
+//            ]);
+//        } else {
+            return $this->render('with-attachments', [
+                        'searchModel' => $searchModel,
+                        'dataProvider' => $dataProvider,
+            ]);
+//        }
     }
-    
+
 //    /**
 //     * Creates a new Order model.
 //     * If creation is successful, the browser will be redirected to the 'view' page.
@@ -164,12 +175,12 @@ class OrderController extends Controller
      * @return Order the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
-    {
+    protected function findModel($id) {
         if (($model = Order::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.order.page_error', ['ru'=>'The requested page does not exist.']));
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.order.page_error', ['ru' => 'The requested page does not exist.']));
         }
     }
+
 }

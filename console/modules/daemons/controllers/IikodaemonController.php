@@ -10,32 +10,30 @@ use PhpAmqpLib\Message\AMQPMessage;
 class IikodaemonController extends AbstractDaemonController
 {
     /**
-     * @return array|bool
+     * Имя очереди
+     * @return string
      */
-    protected function defineJobs()
-    {
-        echo "Daemon " . get_class($this) . " job running and working fine." . PHP_EOL;
-        $channel = $this->getChannel('log_service_' . iikoService::getServiceId(), 'log');
-        while (count($channel->callbacks)) {
-            try {
-                $channel->wait(null, true, 5);
-            } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $timeout) {
-
-            } catch (\PhpAmqpLib\Exception\AMQPRuntimeException $runtime) {
-                \Yii::error($runtime->getMessage());
-            }
-        }
-        return false;
+    public function getQueueName() {
+        return 'log_service_' . iikoService::getServiceId();
     }
 
     /**
+     * Топик обмена
+     * @return string
+     */
+    public function getExchangeName() {
+        return 'log';
+    }
+
+    /**
+     * Обработка полученных сообщений
      * @param AMQPMessage $job
      * @return bool
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function doJob($job)
     {
         $this->ask($job);
+        echo $job->body;
         return true;
     }
 }

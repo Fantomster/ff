@@ -27,6 +27,8 @@ class UserSearch extends User {
     public $email;
     public $job;
     public $job_name;
+    public $subscribe;
+    public $sms_subscribe;
 
     /**
      * @inheritdoc
@@ -40,8 +42,8 @@ class UserSearch extends User {
      */
     public function rules() {
         return [
-            [['id', 'status', 'organization_id', 'sms_allow', 'gender', 'email_allow', 'job'], 'integer'],
-            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id', 'job_name'], 'safe'],
+            [['id', 'status', 'organization_id', 'sms_allow', 'gender', 'email_allow', 'job', 'subscribe', 'sms_subscribe'], 'integer'],
+            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id', 'job_name', 'language'], 'safe'],
         ];
     }
 
@@ -114,13 +116,17 @@ class UserSearch extends User {
             'asc' => ["$jobTable.name_job" => SORT_ASC],
             'desc' => ["$jobTable.name_job" => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['sms_allow'] = [
-            'asc' => ["$profileTable.sms_allow" => SORT_ASC],
-            'desc' => ["$profileTable.sms_allow" => SORT_DESC],
+        $dataProvider->sort->attributes['sms_subscribe'] = [
+            'asc' => ["$userTable.sms_subscribe" => SORT_ASC],
+            'desc' => ["$userTable.sms_subscribe" => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['email_allow'] = [
-            'asc' => ["$profileTable.email_allow" => SORT_ASC],
-            'desc' => ["$profileTable.email_allow" => SORT_DESC],
+        $dataProvider->sort->attributes['subscribe'] = [
+            'asc' => ["$userTable.subscribe" => SORT_ASC],
+            'desc' => ["$userTable.subscribe" => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['language'] = [
+            'asc' => ["$userTable.language" => SORT_ASC],
+            'desc' => ["$userTable.language" => SORT_DESC],
         ];
 
         // grid filtering conditions
@@ -141,7 +147,8 @@ class UserSearch extends User {
                 ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
                 ->andFilterWhere(['like', "$organizationTable.type_id", $this->org_type_id])
                 ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
-                ->andFilterWhere(['like', "$profileTable.sms_allow", $this->sms_allow])
+                ->andFilterWhere(['like', "$userTable.subscribe", $this->subscribe])
+                ->andFilterWhere(['like', "$userTable.sms_subscribe", $this->sms_subscribe])
                 ->andFilterWhere(['like', "$profileTable.phone", $this->phone])
                 ->andFilterWhere(['like', "$profileTable.gender", $this->gender])
                 ->andFilterWhere(['like', "$profileTable.job_id", $this->job])

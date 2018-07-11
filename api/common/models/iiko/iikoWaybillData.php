@@ -66,7 +66,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            [['koef', 'sum', 'quant'], 'number', 'min' => 0.0001],
+            [['koef', 'quant'], 'number', 'min' => 0.0001],
         ];
     }
 
@@ -78,7 +78,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'waybill_id' => Yii::t('app', 'Waybill ID'),
-            'product_id' => Yii::t('app', 'ID в F-keeper'),
+            'product_id' => Yii::t('app', 'ID в Mixcart'),
             'product_rid' => Yii::t('app', 'Product Rid'),
             'munit' => Yii::t('app', 'Munit'),
             'org' => Yii::t('app', 'Org'),

@@ -6,7 +6,9 @@ use yii\helpers\Html;
 /* @var $model common\models\User */
 
 $this->title = 'Редактирование пользователя: ' . $user->profile->full_name;
-$this->params['breadcrumbs'][] = ['label' => 'Пользователи', 'url' => ['index']];
+$clients = !empty(Yii::$app->session->get('clients')) ? Yii::$app->session->get('clients') : 'index';
+$clientsName = !empty(Yii::$app->session->get('clients_name')) ? Yii::$app->session->get('clients_name') : 'Пользователи';
+$this->params['breadcrumbs'][] = ['label' => $clientsName, 'url' => [$clients]];
 $this->params['breadcrumbs'][] = ['label' => $user->id, 'url' => ['view', 'id' => $user->id]];
 $this->params['breadcrumbs'][] = 'Редактирование пользователя';
 ?>

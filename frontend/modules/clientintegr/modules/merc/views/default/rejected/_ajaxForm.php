@@ -19,17 +19,26 @@ $form = ActiveForm::begin([
     </div>
     <div class="modal-body">
         <?php if (Yii::$app->session->hasFlash('success')): ?>
-            <div class="alert alert-danger alert-dismissable">
+            <div class="alert alert-success alert-dismissable">
                 <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                 <h4>
-                    <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                    <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
                 </h4>
                 <?= Yii::$app->session->getFlash('success') ?>
             </div>
         <?php endif; ?>
+        <?php if (Yii::$app->session->hasFlash('error')): ?>
+            <div class="alert alert-danger alert-dismissable">
+                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                <h4>
+                    <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                </h4>
+                <?= Yii::$app->session->getFlash('error') ?>
+            </div>
+        <?php endif; ?>
         <?php echo $form->errorSummary($model); ?>
         <?php
-        if($model->decision == \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentDone::RETURN_ALL)
+        if($model->decision ==  \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone::RETURN_ALL)
             echo $form->field($model, 'volume')->hiddenInput(['value' => 0])->label(false);
         else
             echo $form->field($model, 'volume')->textInput()->label($model->getAttributeLabel('volume')." (".$volume.")"); ?>

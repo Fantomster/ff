@@ -25,6 +25,35 @@ use api_web\exceptions\ValidationException;
  */
 class UserWebApi extends \api_web\components\WebApi
 {
+
+    /**
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        if (!empty($post['email'])) {
+            $model = User::findOne(['email' => $post['email']]);
+        } else {
+            $user_id = $post['id'] ?? $this->user->id;
+            $model = User::findOne($user_id);
+        }
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('user_not_found');
+        }
+
+        return [
+            'id' => $model->id,
+            'email' => $model->email,
+            'phone' => $model->profile->phone,
+            'name' => $model->profile->full_name,
+            'role_id' => $model->role->id,
+            'role' => $model->role->name,
+        ];
+    }
+
     /**
      * @param array $post
      * [
@@ -146,12 +175,12 @@ class UserWebApi extends \api_web\components\WebApi
         try {
             $user_id = (int)trim($post['user_id']);
             if (empty($user_id)) {
-                throw new BadRequestHttpException('Empty user_id');
+                throw new BadRequestHttpException('empty_param|user_id');
             }
 
             $code = (int)trim($post['code']);
             if (empty($code)) {
-                throw new BadRequestHttpException('Empty code');
+                throw new BadRequestHttpException('empty_param|code');
             }
 
             $userToken = UserToken::findByPIN($code, [UserToken::TYPE_EMAIL_ACTIVATE]);
@@ -186,7 +215,7 @@ class UserWebApi extends \api_web\components\WebApi
         try {
 
             if (!isset($post['organization_id'])) {
-                throw new BadRequestHttpException('Empty organization_id');
+                throw new BadRequestHttpException('empty_param|organization_id');
             }
 
             $organization = Organization::findOne(['id' => $post['organization_id']]);
@@ -198,15 +227,13 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
             }
 
-            $allow_roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER];
+            $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
 
-            if (in_array($this->user->role_id, $allow_roles) || RelationUserOrganization::checkRelationExisting($this->user)) {
+            if ($roleID != null) {
                 if (!in_array($this->user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER])) {
-                    $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                         $this->user->role_id = $roleID ?? Role::ROLE_RESTAURANT_MANAGER;
                     }
-
                     if ($organization->type_id == Organization::TYPE_SUPPLIER) {
                         $this->user->role_id = $roleID ?? Role::ROLE_SUPPLIER_MANAGER;
                     }
@@ -215,12 +242,11 @@ class UserWebApi extends \api_web\components\WebApi
             } else if (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
                 $this->user->organization_id = $organization->id;
             } else {
-                throw new \Exception('access denied');
+                throw new \Exception('access denied.');
             }
 
             $result = $this->user->save();
             $transaction->commit();
-
             return $result;
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -454,14 +480,14 @@ class UserWebApi extends \api_web\components\WebApi
     public function removeVendor(array $post)
     {
         if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('Empty vendor_id');
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
 
         $id = (int)$post['vendor_id'];
         $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
 
         if (empty($vendor)) {
-            throw new BadRequestHttpException('Not found vendor');
+            throw new BadRequestHttpException('vendor_not_found');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -494,15 +520,15 @@ class UserWebApi extends \api_web\components\WebApi
     public function changePassword($post)
     {
         if (empty($post['password'])) {
-            throw new BadRequestHttpException('Empty password');
+            throw new BadRequestHttpException('empty_param|password');
         }
 
         if (empty($post['new_password'])) {
-            throw new BadRequestHttpException('Empty new_password');
+            throw new BadRequestHttpException('empty_param|new_password');
         }
 
         if (empty($post['new_password_confirm'])) {
-            throw new BadRequestHttpException('Empty new_password_confirm');
+            throw new BadRequestHttpException('empty_param|new_password_confirm');
         }
 
         if (!$this->user->validatePassword($post['password'])) {
@@ -544,7 +570,7 @@ class UserWebApi extends \api_web\components\WebApi
         WebApiHelper::clearRequest($post);
 
         if (empty($post['phone'])) {
-            throw new BadRequestHttpException('Empty password');
+            throw new BadRequestHttpException('empty_param|password');
         }
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
@@ -579,7 +605,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         //Даем отлуп если он уже достал выпращивать коды
         if ($model->isNewRecord === false && $model->accessAllow() === false) {
-            throw new BadRequestHttpException('Wait ' . (300 - (int)$model->wait_time) . ' seconds.');
+            throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$model->wait_time));
         }
 
         //Если код в запросе не пришел, шлем смс и создаем запись
@@ -604,7 +630,7 @@ class UserWebApi extends \api_web\components\WebApi
                 //Меняем номер телефона, если все хорошо
                 $model->changePhoneUser();
             } else {
-                throw new BadRequestHttpException('Bad code!');
+                throw new BadRequestHttpException('bad_sms_code');
             }
         }
         return ['result' => true];

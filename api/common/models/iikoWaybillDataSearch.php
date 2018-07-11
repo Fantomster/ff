@@ -23,7 +23,7 @@ class iikoWaybillDataSearch extends iikoWaybillData
     {
         return [
             [['id', 'waybill_id', 'product_id', 'product_rid', 'org', 'vat', 'vat_included'], 'integer'],
-            [['munit', 'created_at', 'updated_at', 'linked_at', 'fproductnameProduct'], 'safe'],
+            [['munit', 'created_at', 'updated_at', 'fproductnameProduct'], 'safe'],
             [['sum', 'quant', 'defsum', 'defquant', 'koef'], 'number'],
         ];
     }

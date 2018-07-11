@@ -6,7 +6,8 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\search\mercDicconstSearch;
-use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\models\ActivityLocationList;
 use Yii;
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -74,11 +75,12 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $org = [];
             if($dicConst->denom == 'enterprise_guid')
             {
-                $list = mercApi::getInstance()->getActivityLocationList();
+                $list = cerberApi::getInstance()->getActivityLocationList();
 
-                foreach ($list->soapenvBody->v2getActivityLocationListResponse->dtactivityLocationList->dtlocation as $item)
+                foreach ($list->activityLocationList->location as $item)
                 {
-                    $org[$item->dtenterprise->bsguid->__toString()] = $item->dtenterprise->dtname->__toString(). ' ('.$item->dtenterprise->dtaddress->dtaddressView->__toString().')';
+                    $org[$item->enterprise->guid] = $item->enterprise->name. ' ('.$item->enterprise->address->addressView.')';
+                    //$org[$item->dtenterprise->bsguid->__toString()] = $item->dtenterprise->dtname->__toString(). ' ('.$item->dtenterprise->dtaddress->dtaddressView->__toString().')';
                 }
 
             }

@@ -55,7 +55,7 @@ echo GridView::widget([
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['class' => 'view-data', 'id' => 'qnty' . $data->id],
+                            'options' => ['class' => 'quantity view-data', 'id' => 'qnty' . $data->id],
                         ]) . Html::hiddenInput("OrderContent[$data->id][id]", $data->id);
             },
             'contentOptions' => ['class' => 'width150'],
@@ -78,7 +78,7 @@ echo GridView::widget([
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['class' => 'view-data'],
+                            'options' => ['class' => 'price view-data'],
                 ]);
             },
             'contentOptions' => ['class' => 'width150'],

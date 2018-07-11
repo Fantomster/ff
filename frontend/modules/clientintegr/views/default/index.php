@@ -21,7 +21,7 @@ use backend\controllers\RkwsController;
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с внешними системами 
+        <i class="fa fa-upload"></i> Интеграция с внешними системами
         <small>Обменивайтесь номенклатурой и приходными документами с Вашей учетной системой автоматически</small>
     </h1>
     <?=
@@ -77,6 +77,7 @@ if(isset($licenses['mercury'])) {
     if (($licenses['mercury']->status_id==1) and ($timestamp_now>(strtotime($licenses['mercury']->td)))) $lic_merc=1;
 }
 if(isset($licenses['odinsobsh'])) {
+    $lic_odinsobsh=0;
     $sub0 = explode(' ',$licenses['odinsobsh']->td);
     $sub1 = explode('-',$sub0[0]);
     $licenses['odinsobsh']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];

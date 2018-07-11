@@ -53,10 +53,10 @@ class CartWebApi extends \api_web\components\WebApi
     private function addItem(array $post)
     {
         if (!isset($post['quantity'])) {
-            throw new BadRequestHttpException("ERROR: Empty quantity");
+            throw new BadRequestHttpException("empty_param|quantity");
         }
         if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty product_id");
+            throw new BadRequestHttpException("empty_param|product_id");
         }
         /**
          * @var Organization $client
@@ -67,7 +67,6 @@ class CartWebApi extends \api_web\components\WebApi
         try {
             $cart = $this->getCart();
             $product = (new Product())->findFromCatalogs($post['product_id']);
-
             $catalogs = explode(',', $client->getCatalogs());
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $catalogs) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
@@ -76,6 +75,8 @@ class CartWebApi extends \api_web\components\WebApi
             $this->setPosition($cart, $product, $post['quantity']);
             //Сообщение в очередь, Изменение количества товара в корзине
             Notice::init('Order')->sendOrderToTurnClient($client);
+            Notice::init('Order')->sendLastUserCartAdd($this->user);
+
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -183,7 +184,7 @@ class CartWebApi extends \api_web\components\WebApi
             $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {
-                    throw new BadRequestHttpException("ERROR: Empty id");
+                    throw new BadRequestHttpException("empty_param|id");
                 }
                 $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
@@ -317,7 +318,7 @@ class CartWebApi extends \api_web\components\WebApi
     public function productComment(array $post)
     {
         if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty product_id");
+            throw new BadRequestHttpException("empty_param|product_id");
         }
 
         /**

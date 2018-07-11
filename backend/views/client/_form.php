@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
+use common\models\Allow;
+use common\models\Role;
 use kartik\checkbox\CheckboxX;
 
 /* @var $this yii\web\View */
@@ -16,6 +17,36 @@ use kartik\checkbox\CheckboxX;
 
     <?= $form->field($profile, 'full_name') ?>
 
+    <?=
+    $form->field($profile, 'gender')->dropDownList(common\models\Gender::getList());
+    ?>
+
+    <?php
+
+    switch ($user->role_id) {
+        case Role::ROLE_RESTAURANT_MANAGER:
+            print $form->field($profile, 'job_id')->dropDownList(common\models\Job::getListRestor());
+            break;
+        case Role::ROLE_RESTAURANT_EMPLOYEE:
+            print $form->field($profile, 'job_id')->dropDownList(common\models\Job::getListRestor());
+            break;
+        case Role::ROLE_RESTAURANT_EMPLOYEE:
+            print $form->field($profile, 'job_id')->dropDownList(common\models\Job::getListRestor());
+            break;
+        case Role::ROLE_SUPPLIER_MANAGER:
+            print $form->field($profile, 'job_id')->dropDownList(common\models\Job::getListPostav());
+            break;
+        case Role::ROLE_SUPPLIER_EMPLOYEE:
+            print $form->field($profile, 'job_id')->dropDownList(common\models\Job::getListPostav());
+            break;
+        default:
+            print $form->field($profile, 'job_id');
+    }
+    //$form->field($profile, 'job_id')
+    ?>
+
+    <?php //echo $form->field($profile, 'email') ?>
+
     <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
         'jsOptions' => [
             'preferredCountries' => ['ru'],
@@ -26,6 +57,15 @@ use kartik\checkbox\CheckboxX;
             'class' => 'form-control',
         ],
     ]) ?>
+
+    <?=
+    $form->field($user, 'subscribe')->dropDownList(common\models\Allow::getList());
+    ?>
+
+    <?=
+    $form->field($user, 'sms_subscribe')->dropDownList(common\models\Allow::getList());
+    ?>
+
 
     <?=
             $form->field($user, 'status')->dropDownList(common\models\User::statusDropdown());

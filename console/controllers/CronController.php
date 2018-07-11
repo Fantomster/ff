@@ -360,28 +360,69 @@ class CronController extends Controller {
         Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '%test%' OR name LIKE '%тест%')");
     }
 
-
     //handle EDI integration files
-    public function actionHandleFiles()
-    {
+    public function actionHandleFiles() {
         $eComIntegration = new EComIntegration();
         $eComIntegration->handleFilesList();
     }
 
-
     //handle EDI integration files queue
-    public function actionHandleFilesQueue()
-    {
+    public function actionHandleFilesQueue() {
         $eComIntegration = new EComIntegration();
         $eComIntegration->handleFilesListQueue();
     }
 
-
     //archieve EDI integration files
-    public function actionArchiveFiles()
-    {
+    public function actionArchiveFiles() {
         $eComIntegration = new EComIntegration();
         $eComIntegration->archiveFiles();
+    }
+
+    public function actionProcessMercVsd() {
+        $organizations = \yii\helpers\ArrayHelper::map(Yii::$app->db_api->CreateCommand("
+            SELECT count(mvsd.id) AS vsd_count, mpconst.org AS organization_id
+            FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10
+            WHERE mvsd.status = 'CONFIRMED'
+            GROUP BY mpconst.org;
+        ")->queryAll(), 'organization_id', 'vsd_count');
+        var_dump($organizations);
+
+        foreach ($organizations as $organization_id => $vsd_count) {
+            $organization = Organization::findOne(['id' => $organization_id]);
+            if (isset($organization)) {
+                $recipients = [];
+                $relatedUsers = \common\models\RelationUserOrganization::findAll([
+                            'organization_id' => $organization_id,
+                            'is_active' => true,
+                            'role_id' => [
+                                \common\models\Role::ROLE_RESTAURANT_MANAGER,
+                                \common\models\Role::ROLE_SUPPLIER_MANAGER,
+                                \common\models\Role::ROLE_ADMIN,
+                                \common\models\Role::ROLE_FKEEPER_MANAGER,
+                            ],
+                ]);
+                foreach ($relatedUsers as $relatedUser) {
+                    if ($relatedUser->user->emailNotification->merc_vsd) {
+                        $recipients[] = $relatedUser->user->email;
+                    }
+                }
+                foreach ($organization->additionalEmail as $addEmail) {
+                    if ($addEmail->merc_vsd) {
+                        $recipients[] = $addEmail->email;
+                    }
+                }
+                var_dump($recipients);
+                foreach ($recipients as $recipient) {
+                    Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
+                    $mailer = Yii::$app->mailer;
+                    $subject = Yii::t('app', 'common.mail.merc_vsd.subject', ['ru' => 'Уведомление о непогашенных ВСД для'], 'ru') . '  ' . $organization->name;
+                    $mailer->compose('merc_vsd', compact("vsd_count"))
+                            ->setTo($recipient)
+                            ->setSubject($subject)
+                            ->send();
+                }
+            }
+        }
     }
 
 }

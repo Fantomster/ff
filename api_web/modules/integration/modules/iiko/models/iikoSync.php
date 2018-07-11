@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\iiko\models;
 
 use api\common\models\iiko\iikoWaybillData;
+use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use api\common\models\iiko\iikoAgent;
@@ -57,11 +58,13 @@ class iikoSync extends WebApi
                     throw new BadRequestHttpException($dicModel->getFirstErrors());
                 }
                 //Сохраняем данные
+                iikoLogger::save();
                 $transaction->commit();
                 return ['success' => true];
             } catch (\Exception $e) {
                 $transaction->rollBack();
                 iikoApi::getInstance()->logout();
+                iikoLogger::save();
                 iikoDic::errorSync($model->id);
                 throw $e;
             }

@@ -101,7 +101,7 @@ class ChatWebApi extends WebApi
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
         if (empty($post['dialog_id'])) {
-            throw new BadRequestHttpException("ERROR: Empty dialog_id");
+            throw new BadRequestHttpException("empty_param|dialog_id");
         }
 
         $client = $this->user->organization;
@@ -123,9 +123,25 @@ class ChatWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = [];
+
+        /**
+         * @var $model OrderChat
+         */
         foreach ($dataProvider->models as $model) {
-            $result[] = $this->prepareMessage($model);
+            $message = $this->prepareMessage($model);
+
+            if($message['is_my_message'] === false && $message['viewed'] === false) {
+                $model->viewed = true;
+                $model->save();
+            }
+
+            $result[] = $message;
         }
+
+        /**
+         * Отправка уведомлений в FCM
+         */
+        Notice::init('Chat')->updateCountMessageAndDialog($this->user->organization->id, $order);
 
         $return = [
             'result' => $result,
@@ -183,7 +199,7 @@ class ChatWebApi extends WebApi
         }
 
         //Отправляем нотификацию
-        Notice::init('Chat')->addMessage($recipient_id, $order);
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_id, $order);
 
         return $this->getDialogMessages(['dialog_id' => $order->id]);
     }

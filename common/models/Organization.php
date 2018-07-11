@@ -72,6 +72,7 @@ use common\models\guides\Guide;
  * @property Guide $favorite
  * @property Guide[] $guides
  * @property Catalog $baseCatalog
+ * @property AdditionalEmail[] additionalEmail
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -1523,6 +1524,10 @@ class Organization extends \yii\db\ActiveRecord {
         {
             return 0;
         }
+    }
+    
+    public function getMercLicense() {
+        return mercService::findOne(['org' => $this->id]);
     }
 
     public function getOrganizationManagersExportColumns(): array {

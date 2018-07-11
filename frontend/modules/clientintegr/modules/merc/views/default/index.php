@@ -9,6 +9,7 @@ use yii\web\View;
 use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\widgets\DatePicker;
+use api\common\models\merc\MercVsd;
 ?>
 
 <?=
@@ -53,7 +54,7 @@ Modal::widget([
             'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
             'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
             'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
-                $enable = !($model->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentListRequest::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
+                $enable = !($model->status == MercVsd::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
                 $style = ($enable ) ? "visibility:hidden" : "";
                 return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
             }
@@ -78,7 +79,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status ' . \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$status_color[$data['status']] . '">'.\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses[$data['status']].'</span>';
+                return '<span class="status ' . MercVsd::$status_color[$data['status']] . '">'.MercVsd::$statuses[$data['status']].'</span>';
             },
         ],
         [
@@ -102,15 +103,23 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['production_date'];
+            $res = $data['production_date'];
+            try{
+                $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+            }
+            catch (Exception $e)
+            {
+                $res = $data['production_date'];
+            }
+                return $res;
             },
         ],
         [
-            'attribute' => 'recipient_name',
+            'attribute' => 'sender_name',
             'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отправитель']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['recipient_name'];
+                return $data['sender_name'];
             },
         ],
         [
@@ -137,7 +146,7 @@ Modal::widget([
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
                 'done-partial' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                    if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
@@ -156,7 +165,7 @@ Modal::widget([
                     return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                 },
                 'rejected' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
+                    if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
@@ -207,8 +216,19 @@ Modal::widget([
                             <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
+                    <?=
+                                   /* Html::button(Yii::t('message', 'frontend.views.order.order_comment_two', ['ru' => 'Комментарий к заказу']), [
+                                        'class' => 'but_comments comment pull-right',
+                                        'data' => [
+                                            'url' => Url::to(['order/ajax-set-comment', 'vendor_id' => $cart['id']]),
+                                            'toggle' => "tooltip",
+                                            'placement' => "bottom",
+                                            "original-title" => Yii::$app->request->cookies->getValue('order_comment_'.$cart['id'], null),
+                                        ]
+                                    ]);*/
+                    Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
                     <?php
-                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : \frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::DOC_STATUS_CONFIRMED;
+                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
                         'options' => [
                             'data-pjax' => true,
@@ -236,7 +256,7 @@ Modal::widget([
                             <div class="form-group field-statusFilter">
                                 <?=
                                 $form->field($searchModel, 'status')
-                                    ->dropDownList(\frontend\modules\clientintegr\modules\merc\helpers\vetDocumentsList::$statuses, ['id' => 'statusFilter'])
+                                    ->dropDownList(MercVsd::$statuses, ['id' => 'statusFilter'])
                                     ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
@@ -244,7 +264,7 @@ Modal::widget([
                         <div class="col-sm-3 col-md-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'recipient_name')
+                                $form->field($searchModel, 'sender_name')
                                     ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
                                     ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
@@ -325,6 +345,12 @@ Modal::widget([
 <?php
 $urlDoneAll = Url::to(['done-all']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
+$title = Yii::t('message', 'rontend.client.integration.hand_loading', ['ru' => 'Список ВСД для загрузки']);
+$cancelButtonText = Yii::t('message', 'frontend.views.order.close_three', ['ru' => 'Закрыть']);
+$confirmButtonText = Yii::t('message', 'frontend.views.order.load', ['ru' => 'Загрузить']);
+$error = Yii::t('error', 'frontend.views.order.error_four', ['ru' => 'Ошибка!']);
+$error_text = Yii::t('message', 'frontend.views.order.try_again_four', ['ru' => 'Попробуйте еще раз']);
+$loadUrl = Url::to(['ajax-load-vsd']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".done_all", function(e) {
@@ -412,6 +438,55 @@ $("#ajax-load").on("click", ".save-form", function() {
             $("#search-form").submit();
         }, 700);
     });
+ 
+$(document).on("click", ".hand_loading", function(e) {
+                e.preventDefault();
+                var clicked = $(this);
+                    title = "$title";
+                swal({
+                    title: title,
+                    input: "textarea",
+                    showCancelButton: true,
+                    cancelButtonText: "$cancelButtonText",
+                    confirmButtonText: "$confirmButtonText",
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                    showLoaderOnConfirm: true,
+                    inputValue: "",
+                    onClose: function() {
+                        clicked.blur();
+                        swal.resetDefaults()
+                    },
+                    preConfirm: function (text) {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                "$loadUrl",
+                                {list: text}
+                            ).done(function (result) {
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function (result) {
+                    if (result.value.type == "success") {
+                        clicked.tooltip("hide")
+                            .attr("data-original-title", result.value.comment)
+                            .tooltip("fixTitle")
+                            .blur();
+                        clicked.data("original-title", result.value.comment);
+                        swal(result.value);
+                    } else if (result.dismiss === "cancel") {
+                        swal.close();
+                        $.pjax.reload("#pjax-vsd-list", {timeout:30000});
+                    } else {
+                        swal({title: "$error", text: "$error_text", type: "error"});
+                    }
+                });
+            }); 
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

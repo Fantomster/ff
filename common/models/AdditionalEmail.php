@@ -18,6 +18,9 @@ use Yii;
  * @property integer $order_processing
  * @property integer $order_done
  * @property integer $request_accept
+ * @property integer $merc_vsd
+ * @property integer $confirmed
+ * @property string $token
  *
  * @property Organization $organization
  */
@@ -38,8 +41,8 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     {
         return [
             [['email', 'organization_id'], 'required'],
-            [['organization_id', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept'], 'integer'],
-            [['email'], 'string', 'max' => 255],
+            [['organization_id', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'merc_vsd', 'confirmed'], 'integer'],
+            [['email', 'token'], 'string', 'max' => 255],
             ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
             ['email', 'email'],
@@ -62,6 +65,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
             'order_processing' => Yii::t('app', 'common.models.additional_email.working', ['ru' => 'В работе']),
             'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru' => 'Выполнен']),
             'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru' => 'Принятие заявки']),
+            'merc_vsd' => Yii::t('app', 'common.models.additional_email.vsd_short', ['ru' => 'ВСД']),
         ];
     }
 
@@ -108,5 +112,25 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     public function getProfile()
     {
         return new \amnah\yii2\user\models\Profile();
+    }
+    
+    /**
+     * Send confirmation mail
+     * @param Organization $organization
+     * @return int
+     */
+    public function sendConfirmationEmail() {
+        /** @var Mailer $mailer */
+        $mailer = Yii::$app->mailer;
+        $this->token = md5($this->email);
+        $this->save();
+        $token = $this->token;
+        $subject = Yii::t('app', 'common.models.additional_mail_subject', ['ru'=>"Дополнительная почта для MixCart"]);
+        $result = $mailer->compose('confirmAdditionalEmail', compact("token"))
+                ->setTo($this->email)
+                ->setSubject($subject)
+                ->send();
+
+        return $result;
     }
 }

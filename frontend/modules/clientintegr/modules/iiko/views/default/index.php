@@ -69,7 +69,7 @@ use kartik\grid\GridView;
                                 'view' => function ($url, $model) {
                                     return \yii\helpers\Html::a(
                                         '<i class="fa fa-eye" aria-hidden="true"></i>',
-                                        Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/' . $model->dictype->contr . '-view']),
+                                        Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/sync/' . $model->dictype->method . '-view']),
                                         [
                                             'title' => Yii::t('backend', 'Просмотр'),
                                             'data-pjax' => "0"
@@ -81,7 +81,7 @@ use kartik\grid\GridView;
                                         \yii\helpers\Html::tag('i', '', [
                                             'class' => 'fa fa-download get-content-sync',
                                             'aria-hidden' => true,
-                                            'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/' . $model->dictype->contr . '-get']),
+                                            'data-url' => Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/sync/run']),
                                             'data-id' => $model->id
                                         ]),
                                         '#',

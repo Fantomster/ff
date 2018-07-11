@@ -11,19 +11,9 @@ use yii\helpers\ArrayHelper;
 class iikoLogger
 {
 
-    private static $tableName = '{{%iiko_log}}';
+    public static $tableName = '{{%iiko_log}}';
     private static $guide;
     private static $row;
-
-    private static $instance;
-
-    function __clone()
-    {
-    }
-
-    function __wakeup()
-    {
-    }
 
     function __construct()
     {
@@ -35,20 +25,12 @@ class iikoLogger
         $this->setUser(\Yii::$app->user->id);
     }
 
-    public static function getInstance()
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
     /**
      * @param $denom
      * @return array|bool
      * @throws \Exception
      */
-    public static function setOperation($denom)
+    public function setOperation($denom)
     {
         $operation = (new Query())
             ->select('code')
@@ -67,7 +49,7 @@ class iikoLogger
      * @param $request
      * @throws \Exception
      */
-    public static function request($request)
+    public function request($request)
     {
         self::update([
             'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
@@ -79,20 +61,23 @@ class iikoLogger
      * @param $response
      * @throws \Exception
      */
-    public static function response($response)
+    public function response($response)
     {
         self::update([
             'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
             'response_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
         ]);
 
-        self::saveToTurn();
+        \Yii::$app->get('rabbit')
+            ->setQueue('log_service_' . iikoService::getServiceId())
+            ->setExchange('log')
+            ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
     }
 
     /**
      * @param string $type
      */
-    public static function setType($type)
+    public function setType($type)
     {
         self::update([
             'type' => $type
@@ -103,7 +88,7 @@ class iikoLogger
      * @param $user_id
      * @throws \Exception
      */
-    private static function setUser($user_id)
+    private function setUser($user_id)
     {
         $user = User::findOne($user_id);
         if (!empty($user)) {
@@ -139,40 +124,5 @@ class iikoLogger
     private static function get()
     {
         return self::$row[self::$guide];
-    }
-
-    /**
-     * логируем запросы в Redis и Rabbit
-     */
-    private static function saveToTurn()
-    {
-        \Yii::$app->get('redis')->append(self::getRedisUserKey(), \json_encode(self::$row[self::$guide]) . '|');
-        self::$instance = null;
-    }
-
-    /**
-     * Сохранение действий в базу
-     */
-    public static function save()
-    {
-        $item = \Yii::$app->get('redis')->get(self::getRedisUserKey());
-        if (!empty($item)) {
-            $item = explode('|', $item);
-            foreach ($item as $row) {
-                if (!empty($row)) {
-                    \Yii::$app->get('db_api')->createCommand()->insert(self::$tableName, \json_decode($row, true))->execute();
-                }
-            }
-            \Yii::$app->get('redis')->del(self::getRedisUserKey());
-        }
-    }
-
-    /**
-     * Генерируем ключ для сохранения логов в редис
-     * @return string
-     */
-    private static function getRedisUserKey()
-    {
-        return 'iiko_logger_' . \Yii::$app->user->id;
     }
 }

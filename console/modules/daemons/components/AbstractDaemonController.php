@@ -17,14 +17,15 @@ abstract class AbstractDaemonController extends DaemonController
      */
     protected function defineJobs()
     {
-        echo "Daemon " . get_class($this) . " job running and working fine." . PHP_EOL;
+        $this->stdout("Daemon " . get_class($this) . " job running and working fine." . PHP_EOL);
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
         while (count($channel->callbacks)) {
             try {
                 $channel->wait(null, true, 5);
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $timeout) {
-
+                $this->stderr($timeout->getMessage());
             } catch (\PhpAmqpLib\Exception\AMQPRuntimeException $runtime) {
+                $this->stderr($runtime->getMessage());
                 \Yii::error($runtime->getMessage());
             }
         }
@@ -48,7 +49,7 @@ abstract class AbstractDaemonController extends DaemonController
 
             if ($rabbit->channel() == null) {
                 $rabbit->channel()->exchange_declare($exchange, 'direct', false, true, false);
-                echo "Daemon create chanel" . PHP_EOL;
+                $this->stdout("Daemon create chanel" . PHP_EOL);
             }
             $this->channel = $rabbit->channel();
             list($queue, ,) = $this->channel->queue_declare($queue, false, true, false, false);

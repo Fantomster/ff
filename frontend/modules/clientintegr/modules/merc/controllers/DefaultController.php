@@ -10,7 +10,7 @@ use api\common\models\merc\search\mercVSDSearch;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsChangeList;
-use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumentByUUID;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 
@@ -63,7 +63,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionView($uuid)
     {
         try {
-            $document = new getVetDocumentByUUIDRequest();
+            $document = new getVetDocumentByUUID();
             $document->getDocumentByUUID($uuid);
         }catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
@@ -230,18 +230,17 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     private function updateVSDList()
     {
         $hand_only = mercDicconst::getSetting('hand_load_only');
-
         if($hand_only == 1)
             return true;
 
-        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id);
+        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
         $transaction = Yii::$app->db_api->beginTransaction();
        try {
             $vsd = new VetDocumentsChangeList();
             if(isset($visit))
                 $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*30);
             $vsd->updateData($visit);
-            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id);
+            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
             $transaction->commit();
         }catch (\Exception $e)
         {

@@ -6,17 +6,16 @@
  * Time: 20:01
  */
 
-namespace frontend\modules\clientintegr\modules\merc\models;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
 
-class getVetDocumentByUUIDRequest extends Model
+class getVetDocumentByUUID extends Model
 {
     public $UUID;
     public $issueSeries;
@@ -46,10 +45,6 @@ class getVetDocumentByUUIDRequest extends Model
     public $localTransactionId;
     public $vetDocumentType;
     public $vetDocumentStatus;
-
-    private $initiator;
-    private $enterpriseGuid;
-    private $soap_namespaces = ['xmlns:merc="http://api.vetrf.ru/schema/cdm/mercury/applications"', ' xmlns:base="http://api.vetrf.ru/schema/cdm/base"'];
 
     public function rules()
     {

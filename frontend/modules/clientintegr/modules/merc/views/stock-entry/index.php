@@ -9,7 +9,6 @@ use yii\web\View;
 use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\widgets\DatePicker;
-use api\common\models\merc\MercVsd;
 ?>
 
 <?=
@@ -45,11 +44,11 @@ Modal::widget([
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
     <?php
-    $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
+   // $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
     $timestamp_now=time();
     ($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
     $columns = array (
-        [
+        /*[
             'class' => 'yii\grid\CheckboxColumn',
             'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
             'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
@@ -58,20 +57,20 @@ Modal::widget([
                 $style = ($enable ) ? "visibility:hidden" : "";
                 return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
             }
-        ],
-        /*[
-            'attribute' => 'number',
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['number'];
-            },
         ],*/
         [
-            'attribute' => 'date_doc',
-            'label' => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
+            'attribute' => 'entryNumber',
             'format' => 'raw',
             'value' => function ($data) {
-                return Yii::$app->formatter->asDatetime($data['date_doc'], "php:j M Y");
+                return $data['entryNumber'];
+            },
+        ],
+        [
+            'attribute' => 'create_date',
+            'label' => Yii::t('message', 'frontend.client.integration.create_date', ['ru' => 'Дата добавления']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return Yii::$app->formatter->asDatetime($data['create_date'], "php:j M Y");
             },
         ],
         [
@@ -79,9 +78,17 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status ' . MercVsd::$status_color[$data['status']] . '">'.MercVsd::$statuses[$data['status']].'</span>';
+                return '<span class="status">'.\api\common\models\merc\MercStockEntry::$statuses[$data['status']].'</span>';
             },
         ],
+        /*[
+            'attribute' => 'producer_name',
+            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return $data['product_name'];
+            },
+        ],*/
         [
             'attribute' => 'product_name',
             'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
@@ -115,11 +122,27 @@ Modal::widget([
             },
         ],
         [
-            'attribute' => 'sender_name',
-            'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отправитель']),
+            'attribute' => 'producer_country',
+            'label' => Yii::t('message', 'frontend.client.integration.producer_country', ['ru' => 'Страна происхождения']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['sender_name'];
+                return $data['producer_country'];
+            },
+        ],
+        [
+            'attribute' => 'producer_name',
+            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return $data['producer_name'];
+            },
+        ],
+        [
+            'attribute' => 'product_marks',
+            'label' => Yii::t('message', 'frontend.client.integration.product_marks', ['ru' => 'Маркировка/клеймо']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return $data['product_marks'];
             },
         ],
         [
@@ -145,7 +168,7 @@ Modal::widget([
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
-                'done-partial' => function ($url, $model, $key) use ($searchModel) {
+               /* 'done-partial' => function ($url, $model, $key) use ($searchModel) {
                     if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
@@ -182,7 +205,7 @@ Modal::widget([
                         'style' => 'width: 18px'
                     ]);
                     return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
-                },
+                },*/
             ]
         ]
     );
@@ -190,7 +213,7 @@ Modal::widget([
     ?>
 </section>
 <section class="content-header">
-    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru'=>'Список ВСД"']) ?>:</h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru'=>'Журнал входной продукци']) ?>:</h4>
 </section>
 <section class="content-header">
     <div class="box box-info">
@@ -216,9 +239,8 @@ Modal::widget([
                             <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
-                    <?= Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
                     <?php
-                    $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
+                    /*$searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
                         'options' => [
                             'data-pjax' => true,
@@ -304,10 +326,10 @@ Modal::widget([
                             <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
                     </div>
-                    <?php ActiveForm::end(); ?>
+                    <?php ActiveForm::end(); */?>
                     <div class="col-md-12">
                         <?php
-                        $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
+                        //$checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
                         echo GridView::widget([
                             'id' => 'vetDocumentsList',
                             'dataProvider' => $dataProvider,
@@ -318,11 +340,11 @@ Modal::widget([
                             'options' => ['class' => ''],
                             'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                             'columns' => $columns
-                        ]);
+                        ]);/*
                         if ($lic_merc==1) {
                             if ($searchModel->type != 2 && ($searchModel->status == 'CONFIRMED' || $searchModel->status == null))
                                 echo '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']) . '</div>';
-                        }
+                        }*/
                         ?>
                     </div>
                     <?php Pjax::end(); ?>
@@ -335,12 +357,6 @@ Modal::widget([
 <?php
 $urlDoneAll = Url::to(['done-all']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
-$title = Yii::t('message', 'frontend.client.integration.hand_loading', ['ru' => 'Список ВСД для загрузки']);
-$cancelButtonText = Yii::t('message', 'frontend.views.order.close_three', ['ru' => 'Закрыть']);
-$confirmButtonText = Yii::t('message', 'frontend.client.integration.load', ['ru' => 'Загрузить']);
-$error = Yii::t('error', 'frontend.views.order.error_four', ['ru' => 'Ошибка!']);
-$error_text = Yii::t('message', 'frontend.views.order.try_again_four', ['ru' => 'Попробуйте еще раз']);
-$loadUrl = Url::to(['ajax-load-vsd']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".done_all", function(e) {
@@ -428,55 +444,6 @@ $("#ajax-load").on("click", ".save-form", function() {
             $("#search-form").submit();
         }, 700);
     });
- 
-$(document).on("click", ".hand_loading", function(e) {
-                e.preventDefault();
-                var clicked = $(this);
-                    title = "$title";
-                swal({
-                    title: title,
-                    input: "textarea",
-                    showCancelButton: true,
-                    cancelButtonText: "$cancelButtonText",
-                    confirmButtonText: "$confirmButtonText",
-                    showLoaderOnConfirm: true,
-                    allowOutsideClick: false,
-                    showLoaderOnConfirm: true,
-                    inputValue: "",
-                    onClose: function() {
-                        clicked.blur();
-                        swal.resetDefaults()
-                    },
-                    preConfirm: function (text) {
-                        return new Promise(function (resolve, reject) {
-                            $.post(
-                                "$loadUrl",
-                                {list: text}
-                            ).done(function (result) {
-                                if (result) {
-                                    resolve(result);
-                                } else {
-                                    resolve(false);
-                                }
-                            });
-                        })
-                    },
-                }).then(function (result) {
-                    if (result.value.type == "success") {
-                        clicked.tooltip("hide")
-                            .attr("data-original-title", result.value.comment)
-                            .tooltip("fixTitle")
-                            .blur();
-                        clicked.data("original-title", result.value.comment);
-                        swal(result.value);
-                    } else if (result.dismiss === "cancel") {
-                        swal.close();
-                        $.pjax.reload("#pjax-vsd-list", {timeout:30000});
-                    } else {
-                        swal({title: "$error", text: "$error_text", type: "error"});
-                    }
-                });
-            }); 
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

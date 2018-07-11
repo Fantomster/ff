@@ -42,6 +42,7 @@ use yii\web\BadRequestHttpException;
  * @property User[] $recipientsList
  * @property Currency $currency
  * @property OrderAttachment[] $attachments
+ * @property OrderAssignment $assignment
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -610,5 +611,12 @@ class Order extends \yii\db\ActiveRecord
     public function getAttachments()
     {
         return $this->hasMany(OrderAttachment::className(), ['order_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignment() {
+        return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
     }
 }

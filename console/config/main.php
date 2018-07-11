@@ -25,10 +25,9 @@ return [
         ]
     ],
     'controllerMap' => [
-     //   'command-bus' => [
-     //       'class' => 'trntv\bus\console\BackgroundBusController',
-     //   ],
-
+        'iiko-daemon' => [
+            'class' => 'console\modules\daemons\controllers\IikodaemonController'
+        ]
     ],
     'aliases' => [
           '@baseUrl'=>'https://mixcart.ru'

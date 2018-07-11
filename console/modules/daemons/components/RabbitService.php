@@ -28,15 +28,8 @@ class RabbitService extends Component
             $message = json_encode($message);
         }
 
-        //Создаёт совединение с RabbitAMQP
-        $connection = new AMQPStreamConnection(
-            $this->host,        #host - имя хоста, на котором запущен сервер RabbitMQ
-            $this->port,        #port - номер порта сервиса, по умолчанию - 5672
-            $this->user,        #user - имя пользователя для соединения с сервером
-            $this->password     #password
-        );
+        $connection = $this->connect();
 
-        //Канал
         $channel = $connection->channel();
         $channel->queue_declare(
             $this->queue,       #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
@@ -84,5 +77,17 @@ class RabbitService extends Component
         }
         $this->exchange = $exchange;
         return $this;
+    }
+
+    /**
+     * @return AMQPStreamConnection
+     */
+    public function connect() {
+        return new AMQPStreamConnection(
+            $this->host,        #host - имя хоста, на котором запущен сервер RabbitMQ
+            $this->port,        #port - номер порта сервиса, по умолчанию - 5672
+            $this->user,        #user - имя пользователя для соединения с сервером
+            $this->password     #password
+        );
     }
 }

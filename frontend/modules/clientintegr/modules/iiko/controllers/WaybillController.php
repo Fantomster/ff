@@ -412,6 +412,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $transaction->commit();
             $api->logout();
             iikoLogger::save();
+            Yii::$app->session->set("iiko_waybill", $model->order_id);
             return ['success' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();

@@ -63,11 +63,7 @@ class VetDocumentsChangeList extends Model
                 'raw_data' => serialize($item)
             ]);
 
-            if(!$model->save()) {
-                var_dump($model->getErrors());
-                throw new \Exception('VSD save error');
-            }
-
+            $model->save(false);
         }
     }
 

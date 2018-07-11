@@ -18,7 +18,7 @@ $this->registerCss('.container{width:100% !important;}');
             <div class="col-md-12">
                 <?php
                 foreach ($order->attachments as $attachment) {
-                    echo Html::a($attachment->file, Url::to(['order/edit-bill', 'id' => $order->id, 'attachment_id' => $attachment->id]), ['style' => 'border: 1px solid;padding:5px;']) . "&nbsp;";
+                    echo Html::a($attachment->file, Url::to(['order/edit', 'id' => $order->id, 'attachment_id' => $attachment->id]), ['style' => 'border: 1px solid;padding:5px;']) . "&nbsp;";
                 }
                 ?>
             </div>

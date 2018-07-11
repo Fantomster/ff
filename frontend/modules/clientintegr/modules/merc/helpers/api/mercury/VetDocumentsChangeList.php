@@ -35,8 +35,6 @@ class VetDocumentsChangeList extends Model
             if($model == null)
                 $model = new MercVsd();
 
-            var_dump($item->certifiedConsignment->batch->batchID);
-
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'number' => (isset($item->issueSeries) && (isset($item->issueNumber))) ? MercVsd::getNumber($item->issueSeries, $item->issueNumber) : null,

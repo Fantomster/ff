@@ -63,10 +63,7 @@ class VetDocumentsChangeList extends Model
                 'raw_data' => serialize($item)
             ]);
 
-            if(!$model->save()) {
-                Yii::error(serialize($model->getErrors()));
-            }
-
+            $model->save(false);
         }
     }
 

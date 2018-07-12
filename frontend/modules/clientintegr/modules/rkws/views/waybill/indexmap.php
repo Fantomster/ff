@@ -453,6 +453,7 @@ $js = <<< JS
                         onOpen: () => {
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {
+                                console.log(data);
                                 if (data === 'true') {
                                     swal.close();
                                     swal('Готово', '', 'success');
@@ -460,7 +461,7 @@ $js = <<< JS
                                     arr = path.split('waybill');
                                     path = arr[0] + 'waybill/index';
                                     loc = "document.location.href='"+path+"'";
-                                    setTimeout(loc, 1000);
+                                    setTimeout(loc, 1500);
                                 } else {
                                     swal(
                                         'Ошибка',

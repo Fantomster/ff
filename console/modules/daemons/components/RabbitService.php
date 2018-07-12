@@ -15,6 +15,17 @@ class RabbitService extends Component
     public $password;       #password
     public $queue;          #queue - очередь
     public $exchange = 'router';
+    public $queue_prefix;
+
+    public function __set($name, $value)
+    {
+
+        if ($name == 'queue') {
+            $value = ($this->queue_prefix ?? '') . $value;
+        }
+
+        return parent::__set($name, $value);
+    }
 
     public function addRabbitQueue($message)
     {
@@ -62,7 +73,7 @@ class RabbitService extends Component
         if (empty($queue)) {
             throw new ErrorException('Необходимо установить имя очереди (new RabbitService())->setQueue($name_queue);');
         }
-        $this->queue = $queue;
+        $this->queue = ($this->queue_prefix ?? '') . $queue;
         return $this;
     }
 
@@ -82,7 +93,8 @@ class RabbitService extends Component
     /**
      * @return AMQPStreamConnection
      */
-    public function connect() {
+    public function connect()
+    {
         return new AMQPStreamConnection(
             $this->host,        #host - имя хоста, на котором запущен сервер RabbitMQ
             $this->port,        #port - номер порта сервиса, по умолчанию - 5672

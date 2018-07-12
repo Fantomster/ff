@@ -377,7 +377,8 @@ $js = <<< JS
                                     arr = path.split('waybill');
                                     path = arr[0] + 'waybill/index';
                                     loc = "document.location.href='"+path+"'";
-                                    setTimeout(loc, 1000);
+                                    setTimeout(loc, 1500);
+                                    $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
                                 } else {
                                     swal(
                                         'Ошибка',

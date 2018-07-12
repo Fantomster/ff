@@ -74,8 +74,8 @@ class OrganizationController extends Controller {
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -101,7 +101,7 @@ class OrganizationController extends Controller {
      */
     public function actionView($id) {
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -151,9 +151,9 @@ class OrganizationController extends Controller {
     public function actionStartTestVendorsUpdating()
     {
         $clients = Organization::findAll(['type_id'=>Organization::TYPE_RESTAURANT]);
-            foreach ($clients as $client){
-                TestVendors::setGuides($client);
-            }
+        foreach ($clients as $client){
+            TestVendors::setGuides($client);
+        }
         return $this->redirect(['test-vendors']);
     }
 

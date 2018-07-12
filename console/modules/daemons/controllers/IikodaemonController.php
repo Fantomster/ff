@@ -2,6 +2,7 @@
 
 namespace console\modules\daemons\controllers;
 
+use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use console\modules\daemons\components\AbstractDaemonController;
 
@@ -13,15 +14,17 @@ class IikodaemonController extends AbstractDaemonController
      * Имя очереди
      * @return string
      */
-    public function getQueueName() {
-        return 'log_service_' . iikoService::getServiceId();
+    public function getQueueName()
+    {
+        return (\Yii::$app->rabbit->queue_prefix ?? '') . iikoLogger::getNameQueue();
     }
 
     /**
      * Топик обмена
      * @return string
      */
-    public function getExchangeName() {
+    public function getExchangeName()
+    {
         return 'log';
     }
 
@@ -32,8 +35,12 @@ class IikodaemonController extends AbstractDaemonController
      */
     public function doJob($job)
     {
-        $this->ask($job);
-        echo $job->body;
+        $row = \json_decode($job->body, true);
+        if (\Yii::$app->get('db_api')->createCommand()->insert(iikoLogger::$tableName, $row)->execute()) {
+            $this->ask($job);
+        } else {
+            $this->nask($job);
+        }
         return true;
     }
 }

@@ -58,13 +58,11 @@ class iikoSync extends WebApi
                     throw new BadRequestHttpException($dicModel->getFirstErrors());
                 }
                 //Сохраняем данные
-                iikoLogger::save();
                 $transaction->commit();
                 return ['success' => true];
             } catch (\Exception $e) {
                 $transaction->rollBack();
                 iikoApi::getInstance()->logout();
-                iikoLogger::save();
                 iikoDic::errorSync($model->id);
                 throw $e;
             }

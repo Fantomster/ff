@@ -458,14 +458,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $url; // Возвращаем итоговый URL
     }
 
-    public function actionSendws($waybill_id) {
+    public function actionSendws() {
 
-        //  $resres = ApiHelper::getAgents();     
+
+        $waybill_id = Yii::$app->request->post('id');
+        $model = $this->findModel($waybill_id);
 
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
         $res->sendWaybill($waybill_id);
 
-        $this->redirect('/clientintegr/rkws/waybill/index');
+        return 'true';
+       //$this->redirect('/clientintegr/rkws/waybill/index');
     }
 
 
@@ -497,7 +500,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 if ($model->status_id!=2) $error.= 'Ошибка при отправке. ';
             }
 
-        if ($error=='') return 'true'; else return $error;
+        if ($error=='') {
+                Yii::$app->session->set("rkws_waybill", $model->order_id);
+                return 'true';}
+                else return $error;
     }
 
     protected function checkLic() {

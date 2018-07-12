@@ -447,6 +447,7 @@ class Order extends \yii\db\ActiveRecord
         foreach ($recipients as $recipient) {
             $result[] = $recipient;
         }
+        //da($result);
 
         return $result;
     }

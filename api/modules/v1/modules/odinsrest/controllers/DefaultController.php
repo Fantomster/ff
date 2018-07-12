@@ -100,10 +100,12 @@ class DefaultController extends Controller
             $organizationID = $session->acc;
             $db = Yii::$app->get('db_api');
             $dbName = $this->getDsnAttribute('dbname', $db->dsn);
-            $rows = (new Query())->select([$dbName . '.one_s_waybill.*', $dbName . '.one_s_waybill_data.*', $dbName . '.one_s_good.name as one_s_product_name', $dbName . '.one_s_good.cid as one_s_product_cid', $dbName . '.one_s_good.parent_id as one_s_product_parent_id', $dbName . '.one_s_good.measure as one_s_product_measure', 'catalog_base_goods.product as mixcart_product_name'])->from($dbName . '.one_s_waybill')
+            $rows = (new Query())->select([$dbName . '.one_s_waybill.*', $dbName . '.one_s_waybill_data.*', $dbName . '.one_s_good.name as one_s_product_name', $dbName . '.one_s_good.cid as one_s_product_cid', $dbName . '.one_s_good.parent_id as one_s_product_parent_id', $dbName . '.one_s_good.measure as one_s_product_measure', $dbName . '.one_s_store.cid as one_s_store_cid', $dbName . '.one_s_contragent.cid as one_s_contragent_cid', 'catalog_base_goods.product as mixcart_product_name'])->from($dbName . '.one_s_waybill')
                 ->where([$dbName . '.one_s_waybill.org' => $organizationID, $dbName . '.one_s_waybill.readytoexport' => 1])
                 ->leftJoin($dbName . '.one_s_waybill_data', $dbName . '.one_s_waybill_data.waybill_id = ' . $dbName . '.one_s_waybill.id')
                 ->leftJoin($dbName . '.one_s_good', $dbName . '.one_s_good.id = ' . $dbName . '.one_s_waybill_data.product_rid')
+                ->leftJoin($dbName . '.one_s_contragent', $dbName . '.one_s_contragent.id = ' . $dbName . '.one_s_waybill.agent_uuid')
+                ->leftJoin($dbName . '.one_s_store', $dbName . '.one_s_store.id = ' . $dbName . '.one_s_waybill.store_id')
                 ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = ' . $dbName . '.one_s_waybill_data.product_id')
                 ->all();
             return json_encode($rows, JSON_UNESCAPED_UNICODE);

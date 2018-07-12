@@ -11,6 +11,7 @@ use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -45,7 +46,7 @@ class OrganizationController extends DefaultController {
                 'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent', 'ajax-update-currency'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization', 'ajax-update-currency'],
+                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization', 'ajax-update-currency', 'update-notifications'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -632,5 +633,42 @@ class OrganizationController extends DefaultController {
 
         $redirectURL = Yii::$app->params['staticUrl'][Yii::$app->language]['home'] . "user/login";
         return $this->redirect($redirectURL);
+    }
+
+
+    public function actionUpdateNotifications(int $id){
+        $organization = Organization::findOne(['id' => $id]);
+        $user = $this->currentUser;
+        $emailNotification = $user->getEmailNotification($id, true);
+        $smsNotification = $user->getSmsNotification($id, true);
+        if (count(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post();
+            $emails = $post['Email'];
+            foreach ($emails as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                if(isset($post['User'][$userId]['subscribe'])){
+                    $user->subscribe = $post['User'][$userId]['subscribe'];
+                    $user->save();
+                }
+                $emailNotification = $user->emailNotification;
+                foreach ($fields as $key => $value){
+                    $emailNotification->$key = $value;
+                }
+                $emailNotification->save();
+                unset($user);
+            }
+            $sms = $post['Sms'];
+            foreach ($sms as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                $smsNotification = $user->smsNotification;
+                foreach ($fields as $key => $value){
+                    $smsNotification->$key = $value;
+                }
+                $smsNotification->save();
+                unset($user);
+            }
+            return $this->redirect([Url::previous()]);
+        }
+        return $this->render('notifications', compact('user','emailNotification', 'smsNotification', 'organization'));
     }
 }

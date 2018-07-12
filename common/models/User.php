@@ -303,31 +303,40 @@ class User extends \amnah\yii2\user\models\User {
 
     /**
      * @param null $org_id
+     * @param boolean $isFranchisee
      * @return EmailNotification|null|static
      */
-    public function getEmailNotification($org_id = null)
+    public function getEmailNotification($org_id = null, bool $isFranchisee = false)
     {
-        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
-        if ($rel === null) {
-            return EmailNotification::emptyInstance();
-        }
-        $res = EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
-        return ($res != null) ? $res : EmailNotification::emptyInstance();
+        return $this->getNotifications('common\models\notifications\EmailNotification', $org_id, $isFranchisee);
     }
 
     /**
      * @param null $org_id
      * @return SmsNotification|null|static
      */
-    public function getSmsNotification($org_id = null)
+    public function getSmsNotification($org_id = null, bool $isFranchisee = false)
+    {
+        return $this->getNotifications('common\models\notifications\SmsNotification', $org_id, $isFranchisee);
+    }
+
+
+    private function getNotifications(String $className, $org_id = null, bool $isFranchisee = false)
     {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
-        if ($rel === null)
-            return SmsNotification::emptyInstance();
-        $res = SmsNotification::findOne(['rel_user_org_id' => $rel->id]);
-        return ($res != null) ? $res : SmsNotification::emptyInstance();
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);;
+        if ($rel === null && !$isFranchisee) {
+            return $className::emptyInstance();
+        }
+        if($rel === null && $isFranchisee){
+            $rel = new RelationUserOrganization();
+            $rel->user_id = $this->id;
+            $rel->organization_id = $org_id;
+            $rel->role_id = $this->role_id;
+            $rel->save();
+        }
+        $res = $className::findOne(['rel_user_org_id' => $rel->id]);
+        return ($res != null) ? $res : $className::emptyInstance();
     }
 
     /**

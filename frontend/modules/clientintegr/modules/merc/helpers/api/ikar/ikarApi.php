@@ -31,4 +31,12 @@ class ikarApi extends baseApi
 
         return $result;
     }
+
+    public function getAllCountryList ()
+    {
+        $client = $this->getSoapClient('ikar');
+        $request = new getAllCountryListRequest();
+        $result = $client->GetAllCountryList($request);
+        return $result;
+    }
 }

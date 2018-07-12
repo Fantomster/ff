@@ -102,4 +102,36 @@ class cerberApi extends baseApi
             $cache->add('Business_'.$GUID, $result, 60*60*24);
         return $result;
     }
+
+    public function getForeignEnterpriseList ($name)
+    {
+        $client = $this->getSoapClient('cerber');
+
+        $request = new getForeignEnterpriseListRequest();
+        $request->enterprise = new Enterprise();
+        $request->enterprise->name = $name;
+        $request->listOptions = new ListOptions();
+        $request->listOptions->count = 10;
+        $request->listOptions->offset = 0;
+
+        $result = $client->GetForeignEnterpriseList($request);
+
+        return $result;
+    }
+
+    public function getRussianEnterpriseList ($name)
+    {
+        $client = $this->getSoapClient('cerber');
+
+        $request = new getRussianEnterpriseListRequest();
+        $request->enterprise = new Enterprise();
+        $request->enterprise->name = $name;
+        $request->listOptions = new ListOptions();
+        $request->listOptions->count = 10;
+        $request->listOptions->offset = 0;
+
+        $result = $client->GetRussianEnterpriseList($request);
+
+        return $result;
+    }
 }

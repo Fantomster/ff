@@ -8,11 +8,10 @@
 
 namespace frontend\modules\clientintegr\modules\merc\models;
 
-
 use api\common\models\merc\mercDicconst;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\getForeignEnterpriseChangesListRequest;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
 
@@ -25,8 +24,6 @@ class createStoreEntryForm extends Model {
     public $product_name;
     public $volume;
     public $unit;
-    public $dateOfProduction;
-    public $expiryDate;
     public $perishable;
     public $country;
     public $producer;
@@ -39,7 +36,7 @@ class createStoreEntryForm extends Model {
             [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer','producer_role','producer_product_name'], 'required'],
             [['productType','perishable'],'integer'],
             [['volume'], 'double'],
-            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID'], 'string', 'max' => 255],
+            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID', 'country'], 'string', 'max' => 255],
         ];
     }
 
@@ -60,7 +57,7 @@ class createStoreEntryForm extends Model {
             'country' => 'Страна происхождения',
             'producer' => 'Производитель продукции',
             'producer_role' => 'Роль предприятия-производителя продукции',
-            'producer_product_name' => 'Наименование продукции'
+            'producer_product_name' => 'Наименование продукции',
         ];
     }
 
@@ -154,6 +151,19 @@ class createStoreEntryForm extends Model {
                 $res[] = ['value' => $item->name,
                     'label' => $item->name
                     ];
+        }
+        return $res;
+    }
+
+    public static function getCountryList()
+    {
+        $list = ikarApi::getInstance()->getAllCountryList();
+
+        $res = [];
+        foreach ($list->countryList->country as $item)
+        {
+            if($item->last)
+                $res[$item->uuid] = $item->name;
         }
         return $res;
     }

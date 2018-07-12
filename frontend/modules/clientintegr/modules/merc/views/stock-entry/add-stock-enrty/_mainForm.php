@@ -2,6 +2,10 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\jui\AutoComplete;
+use kartik\widgets\DateTimePicker;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
+use kartik\widgets\Select2;
+use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
@@ -46,12 +50,78 @@ use yii\jui\AutoComplete;
 
     <?=
     $form->field($model, 'unit')
-        ->dropDownList(\frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm::getUnitList(),['prompt' => 'не указано'])
+        ->dropDownList(createStoreEntryForm::getUnitList(),['prompt' => 'не указано'])
         ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
     ?>
 
     <?= $form->field($model, 'perishable')
         ->radioList($model->getPerishableList()) ?>
+
+    <div class="form-group required">
+        <?php echo '<label class="control-label"><b>Дата выработки продукции</b></label>';
+        echo $form->field($productionDate, 'first_date')->widget(DateTimePicker::classname(), [
+            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата', 'id' => 'productionDate-first_date'],
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'mm.dd.yyyy hh:ii'
+            ]
+        ])->label(false);
+        echo $form->field($productionDate, 'second_date')->widget(DateTimePicker::classname(), [
+            'options' => ['placeholder' => 'Конечная дата в интервале', 'id' => 'productionDate-second_date'],
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'mm.dd.yyyy hh:ii'
+            ]
+        ])->label(false);
+        ?>
+    </div>
+    <div class="form-group required">
+        <?php echo '<label class="control-label"><b>Дата окончания срока годности продукции</b></label>';
+        echo $form->field($expiryDate, 'first_date')->widget(DateTimePicker::classname(), [
+            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата', 'id' => 'expiryDate-first_date'],
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'mm.dd.yyyy hh:ii'
+            ]
+        ])->label(false);
+        echo $form->field($expiryDate, 'second_date')->widget(DateTimePicker::classname(), [
+            'options' => ['placeholder' => 'Конечная дата в интервале', 'id' => 'expiryDate-first_date'],
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'mm.dd.yyyy hh:ii'
+            ]
+        ])->label(false);
+        ?>
+    </div>
+    <h4>Сведения о происхождении продукции: </h4>
+    <?=
+    $form->field($model, 'country')
+        ->dropDownList(createStoreEntryForm::getCountryList(),['prompt' => 'не указано']);
+    ?>
+    <?php
+    $url = \yii\helpers\Url::to(['producers-list']);
+    $desc = '';//empty($model->city) ? '' : City::findOne($model->city)->description;
+
+    echo $form->field($model, 'producer')->widget(Select2::classname(), [
+        'initValueText' => $desc, // set the initial display text
+        'options' => ['placeholder' => 'Укажите название предприятия для поиска  ...'],
+        'pluginOptions' => [
+            'allowClear' => true,
+            'minimumInputLength' => 3,
+            'language' => [
+                'errorLoading' => new JsExpression("function () { return 'Загрузка результатов...'; }"),
+            ],
+            'ajax' => [
+                'url' => $url,
+                'dataType' => 'json',
+                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+            ],
+            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+            /*'templateResult' => new JsExpression('function(city) { return producer.text; }'),
+            'templateSelection' => new JsExpression('function (city) { return producer.text; }'),*/
+        ],
+    ]);
+    ?>
     <div class="form-group">
         <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
     </div>
@@ -93,6 +163,19 @@ $("document").ready(function(){
                     });
      }); 
  });      
+
+$("document").ready(function(){
+        $("#StockEntryForm").on("change", "#createstoreentryform-subproduct", function() {
+             var form = $("#StockEntryForm");
+            $.post(
+                form.attr("action"),
+                    form.serialize()
+                    )
+                    .done(function(result) {
+                        form.replaceWith(result);
+                    });
+     }); 
+ });    
 
 $("document").ready(function(){
         $("#StockEntryForm").on("change", "#createstoreentryform-subproduct", function() {

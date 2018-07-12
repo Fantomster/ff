@@ -6,9 +6,11 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
+use frontend\modules\clientintegr\modules\merc\models\dateForm;
 use Yii;
 
 class StockEntryController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -81,10 +83,12 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     public function actionCreate()
     {
         $model = new createStoreEntryForm();
-        if ($model->load(Yii::$app->request->post())) {
+        $productionDate = new dateForm();
+        $expiryDate = new dateForm();
+        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post())) {
 
         }
-        $params = ['model' => $model];
+        $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('add-stock-enrty/_mainForm', $params);
         } else {
@@ -107,6 +111,45 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         {
            $transaction->rollback();
         }
+    }
+
+    public function actionProducersList($q = null) {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+        if (!is_null($q)) {
+            $res = [];
+           $list = cerberApi::getInstance()->getForeignEnterpriseList ($q);
+            if(isset($list->enterpriseList->enterprise)) {
+                $res = [];
+                foreach ($list->enterpriseList->enterprise as $item) {
+                    if(($item->last) && ($item->active))
+                    $res[] = ['id' => $item->guid,
+                        'text' => $item->name.'('.
+                            $item->address->addressView
+                            .')'
+                    ];
+                }
+            }
+            $list = cerberApi::getInstance()->getRussianEnterpriseList ($q);
+            if(isset($list->enterpriseList->enterprise)) {
+
+                foreach ($list->enterpriseList->enterprise as $item) {
+                    if(($item->last) && ($item->active))
+                    $res[] = ['id' => $item->guid,
+                        'text' => $item->name.'('.
+                            $item->address->addressView
+                            .')'
+                    ];
+                }
+            }
+            if(count($res) > 0)
+                $out['results'] = $res;
+
+        }
+       /* elseif ($id > 0) {
+            $out['results'] = ['id' => $id, 'text' => City::find($id)->name];
+        }*/
+        return $out;
     }
 
     private function getErrorText($e)

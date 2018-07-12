@@ -43,6 +43,8 @@ use yii\widgets\Breadcrumbs;
                         <div class="dict-agent-form">
                         <?php echo $this->render('_mainForm', [
                             'model' => $model,
+                            'productionDate' => $productionDate,
+                            'expiryDate' => $expiryDate
                         ]) ?>
                         </div>
                     </div>

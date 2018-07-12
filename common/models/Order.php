@@ -293,17 +293,20 @@ class Order extends \yii\db\ActiveRecord
         return $statusList[$this->status];
     }
 
-    public static function getStatusList()
+    public static function getStatusList($short = false)
     {
-        return [
+        $result = [
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru' => 'Ожидает подтверждения поставщика']),
             Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
             Order::STATUS_PROCESSING => Yii::t('app', 'common.models.in_process_two', ['ru' => 'Выполняется']),
             Order::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
             Order::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
             Order::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
-            Order::STATUS_FORMING => Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']),
         ];
+        if (!$short) {
+            $result[Order::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);
+        }
+        return $result;
     }
 
     public static function getStatusColors()

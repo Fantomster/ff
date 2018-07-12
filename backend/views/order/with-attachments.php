@@ -8,7 +8,7 @@ $columns = [
         'format' => 'raw',
         'attribute' => 'order_id',
         'value' => function ($data) {
-            return Html::a($data->order_id, ['order/edit', 'id' => $data->order_id]);
+            return Html::a($data->order_id, ['order/edit', 'id' => $data->order_id], ['data-pjax' => 0]);
         },
         'label' => 'ID заказа',
         'group' => true,
@@ -24,6 +24,7 @@ $columns = [
     ],
     [
         'format' => 'raw',
+        'filter' => common\models\User::getMixManagersList(),
         'attribute' => 'assigned_to',
         'value' => function ($data) {
             return isset($data->assignment) ? $data->assignment->assigned_to : null;
@@ -39,6 +40,10 @@ $columns = [
         'group' => true,
     ],
 ];
+        
+$this->registerCss('
+        td{vertical-align:middle !important;}
+        ');        
 ?>
 
 <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderList', 'timeout' => 5000]); ?> 

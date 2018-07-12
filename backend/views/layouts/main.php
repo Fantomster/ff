@@ -181,6 +181,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             'label' => 'Заказы и заявки',
                             'items' => [
                                 ['label' => 'Заказы', 'url' => ['/order/index']],
+                                ['label' => 'Заказы с прикрепленными файлами', 'url' => ['/order/with-attachments']],
                                 ['label' => 'Заявки', 'url' => ['/request/index']],
                             ],
                         ],

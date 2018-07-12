@@ -96,6 +96,7 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
 
         $query->andFilterWhere([
             "$orderTable.id" => $this->order_id,
+            "$assignmentTable.assigned_to" => $this->assigned_to,
             ]);
         
         return $dataProvider;

@@ -41,6 +41,10 @@ class VendorWebApi extends \api_web\components\WebApi
         $vendorID = $post['user']['vendor_id'] ?? null;
         $check = RestaurantChecker::checkEmail($email);
 
+        if ($check['eventType'] == 7) {
+            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+        }
+
         if ($check['eventType'] != 5) {
             $user = User::find()->where(['email' => $email])->one();
         } else {

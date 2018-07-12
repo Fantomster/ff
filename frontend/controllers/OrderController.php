@@ -2145,7 +2145,7 @@ class OrderController extends DefaultController {
 
         $order = $position->order;
         if ($order->status == 6)
-            throw new BadRequestHttpException('Access denided');
+            throw new BadRequestHttpException('Access denied');
 
         if (!$position->save(false))
             throw new BadRequestHttpException('SaveError');

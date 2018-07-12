@@ -107,7 +107,7 @@ class User extends \amnah\yii2\user\models\User {
         $this->language = Yii::$app->language;
         return $result;
     }
-    
+
     /**
      * Confirm user email
      * @param string $newEmail
@@ -133,7 +133,7 @@ class User extends \amnah\yii2\user\models\User {
         $this->save(false, ["email", "status", "first_logged_in_at"]);
         return $success;
     }
-    
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
@@ -178,15 +178,15 @@ class User extends \amnah\yii2\user\models\User {
                 $userId = $this->id;
                 $organizationId = $this->organization_id;
                 $clients = \common\models\RelationSuppRest::findAll(['supp_org_id' => $organizationId]);
-                    if ($clients){
-                        foreach ($clients as $client){
-                            $clientId = $client->rest_org_id;
-                            $managerAssociate = new ManagerAssociate();
-                            $managerAssociate->manager_id = $userId;
-                            $managerAssociate->organization_id = $clientId;
-                            $managerAssociate->save();
-                        }
+                if ($clients){
+                    foreach ($clients as $client){
+                        $clientId = $client->rest_org_id;
+                        $managerAssociate = new ManagerAssociate();
+                        $managerAssociate->manager_id = $userId;
+                        $managerAssociate->organization_id = $clientId;
+                        $managerAssociate->save();
                     }
+                }
 
             }
         }
@@ -303,36 +303,45 @@ class User extends \amnah\yii2\user\models\User {
 
     /**
      * @param null $org_id
+     * @param boolean $isFranchisee
      * @return EmailNotification|null|static
      */
-    public function getEmailNotification($org_id = null)
+    public function getEmailNotification($org_id = null, bool $isFranchisee = false)
     {
-        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
-        if ($rel === null) {
-            return EmailNotification::emptyInstance();
-        }
-        $res = EmailNotification::findOne(['rel_user_org_id' => $rel->id]);
-        return ($res != null) ? $res : EmailNotification::emptyInstance();
+        return $this->getNotifications('common\models\notifications\EmailNotification', $org_id, $isFranchisee);
     }
 
     /**
      * @param null $org_id
      * @return SmsNotification|null|static
      */
-    public function getSmsNotification($org_id = null)
+    public function getSmsNotification($org_id = null, bool $isFranchisee = false)
+    {
+        return $this->getNotifications('common\models\notifications\SmsNotification', $org_id, $isFranchisee);
+    }
+
+
+    private function getNotifications(String $className, $org_id = null, bool $isFranchisee = false)
     {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
-        if ($rel === null)
-            return SmsNotification::emptyInstance();
-        $res = SmsNotification::findOne(['rel_user_org_id' => $rel->id]);
-        return ($res != null) ? $res : SmsNotification::emptyInstance();
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);;
+        if ($rel === null && !$isFranchisee) {
+            return $className::emptyInstance();
+        }
+        if($rel === null && $isFranchisee){
+            $rel = new RelationUserOrganization();
+            $rel->user_id = $this->id;
+            $rel->organization_id = $org_id;
+            $rel->role_id = $this->role_id;
+            $rel->save();
+        }
+        $res = $className::findOne(['rel_user_org_id' => $rel->id]);
+        return ($res != null) ? $res : $className::emptyInstance();
     }
 
     /**
      * Check if user account is active
-     * 
+     *
      * @return bool
      */
     public function isActive() {
@@ -358,9 +367,9 @@ class User extends \amnah\yii2\user\models\User {
         $email = $vendor->email;
         $subject = "Приглашение на MixCart";
         $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -384,9 +393,9 @@ class User extends \amnah\yii2\user\models\User {
         $email = $client->email;
         $subject = Yii::t('app', 'common.models.invitation', ['ru'=>"Приглашение на MixCart"]);
         $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -435,9 +444,9 @@ class User extends \amnah\yii2\user\models\User {
         $we = $this->organization->name;
         $subject = Yii::t('app', 'common.models.invitation_two', ['ru'=>"Приглашение на MixCart"]);
         $result = $mailer->compose('friendInvite', compact("subject", "we"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -463,9 +472,9 @@ class User extends \amnah\yii2\user\models\User {
         $user = $this;
         $subject = Yii::t('app', 'common.models.welcome', ['ru'=>"Добро пожаловать на  MixCart"]);
         $result = $mailer->compose('welcome', compact("subject", "type", "name", "user"))
-                ->setTo($this->email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($this->email)
+            ->setSubject($subject)
+            ->send();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
 //            \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this);
@@ -495,9 +504,9 @@ class User extends \amnah\yii2\user\models\User {
         $email = $user->email;
         $subject = Yii::t('app', 'common.models.confirm', ['ru'=>"Подтвердите аккаунт на MixCart"]);
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -529,9 +538,9 @@ class User extends \amnah\yii2\user\models\User {
         $subject = Yii::$app->id . " - " . Yii::t("app", 'common.models.user.confirm.', ['ru'=>"Подтверждение Email"]);
 
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -850,7 +859,7 @@ class User extends \amnah\yii2\user\models\User {
         self::createRelationUserOrganization($userID, $organizationID, $roleID);
         return true;
     }
-	
+
     /**
      * Список организаций доступных для пользователя
      * @return array
@@ -962,7 +971,7 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->save();
         }
     }
-    
+
     public function setNotifications() {
         $toBeSet = [
             'order_created' => 1,
@@ -984,5 +993,15 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->load(['SmsNotification' => $toBeSet]);
             $smsNotification->save();
         }
+    }
+    
+    public static function getMixManagersList($empty = false) {
+        $managers = self::find()
+                ->select(['user.id', 'profile.full_name'])
+                ->joinWith('profile')
+                ->where(['user.role_id' => Role::ROLE_FKEEPER_MANAGER])
+                ->asArray()
+                ->all();
+        return \yii\helpers\ArrayHelper::map($managers, 'id', 'full_name');
     }
 }

@@ -925,6 +925,18 @@ class Organization extends \yii\db\ActiveRecord {
                         ->all();
     }
 
+
+    public function getRelatedFranchisee() {
+        $usrTable = User::tableName();
+        $relationTable = RelationUserOrganization::tableName();
+
+        return User::find()
+            ->leftJoin($relationTable, "$relationTable.user_id = $usrTable.id")
+            ->where(["$relationTable.organization_id" => $this->id, "$relationTable.role_id" => Role::ROLE_FRANCHISEE_OWNER])
+            ->all();
+    }
+
+
     public function hasActiveUsers() {
         return User::find()->where(['organization_id' => $this->id, 'status' => User::STATUS_ACTIVE])->count();
     }
@@ -1569,9 +1581,9 @@ class Organization extends \yii\db\ActiveRecord {
 
     public static function getStatusList() {
         return [
-            self::STATUS_WHITELISTED => 'Разрешено',
-            self::STATUS_BLACKISTED => 'Заблокировано',
-            self::STATUS_UNSORTED => 'Неотсортировано',
+            self::STATUS_WHITELISTED => 'Работает',
+            self::STATUS_BLACKISTED => 'Отключен',
+            self::STATUS_UNSORTED => 'Неопределен',
         ];
     }
 

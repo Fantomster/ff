@@ -4,6 +4,7 @@ namespace api_web\modules\integration\modules\iiko\models;
 
 use api\common\models\iiko\iikoWaybillData;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
+use common\models\Journal;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use api\common\models\iiko\iikoAgent;

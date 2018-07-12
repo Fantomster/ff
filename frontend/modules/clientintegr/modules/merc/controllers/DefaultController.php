@@ -251,6 +251,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     private function getErrorText($e)
     {
+        Yii::error($e->getMessage());
         if ($e->getCode() == 600)
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №".$e->getMessage().". Если ошибка повторяется обратитесь в техническую службу.";
         else

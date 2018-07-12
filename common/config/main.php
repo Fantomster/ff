@@ -218,6 +218,7 @@ return [
             'port' => 5672,        #port - номер порта сервиса, по умолчанию - 5672
             'user' => 'login',        #user - имя пользователя для соединения с сервером
             'password' => 'password',
+            'queue_prefix' => 'prod_',
             'queue' => 'empty',
             'exchange' => 'router'
         ],

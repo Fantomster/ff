@@ -1581,9 +1581,9 @@ class Organization extends \yii\db\ActiveRecord {
 
     public static function getStatusList() {
         return [
-            self::STATUS_WHITELISTED => 'Разрешено',
-            self::STATUS_BLACKISTED => 'Заблокировано',
-            self::STATUS_UNSORTED => 'Неотсортировано',
+            self::STATUS_WHITELISTED => 'Работает',
+            self::STATUS_BLACKISTED => 'Отключен',
+            self::STATUS_UNSORTED => 'Неопределен',
         ];
     }
 

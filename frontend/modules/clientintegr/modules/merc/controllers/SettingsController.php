@@ -76,14 +76,14 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             if($dicConst->denom == 'enterprise_guid')
             {
                 $list = cerberApi::getInstance()->getActivityLocationList();
-
-                foreach ($list->activityLocationList->location as $item)
-                {
-                    if(isset($item->enterprise)) {
-                        $org[] = [
-                            'value' => $item->enterprise->guid,
-                            'label' => $item->enterprise->name .
-                                ' (' . $item->enterprise->address->addressView . ')'];
+                if(isset($list->activityLocationList->location)) {
+                    foreach ($list->activityLocationList->location as $item) {
+                        if (isset($item->enterprise)) {
+                            $org[] = [
+                                'value' => $item->enterprise->guid,
+                                'label' => $item->enterprise->name .
+                                    ' (' . $item->enterprise->address->addressView . ')'];
+                        }
                     }
                 }
                 if(count($org) == 0)

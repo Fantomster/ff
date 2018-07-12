@@ -994,4 +994,14 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->save();
         }
     }
+    
+    public static function getMixManagersList($empty = false) {
+        $managers = self::find()
+                ->select(['user.id', 'profile.full_name'])
+                ->joinWith('profile')
+                ->where(['user.role_id' => Role::ROLE_FKEEPER_MANAGER])
+                ->asArray()
+                ->all();
+        return \yii\helpers\ArrayHelper::map($managers, 'id', 'full_name');
+    }
 }

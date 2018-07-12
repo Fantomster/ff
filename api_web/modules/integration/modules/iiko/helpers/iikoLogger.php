@@ -147,8 +147,8 @@ class iikoLogger
      */
     private static function saveToFile()
     {
-        $row = \Yii::$app->db_api->createCommand()->insert(self::$tableName, self::$row[self::$guide])->getRawSql() . ';' . PHP_EOL;
-        file_put_contents(Yii::getAlias('@runtime') . '/iiko_log.log', $row, FILE_APPEND);
+        //$row = \Yii::$app->db_api->createCommand()->insert(self::$tableName, self::$row[self::$guide])->getRawSql() . ';' . PHP_EOL;
+        //file_put_contents(Yii::getAlias('@runtime') . '/iiko_log.log', $row, FILE_APPEND);
         self::$instance = null;
     }
 
@@ -157,7 +157,7 @@ class iikoLogger
      */
     public static function save()
     {
-        $file = Yii::getAlias('@runtime') . '/iiko_log.log';
+        /*$file = Yii::getAlias('@runtime') . '/iiko_log.log';
         if (file_exists($file)) {
             $sql = file($file);
             if (!empty($sql)) {
@@ -168,6 +168,6 @@ class iikoLogger
                 \Yii::$app->db_api->createCommand($sql_raw)->execute();
             }
             unlink($file);
-        }
+        }*/
     }
 }

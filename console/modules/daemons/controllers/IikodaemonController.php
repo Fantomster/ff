@@ -16,7 +16,7 @@ class IikodaemonController extends AbstractDaemonController
      */
     public function getQueueName()
     {
-        return 'log_service_' . iikoService::getServiceId();
+        return (\Yii::$app->rabbit->queue_prefix ?? '') . iikoLogger::getNameQueue();
     }
 
     /**

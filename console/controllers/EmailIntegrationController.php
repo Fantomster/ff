@@ -71,6 +71,7 @@ class EmailIntegrationController extends Controller
         $temp_file[29] = '/app/console/runtime/testnac29.xls';
         $temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
         $temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
+        $temp_file[32] = '/app/console/runtime/id7905.xlsx';
 
 
         $i =1;
@@ -102,8 +103,8 @@ class EmailIntegrationController extends Controller
             print_r("=================================".PHP_EOL);
             //print_r($result[$i-1]['invoice']['rows']);
 
-            file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
-            file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
+            //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
+            //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
             $i++;
         }
     }
@@ -145,7 +146,7 @@ class EmailIntegrationController extends Controller
                     if (empty($email['attachment'])) {
                         continue;
                     }
-                    //Получаем только одходящие нам вложения из емайла
+                    //Получаем только подходящие нам вложения из емэйла
                     if ($files = $this->getAttachments($email, $setting)) {
                         foreach ($files as $file) {
                             $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
@@ -236,9 +237,9 @@ class EmailIntegrationController extends Controller
         ];
 
         foreach ($email['attachment'] as $name_file => $file) {
-            //Узнаме тип вложения
+            //Узнаём тип вложения
             $mime_type = array_keys($file)[0];
-            //Собираем только разрешенные вложения
+            //Собираем только разрешённые вложения
             if (!in_array(trim($mime_type), $allow_mime_types)) {
                 //echo '- Missed File MIME-TYPE:' . $mime_type . PHP_EOL;
                 continue;

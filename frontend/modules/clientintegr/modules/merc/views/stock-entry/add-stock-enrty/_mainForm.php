@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\jui\AutoComplete;
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
@@ -29,7 +30,17 @@ use yii\bootstrap\ActiveForm;
         ->dropDownList($model->getSubProductList(),['prompt' => 'не указано'])
     ?>
 
-    <?= $form->field($model, 'product_name')->textInput(['maxlength' => true]); ?>
+    <?php $model->getProductName() ?>
+    <?= $form->field($model, 'product_name')->widget(
+    AutoComplete::className(), [
+    'clientOptions' => [
+    'source' => $model->getProductName(),
+    ],
+    'options'=>[
+    'class'=>'form-control'
+    ]
+    ])
+    ?>
 
     <?= $form->field($model, 'volume')->textInput(['maxlength' => true]); ?>
 
@@ -38,6 +49,9 @@ use yii\bootstrap\ActiveForm;
         ->dropDownList(\frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm::getUnitList(),['prompt' => 'не указано'])
         ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
     ?>
+
+    <?= $form->field($model, 'perishable')
+        ->radioList($model->getPerishableList()) ?>
     <div class="form-group">
         <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
     </div>
@@ -48,6 +62,11 @@ $customJs = <<< JS
  $("document").ready(function(){
         $("#StockEntryForm").on("change", "#createstoreentryform-producttype", function() {
              var form = $("#StockEntryForm");
+             if ($(this).val() == "")
+                 {
+                     $("#createstoreentryform-product").val("");
+                     $("#createstoreentryform-subproduct").val("");
+                 }
             $.post(
                 form.attr("action"),
                     form.serialize()
@@ -61,6 +80,10 @@ $customJs = <<< JS
 $("document").ready(function(){
         $("#StockEntryForm").on("change", "#createstoreentryform-product", function() {
              var form = $("#StockEntryForm");
+             if ($(this).val() == "")
+                 {
+                     $("#createstoreentryform-subproduct").val("");
+                 }
             $.post(
                 form.attr("action"),
                     form.serialize()
@@ -69,7 +92,20 @@ $("document").ready(function(){
                         form.replaceWith(result);
                     });
      }); 
- });        
+ });      
+
+$("document").ready(function(){
+        $("#StockEntryForm").on("change", "#createstoreentryform-subproduct", function() {
+             var form = $("#StockEntryForm");
+            $.post(
+                form.attr("action"),
+                    form.serialize()
+                    )
+                    .done(function(result) {
+                        form.replaceWith(result);
+                    });
+     }); 
+ });     
  
   
  

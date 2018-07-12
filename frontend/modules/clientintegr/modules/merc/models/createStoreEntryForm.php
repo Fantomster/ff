@@ -64,6 +64,14 @@ class createStoreEntryForm extends Model {
         ];
     }
 
+    public function getPerishableList()
+    {
+        return [
+            true => 'скоропортящаяся продукция ',
+            false => 'не скоропортящаяся продукция '
+        ];
+    }
+
     public static function getOwner()
     {
         $ent_guid = mercDicconst::getSetting('enterprise_guid');
@@ -125,7 +133,27 @@ class createStoreEntryForm extends Model {
         foreach ($list->subProductList->subProduct as $item)
         {
             if($item->last)
-                $res[$item->guid] = $item->name;
+                $res[$item->guid] = $item->name. " (".$item->code.")";
+        }
+        return $res;
+    }
+
+    public function getProductName()
+    {
+        if(empty($this->productType) || empty($this->product) || empty($this->subProduct))
+            return "";
+        $list = productApi::getInstance()->getProductItemList  ($this->productType, $this->product, $this->subProduct);
+
+        if(!isset($list->productItemList->productItem))
+            return [];
+
+        $res = [];
+        foreach ($list->productItemList->productItem as $item)
+        {
+            if($item->last)
+                $res[] = ['value' => $item->name,
+                    'label' => $item->name
+                    ];
         }
         return $res;
     }

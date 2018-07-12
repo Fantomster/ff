@@ -204,12 +204,14 @@ class ProductItem{
     var $isPublic;//boolean
 }
 class Product{
+    var $guid;//UUID
     var $name;//String255
     var $code;//String255
     var $englishName;//String255
     var $productType;//ProductType
 }
 class SubProduct{
+    var $guid;//UUID
     var $name;//String255
     var $code;//String255
     var $englishName;//String255

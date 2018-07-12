@@ -9,10 +9,16 @@
 namespace frontend\modules\clientintegr\modules\merc\models;
 
 
+use api\common\models\merc\mercDicconst;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\getForeignEnterpriseChangesListRequest;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
 
 class createStoreEntryForm extends Model {
 
+    public $batchID;
     public $productType;
     public $product;
     public $subProduct;
@@ -33,7 +39,7 @@ class createStoreEntryForm extends Model {
             [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer','producer_role','producer_product_name'], 'required'],
             [['productType','perishable'],'integer'],
             [['volume'], 'double'],
-            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name'], 'string', 'max' => 255],
+            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID'], 'string', 'max' => 255],
         ];
     }
 
@@ -43,6 +49,7 @@ class createStoreEntryForm extends Model {
     public function attributeLabels()
     {
         return [
+            'batchID' => 'Номер производственной партии',
             'productType' => 'Тип продукции',
             'product' => 'Продукция',
             'subProduct' => 'Вид продукции',
@@ -55,6 +62,72 @@ class createStoreEntryForm extends Model {
             'producer_role' => 'Роль предприятия-производителя продукции',
             'producer_product_name' => 'Наименование продукции'
         ];
+    }
+
+    public static function getOwner()
+    {
+        $ent_guid = mercDicconst::getSetting('enterprise_guid');
+        $bis_guid = mercDicconst::getSetting('issuer_id');
+        $business = cerberApi::getInstance()->getBusinessEntityByGuid($bis_guid);
+        $enterprise = cerberApi::getInstance()->getEnterpriseByGuid($ent_guid);
+        $enterprise = $enterprise->enterprise;
+        $business = $business->businessEntity;
+
+        return [ $enterprise->name.'('.
+                    $enterprise->address->addressView
+                    .')',
+                $business->name.', ИНН:'.$business->inn,
+        ];
+    }
+
+    public static function getUnitList()
+    {
+        $list = dictsApi::getInstance()->getUnitList();
+
+        $res = [];
+        foreach ($list->unitList->unit as $item)
+        {
+            if($item->last)
+                $res[$item->uuid] = $item->name;
+        }
+        return $res;
+    }
+
+    public function getProductList()
+    {
+        if(empty($this->productType))
+            return [];
+
+       $list = productApi::getInstance()->getProductByTypeList($this->productType);
+
+        if(!isset($list->productList->product))
+            return [];
+
+        $res = [];
+        foreach ($list->productList->product as $item)
+        {
+            if($item->last)
+                $res[$item->guid] = $item->name;
+        }
+        return $res;
+    }
+
+    public function getSubProductList()
+    {
+        if(empty($this->product))
+            return [];
+        $list = productApi::getInstance()->getSubProductByProductList($this->product);
+
+        if(!isset($list->subProductList->subProduct))
+            return [];
+
+        $res = [];
+        foreach ($list->subProductList->subProduct as $item)
+        {
+            if($item->last)
+                $res[$item->guid] = $item->name;
+        }
+        return $res;
     }
 
 }

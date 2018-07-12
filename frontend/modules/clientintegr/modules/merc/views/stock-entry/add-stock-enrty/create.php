@@ -33,15 +33,16 @@ use yii\widgets\Breadcrumbs;
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
                         <h4>Сведения об отправителе: </h4>
+                        <?php $owner = \frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm::getOwner(); ?>
                         <table id="w1" class="table table-striped table-bordered detail-view">
                             <tbody>
-                                <tr><th>Название предприятия</th><td><?= $owner['company']?></td></tr>
-                                <tr><th>Хозяйствующий субъект (владелец продукции):</th><td><?= $owner['owner']?></td></tr>
+                                <tr><th>Название предприятия</th><td><?= $owner[0]?></td></tr>
+                                <tr><th>Хозяйствующий субъект (владелец продукции):</th><td><?= $owner[1]?></td></tr>
                             </tbody>
                         </table>
                         <div class="dict-agent-form">
                         <?php echo $this->render('_mainForm', [
-                            'model' => $mainForm,
+                            'model' => $model,
                         ]) ?>
                         </div>
                     </div>

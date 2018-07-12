@@ -1,8 +1,6 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use common\models\User;
-use yii\jui\AutoComplete;
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
@@ -11,38 +9,81 @@ use yii\jui\AutoComplete;
 ?>
 
 <div class="dict-agent-form">
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']); ?>
     <?php echo $form->errorSummary($model); ?>
-    <?php
-    switch ($dicConst->type) {
-        case \api\common\models\merc\mercDicconst::TYPE_DROP :
-            if ($dicConst->denom === 'enterprise_guid') {
-                echo $form->field($model, 'value')->widget(
-                    AutoComplete::className(), [
-                    'clientOptions' => [
-                        'source' => $org_list,
-                    ],
-                    'options'=>[
-                        'class'=>'form-control'
-                    ]
-                ])->label(false);
-                //echo $form->field($model, 'value')->dropDownList($org_list);
-            }
-        break;
-        case \api\common\models\merc\mercDicconst::TYPE_PASSWORD:
-            echo $form->field($model, 'value')->passwordInput(['maxlength' => true])->label(false);
-        break;
-        case \api\common\models\merc\mercDicconst::TYPE_CHECKBOX:
-            echo $form->field($model, 'value')->checkbox(['label' => 'Только ручная загрузка ВСД'])->label(false);
-        break;
-        default:
-            echo $form->field($model, 'value')->textInput(['maxlength' => true])->label(false);
-    }
+    <h4>Информация о продукции: </h4>
+    <?= $form->field($model, 'batchID')->textInput(['maxlength' => true]); ?>
+
+    <?=
+    $form->field($model, 'productType')
+        ->dropDownList(\api\common\models\merc\MercVsd::$product_types,['prompt' => 'не указано']);
+    ?>
+
+    <?=
+    $form->field($model, 'product')
+        ->dropDownList($model->getProductList(),['prompt' => 'не указано'])
+    ?>
+
+    <?=
+    $form->field($model, 'subProduct')
+        ->dropDownList($model->getSubProductList(),['prompt' => 'не указано'])
+    ?>
+
+    <?= $form->field($model, 'product_name')->textInput(['maxlength' => true]); ?>
+
+    <?= $form->field($model, 'volume')->textInput(['maxlength' => true]); ?>
+
+    <?=
+    $form->field($model, 'unit')
+        ->dropDownList(\frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm::getUnitList(),['prompt' => 'не указано'])
+        ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
     ?>
     <div class="form-group">
-        <?php echo Html::submitButton($model->isNewRecord ? Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']) : Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
-        <?= Html::a(Yii::t('message', 'Close'), ['index'], ['class' => 'btn btn-success btn-export']);?>
+        <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>
+<?php
+$customJs = <<< JS
+ $("document").ready(function(){
+        $("#StockEntryForm").on("change", "#createstoreentryform-producttype", function() {
+             var form = $("#StockEntryForm");
+            $.post(
+                form.attr("action"),
+                    form.serialize()
+                    )
+                    .done(function(result) {
+                        form.replaceWith(result);
+                    });
+     }); 
+ });    
+
+$("document").ready(function(){
+        $("#StockEntryForm").on("change", "#createstoreentryform-product", function() {
+             var form = $("#StockEntryForm");
+            $.post(
+                form.attr("action"),
+                    form.serialize()
+                    )
+                    .done(function(result) {
+                        form.replaceWith(result);
+                    });
+     }); 
+ });        
+ 
+  
+ 
+ /*$(document).on("click", ".clear_filters", function () {
+           $('#product_name').val(''); 
+           $('#statusFilter').val(''); 
+           $('#typeFilter').val('1');
+           $('#dateFrom').val('');
+           $('#dateTo').val('');
+           $('#recipientFilter').val('');
+           $("#search_form").submit();
+    });*/
+JS;
+$this->registerJs($customJs, $this::POS_READY);
+?>
+
 

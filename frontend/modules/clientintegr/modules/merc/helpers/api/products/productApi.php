@@ -47,4 +47,22 @@ class productApi extends baseApi
             $cache->add('subProduct_'.$GUID, $result, 60*60*24);
         return $result;
     }
+
+    public function getProductByTypeList ($type)
+    {
+        $client = $this->getSoapClient('product');
+        $request = new getProductByTypeListRequest();
+        $request->productType = $type;
+        $result = $client->GetProductByTypeList($request);
+        return $result;
+    }
+
+    public function getSubProductByProductList ($guid)
+    {
+        $client = $this->getSoapClient('product');
+        $request = new getSubProductByProductListRequest();
+        $request->productGuid = $guid;
+        $result = $client->GetSubProductByProductList ($request);
+        return $result;
+    }
 }

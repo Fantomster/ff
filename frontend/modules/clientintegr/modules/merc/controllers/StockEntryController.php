@@ -8,6 +8,7 @@ use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use Yii;
 
 class StockEntryController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -74,6 +75,20 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             return $this->renderAjax('_ajaxView', $params);
         } else {
             return $this->render('view', $params);
+        }
+    }
+
+    public function actionCreate()
+    {
+        $model = new createStoreEntryForm();
+        if ($model->load(Yii::$app->request->post())) {
+
+        }
+        $params = ['model' => $model];
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('add-stock-enrty/_mainForm', $params);
+        } else {
+            return $this->render('add-stock-enrty/create', $params);
         }
     }
 

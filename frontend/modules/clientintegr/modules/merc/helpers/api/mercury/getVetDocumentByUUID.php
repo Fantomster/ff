@@ -284,7 +284,7 @@ class getVetDocumentByUUID extends Model
         $this->cargoReloadingPointList = isset($doc->certifiedConsignment->cargoReloadingPointList) ? $doc->certifiedConsignment->cargoReloadingPointList : null;
 
         if(($doc->referencedDocument->type >= 1) && ($doc->referencedDocument->type <= 5)) { 
-            $this->waybillSeries = $doc->referencedDocument->issueSeries;
+            $this->waybillSeries = isset($doc->referencedDocument->issueSeries) ? $doc->referencedDocument->issueSeries : null;
             $this->waybillNumber = $doc->referencedDocument->issueNumber;
             $this->waybillDate = $doc->referencedDocument->issueDate;
         }

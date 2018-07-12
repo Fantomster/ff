@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EComIntegration;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -429,6 +430,9 @@ class Order extends \yii\db\ActiveRecord
                 $recipients = array_merge($recipients, $associatedManagers);
             }
         }
+        $franchiseeClientsManagers = $this->client->getRelatedFranchisee();
+        $franchiseeVendorsManagers = $this->vendor->getRelatedFranchisee();
+        $recipients = array_merge($recipients, $franchiseeClientsManagers, $franchiseeVendorsManagers);
 
         //Получаем дополнительные Емайлы для рассылки
         //Для заказчика

@@ -101,7 +101,7 @@ class VetDocumentDone extends Component
 
         $accompanyingForms = new ConsignmentDocumentList();
         if(isset($this->doc->referencedDocument))
-            if($this->doc->referencedDocument->type == 1) {
+            if(($this->doc->referencedDocument->type >= 1) && ($this->doc->referencedDocument->type <= 5)) {
                 $accompanyingForms->waybill = new Waybill();
                 $accompanyingForms->waybill->issueSeries = $this->doc->referencedDocument->issueSeries;
                 $accompanyingForms->waybill->issueNumber = $this->doc->referencedDocument->issueNumber;

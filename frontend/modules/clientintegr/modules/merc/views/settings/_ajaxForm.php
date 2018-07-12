@@ -28,6 +28,15 @@ $this->registerCss(".ui-autocomplete {
     <h4 class="modal-title"><?= Yii::t('message', 'frontend.client.integration.mercury.edit_settings', ['ru'=>'Редактирование настройки']) ?>: <strong> <?= $dicConst->comment?></strong></h4>
 </div>
 <div class="modal-body">
+    <?php if (Yii::$app->session->hasFlash('error')): ?>
+        <div class="alert alert-info alert-dismissable">
+            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <h4>
+                <i class="icon fa fa-exclamation-circle"></i>Внимание!
+            </h4>
+            <?= Yii::$app->session->getFlash('error') ?>
+        </div>
+    <?php endif; ?>
     <?php echo $form->errorSummary($model); ?>
     <?php
     switch ($dicConst->type) {

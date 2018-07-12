@@ -147,9 +147,9 @@ class iikoApi
      */
     private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
     {
-        $logger = iikoLogger::getInstance();
-        $logger::setOperation($url);
-        $logger::request($params);
+        $logger = new iikoLogger();
+        $logger->setOperation($url);
+        $logger->request($params);
 
         $header = ['Content-Type: application/x-www-form-urlencoded'];
         $header = ArrayHelper::merge($header, $headers);
@@ -170,11 +170,11 @@ class iikoApi
         $info = curl_getinfo($ch);
 
         if ($info['http_code'] != 200) {
-            $logger::setType('error');
-            $logger::response(['info' => $info, 'response' => $response]);
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
-        $logger::response($response);
+        $logger->response($response);
         return $response;
     }
 
@@ -188,9 +188,9 @@ class iikoApi
      */
     private function send($url, $params = [], $method = 'GET', $headers = [])
     {
-        $logger = iikoLogger::getInstance();
-        $logger::setOperation($url);
-        $logger::request($params);
+        $logger = new iikoLogger();
+        $logger->setOperation($url);
+        $logger->request($params);
 
         $header = ['Content-Type: application/x-www-form-urlencoded'];
         $header = ArrayHelper::merge($header, $headers);
@@ -221,8 +221,8 @@ class iikoApi
         }
 
         if ($info['http_code'] != 200) {
-            $logger::setType('error');
-            $logger::response(['info' => $info, 'response' => $response]);
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
 
@@ -255,12 +255,12 @@ class iikoApi
         curl_close($ch);
 
         if ($info['http_code'] != 200) {
-            $logger::setType('error');
-            $logger::response(['info' => $info, 'response' => $response]);
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
             throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
 
-        $logger::response($response);
+        $logger->response($response);
         return $response;
     }
 
@@ -286,9 +286,9 @@ class iikoApi
      */
     private function sendXml($url, $body, $headers = [])
     {
-        $logger = iikoLogger::getInstance();
-        $logger::setOperation($url);
-        $logger::request($body);
+        $logger = new iikoLogger();
+        $logger->setOperation($url);
+        $logger->request($body);
 
         $header = [
             "Content-type: application/xml",
@@ -316,12 +316,12 @@ class iikoApi
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         if ($info['http_code'] !== 200) {
-            $logger::setType('error');
-            $logger::response(['info' => $info, 'response' => $response]);
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
             return false;
         }
 
-        $logger::response($response);
+        $logger->response($response);
         return $response;
     }
 

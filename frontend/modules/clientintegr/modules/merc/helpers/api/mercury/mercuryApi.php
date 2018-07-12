@@ -54,8 +54,7 @@ class mercuryApi extends baseApi
         $appData->any['ns3:getVetDocumentListRequest'] = $vetDocList;
 
         $request->application->data = $appData;
-
-
+        try{
         $result = $client->submitApplicationRequest($request);
 
         $reuest_xml = $client->__getLastRequest();
@@ -75,7 +74,9 @@ class mercuryApi extends baseApi
         //Пишем лог
         $client = $this->getSoapClient('mercury');
         $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
-
+        } catch(\SoapFault $e) {
+            Yii::error($e->detail);
+        }
         return $result;
     }
 
@@ -111,6 +112,7 @@ class mercuryApi extends baseApi
 
         $request->application->data = $appData;
 
+        try{
         $result = $client->submitApplicationRequest($request);
 
         $reuest_xml = $client->__getLastRequest();
@@ -127,6 +129,9 @@ class mercuryApi extends baseApi
 
         //Пишем лог
         $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+        } catch(\SoapFault $e) {
+            Yii::error($e->detail);
+        }
 
         return $result;
     }
@@ -165,6 +170,7 @@ class mercuryApi extends baseApi
 
         $request->application->data = $appData;
 
+        try {
         //Делаем запрос
         $result = $client->submitApplicationRequest($request);
 
@@ -190,6 +196,9 @@ class mercuryApi extends baseApi
         } else
             $result = null;
 
+        } catch(\SoapFault $e) {
+            Yii::error($e->detail);
+        }
         return $doc;
     }
 
@@ -197,7 +206,6 @@ class mercuryApi extends baseApi
     {
         $result = null;
 
-        try {
             //Генерируем id запроса
             $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
 
@@ -226,6 +234,7 @@ class mercuryApi extends baseApi
 
             $request->application->data = $appData;
 
+            try{
             $result = $client->submitApplicationRequest($request);
 
             $reuest_xml = $client->__getLastRequest();
@@ -266,9 +275,9 @@ class mercuryApi extends baseApi
             } else
                 $result = null;
 
-        } catch (\SoapFault $e) {
-            var_dump($e->faultcode, $e->faultstring, $e->faultactor, $e->detail, $e->_name, $e->headerfault);
-        }
+            } catch(\SoapFault $e) {
+                Yii::error($e->detail);
+            }
         return $result;
     }
 
@@ -302,7 +311,12 @@ class mercuryApi extends baseApi
         $request->apiKey = $this->apiKey;
         $request->issuerId = $this->issuerID;
         $request->applicationId = $applicationId;
-        return $client->receiveApplicationResult($request);
+        try {
+        $result = $client->receiveApplicationResult($request);
+        } catch(\SoapFault $e) {
+            Yii::error($e->detail);
+        }
+        return $result;
     }
 
     public function getStockEntryList($listOptions = null)

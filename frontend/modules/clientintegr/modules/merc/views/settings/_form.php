@@ -12,6 +12,15 @@ use yii\jui\AutoComplete;
 ?>
 
 <div class="dict-agent-form">
+    <?php if (\Yii::$app->session->hasFlash('error')): ?>
+        <div class="alert alert-info alert-dismissable">
+            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <h4>
+                <i class="icon fa fa-exclamation-circle"></i>Внимание!
+            </h4>
+            <?= \Yii::$app->session->getFlash('error') ?>
+        </div>
+    <?php endif; ?>
     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; ?>
     <?php $form = ActiveForm::begin(); ?>
     <?php echo $form->errorSummary($model); ?>

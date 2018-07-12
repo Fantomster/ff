@@ -98,7 +98,7 @@ class MercController extends Controller
             $query = new \yii\db\Query;
             $query->select(['id'=>'id','text' => 'CONCAT("(ID:",`id`,") ",`name`)'])
                 ->from('organization')
-                ->where('type_id = 1')
+                ->where('type_id in (1,2)')
                 ->andwhere("id like :id or `name` like :name",[':id' => '%'.$term.'%', ':name' => '%'.$term.'%'])
                 ->limit(20);
 

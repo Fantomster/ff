@@ -23,9 +23,7 @@ abstract class AbstractDaemonController extends DaemonController
             try {
                 $channel->wait(null, true, 5);
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $timeout) {
-                $this->stderr($timeout->getMessage());
             } catch (\PhpAmqpLib\Exception\AMQPRuntimeException $runtime) {
-                $this->stderr($runtime->getMessage());
                 \Yii::error($runtime->getMessage());
             }
         }

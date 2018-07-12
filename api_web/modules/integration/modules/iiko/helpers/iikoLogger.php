@@ -69,7 +69,7 @@ class iikoLogger
         ]);
 
         \Yii::$app->get('rabbit')
-            ->setQueue('log_service_' . iikoService::getServiceId())
+            ->setQueue(self::getNameQueue())
             ->setExchange('log')
             ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
     }
@@ -124,5 +124,13 @@ class iikoLogger
     private static function get()
     {
         return self::$row[self::$guide];
+    }
+
+    /**
+     * @return string
+     */
+    public static function getNameQueue()
+    {
+        return 'log_service_' . iikoService::getServiceId();
     }
 }

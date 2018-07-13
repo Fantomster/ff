@@ -85,6 +85,7 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionClients() {
+        Url::remember();
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
@@ -320,6 +321,7 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionVendors() {
+        Url::remember();
         $searchModel = new \franchise\models\VendorSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
@@ -645,12 +647,11 @@ class OrganizationController extends DefaultController {
             $post = Yii::$app->request->post();
             $emails = $post['Email'];
             foreach ($emails as $userId => $fields){
-                $user = User::findOne(['id' => $userId]);
+                $user = User::findOne(['id' => $user->id]);
                 if(isset($post['User'][$userId]['subscribe'])){
                     $user->subscribe = $post['User'][$userId]['subscribe'];
                     $user->save();
                 }
-                $emailNotification = $user->emailNotification;
                 foreach ($fields as $key => $value){
                     $emailNotification->$key = $value;
                 }
@@ -660,14 +661,14 @@ class OrganizationController extends DefaultController {
             $sms = $post['Sms'];
             foreach ($sms as $userId => $fields){
                 $user = User::findOne(['id' => $userId]);
-                $smsNotification = $user->smsNotification;
                 foreach ($fields as $key => $value){
                     $smsNotification->$key = $value;
                 }
                 $smsNotification->save();
                 unset($user);
             }
-            return $this->redirect([Url::previous()]);
+            $url = (strpos(Url::previous(), 'clients')) ? Url::to('organization/clients') : Url::to('organization/vendors');
+            return $this->redirect([$url]);
         }
         return $this->render('notifications', compact('user','emailNotification', 'smsNotification', 'organization'));
     }

@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
+use Mpdf\Tag\U;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -599,6 +600,65 @@ class mercuryApi extends baseApi
             $result = null;
 
         return $doc;
+    }
+
+    public function resolveDiscrepancyOperation($model)
+    {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        //Формируем тело запроса
+        $report = new ResolveDiscrepancyRequest();
+        $report->localTransactionId = $localTransactionId;
+        $report->enterprise = new Enterprise();
+        $report->enterprise->guid = $this->enterpriseGuid;
+        $report->initiator = new User();
+        $report->initiator->login = $this->vetisLogin;
+
+        $report->inventoryDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+
+        $report->responsible = new User();
+        $report->responsible->login = $this->vetisLogin;
+
+
+        $appData->any['ns3:getStockEntryByUuidRequest'] = $report;
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        $result = $client->submitApplicationRequest($request);
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $result = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
+        } else
+            $result = null;
+
+        return $result;
     }
 
 }

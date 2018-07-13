@@ -13,6 +13,16 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Batch;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ComplexDate;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\GoodsDate;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Product;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ProductItem;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\StockDiscrepancy;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\StockEntry;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\StockEntryList;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\SubProduct;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Unit;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
 
@@ -178,6 +188,41 @@ class createStoreEntryForm extends Model {
                 $listOptions->offset += $list->countryList->count;
         } while ($list->countryList->total > ($list->countryList->offset + $list->countryList->count));
         return $res;
+    }
+
+    public function getStockDiscrepancy()
+    {
+        $ID = 'report1';
+        $stockDiscrepancy = new StockDiscrepancy();
+        $stockDiscrepancy->id = $ID;
+        $stockDiscrepancy->resultingList = new StockEntryList();
+
+        $stockEntry = new StockEntry();
+        $stockEntry->batch = new Batch();
+        $stockEntry->batch->productType = $this->productType;
+
+        $stockEntry->batch->product = new Product();
+        $stockEntry->batch->product->guid = $this->product;
+
+        $stockEntry->batch->subProduct = new SubProduct();
+        $stockEntry->batch->subProduct->guid = $this->subProduct;
+
+        $stockEntry->batch->productItem = new ProductItem();
+        $stockEntry->batch->productItem->name = $this->product_name;
+        $stockEntry->batch->productItem->volume = $this->volume;
+        $stockEntry->batch->productItem->unit = new Unit();
+        $stockEntry->batch->productItem->unit->uuid = $this->unit;
+
+
+    }
+
+    private function convertDate($date)
+    {
+        $time = strtotime($date);
+
+        $res = new GoodsDate();
+        $res->firstDate = new ComplexDate();
+        $res->firstDate->year = date('Y', $time);
     }
 
 }

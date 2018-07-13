@@ -91,6 +91,8 @@ class Purpose{
     var $forSubstandard;//boolean
 }
 class Unit{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $fullName;//String255
     var $commonUnitGuid;//UUID
@@ -249,12 +251,16 @@ class ProductItem{
     var $isPublic;//boolean
 }
 class Product{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $code;//String255
     var $englishName;//String255
     var $productType;//ProductType
 }
 class SubProduct{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $code;//String255
     var $englishName;//String255
@@ -777,6 +783,8 @@ class ModifyActivityLocationsResponse{
     var $businessEntity;//BusinessEntity
 }
 class ResolveDiscrepancyRequest{
+    var $uuid;//UUID
+    var $localTransactionId;
     var $enterprise;//Enterprise
     var $inventoryDate;//dateTime
     var $responsible;//User

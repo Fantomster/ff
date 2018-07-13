@@ -81,6 +81,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'exported_at' => Yii::t('app', 'Exported At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'is_invoice' => Yii::t('app', 'Флаг, указывающий надо ли проводить документ при загрузке '),
         ];
     }
 

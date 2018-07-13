@@ -11,6 +11,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\dateForm;
+use frontend\modules\clientintegr\modules\merc\models\expiryDate;
+use frontend\modules\clientintegr\modules\merc\models\inputDate;
+use frontend\modules\clientintegr\modules\merc\models\productionDate;
 use Yii;
 
 class StockEntryController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -83,12 +86,22 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     public function actionCreate()
     {
         $model = new createStoreEntryForm();
-        $productionDate = new dateForm();
-        $expiryDate = new dateForm();
-        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post())) {
-
+        $productionDate = new productionDate();
+        $expiryDate = new expiryDate();
+        $inputDate = new inputDate();
+        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post()) &&  $inputDate->load(Yii::$app->request->post())) {
+            //var_dump($productionDate->first_date, date('d.m.Y H:i'));
+            if (!Yii::$app->request->isAjax) {
+               // var_dump("setp 2");
+                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate() && $inputDate->validate();
+                if($res)
+                {
+                    var_dump("GOOD");
+                   // die();
+                }
+            }
         }
-        $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate];
+        $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('add-stock-enrty/_mainForm', $params);
         } else {

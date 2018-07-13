@@ -16,6 +16,9 @@ use yii\web\JsExpression;
 <div class="dict-agent-form">
     <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']); ?>
     <?php echo $form->errorSummary($model); ?>
+    <?php echo $form->errorSummary($productionDate); ?>
+    <?php echo $form->errorSummary($expiryDate); ?>
+    <?php echo $form->errorSummary($inputDate); ?>
     <h4>Информация о продукции: </h4>
     <?= $form->field($model, 'batchID')->textInput(['maxlength' => true]); ?>
 
@@ -54,23 +57,24 @@ use yii\web\JsExpression;
         ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
     ?>
 
+    <?php $model->perishable = isset($model->perishable) ? $model->perishable : true; ?>
     <?= $form->field($model, 'perishable')
         ->radioList($model->getPerishableList()) ?>
 
     <div class="form-group required">
         <?php echo '<label class="control-label"><b>Дата выработки продукции</b></label>';
         echo $form->field($productionDate, 'first_date')->widget(DateTimePicker::classname(), [
-            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата', 'id' => 'productionDate-first_date'],
+            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата'],
             'pluginOptions' => [
                 'autoclose' => true,
-                'format' => 'mm.dd.yyyy hh:ii'
+                'format' => 'dd.mm.yyyy hh:ii'
             ]
         ])->label(false);
         echo $form->field($productionDate, 'second_date')->widget(DateTimePicker::classname(), [
-            'options' => ['placeholder' => 'Конечная дата в интервале', 'id' => 'productionDate-second_date'],
+            'options' => ['placeholder' => 'Конечная дата в интервале'],
             'pluginOptions' => [
                 'autoclose' => true,
-                'format' => 'mm.dd.yyyy hh:ii'
+                'format' => 'dd.mm.yyyy hh:ii'
             ]
         ])->label(false);
         ?>
@@ -78,17 +82,17 @@ use yii\web\JsExpression;
     <div class="form-group required">
         <?php echo '<label class="control-label"><b>Дата окончания срока годности продукции</b></label>';
         echo $form->field($expiryDate, 'first_date')->widget(DateTimePicker::classname(), [
-            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата', 'id' => 'expiryDate-first_date'],
+            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата'],
             'pluginOptions' => [
                 'autoclose' => true,
-                'format' => 'mm.dd.yyyy hh:ii'
+                'format' => 'dd.mm.yyyy hh:ii'
             ]
         ])->label(false);
         echo $form->field($expiryDate, 'second_date')->widget(DateTimePicker::classname(), [
-            'options' => ['placeholder' => 'Конечная дата в интервале', 'id' => 'expiryDate-first_date'],
+            'options' => ['placeholder' => 'Конечная дата в интервале'],
             'pluginOptions' => [
                 'autoclose' => true,
-                'format' => 'mm.dd.yyyy hh:ii'
+                'format' => 'dd.mm.yyyy hh:ii'
             ]
         ])->label(false);
         ?>
@@ -122,6 +126,27 @@ use yii\web\JsExpression;
         ],
     ]);
     ?>
+
+    <h4>Дополнительная информация о входной продукции: </h4>
+    <div class="form-group required">
+        <?php echo '<label class="control-label"><b>Дата поступления груза</b></label>';
+        echo $form->field($inputDate, 'first_date')->widget(\kartik\widgets\DatePicker::classname(), [
+            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата'],
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'dd.mm.yyyy'
+            ]
+        ])->label(false);
+        echo $form->field($inputDate, 'second_date')->widget(\kartik\widgets\DatePicker::classname(), [
+            'options' => ['placeholder' => 'Конечная дата в интервале'],
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'dd.mm.yyyy'
+            ]
+        ])->label(false);
+        ?>
+    </div>
+    <?= $form->field($model, 'vsd')->textarea(['rows' => '6']); ?>
     <div class="form-group">
         <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
     </div>

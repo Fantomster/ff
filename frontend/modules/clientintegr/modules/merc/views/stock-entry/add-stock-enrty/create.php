@@ -44,7 +44,8 @@ use yii\widgets\Breadcrumbs;
                         <?php echo $this->render('_mainForm', [
                             'model' => $model,
                             'productionDate' => $productionDate,
-                            'expiryDate' => $expiryDate
+                            'expiryDate' => $expiryDate,
+                            'inputDate' => $inputDate,
                         ]) ?>
                         </div>
                     </div>

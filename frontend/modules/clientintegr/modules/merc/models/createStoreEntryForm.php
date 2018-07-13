@@ -29,14 +29,16 @@ class createStoreEntryForm extends Model {
     public $producer;
     public $producer_role;
     public $producer_product_name;
+    public $vsd;
 
     public function rules()
     {
         return [
-            [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer','producer_role','producer_product_name'], 'required'],
+            [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer'], 'required'],
             [['productType','perishable'],'integer'],
             [['volume'], 'double'],
             [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID', 'country'], 'string', 'max' => 255],
+            [['vsd'],'string']
         ];
     }
 
@@ -58,6 +60,7 @@ class createStoreEntryForm extends Model {
             'producer' => 'Производитель продукции',
             'producer_role' => 'Роль предприятия-производителя продукции',
             'producer_product_name' => 'Наименование продукции',
+            'vsd' => 'Входящий ВСД'
         ];
     }
 

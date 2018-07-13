@@ -55,6 +55,13 @@ class OrderAttachment extends \yii\db\ActiveRecord {
                         'path' => '@app/web/upload/temp/',
                         'url' => '/upload/temp/',
                     ],
+                    'timestamp' => [
+                        'class' => 'yii\behaviors\TimestampBehavior',
+                        'value' => function ($event) {
+                            return gmdate("Y-m-d H:i:s");
+                        },
+                        'updatedAtAttribute' => false,
+                    ],
         ]);
     }
 
@@ -112,4 +119,5 @@ class OrderAttachment extends \yii\db\ActiveRecord {
     public function getAssignment() {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'order_id']);
     }
+
 }

@@ -193,12 +193,12 @@ class GuideWebApi extends \api_web\components\WebApi
              * Фильтр по цене
              */
             if (!empty($post['search']['price'])) {
-                if (!empty($post['search']['price']['start'])) {
-                    $search->price_from = $post['search']['price']['start'];
+                if (!empty($post['search']['price']['from'])) {
+                    $search->price_from = $post['search']['price']['from'];
                 }
 
-                if (!empty($post['search']['price']['end'])) {
-                    $search->price_to = $post['search']['price']['end'];
+                if (!empty($post['search']['price']['to'])) {
+                    $search->price_to = $post['search']['price']['to'];
                 }
             }
         }

@@ -634,7 +634,7 @@ class ParserTorg12
                 $temp0 = $temp1[0]; //переменная, которая по идее должна хранить наименование поставщика
             }
             $valueFromCell = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $temp0); //заменяем в наименовании поставщика полное название типа организации кратким названием
-            $this->invoice->namePostav = ltrim(mb_strtoupper($valueFromCell)); //убираем пробелы и переводим  наименование поставщика в верхний регистр
+            $this->invoice->namePostav = ltrim(mb_strtoupper($valueFromCell)); //убираем пробелы и переводим наименование поставщика в верхний регистр
         }
 
         //цикл по всем значениям массива ячеек, где встречались слова "Грузополучатель" или "Грузополучатель и его адрес:"
@@ -653,7 +653,7 @@ class ParserTorg12
                 $i++;
                 $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + $i, $row)->getValue());
             }
-            if (strlen($cellValueNext)<20) {
+            if (strlen($cellValueNext)<20) { //если в ячейке справа короткое значение, то это значит, что нужное значение нужно искать в строке выше
                 $col_up = 0;
                 $i=0;
                 $cellValueUp = '';
@@ -665,58 +665,56 @@ class ParserTorg12
             }
         }
 
-        $cell = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow(9, 10)->getValue());
         if ($sovpad_poln == 1) $valueFromCell = $cellValueNext; else $valueFromCell = $cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
         $as = $valueFromCell;
-        rsort($this->settingsRow['consignee']);
-        if ($sovpad_poln == 0) {
-            $otrez = 0;
+        rsort($this->settingsRow['consignee']); //Производим сортировку по убыванию массива маркеров Грузополучателей
+        if ($sovpad_poln == 0) { //Если совпадение с маркером неполное, то
+            $otrez = 0; //временная переменная, показывающая, удалялся ли из строки маркер грузополучателя
             foreach ($this->settingsRow['consignee'] as $nam) {
-                //print $nam.PHP_EOL;
                 $nam = mb_strtolower($nam);
                 if ($otrez == 1) continue;
                 if (mb_strpos($as, $nam) !== false) {
-                    $temp = explode($nam, $as);
+                    $temp = explode($nam, $as); //разбиваем строку по маркеру грузополучателя, удаляя его из строки
                     $otrez = 1;
                     $as = trim($temp[1]);
                 }
             }
         }
-        $temp = explode(',', $as);
-        $as = $temp[0];
-        $temp = explode('(', $as);
+        $temp = explode(',', $as); //Разбиваем строку по запятой, выделяя наименование грузополучателя
+        $as = $temp[0]; //наименование грузополучателя всегда идёт первым
+        $temp = explode('(', $as); //разбиваем строку по открывающей скобке, удаляя из наименования грузополучателя указание подразделения, если оно указано в скобках
         $as = trim($temp[0]);
-        $forma = '';
-        $ooo_has = 0;
-        $long = 0;
-        $pos = 0;
-        foreach ($this->tip_ooo_long as $nazv) {
-            if ($ooo_has == 1) continue;
-            if (mb_strpos($as, $nazv) !== false) {
-                $forma = $nazv;
-                $ooo_has = 1;
-                $long = 1;
-                $pos = mb_strpos($as, $nazv);
+        $forma = ''; //временная переменная, которая будет содержать наименование формы собственности
+        $ooo_has = 0; //временная переменная, сигнализирующая, найдена ли форма собственности
+        $long = 0; //временная переменная, сигнализирующая, является ли найденная форма собственности полным названием формы собственности
+        $pos = 0; //временная переменная, отвечающая за позицию вхождения формы собственности в наименовании грузополучателя
+        foreach ($this->tip_ooo_long as $nazv) { //цикл по полным названиям формы собственности
+            if ($ooo_has == 1) continue; //если форма собственности уже найдена, то ничего в этой итерации не делаем
+            if (mb_strpos($as, $nazv) !== false) { //если в наименовании грузополучателя есть форма собственности, то
+                $forma = $nazv; //запоминаем данную форму собственности,
+                $ooo_has = 1; //указываем, что форма собственности найдена,
+                $long = 1; //указываем, что найденная форма собственности - полное название формы собственности,
+                $pos = mb_strpos($as, $nazv); //запоминаем позицию вхождения формы собственности в наименовании грузополучателя.
             }
         }
-        if ($ooo_has != 1) {
-            foreach ($this->tip_ooo_short as $nazv) {
-                if ($ooo_has == 1) continue;
-                if ($nazv == '') continue;
-                if (mb_strpos($as, $nazv) !== false) {
-                    $forma = $nazv;
-                    $ooo_has = 1;
-                    $pos = mb_strpos($as, $nazv);
+        if ($ooo_has != 1) { //если в наименовании грузополучателя нет полного назания формы собственности, то
+            foreach ($this->tip_ooo_short as $nazv) { //цикл по кратким названиям формы собственности
+                if ($ooo_has == 1) continue; //если форма собственности уже найдена, то ничего в этой итерации не делаем
+                if ($nazv == '') continue; //если форма собственности пустая, то ничего в этой итерации не делаем
+                if (mb_strpos($as, $nazv) !== false) { //если в наименовании грузополучателя есть форма собственности, то
+                    $forma = $nazv; //запоминаем данную форму собственности,
+                    $ooo_has = 1; //указываем, что форма собственности найдена,
+                    $pos = mb_strpos($as, $nazv); //запоминаем позицию вхождения формы собственности в наименовании грузополучателя.
                 }
             }
         }
-        $dlina = strlen($forma);
-        $dlin2 = strlen($as)-$dlina;
-        if ($pos > 0) $as = substr($as, 0, $dlin2); else $as = substr($as, $dlina);
-        $as = trim($as);
-        $as = $forma . ' ' . $as;
-        $as = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $as); //заменяем в наименовании поставщика полное название типа организации кратким названием
-        $as = ltrim(mb_strtoupper($as));
+        $dlina = strlen($forma); //вычисляем длину строки, содержащей название формы собственности
+        $dlin2 = strlen($as)-$dlina; //вычисляем длину строки, содержащей наименование грузополучателя без названия формы собственности
+        if ($pos > 0) $as = substr($as, 0, $dlin2); else $as = substr($as, $dlina); //из строки наименования грузополучателя удаляем название формы собственности
+        $as = trim($as); //удаляем начальные и концевые пробелы
+        $as = $forma . ' ' . $as; //заново собираем наименование грузополучателя, где название формы собственности идёт в обязательном порядке в начале строки
+        $as = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $as); //заменяем в наименовании грузополучателя полное название типа организации кратким названием
+        $as = ltrim(mb_strtoupper($as)); //убираем пробелы и переводим наименование грузополучателя в верхний регистр
         $this->invoice->nameConsignee = $as;
 
         if (!isset($this->invoice->namePostav)) $this->invoice->error['namePostav.'] = 'Не найдено наименование поставщика'; //записываем в массив ошибок случаи,
@@ -944,7 +942,7 @@ class ParserTorg12
         $row = [];
         $key = 1;
 
-        for ($col = 0; $col <= $this->highestColumn; $col++) {
+        for ($col = $this->columnList['num']['col']; $col <= $this->highestColumn; $col++) {
             $currentCell = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $rowNumber)->getValue());
             // запишем непустые значения в массив для текущей строки
             if ($currentCell) {
@@ -959,7 +957,6 @@ class ParserTorg12
         ) {
             return false;
         }
-
         // Hotfix 1.5.10 corrected (#DEV - 874) Непонятно, что здесь проверялось, толи столбцы надо было проверять,
         // толи все строчки а не только значимые. Но в итоге все накладные где меньше 12 значимых строк не выгружались.
         // Закомментировано
@@ -1003,7 +1000,6 @@ class ParserTorg12
     private function processRows()
     {
         $ws = $this->worksheet;
-
         for ($row = $this->startRow; $row <= $this->highestRow; ++$row) {
 
             // пропускаем строки, которые не надо обрабатывать

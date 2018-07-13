@@ -47,6 +47,7 @@ class OrderController extends Controller {
                             'with-attachments',
                             'ajax-show-products',
                             'ajax-add-to-order',
+                            'assign',
                         ],
                         'allow' => true,
                         'roles' => [
@@ -148,7 +149,7 @@ class OrderController extends Controller {
         ];
 
         $order = Order::findOne(['id' => $id, 'status' => $editableOrders]);
-        
+
         $currentAttachment = null;
 
         if (empty($order)) {
@@ -225,20 +226,33 @@ class OrderController extends Controller {
     public function actionWithAttachments() {
         $searchModel = new \backend\models\OrderWithAttachmentsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        //$dataProvider->sort = ['defaultOrder' => ['created_at' => SORT_DESC]];
-//        if (Yii::$app->request->isPjax) {
-//            return $this->renderAjax('with-attachments', [
-//                        'searchModel' => $searchModel,
-//                        'dataProvider' => $dataProvider,
-//            ]);
-//        } else {
-        return $this->render('with-attachments', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
-        ]);
-//        }
+        if (Yii::$app->request->isPjax) {
+            return $this->renderAjax('with-attachments', [
+                        'searchModel' => $searchModel,
+                        'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            return $this->render('with-attachments', [
+                        'searchModel' => $searchModel,
+                        'dataProvider' => $dataProvider,
+            ]);
+        }
     }
 
+    public function actionAssign($id) {
+        $assignment = \common\models\OrderAssignment::findOne(['order_id' => $id]);
+        if (empty($assignment)) {
+            $assignment = new \common\models\OrderAssignment(['order_id' => $id, 'assigned_by' => Yii::$app->user->id]);
+        }
+        $assignment->load(Yii::$app->request->post());
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        if ($assignment->save()) {
+            return true;
+        } else {
+            return ['output'=>'', 'message'=>''];
+        }
+    }
+    
 //    /**
 //     * Creates a new Order model.
 //     * If creation is successful, the browser will be redirected to the 'view' page.

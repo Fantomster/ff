@@ -1,7 +1,12 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
+use kartik\editable\Editable;
+use kartik\daterange\DateRangePicker;;
+
+$this->title = 'Заказы с прикрепленными файлами';
 
 $columns = [
     [
@@ -16,6 +21,16 @@ $columns = [
     'file',
     [
         'format' => 'raw',
+        'filter' => DateRangePicker::widget([
+            'model' => $searchModel,
+            'attribute' => 'created_at_range',
+            'pluginOptions' => [
+                'format' => 'd-m-Y',
+                'autoUpdateInput' => false
+            ],
+            'hideInput' => true,
+            'pjaxContainerId' => 'orderList',
+        ]),
         'attribute' => 'created_at',
         'label' => 'Прикреплено',
         'value' => function ($data) {
@@ -26,24 +41,54 @@ $columns = [
         'format' => 'raw',
         'filter' => common\models\User::getMixManagersList(),
         'attribute' => 'assigned_to',
+        'label' => 'Назначен (кому)',
         'value' => function ($data) {
-            return isset($data->assignment) ? $data->assignment->assigned_to : null;
+            $model = isset($data->assignment) ? $data->assignment : new \common\models\OrderAssignment();
+            $display = [];
+            if (isset($model->assigned_to)) {
+                $display = [$model->assigned_to => Html::a($data->assignment->assignedTo->profile->full_name, ['client/view', 'id' => $model->assigned_to], ['data-pjax' => 0])];
+            }
+            return Editable::widget([
+                        'model' => $model,
+                        'attribute' => 'assigned_to',
+                        'asPopover' => true,
+                        //'header' => 'Province',
+                        'format' => Editable::FORMAT_BUTTON,
+                        'inputType' => Editable::INPUT_DROPDOWN_LIST,
+                        'data' => common\models\User::getMixManagersList(), // any list of values
+                        'displayValueConfig' => $display,
+                        'options' => [
+                            'class' => 'form-control',
+                            'prompt' => 'Возложить ответственность...',
+                        ],
+                        'formOptions' => [
+                            'action' => Url::to(['/order/assign', 'id' => $data->order_id]),
+                        ],
+                        'pluginEvents' => [
+                            "editableSuccess" => "function(event, val, form, data) {
+                                $.pjax.reload({container: '#orderList', timeout:30000}); 
+                            }",
+                        ],
+                        'editableValueOptions' => ['class' => 'text-danger'],
+                        'pjaxContainerId' => 'orderList',
+            ]); //isset($data->assignment) ? $data->assignment->assigned_to : null;
         },
         'group' => true,
     ],
     [
         'format' => 'raw',
         'attribute' => 'is_processed',
+        'label' => 'Обработан',
         'value' => function ($data) {
             return isset($data->assignment) ? $data->assignment->is_processed : null;
         },
         'group' => true,
     ],
 ];
-        
+
 $this->registerCss('
         td{vertical-align:middle !important;}
-        ');        
+        ');
 ?>
 
 <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderList', 'timeout' => 5000]); ?> 

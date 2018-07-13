@@ -13,7 +13,7 @@ class m180711_125348_add_fields_to_edi_order_content_table extends Migration
     public function safeUp()
     {
         $this->addColumn('edi_order_content', 'delivery_note_number', $this->string(100)->null());
-        $this->addColumn('edi_order_content', 'delivery_note_date', $this->timestamp());
+        $this->addColumn('edi_order_content', 'delivery_note_date', $this->timestamp()->null());
     }
 
     /**

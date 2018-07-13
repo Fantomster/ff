@@ -11,6 +11,7 @@ namespace frontend\modules\clientintegr\modules\merc\models;
 use api\common\models\merc\mercDicconst;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
@@ -160,14 +161,22 @@ class createStoreEntryForm extends Model {
 
     public static function getCountryList()
     {
-        $list = ikarApi::getInstance()->getAllCountryList();
+
+        $listOptions = new ListOptions();
+        $listOptions->count = 100;
+        $listOptions->offset = 0;
 
         $res = [];
-        foreach ($list->countryList->country as $item)
-        {
-            if($item->last)
-                $res[$item->uuid] = $item->name;
-        }
+        do {
+            $list = ikarApi::getInstance()->getAllCountryList($listOptions);
+            foreach ($list->countryList->country as $item) {
+                if ($item->last)
+                    $res[$item->uuid] = $item->name;
+            }
+
+            if($list->countryList->count < $list->countryList->total)
+                $listOptions->offset += $list->countryList->count;
+        } while ($list->countryList->total > ($list->countryList->offset + $list->countryList->count));
         return $res;
     }
 

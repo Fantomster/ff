@@ -156,7 +156,9 @@ function renderButton($id)
                                 [
                                     'attribute' => 'organization_id',
                                     'value' => function ($data) {
-                                        return $data->organization->name;
+                                        //return $data->organization->name;
+                                        if ($data->consignee) return $data->consignee;
+                                        else return $data->organization->name;
                                     }
                                 ],
                                 [

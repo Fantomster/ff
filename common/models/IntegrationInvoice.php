@@ -164,6 +164,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->name_postav = $invoice['invoice']['namePostav'];
         $this->inn_postav = $invoice['invoice']['innPostav'];
         $this->kpp_postav = $invoice['invoice']['kppPostav'];
+        $this->consignee = $invoice['invoice']['nameConsignee'];
 
         if($this->date == '1970-01-01') {
             $this->date = null;

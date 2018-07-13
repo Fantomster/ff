@@ -95,11 +95,12 @@ class EmailIntegrationController extends Controller
             ];
 
             echo $filet.PHP_EOL;
-            print_r("Result date:".$result[$i-1]['invoice']['date'].PHP_EOL);
-            print_r("Result number:".$result[$i-1]['invoice']['number'].PHP_EOL);
+            //print_r("Result date:".$result[$i-1]['invoice']['date'].PHP_EOL);
+            //print_r("Result number:".$result[$i-1]['invoice']['number'].PHP_EOL);
             print_r("Result name:".$result[$i-1]['invoice']['namePostav'].PHP_EOL);
-            print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
-            print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
+            //print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
+            //print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
+            print_r("Result consignee:".$result[$i-1]['invoice']['nameConsignee'].PHP_EOL);
             print_r("=================================".PHP_EOL);
             //print_r($result[$i-1]['invoice']['rows']);
 

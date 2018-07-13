@@ -460,6 +460,18 @@ class ParserTorg12
 
         $checkSellRekviz = function ($col, $row, $attribute) { //функция для нахождения единственной ячейки, где хранится правильное наименование поставщика
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
+            $has = 0;
+            for ($i = 0; $i < count($attribute); $i++) {
+                $str = mb_strtolower($attribute[$i]);
+                if (strpos($cellValue, $str) !== false) {
+                    $cellValue = ltrim($cellValue);
+                    if (strpos($cellValue, $str) == 0) $has = 1;
+                }
+            }
+            return $has;
+        };
+        /*$checkSellConsignee = function ($col, $row, $attribute) { //функция для нахождения единственной ячейки, где хранится правильное наименование грузополучателя
+            $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
             $has=0;
             for ($i=0;$i<count($attribute);$i++){
                 $str=mb_strtolower($attribute[$i]);
@@ -469,25 +481,26 @@ class ParserTorg12
                 }
             }
             return $has;
-        };
+        };*/
         $checkSellRekvizInn = function ($col, $row, $attribute) { //функция для нахождения всех ячеек, в которых присутствует слово ИНН
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
-            $has=0;
-            for ($i=0;$i<count($attribute);$i++){
-                $str=mb_strtolower($attribute[$i]);
-                if (strpos($cellValue,$str)!==false)  $has=1;
+            $has = 0;
+            for ($i = 0; $i < count($attribute); $i++) {
+                $str = mb_strtolower($attribute[$i]);
+                if (strpos($cellValue, $str) !== false) $has = 1;
             }
             return $has;
         };
 
         $this->invoice->namePostav = null; //свойствам придаём нулевые изначальные значения
+        $this->invoice->nameConsignee = null;
         $this->invoice->innPostav = null;
         $this->invoice->kppPostav = null;
 
         foreach ($this->settingsRow['name_postav'] as $row) { //первыми в массивы загоняем "Продавец" и "Поставщик"
             $this->tip_ooo_long[] = mb_strtolower($row);
             $this->tip_ooo_short[] = '';
-            $this->tip_ooo_long[] = mb_strtolower($row).' ';
+            $this->tip_ooo_long[] = mb_strtolower($row) . ' ';
             $this->tip_ooo_short[] = '';
         }
 
@@ -504,30 +517,38 @@ class ParserTorg12
 
                 $inn = $checkSellRekvizInn($col, $row, $this->settingsRow['inn']);
 
-                if ($inn==1) {
-                    $this->invoice->tmpMassivsInns[]=[$row,$col];
-                    $inn=0;
+                if ($inn == 1) {
+                    $this->invoice->tmpMassivsInns[] = [$row, $col];
+                    $inn = 0;
                 }
 
                 $name_postav = $checkSellRekviz($col, $row, $this->settingsRow['name_postav']);
 
-                if ($name_postav==1) {
-                    $this->invoice->tmpMassivsNames[]=[$row,$col];
-                    $name_postav=0;
+                if ($name_postav == 1) {
+                    $this->invoice->tmpMassivsNames[] = [$row, $col];
+                    $name_postav = 0;
+                }
+
+                $name_consig = $checkSellRekviz($col, $row, $this->settingsRow['consignee']);
+
+                if ($name_consig == 1) {
+                    $this->invoice->tmpMassivsConsignees[] = [$row, $col];
+                    $name_consig = 0;
                 }
             }
         }
 
-        $inn_kpp_prodav=mb_strtolower($this->settingsRow['inn_kpp_prodav'][0]); //для получения ИНН пару значений переводим в строки
-        $postav=mb_strtolower($this->settingsRow['postav'][0]);
-        foreach($this->invoice->tmpMassivsInns as $tmp) { //цикл по всем значениям массива ячеек, где встречалось слово ИНН
-            $row=$tmp[0]; $col=$tmp[1];
-            if ($col!=0) {
-                $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col-1, $row)->getValue()); //ячейка слева
+        $inn_kpp_prodav = mb_strtolower($this->settingsRow['inn_kpp_prodav'][0]); //для получения ИНН пару значений переводим в строки
+        $postav = mb_strtolower($this->settingsRow['postav'][0]);
+        foreach ($this->invoice->tmpMassivsInns as $tmp) { //цикл по всем значениям массива ячеек, где встречалось слово ИНН
+            $row = $tmp[0];
+            $col = $tmp[1];
+            if ($col != 0) {
+                $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col - 1, $row)->getValue()); //ячейка слева
                 $col_pr = $col;
-                while($cellValuePrev=='') {
+                while ($cellValuePrev == '') {
                     $col_pr--;
-                    if ($col_pr==0) {
+                    if ($col_pr == 0) {
                         $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
                         break;
                     }
@@ -537,13 +558,13 @@ class ParserTorg12
                 $cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //ячейка слева
             }
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //ячейка из массива
-            $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col+1, $row)->getValue()); //ячейка справа
-            $cellValue=trim($cellValue); //убираем пробелы
-            $cellValuePrev=trim($cellValuePrev);
-            $cellValueNext=trim($cellValueNext);
-            if ((strpos($cellValue,$inn_kpp_prodav)===false) and ($cellValuePrev!=$postav)) continue; else {//если ячейка не содержит "ИНН/КПП продавца" и ячейка слева не содержит "Поставщик", переходим к следующей итерации цикла
-                if ($cellValuePrev==$postav) { //если ячейка слева содержит "Поставщик", то работаем с текущей ячейкой
-                    if (strpos($cellValue,'инн/кпп')===false) { //если строка не содержит сочетание "ИНН/КПП", то
+            $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + 1, $row)->getValue()); //ячейка справа
+            $cellValue = trim($cellValue); //убираем пробелы
+            $cellValuePrev = trim($cellValuePrev);
+            $cellValueNext = trim($cellValueNext);
+            if ((strpos($cellValue, $inn_kpp_prodav) === false) and ($cellValuePrev != $postav)) continue; else {//если ячейка не содержит "ИНН/КПП продавца" и ячейка слева не содержит "Поставщик", переходим к следующей итерации цикла
+                if ($cellValuePrev == $postav) { //если ячейка слева содержит "Поставщик", то работаем с текущей ячейкой
+                    if (strpos($cellValue, 'инн/кпп') === false) { //если строка не содержит сочетание "ИНН/КПП", то
                         $temp1 = explode(',', $cellValue); //разбиваем значение ячейки по запятой, ИНН всегда указывается вторым реквизитом
                         $temp3 = trim($temp1[1]);
                         $temp2 = explode(' ', $temp3); //разбиваем по пробелу - отделяем цифры от самого слова "ИНН"
@@ -559,64 +580,149 @@ class ParserTorg12
                         $this->invoice->kppPostav = $temp3[1];
                     }
                 } else {
-                    if ($cellValue==$inn_kpp_prodav) { //если ячейка содержит только слова "ИНН/КПП продавца:", то работать будем с ячейкой справа
-                        $i=1;
-                        while($cellValueNext=='') { //если ячейка справа пустая, то в цикле находим непустую ячейку
+                    if ($cellValue == $inn_kpp_prodav) { //если ячейка содержит только слова "ИНН/КПП продавца:", то работать будем с ячейкой справа
+                        $i = 1;
+                        while ($cellValueNext == '') { //если ячейка справа пустая, то в цикле находим непустую ячейку
                             $i++;
-                            $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col+$i, $row)->getValue());
+                            $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + $i, $row)->getValue());
                         }
-                        $temp1=explode('/',$cellValueNext); //разбиваем значения ячейки справа по слэшу, отделяя цифры ИНН от КПП
+                        $temp1 = explode('/', $cellValueNext); //разбиваем значения ячейки справа по слэшу, отделяя цифры ИНН от КПП
                         $this->invoice->innPostav = $temp1[0];
                         $this->invoice->kppPostav = $temp1[1];
                     } else { //если ячейка содержит не только слова "ИНН/КПП продавца:", то работаем с текущей ячейкой
-                        $temp1=explode($inn_kpp_prodav,$cellValue); //убираем из значения текущей ячейки "ИНН/КПП продавца:"
-                        $temp1[1]=trim($temp1[1]); //убираем пробелы
-                        $temp2=explode('/',$temp1[1]); //разбиваем значения текущей ячейки по слэшу, отделяя цифры ИНН от КПП
+                        $temp1 = explode($inn_kpp_prodav, $cellValue); //убираем из значения текущей ячейки "ИНН/КПП продавца:"
+                        $temp1[1] = trim($temp1[1]); //убираем пробелы
+                        $temp2 = explode('/', $temp1[1]); //разбиваем значения текущей ячейки по слэшу, отделяя цифры ИНН от КПП
                         $this->invoice->innPostav = $temp2[0];
                         $this->invoice->kppPostav = $temp2[1];
                     }
                 }
             }
         }
-        foreach($this->invoice->tmpMassivsNames as $tmp) { //цикл по всем значениям массива ячеек, где встречались слова "Поставщик" или "Продавец"
-            $row=$tmp[0]; $col=$tmp[1];
+        foreach ($this->invoice->tmpMassivsNames as $tmp) { //цикл по всем значениям массива ячеек, где встречались слова "Поставщик" или "Продавец"
+            $row = $tmp[0];
+            $col = $tmp[1];
             //$cellValuePrev = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col-1, $row)->getValue());
             $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //ячейка из массива
-            $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col+1, $row)->getValue()); //ячейка справа
-            $sovpad_poln=0; //временная переменная, отвечающая за факт полного совпадения значения ячейки и маркеров Поставщика
-            foreach($this->settingsRow['name_postav'] as $nam) {
-                $str=mb_strtolower($nam);
-                if ($str==$cellValue) $sovpad_poln=1; //если значение ячейки содержит только слово "Поставщик" или только слово "Продавец", то переменная равна 1
+            $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + 1, $row)->getValue()); //ячейка справа
+            $sovpad_poln = 0; //временная переменная, отвечающая за факт полного совпадения значения ячейки и маркеров Поставщика
+            foreach ($this->settingsRow['name_postav'] as $nam) {
+                $str = mb_strtolower($nam);
+                if ($str == $cellValue) $sovpad_poln = 1; //если значение ячейки содержит только слово "Поставщик" или только слово "Продавец", то переменная равна 1
             }
-            if ($sovpad_poln==1) { //если совпадение полное, то
-                $i=1;
-                while($cellValueNext=='') { //если ячейка справа пустая, то в цикле находим непустую ячейку
+            if ($sovpad_poln == 1) { //если совпадение полное, то
+                $i = 1;
+                while ($cellValueNext == '') { //если ячейка справа пустая, то в цикле находим непустую ячейку
                     $i++;
-                    $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col+$i, $row)->getValue());
+                    $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + $i, $row)->getValue());
                 }
             }
-            if ($sovpad_poln==1) $valueFromCell=$cellValueNext; else $valueFromCell=$cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
-            $temp1 = explode(',',$valueFromCell); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
+            if ($sovpad_poln == 1) $valueFromCell = $cellValueNext; else $valueFromCell = $cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
+            $temp1 = explode(',', $valueFromCell); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
             $temp0 = $temp1[0]; //переменная, которая по идее должна хранить наименование поставщика
             $sovpad = 0; //временная переменная, отвечающая за нахождение названия юр. лица в строке, по умолчанию 0 (не найдено)
-            foreach($this->tip_ooo_long as $nazv) { //цикл, в котором проверяется, есть ли в предполагаемом названии поставщика полное наименование юр. лица
-                if (mb_strpos($temp0,$nazv)!==false) $sovpad = 1; //если да, то временная переменная равна 1
+            foreach ($this->tip_ooo_long as $nazv) { //цикл, в котором проверяется, есть ли в предполагаемом названии поставщика полное наименование юр. лица
+                if (mb_strpos($temp0, $nazv) !== false) $sovpad = 1; //если да, то временная переменная равна 1
             }
-            foreach($this->tip_ooo_short as $nazv) { //цикл, в котором проверяется, есть ли в предполагаемом названии поставщика краткое наименование юр. лица
-                if ($nazv=='') continue; //пропускаем пустые ячейки массива, соответствующие полным названиям "Продавец", "Поставщик"
-                if (strpos($temp0,$nazv)!==false) $sovpad = 1; //если да, то временная переменная равна 1
+            foreach ($this->tip_ooo_short as $nazv) { //цикл, в котором проверяется, есть ли в предполагаемом названии поставщика краткое наименование юр. лица
+                if ($nazv == '') continue; //пропускаем пустые ячейки массива, соответствующие полным названиям "Продавец", "Поставщик"
+                if (strpos($temp0, $nazv) !== false) $sovpad = 1; //если да, то временная переменная равна 1
             }
-            if ($sovpad==0) { //если в предполагаемом названии поставщика нет ни полного, ни краткого наименования юр. лица, значит, настоящее название поставщика в другой ячейке (выше справа)
-                $cellValueUp = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col+$i, $row-1)->getValue()); //получаем значение ячейки справа вверху
-                $temp1 = explode(',',$cellValueUp); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
+            if ($sovpad == 0) { //если в предполагаемом названии поставщика нет ни полного, ни краткого наименования юр. лица, значит, настоящее название поставщика в другой ячейке (выше справа)
+                $cellValueUp = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + $i, $row - 1)->getValue()); //получаем значение ячейки справа вверху
+                $temp1 = explode(',', $cellValueUp); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
                 $temp0 = $temp1[0]; //переменная, которая по идее должна хранить наименование поставщика
             }
             $valueFromCell = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $temp0); //заменяем в наименовании поставщика полное название типа организации кратким названием
             $this->invoice->namePostav = ltrim(mb_strtoupper($valueFromCell)); //убираем пробелы и переводим  наименование поставщика в верхний регистр
         }
-        if(!isset($this->invoice->namePostav)) $this->invoice->error['namePostav.'] = 'Не найдено наименование поставщика'; //записываем в массив ошибок случаи,
-        if(!isset($this->invoice->innPostav)) $this->invoice->error['innPostav.'] = 'Не найден ИНН поставщика'; //когда реквизиты не нашлись
-        if(!isset($this->invoice->kppPostav)) $this->invoice->error['kppPostav.'] = 'Не найден КПП поставщика';
+
+        //цикл по всем значениям массива ячеек, где встречались слова "Грузополучатель" или "Грузополучатель и его адрес:"
+        $row = $this->invoice->tmpMassivsConsignees[0][0];
+        $col = $this->invoice->tmpMassivsConsignees[0][1];
+        $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //ячейка из массива
+        $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + 1, $row)->getValue()); //ячейка справа
+        $sovpad_poln = 0; //временная переменная, отвечающая за факт полного совпадения значения ячейки и маркеров Грузополучателя
+        foreach ($this->settingsRow['consignee'] as $nam) {
+            $str = mb_strtolower($nam);
+            if ($str == $cellValue) $sovpad_poln = 1; //если значение ячейки содержит только слово "Грузополучатель" или только слово "Грузополучатель и его адрес:", то переменная равна 1
+        }
+        if ($sovpad_poln == 1) { //если совпадение полное, то
+            $i = 1;
+            while ($cellValueNext == '') { //если ячейка справа пустая, то в цикле находим непустую ячейку
+                $i++;
+                $cellValueNext = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col + $i, $row)->getValue());
+            }
+            if (strlen($cellValueNext)<20) {
+                $col_up = 0;
+                $i=0;
+                $cellValueUp = '';
+                while ($cellValueUp == '') { //если ячейка справа пустая, то в цикле находим непустую ячейку
+                    $i++;
+                    $cellValueUp = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col_up + $i, $row-1)->getValue());
+                }
+                $cellValueNext = $cellValueUp;
+            }
+        }
+
+        $cell = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow(9, 10)->getValue());
+        if ($sovpad_poln == 1) $valueFromCell = $cellValueNext; else $valueFromCell = $cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
+        $as = $valueFromCell;
+        rsort($this->settingsRow['consignee']);
+        if ($sovpad_poln == 0) {
+            $otrez = 0;
+            foreach ($this->settingsRow['consignee'] as $nam) {
+                //print $nam.PHP_EOL;
+                $nam = mb_strtolower($nam);
+                if ($otrez == 1) continue;
+                if (mb_strpos($as, $nam) !== false) {
+                    $temp = explode($nam, $as);
+                    $otrez = 1;
+                    $as = trim($temp[1]);
+                }
+            }
+        }
+        $temp = explode(',', $as);
+        $as = $temp[0];
+        $temp = explode('(', $as);
+        $as = trim($temp[0]);
+        $forma = '';
+        $ooo_has = 0;
+        $long = 0;
+        $pos = 0;
+        foreach ($this->tip_ooo_long as $nazv) {
+            if ($ooo_has == 1) continue;
+            if (mb_strpos($as, $nazv) !== false) {
+                $forma = $nazv;
+                $ooo_has = 1;
+                $long = 1;
+                $pos = mb_strpos($as, $nazv);
+            }
+        }
+        if ($ooo_has != 1) {
+            foreach ($this->tip_ooo_short as $nazv) {
+                if ($ooo_has == 1) continue;
+                if ($nazv == '') continue;
+                if (mb_strpos($as, $nazv) !== false) {
+                    $forma = $nazv;
+                    $ooo_has = 1;
+                    $pos = mb_strpos($as, $nazv);
+                }
+            }
+        }
+        $dlina = strlen($forma);
+        $dlin2 = strlen($as)-$dlina;
+        if ($pos > 0) $as = substr($as, 0, $dlin2); else $as = substr($as, $dlina);
+        $as = trim($as);
+        $as = $forma . ' ' . $as;
+        $as = str_replace($this->tip_ooo_long, $this->tip_ooo_short, $as); //заменяем в наименовании поставщика полное название типа организации кратким названием
+        $as = ltrim(mb_strtoupper($as));
+        $this->invoice->nameConsignee = $as;
+
+        if (!isset($this->invoice->namePostav)) $this->invoice->error['namePostav.'] = 'Не найдено наименование поставщика'; //записываем в массив ошибок случаи,
+        if (!isset($this->invoice->innPostav)) $this->invoice->error['innPostav.'] = 'Не найден ИНН поставщика'; //когда реквизиты не нашлись
+        if (!isset($this->invoice->kppPostav)) $this->invoice->error['kppPostav.'] = 'Не найден КПП поставщика';
+        if (!isset($this->invoice->nameConsignee)) $this->invoice->error['nameConsignee.'] = 'Не найдено наименование грузополучателя';
     }
 
     /**

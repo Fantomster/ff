@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use api\common\models\iiko\iikoWaybill;
+use api\common\models\one_s\OneSWaybill;
 use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
 use Yii;
@@ -390,7 +391,7 @@ class OrderSearch extends Order
      *
      * @return array
      */
-   public function searchWaybillWebApi(array $post): array
+   public function searchWaybillWebApi(array $post, String $modelName = 'api\common\models\iiko\iikoWaybill'): array
    {
        $arr = [];
        $userID = $post['search']['user_id'];
@@ -421,25 +422,27 @@ class OrderSearch extends Order
        if($numCode || $storeID)
        {
            $orders = ArrayHelper::getColumn($query->all(),'id');
-           $waybills = iikoWaybill::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
-           if($numCode){
-               $waybills->andWhere("num_code = $numCode");
-           }
+           if(count($orders)){
+               $waybills = $modelName::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
+               if($numCode){
+                   $waybills->andWhere("num_code = $numCode");
+               }
 
-           if($storeID){
-               $waybills->andWhere("store_id = $storeID");
+               if($storeID){
+                   $waybills->andWhere("store_id = $storeID");
+               }
+               $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
+               if(empty($waybills))
+                   $waybills[] = 0;
+               $query->andWhere('id IN ('.implode(',', $waybills) . ')');
            }
-           $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
-           if(empty($waybills))
-               $waybills[] = 0;
-           $query->andWhere('id IN ('.implode(',', $waybills) . ')');
        }
       
        $count = $query->count();
        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
        $i=0;
        foreach ($ordersArray as $order){
-           $nacl = iikoWaybill::findOne(['order_id' => $order->id]);
+           $nacl = $modelName::findOne(['order_id' => $order->id]);
            
            if (isset($nacl->status)) {
                $status = $nacl->status->id;

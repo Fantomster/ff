@@ -191,7 +191,10 @@ class User extends \amnah\yii2\user\models\User {
             }
         }
         if(!$insert && $this->role_id == Role::ROLE_ONE_S_INTEGRATION){
-            $this->createOneSIntegrationAccount($this->email, $this->password, $this->organization_id);
+            $organizationId = $this->organization_id;
+            if($organizationId){
+                $this->createOneSIntegrationAccount($this->email, $this->password, $this->organization_id);
+            }
         }
         parent::afterSave($insert, $changedAttributes);
     }

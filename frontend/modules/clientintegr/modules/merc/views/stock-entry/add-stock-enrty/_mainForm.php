@@ -127,18 +127,13 @@ use yii\web\JsExpression;
     ]);
     ?>
 
-    <h4>Дополнительная информация о входной продукции: </h4>
+    <h4>Сведения о бумажном ВСД: </h4>
+    <?= $form->field($model, 'vsd_issueSeries')->textInput(['maxlength' => true]); ?>
+    <?= $form->field($model, 'vsd_issueNumber')->textInput(['maxlength' => true]); ?>
     <div class="form-group required">
-        <?php echo '<label class="control-label"><b>Дата поступления груза</b></label>';
+        <?php echo '<label class="control-label"><b>Дата бумажного ВСД</b></label>';
         echo $form->field($inputDate, 'first_date')->widget(\kartik\widgets\DatePicker::classname(), [
-            'options' => ['placeholder' => 'Начальная дата в интервале, либо единичная дата'],
-            'pluginOptions' => [
-                'autoclose' => true,
-                'format' => 'dd.mm.yyyy'
-            ]
-        ])->label(false);
-        echo $form->field($inputDate, 'second_date')->widget(\kartik\widgets\DatePicker::classname(), [
-            'options' => ['placeholder' => 'Конечная дата в интервале'],
+            'options' => ['placeholder' => 'Дата бумажного ВСД'],
             'pluginOptions' => [
                 'autoclose' => true,
                 'format' => 'dd.mm.yyyy'
@@ -146,7 +141,6 @@ use yii\web\JsExpression;
         ])->label(false);
         ?>
     </div>
-    <?= $form->field($model, 'vsd')->textarea(['rows' => '6']); ?>
     <div class="form-group">
         <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
     </div>

@@ -14,8 +14,12 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Batch;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\BatchOrigin;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ComplexDate;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Country;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Enterprise;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\GoodsDate;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Producer;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Product;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ProductItem;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\StockDiscrepancy;
@@ -23,6 +27,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\StockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\StockEntryList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\SubProduct;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Unit;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocument;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
 
@@ -41,14 +46,19 @@ class createStoreEntryForm extends Model {
     public $producer_role;
     public $producer_product_name;
     public $vsd;
+    public $dateOfProduction;
+    public $expiryDate;
+    public $vsd_issueDate;
+    public $vsd_issueSeries;
+    public $vsd_issueNumber;
 
     public function rules()
     {
         return [
-            [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer'], 'required'],
+            [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer','vsd_issueNumber'], 'required'],
             [['productType','perishable'],'integer'],
             [['volume'], 'double'],
-            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID', 'country'], 'string', 'max' => 255],
+            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID', 'country','vsd_issueNumber','vsd_issueSeries'], 'string', 'max' => 255],
             [['vsd'],'string']
         ];
     }
@@ -71,7 +81,9 @@ class createStoreEntryForm extends Model {
             'producer' => 'Производитель продукции',
             'producer_role' => 'Роль предприятия-производителя продукции',
             'producer_product_name' => 'Наименование продукции',
-            'vsd' => 'Входящий ВСД'
+            'vsd' => 'Входящий ВСД',
+            'vsd_issueSeries' => 'Серия бумажного ВСД',
+            'vsd_issueNumber' => 'Номер бумажного ВСД',
         ];
     }
 
@@ -190,9 +202,8 @@ class createStoreEntryForm extends Model {
         return $res;
     }
 
-    public function getStockDiscrepancy()
+    public function getStockDiscrepancy($ID)
     {
-        $ID = 'report1';
         $stockDiscrepancy = new StockDiscrepancy();
         $stockDiscrepancy->id = $ID;
         $stockDiscrepancy->resultingList = new StockEntryList();
@@ -209,20 +220,56 @@ class createStoreEntryForm extends Model {
 
         $stockEntry->batch->productItem = new ProductItem();
         $stockEntry->batch->productItem->name = $this->product_name;
-        $stockEntry->batch->productItem->volume = $this->volume;
-        $stockEntry->batch->productItem->unit = new Unit();
-        $stockEntry->batch->productItem->unit->uuid = $this->unit;
+        $stockEntry->batch->volume = $this->volume;
+        $stockEntry->batch->unit = new Unit();
+        $stockEntry->batch->unit->uuid = $this->unit;
 
+        $stockEntry->batch->dateOfProduction = $this->convertDate($this->dateOfProduction);
+        $stockEntry->batch->expiryDate = $this->convertDate($this->expiryDate);
 
+        $stockEntry->batch->batchID = $this->batchID;
+        $stockEntry->batch->perishable = (bool)$this->perishable;
+
+        $stockEntry->batch->origin = new BatchOrigin();
+        $stockEntry->batch->origin->country = new Country();
+        $stockEntry->batch->origin->country->uuid = $this->country;
+        $stockEntry->batch->origin->producer = new Producer();
+        $stockEntry->batch->origin->producer->role = 'PRODUCER';
+        $stockEntry->batch->origin->producer->enterprise = new Enterprise();
+        $stockEntry->batch->origin->producer->enterprise->guid = $this->producer;
+
+        $stockEntry->vetDocument = new VetDocument();
+        $stockEntry->vetDocument->issueSeries = $this->vsd_issueSeries;
+        $stockEntry->vetDocument->issueNumber = $this->vsd_issueNumber;
+        $time = strtotime($this->vsd_issueDate->first_date);
+        $stockEntry->vetDocument->issueDate = date("Y-m-d", $time);
+
+        $stockDiscrepancy->resultingList->stockEntry = $stockEntry;
+        return $stockDiscrepancy;
     }
 
     private function convertDate($date)
     {
-        $time = strtotime($date);
+        $time = strtotime($date->first_date);
 
         $res = new GoodsDate();
         $res->firstDate = new ComplexDate();
         $res->firstDate->year = date('Y', $time);
+        $res->firstDate->month = date('m', $time);
+        $res->firstDate->day = date('d', $time);
+        $res->firstDate->hour = date('h', $time);
+
+        if(isset($date->secondDate))
+        {
+            $time = strtotime($date->second_date);
+
+            $res->secondDate = new ComplexDate();
+            $res->secondDate->year = date('Y', $time);
+            $res->secondDate->month = date('m', $time);
+            $res->secondDate->day = date('d', $time);
+            $res->secondDate->hour = date('h', $time);
+        }
+        return $res;
     }
 
 }

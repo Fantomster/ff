@@ -109,6 +109,8 @@ class UnitList{
     var $unit;//Unit
 }
 class Country{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $fullName;//String255
     var $englishName;//String255
@@ -387,6 +389,9 @@ class ActivityLocationList{
     var $location;//BusinessMember
 }
 class VetDocument{
+    var $issueSeries;//String255
+    var $issueNumber;//String255
+    var $issueDate;//date
     var $UUID; //UUID
     var $vetDForm;//VetDocumentForm
     var $vetDType;//VetDocumentType
@@ -483,6 +488,7 @@ class DiscrepancyReport{
     var $issueDate;
     var $reason;//DiscrepancyReason
     var $description;//string
+    var $id;//ID
 }
 class DiscrepancyReason{
     var $name;//String255

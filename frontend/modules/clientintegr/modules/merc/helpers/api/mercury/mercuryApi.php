@@ -569,7 +569,6 @@ class mercuryApi extends baseApi
         $stockEntry->initiator->login = $this->vetisLogin;
         $stockEntry->uuid = $UUID;
 
-
         $appData->any['ns3:getStockEntryByUuidRequest'] = $stockEntry;
 
         $request->application->data = $appData;
@@ -629,8 +628,14 @@ class mercuryApi extends baseApi
         $report->responsible = new User();
         $report->responsible->login = $this->vetisLogin;
 
+        $ID = 'report1';
+        $report->stockDiscrepancy = $model->getStockDiscrepancy($ID);
+        $report->discrepancyReport = new DiscrepancyReport();
+        $report->discrepancyReport->id = $ID;
+        $report->discrepancyReport->reason = new DiscrepancyReason();
+        $report->discrepancyReport->reason->name = 'Добавление по бумажному ВСД';
 
-        $appData->any['ns3:getStockEntryByUuidRequest'] = $report;
+        $appData->any['ns3:resolveDiscrepancyRequest'] = $report;
 
         $request->application->data = $appData;
 
@@ -654,7 +659,7 @@ class mercuryApi extends baseApi
         $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
+            $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList;
         } else
             $result = null;
 

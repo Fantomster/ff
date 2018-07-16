@@ -220,6 +220,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         return false;
     }
 
+    public function actionGetPdf($uuid) {
+        //
+    }
+    
     private function updateVSDList()
     {
         $hand_only = mercDicconst::getSetting('hand_load_only');

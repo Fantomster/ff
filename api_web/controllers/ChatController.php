@@ -267,6 +267,45 @@ class ChatController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/chat/dialog-read",
+     *     tags={"Chat"},
+     *     summary="Отметить сообщения диалога прочитаными",
+     *     description="Отметить сообщения диалога прочитаными",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={"dialog_id":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(default={"result":1}),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDialogRead()
+    {
+        $this->response = $this->container->get('ChatWebApi')->readMessages($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/chat/dialog-read-all",
      *     tags={"Chat"},
      *     summary="Отметить все сообщения прочитаными",

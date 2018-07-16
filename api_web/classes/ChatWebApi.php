@@ -130,7 +130,7 @@ class ChatWebApi extends WebApi
         foreach ($dataProvider->models as $model) {
             $message = $this->prepareMessage($model);
 
-            if($message['is_my_message'] === false && $message['viewed'] === false) {
+            if ($message['is_my_message'] === false && $message['viewed'] === false) {
                 $model->viewed = true;
                 $model->save();
             }
@@ -269,14 +269,68 @@ class ChatWebApi extends WebApi
     /**
      * Отмечаем все сообщения прочитаными
      * @return array
+     * @throws \Exception
      */
     public function readAllMessages()
     {
-        $result = ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
-        Notice::init('Chat')->readAllMessages($this->user->organization->id);
-        return $result;
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            OrderChat::updateAll(['viewed' => 1], [
+                'recipient_id' => $this->user->organization->id,
+                'viewed' => 0
+            ]);
+            $transaction->commit();
+            Notice::init('Chat')->readAllMessages($this->user->organization->id);
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
+    /**
+     * Пометить сообщения прочитанными
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function readMessages($post)
+    {
+        if (empty($post['dialog_id'])) {
+            throw new BadRequestHttpException("empty_param|dialog_id");
+        }
+
+        $order = Order::find()->where(['id' => $post['dialog_id']])->andWhere([
+            'or',
+            ['client_id' => $this->user->organization_id],
+            ['vendor_id' => $this->user->organization_id]
+        ])->one();
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            OrderChat::updateAll(['viewed' => 1], [
+                'recipient_id' => $this->user->organization->id,
+                'viewed' => 0,
+                'order_id' => $order->id
+            ]);
+            $transaction->commit();
+            Notice::init('Chat')->readAllMessages($this->user->organization->id);
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @param null $r_id
+     * @return int
+     */
     public function getUnreadMessageCount($r_id = null)
     {
         $recipient_id = $r_id ?? $this->user->organization->id;

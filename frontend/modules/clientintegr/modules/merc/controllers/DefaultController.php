@@ -56,7 +56,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();
-            Yii::error($e->getMessage());
+            Yii::error($e->getMessage().$e->getTraceAsString());
         }
     }
 
@@ -84,16 +84,16 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($uuid)
     {
-        //try {
+        try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        /*} catch (\Error $e) {
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }*/
+        }
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);

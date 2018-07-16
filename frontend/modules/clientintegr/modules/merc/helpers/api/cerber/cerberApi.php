@@ -61,4 +61,77 @@ class cerberApi extends baseApi
             $cache->add('Business_'.$UUID, $result, 60*60*24);
         return $result;
     }
+
+    public function getEnterpriseByGuid ($GUID)
+    {
+        $cache = Yii::$app->cache;
+        $enterprise = $cache->get('Enterprise_'.$GUID);
+        if($GUID == null){
+            return null;}
+        if(!($enterprise === false))
+            return $enterprise;
+
+        $client = $this->getSoapClient('cerber');
+
+        $request = new getEnterpriseByGuidRequest();
+        $request->guid = $GUID;
+
+        $result = $client->GetEnterpriseByGuid($request);
+
+        if(isset($result))
+            $cache->add('Enterprise_'.$GUID, $result, 60*60*24);
+
+        return $result;
+    }
+
+    public function getBusinessEntityByGuid ($GUID)
+    {
+        $cache = Yii::$app->cache;
+        $business = $cache->get('Business_'.$GUID);
+
+        if(!($business === false))
+            return $business;
+
+        $client = $this->getSoapClient('cerber');
+        $request = new getBusinessEntityByGuidRequest();
+        $request->guid = $GUID;
+
+        $result = $client->GetBusinessEntityByGuid($request);
+
+        if(isset($result))
+            $cache->add('Business_'.$GUID, $result, 60*60*24);
+        return $result;
+    }
+
+    public function getForeignEnterpriseList ($name)
+    {
+        $client = $this->getSoapClient('cerber');
+
+        $request = new getForeignEnterpriseListRequest();
+        $request->enterprise = new Enterprise();
+        $request->enterprise->name = $name;
+        $request->listOptions = new ListOptions();
+        $request->listOptions->count = 10;
+        $request->listOptions->offset = 0;
+
+        $result = $client->GetForeignEnterpriseList($request);
+
+        return $result;
+    }
+
+    public function getRussianEnterpriseList ($name)
+    {
+        $client = $this->getSoapClient('cerber');
+
+        $request = new getRussianEnterpriseListRequest();
+        $request->enterprise = new Enterprise();
+        $request->enterprise->name = $name;
+        $request->listOptions = new ListOptions();
+        $request->listOptions->count = 10;
+        $request->listOptions->offset = 0;
+
+        $result = $client->GetRussianEnterpriseList($request);
+
+        return $result;
+    }
 }

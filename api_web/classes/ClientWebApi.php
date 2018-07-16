@@ -659,13 +659,6 @@ class ClientWebApi extends WebApi
                 $user->profile->setAttribute('phone', $post['phone']);
             }
 
-            if (!empty($post['email']) && $post['email'] != $user->email) {
-                if (User::find()->where(['email' => $post['email']])->exists()) {
-                    throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
-                }
-                $user->email = $post['email'];
-            }
-
             if (!empty($post['role_id'])) {
 
                 $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
@@ -713,6 +706,10 @@ class ClientWebApi extends WebApi
 
         if (empty($post['id'])) {
             throw new BadRequestHttpException('empty_param|id');
+        }
+
+        if ($post['id'] === $this->user->id) {
+            throw new BadRequestHttpException('Удаление себя из списка сотрудников недоступно.');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();

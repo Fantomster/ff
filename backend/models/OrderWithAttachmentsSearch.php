@@ -51,6 +51,13 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
         $orderTable = Order::tableName();
         $assignmentTable = OrderAssignment::tableName();
 
+        $editableOrders = [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_DONE,
+        ];
+        
         $query = OrderAttachment::find();
 
         $dataProvider = new ActiveDataProvider([
@@ -63,7 +70,7 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
 
         $query->joinWith('assignment', true);
 
-        //$query->where("attachments.id is not null");
+        $query->where(["order.status" => $editableOrders]);
 
         $query->select([
             "$orderTable.id as order_id",

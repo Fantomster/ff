@@ -206,7 +206,8 @@ class UserWebApi extends \api_web\components\WebApi
      * [
      *      'organization_id' => 12
      * ]
-     * @return int
+     * @param array $post
+     * @return bool
      * @throws BadRequestHttpException
      */
     public function setOrganization(array $post)
@@ -245,9 +246,12 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new \Exception('access denied.');
             }
 
-            $result = $this->user->save();
+            if (!$this->user->validate() || !$this->user->save()) {
+                throw new ValidationException($this->user->getFirstErrors());
+            }
+
             $transaction->commit();
-            return $result;
+            return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);

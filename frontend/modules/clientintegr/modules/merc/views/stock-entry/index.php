@@ -239,6 +239,12 @@ Modal::widget([
                             <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
+                    <?=
+                    Html::a('<i class="fa fa-plus" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Добавление входной продукции на предприятие  </span>', ['create'], [
+                        'class' => 'btn btn-success',
+                        'data-pjax' => 0,
+                    ]);
+                    ?>
                     <?php
                     /*$searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([

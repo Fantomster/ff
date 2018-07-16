@@ -28,7 +28,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return false;
         }
 
-        if(!mercDicconst::checkSettings()) {
+        if (!mercDicconst::checkSettings()) {
             $this->redirect(['/clientintegr/merc/settings']);
             return false;
         }
@@ -55,6 +55,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
+
     public function actionNolic()
     {
         return $this->render('/default/_nolic');
@@ -63,13 +64,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionView($uuid)
     {
         try {
+
             $document = new getVetDocumentByUUID();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e) {
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
@@ -86,32 +87,31 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $start = Yii::$app->params['merc_settings']['start_date'];
 
         if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null) {
-            Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
-        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index'])); }
+            Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до ' . Yii::$app->formatter->asDatetime($start, "php:j M Y") . ' необходимо перейти в систему Меркурий');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
 
         try {
             $api = mercuryApi::getInstance();
 
-            if(!$api->getVetDocumentDone($uuid))
+            if (!$api->getVetDocumentDone($uuid))
                 throw new \Exception('Done error');
 
-       } catch (\Error $e)
-        {
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
 
         Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
         $this->updateVSDList();
-            if (Yii::$app->request->isAjax) {
-                return true;
-            } else {
-                return $this->redirect(['view', 'uuid' => $uuid]);
-            }
+        if (Yii::$app->request->isAjax) {
+            return true;
+        } else {
+            return $this->redirect(['view', 'uuid' => $uuid]);
+        }
     }
 
     public function actionDonePartial($uuid, $reject = false)
@@ -119,34 +119,32 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $start = Yii::$app->params['merc_settings']['start_date'];
 
         if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null) {
-            Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до '.Yii::$app->formatter->asDatetime($start, "php:j M Y").' необходимо перейти в систему Меркурий');
-        return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index'])); }
+            Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до ' . Yii::$app->formatter->asDatetime($start, "php:j M Y") . ' необходимо перейти в систему Меркурий');
+            return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
+        }
 
         $model = new rejectedForm();
-        if($reject)
+        if ($reject)
             $model->decision = VetDocumentDone::RETURN_ALL;
         else
             $model->decision = VetDocumentDone::PARTIALLY;
 
-       try {
+        try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
 
-                if(!$api->getVetDocumentDone($uuid, $model->attributes))
+                if (!$api->getVetDocumentDone($uuid, $model->attributes))
                     throw new \Exception('Done error');
 
                 Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
                 if (Yii::$app->request->isAjax)
                     return true;
                 return $this->redirect(['view', 'uuid' => $uuid]);
-           }
-        } catch (\Error $e)
-        {
+            }
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
@@ -154,13 +152,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         try {
             $document = new getVetDocumentByUUIDRequest();
             $document->getDocumentByUUID($uuid);
-        }catch (\Error $e)
-        {
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         }
@@ -180,7 +175,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionDoneAll()
     {
         $selected = Yii::$app->request->get('selected');
-        $start =  Yii::$app->params['merc_settings']['start_date'];
+        $start = Yii::$app->params['merc_settings']['start_date'];
         $error = false;
 
         try {
@@ -191,35 +186,33 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
                 if ((MercVsd::find()->where("uuid = '$uuid' and date_doc >= '$start'")->one()) == null) {
                     Yii::$app->session->setFlash('error', 'Для гашения сертификатов ВСД созданных до ' . Yii::$app->formatter->asDatetime($start, "php:j M Y") . ' необходимо перейти в систему Меркурий');
-                $error = true;
+                    $error = true;
                 }
-                if(!$api->getVetDocumentDone($uuid))
+                if (!$api->getVetDocumentDone($uuid))
                     throw new \Exception('Done error');
             }
-        } catch (\Error $e)
-        {
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
 
-        if(!$error)
-        Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
+        if (!$error)
+            Yii::$app->session->setFlash('success', 'ВСД успешно погашены!');
         $this->updateVSDList();
         return $this->redirect(['index']);
     }
 
-    public function actionAjaxLoadVsd() {
+    public function actionAjaxLoadVsd()
+    {
         if (Yii::$app->request->post()) {
             $list = Yii::$app->request->post('list');
 
             $vsd = new VetDocumentsChangeList();
 
-            if($vsd->handUpdateData($list)) {
+            if ($vsd->handUpdateData($list)) {
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                 return ["title" => 'ВСД успешно загружены', "type" => "success"];
             }

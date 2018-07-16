@@ -23,6 +23,9 @@ class Module extends \yii\base\Module
             'rkeeper' => [
                 'class' => 'api_web\modules\integration\modules\rkeeper\Module',
             ],
+            'one_s' => [
+                'class' => 'api_web\modules\integration\modules\one_s\Module',
+            ],
         ];
     }
 }

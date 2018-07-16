@@ -176,15 +176,10 @@ class getVetDocumentByUUIDRequest extends Model
         $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->authentication->purpose->guid);
         $purpose = $purpose->purpose->name;
 
-        $producer = null;
+        $producer = isset($doc->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($doc->certifiedConsignment->batch->origin->producer) : null;
 
-        if(isset($doc->certifiedConsignment->batch->producerList->producer)) {
-            $producer_raw = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->batch->producerList->producer->enterprise->uuid);
-            $producer = $producer_raw->enterprise;
-
-            $producer = $producer->name . '(' .
-                $producer->address->addressView
-                . ')';
+        if(isset($producer)) {
+            $producer = implode(", ",$producer['name']);
         }
 
         $this->batch =

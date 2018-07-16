@@ -24,13 +24,8 @@ class ikarApi extends baseApi
         $request = new getCountryByGuidRequest();
         $request->guid = $GUID;
 
-        try {
-            $result = $client->GetCountryByGuid($request);
-        } catch (\SoapFault $e)
-        {
-            var_dump($e->detail); die();
-        }
-
+        $result = $client->GetCountryByGuid($request);
+        
         if($result != null)
             $cache->add('Country_'.$GUID, $result, 60*60*24*7);
 

@@ -346,11 +346,13 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
 </section>
 <?php
 $url = Url::toRoute('waybill/send-by-button');
+$query_string = Yii::$app->session->get('query_string');
 $js = <<< JS
     $(function () {
         $(' .sendonbutton').on('click', '.export-waybill-btn', function () {
             $('a .export-waybill-btn').click(function(){ return false;});
             var url = '$url';
+            var query_string = '$query_string';
             var id = $(this).data('id');
             var oid = $(this).data('oid');
             swal({
@@ -376,6 +378,7 @@ $js = <<< JS
                                     path = document.location.href;
                                     arr = path.split('waybill');
                                     path = arr[0] + 'waybill/index';
+                                    if (query_string!='') {path = path+'?'+query_string;}
                                     loc = "document.location.href='"+path+"'";
                                     setTimeout(loc, 1500);
                                     $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});

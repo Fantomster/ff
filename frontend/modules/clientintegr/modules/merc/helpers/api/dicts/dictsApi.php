@@ -49,4 +49,14 @@ class dictsApi extends baseApi
             $cache->add('Unit_'.$GUID, $result, 60*60*24*7);
         return $result;
     }
+
+    public function getUnitList ()
+    {
+        $client = $this->getSoapClient('dicts');
+
+        $request = new getUnitListRequest();
+        $result = $client->GetUnitList($request);
+
+        return $result;
+    }
 }

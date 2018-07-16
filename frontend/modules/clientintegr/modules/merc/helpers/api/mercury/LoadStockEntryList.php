@@ -18,7 +18,6 @@ class LoadStockEntryList extends Model
 
         foreach ($list as $item)
         {
-
             if(!$cache->get('stockEntryRaw_'.$item->GUID))
                 $cache->add('stockEntry_'.$item->GUID, $item,60);
 

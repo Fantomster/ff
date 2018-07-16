@@ -6,6 +6,8 @@ use yii2assets\pdfjs\PdfJs;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
+$this->title = 'Редактирование заказа';
+
 $this->registerCss('
         .container{width:100% !important;}
         .wrap > .container {padding: 65px 15px 20px;}

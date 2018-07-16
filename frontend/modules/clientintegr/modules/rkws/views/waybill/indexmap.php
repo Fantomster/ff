@@ -252,7 +252,8 @@ $columns = array(
         'vAlign'=>'middle',
         // 'width'=>'100px',
         'format'=>['decimal',2],
-        'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+        //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+        'footer' => \api\common\models\RkWaybilldata::getSumByWaybillid($wmodel->id),
         'pageSummary'=>true
     ]);
 

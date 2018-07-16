@@ -708,6 +708,10 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('empty_param|id');
         }
 
+        if ($post['id'] === $this->user->id) {
+            throw new BadRequestHttpException('Удаление себя из списка сотрудников недоступно.');
+        }
+
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);

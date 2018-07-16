@@ -2,6 +2,7 @@
 
 namespace api\common\models\iiko;
 
+use api\common\models\iikoWaybillDataSearch;
 use Yii;
 
 /**
@@ -161,5 +162,19 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     public function getProduct()
     {
         return $this->hasOne(iikoProduct::className(), ['id' => 'product_rid']);
+    }
+
+    /**
+     * @return double
+     */
+    public function getSumByWaybillid($number)
+    {
+        Yii::$app->get('db_api');
+        $sum=0;
+        $summes = iikoWaybillData::find()->where(['waybill_id' => $number])->all();
+        foreach ($summes as $summa) {
+            $sum+=$summa->sum;
+        }
+        return $sum;
     }
 }

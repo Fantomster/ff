@@ -60,7 +60,7 @@ class VetDocumentsChangeList extends Model
                 'article' => $item->certifiedConsignment->batch->productItem->code,
                 'production_date' => MercVsd::getDate($item->certifiedConsignment->batch->dateOfProduction),
                 'expiry_date' => MercVsd::getDate($item->certifiedConsignment->batch->expiryDate),
-                'batch_id' => $item->certifiedConsignment->batch->batchID,
+                'batch_id' => !is_array($item->certifiedConsignment->batch->batchID) ? $item->certifiedConsignment->batch->batchID : implode(", ", $item->certifiedConsignment->batch->batchID),
                 'perishable' =>  (int)$item->certifiedConsignment->batch->perishable,
                 'producer_name' => isset($producer) ? ($producer->enterprise->name.'('. $producer->enterprise->address->addressView .')') : null,
                 'producer_guid' => $item->certifiedConsignment->batch->origin->producer->enterprise->guid,

@@ -306,6 +306,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;
+        $model->discount = $ord->discount;
+        $model->discount_type = $ord->discount_type;
         $is_invoice = OneSPconst::getSettingsColumn($user->organization_id);
         $model->is_invoice = $is_invoice;
 

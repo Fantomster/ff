@@ -194,7 +194,8 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'vAlign' => 'middle',
                                     'format' => ['decimal', 2],
                                     'pageSummary' => true,
-                                    'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+                                    //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+                                    'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
                                 ],
                                 [
                                     'attribute' => 'vat',
@@ -366,12 +367,12 @@ $js = <<< JS
             }).then((result) => {
                 if(result.value)
                 {
-                    swal({
+                    swal({console.log('1-1');
                         title: 'Идёт отправка',
                         text: 'Подождите, пока закончится выгрузка...',
                         onOpen: () => {
                             swal.showLoading();
-                            $.post(url, {id:id}, function (data) {
+                            $.post(url, {id:id}, function (data) {console.log('1-2');
                                 if (data.success === true) {
                                     swal.close();
                                     swal('Готово', '', 'success');
@@ -390,7 +391,7 @@ $js = <<< JS
                                     )
                                 }
                             })
-                            .fail(function() { 
+                            .fail(function() { console.log('2-1');
                                swal(
                                     'Ошибка',
                                     'Обратитесь в службу поддержки.',

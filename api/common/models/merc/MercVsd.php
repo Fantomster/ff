@@ -2,6 +2,7 @@
 
 namespace api\common\models\merc;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use Yii;
 
 /**
@@ -235,5 +236,25 @@ class MercVsd extends \yii\db\ActiveRecord
         }
 
         return $first_date;
+    }
+
+    public static function getProduccerData($producer)
+    {
+        if(!is_array($producer))
+            $data[] = $producer;
+        else
+            $data = $producer;
+
+        $result = null;
+        foreach ($data as $item)
+        {
+            $res = isset($item->enterprise->uuid) ? cerberApi::getInstance()->getEnterpriseByUuid($item->enterprise->uuid) : null;
+
+            $result['name'][] = isset($res) ? ($res->enterprise->name.'('. $res->enterprise->address->addressView .')') : null;
+            $result['guid'][] = $item->enterprise->guid;
+
+        }
+
+        return $result;
     }
 }

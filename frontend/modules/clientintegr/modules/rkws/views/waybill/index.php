@@ -182,6 +182,8 @@ $this->registerCss("
                     $wmodel = null;
                 }
                 $order_id = $model->id;
+                $query_string = Yii::$app->getRequest()->getQueryString();
+                Yii::$app->session->set("query_string", $query_string);
                 return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'order_id'=>$order_id, 'lic' => $lic, 'licucs' => $licucs]);
             },
             'headerOptions'=>['class'=>'kartik-sheet-style'],

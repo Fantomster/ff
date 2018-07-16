@@ -17,4 +17,9 @@ class VsdHttp {
     public $pdfLink = 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&isplayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=';
     public $username;
     public $password;
+    private $session = 'vsd-http-cookie';
+    
+    private function getCookie() {
+        if (!isset())
+    }
 }

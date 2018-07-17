@@ -355,13 +355,13 @@ Modal::widget([
 </section>
 
 <?php
-$urlCreateVSD = Url::to(['create-transport-vsd']);
+$urlCreateVSD = Url::to(['transport-vsd/step-1']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".create_vsd", function(e) {
         if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlCreateVSDl?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
+            window.location.href =  "$urlCreateVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
         }
     });
 

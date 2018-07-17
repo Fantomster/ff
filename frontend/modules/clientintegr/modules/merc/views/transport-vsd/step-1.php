@@ -1,0 +1,177 @@
+<?php
+use yii\widgets\Breadcrumbs;
+use yii\helpers\Url;
+use yii\widgets\Pjax;
+use common\models\Users;
+use unclead\multipleinput\TabularInput;
+use yii\bootstrap\ActiveForm;
+use yii\bootstrap\Html;
+$this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД '])
+?>
+<section class="content-header">
+        <h1 class="margin-right-350">
+            <i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.mercury.new_transport_vsd_create', ['ru'=>'Создание нового транспортного ВСД']) ?>
+        </h1>
+        <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
+                'url' => ['/clientintegr/default'],
+            ],
+            Yii::t('message', 'frontend.views.mercury.new_transport_vsd_step_one', ['ru'=>'Шаг 1. Создание нового транспортного ВСД'])
+        ],
+    ])
+?>
+</section>
+<section class="content">
+<div class="box box-info">
+    <div class="box-body">
+            <div class="panel-body">
+                <ul class="nav fk-tab nav-tabs  pull-left">
+                    <?= '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>';?>
+                    <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_recipient_info', ['ru'=>' Информация о товарополучателе'])).'</li>'?>
+                    <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_transport_info', ['ru'=>'Информация о транспорте'])).'</li>'?>
+                </ul>
+
+
+                <ul class="fk-prev-next pull-right">
+                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
+                </ul>
+        </div>
+        <?php Pjax::begin(['id' => 'pjax-container'])?>
+        <div class="panel-body">
+            <div class="callout callout-fk-info">
+                <h4><?= Yii::t('message', 'frontend.views.vendor.step_one_two', ['ru'=>'ШАГ 1']) ?></h4>
+                <p><?=Yii::t('message', 'frontend.views.mercury.enter_cat_name', ['ru'=>'Введите название для нового каталога'])?></p>
+            </div>
+            <?php
+            $form = ActiveForm::begin([
+                'enableAjaxValidation' => false,
+                'enableClientValidation' => false,
+                'validateOnChange' => false,
+                'validateOnSubmit' => true,
+                'validateOnBlur' => false,
+                'options' => ['style' => "width: 100%;", 'id' => 'product_list_form']]);
+
+            echo TabularInput::widget([
+                'models' => $list,
+                'attributeOptions' => [
+                    'enableAjaxValidation' => false,
+                    'enableClientValidation' => false,
+                    'validateOnChange' => false,
+                    'validateOnSubmit' => true,
+                    'validateOnBlur' => false,
+                ],
+                'columns' => [
+                    [
+                        'name'  => 'id',
+                        'title' => 'ID',
+                        'type'  => \unclead\multipleinput\MultipleInputColumn::TYPE_HIDDEN_INPUT,
+                    ],
+                    [
+                        'name'  => 'product_name',
+                        'title' =>  Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
+                        'enableError' => true,
+                    ],
+                    [
+                        'name'  => 'amount',
+                        'title' =>  Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
+                        'enableError' => true,
+                        'type' => \kartik\widgets\TouchSpin::className(),
+                        'options' => function ($data) { return [
+                            'pluginOptions' => [
+                                'initval' => 1,
+                                'min' => 1,
+                                'max' => $data->amount,
+                                'step' =>  1,
+                                //'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
+                                //'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
+                                'buttonup_class' => 'btn btn-default',
+                                'buttondown_class' => 'btn btn-default',
+                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
+                            ],
+                        ];}
+                    ],
+                    [
+                        'name'  => 'total_amount',
+                        'title' =>  Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
+                        'enableError' => true,
+                    ],
+                    [
+                        'name' => 'unit',
+                        'title' => 'Ед. измерения',
+                        'type'  => 'static',
+                    ],
+                ]
+            ]); ?>
+            <div class="form-group">
+                <?php echo Html::submitButton($invoiceModel->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $invoiceModel->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+            </div>
+
+            <?php ActiveForm::end(); ?>
+        </div>
+        <?php Pjax::end(); ?>
+    </div>
+</div>
+</section>
+<?php
+$router = Url::to(['step-1']);
+$this->registerJs('
+/** 
+ * Forward port jQuery.live()
+ * Wrapper for newer jQuery.on()
+ * Uses optimized selector context 
+ * Only add if live() not already existing.
+*/
+if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))) {
+  jQuery.fn.extend({
+      live: function (event, callback) {
+         if (this.selector) {
+              jQuery(document).on(event, this.selector, callback);
+          }
+      }
+  });
+}
+$(".step-2").click(function(e){
+e.preventDefault();
+var urlStap = "'.$router.'";
+$.ajax({
+    url: urlStap,
+    type: "POST",
+    dataType: "json",
+    data: $("#product_list_form" ).serialize(),
+    cache: false,
+    success: function(response) {
+            
+            if(response.success){
+                var url = "' . Url::toRoute(['vendor/step-2', 'id' => '']) . '"+response.cat_id;
+                $(location).attr("href",url);
+                }else{
+            if(response.type==1){
+            bootbox.dialog({
+                    message: response.alert.body,
+                    title: response.alert.title,
+                    buttons: {
+                        success: {
+                          label: "' . Yii::t('message', 'frontend.views.vendor.ok_three', ['ru'=>'Окей']) . ' ",
+                          className: "btn-success btn-md",
+                        },
+                    },
+                    className: response.alert.class
+                });
+            }
+            console.log(response);    
+            }
+        },
+        failure: function(errMsg) {
+        console.log(errMsg);
+        }
+    });
+});        
+');
+?>

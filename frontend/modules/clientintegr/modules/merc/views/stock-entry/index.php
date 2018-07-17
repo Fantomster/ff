@@ -334,7 +334,7 @@ Modal::widget([
                         <?php
                         //$checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
                         echo GridView::widget([
-                            'id' => 'vetDocumentsList',
+                            'id' => 'vetStoreEntryList',
                             'dataProvider' => $dataProvider,
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             //'filterModel' => $searchModel,
@@ -347,7 +347,7 @@ Modal::widget([
                         ?>
                     </div>
                     <?php Pjax::end(); ?>
-                    <?= '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success done_all']) . '</div>' ?>
+                    <?= '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
                 </div>
             </div>
         </div>
@@ -355,13 +355,13 @@ Modal::widget([
 </section>
 
 <?php
-$urlDoneAll = Url::to(['done-all']);
+$urlCreateVSD = Url::to(['create-transport-vsd']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
 $customJs = <<< JS
 var justSubmitted = false;
-$(document).on("click", ".done_all", function(e) {
-        if($("#vetDocumentsList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlDoneAll?selected=" +  $("#vetDocumentsList").yiiGridView("getSelectedRows");  
+$(document).on("click", ".create_vsd", function(e) {
+        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
+            window.location.href =  "$urlCreateVSDl?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
         }
     });
 
@@ -435,7 +435,7 @@ $("#ajax-load").on("click", ".save-form", function() {
             }
         }); 
  */
- $(document).on("change keyup paste cut", "#product_name", function() {
+/* $(document).on("change keyup paste cut", "#product_name", function() {
      if (justSubmitted) {
             clearTimeout(justSubmitted);
         }
@@ -443,7 +443,7 @@ $("#ajax-load").on("click", ".save-form", function() {
             justSubmitted = false;
             $("#search-form").submit();
         }, 700);
-    });
+    });*/
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -223,7 +223,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionGetPdf($uuid) {
         $vsdHttp = new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
             'username' => mercDicconst::getSetting("vetis_login"),
-            'password' => '2wsx2WSX', //mercDicconst::getSetting("vetis_password"),
+            'password' => mercDicconst::getSetting("vetis_password"), //'2wsx2WSX', //
         ]);
         $data = $vsdHttp->getPdfData($uuid);
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;

@@ -15,6 +15,7 @@ class mercDicconstSearch extends mercDicconst
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['denom' => SORT_ASC]],
         ]);
 
         $this->load($params);
@@ -34,7 +35,7 @@ class mercDicconstSearch extends mercDicconst
         ]);
 
         $query->andFilterWhere(['like', 'comment', $this->comment]);
-
+        
         return $dataProvider;
     }
 }

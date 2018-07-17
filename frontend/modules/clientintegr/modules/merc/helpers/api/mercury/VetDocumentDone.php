@@ -100,14 +100,24 @@ class VetDocumentDone extends Component
         $data->delivery->transportStorageType = $this->doc->certifiedConsignment->transportStorageType;
 
         $accompanyingForms = new ConsignmentDocumentList();
-        if(isset($this->doc->referencedDocument))
-            if(($this->doc->referencedDocument->type >= 1) && ($this->doc->referencedDocument->type <= 5)) {
-                $accompanyingForms->waybill = new Waybill();
-                $accompanyingForms->waybill->issueSeries = isset($this->doc->referencedDocument->issueSeries) ? $this->doc->referencedDocument->issueSeries : null;
-                $accompanyingForms->waybill->issueNumber = $this->doc->referencedDocument->issueNumber;
-                $accompanyingForms->waybill->issueDate = $this->doc->referencedDocument->issueDate;
-                $accompanyingForms->waybill->type = $this->doc->referencedDocument->type;
+        if(isset($this->doc->referencedDocument)) {
+            $docs = null;
+            if (!is_array($this->doc->referencedDocument))
+                $docs[] = $this->doc->referencedDocument;
+            else
+                $docs = $this->doc->referencedDocument;
+
+            foreach ($docs as $item) {
+                if (($item->type >= 1) && ($item->type <= 5)) {
+                    $accompanyingForms->waybill = new Waybill();
+                    $accompanyingForms->waybill->issueSeries = isset($item->issueSeries) ? $item->issueSeries : null;
+                    $accompanyingForms->waybill->issueNumber = $item->issueNumber;
+                    $accompanyingForms->waybill->issueDate = $item->issueDate;
+                    $accompanyingForms->waybill->type = $item->type;
+                    break;
+                }
             }
+        }
         $accompanyingForms->vetCertificate = new VetDocument();
         $accompanyingForms->vetCertificate->uuid = $this->UUID;
         $data->delivery->accompanyingForms = $accompanyingForms;

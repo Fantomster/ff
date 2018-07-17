@@ -273,11 +273,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($id);
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render($vi, [
@@ -304,11 +302,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->status_id = 1;
         $model->org = $ord->client_id;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+            $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render('create', [

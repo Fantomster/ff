@@ -214,6 +214,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                         'label' => 'Лицензии MixCart',
                                         'url' => ['/integration/index'],
                                     ],
+                                    [
+                                        'label' => 'Журнал',
+                                        'url' => ['/journal/index'],
+                                    ],
                                 //  [
                                 //      'label' => 'Загруженные каталоги',
                                 //      'url' => ['/goods/uploaded-catalogs'],

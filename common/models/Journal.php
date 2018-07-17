@@ -60,15 +60,24 @@ class Journal extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
-            'service_id' => Yii::t('app', 'Service ID'),
+            'service_id' => Yii::t('app', 'Сервис'),
             'operation_code' => Yii::t('app', 'Operation Code'),
             'user_id' => Yii::t('app', 'User ID'),
-            'organization_id' => Yii::t('app', 'Organization ID'),
+            'organization_id' => Yii::t('app', 'Организация'),
             'response' => Yii::t('app', 'Response'),
             'log_guide' => Yii::t('app', 'Log Guide'),
-            'type' => Yii::t('app', 'Type'),
+            'type' => Yii::t('app', 'Результат'),
+            'record.response' => Yii::t('app', 'Ответ сервера'),
             'created_at' => Yii::t('app', 'Created At')
         ];
+    }
+
+    /**
+     * Информация о сервисе
+     * @return \yii\db\ActiveQuery
+     */
+    public function getService() {
+        return $this->hasOne(AllService::className(), ['id' => 'service_id']);
     }
 
     /**
@@ -77,6 +86,22 @@ class Journal extends \yii\db\ActiveRecord
      */
     public function getOperation() {
         return $this->hasOne(AllServiceOperation::className(), ['service_id' => 'service_id', 'code' => 'operation_code']);
+    }
+
+    /**
+     * Информация о пользователе
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser() {
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * Организация
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization() {
+        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
     }
 
     /**

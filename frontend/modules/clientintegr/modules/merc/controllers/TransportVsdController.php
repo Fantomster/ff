@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
+use frontend\modules\clientintegr\modules\merc\models\TransportVsd;
 use Yii;
 use yii\bootstrap\ActiveForm;
 
@@ -39,9 +40,19 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function actionStep1()
     {
-        $selected = Yii::$app->request->get('selected');
-        $list = MercStockEntry::find()->where("id in ($selected)")->all();
+        if(Yii::$app->request->isGet)
+            $selected = Yii::$app->request->get('selected');
+        else {
+            $post = Yii::$app->request->post('TransportVsd');
+            $res = [];
+            foreach ($post as $item)
+            {
+                $res[] = $item['id'];
+            }
+            $selected = implode(",", $res);
+        }
 
+            $list = TransportVsd::find()->where("id in ($selected)")->all();
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
                 var_dump(1);
         }

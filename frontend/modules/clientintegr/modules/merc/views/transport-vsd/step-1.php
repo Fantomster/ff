@@ -6,7 +6,17 @@ use common\models\Users;
 use unclead\multipleinput\TabularInput;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
-$this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД '])
+$this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД ']);
+$style= <<< CSS
+
+  .js-input-remove {
+    display: none;
+  }
+  .js-input-plus {
+    display: none;
+  }
+CSS;
+ $this->registerCss($style);
 ?>
 <section class="content-header">
         <h1 class="margin-right-350">
@@ -78,13 +88,13 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                         'enableError' => true,
                     ],
                     [
-                        'name'  => 'amount',
+                        'name'  => 'select_amount',
                         'title' =>  Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
                         'enableError' => true,
                         'type' => \kartik\widgets\TouchSpin::className(),
                         'options' => function ($data) { return [
                             'pluginOptions' => [
-                                'initval' => 1,
+                                'initval' => isset($data->select_amount) ? $data->select_amount : $data->amount,
                                 'min' => 1,
                                 'max' => $data->amount,
                                 'step' =>  1,
@@ -98,9 +108,12 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                         ];}
                     ],
                     [
-                        'name'  => 'total_amount',
-                        'title' =>  Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
-                        'enableError' => true,
+                        'name'  => 'amount',
+                        'title' =>  Yii::t('message', 'frontend.client.integration.max_volume', ['ru' => 'Макс. Объём']),
+                        'type'  => 'static',
+                        'value' => function ($data) {
+                            return round($data->amount);
+                        }
                     ],
                     [
                         'name' => 'unit',
@@ -109,10 +122,6 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                     ],
                 ]
             ]); ?>
-            <div class="form-group">
-                <?php echo Html::submitButton($invoiceModel->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $invoiceModel->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
-            </div>
-
             <?php ActiveForm::end(); ?>
         </div>
         <?php Pjax::end(); ?>

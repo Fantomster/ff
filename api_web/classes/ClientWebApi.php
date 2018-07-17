@@ -321,7 +321,7 @@ class ClientWebApi extends WebApi
             if (empty($rel)) {
                 throw new BadRequestHttpException('Relation not found.');
             }
-            
+
             switch ($post['type']) {
                 case 'user_phone':
                     $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
@@ -656,7 +656,14 @@ class ClientWebApi extends WebApi
             }
 
             if (!empty($post['phone'])) {
-                $user->profile->setAttribute('phone', $post['phone']);
+                $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
+                if (mb_substr($phone, 0, 1) == '8') {
+                    $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
+                }
+                if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+                    throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+                }
+                $user->profile->setAttribute('phone', $phone);
             }
 
             if (!empty($post['role_id'])) {

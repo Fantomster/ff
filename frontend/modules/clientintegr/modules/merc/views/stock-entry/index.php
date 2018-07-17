@@ -44,20 +44,17 @@ Modal::widget([
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
     <?php
-   // $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
     $timestamp_now=time();
     ($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
     $columns = array (
-        /*[
+        [
             'class' => 'yii\grid\CheckboxColumn',
-            'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
-            'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
+            'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
+            'headerOptions'    =>   ['style' => 'text-align:center; '],
             'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
-                $enable = !($model->status == MercVsd::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
-                $style = ($enable ) ? "visibility:hidden" : "";
-                return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
+                return ['value' => $model->uuid,'class'=>'checkbox-group_operations'];
             }
-        ],*/
+        ],
         [
             'attribute' => 'entryNumber',
             'format' => 'raw',
@@ -346,14 +343,11 @@ Modal::widget([
                             'options' => ['class' => ''],
                             'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                             'columns' => $columns
-                        ]);/*
-                        if ($lic_merc==1) {
-                            if ($searchModel->type != 2 && ($searchModel->status == 'CONFIRMED' || $searchModel->status == null))
-                                echo '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']) . '</div>';
-                        }*/
+                        ]);
                         ?>
                     </div>
                     <?php Pjax::end(); ?>
+                    <?= '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success done_all']) . '</div>' ?>
                 </div>
             </div>
         </div>
@@ -403,7 +397,7 @@ $("#ajax-load").on("click", ".save-form", function() {
         return false;
     });
 
- $("document").ready(function(){
+ /*$("document").ready(function(){
         $(".box-body").on("change", "#statusFilter", function() {
             $("#search-form").submit();
         });
@@ -440,7 +434,7 @@ $("#ajax-load").on("click", ".save-form", function() {
                 }, 500);
             }
         }); 
- 
+ */
  $(document).on("change keyup paste cut", "#product_name", function() {
      if (justSubmitted) {
             clearTimeout(justSubmitted);

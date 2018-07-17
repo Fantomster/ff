@@ -1,4 +1,12 @@
-<b>Выберите заказ для связи с накладной:</b><br>
+<div class="row">
+    <div class="col-md-5">
+        <b>Выберите заказ для связи с накладной:</b>
+    </div>
+    <div class="col-md-2"></div>
+    <div class="col-md-5"></div>
+
+</div>
+<br>
 <?php
 use \common\models\Order;
 use yii\web\View;
@@ -18,6 +26,10 @@ $columns = [
         'attribute' => 'id',
         'value' => 'id',
         'label' => '№',
+    ],
+    [
+        'attribute' => 'waybill_number',
+        'value' => 'waybill_number',
     ],
     [
         'attribute' => 'vendor.name',

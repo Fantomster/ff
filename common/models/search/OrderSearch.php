@@ -79,7 +79,6 @@ class OrderSearch extends Order
         $query = Order::find();
         $this->load($params);
 
-
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
             $t1_f = $from->format('Y-m-d H:i:s');
@@ -201,6 +200,10 @@ class OrderSearch extends Order
             $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         }
         $query->andFilterWhere(['client_id' => $this->client_id]);
+
+        if(isset($params['invoice_id'])){
+            $query->rightJoin('integration_invoice', 'integration_invoice.number=order.waybill_number');
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

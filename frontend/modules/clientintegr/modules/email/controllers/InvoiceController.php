@@ -54,6 +54,7 @@ class InvoiceController extends Controller
         $params = \Yii::$app->request->getQueryParams();
         $params['OrderSearch']['client_id'] = $user->organization_id;
         $params['OrderSearch']['client_search_id'] = $user->organization_id;
+        //dd($params);
         $searchModel = new OrderSearch();
         $searchModel->status_array = [Order::STATUS_DONE, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
         $dataProvider = $searchModel->search($params);

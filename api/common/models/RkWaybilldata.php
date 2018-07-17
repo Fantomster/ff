@@ -200,4 +200,18 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         return \Yii::$app->db_api;
     }
 
+    /**
+     * @return double
+     */
+    public function getSumByWaybillid($number)
+    {
+        Yii::$app->get('db_api');
+        $sum=0;
+        $summes = RkWaybillData::find()->where(['waybill_id' => $number])->all();
+        foreach ($summes as $summa) {
+            $sum+=$summa->sum;
+        }
+        return $sum;
+    }
+
 }

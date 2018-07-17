@@ -79,6 +79,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $organization = new Organization (["scenario" => "register"]);
             $organization->load($post, 'organization');
+            $organization->is_allowed_for_franchisee = 0;
 
             if ($organization->rating == null or empty($organization->rating) or empty(trim($organization->rating))) {
                 $organization->setAttribute('rating', 0);
@@ -91,6 +92,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
             $user->setOrganization($organization, true);
+            $user->setRelationUserOrganization($user->id, $organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
 
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
@@ -102,7 +104,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new ValidationException($e->validation);
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 
@@ -197,7 +199,7 @@ class UserWebApi extends \api_web\components\WebApi
             return $user->access_token;
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 
@@ -254,7 +256,7 @@ class UserWebApi extends \api_web\components\WebApi
             return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 

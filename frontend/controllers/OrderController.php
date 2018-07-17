@@ -121,6 +121,7 @@ class OrderController extends DefaultController {
                             'ajax-remove-from-guide',
                             'ajax-show-guide',
                             'ajax-select-vendor',
+                            'ajax-order-update-waybill',
                             'complete-obsolete',
                             'pjax-cart',
                         ],
@@ -2383,6 +2384,17 @@ class OrderController extends DefaultController {
         $value = Yii::$app->request->get('quantity');
         $session = Yii::$app->session;
         $session['GuideProductCount.'.$key] = $value;
+    }
+
+
+    public function actionAjaxOrderUpdateWaybill(){
+        $waybillNumber = Yii::$app->request->post('waybill_number') ?? null;
+        $orderID = Yii::$app->request->post('order_id') ?? null;
+        if(!$orderID) return 0;
+        $order = Order::findOne(['id' => $orderID]);
+        $order->waybill_number = $waybillNumber;
+        $order->save();
+        return $waybillNumber;
     }
     
 }

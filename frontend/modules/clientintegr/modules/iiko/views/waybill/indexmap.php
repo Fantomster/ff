@@ -367,7 +367,7 @@ $js = <<< JS
             }).then((result) => {
                 if(result.value)
                 {
-                    swal({console.log('1-1');
+                    swal({
                         title: 'Идёт отправка',
                         text: 'Подождите, пока закончится выгрузка...',
                         onOpen: () => {

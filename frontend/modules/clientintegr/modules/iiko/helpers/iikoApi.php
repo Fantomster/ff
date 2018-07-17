@@ -312,17 +312,16 @@ class iikoApi
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
-
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         if ($info['http_code'] !== 200) {
-            $logger::setType('error');
-            $logger::response(['info' => $info, 'response' => $response]);
-            return false;
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
+            return $response;
         }
 
-        $logger::response($response);
-        return $response;
+        $logger->response($response);
+        return true;
     }
 
     /**

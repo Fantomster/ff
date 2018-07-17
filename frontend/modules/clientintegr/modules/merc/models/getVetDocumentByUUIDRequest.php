@@ -176,15 +176,10 @@ class getVetDocumentByUUIDRequest extends Model
         $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->authentication->purpose->guid);
         $purpose = $purpose->purpose->name;
 
-        $producer = null;
+        $producer = isset($doc->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($doc->certifiedConsignment->batch->origin->producer) : null;
 
-        if(isset($doc->certifiedConsignment->batch->producerList->producer)) {
-            $producer_raw = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->batch->producerList->producer->enterprise->uuid);
-            $producer = $producer_raw->enterprise;
-
-            $producer = $producer->name . '(' .
-                $producer->address->addressView
-                . ')';
+        if(isset($producer)) {
+            $producer = implode(", ",$producer['name']);
         }
 
         $this->batch =
@@ -288,10 +283,19 @@ class getVetDocumentByUUIDRequest extends Model
         $this->transportStorageType = isset($doc->certifiedConsignment->transportStorageType) ? $doc->certifiedConsignment->transportStorageType : null;
         $this->cargoReloadingPointList = isset($doc->certifiedConsignment->cargoReloadingPointList) ? $doc->certifiedConsignment->cargoReloadingPointList : null;
 
-        if($doc->referencedDocument->type == 1) {
-            $this->waybillSeries = $doc->referencedDocument->issueSeries;
-            $this->waybillNumber = $doc->referencedDocument->issueNumber;
-            $this->waybillDate = $doc->referencedDocument->issueDate;
+        $docs = null;
+        if(!is_array($doc->referencedDocument))
+            $docs[] = $doc->referencedDocument;
+        else
+            $docs = $doc->referencedDocument;
+
+        foreach ($docs as $item) {
+            if (($item->type >= 1) && ($item->type <= 5)) {
+                $this->waybillSeries = isset($item->issueSeries) ? $item->issueSeries : null;
+                $this->waybillNumber = $item->issueNumber;
+                $this->waybillDate = $item->issueDate;
+                break;
+            }
         }
 
         $this->cargoExpertized = isset($doc->authentication->cargoExpertized) ? $doc->authentication->cargoExpertized : null;

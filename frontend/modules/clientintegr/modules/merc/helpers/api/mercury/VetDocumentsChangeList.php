@@ -28,8 +28,9 @@ class VetDocumentsChangeList extends Model
             $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
             $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
             $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
-            $producer = isset($item->certifiedConsignment->batch->origin->producer->enterprise->uuid) ? cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->batch->origin->producer->enterprise->uuid) : null;
 
+
+            $producer = isset($item->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($item->certifiedConsignment->batch->origin->producer) : null;
             $model = MercVsd::findOne(['uuid' => $item->uuid]);
 
             if($model == null)
@@ -60,19 +61,15 @@ class VetDocumentsChangeList extends Model
                 'article' => $item->certifiedConsignment->batch->productItem->code,
                 'production_date' => MercVsd::getDate($item->certifiedConsignment->batch->dateOfProduction),
                 'expiry_date' => MercVsd::getDate($item->certifiedConsignment->batch->expiryDate),
-                'batch_id' => $item->certifiedConsignment->batch->batchID,
+                'batch_id' => !is_array($item->certifiedConsignment->batch->batchID) ? $item->certifiedConsignment->batch->batchID : implode(", ", $item->certifiedConsignment->batch->batchID),
                 'perishable' =>  (int)$item->certifiedConsignment->batch->perishable,
-                'producer_name' => isset($producer) ? ($producer->enterprise->name.'('. $producer->enterprise->address->addressView .')') : null,
-                'producer_guid' => $item->certifiedConsignment->batch->origin->producer->enterprise->guid,
+                'producer_name' => isset($producer) ? serialize($producer['name']) : null,
+                'producer_guid' => isset($producer) ? serialize($producer['guid']) : null,
                 'low_grade_cargo' =>  (int)$item->certifiedConsignment->batch->lowGradeCargo,
                 'raw_data' => serialize($item)
             ]);
 
-            if(!$model->save()) {
-                var_dump($model->getErrors());
-                throw new \Exception('VSD save error');
-            }
-
+            $model->save(false);
         }
     }
 

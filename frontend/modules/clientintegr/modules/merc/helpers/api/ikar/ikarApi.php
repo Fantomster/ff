@@ -25,7 +25,7 @@ class ikarApi extends baseApi
         $request->guid = $GUID;
 
         $result = $client->GetCountryByGuid($request);
-
+        
         if($result != null)
             $cache->add('Country_'.$GUID, $result, 60*60*24*7);
 

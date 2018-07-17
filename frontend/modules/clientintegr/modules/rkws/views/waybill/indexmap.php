@@ -11,8 +11,8 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
-use api\common\models\RkAccess;
-use api\common\models\RkWaybill;
+//use api\common\models\RkAccess;
+//use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
 use common\components\Torg12Invoice;
@@ -376,7 +376,7 @@ array_push($columns,
                         <?=
 GridView::widget([
     'dataProvider' => $dataProvider,
-    'pjax' => true, // pjax is set to always true for this demo
+    'pjax' => false, // pjax is set to always true for this demo
     'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
     'filterPosition' => false,
     'columns' => $columns,
@@ -397,17 +397,98 @@ GridView::widget([
         'fontAwesome' => true,
     ],
 ]);
-?> 
+?>
+                        <div class="sendonbutton">
                         <?= Html::a('Вернуться',
             [$this->context->getLastUrl().'way='.$wmodel->order_id],
             ['class' => 'btn btn-success btn-export']);
         ?>
+                        <?php
+                        echo \yii\helpers\Html::a(
+                            Html::tag('b','Выгрузить накладную',
+                                [
+                                    'class' => 'btn btn-success',
+                                    'aria-hidden' => true
+                                ]),
+                            '#',
+                            [
+                                'class' => 'export-waybill-btn',
+                                'title' => Yii::t('backend', 'Выгрузить'),
+                                'data-pjax' => "0",
+                                'data-id' => $wmodel->id,
+                                'data-oid' => $wmodel->order_id,
+                            ])
+                        ?>
+                        </div>
                     </div>
                 </div>    
             </div>
         </div>        
     </div>            
 </section>
+
+<?php
+$url = Url::toRoute('waybill/sendws-by-button');
+$query_string = Yii::$app->session->get('query_string');
+$js = <<< JS
+    $(function () {
+        $(' .sendonbutton').on('click', '.export-waybill-btn', function () {
+            $('a .export-waybill-btn').click(function(){ return false;});
+            var url = '$url';
+            var query_string = '$query_string';
+            var id = $(this).data('id');
+            var oid = $(this).data('oid');
+            swal({
+                title: 'Выполнить выгрузку накладной?',
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Выгрузить',
+                cancelButtonText: 'Отмена',
+            }).then((result) => {
+                if(result.value)
+                {
+                    swal({
+                        title: 'Идёт отправка',
+                        text: 'Подождите, пока закончится выгрузка...',
+                        onOpen: () => {
+                            swal.showLoading();
+                            $.post(url, {id:id}, function (data) {
+                                if (data === 'true') {
+                                    swal.close();
+                                    swal('Готово', '', 'success');
+                                    path = document.location.href;
+                                    arr = path.split('waybill');
+                                    path = arr[0] + 'waybill/index';
+                                    if (query_string!='') {path = path+'?'+query_string;}
+                                    loc = "document.location.href='"+path+"'";
+                                    setTimeout(loc, 1500);
+                                } else {
+                                    swal(
+                                        'Ошибка',
+                                        data,
+                                        'error'
+                                    )
+                                }
+                            })
+                            .fail(function() {
+                               swal(
+                                    'Ошибка',
+                                    'Обратитесь в службу поддержки.',
+                                    'error'
+                                );
+                            });
+                        }
+                    })
+                }
+            })
+        });
+    });
+JS;
+
+$this->registerJs($js);
+?>
 
 <?php 
 /*

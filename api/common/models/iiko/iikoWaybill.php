@@ -89,13 +89,13 @@ class iikoWaybill extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
+        //if (parent::beforeSave($insert)) {
 
-            if ($this->doc_date) {
-                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
-            } else {
-                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
-            }
+//            if ($this->doc_date) {
+//                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
+//            } else {
+//                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
+//            }
 
             if (empty($this->text_code)) {
                 $this->text_code = 'mixcart';
@@ -106,7 +106,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
             }
 
             return parent::beforeSave($insert);
-        }
+        //}
     }
 
     public function afterSave($insert, $changedAttributes)

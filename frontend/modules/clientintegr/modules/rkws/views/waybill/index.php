@@ -167,7 +167,8 @@ $this->registerCss("
             'class'=>'kartik\grid\ExpandRowColumn',
             'width'=>'50px',
             'value'=>function ($model, $key, $index, $column) use ($way) {
-                if ($model->id == $way) {
+                if (($model->id == $way) or (Yii::$app->session->get('rkws_waybill')==$model->id))  {
+                    Yii::$app->session->set("rkws_waybill", 0);
                     return GridView::ROW_EXPANDED;
                 }
                 return GridView::ROW_COLLAPSED;
@@ -181,6 +182,8 @@ $this->registerCss("
                     $wmodel = null;
                 }
                 $order_id = $model->id;
+                $query_string = Yii::$app->getRequest()->getQueryString();
+                Yii::$app->session->set("query_string", $query_string);
                 return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'order_id'=>$order_id, 'lic' => $lic, 'licucs' => $licucs]);
             },
             'headerOptions'=>['class'=>'kartik-sheet-style'],
@@ -197,7 +200,7 @@ $this->registerCss("
     	<div class="box box-info">            
             <div class="box-header with-border">
                             <div class="panel-body">
-                                <div class ="box-body ">
+                                <div class ="box-body table-responsive no-padding orders-table">
                                     <?php
                                     Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
                                     $form = ActiveForm::begin([
@@ -298,6 +301,64 @@ $this->registerCss("
        <?php Pjax::end() ?>
     </div>            
 </section>
+<?php
+$url = Url::toRoute('waybill/sendws');
+$js = <<< JS
+    $(function () {
+        $('.orders-table').on('click', '.export-waybill-btn', function () {
+            console.log('Colonel');
+            var url = '$url';
+            var id = $(this).data('id');
+            var oid = $(this).data('oid');
+            swal({
+                title: 'Выполнить выгрузку накладной?',
+                type: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Выгрузить',
+                cancelButtonText: 'Отмена',
+            }).then((result) => {
+                if(result.value)
+                {
+                    swal({
+                        title: 'Идёт отправка',
+                        text: 'Подождите, пока закончится выгрузка...',
+                        onOpen: () => {
+                            swal.showLoading();
+                            $.post(url, {id:id}, function (data) {
+                                console.log(data);
+                                if (data === 'true') {
+                                    swal.close();
+                                    swal('Готово', '', 'success')
+                                } else {
+                                    console.log(data.error);
+                                    swal(
+                                        'Ошибка',
+                                        'Обратитесь в службу поддержки.',
+                                        'error'
+                                    )
+                                }                                
+                                $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
+                            })
+                            .fail(function() { 
+                               swal(
+                                    'Ошибка',
+                                    'Обратитесь в службу поддержки.',
+                                    'error'
+                                );
+                               $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
+                            });
+                        }
+                    })
+                }
+            })
+        });
+    });
+JS;
+
+$this->registerJs($js);
+?>
 <?php
    /*  echo 'Testing for ' . Html::tag('span', 'popover', [
     'title'=>'This is a test tooltip',

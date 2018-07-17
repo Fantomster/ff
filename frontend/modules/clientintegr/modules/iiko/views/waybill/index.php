@@ -107,7 +107,8 @@ $this->title = 'Интеграция с iiko Office';
             'class' => 'kartik\grid\ExpandRowColumn',
             'width' => '50px',
             'value'=>function ($model, $key, $index, $column) use ($way) {
-                if ($model->id == $way) {
+                if (($model->id == $way) or (Yii::$app->session->get('iiko_waybill')==$model->id))  {
+                    Yii::$app->session->set("iiko_waybill", 0);
                     return GridView::ROW_EXPANDED;
                 }
                 return GridView::ROW_COLLAPSED;
@@ -121,6 +122,8 @@ $this->title = 'Интеграция с iiko Office';
                     $wmodel = null;
                 }
                 $order_id = $model->id;
+                $query_string = Yii::$app->getRequest()->getQueryString();
+                Yii::$app->session->set("query_string", $query_string);
                 return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
             },
             'headerOptions' => ['class' => 'kartik-sheet-style'],
@@ -168,6 +171,7 @@ $url = Url::toRoute('waybill/send');
 $js = <<< JS
     $(function () {
         $('.orders-table').on('click', '.export-waybill', function () {
+            console.log('Colonel');
             var url = '$url';
             var id = $(this).data('id');
             var oid = $(this).data('oid');
@@ -183,8 +187,8 @@ $js = <<< JS
                 if(result.value)
                 {
                     swal({
-                        title: 'Идёт оптравка',
-                        text: 'Подождите пока закончится выгрузка...',
+                        title: 'Идёт отправка',
+                        text: 'Подождите, пока закончится выгрузка...',
                         onOpen: () => {
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {
@@ -200,7 +204,7 @@ $js = <<< JS
                                         'error'
                                     )
                                 }
-                                $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:2000});
+                                $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
                             })
                             .fail(function() { 
                                swal(
@@ -208,7 +212,7 @@ $js = <<< JS
                                     'Обратитесь в службу поддержки.',
                                     'error'
                                 );
-                               $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:2000});
+                               $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
                             });
                         }
                     })

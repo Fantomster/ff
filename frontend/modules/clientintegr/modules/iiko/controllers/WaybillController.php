@@ -77,11 +77,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way',0);
+        $way = Yii::$app->request->get('way', 0);
         Url::remember();
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-       // $dataProvider->pagination->pageSize=3;
+        // $dataProvider->pagination->pageSize=3;
 
 
         $lic = iikoService::getLicense();
@@ -90,7 +90,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
-            'visible' =>iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
+            'visible' => iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
         ];
 
@@ -188,7 +188,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->quant = $model->defquant;
         $model->koef = 1;
 
-        $wayModel = iiloWaybill::findOne($model->waybill_id);
+        $wayModel = iikoWaybill::findOne($model->waybill_id);
         if (!$wayModel) {
             die("Cant find wmodel in map controller cleardata");
         }
@@ -215,22 +215,22 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if (!is_null($term)) {
-       /*     $query = new \yii\db\Query;
-            $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unit,")")'])
-                ->from('iiko_product')
-                ->where('org_id = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
-                ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
-                ->limit(20);
+            /*     $query = new \yii\db\Query;
+                 $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unit,")")'])
+                     ->from('iiko_product')
+                     ->where('org_id = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
+                     ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
+                     ->limit(20);
 
-            $command = $query->createCommand();
-            $command->db = Yii::$app->db_api;
-            $data = $command->queryAll();
-            $out['results'] = array_values($data);
-       */
-            $sql = "( select id, denom as `text` from iiko_product where is_active = 1 and org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-                " union ( select id, denom as `text` from iiko_product  where is_active = 1 and  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-                "union ( select id, denom as `text` from iiko_product where is_active = 1 and  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
-                "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
+                 $command = $query->createCommand();
+                 $command->db = Yii::$app->db_api;
+                 $data = $command->queryAll();
+                 $out['results'] = array_values($data);
+            */
+            $sql = "( select id, denom as `text` from iiko_product where is_active = 1 and org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom = '" . $term . "' )" .
+                " union ( select id, denom as `text` from iiko_product  where is_active = 1 and  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom like '" . $term . "%' limit 10 )" .
+                "union ( select id, denom as `text` from iiko_product where is_active = 1 and  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom like '%" . $term . "%' limit 5 )" .
+                "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)->queryAll();
@@ -273,12 +273,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($id);
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
-            }
-            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->save();
+            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -304,12 +302,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->status_id = 1;
         $model->org = $ord->client_id;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
-            }
-            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+            $model->save();
+            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -326,12 +322,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $transaction = Yii::$app->db_api->beginTransaction();
 
         /**
-            header ("Content-Type:text/xml");
-            $id = Yii::$app->request->get('id');
-            $model = $this->findModel($id);
-            echo $model->getXmlDocument();
-            exit;
-        */
+         * header ("Content-Type:text/xml");
+         * $id = Yii::$app->request->get('id');
+         * $model = $this->findModel($id);
+         * echo $model->getXmlDocument();
+         * exit;
+         */
 
         $api = iikoApi::getInstance();
         try {
@@ -347,8 +343,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
 
             if ($api->auth()) {
-                if(!$api->sendWaybill($model)) {
-                    throw new \Exception('Ошибка при отправке.');
+                $response = $api->sendWaybill($model);
+                if ($response !== true) {
+                    throw new \Exception('Ошибка при отправке. ' . $response);
                 }
                 $model->status_id = 2;
                 $model->save();
@@ -357,46 +354,101 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
             $transaction->commit();
             $api->logout();
-            iikoLogger::save();
             return ['success' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
             $api->logout();
-            iikoLogger::save();
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 
-    public function actionMakevat($waybill_id, $vat) {
+    /**
+     * Отправляем накладную
+     */
+    public function actionSendByButton()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+
+        /**
+         * header ("Content-Type:text/xml");
+         * $id = Yii::$app->request->get('id');
+         * $model = $this->findModel($id);
+         * echo $model->getXmlDocument();
+         * exit;
+         */
+
+        $api = iikoApi::getInstance();
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new \Exception('Only ajax method');
+            }
+
+            $id = Yii::$app->request->post('id');
+            $model = $this->findModel($id);
+
+            if (!$model) {
+                throw new \Exception('Не удалось найти накладную');
+            }
+
+            if ($model->readytoexport == 0) {
+                throw new \Exception('Не все товары сопоставлены!');
+            }
+
+            if ($api->auth()) {
+                $response = $api->sendWaybill($model);
+                if ($response !== true) {
+                    throw new \Exception('Ошибка при отправке. ' . $response);
+                }
+                $model->status_id = 2;
+                $model->save();
+            } else {
+                throw new \Exception('Не удалось авторизоваться');
+            }
+            $transaction->commit();
+            $api->logout();
+            Yii::$app->session->set("iiko_waybill", $model->order_id);
+            return ['success' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            $api->logout();
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    public function actionMakevat($waybill_id, $vat)
+    {
 
         $model = $this->findModel($waybill_id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+            ->createCommand('UPDATE iiko_waybill_data SET vat = :vat, linked_at = now() WHERE waybill_id = :id', [':vat' => $vat, ':id' => $waybill_id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->id]);
     }
 
 
-    public function actionChvat($id, $vat) {
+    public function actionChvat($id, $vat)
+    {
 
         $model = $this->findDataModel($id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE iiko_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+            ->createCommand('UPDATE iiko_waybill_data SET vat = :vat, linked_at = now() WHERE id = :id', [':vat' => $vat, ':id' => $id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
 
     }
 
-    public function getLastUrl() {
+    public function getLastUrl()
+    {
 
         $lastUrl = Url::previous();
-        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+        $lastUrl = substr($lastUrl, strpos($lastUrl, "/clientintegr"));
 
-        $lastUrl = $this->deleteGET($lastUrl,'way');
+        $lastUrl = $this->deleteGET($lastUrl, 'way');
 
-        if(!strpos($lastUrl,"?")) {
+        if (!strpos($lastUrl, "?")) {
             $lastUrl .= "?";
         } else {
             $lastUrl .= "&";
@@ -404,16 +456,16 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $lastUrl;
     }
 
-    public function deleteGET($url, $name, $amp = true) {
+    public function deleteGET($url, $name, $amp = true)
+    {
         $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
         list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
         parse_str($qs_part, $qs_vars); // Разбиваем строку с запросом на массив с параметрами и их значениями
         unset($qs_vars[$name]); // Удаляем необходимый параметр
         if (count($qs_vars) > 0) { // Если есть параметры
-            $url = $url_part."?".http_build_query($qs_vars); // Собираем URL обратно
+            $url = $url_part . "?" . http_build_query($qs_vars); // Собираем URL обратно
             if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
-        }
-        else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
+        } else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
         return $url; // Возвращаем итоговый URL
     }
 

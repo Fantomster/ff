@@ -97,15 +97,30 @@
                     },
                     'export' =>  function ($url, $model) {
                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/sendws', 'waybill_id'=>$model->id]);
+                        /*$customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/sendws', 'waybill_id'=>$model->id]);
                         return \yii\helpers\Html::a( '<i class="fa fa-upload" aria-hidden="true"></i>', $customurl,
-                            ['title' => Yii::t('backend', 'Выгрузить'), 'data-pjax'=>"0"]);
+                            ['title' => Yii::t('backend', 'Выгрузить'), 'data-pjax'=>"0"]);*/
+
+                        return \yii\helpers\Html::a(
+                            Html::tag('i','',[
+                                'class' => 'fa fa-upload ',
+                                'aria-hidden' => true
+                            ]),
+                            '#',
+                            [
+                                'class' => 'export-waybill-btn',
+                                'title' => Yii::t('backend', 'Выгрузить'),
+                                'data-pjax' => "1",
+                                'data-id' => $model->id,
+                                'data-oid' => $model->order_id,
+                            ]);
                     },
 
                 ]
 
             ]
         );
+
         $timestamp_now=time();
         ($licucs->status_id==1) && ($timestamp_now<=(strtotime($licucs->td))) ? $lic_rkws_ucs=1 : $lic_rkws_ucs=0;
         (($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td)))) ? $lic_rkws=1 : $lic_rkws=0;
@@ -120,7 +135,9 @@
                                         'sort' => false,
                                                                                 ]),
                                         'layout' => '{items}',
-                                        'pjax' => true, // pjax is set to always true for this demo
+                                        'pjax' => true,
+                                        'id' => 'pjax_user_row_' . $order_id,
+                                        // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                         'columns' => $columns,

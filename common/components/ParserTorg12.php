@@ -942,7 +942,7 @@ class ParserTorg12
         $row = [];
         $key = 1;
 
-        for ($col = $this->columnList['num']['col']; $col <= $this->highestColumn; $col++) {
+        for ($col = $this->columnList['num']['col']; $col <= $this->highestColumn; $col++) {//
             $currentCell = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $rowNumber)->getValue());
             // запишем непустые значения в массив для текущей строки
             if ($currentCell) {

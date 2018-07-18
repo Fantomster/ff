@@ -49,7 +49,9 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 <h4><?= Yii::t('message', 'frontend.views.vendor.step_two', ['ru'=>'ШАГ 2']) ?></h4>
                 <p><?= Yii::t('message', 'frontend.views.mercury.new_transport_vsd_get_recipient_info', ['ru'=>'Укажите информацию о товарополучателе']) ?></p>
             </div>
-            <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']); ?>
+            <?php $form = ActiveForm::begin(['id' => 'StockEntryForm',
+                /*'enableClientValidation'=>false,
+                'enableClientValidation' => false*/]); ?>
             <?php
             $url = \yii\helpers\Url::to(['stock-entry/producers-list']);
             $desc = '';//empty($model->city) ? '' : City::findOne($model->city)->description;
@@ -92,7 +94,7 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
             ]);
             ?>
 
-            <?= $form->field($model, 'hc')->hiddenInput()->label(false); ?>
+            <?= $form->field($model, 'hc',['enableClientValidation' => false])->hiddenInput()->label(false); ?>
             <?= $form->field($model, 'hc_name')->textInput(['maxlength' => true]); ?>
 
             <?php $model->isTTN = isset($model->isTTN) ? $model->isTTN : true; ?>
@@ -104,9 +106,9 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
 
             <div id="TTN-data">
                 <?= $form->field($model, 'seriesTTN')->textInput(['maxlength' => true]); ?>
-                <?= $form->field($model, 'numberTTN')->textInput(['maxlength' => true]); ?>
+                <?= $form->field($model, 'numberTTN',['enableClientValidation' => false])->textInput(['maxlength' => true]); ?>
                 <?php echo '<label class="control-label"><b>Дата бумажного ВСД</b></label>';
-                echo $form->field($model, 'dateTTN')->widget(\kartik\widgets\DatePicker::classname(), [
+                echo $form->field($model, 'dateTTN',['enableClientValidation' => false])->widget(\kartik\widgets\DatePicker::classname(), [
                     'options' => ['placeholder' => 'Дата бумажного ВСД'],
                     'pluginOptions' => [
                         'autoclose' => true,
@@ -142,7 +144,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 $(".step-3").click(function(e){
 e.preventDefault();
 //var urlStep = "'.$router.'";
-$("#product_list_form" ).submit();
+$("#StockEntryForm" ).submit();
 /*$.ajax({
     url: urlStap,
     type: "POST",

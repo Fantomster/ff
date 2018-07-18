@@ -9,6 +9,8 @@ use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
 use common\models\User;
+use yii\db\Connection;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use yii\web\NotFoundHttpException;
@@ -214,26 +216,35 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionAutoComplete($term = null)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = [];
         if (!is_null($term)) {
-            /*     $query = new \yii\db\Query;
-                 $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unit,")")'])
-                     ->from('iiko_product')
-                     ->where('org_id = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
-                     ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
-                     ->limit(20);
 
-                 $command = $query->createCommand();
-                 $command->db = Yii::$app->db_api;
-                 $data = $command->queryAll();
-                 $out['results'] = array_values($data);
-            */
-            $sql = "( select id, denom as `text` from iiko_product where is_active = 1 and org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom = '" . $term . "' )" .
-                " union ( select id, denom as `text` from iiko_product  where is_active = 1 and  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom like '" . $term . "%' limit 10 )" .
-                "union ( select id, denom as `text` from iiko_product where is_active = 1 and  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom like '%" . $term . "%' limit 5 )" .
-                "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
+            $sql = <<<SQL
+            SELECT id, denom as text FROM (
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term )
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ LIMIT 10)
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ LIMIT 5)
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                     THEN 1
+                     ELSE 2
+                  END
+            ) as t
+SQL;
 
+            /**
+             * @var $db Connection
+             */
             $db = Yii::$app->db_api;
-            $data = $db->createCommand($sql)->queryAll();
+            $data = $db->createCommand($sql)
+                ->bindValues([
+                    'term' => $term,
+                    'term_' => $term . '%',
+                    '_term_' => '%' . $term . '%',
+                    'org_id' => User::findOne(Yii::$app->user->id)->organization_id
+                ])
+                ->queryAll();
             $out['results'] = array_values($data);
         }
         return $out;

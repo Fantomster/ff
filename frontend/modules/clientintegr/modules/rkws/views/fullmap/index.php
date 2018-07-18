@@ -359,6 +359,11 @@ array_push($columns,
 */
 ?>
 
+                        <div style="width: 50%; margin: 0 auto;" id="fullmapconsole">
+                            <span id="fmtotal" >0</span>
+                            <span id="fmsuccess" >0</span>
+                            <span id="fmfailed" >0</span>
+                        </div>
 
 <div align="right">
     <?php
@@ -368,13 +373,6 @@ array_push($columns,
 
     ?>
 </div>
-
-                        <div class="col-lg-5 col-md-6 col-sm-6" id="fullmapconsole">
-                            <span id="fmtotal" >0</span>
-                            <span id="fmsuccess" >0</span>
-                            <span id="fmfailed" >0</span>
-                        </div>
-
                         <?=
 GridView::widget([
     'dataProvider' => $dataProvider,

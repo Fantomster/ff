@@ -417,26 +417,29 @@ HTML;
                             </div>
                         </div>
                         <hr>
-
-                            <?=
-                            DatePicker::widget([
-                                'name' => 'filter_from_date_price_stat',
-                                'id' => 'filter-date-price-stat',
-                                'value' => $filter_from_date_two,
-                                'type' => DatePicker::TYPE_RANGE,
-                                'name2' => 'filter_to_date_price_stat',
-                                'value2' => $filter_to_date,
-                                'separator' => '-',
-                                'layout' => $layout,
-                                'pluginOptions' => [
-                                    'autoclose' => true,
-                                    'format' => 'dd-mm-yyyy',
-                                    'todayHighlight' => true,
-                                    'endDate' => "0d",
-                                ],
-                                'removeButton' => false,
-                            ]);
-                            ?>
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-4">
+                                <?= Html::label(Yii::t('app', 'franchise.views.anal.date_from_two', ['ru' => 'Начальная дата ']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                                <?=
+                                DatePicker::widget([
+                                    'name' => 'filter_from_date_price_stat',
+                                    'id' => 'filter-date-price-stat',
+                                    'value' => $filter_from_date_two,
+                                    'type' => DatePicker::TYPE_INPUT,
+                                    'name2' => 'filter_to_date_price_stat',
+                                    'value2' => $filter_to_date,
+                                    'separator' => '-',
+                                    'pluginOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'dd-mm-yyyy',
+                                        'todayHighlight' => true,
+                                        'endDate' => "0d",
+                                    ],
+                                    'removeButton' => false,
+                                ]);
+                                ?>
+                            </div>
+                        </div>
 
                         <hr>
                         <div class="row">

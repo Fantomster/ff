@@ -465,7 +465,7 @@ $('#fmfailed').LineProgressbar({
 		});
 		
 $( document ).ready(function() {
-$('#div').hide();
+$('#fullmapconsole').hide();
 });
 
 JS;

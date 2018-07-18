@@ -15,6 +15,7 @@ use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
+use frontend\assets\ProgressBarAsset;
 
 
 ?>
@@ -22,6 +23,7 @@ use api\common\models\RkDicconst;
 
 // $productDesc = empty($model->product_rid) ? '' : $model->product->denom;
 
+ProgressBarAsset::register($this);
 
 ?>
 
@@ -356,6 +358,8 @@ array_push($columns,
     ]);
 */
 ?>
+
+
 <div align="right">
     <?php
     $loadUrl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/renewcats']);
@@ -364,7 +368,8 @@ array_push($columns,
 
     ?>
 </div>
-                        <div class ="" id="fullmapconsole">
+
+                        <div class="col-lg-5 col-md-6 col-sm-6" id="fullmapconsole">
                             <span id="fmtotal" >0</span>
                             <span id="fmsuccess" >0</span>
                             <span id="fmfailed" >0</span>
@@ -437,4 +442,32 @@ $js = "
 ";
     
 $this->registerJs($js);
+?>
+
+<?php
+$customJs = <<< JS
+$('#fmtotal').LineProgressbar({
+		percentage:0,
+		radius: '3px',
+		height: '20px',
+		});
+$('#fmsuccess').LineProgressbar({
+		percentage:0,
+		radius: '3px',
+		height: '20px',
+		fillBackgroundColor: '#DA4453' //цвет бара
+		});
+$('#fmfailed').LineProgressbar({
+		percentage:0,
+		radius: '3px',
+		height: '20px',
+		fillBackgroundColor: '#E0C341' //цвет бара
+		});
+		
+$( document ).ready(function() {
+$('#div').hide();
+});
+
+JS;
+$this->registerJs($customJs, $this::POS_READY);
 ?>

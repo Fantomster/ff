@@ -61,12 +61,14 @@ class InvoiceController extends Controller
 
         $vendor_id = $params['OrderSearch']['vendor_id'];
         $invoice_id = $params['invoice_id'];
+        $showAll = (isset($params['show_waybill']) && $params['show_waybill'] == 'true') ? 1 : 0;
 
         return $this->renderAjax('_orders', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'vendor_id' => $vendor_id,
             'invoice_id' => $invoice_id,
+            'showAll' => $showAll
         ]);
     }
 

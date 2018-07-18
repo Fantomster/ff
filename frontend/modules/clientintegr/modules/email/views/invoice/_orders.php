@@ -10,7 +10,7 @@
         <b>Выберите заказ для связи с накладной:</b>
     </div>
     <div class="col-md-5">
-        <?= \yii\helpers\Html::checkbox('show_all_waybills', false, ['label' => "<span style='min-height: 20px; padding-left: 20px; margin-bottom: 0;'>" . Yii::t('app', 'franchise.views.anal.all_orders_four', ['ru' => 'Все заказы']) . "</span>", 'id' => 'alShowAllWaybills']); ?>
+        <?= \yii\helpers\Html::checkbox('show_all_waybills', $showAll, ['label' => "<span style='min-height: 20px; padding-left: 20px; margin-bottom: 0;'>" . Yii::t('app', 'franchise.views.anal.all_orders_four', ['ru' => 'Все заказы']) . "</span>", 'id' => 'alShowAllWaybills']); ?>
     </div>
 </div>
 <br>

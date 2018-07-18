@@ -1,6 +1,8 @@
 <style>
     #alShowAllWaybills {
-        margin-top: 5px;
+        margin-top: 4px;
+        position: absolute;
+        margin-left: -10px;
     }
 </style>
 <div class="row">
@@ -127,7 +129,7 @@ echo \kartik\grid\GridView::widget([
     'columns' => $columns
 ]);
 
-
+$url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
 $js = <<< 'SCRIPT'
 /* To initialize BS3 tooltips set this below */
 // $(function () {
@@ -152,9 +154,28 @@ $("[data-toggle='popover']").popover({
 //        });
 //    }
 // });
+
 SCRIPT;
 // Register tooltip/popover initialization javascript
 $this->registerJs($js,View::POS_END);
+
+$customJs = <<< JS
+ $('#alShowAllWaybills').on('click', function(e) {
+     var checked = $(this).prop('checked');
+     $.get('$url/get-orders', {
+                    OrderSearch: {vendor_search_id: $vendor_id, vendor_id: $vendor_id},
+                    invoice_id:"$invoice_id",
+                    show_waybill: checked
+                }, function (data) {
+                    $('#invoice-orders').html(data);
+                    $('.orders').show();
+                    //     $(this).data('vendor_id', result.value);
+                    // $(this).html(vendors[result.value]);
+                });
+     });
+JS;
+$this->registerJs($customJs, View::POS_READY);
+
 ?>
 
 <?php

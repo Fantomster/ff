@@ -56,7 +56,7 @@ CSS;
         <div class="panel-body">
             <div class="callout callout-fk-info">
                 <h4><?= Yii::t('message', 'frontend.views.vendor.step_one_two', ['ru'=>'ШАГ 1']) ?></h4>
-                <p><?=Yii::t('message', 'frontend.views.mercury.enter_cat_name', ['ru'=>'Введите название для нового каталога'])?></p>
+                <p><?=Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) ?></p>
             </div>
             <?php
             $form = ActiveForm::begin([

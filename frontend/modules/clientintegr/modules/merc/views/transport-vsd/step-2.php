@@ -7,16 +7,6 @@ use unclead\multipleinput\TabularInput;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
 $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД ']);
-$style= <<< CSS
-
-  .js-input-remove {
-    display: none;
-  }
-  .js-input-plus {
-    display: none;
-  }
-CSS;
- $this->registerCss($style);
 ?>
 <section class="content-header">
         <h1 class="margin-right-350">
@@ -32,7 +22,7 @@ CSS;
                 'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
-            Yii::t('message', 'frontend.views.mercury.new_transport_vsd_step_one', ['ru'=>'Шаг 1. Создание нового транспортного ВСД'])
+            Yii::t('message', 'frontend.views.mercury.new_transport_vsd_step_two', ['ru'=>'Шаг 2. Создание нового транспортного ВСД'])
         ],
     ])
 ?>
@@ -42,87 +32,22 @@ CSS;
     <div class="box-body">
             <div class="panel-body">
                 <ul class="nav fk-tab nav-tabs  pull-left">
-                    <?= '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>';?>
-                    <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_recipient_info', ['ru'=>' Информация о товарополучателе'])).'</li>'?>
+                    <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>';?>
+                    <?= '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_recipient_info', ['ru'=>' Информация о товарополучателе'])).'</li>'?>
                     <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_transport_info', ['ru'=>'Информация о транспорте'])).'</li>'?>
                 </ul>
-
-
                 <ul class="fk-prev-next pull-right">
+                  <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru'=>'Назад']), ['step-1']) . '</li>' ?>
                   <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4><?= Yii::t('message', 'frontend.views.vendor.step_one_two', ['ru'=>'ШАГ 1']) ?></h4>
-                <p><?=Yii::t('message', 'frontend.views.mercury.enter_cat_name', ['ru'=>'Введите название для нового каталога'])?></p>
+                <h4><?= Yii::t('message', 'frontend.views.vendor.step_two', ['ru'=>'ШАГ 2']) ?></h4>
+                <p><?= Yii::t('message', 'frontend.views.mercury.new_transport_vsd_get_recipient_info', ['ru'=>'Укажите информацию о товарополучателе']) ?></p>
             </div>
-            <?php
-            $form = ActiveForm::begin([
-                'enableAjaxValidation' => false,
-                'enableClientValidation' => false,
-                'validateOnChange' => false,
-                'validateOnSubmit' => true,
-                'validateOnBlur' => false,
-                'options' => ['style' => "width: 100%;", 'id' => 'product_list_form']]);
 
-            echo TabularInput::widget([
-                'models' => $list,
-                'attributeOptions' => [
-                    'enableAjaxValidation' => false,
-                    'enableClientValidation' => false,
-                    'validateOnChange' => false,
-                    'validateOnSubmit' => true,
-                    'validateOnBlur' => false,
-                ],
-                'columns' => [
-                    [
-                        'name'  => 'id',
-                        'title' => 'ID',
-                        'type'  => \unclead\multipleinput\MultipleInputColumn::TYPE_HIDDEN_INPUT,
-                    ],
-                    [
-                        'name'  => 'product_name',
-                        'title' =>  Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
-                        'enableError' => true,
-                    ],
-                    [
-                        'name'  => 'select_amount',
-                        'title' =>  Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
-                        'enableError' => true,
-                        'type' => \kartik\widgets\TouchSpin::className(),
-                        'options' => function ($data) { return [
-                            'pluginOptions' => [
-                                'initval' => isset($data->select_amount) ? $data->select_amount : $data->amount,
-                                'min' => 1,
-                                'max' => $data->amount,
-                                'step' =>  1,
-                                //'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
-                                //'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
-                                'buttonup_class' => 'btn btn-default',
-                                'buttondown_class' => 'btn btn-default',
-                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                            ],
-                        ];}
-                    ],
-                    [
-                        'name'  => 'amount',
-                        'title' =>  Yii::t('message', 'frontend.client.integration.max_volume', ['ru' => 'Макс. Объём']),
-                        'type'  => 'static',
-                        'value' => function ($data) {
-                            return round($data->amount);
-                        }
-                    ],
-                    [
-                        'name' => 'unit',
-                        'title' => 'Ед. измерения',
-                        'type'  => 'static',
-                    ],
-                ]
-            ]); ?>
-            <?php ActiveForm::end(); ?>
         </div>
         <?php Pjax::end(); ?>
     </div>

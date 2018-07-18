@@ -81,8 +81,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function actionStep2()
     {
-        var_dump(2);
-        exit();
+        return $this->render('step-2');
     }
 
     private function getErrorText($e)

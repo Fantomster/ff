@@ -417,6 +417,7 @@ HTML;
                             </div>
                         </div>
                         <hr>
+
                         <div class="row">
                             <div class="col-md-4 col-md-offset-4">
                                 <?= Html::label(Yii::t('app', 'franchise.views.anal.date_from_two', ['ru' => 'Начальная дата ']), null, ['class' => 'label', 'style' => 'color:#555']) ?>

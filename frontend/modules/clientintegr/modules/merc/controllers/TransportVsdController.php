@@ -67,7 +67,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             {
                 $attributes[$item->id] = $item->getAttributes(['product_name','select_amount']);
             }
-                $session->set('store_entry_list', $attributes);
+                $session->set('TrVsd_step1', $attributes);
                 if (Yii::$app->request->isAjax) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
                     return (['success' => true]);
@@ -83,7 +83,24 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function actionStep2()
     {
+        $session = Yii::$app->session;
         $model = new step2Form();
+        $model->attributes = $session->get('TrVsd_step2');
+        $session->remove('store_entry_list');
+
+        $post = Yii::$app->request->post();
+        if ($model->load($post)) {
+            if ($model->isTTN)
+                $model->setScenario('isTTN');
+            if ($model->validate()) {
+                $session->set('TrVsd_step2', $model->attributes);
+                if (Yii::$app->request->isAjax) {
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    return (['success' => true]);
+                }
+                return $this->redirect(['step-3']);
+            }
+        }
         return $this->render('step-2', ['model' => $model]);
     }
 

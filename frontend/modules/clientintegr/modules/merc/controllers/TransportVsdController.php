@@ -104,6 +104,12 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         return $this->render('step-2', ['model' => $model]);
     }
 
+    public function actionStep3()
+    {
+        var_dump(1);
+        exit();
+    }
+
     public function actionGetHc($recipient_guid)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;

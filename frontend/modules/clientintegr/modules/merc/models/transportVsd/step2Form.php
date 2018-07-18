@@ -25,9 +25,9 @@ class step2Form extends Model
     {
         return [
             [['recipient', 'hc', 'isTTN'], 'required'],
-            [['numberTTN', 'dateTTN', 'typeTTN'], 'required', 'on' => 'isTTN'],
+            [['recipient', 'hc', 'numberTTN', 'dateTTN', 'typeTTN'], 'required', 'on' => 'isTTN'],
             [['isTTN'],'integer'],
-            [['resipient', 'hc', 'seriesTTN', 'numberTTN', 'typeTTN', 'hc_name'], 'string'],
+            [['recipient', 'hc', 'seriesTTN', 'numberTTN', 'typeTTN', 'hc_name'], 'string'],
         ];
     }
 

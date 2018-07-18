@@ -115,9 +115,6 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 ])->label(false);
                 ?>
             </div>
-            <div class="form-group">
-                <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
-            </div>
             <?php ActiveForm::end(); ?>
         </div>
         <?php Pjax::end(); ?>
@@ -125,7 +122,7 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
 </div>
 </section>
 <?php
-$router = Url::to(['step-1']);
+$router = Url::to(['step-3']);
 $this->registerJs('
 /** 
  * Forward port jQuery.live()
@@ -155,7 +152,7 @@ $("#product_list_form" ).submit();
     success: function(response) {
             
             if(response.success){
-                var url = "' . Url::toRoute(['step-2']) . '";
+                var url = "' . Url::toRoute(['step-3']) . '";
                 $(location).attr("href",url);
                 }else{
                 alert(1);

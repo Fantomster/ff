@@ -124,7 +124,6 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
 </div>
 </section>
 <?php
-$router = Url::to(['step-3']);
 $this->registerJs('
 /** 
  * Forward port jQuery.live()
@@ -143,29 +142,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 }
 $(".step-3").click(function(e){
 e.preventDefault();
-//var urlStep = "'.$router.'";
 $("#StockEntryForm" ).submit();
-/*$.ajax({
-    url: urlStap,
-    type: "POST",
-    dataType: "json",
-    data: $("#product_list_form" ).serialize(),
-    cache: false,
-    success: function(response) {
-            
-            if(response.success){
-                var url = "' . Url::toRoute(['step-3']) . '";
-                $(location).attr("href",url);
-                }else{
-                alert(1);
-           $("#product_list_form" ).replaceWith(result);
-            console.log(response);    
-            }
-        },
-        failure: function(errMsg) {
-        console.log(errMsg);
-        }
-    });*/
 });        
 ');
 

@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step1Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step2Form;
+use frontend\modules\clientintegr\modules\merc\models\transportVsd\step3Form;
 use Yii;
 use yii\bootstrap\ActiveForm;
 use yii\web\Response;
@@ -47,7 +48,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $get = Yii::$app->request->get();
             if (isset($get['selected'])) {
                 $selected = Yii::$app->request->get('selected');
-                $session->remove('store_entry_list');
+                $session->remove('TrVsd_step1');
             }
         }
         else {
@@ -86,7 +87,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $session = Yii::$app->session;
         $model = new step2Form();
         $model->attributes = $session->get('TrVsd_step2');
-        $session->remove('store_entry_list');
+        $session->remove('TrVsd_step2');
 
         $post = Yii::$app->request->post();
         if ($model->load($post)) {
@@ -106,8 +107,24 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function actionStep3()
     {
-        var_dump(1);
-        exit();
+        $session = Yii::$app->session;
+        $model = new step3Form();
+        $model->attributes = $session->get('TrVsd_step3');
+        $session->remove('TrVsd_step3');
+
+        $post = Yii::$app->request->post();
+        if ($model->load($post)) {
+            if ($model->validate()) {
+                $session->set('TrVsd_step3', $model->attributes);
+                var_dump(1); exit();
+                /*if (Yii::$app->request->isAjax) {
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    return (['success' => true]);
+                }*/
+                //return $this->redirect(['step-3']);
+            }
+        }
+        return $this->render('step-3', ['model' => $model]);
     }
 
     public function actionGetHc($recipient_guid)

@@ -129,7 +129,6 @@ CSS;
 </div>
 </section>
 <?php
-$router = Url::to(['step-1']);
 $this->registerJs('
 /** 
  * Forward port jQuery.live()
@@ -148,29 +147,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 }
 $(".step-2").click(function(e){
 e.preventDefault();
-//var urlStep = "'.$router.'";
 $("#product_list_form" ).submit();
-/*$.ajax({
-    url: urlStap,
-    type: "POST",
-    dataType: "json",
-    data: $("#product_list_form" ).serialize(),
-    cache: false,
-    success: function(response) {
-            
-            if(response.success){
-                var url = "' . Url::toRoute(['step-2']) . '";
-                $(location).attr("href",url);
-                }else{
-                alert(1);
-           $("#product_list_form" ).replaceWith(result);
-            console.log(response);    
-            }
-        },
-        failure: function(errMsg) {
-        console.log(errMsg);
-        }
-    });*/
 });        
 ');
 ?>

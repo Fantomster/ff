@@ -1862,7 +1862,6 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $showNotChangedPrice = $post['show_not_changed_price'] ?? false;
         $dateFrom = date('Y-m-d', strtotime($post['filter_from_date_price_stat']));
         $dateTo = date('Y-m-d', strtotime($post['filter_from_date_price_stat'] . " + 14 days"));
-
         $orderContent = OrderContent::find()->joinWith('order')->where(['order.status' => Order::STATUS_DONE])->andWhere(['between', 'order.created_at', $dateFrom, $dateTo]);
 
         $businessArray = [];

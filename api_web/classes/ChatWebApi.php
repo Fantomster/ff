@@ -43,8 +43,10 @@ class ChatWebApi extends WebApi
 
         $search = Order::find()->select([
             'order.*',
-            '(SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id and viewed = 0 AND recipient_id = `order`.client_id) as  last_message_date'
-        ])->where($where);
+            '(
+                SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id AND recipient_id = :org_id
+             ) as last_message_date'
+        ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {
             throw new BadRequestHttpException("Нет диалогов");
@@ -60,7 +62,7 @@ class ChatWebApi extends WebApi
             }
         }
 
-        $search->orderBy('last_message_date desc, order.created_at DESC');
+        $search->orderBy("last_message_date DESC");
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()

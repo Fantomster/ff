@@ -3,9 +3,11 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use common\models\Users;
-use unclead\multipleinput\TabularInput;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
+use kartik\widgets\Select2;
+use yii\web\JsExpression;
+
 $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД ']);
 ?>
 <section class="content-header">
@@ -38,7 +40,7 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 </ul>
                 <ul class="fk-prev-next pull-right">
                   <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru'=>'Назад']), ['step-1']) . '</li>' ?>
-                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
+                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-3']).'</li>'?>
                 </ul>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>
@@ -47,7 +49,76 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 <h4><?= Yii::t('message', 'frontend.views.vendor.step_two', ['ru'=>'ШАГ 2']) ?></h4>
                 <p><?= Yii::t('message', 'frontend.views.mercury.new_transport_vsd_get_recipient_info', ['ru'=>'Укажите информацию о товарополучателе']) ?></p>
             </div>
+            <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']); ?>
+            <?php
+            $url = \yii\helpers\Url::to(['stock-entry/producers-list']);
+            $desc = '';//empty($model->city) ? '' : City::findOne($model->city)->description;
 
+            echo $form->field($model, 'recipient')->widget(Select2::classname(), [
+                'initValueText' => $desc, // set the initial display text
+                'options' => ['placeholder' => 'Укажите название предприятия для поиска  ...'],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                    'minimumInputLength' => 3,
+                    'language' => [
+                        'errorLoading' => new JsExpression("function () { return 'Загрузка результатов...'; }"),
+                    ],
+                    'ajax' => [
+                        'url' => $url,
+                        'dataType' => 'json',
+                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                    ],
+                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                ],
+                'pluginEvents' => [
+                    "select2:select" => "function() { 
+                     var recipient = $(this).select2(\"data\")[0].id;
+                            $.ajax({
+                                     type     :\"GET\",
+                                     cache    : false,
+                                     url      : '". \yii\helpers\Url::to(['get-hc'])."?recipient_guid=' + recipient,
+                                     success  : function(result) {
+                                         $('#step2form-hc_name').val(result.name);
+                                         $('#step2form-hc').val(result.uuid);
+                                    },
+                                    error : function ()
+                                    {
+                                       $('#step2form-hc_name').val(result.name);
+                                        $('#step2form-hc').val('');
+                                    }
+                                });
+                      }",
+                  ]
+            ]);
+            ?>
+
+            <?= $form->field($model, 'hc')->hiddenInput()->label(false); ?>
+            <?= $form->field($model, 'hc_name')->textInput(['maxlength' => true]); ?>
+
+            <?php $model->isTTN = isset($model->isTTN) ? $model->isTTN : true; ?>
+            <?= $form->field($model, 'isTTN')
+                ->radioList([
+                    true => 'Указать ТТН',
+                    false => 'ТТН отсутствует'
+                ],['id' => 'isTTN']) ?>
+
+            <div id="TTN-data">
+                <?= $form->field($model, 'seriesTTN')->textInput(['maxlength' => true]); ?>
+                <?= $form->field($model, 'numberTTN')->textInput(['maxlength' => true]); ?>
+                <?php echo '<label class="control-label"><b>Дата бумажного ВСД</b></label>';
+                echo $form->field($model, 'dateTTN')->widget(\kartik\widgets\DatePicker::classname(), [
+                    'options' => ['placeholder' => 'Дата бумажного ВСД'],
+                    'pluginOptions' => [
+                        'autoclose' => true,
+                        'format' => 'dd.mm.yyyy'
+                    ]
+                ])->label(false);
+                ?>
+            </div>
+            <div class="form-group">
+                <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' =>'btn btn-success']) ?>
+            </div>
+            <?php ActiveForm::end(); ?>
         </div>
         <?php Pjax::end(); ?>
     </div>
@@ -71,7 +142,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }
-$(".step-2").click(function(e){
+$(".step-3").click(function(e){
 e.preventDefault();
 //var urlStep = "'.$router.'";
 $("#product_list_form" ).submit();
@@ -98,4 +169,20 @@ $("#product_list_form" ).submit();
     });*/
 });        
 ');
+
+$customJs = <<< JS
+$("document").ready(function(){
+        $("#StockEntryForm").on("change", "#isTTN", function() {
+            if(($("input[name='step2Form[isTTN]']:checked").val()) == 1)
+                $('#TTN-data').show();
+            else {
+                $('#TTN-data').hide();
+                $('#step2form-seriesttn').val(''); 
+                $('#step2form-numberttn').val(''); 
+                $('#step2form-datettn').val('');
+            }
+     }); 
+ });
+JS;
+$this->registerJs($customJs, $this::POS_READY);
 ?>

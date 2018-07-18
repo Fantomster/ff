@@ -6,12 +6,12 @@
  * Time: 18:36
  */
 
-namespace frontend\modules\clientintegr\modules\merc\models;
+namespace frontend\modules\clientintegr\modules\merc\models\transportVsd;
 
 
 use api\common\models\merc\MercStockEntry;
 
-class TransportVsd extends MercStockEntry
+class step1Form extends MercStockEntry
 {
     public $select_amount;
 

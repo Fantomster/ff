@@ -4,8 +4,10 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
-use frontend\modules\clientintegr\modules\merc\models\TransportVsd;
+use frontend\modules\clientintegr\modules\merc\models\transportVsd\step1Form;
+use frontend\modules\clientintegr\modules\merc\models\transportVsd\step2Form;
 use Yii;
 use yii\bootstrap\ActiveForm;
 use yii\web\Response;
@@ -58,7 +60,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-            $list = TransportVsd::find()->where("id in ($selected)")->all();
+            $list = step1Form::find()->where("id in ($selected)")->all();
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
             foreach ($list as $item)
@@ -81,7 +83,21 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function actionStep2()
     {
-        return $this->render('step-2');
+        $model = new step2Form();
+        return $this->render('step-2', ['model' => $model]);
+    }
+
+    public function actionGetHc($recipient_guid)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        try {
+            $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
+            $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->enterprise->owner->uuid);
+        }catch (\SoapFault $e)
+        {
+            return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+        }
+        return (['result' => true, 'name' => $hc->businessEntity->name.', ИНН:'.$hc->businessEntity->inn, 'uuid' => $hc->businessEntity->uuid]);
     }
 
     private function getErrorText($e)

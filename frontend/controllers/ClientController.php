@@ -1972,6 +1972,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $businessBegin = 4;
         $goodRowBegin = 5;
         $allBusinessArray = [];
+        echo "<pre>".print_r($arr, 1)."</pre>";
+        die();
         foreach ($arr as $businessName => $secondArr){
             if($businessName == 'day_all_business_total_price_diff')continue;
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, $businessBegin, $businessName);

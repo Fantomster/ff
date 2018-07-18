@@ -27,7 +27,7 @@ use yii\widgets\ActiveForm;
         <?php
         $organizations = \common\models\Journal::find()
             ->distinct()->select('organization_id')->all();
-        $items = [];
+        $items = [null => 'Все'];
         if (!empty($organizations)) {
             foreach ($organizations as $organization) {
                 $items[$organization->organization_id] = \common\models\Organization::findOne($organization->organization_id)->name;
@@ -36,7 +36,7 @@ use yii\widgets\ActiveForm;
         echo $form->field($model, 'organization_id')->dropDownList($items);
         ?>
 
-        <?php echo $form->field($model, 'type')->dropDownList(['success' => 'Успех', 'error' => 'Ошибка']) ?>
+        <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>
 
         <?php // echo $form->field($model, 'created_at') ?>
 

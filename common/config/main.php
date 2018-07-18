@@ -210,7 +210,18 @@ return [
             'options' => [
                 'cache_wsdl' => WSDL_CACHE_NONE,
             ],
-        ]
+        ],
+        //Rabbit MQ
+        'rabbit' => [
+            'class' => 'console\modules\daemons\components\RabbitService',
+            'host' => 'server_ip',    #host - имя хоста, на котором запущен сервер RabbitMQ
+            'port' => 5672,        #port - номер порта сервиса, по умолчанию - 5672
+            'user' => 'login',        #user - имя пользователя для соединения с сервером
+            'password' => 'password',
+            'queue_prefix' => 'prod_',
+            'queue' => 'empty',
+            'exchange' => 'router'
+        ],
     ],
     'modules' => [
         'user' => [

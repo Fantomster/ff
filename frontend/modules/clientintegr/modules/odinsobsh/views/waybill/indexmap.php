@@ -146,7 +146,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'refreshGrid' => true,
                                     'editableOptions' => [
                                         'asPopover' => $isAndroid ? false : true,
-                                        'header' => ':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
+                                        'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</srong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
                                         'formOptions' => [
                                             'action' => Url::toRoute('change-coefficient'),
@@ -175,7 +175,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'hAlign' => 'right',
                                     'vAlign' => 'middle',
                                     'format' => ['decimal'],
-
+                                    'footer' => 'Итого сумма без НДС:',
                                     'pageSummary' => true
                                 ],
                                 [
@@ -195,7 +195,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'vAlign' => 'middle',
                                     // 'width'=>'100px',
                                     'format' => ['decimal', 2],
-
+                                    'footer' => \api\common\models\one_s\OneSWaybilldata::getSumByWaybillid($wmodel->id),
                                     'pageSummary' => true
                                 ],
                                 [
@@ -302,6 +302,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     ]
                                 ],
                             ],
+                            'showFooter' => true,
                             'options' => ['class' => 'table-responsive'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],

@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
+use Mpdf\Tag\U;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -41,14 +42,14 @@ class mercuryApi extends baseApi
         $appData = new ApplicationDataWrapper();
 
         $vetDocList = new GetVetDocumentListRequest();
-        if(isset($status))
+        if (isset($status))
             $vetDocList->vetDocumentStatus = $status;
         $vetDocList->localTransactionId = $localTransactionId;
         $vetDocList->enterpriseGuid = $this->enterpriseGuid;
         $vetDocList->initiator = new User();
         $vetDocList->initiator->login = $this->vetisLogin;
 
-        if(isset($listOptions))
+        if (isset($listOptions))
             $vetDocList->listOptions = $listOptions;
 
         $appData->any['ns3:getVetDocumentListRequest'] = $vetDocList;
@@ -62,7 +63,7 @@ class mercuryApi extends baseApi
         $app_id = $result->application->applicationId;
         do {
             //timeout перед запросом результата
-            sleep(1);
+            sleep($this->query_timeout);
             //Получаем результат запроса
             $result = $this->getReceiveApplicationResult($app_id);
 
@@ -101,12 +102,12 @@ class mercuryApi extends baseApi
         $vetDocList->initiator = new User();
         $vetDocList->initiator->login = $this->vetisLogin;
 
-        if(isset($listOptions))
+        if (isset($listOptions))
             $vetDocList->listOptions = $listOptions;
 
         $vetDocList->updateDateInterval = new DateInterval();
-        $vetDocList->updateDateInterval->beginDate = Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime($date_start, 'HH:mm:ss').'+03:00';
-        $vetDocList->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s').'+03:00';
+        $vetDocList->updateDateInterval->beginDate = Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime($date_start, 'HH:mm:ss') . '+03:00';
+        $vetDocList->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
 
         $appData->any['ns3:getVetDocumentChangesListRequest'] = $vetDocList;
 
@@ -120,7 +121,7 @@ class mercuryApi extends baseApi
         $app_id = $result->application->applicationId;
         do {
             //timeout перед запросом результата
-            sleep(1);
+            sleep($this->query_timeout);
             //Получаем результат запроса
             $result = $this->getReceiveApplicationResult($app_id);
 
@@ -141,7 +142,7 @@ class mercuryApi extends baseApi
         $cache = Yii::$app->cache;
         $doc = MercVsd::findOne(['uuid' => $UUID]);
 
-        if($doc != null)
+        if ($doc != null)
             return unserialize($doc->raw_data);
 
         $result = null;
@@ -158,7 +159,7 @@ class mercuryApi extends baseApi
         $appData = new ApplicationDataWrapper();
 
         //Формируем тело запроса
-        $vetDoc = new GetVetDocumentByUuidRequest();
+        $vetDoc = new getVetDocumentByUUID();
         $vetDoc->localTransactionId = $localTransactionId;
         $vetDoc->enterpriseGuid = $this->enterpriseGuid;
         $vetDoc->initiator = new User();
@@ -174,12 +175,12 @@ class mercuryApi extends baseApi
         //Делаем запрос
         $result = $client->submitApplicationRequest($request);
 
-        $reuest_xml = $client->__getLastRequest();
+        $request_xml = $client->__getLastRequest();
 
         $app_id = $result->application->applicationId;
         do {
             //timeout перед запросом результата
-            sleep(1);
+            sleep($this->query_timeout);
             //Получаем результат запроса
             $result = $this->getReceiveApplicationResult($app_id);
 
@@ -188,7 +189,7 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
@@ -242,7 +243,7 @@ class mercuryApi extends baseApi
             $app_id = $result->application->applicationId;
             do {
                 //timeout перед запросом результата
-                sleep(1);
+                sleep($this->query_timeout);
                 //Получаем результат запроса
                 $result = $this->getReceiveApplicationResult($app_id);
 
@@ -256,17 +257,20 @@ class mercuryApi extends baseApi
             if ($status == 'COMPLETED') {
                 $doc = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
                 $row = MercVsd::findOne(['uuid' => $UUID]);
-                if($row != null)
-                {
+                if ($row != null) {
                     switch ($rejectedData['decision']) {
                         case  VetDocumentDone::RETURN_ALL :
-                                $doc = $doc[1]; break;
-                        case VetDocumentDone::ACCEPT_ALL : break;
-                        case VetDocumentDone::PARTIALLY : $doc = $doc[0]; break;
+                            $doc = $doc[1];
+                            break;
+                        case VetDocumentDone::ACCEPT_ALL :
+                            break;
+                        case VetDocumentDone::PARTIALLY :
+                            $doc = $doc[0];
+                            break;
                     }
 
-                $row->raw_data = serialize(is_array($doc) ? $doc[0] : $doc);
-                $row->status = $doc->vetDStatus;
+                    $row->raw_data = serialize(is_array($doc) ? $doc[0] : $doc);
+                    $row->status = $doc->vetDStatus;
                     $row->save();
                 }
             } else
@@ -313,6 +317,352 @@ class mercuryApi extends baseApi
         } catch(\SoapFault $e) {
             Yii::error($e->detail);
         }
+        return $result;
+    }
+
+    public function getStockEntryList($listOptions = null)
+    {
+        $result = null;
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $entryList = new GetStockEntryListRequest();
+        $entryList->localTransactionId = $localTransactionId;
+        $entryList->enterpriseGuid = $this->enterpriseGuid;
+        $entryList->initiator = new User();
+        $entryList->initiator->login = $this->vetisLogin;
+
+        if (isset($listOptions))
+            $entryList->listOptions = $listOptions;
+
+        $entryList->searchPattern = new StockEntrySearchPattern();
+        $entryList->searchPattern->blankFilter = 'NOT_BLANK';
+
+        $appData->any['ns3:getStockEntryListRequest'] = $entryList;
+
+        $request->application->data = $appData;
+
+
+        $result = $client->submitApplicationRequest($request);
+
+        $reuest_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            //var_dump($result);
+
+            $status = $result->application->status;
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $client = $this->getSoapClient('mercury');
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
+        return $result;
+    }
+
+    public function getStockEntryVersionList($listOptions = null)
+    {
+        $result = null;
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $entryList = new GetStockEntryVersionListRequest();
+        $entryList->localTransactionId = $localTransactionId;
+        $entryList->enterpriseGuid = $this->enterpriseGuid;
+        $entryList->initiator = new User();
+        $entryList->initiator->login = $this->vetisLogin;
+
+        if (isset($listOptions))
+            $entryList->listOptions = $listOptions;
+
+        $entryList->searchPattern = new StockEntrySearchPattern();
+        $entryList->searchPattern->blankFilter = 'NOT_BLANK';
+
+        $appData->any['ns3:getStockEntryVersionListRequest'] = $entryList;
+
+        $request->application->data = $appData;
+
+
+        $result = $client->submitApplicationRequest($request);
+
+        $reuest_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            //var_dump($result);
+
+            $status = $result->application->status;
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $client = $this->getSoapClient('mercury');
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
+        return $result;
+    }
+
+    public function getStockEntryChangesList($date_start, $listOptions = null)
+    {
+        $result = null;
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $entryList = new GetStockEntryChangesListRequest();
+        $entryList->localTransactionId = $localTransactionId;
+        $entryList->enterpriseGuid = $this->enterpriseGuid;
+        $entryList->initiator = new User();
+        $entryList->initiator->login = $this->vetisLogin;
+
+        if (isset($listOptions))
+            $entryList->listOptions = $listOptions;
+
+        $entryList->updateDateInterval = new DateInterval();
+        $entryList->updateDateInterval->beginDate = Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime($date_start, 'HH:mm:ss') . '+03:00';
+        $entryList->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+
+        $appData->any['ns3:getStockEntryChangesListRequest'] = $entryList;
+
+        $request->application->data = $appData;
+
+        $result = $client->submitApplicationRequest($request);
+
+        $reuest_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            //var_dump($result);
+
+            $status = $result->application->status;
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $client = $this->getSoapClient('mercury');
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
+        return $result;
+    }
+
+    public function getStockEntryByGuid($GUID)
+    {
+        $cache = Yii::$app->cache;
+        /*$doc = MercVsd::findOne(['uuid' => $UUID]);
+
+        if ($doc != null)
+            return unserialize($doc->raw_data);
+        */
+
+        $result = null;
+        $doc = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        //Формируем тело запроса
+        $stockEntry = new GetStockEntryByGuidRequest();
+        $stockEntry->localTransactionId = $localTransactionId;
+        $stockEntry->enterpriseGuid = $this->enterpriseGuid;
+        $stockEntry->initiator = new User();
+        $stockEntry->initiator->login = $this->vetisLogin;
+        $stockEntry->guid = $GUID;
+
+
+        $appData->any['ns3:getStockEntryByGuidRequest'] = $stockEntry;
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        $result = $client->submitApplicationRequest($request);
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $doc = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
+            $cache->add('stockEntryRaw_' . $doc->uuid, $doc, 60 * 5);
+        } else
+            $result = null;
+
+        return $doc;
+    }
+
+    public function getStockEntryByUuid($UUID)
+    {
+        $cache = Yii::$app->cache;
+        /*$doc = MercVsd::findOne(['uuid' => $UUID]);
+
+        if ($doc != null)
+            return unserialize($doc->raw_data);
+        */
+
+        $result = null;
+        $doc = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        //Формируем тело запроса
+        $stockEntry = new GetStockEntryByUuidRequest();
+        $stockEntry->localTransactionId = $localTransactionId;
+        $stockEntry->enterpriseGuid = $this->enterpriseGuid;
+        $stockEntry->initiator = new User();
+        $stockEntry->initiator->login = $this->vetisLogin;
+        $stockEntry->uuid = $UUID;
+
+        $appData->any['ns3:getStockEntryByUuidRequest'] = $stockEntry;
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        $result = $client->submitApplicationRequest($request);
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $doc = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
+            $cache->add('stockEntryRaw_' . $UUID, $doc, 60 * 5);
+        } else
+            $result = null;
+
+        return $doc;
+    }
+
+    public function resolveDiscrepancyOperation($model)
+    {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        //Формируем тело запроса
+        $report = new ResolveDiscrepancyRequest();
+        $report->localTransactionId = $localTransactionId;
+        $report->enterprise = new Enterprise();
+        $report->enterprise->guid = $this->enterpriseGuid;
+        $report->initiator = new User();
+        $report->initiator->login = $this->vetisLogin;
+
+        $report->inventoryDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+
+        $report->responsible = new User();
+        $report->responsible->login = $this->vetisLogin;
+
+        $ID = 'report1';
+        $report->stockDiscrepancy = $model->getStockDiscrepancy($ID);
+        $report->discrepancyReport = new DiscrepancyReport();
+        $report->discrepancyReport->id = $ID;
+        $report->discrepancyReport->reason = new DiscrepancyReason();
+        $report->discrepancyReport->reason->name = 'Добавление по бумажному ВСД';
+
+        $appData->any['ns3:resolveDiscrepancyRequest'] = $report;
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        $result = $client->submitApplicationRequest($request);
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList;
+        } else
+            $result = null;
+
         return $result;
     }
 

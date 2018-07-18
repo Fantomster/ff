@@ -44,7 +44,7 @@ class VetDocumentDone extends Component
     public function getProcessIncomingConsignmentRequest()
     {
 
-        $this->doc = (new \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest())->getDocumentByUUID($this->UUID, true);
+        $this->doc = (new getVetDocumentByUUID())->getDocumentByUUID($this->UUID, true);
 
         $data = new ProcessIncomingConsignmentRequest();
         $date = \Yii::$app->formatter->asDate('now', 'yyyy-MM-dd').'T'.\Yii::$app->formatter->asTime('now', 'HH:mm:ss');

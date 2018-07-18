@@ -194,7 +194,8 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'vAlign' => 'middle',
                                     'format' => ['decimal', 2],
                                     'pageSummary' => true,
-                                    'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+                                    //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+                                    'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
                                 ],
                                 [
                                     'attribute' => 'vat',

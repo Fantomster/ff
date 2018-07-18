@@ -34,12 +34,19 @@ class ChatNotice
     {
         $chat_web_api = new ChatWebApi();
 
+        $last_message = $order->orderChatLastMessage->message ?? 'Нет сообщений';
+        if (!empty($last_message)) {
+            $last_message = stripcslashes(trim($last_message, "'"));
+        }
+
         FireBase::getInstance()->update([
             'chat',
             'organization' => $recipient_id,
             'dialog' => $order->id
         ], [
-            'unread_message_count' => (int)$order->getOrderChatUnreadCount($recipient_id)
+            'unread_message_count' => (int)$order->getOrderChatUnreadCount($recipient_id),
+            'last_message' => $last_message,
+            'last_message_date' => $order->orderChatLastMessage->created_at ?? null,
         ]);
 
         FireBase::getInstance()->update([

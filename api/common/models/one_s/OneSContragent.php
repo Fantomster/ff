@@ -38,7 +38,7 @@ class OneSContragent extends \yii\db\ActiveRecord
         return [
             [['name','cid','org_id'], 'required'],
             [['org_id'], 'integer'],
-            [['name', 'inn'], 'string', 'max' => 255],
+            [['name', 'inn_kpp'], 'string', 'max' => 255],
         ];
     }
 
@@ -51,7 +51,7 @@ class OneSContragent extends \yii\db\ActiveRecord
             'id' => 'ID',
             'cid' => 'CID',
             'name' => 'Наименование',
-            'inn' => 'ИНН',
+            'inn_kpp' => 'ИНН/КПП',
             'updated_at' => 'Обновлено',
         ];
     }

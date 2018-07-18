@@ -274,11 +274,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($id);
         $lic = OneSService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
             if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
             }
+            $model->save();
             return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render($vi, [
@@ -293,6 +294,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionCreate($order_id)
     {
+        $user = $this->currentUser;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
         if (!$ord) {
@@ -304,6 +306,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;
+        $model->discount = $ord->discount;
+        $model->discount_type = $ord->discount_type;
+        $is_invoice = OneSPconst::getSettingsColumn($user->organization_id);
+        $model->is_invoice = $is_invoice;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             if ($model->getErrors()) {

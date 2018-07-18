@@ -172,4 +172,18 @@ class OneSWaybillData extends \yii\db\ActiveRecord
     {
         return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'product_id']);
     }
+
+    /**
+     * @return double
+     */
+    public function getSumByWaybillid($number)
+    {
+        Yii::$app->get('db_api');
+        $sum=0;
+        $summes = OneSWaybillData::find()->where(['waybill_id' => $number])->all();
+        foreach ($summes as $summa) {
+            $sum+=$summa->sum;
+        }
+        return $sum;
+    }
 }

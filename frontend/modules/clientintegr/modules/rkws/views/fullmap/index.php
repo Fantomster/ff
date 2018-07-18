@@ -360,10 +360,15 @@ array_push($columns,
     <?php
     $loadUrl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/renewcats']);
 
-    echo Html::a('Обновить данные каталогов', $loadUrl, ['class' => 'btn btn-success btn-export']);
+    echo Html::button('Обновить данные каталогов', ['id' => 'fullmapbutton', 'class' => 'btn btn-success btn-export']);
 
     ?>
 </div>
+                        <div class ="" id="fullmapconsole">
+                            <span id="fmtotal" >0</span>
+                            <span id="fmsuccess" >0</span>
+                            <span id="fmfailed" >0</span>
+                        </div>
 
                         <?=
 GridView::widget([
@@ -401,30 +406,29 @@ GridView::widget([
 </section>
 
 <?php 
-/*
+
 $js = "
-  $('#s_1').on('change', function(){
+  $('#fullmapbutton').on('click', function(){
   
-    alert($('#s_1').checked);
-    return true;
-  /*
+    // alert('Hello');
+  
     $.ajax({
-      url: 'changevat', // путь к php-обработчику
+      url: '".$loadUrl."', // путь к php-обработчику
       type: 'POST', // метод передачи данных
-      dataType: 'json', // тип ожидаемых данных в ответе
-      data: {key: 1}, // данные, которые передаем на сервер
-      beforeSend: function(){ // Функция вызывается перед отправкой запроса
-        output.text('Запрос отправлен. Ждите ответа.');
-      },
+     // dataType: 'json', // тип ожидаемых данных в ответе
+     // data: {key: 1}, // данные, которые передаем на сервер
+     // beforeSend: function(){ // Функция вызывается перед отправкой запроса
+     //   console.log('Запрос отправлен. Ждите ответа.');
+     // },
       error: function(req, text, error){ // отслеживание ошибок во время выполнения ajax-запроса
-        output.text('Хьюстон, У нас проблемы! ' + text + ' | ' + error);
+      console.log('Хьюстон, У нас проблемы! ' + text + ' | ' + error);
       },
-      complete: function(){ // функция вызывается по окончании запроса
-        output.append('<p>Запрос полностью завершен!</p>');
-      },
+     // complete: function(){ // функция вызывается по окончании запроса
+     //   output.append('<p>Запрос полностью завершен!</p>');
+     // },
       success: function(json){ // функция, которая будет вызвана в случае удачного завершения запроса к серверу
         // json - переменная, содержащая данные ответа от сервера. Обзывайте её как угодно ;)
-        output.html(json); // выводим на страницу данные, полученные с сервера
+        console.log(json); // выводим на страницу данные, полученные с сервера
       }
     });
 
@@ -432,7 +436,5 @@ $js = "
 
 ";
     
-$this->registerJs($js);  
-*/
+$this->registerJs($js);
 ?>
-

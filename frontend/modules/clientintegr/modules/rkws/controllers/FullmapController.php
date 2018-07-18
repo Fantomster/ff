@@ -116,14 +116,12 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionRenewcats() {
 
-        ini_set('memory_limit', '512M');
-
         $helper = new FullmapHelper();
 
         $helper->getcats();
 
-        return $this->redirect(['index']);
-
+       // return $this->redirect(['index']);
+          return true;
     }
 
     public function actionChvat($id, $vat) {

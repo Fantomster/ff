@@ -91,6 +91,8 @@ class Purpose{
     var $forSubstandard;//boolean
 }
 class Unit{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $fullName;//String255
     var $commonUnitGuid;//UUID
@@ -107,6 +109,8 @@ class UnitList{
     var $unit;//Unit
 }
 class Country{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $fullName;//String255
     var $englishName;//String255
@@ -249,12 +253,16 @@ class ProductItem{
     var $isPublic;//boolean
 }
 class Product{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $code;//String255
     var $englishName;//String255
     var $productType;//ProductType
 }
 class SubProduct{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $code;//String255
     var $englishName;//String255
@@ -381,6 +389,9 @@ class ActivityLocationList{
     var $location;//BusinessMember
 }
 class VetDocument{
+    var $issueSeries;//String255
+    var $issueNumber;//String255
+    var $issueDate;//date
     var $UUID; //UUID
     var $vetDForm;//VetDocumentForm
     var $vetDType;//VetDocumentType
@@ -477,6 +488,7 @@ class DiscrepancyReport{
     var $issueDate;
     var $reason;//DiscrepancyReason
     var $description;//string
+    var $id;//ID
 }
 class DiscrepancyReason{
     var $name;//String255
@@ -777,6 +789,8 @@ class ModifyActivityLocationsResponse{
     var $businessEntity;//BusinessEntity
 }
 class ResolveDiscrepancyRequest{
+    var $uuid;//UUID
+    var $localTransactionId;
     var $enterprise;//Enterprise
     var $inventoryDate;//dateTime
     var $responsible;//User
@@ -824,6 +838,8 @@ class GetVetDocumentChangesListResponse{
     var $vetDocumentList;//VetDocumentList
 }
 class GetStockEntryByGuidRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $guid;//UUID
     var $enterpriseGuid;//UUID
 }
@@ -831,6 +847,8 @@ class GetStockEntryByGuidResponse{
     var $stockEntry;//StockEntry
 }
 class GetStockEntryByUuidRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $uuid;//UUID
     var $enterpriseGuid;//UUID
 }
@@ -838,6 +856,8 @@ class GetStockEntryByUuidResponse{
     var $stockEntry;//StockEntry
 }
 class GetStockEntryChangesListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $updateDateInterval;//DateInterval
     var $enterpriseGuid;//UUID
@@ -846,6 +866,8 @@ class GetStockEntryChangesListResponse{
     var $stockEntryList;//StockEntryList
 }
 class GetStockEntryListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $enterpriseGuid;//UUID
     var $searchPattern;//StockEntrySearchPattern
@@ -854,6 +876,8 @@ class GetStockEntryListResponse{
     var $stockEntryList;//StockEntryList
 }
 class GetStockEntryVersionListRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $listOptions;//ListOptions
     var $guid;//UUID
     var $enterpriseGuid;//UUID

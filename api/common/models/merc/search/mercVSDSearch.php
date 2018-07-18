@@ -56,8 +56,6 @@ class mercVSDSearch extends MercVsd
             'number' => $this->id,
             'status' => $this->status,
             'amount' => $this->amount,
-            'date_doc' => $this->date_doc,
-
         ]);
 
         if($this->type == 2)

@@ -1,10 +1,15 @@
+<style>
+    #alShowAllWaybills {
+        margin-top: 5px;
+    }
+</style>
 <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-3">
         <b>Выберите заказ для связи с накладной:</b>
     </div>
-    <div class="col-md-2"></div>
-    <div class="col-md-5"></div>
-
+    <div class="col-md-5">
+        <?= \yii\helpers\Html::checkbox('show_all_waybills', false, ['label' => "<span style='min-height: 20px; padding-left: 20px; margin-bottom: 0;'>" . Yii::t('app', 'franchise.views.anal.all_orders_four', ['ru' => 'Все заказы']) . "</span>", 'id' => 'alShowAllWaybills']); ?>
+    </div>
 </div>
 <br>
 <?php

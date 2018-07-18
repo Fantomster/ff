@@ -123,7 +123,7 @@ if (!Yii::$app->user->isGuest) {
                 $('#fmsuccess').progressTo(Math.round(message.success*100/message.total));
                 $('#fmfailed').progressTo(Math.round(message.failed*100/message.total));
                 
-                if(message.total = (message.success + message.failed)) //Все обработано
+                if(message.total == (message.success + message.failed)) //Все обработано
                 {
                     $.pjax.reload("#map_grid1", {timeout:30000});
                 }

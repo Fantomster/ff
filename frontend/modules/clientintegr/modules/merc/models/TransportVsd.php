@@ -19,8 +19,26 @@ class TransportVsd extends MercStockEntry
     {
         return [
             [['product_name', 'select_amount'], 'required'],
-            [['amount'], 'number'],
+            [['select_amount'], 'number'],
+            [['select_amount'], 'checkNax'],
             [['product_name'], 'string'],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return array_merge([
+            'select_amount' => \Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём'])],
+            parent::attributeLabels());
+    }
+
+    public function checkNax($attribute, $params)
+    {
+
+            if ($this->$attribute > $this->amount)
+                $this->addError($attribute, 'Введенное количество больше доступного.');
     }
 }

@@ -4,11 +4,11 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
-use api\common\models\merc\MercStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
 use frontend\modules\clientintegr\modules\merc\models\TransportVsd;
 use Yii;
 use yii\bootstrap\ActiveForm;
+use yii\web\Response;
 
 class TransportVsdController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -40,8 +40,14 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     public function actionStep1()
     {
-        if(Yii::$app->request->isGet)
-            $selected = Yii::$app->request->get('selected');
+        $session = Yii::$app->session;
+        if(Yii::$app->request->isGet) {
+            $get = Yii::$app->request->get();
+            if (isset($get['selected'])) {
+                $selected = Yii::$app->request->get('selected');
+                $session->remove('store_entry_list');
+            }
+        }
         else {
             $post = Yii::$app->request->post('TransportVsd');
             $res = [];
@@ -54,10 +60,29 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
             $list = TransportVsd::find()->where("id in ($selected)")->all();
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
-                var_dump(1);
+            $attributes = [];
+            foreach ($list as $item)
+            {
+                $attributes[$item->id] = $item->getAttributes(['product_name','select_amount']);
+            }
+                $session->set('store_entry_list', $attributes);
+                if (Yii::$app->request->isAjax) {
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    return (['success' => true]);
+                }
+                return $this->redirect(['step-2']);
+
         }
 
+        if (Yii::$app->request->isAjax)
+            return $this->renderAjax('step-1', ['list' => $list]);
         return $this->render('step-1', ['list' => $list]);
+    }
+
+    public function actionStep2()
+    {
+        var_dump(2);
+        exit();
     }
 
     private function getErrorText($e)

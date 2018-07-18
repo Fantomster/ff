@@ -148,8 +148,9 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 }
 $(".step-2").click(function(e){
 e.preventDefault();
-var urlStap = "'.$router.'";
-$.ajax({
+//var urlStep = "'.$router.'";
+$("#product_list_form" ).submit();
+/*$.ajax({
     url: urlStap,
     type: "POST",
     dataType: "json",
@@ -158,29 +159,18 @@ $.ajax({
     success: function(response) {
             
             if(response.success){
-                var url = "' . Url::toRoute(['vendor/step-2', 'id' => '']) . '"+response.cat_id;
+                var url = "' . Url::toRoute(['step-2']) . '";
                 $(location).attr("href",url);
                 }else{
-            if(response.type==1){
-            bootbox.dialog({
-                    message: response.alert.body,
-                    title: response.alert.title,
-                    buttons: {
-                        success: {
-                          label: "' . Yii::t('message', 'frontend.views.vendor.ok_three', ['ru'=>'Окей']) . ' ",
-                          className: "btn-success btn-md",
-                        },
-                    },
-                    className: response.alert.class
-                });
-            }
+                alert(1);
+           $("#product_list_form" ).replaceWith(result);
             console.log(response);    
             }
         },
         failure: function(errMsg) {
         console.log(errMsg);
         }
-    });
+    });*/
 });        
 ');
 ?>

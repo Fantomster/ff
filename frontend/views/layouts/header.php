@@ -116,11 +116,17 @@ if (!Yii::$app->user->isGuest) {
         if (message.isRabbit == 1) {
             if (message.action == 'fullmap') {
                 
-                $('#fmtotal').html(message.total);
-                $('#fmsuccess').html(message.success);
-                $('#fmfailed').html(message.failed);
+                $('#fullmapconsole').show();
+                $('#fullmapbutton').hide();
                 
-                // Check pjax reload
+                $('#fmtotal').progressTo(Math.round((message.success + message.failed)*100/message.total))
+                $('#fmsuccess').progressTo(Math.round(message.success*100/message.total));
+                $('#fmfailed').progressTo(Math.round(message.failed*100/message.total));
+                
+                if(message.total == (message.success + message.failed)) //Все обработано
+                {
+                    $.pjax.reload("#map_grid1", {timeout:30000});
+                }
             }
         }
 

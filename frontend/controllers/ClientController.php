@@ -1861,10 +1861,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $businessId = $post['business'];
         $showNotChangedPrice = $post['show_not_changed_price'] ?? false;
         $dateFrom = date('Y-m-d', strtotime($post['filter_from_date_price_stat']));
-        $dateTo = date('Y-m-d', strtotime($post['filter_to_date_price_stat'] . " + 1 days"));
-
+        $dateTo = date('Y-m-d', strtotime($post['filter_from_date_price_stat'] . " + 14 days"));
         $orderContent = OrderContent::find()->joinWith('order')->where(['order.status' => Order::STATUS_DONE])->andWhere(['between', 'order.created_at', $dateFrom, $dateTo]);
-
         $businessArray = [];
         if(empty($businessId)){
             $relations = RelationUserOrganization::find()->where(['relation_user_organization.user_id' => Yii::$app->user->id])->leftJoin('organization', 'organization.id = relation_user_organization.organization_id')->andWhere(['organization.type_id' => Organization::TYPE_RESTAURANT])->all();
@@ -1942,7 +1940,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $objPHPExcel->getActiveSheet()->mergeCells('A1:N1');
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
             ->setCellValue('A1', Yii::t('app', 'Отчет об отклонениях цены по поставщику') . " " .
-                $vendorText . " " . Yii::t('app', 'за период с') . " " . date('d.m.Y', strtotime($post['filter_from_date_price_stat'])) . " " . Yii::t('app', 'по') . " " . date('d.m.Y', strtotime($post['filter_to_date_price_stat'])));
+                $vendorText . " " . Yii::t('app', 'за период с') . " " . date('d.m.Y', strtotime($post['filter_from_date_price_stat'])) . " " . Yii::t('app', 'по') . " " . date('d.m.Y', strtotime($dateTo)));
         $objPHPExcel->getActiveSheet()->getStyle('A1:N1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(18);
         $objPHPExcel->getActiveSheet()->setCellValue('A2', Yii::t('message', 'frontend.views.user.default.business', ['ru' => 'БИЗНЕС']));

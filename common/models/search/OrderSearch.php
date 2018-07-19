@@ -200,8 +200,7 @@ class OrderSearch extends Order
             $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         }
         $query->andFilterWhere(['client_id' => $this->client_id]);
-
-        if(isset($params['invoice_id'])){
+        if((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')){
             $query->rightJoin('integration_invoice', 'integration_invoice.number=order.waybill_number');
         }
 

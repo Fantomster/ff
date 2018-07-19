@@ -402,32 +402,27 @@ ob_start();
                 confirmButtonText: 'Продолжить',
                 cancelButtonText: 'Отмена',
             }).then(function (result) {
-                if (result.value) {
-                    create_order = true;
-                }
-                button.removeAttr('disabled', false);
-                button.html('<i class="fa fa-save"></i> Сохранить');
+                $.post('<?= $url ?>/create-order', params, function (data) {
+                    if (data.status === true) {
+                        $('input[class="orders_radio"]').prop('checked', false);
+                        $('.catalog-index.orders').hide();
+                        $(row_invoice).find('.invoice_radio').remove();
+                        swal(
+                            'Накладная успешно привязана!',
+                            'Перейти в интеграцию: <?= $list_integration ?>',
+                            'success'
+                        );
+                    } else {
+                        errorSwal(data.error)
+                    }
+                    button.removeAttr('disabled', false);
+                    button.html('<i class="fa fa-save"></i> Сохранить');
+                    });
+                    button.removeAttr('disabled', false);
+                    button.html('<i class="fa fa-save"></i> Сохранить');
             });
         }
 
-        if (create_order === true) {
-            $.post('<?= $url ?>/create-order', params, function (data) {
-                if (data.status === true) {
-                    $('input[class="orders_radio"]').prop('checked', false);
-                    $('.catalog-index.orders').hide();
-                    $(row_invoice).find('.invoice_radio').remove();
-                    swal(
-                        'Накладная успешно привязана!',
-                        'Перейти в интеграцию: <?=$list_integration?>',
-                        'success'
-                    );
-                } else {
-                    errorSwal(data.error)
-                }
-                button.removeAttr('disabled', false);
-                button.html('<i class="fa fa-save"></i> Сохранить');
-            });
-        }
     });
 
     function errorSwal(message) {

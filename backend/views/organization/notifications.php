@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php foreach ($users as $user){
             $emailNotification = $user->emailNotification;
             $smsNotification = $user->smsNotification;
+            if(!$emailNotification->id || !$smsNotification)continue;
             ?>
             <div class="row">
                 <div class="col-md-6">

@@ -335,6 +335,7 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                     ]),
                                 '#',
                                 [
+                                    'onclick' => 'return false;',
                                     'class' => 'export-waybill-btn',
                                     'title' => Yii::t('backend', 'Выгрузить'),
                                     'data-pjax' => "0",

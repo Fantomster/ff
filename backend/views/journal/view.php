@@ -33,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'log_guide',
             'type',
-            'created_at',
+            [
+                'header' => 'Дата операции',
+                'attribute' => 'record.response_at',
+                'value' => function ($data) {
+                    return $data->record['response_at'];
+                }
+            ]
         ],
     ]) ?>
 

@@ -35,7 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
             //'response:ntext',
             //'log_guide',
             'type',
-            'created_at',
+            [
+                'header' => 'Дата операции',
+                'value' => function ($data) {
+                    return $data->record['response_at'];
+                }
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}'

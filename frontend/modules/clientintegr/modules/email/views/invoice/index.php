@@ -192,13 +192,13 @@ function renderButton($id)
                                     'template' => '{view_relations}',
                                     'contentOptions' => ['style' => 'text-align:center'],
                                     'buttons' => [
-                                        'view_content' => function ($url, $model) {
+                                        /*'view_content' => function ($url, $model) {
                                             return \yii\helpers\Html::tag('span', '', [
                                                 'class' => 'actions_icon view-content fa fa-eye',
                                                 'data-invoice_id' => $model->id,
                                                 'style' => 'cursor:pointer'
                                             ]);
-                                        },
+                                        },*/
                                         'view_relations' => function ($url, $model) {
                                             if (isset($model->order->vendor)) {
                                                 return $model->order->vendor->name;
@@ -282,6 +282,7 @@ ob_start();
         var $invoice_id = $(this).data('invoice_id');
         var td = $(this).parents('tr').find('td:last-child');
         var this_ = $(this);
+        var organization_id = <?=$organization->id?>;
 
 
 
@@ -322,29 +323,58 @@ ob_start();
         });*/
 
         swal({
-                input: 'select',
+                html: '<input type="text" id="bukv-postav" class="swal2-input" placeholder="Введите хотя бы две буквы названия поставщика" autofocus>'+'<div id="bukv-postav2"></div>',
+                inputPlaceholder: 'Введите хотя бы две буквы',
                 confirmButtonText: 'Выбрать',
                 cancelButtonText: 'Отмена',
                 showCancelButton: true,
                 title: 'Выберите поставщика',
                 inputOptions: new Promise(function (resolve) {
-                    $.post('<?= $url ?>/get-suppliers', function (data) {
-                        vendors = data;
-                        resolve(vendors);
+                    $(document).ready ( function(){
+                        $("#bukv-postav").focus();
+                        $("#bukv-postav").keyup(function() {
+                            var a = $("#bukv-postav").val();
+                                if (a.length>=2) {
+                                    $.post('<?=$url?>/list-postav', {org_id: organization_id, stroka: a}).done(
+                                    function(data){
+                                    var arr = JSON.parse(data);
+                                    if (arr.length>0) {
+                                        var sel = '<select id="selpos" name="list_postav" class="swal2-input">';
+                                        var index;
+                                        for (index = 0; index < arr.length; ++index) {
+                                            sel = sel+'<option value="'+arr[index]['id']+'">'+arr[index]['name']+'</option>';
+                                        }
+                                        sel = sel+'</select>';
+                                    } else {
+                                        sel = 'Нет данных.';
+                                    }
+                                    $('#bukv-postav2').html(sel);
+                                });
+                            } else {
+                                $('#bukv-postav2').text('');
+                            }
+                        });
                     });
                 })
             }
         ).then(function (result) {
-            if (result.value) {
-                $.get('<?= $url ?>/get-orders', {
-                    OrderSearch: {vendor_search_id: result.value, vendor_id: result.value},
-                    invoice_id: $invoice_id
-                }, function (data) {
-                    $('#invoice-orders').html(data);
-                    $('.orders').show();
-                        $(this_).data('vendor_id', result.value);
-                    $(this_).html(vendors[result.value]);
-                });
+            if(result.value) {
+                var selectd = $("#selpos").val();
+                if (selectd) {
+                    var selected_name = $("#selpos option:selected").text();
+                    console.log(selected_name);
+                    if (selectd!=-1) {
+                        $.get('<?= $url ?>/get-orders', {
+                            OrderSearch: {vendor_search_id: selectd, vendor_id: selectd},
+                            invoice_id: $invoice_id
+                        }, function (data) {
+                            $('#invoice-orders').html(data);
+                            $('.orders').show();
+                            $(this_).data('vendor_id', selectd);
+                            $(this_).html(selected_name);
+                        });
+                    }
+                }
             }
         });
     });

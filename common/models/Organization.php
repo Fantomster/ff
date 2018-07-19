@@ -1573,7 +1573,7 @@ class Organization extends \yii\db\ActiveRecord {
                 $result = 'Заблокировано';
                 break;
             case self::STATUS_UNSORTED:
-                $result = 'Неотсортировано';
+                $result = 'Не отсортировано';
                 break;
         }
         return $result;
@@ -1582,8 +1582,8 @@ class Organization extends \yii\db\ActiveRecord {
     public static function getStatusList() {
         return [
             self::STATUS_WHITELISTED => 'Работает',
-            self::STATUS_BLACKISTED => 'Отключен',
-            self::STATUS_UNSORTED => 'Неопределен',
+            self::STATUS_BLACKISTED => 'Отключён',
+            self::STATUS_UNSORTED => 'Не определён',
         ];
     }
 
@@ -1616,5 +1616,20 @@ class Organization extends \yii\db\ActiveRecord {
         $this->blacklisted = true;
         $this->parent_id = null;
         return $this->save();
+    }
+
+    public function getSuppliersByString($numrest, string $stroka) {
+        $sql = "SELECT organization.id,organization.name FROM organization INNER JOIN relation_supp_rest ON
+                (organization.id=relation_supp_rest.supp_org_id AND relation_supp_rest.rest_org_id=$numrest)";
+        $connection = \Yii::$app->getDb();
+        $command = $connection->createCommand($sql);
+        $res = $command->queryAll();
+        ksort($res);
+        $res2 = array();
+        foreach($res as $postav) {
+            $podstav = mb_strtolower($postav['name']);
+            if (strpos($podstav, $stroka) !== false) $res2[] = $postav;
+        }
+        return $res2;
     }
 }

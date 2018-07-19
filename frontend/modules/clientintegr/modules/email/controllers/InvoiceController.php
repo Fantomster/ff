@@ -171,4 +171,13 @@ class InvoiceController extends Controller
             throw new Exception('Not access this invoice.');
         }
     }
+
+    public function actionListPostav()
+    {
+        $org_id = $_POST["org_id"];
+        $stroka = $_POST["stroka"];
+        $res = Organization::getSuppliersByString($org_id,$stroka);
+        $res = json_encode($res);
+        return $res;
+    }
 }

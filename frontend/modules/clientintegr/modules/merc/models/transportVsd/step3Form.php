@@ -2,43 +2,57 @@
 /**
  * Created by PhpStorm.
  * User: user
- * Date: 17.07.2018
- * Time: 18:36
+ * Date: 19.07.2018
+ * Time: 16:13
  */
 
 namespace frontend\modules\clientintegr\modules\merc\models\transportVsd;
+
 
 use yii\base\Model;
 
 class step3Form extends Model
 {
-    public $type = 1;
-    public $type_name = 'Автомобильный';
-    public $car_number;
-    public $trailer_number;
-    public $container_number;
-    public $storage_type;
+    public $recipient;
+    public $hc;
+    public $isTTN;
+    public $seriesTTN;
+    public $numberTTN;
+    public $dateTTN;
+    public $typeTTN;
+    public $hc_name;
+
+    public static $ttn_types = [
+        '1' => 'Товарно-транспортная накладная',
+        '2' => 'Коносамент',
+        '3' => 'CMR',
+        '4' => 'Авианакладная',
+        '5' => 'Транспортная накладная ',
+    ];
 
     public function rules()
     {
         return [
-            [['type', 'car_number', 'trailer_number', 'container_number', 'storage_type'], 'required'],
-            [['type'],'integer'],
-            [['car_number', 'trailer_number', 'container_number', 'storage_type', 'type_name'], 'string'],
+            [['recipient', 'hc', 'isTTN'], 'required'],
+            [['recipient', 'hc', 'numberTTN', 'dateTTN', 'typeTTN'], 'required', 'on' => 'isTTN'],
+            [['isTTN'],'integer'],
+            [['recipient', 'hc', 'seriesTTN', 'numberTTN', 'typeTTN', 'hc_name', 'dateTTN'], 'string'],
         ];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function attributeLabels()
     {
         return [
-            'type' => 'Вид транспорта',
-            'car_number' => 'Номер авто',
-            'trailer_number' => 'Номер полуприцепа',
-            'container_number' => 'Номер контейнера',
-            'storage_type' => 'Способ хранения'
+            'recipient' => 'Предприятие-получатель',
+            'hc_name' => 'Фирма-получатель',
+            'isTTN' => 'Наличие TTN',
+            'seriesTTN' => 'Серия ТТН',
+            'numberTTN' => 'Номер ТТН',
+            'dateTTN' => 'Дата ТТН',
+            'typeTTN' => 'Тип ТТН'
         ];
     }
+
+
+
 }

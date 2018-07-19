@@ -42,9 +42,10 @@ CSS;
     <div class="box-body">
             <div class="panel-body">
                 <ul class="nav fk-tab nav-tabs  pull-left">
-                    <?= '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>';?>
-                    <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_recipient_info', ['ru'=>' Информация о товарополучателе'])).'</li>'?>
-                    <?= '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_transport_info', ['ru'=>'Информация о транспорте'])).'</li>'?>
+                    <?= '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['step-1'],['class'=>'btn btn-default']).'</li>';?>
+                    <?= '<li class="">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_vet_info', ['ru'=>'Ветеринарная Экспертиза'])).'</li>';?>
+                    <?= '<li class="">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_recipient_info', ['ru'=>' Информация о товарополучателе'])).'</li>'?>
+                    <?= '<li class="">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_transport_info', ['ru'=>'Информация о транспорте'])).'</li>'?>
                 </ul>
 
 

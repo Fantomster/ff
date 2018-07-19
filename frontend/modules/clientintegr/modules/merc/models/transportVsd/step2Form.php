@@ -8,26 +8,21 @@
 
 namespace frontend\modules\clientintegr\modules\merc\models\transportVsd;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use yii\base\Model;
 
 class step2Form extends Model
 {
-    public $recipient;
-    public $hc;
-    public $isTTN;
-    public $seriesTTN;
-    public $numberTTN;
-    public $dateTTN;
-    public $typeTTN;
-    public $hc_name;
+    public $purpose;
+    public $cargoExpertized;
+    public $locationProsperity = 'Благополучна';
 
     public function rules()
     {
         return [
-            [['recipient', 'hc', 'isTTN'], 'required'],
-            [['recipient', 'hc', 'numberTTN', 'dateTTN', 'typeTTN'], 'required', 'on' => 'isTTN'],
-            [['isTTN'],'integer'],
-            [['recipient', 'hc', 'seriesTTN', 'numberTTN', 'typeTTN', 'hc_name'], 'string'],
+            [['purpose', 'cargoExpertized', 'locationProsperity'], 'required'],
+            [['purpose', 'cargoExpertized', 'locationProsperity'], 'string'],
         ];
     }
 
@@ -37,13 +32,47 @@ class step2Form extends Model
     public function attributeLabels()
     {
         return [
-            'recipient' => 'Предприятие-получатель',
-            'hc_name' => 'Фирма-получатель',
-            'isTTN' => 'Наличие TTN',
-            'seriesTTN' => 'Серия ТТН',
-            'numberTTN' => 'Номер ТТН',
-            'dateTTN' => 'Дата ТТН',
-            'typeTTN' => 'Тип ТТН'
+            'purpose' => 'Назначение груза',
+            'cargoExpertized' => 'Результат проведения ВСЭ',
+            'locationProsperity' => 'Благополучие местности',
         ];
+    }
+
+    public function getPurposeList()
+    {
+        $api = dictsApi::getInstance();
+        $listOptions = new ListOptions();
+        $listOptions->count = 100;
+        $listOptions->offset = 0;
+        $res = [];
+
+        do {
+            $list = $api->getPurposeList($listOptions);
+            $list = $list->purposeList;
+
+            if(isset($list->purpose)) {
+                foreach ($list->purpose as $item) {
+                    if ($item->last && $item->active)
+                        $res[$item->guid] = $item->name;
+                }
+            }
+            if($list->count < $list->total)
+                $listOptions->offset += $list->count;
+        } while ($list->total > ($list->count + $list->offset));
+
+        return $res;
+    }
+
+    public function getExpertizeList()
+    {
+       return [
+            'UNKNOWN' => 'Результат неизвестен',
+            'UNDEFINED' => 'Результат невозможно определить (не нормируется)',
+            'POSITIVE' => 'Положительный результат',
+            'NEGATIVE' => 'Отрицательный результат',
+            'UNFULFILLED' => 'Не проводилось',
+            'VSERAW' => 'ВСЭ подвергнуто сырьё, из которого произведена продукция',
+            'VSEFULL' => 'Продукция подвергнута ВСЭ в полном объеме'
+       ];
     }
 }

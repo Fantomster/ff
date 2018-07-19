@@ -59,4 +59,15 @@ class dictsApi extends baseApi
 
         return $result;
     }
+
+    public function getPurposeList ($listOptions)
+    {
+        $client = $this->getSoapClient('dicts');
+
+        $request = new getPurposeListRequest();
+        $request->listOptions = $listOptions;
+        $result = $client->GetPurposeList($request);
+
+        return $result;
+    }
 }

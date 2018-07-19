@@ -87,6 +87,8 @@ class receiveApplicationResultResponse{
     var $application;//Application
 }
 class Purpose{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $name;//String255
     var $forSubstandard;//boolean
 }
@@ -389,6 +391,7 @@ class ActivityLocationList{
     var $location;//BusinessMember
 }
 class VetDocument{
+    var $for;//ID
     var $issueSeries;//String255
     var $issueNumber;//String255
     var $issueDate;//date
@@ -494,6 +497,8 @@ class DiscrepancyReason{
     var $name;//String255
 }
 class StockEntry{
+    var $uuid; //UUID
+    var $guid; //UUID
     var $entryNumber;//StockEntryNumber
     var $batch;//Batch
     var $vetDocument;//VetDocument
@@ -738,6 +743,8 @@ class ProcessIncomingConsignmentResponse{
     var $vetDocument;//VetDocument
 }
 class PrepareOutgoingConsignmentRequest{
+    var $localTransactionId;//Identifier
+    var $initiator;//User
     var $delivery;//Delivery
 }
 class PrepareOutgoingConsignmentResponse{

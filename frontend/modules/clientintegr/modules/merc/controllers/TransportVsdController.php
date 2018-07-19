@@ -10,6 +10,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step1Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step2Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step3Form;
+use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use Yii;
 use yii\bootstrap\ActiveForm;
 use yii\web\Response;
@@ -51,9 +52,21 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $selected = Yii::$app->request->get('selected');
                 $session->remove('TrVsd_step1');
             }
+            else
+            {
+                $selected = $session->get('TrVsd_step1');
+                $attributes = $selected;
+                $session->remove('TrVsd_step1');
+                $selected = implode(",", array_keys($selected));
+                $list = step1Form::find()->where("id in ($selected)")->all();
+                foreach ($list as $key => $item)
+                {
+                    $list[$key]->attributes = $attributes[$item->id];
+                }
+            }
         }
         else {
-            $post = Yii::$app->request->post('TransportVsd');
+            $post = Yii::$app->request->post('step1Form');
             $res = [];
             foreach ($post as $item)
             {
@@ -62,6 +75,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
+        if(!isset($list))
             $list = step1Form::find()->where("id in ($selected)")->all();
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
@@ -92,8 +106,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         $post = Yii::$app->request->post();
         if ($model->load($post)) {
-            if ($model->isTTN)
-                $model->setScenario('isTTN');
             if ($model->validate()) {
                 $session->set('TrVsd_step2', $model->attributes);
                 if (Yii::$app->request->isAjax) {
@@ -115,8 +127,31 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         $post = Yii::$app->request->post();
         if ($model->load($post)) {
+            if ($model->isTTN)
+                $model->setScenario('isTTN');
             if ($model->validate()) {
                 $session->set('TrVsd_step3', $model->attributes);
+                if (Yii::$app->request->isAjax) {
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    return (['success' => true]);
+                }
+                return $this->redirect(['step-4']);
+            }
+        }
+        return $this->render('step-3', ['model' => $model]);
+    }
+
+    public function actionStep4()
+    {
+        $session = Yii::$app->session;
+        $model = new step4Form();
+        $model->attributes = $session->get('TrVsd_step4');
+        $session->remove('TrVsd_step4');
+
+        $post = Yii::$app->request->post();
+        if ($model->load($post)) {
+            if ($model->validate()) {
+                $session->set('TrVsd_step4', $model->attributes);
                 var_dump(1); exit();
                 /*if (Yii::$app->request->isAjax) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
@@ -125,7 +160,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 //return $this->redirect(['step-3']);
             }
         }
-        return $this->render('step-3', ['model' => $model]);
+        return $this->render('step-4', ['model' => $model]);
     }
 
     public function actionAutocomplete($type = 1) {

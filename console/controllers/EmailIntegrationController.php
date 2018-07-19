@@ -40,7 +40,7 @@ class EmailIntegrationController extends Controller
 
     public function actionTest() {
 
-        $temp_file[1] = '/app/console/runtime/testnac.xls';
+        //$temp_file[1] = '/app/console/runtime/testnac.xls';
         /*$temp_file[2] = '/app/console/runtime/testnac2.xls';
         $temp_file[3] = '/app/console/runtime/testnac3.xls';
         $temp_file[4] = '/app/console/runtime/testnac4.xls';
@@ -73,7 +73,9 @@ class EmailIntegrationController extends Controller
         $temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
         $temp_file[32] = '/app/console/runtime/id7905.xlsx';
         $temp_file[33] = '/app/console/runtime/testnac30.xlsx';*/
-        $temp_file[33] = '/app/console/runtime/testnac31.xlsx';
+        //$temp_file[34] = '/app/console/runtime/testnac31.xlsx';
+        $temp_file[35] = '/app/console/runtime/testnac32.xls';
+        $temp_file[36] = '/app/console/runtime/testnac33.xlsx';
 
 
         $i =1;
@@ -103,8 +105,8 @@ class EmailIntegrationController extends Controller
             print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
             print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
             print_r("Result consignee:".$result[$i-1]['invoice']['nameConsignee'].PHP_EOL);
-            //print_r("Result price_without_tax_sum:".$result[$i-1]['invoice']['price_without_tax_sum'].PHP_EOL);
-            //print_r("Result price_with_tax_sum:".$result[$i-1]['invoice']['price_with_tax_sum'].PHP_EOL);
+            print_r("Result price_without_tax_sum:".$result[$i-1]['invoice']['price_without_tax_sum'].PHP_EOL);
+            print_r("Result price_with_tax_sum:".$result[$i-1]['invoice']['price_with_tax_sum'].PHP_EOL);
             print_r("=================================".PHP_EOL);
             //print_r($result[$i-1]['invoice']['rows']);
 

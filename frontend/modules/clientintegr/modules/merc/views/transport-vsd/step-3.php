@@ -1,12 +1,11 @@
 <?php
 use yii\widgets\Breadcrumbs;
-use yii\helpers\Url;
 use yii\widgets\Pjax;
 use common\models\Users;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
-use kartik\widgets\Select2;
-use yii\web\JsExpression;
+use yii\jui\AutoComplete;
+use yii\helpers\Url;
 
 $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД ']);
 ?>
@@ -52,9 +51,57 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
             <?= $form->field($model, 'type',['enableClientValidation' => false])->hiddenInput()->label(false); ?>
             <?= $form->field($model, 'type_name')->textInput(['maxlength' => true]); ?>
 
-            <?= $form->field($model, 'car_number')->textInput(['maxlength' => true]); ?>
-            <?= $form->field($model, 'trailer_number')->textInput(['maxlength' => true]); ?>
-            <?= $form->field($model, 'container_number')->textInput(['maxlength' => true]); ?>
+            <?= $form->field($model, 'car_number')->widget(
+                AutoComplete::className(), [
+                'clientOptions' =>
+                    [
+                        //'main_selector' => '#defect-form',
+                        //'class' => 'runame',
+                        'source' =>  Url::toRoute(['autocomplete', 'type' => 1]),
+                        'dataType'=>'json',
+                        'autoFill'=>true,
+                        'minLength'=>'2',
+                    ],
+                'options'=>[
+                    'class'=>'form-control'
+                ]
+            ])
+            ?>
+
+            <?= $form->field($model, 'trailer_number')->widget(
+                AutoComplete::className(), [
+                'clientOptions' =>
+                    [
+                        //'main_selector' => '#defect-form',
+                        //'class' => 'runame',
+                        'source' =>  Url::toRoute(['autocomplete','type' => 2]),
+                        'dataType'=>'json',
+                        'autoFill'=>true,
+                        'minLength'=>'2',
+                    ],
+                'options'=>[
+                    'class'=>'form-control'
+                ]
+            ])
+            ?>
+
+            <?= $form->field($model, 'container_number')->widget(
+                AutoComplete::className(), [
+                'clientOptions' =>
+                    [
+                        //'main_selector' => '#defect-form',
+                        //'class' => 'runame',
+                        'source' =>  Url::toRoute(['autocomplete','type' => 3]),
+                        'dataType'=>'json',
+                        'autoFill'=>true,
+                        'minLength'=>'2',
+                    ],
+                'options'=>[
+                    'class'=>'form-control'
+                ]
+            ])
+            ?>
+
             <?=
             $form->field($model, 'storage_type')
                 ->dropDownList(\api\common\models\merc\MercVsd::$storage_types,['prompt' => 'не указано']);

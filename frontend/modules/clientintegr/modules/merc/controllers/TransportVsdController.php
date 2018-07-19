@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
+use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step1Form;
@@ -125,6 +126,29 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
         }
         return $this->render('step-3', ['model' => $model]);
+    }
+
+    public function actionAutocomplete($type = 1) {
+        if (Yii::$app->request->get('term')) {
+            $term = Yii::$app->request->get('term');
+
+            switch ($type){
+                case 2 : $column = 'trailer_number'; break;
+                case 3 : $column = 'container_number'; break;
+                default : $column = 'vehicle_number';
+            }
+
+                $data = MercVsd::find()
+                    ->select([$column.' as label', $column.' as id'])
+                    ->where(['like', $column, $term])
+                    ->asArray()
+                    ->all();
+            //Yii::$app->response->format = Response::FORMAT_JSON;
+            //echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+            return json_encode($data);
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
 
     public function actionGetHc($recipient_guid)

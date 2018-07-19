@@ -632,6 +632,7 @@ class OrderWebApi extends \api_web\components\WebApi
         foreach ($result as $model) {
             $return['products'][] = [
                 'id' => (int)$model['id'],
+                'product_id' => (int)$model['id'],
                 'product' => $model['product'],
                 'article' => $model['article'],
                 'supplier' => $model['name'],

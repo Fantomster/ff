@@ -18,29 +18,32 @@ use yii\base\Component;
 class CreatePrepareOutgoingConsignmentRequest extends Component{
 
     public $localTransactionId;
-    public $iniciator;
+    public $initiator;
     //step-1
-    public $products;
+    public $step1;
     //step-2
-    public $purpose;
+    public $step2;
+    /*public $purpose;
     public $cargoExpertized;
-    public $locationProsperity;
+    public $locationProsperity;*/
     //step-3
-    public $recipient;
+    public $step3;
+    /*public $recipient;
     public $hc;
     public $isTTN;
     public $seriesTTN;
     public $numberTTN;
     public $dateTTN;
     public $typeTTN;
-    public $hc_name;
+    public $hc_name;*/
     //step-4
-    public $type;
+    public $step4;
+    /*public $type;
     public $type_name;
     public $car_number;
     public $trailer_number;
     public $container_number;
-    public $storage_type;
+    public $storage_type;*/
 
 
 
@@ -49,30 +52,31 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
     {
         $request = new PrepareOutgoingConsignmentRequest();
         $request->localTransactionId = $this->localTransactionId;
-        $request->initiator = $this->iniciator;
+        $request->initiator = $this->initiator;
 
         $enterprise = mercDicconst::getSetting('enterprise_guid');
         $hc =  mercDicconst::getSetting('issuer_id');
 
-        $enterprise = cerberApi::getInstance()->getEnterpriseByGuid($enterprise);
-        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc);
+        /*$enterprise = cerberApi::getInstance()->getEnterpriseByGuid($enterprise);
+        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc);*/
 
         $delivery = new Delivery();
         $delivery->consignor = new BusinessMember();
-        $delivery->consignor->enterprise = $enterprise;
-        $delivery->consignor->businessEntity = $hc;
+        $delivery->consignor->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($enterprise))->enterprise;
+        $delivery->consignor->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($hc))->businessEntity;
 
-        $enterprise = cerberApi::getInstance()->getEnterpriseByGuid($this->recipient);
-        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($this->hc);
+        /*$enterprise = cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']);
+        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']);*/
 
         $delivery->consignee = new BusinessMember();
-        $delivery->consignee->enterprise = $enterprise;
-        $delivery->consignee->businessEntity = $hc;
+        $delivery->consignee->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']))->enterprise;
+        $delivery->consignee->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']))->businessEntity;
 
-        //$consigment = [];
-        foreach ($this->products as $id => $product) {
+        $consigments = [];
+        $vetCertificates = [];
+        foreach ($this->step1 as $id => $product) {
             $consigment = new Consignment();
-            $consigment[]->id = $id;
+            $consigment->id = 'con'.$id;
             $stock = MercStockEntry::findOne(['id' => $id]);
             $stock_raw = unserialize($stock->raw_data);
             if($stock->product_name != $product['product_name'])
@@ -87,37 +91,46 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
             $consigment->sourceStockEntry->uuid = $stock->uuid;
             $consigment->sourceStockEntry->guid = $stock->guid;
 
+            $consigments[] = $consigment;
+
             $vetCertificate = new VetDocument();
-            $vetCertificate->for = $id;
+            $vetCertificate->for = 'con'.$id;
             $vetCertificate->authentication = new VeterinaryAuthentication();
             $vetCertificate->authentication->purpose = new Purpose();
-            $vetCertificate->authentication->purpose->uuid = $this->purpose;
-            $vetCertificate->authentication->cargoExpertized = $this->cargoExpertized;
-            $vetCertificate->authentication->locationProsperity = $this->locationProsperity;
+            $vetCertificate->authentication->purpose->guid = $this->step2['purpose'];
+            $vetCertificate->authentication->cargoExpertized = $this->step2['cargoExpertized'];
+            $vetCertificate->authentication->locationProsperity = $this->step2['locationProsperity'];
+
+            $vetCertificates[] = $vetCertificate;
         }
 
-        $delivery->consignment = $consigment;
+        $delivery->consignment = $consigments;
 
         $delivery->transportInfo = new TransportInfo();
-        $delivery->transportInfo->transportType = $this->type;
+        $delivery->transportInfo->transportType = $this->step4['type'];
         $delivery->transportInfo->transportNumber = new TransportNumber();
-        $delivery->transportInfo->transportNumber->vehicleNumber = $this->car_number;
-        $delivery->transportInfo->transportNumber->trailerNumber = $this->trailer_number;
-        $delivery->transportInfo->transportNumber->containerNumber = $this->container_number;
+        $delivery->transportInfo->transportNumber->vehicleNumber = $this->step4['car_number'];
+        $delivery->transportInfo->transportNumber->trailerNumber = $this->step4['trailer_number'];
+        $delivery->transportInfo->transportNumber->containerNumber = $this->step4['container_number'];
 
-        $delivery->transportStorageType = $this->storage_type;
+        $delivery->transportStorageType = $this->step4['storage_type'];
 
         $delivery->accompanyingForms = new ConsignmentDocumentList();
-        if($this->isTTN) {
+        if($this->step4['isTTN']) {
             $delivery->accompanyingForms->waybill = new Waybill();
-            $delivery->accompanyingForms->waybill->issueSeries = $this->seriesTTN;
-            $delivery->accompanyingForms->waybill->issueNumber = $this->numberTTN;
-            $delivery->accompanyingForms->waybill->issueDate = date('Y-m-d', $this->dateTTN);
+            $delivery->accompanyingForms->waybill->issueSeries = $this->step3['seriesTTN'];
+            $delivery->accompanyingForms->waybill->issueNumber = $this->step3['numberTTN'];
+            $delivery->accompanyingForms->waybill->issueDate = date('Y-m-d', $this->step3['dateTTN']);
             $delivery->accompanyingForms->waybill->type = $this->typeTTN;
         }
 
+        $delivery->accompanyingForms->vetCertificate = $vetCertificates;
 
+        $request->delivery = $delivery;
 
+       /* echo "<pre>";
+        var_dump($request); die();*/
+        return $request;
     }
 
 }

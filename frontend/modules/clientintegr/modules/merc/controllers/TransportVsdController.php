@@ -6,6 +6,8 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreatePrepareOutgoingConsignmentRequest;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step1Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step2Form;
@@ -152,12 +154,14 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         if ($model->load($post)) {
             if ($model->validate()) {
                 $session->set('TrVsd_step4', $model->attributes);
-                var_dump(1); exit();
-                /*if (Yii::$app->request->isAjax) {
-                    Yii::$app->response->format = Response::FORMAT_JSON;
-                    return (['success' => true]);
-                }*/
-                //return $this->redirect(['step-3']);
+                $request = new CreatePrepareOutgoingConsignmentRequest();
+                $request->step4 = $model->attributes;
+                $request->step1 = $session->get('TrVsd_step1');
+                $request->step2 = $session->get('TrVsd_step2');
+                $request->step3 = $session->get('TrVsd_step3');
+
+                mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
+                $this->redirect(['/stock-entry']);
             }
         }
         return $this->render('step-4', ['model' => $model]);

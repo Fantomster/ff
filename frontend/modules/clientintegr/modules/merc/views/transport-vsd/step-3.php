@@ -55,8 +55,6 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 AutoComplete::className(), [
                 'clientOptions' =>
                     [
-                        //'main_selector' => '#defect-form',
-                        //'class' => 'runame',
                         'source' =>  Url::toRoute(['autocomplete', 'type' => 1]),
                         'dataType'=>'json',
                         'autoFill'=>true,
@@ -72,8 +70,6 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 AutoComplete::className(), [
                 'clientOptions' =>
                     [
-                        //'main_selector' => '#defect-form',
-                        //'class' => 'runame',
                         'source' =>  Url::toRoute(['autocomplete','type' => 2]),
                         'dataType'=>'json',
                         'autoFill'=>true,
@@ -89,8 +85,6 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 AutoComplete::className(), [
                 'clientOptions' =>
                     [
-                        //'main_selector' => '#defect-form',
-                        //'class' => 'runame',
                         'source' =>  Url::toRoute(['autocomplete','type' => 3]),
                         'dataType'=>'json',
                         'autoFill'=>true,

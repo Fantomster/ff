@@ -4,7 +4,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use kartik\editable\Editable;
-use kartik\daterange\DateRangePicker;;
+use kartik\daterange\DateRangePicker;
+;
 
 $this->title = 'Заказы с прикрепленными файлами';
 
@@ -58,6 +59,7 @@ $columns = [
                         'data' => common\models\User::getMixManagersList(), // any list of values
                         'displayValueConfig' => $display,
                         'options' => [
+                            'id' => 'edit' . $data->order_id,
                             'class' => 'form-control',
                             'prompt' => 'Возложить ответственность...',
                         ],
@@ -74,6 +76,7 @@ $columns = [
             ]); //isset($data->assignment) ? $data->assignment->assigned_to : null;
         },
         'group' => true,
+        'subGroupOf' => 0,
     ],
     [
         'format' => 'raw',
@@ -83,6 +86,7 @@ $columns = [
             return isset($data->assignment) ? $data->assignment->is_processed : null;
         },
         'group' => true,
+        'subGroupOf' => 0,
     ],
 ];
 

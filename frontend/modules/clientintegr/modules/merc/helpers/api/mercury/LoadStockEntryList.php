@@ -56,16 +56,12 @@ class LoadStockEntryList extends Model
                 'producer_guid' => $item->batch->origin->producer->enterprise->guid,
                 'low_grade_cargo' =>  (int)$item->batch->lowGradeCargo,
                 'vsd_uuid' => isset($item->vetDocument) ? $item->vetDocument->uuid : null,
-                'product_marks' => isset($item->batch->packageList->package->productMarks) ? $item->batch->packageList->package->productMarks_ : "",
+                'product_marks' => isset($item->batch->packageList->package->productMarks->_) ? $item->batch->packageList->package->productMarks->_ : "",
                 'raw_data' => serialize($item)
                 //Json::encode($item)
             ]);
 
-            if(!$model->save()) {
-                var_dump($model->getErrors());
-                throw new \Exception('Stock entry save error');
-            }
-
+            $model->save(false);
         }
     }
 

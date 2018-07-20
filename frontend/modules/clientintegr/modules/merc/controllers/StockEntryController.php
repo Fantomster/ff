@@ -24,6 +24,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function beforeAction($action)
     {
+        error_reporting(E_ERROR);
         $lic = mercService::getLicense();
 
         if (!isset($lic) && ($this->getRoute() != 'clientintegr/merc/default/nolic')) {
@@ -127,16 +128,16 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     {
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
         $transaction = Yii::$app->db_api->beginTransaction();
-        try {
+        //try {
             $vsd = new LoadStockEntryList();
             if (isset($visit))
                 $visit = gmdate("Y-m-d H:i:s", strtotime($visit) - 60 * 30);
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-            $transaction->commit();
-        } catch (\Exception $e) {
+           // $transaction->commit();
+        /*} catch (\Exception $e) {
             $transaction->rollback();
-        }
+        }*/
     }
 
     public function actionProducersList($q = null)

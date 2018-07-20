@@ -9,43 +9,59 @@ use yii\widgets\ActiveForm;
 ?>
 
 
-<div class="journal-search">
-    <a class="btn btn-primary pull-right" data-toggle="collapse" href="#search_form" aria-expanded="false"
-       aria-controls="search_form">
-        Форма поиска
-    </a>
-    <div class="collapse" id="search_form">
+<div class="journal-search row">
+    <div id="search_form">
         <?php $form = ActiveForm::begin([
             'action' => ['index'],
             'method' => 'get',
+            'options' => [
+                'data-pjax' => 1
+            ]
         ]); ?>
 
-        <?= $form->field($model, 'service_id')->dropDownList(\yii\helpers\ArrayHelper::map(
-            \common\models\AllService::find()->all(), 'id', 'denom'
-        )) ?>
-
-        <?php
-        $organizations = \common\models\Journal::find()
-            ->distinct()->select('organization_id')->all();
-        $items = [null => 'Все'];
-        if (!empty($organizations)) {
-            foreach ($organizations as $organization) {
-                $items[$organization->organization_id] = \common\models\Organization::findOne($organization->organization_id)->name;
+        <div class="col-sm-3">
+            <?php
+            echo $form->field($model, 'service_id')->widget(\kartik\select2\Select2::classname(), [
+                'data' => \yii\helpers\ArrayHelper::map(\common\models\AllService::find()->all(), 'id', 'denom'),
+                'attribute' => 'service_id',
+                'pluginOptions' => [
+                    'selected' => \Yii::$app->request->get('service_id') ?? '',
+                    'allowClear' => false,
+                ],
+            ]);
+            ?>
+        </div>
+        <div class="col-sm-3">
+            <?php
+            $organizations = \common\models\Journal::find()
+                ->distinct()->select('organization_id')->all();
+            $items = [null => 'Все'];
+            if (!empty($organizations)) {
+                foreach ($organizations as $organization) {
+                    $items[$organization->organization_id] = \common\models\Organization::findOne($organization->organization_id)->name;
+                }
             }
-        }
-        echo $form->field($model, 'organization_id')->dropDownList($items);
-        ?>
 
-        <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>
+            echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
+                'data' => $items,
+                'attribute' => 'organization_id',
+                'pluginOptions' => [
+                    'selected' => \Yii::$app->request->get('organization_id') ?? '',
+                    'allowClear' => false,
+                ],
+            ]);
 
-        <?php // echo $form->field($model, 'created_at') ?>
-
-        <div class="form-group">
-            <?= Html::submitButton('Поиск', ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Сброс', '/journal/index', ['class' => 'btn btn-default']) ?>
+            ?>
+        </div>
+        <div class="col-sm-3">
+            <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>
         </div>
 
-        <?php ActiveForm::end(); ?>
 
+        <div class="col-sm-3">
+            <?= Html::label('&nbsp;'); ?><br>
+            <?= Html::submitButton('Поиск', ['class' => 'btn btn-primary']) ?>
+        </div>
+        <?php ActiveForm::end(); ?>
     </div>
 </div>

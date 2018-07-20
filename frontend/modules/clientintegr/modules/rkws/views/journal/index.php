@@ -68,7 +68,7 @@ use yii\widgets\Breadcrumbs;
                             [
                                 'header' => 'Дата операции',
                                 'value' => function ($data) {
-                                    return $data->record['response_at'];
+                                    return $data->record['created_at'];
                                 }
                             ],
                             [

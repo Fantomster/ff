@@ -86,5 +86,11 @@ return [
         'DEFAULT_URL' => 'https://mixcart-test.firebaseio.com',
         'DEFAULT_TOKEN' => '',
         'DEFAULT_PATH' => '/',
-    ]
+    ],
+    
+    'vtsHttp' => [
+        'authLink' => 'https://t2-mercury.vetrf.ru/hs/',
+        'vsdLink' => 'https://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid=',
+        'pdfLink' => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&isplayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
+    ],
 ];

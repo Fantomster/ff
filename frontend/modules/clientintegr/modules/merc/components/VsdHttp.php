@@ -15,9 +15,9 @@ namespace frontend\modules\clientintegr\modules\merc\components;
  */
 class VsdHttp extends \yii\base\Component {
 
-    public $authLink = 'https://t2-mercury.vetrf.ru/hs/';
-    public $vsdLink = 'https://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid=';
-    public $pdfLink = 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&isplayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=';
+    public $authLink;
+    public $vsdLink;
+    public $pdfLink;
     public $username;
     public $password;
     private $sessionName = 'vsd-http-cookie';

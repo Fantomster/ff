@@ -164,6 +164,7 @@ class OrderController extends Controller {
 
         if (Yii::$app->request->post()) {
             $order->load(Yii::$app->request->post());
+            $order->assignment->load(Yii::$app->request->post());
             $content = Yii::$app->request->post('OrderContent');
             $discount = Yii::$app->request->post('Order');
             foreach ($content as $position) {
@@ -186,6 +187,7 @@ class OrderController extends Controller {
             }
             $order->calculateTotalPrice();
             $order->save();
+            $order->assignment->save();
         }
 
 

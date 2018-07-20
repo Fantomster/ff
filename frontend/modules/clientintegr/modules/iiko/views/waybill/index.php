@@ -40,6 +40,10 @@ $this->title = 'Интеграция с iiko Office';
             'attribute' => 'id',
             'contentOptions' => function($data) {
                 return ["id" => "way".$data->id];
+            },
+            'format' => 'raw',
+            'value' => function($data){
+                return \yii\helpers\Html::a($data->id, Url::to(['/order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0", 'target' => '_blank']);
             }
         ],
         [

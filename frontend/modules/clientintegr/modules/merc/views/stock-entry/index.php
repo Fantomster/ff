@@ -145,7 +145,7 @@ Modal::widget([
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
-            'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;&nbsp;{rejected}',
+            'template' => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{rejected}',
             'buttons' => [
                 'view' => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
@@ -164,6 +164,11 @@ Modal::widget([
                         'style' => 'width: 16px'
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
+                },
+                'create' =>  function ($url, $model) {
+                    $customurl = Url::to(['transport-vsd/step-1','selected'=>$model->id]);
+                    return \yii\helpers\Html::a( '<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
+                        ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax'=>"0"]);
                 },
                /* 'done-partial' => function ($url, $model, $key) use ($searchModel) {
                     if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)

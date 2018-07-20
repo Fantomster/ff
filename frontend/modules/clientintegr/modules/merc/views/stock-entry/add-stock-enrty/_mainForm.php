@@ -98,9 +98,13 @@ use yii\web\JsExpression;
         ?>
     </div>
     <h4>Сведения о происхождении продукции: </h4>
-    <?=
-    $form->field($model, 'country')
-        ->dropDownList(createStoreEntryForm::getCountryList(),['prompt' => 'не указано']);
+    <?php
+    $model->country = isset($model->country) ? $model->country : '72a84b51-5c5e-11e1-b9b7-001966f192f1';
+    echo $form->field($model, 'country')
+        ->dropDownList(createStoreEntryForm::getCountryList(),['prompt' => 'не указано',
+           /* 'options'=>[
+            '7' => ['label' => 'JULY', 'selected'=>true],
+        ]*/]);
     ?>
     <?php
     $url = \yii\helpers\Url::to(['producers-list']);
@@ -118,7 +122,7 @@ use yii\web\JsExpression;
             'ajax' => [
                 'url' => $url,
                 'dataType' => 'json',
-                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                'data' => new JsExpression('function(params) { return {q:params.term,c:$( "#createstoreentryform-country option:selected" ).val()}; }')
             ],
             'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
             /*'templateResult' => new JsExpression('function(city) { return producer.text; }'),

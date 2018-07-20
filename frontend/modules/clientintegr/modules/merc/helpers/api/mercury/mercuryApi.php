@@ -666,4 +666,53 @@ class mercuryApi extends baseApi
         return $result;
     }
 
+    public function prepareOutgoingConsignmentOperation($data)
+    {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $data->localTransactionId = $localTransactionId;
+        $data->initiator = new User();
+        $data->initiator->login = $this->vetisLogin;
+
+        $appData->any['ns3:prepareOutgoingConsignmentRequest'] = $data->getPrepareOutgoingConsignmentRequest();
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        $result = $client->submitApplicationRequest($request);
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntryList;
+        } else
+            $result = null;
+
+        return $result;
+    }
+
 }

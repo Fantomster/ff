@@ -204,11 +204,10 @@ Modal::widget([
 <?php
 $user = Yii::$app->user->identity;
 if ($user->role_id == \common\models\Role::ROLE_SUPPLIER_MANAGER) {
-    ?>
-<section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-</section>
-<?php} ?>
+echo "<section class=\"content-header\">";
+echo $this->render('/default/_menu.php');
+echo "</section>";
+} ?>
 <section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru' => 'Список ВСД"']) ?>:</h4>
 </section>
@@ -527,4 +526,3 @@ $(document).on("click", ".hand_loading", function(e) {
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
-

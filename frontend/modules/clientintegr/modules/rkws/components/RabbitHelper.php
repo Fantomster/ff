@@ -20,7 +20,19 @@ class RabbitHelper
 
         var_dump($mess);
 
-        $job = RabbitJournal::find()->andWhere(['org_id' => $mess['body']['org_id'], 'action' => $mess['action']])
+        if (call_user_func([$this, $mess['action']], $mess['body'])) {
+            $query = "UPDATE rabbit_journal SET success_count = success_count + 1 WHERE org_id ='".
+                $mess['body']['org_id']."' and action = '".$mess['action'];
+        } else {
+            $query = "UPDATE rabbit_journal SET fail_count = fail_count + 1 WHERE org_id ='".
+                $mess['body']['org_id']."' and action = '".$mess['action'];
+        }
+
+        Yii::$app->db_api->createCommand($query)->execute();
+
+        // 'UPDATE account SET forum=:newValue WHERE forum=:oldValue', [':newValue' => 300, ':oldValue' => 200])->execute();
+
+        /* $job = RabbitJournal::find()->andWhere(['org_id' => $mess['body']['org_id'], 'action' => $mess['action']])
             ->andWhere('total_count > (success_count + fail_count)')->one();
 
         if (!$job) {
@@ -37,6 +49,9 @@ class RabbitHelper
         if (!$job->save()) {
             echo "Jopa kakayato";
         }
+
+        */
+
 
         $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
 
@@ -59,7 +74,12 @@ class RabbitHelper
 
     private function fullmap($data) {
 
-        $model = new AllMaps();
+        $query = "INSERT into all_maps (service_id, supp_id, cat_id, product_id, org_id, koef, is_active)".
+        " values (1, ".$data["supp_id"].", ".$data["cat_id"].", ".$data["product_id"].", ".$data["org_id"].",1,1)";
+
+        Yii::$app->db_api->createCommand($query)->execute();
+
+        /*  $model = new AllMaps();
 
         $model->service_id = 1;
         $model->supp_id = $data["supp_id"];
@@ -73,7 +93,7 @@ class RabbitHelper
             echo "Can't save catalog model";
             return false;
         }
-
+        */
         return true;
     }
 

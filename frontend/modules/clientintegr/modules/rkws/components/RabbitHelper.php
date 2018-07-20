@@ -25,10 +25,15 @@ class RabbitHelper
                 $mess['body']['org_id']."' and action = '".$mess['action'];
         } else {
             $query = "UPDATE rabbit_journal SET fail_count = fail_count + 1 WHERE org_id ='".
-                $mess['body']['org_id']."' and action = '".$mess['action'];
+                $mess['body']['org_id']."' and action = '".$mess['id'];
         }
 
         Yii::$app->db_api->createCommand($query)->execute();
+
+        $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where org_id = ".
+            $mess['body']['org_id']."' and action = '".$mess['id'];
+
+        $curr =  Yii::$app->db_api->createCommand($sel)->asArray()->queryAll();
 
         // 'UPDATE account SET forum=:newValue WHERE forum=:oldValue', [':newValue' => 300, ':oldValue' => 200])->execute();
 
@@ -53,7 +58,15 @@ class RabbitHelper
         */
 
 
-        $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
+        // $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
+
+        $cache = \Yii::$app->cache;
+        $clientUsers = $cache->get('clientUsers_'.$mess['id']);
+
+        if(!$clientUsers) {
+            $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
+            $cache->set('clientUsers_'.$mess['id'], $clientUsers, 60*10);
+        }
 
         foreach ($clientUsers as $clientUser) {
             $channel = 'user' . $clientUser->id;
@@ -64,9 +77,10 @@ class RabbitHelper
                     'isRabbit' => 1,
                     'channel' => $channel,
                     'action' => $mess['action'],
-                    'total'  => $job->total_count,
-                    'success' => $job->success_count,
-                    'failed' => $job->fail_count
+                    'id' => $mess['id'],
+                    'total'  => $curr['total_count'],
+                    'success' => $curr['success_count'],
+                    'failed' => $curr['fail_count']
                 ])
             ]);
         }

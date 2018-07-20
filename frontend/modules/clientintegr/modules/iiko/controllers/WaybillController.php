@@ -137,6 +137,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
             'isAndroid' => $isAndroid,
+            'searchModel' => $searchModel,
         ];
 
         if (Yii::$app->request->isPjax) {

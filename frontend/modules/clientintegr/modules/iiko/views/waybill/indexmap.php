@@ -19,6 +19,7 @@ $this->title = 'Интеграция с iiko Office';
 $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
 $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
 $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
+$this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-top:-30px;}');
 ?>
 
 <section class="content-header">
@@ -69,6 +70,28 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                 }'],
                             ]); ?>
                         </div>
+                        <?php
+                        $form = ActiveForm::begin([
+                            'options' => [
+                                'data-pjax' => true,
+                                'id' => 'search-form',
+                                'role' => 'search',
+                            ],
+                            'enableClientValidation' => false,
+                            'method' => 'get',
+                        ]);
+                        ?>
+                        <div class="row">
+                            <div class="col-md-offset-10 col-md-2 alVatFilter">
+                                <?=
+                                $form->field($searchModel, 'vat')
+                                    ->dropDownList($wmodel->getVatList(), ['id' => 'vatFilter'])
+                                    ->label('НДС', ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'map_grid1',]); ?>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
@@ -343,6 +366,8 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                     'data-oid' => $wmodel->order_id,
                                 ])
                             ?>
+                            <?php Pjax::end() ?>
+                            <?php ActiveForm::end(); ?>
                         </div>
                     </div>
                 </div>
@@ -408,6 +433,12 @@ $js = <<< JS
                 }
             })
         });
+        
+        $(document).on("change", "#vatFilter", function() {
+            console.log(1);
+            $("#search-form").submit();
+        });
+        
     });
 JS;
 

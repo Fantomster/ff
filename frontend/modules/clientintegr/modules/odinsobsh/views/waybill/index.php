@@ -12,6 +12,7 @@ use yii\widgets\ActiveForm;
 $this->title = 'Интеграция с 1С Общепит';
 $this->registerCss("
     #select2-ordersearch-vendor_id-container{margin-top:0;}
+        .select2-selection__clear{display: none;}
 ");
 ?>
 <section class="content-header">

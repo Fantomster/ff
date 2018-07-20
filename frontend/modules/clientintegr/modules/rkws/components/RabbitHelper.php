@@ -21,17 +21,14 @@ class RabbitHelper
         var_dump($mess);
 
         if (call_user_func([$this, $mess['action']], $mess['body'])) {
-            $query = "UPDATE rabbit_journal SET success_count = success_count + 1 WHERE org_id ='".
-                $mess['body']['org_id']."' and action = '".$mess['action'];
+            $query = "UPDATE rabbit_journal SET success_count = success_count + 1 WHERE id =".$mess['id'];
         } else {
-            $query = "UPDATE rabbit_journal SET fail_count = fail_count + 1 WHERE org_id ='".
-                $mess['body']['org_id']."' and action = '".$mess['id'];
+            $query = "UPDATE rabbit_journal SET fail_count = fail_count + 1 WHERE id =".$mess['id'];
         }
 
         \Yii::$app->db_api->createCommand($query)->execute();
 
-        $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where org_id = ".
-            $mess['body']['org_id']."' and action = '".$mess['id'];
+        $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where id = ".$mess['id'];
 
         $curr =  Yii::$app->db_api->createCommand($sel)->asArray()->queryAll();
 

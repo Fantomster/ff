@@ -62,7 +62,7 @@ class RabbitHelper
 
                 $sel2 = "SELECT id from user where organization_id = ".$mess['body']['org_id'];
 
-                $clientUsers =  \Yii::$app->db_api->createCommand($sel2)->queryAll();
+                $clientUsers =  \Yii::$app->db->createCommand($sel2)->queryAll();
 
 
             $cache->set('clientUsers_'.$mess['id'], $clientUsers, 60*10);

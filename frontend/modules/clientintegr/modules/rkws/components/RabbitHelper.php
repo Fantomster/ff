@@ -29,30 +29,6 @@ class RabbitHelper
 
         $curr =  \Yii::$app->db_api->createCommand($sel)->queryOne();
 
-        // 'UPDATE account SET forum=:newValue WHERE forum=:oldValue', [':newValue' => 300, ':oldValue' => 200])->execute();
-
-        /* $job = RabbitJournal::find()->andWhere(['org_id' => $mess['body']['org_id'], 'action' => $mess['action']])
-            ->andWhere('total_count > (success_count + fail_count)')->one();
-
-        if (!$job) {
-            echo "Achtung";
-        }
-
-        if (call_user_func([$this, $mess['action']], $mess['body'])) {
-            $job->success_count++;
-        } else {
-            $job->fail_count++;
-            $job->fail_content = serialize($mess['body']);
-        }
-
-        if (!$job->save()) {
-            echo "Jopa kakayato";
-        }
-
-        */
-
-
-        // $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
 
         $cache = \Yii::$app->cache;
         $clientUsers = $cache->get('clientUsers_'.$mess['id']);

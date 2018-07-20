@@ -75,7 +75,7 @@ class RabbitHelper
         }
 
         foreach ($clientUsers as $clientUser) {
-            $channel = 'user' . $clientUser->id;
+            $channel = 'user' . $clientUser['id'];
             var_dump($channel);
             \Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
@@ -83,7 +83,6 @@ class RabbitHelper
                     'isRabbit' => 1,
                     'channel' => $channel,
                     'action' => $mess['action'],
-                    'id' => $mess['id'],
                     'total'  => $curr['total_count'],
                     'success' => $curr['success_count'],
                     'failed' => $curr['fail_count']

@@ -87,6 +87,7 @@ class FullmapHelper extends yii\base\BaseObject  {
         foreach ($newProds as $prod) {
 
             $mess['action'] = 'fullmap';
+            $mess['id'] = $jmodel->id;
 
             $mess['body'] = [
                 'service_id' => 1,

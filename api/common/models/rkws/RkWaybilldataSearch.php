@@ -46,8 +46,8 @@ class RkWaybilldataSearch extends RkWaybilldata
 
         $query = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => Yii::$app->request->get('waybill_id')])
             ->leftJoin('rk_product', 'rk_product.id = product_rid');
-        if(isset($params['RkWaybillDataSearch']['vat']) && $params['RkWaybillDataSearch']['vat'] != 1){
-            $vat = $params['RkWaybillDataSearch']['vat'];
+        if(isset($params['RkWaybilldataSearch']['vat']) && $params['RkWaybilldataSearch']['vat'] != 1){
+            $vat = $params['RkWaybilldataSearch']['vat'];
             $query = $query->andWhere(['vat' => $vat]);
         }
         $query = $query->all();

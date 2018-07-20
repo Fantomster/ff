@@ -114,14 +114,14 @@ class Journal extends \yii\db\ActiveRecord
      * @return array
      */
     public function getRecord() {
-        $tableLog = (new Query())->select('log_table')
+        $log = (new Query())->select('log_table, log_field')
             ->from('all_service')
             ->where(['id' => $this->service_id])
-            ->column(\Yii::$app->db_api);
+            ->one(\Yii::$app->db_api);
 
         return (new Query())->select('*')
-            ->from($tableLog)
-            ->where(['guide' => $this->log_guide])
+            ->from($log['log_table'])
+            ->where([$log['log_field'] => $this->log_guide])
             ->one(\Yii::$app->db_api);
     }
 }

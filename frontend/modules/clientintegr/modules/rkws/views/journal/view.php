@@ -58,31 +58,15 @@ use yii\widgets\Breadcrumbs;
                             'user.profile.full_name',
                             'organization.name',
                             [
-                                'header' => 'Запрос',
-                                'attribute' => 'record.request',
-                                'value' => function ($data) {
-                                    return print_r(json_decode($data->record['request']), 1);
-                                }
-                            ],
-                            [
-                                'attribute' => 'record.response',
-                                'value' => function ($data) {
-                                    return print_r(json_decode($data->record['response']), 1);
-                                }
+                                'attribute' => 'response',
                             ],
                             'log_guide',
                             'type',
                             [
-                                'attribute' => 'record.request_at',
-                                'value' => function ($data) {
-                                    return $data->record['request_at'];
-                                }
-                            ],
-                            [
                                 'header' => 'Дата операции',
                                 'attribute' => 'record.response_at',
                                 'value' => function ($data) {
-                                    return $data->record['response_at'];
+                                    return $data->record['created_at'];
                                 }
                             ]
                         ],

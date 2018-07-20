@@ -1,0 +1,49 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
+/* @var $this yii\web\View */
+/* @var $model common\models\search\JournalSearch */
+/* @var $form yii\widgets\ActiveForm */
+?>
+
+<div class="journal-search row">
+    <?php $form = \kartik\form\ActiveForm::begin([
+        'action' => ['index'],
+        'method' => 'get',
+        'options' => [
+            'data-pjax' => 1
+        ]
+    ]); ?>
+    <div class="col-sm-5">
+        <?php
+        $organizations = \common\models\Journal::find()
+            ->distinct()->select('organization_id')->all();
+        $items = ['' => 'Все'];
+        if (!empty($organizations)) {
+            foreach ($organizations as $organization) {
+                $items[$organization->organization_id] = \common\models\Organization::findOne($organization->organization_id)->name;
+            }
+        }
+
+        echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
+            'data' => $items,
+            'attribute' => 'organization_id',
+            'pluginOptions' => [
+                'selected' => \Yii::$app->request->get('organization_id') ?? '',
+                'allowClear' => false,
+            ],
+        ]);
+
+        ?>
+    </div>
+    <div class="col-sm-5">
+        <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>
+    </div>
+    <div class="col-sm-2">
+        <?= Html::label('&nbsp;'); ?><br>
+        <?= Html::submitButton('Поиск', ['class' => 'btn btn-primary']) ?>
+    </div>
+    <?php \kartik\form\ActiveForm::end(); ?>
+</div>

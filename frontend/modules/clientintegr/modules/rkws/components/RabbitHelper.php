@@ -59,6 +59,9 @@ class RabbitHelper
                 ])
             ]);
         }
+
+        \Yii::$app->db->close();
+        \Yii::$app->db_api->close();
     }
 
     private function fullmap($data) {

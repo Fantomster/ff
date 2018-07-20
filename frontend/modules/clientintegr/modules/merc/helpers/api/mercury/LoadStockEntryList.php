@@ -18,8 +18,8 @@ class LoadStockEntryList extends Model
 
         foreach ($list as $item)
         {
-            if(!$cache->get('stockEntryRaw_'.$item->GUID))
-                $cache->add('stockEntry_'.$item->GUID, $item,60);
+            if(!$cache->get('stockEntryRaw_'.$item->guid))
+                $cache->add('stockEntry_'.$item->guid, $item,60);
 
             $unit = dictsApi::getInstance()->getUnitByGuid($item->batch->unit->guid);
             $producer = isset($item->batch->origin->producer->enterprise->uuid) ? cerberApi::getInstance()->getEnterpriseByUuid($item->batch->origin->producer->enterprise->uuid) : null;
@@ -38,8 +38,8 @@ class LoadStockEntryList extends Model
                 'status' => $item->status,
                 'create_date' => date('Y-m-d h:i:s',strtotime($item->createDate)),
                 'update_date' => date('Y-m-d h:i:s',strtotime($item->updateDate)),
-                'previous' => $item->previous,
-                'next' => $item->next,
+                'previous' => isset($item->previous) ? $item->previous : null,
+                'next' => isset($item->next) ? $item->next : null,
                 'entryNumber' => $item->entryNumber,
                 'product_type' => $item->batch->productType,
                 'product_name' => $item->batch->productItem->name,
@@ -55,17 +55,13 @@ class LoadStockEntryList extends Model
                 'producer_country' => $country->country->name,
                 'producer_guid' => $item->batch->origin->producer->enterprise->guid,
                 'low_grade_cargo' =>  (int)$item->batch->lowGradeCargo,
-                'vsd_uuid' => $item->vetDocument->uuid,
-                'product_marks' => isset($item->batch->packageList->package->productMarks) ? $item->batch->packageList->package->productMarks_ : "",
+                'vsd_uuid' => isset($item->vetDocument) ? $item->vetDocument->uuid : null,
+                'product_marks' => isset($item->batch->packageList->package->productMarks->_) ? $item->batch->packageList->package->productMarks->_ : "",
                 'raw_data' => serialize($item)
                 //Json::encode($item)
             ]);
 
-            if(!$model->save()) {
-                var_dump($model->getErrors());
-                throw new \Exception('Stock entry save error');
-            }
-
+            $model->save(false);
         }
     }
 

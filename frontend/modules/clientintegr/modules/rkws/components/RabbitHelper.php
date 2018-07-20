@@ -64,7 +64,13 @@ class RabbitHelper
         $clientUsers = $cache->get('clientUsers_'.$mess['id']);
 
         if(!$clientUsers) {
-            $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
+           //  $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
+
+                $sel2 = "SELECT id from user where organization_id = ".$mess['body']['org_id'];
+
+                $clientUsers =  Yii::$app->api->createCommand($sel2)->asArray()->queryAll();
+
+
             $cache->set('clientUsers_'.$mess['id'], $clientUsers, 60*10);
         }
 

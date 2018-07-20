@@ -24,6 +24,7 @@ use common\models\User;
  * @property string $file_hash_summ
  * @property string $created_at
  * @property string $updated_at
+ * @property string $name_postav
  *
  * @property IntegrationInvoiceContent[] $Content
  * @property Organization $organization
@@ -31,6 +32,8 @@ use common\models\User;
  */
 class IntegrationInvoiceSearch extends IntegrationInvoice
 {
+    public $date_from;
+    public $date_to;
     /**
      * @inheritdoc
      */
@@ -46,7 +49,7 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
     public function rules()
     {
         return [
-          [['date', 'created_at', 'total', 'updated_at'], 'safe'],
+          [['date', 'created_at', 'total', 'updated_at', 'date_from', 'date_to', 'number', 'name_postav'], 'safe'],
 
         ];
     }
@@ -56,7 +59,7 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params): ActiveDataProvider
+    /*public function search($params): ActiveDataProvider
     {
 
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
@@ -88,11 +91,55 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
 
         ]);
 
-     /*   $query->andFilterWhere(['like', 'slug', $this->slug])
-            ->andFilterWhere(['like', 'title', $this->title])
-            ->andFilterWhere(['like', 'body', $this->body]);
+        return $dataProvider;
+    }*/
 
+    /**
+     * Search
+     * @param array $params
+     * @return ActiveDataProvider
      */
+    public function search($params)
+    {
+
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
+        $this->load($params);
+
+        $query = IntegrationInvoice::find()
+            ->where(['organization_id' => $organization]);
+
+        $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
+        if ($from) {
+            $t1_f = $from->format('Y-m-d H:i:s');
+        }
+        $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
+        if ($to) {
+            $to->add(new \DateInterval('P1D'));
+            $t2_f = $to->format('Y-m-d H:i:s');
+        }
+
+        if (isset($t1_f)) {
+            $query->andFilterWhere(['>=', $this->tableName() . '.date', $t1_f]);
+        }
+        if (isset($t2_f)) {
+            $query->andFilterWhere(['<=', $this->tableName() . '.date', $t2_f]);
+        }
+
+        if (isset($this->number)) {
+            $query->andFilterWhere(['=', $this->tableName() . '.number', $this->number]);
+        }
+
+        if (isset($this->name_postav)) {
+            if (strlen($this->name_postav)>0) {
+                $query->andWhere($this->tableName() . '.name_postav like "%'.$this->name_postav.'%"');
+            }
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 20],
+        ]);
 
         return $dataProvider;
     }

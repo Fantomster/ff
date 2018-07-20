@@ -2,8 +2,45 @@
 
 use kartik\grid\GridView;
 use kartik\widgets\Select2;
+use yii\helpers\Html;
+use yii\widgets\Pjax;
+use yii\widgets\ActiveForm;
+use kartik\date\DatePicker;
+use yii\helpers\Url;
 
 $this->title = 'Список накладных';
+$this->registerJs('
+    $("document").ready(function(){
+        var justSubmitted = false;
+        $(".box-body").on("change", "#number", function() {
+            $("#search-form").submit();
+        });
+        //$(".box-body").on("change", "#orgFilter", function() {
+        //    $("#search-form").submit();
+        //});
+        $(".box-body").on("change", "#dateFrom, #dateTo", function() {
+        
+            if (!justSubmitted) {console.log(\'время\');
+                $("#search-form").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 500);
+            }
+        });
+        $(".box-body").on("change keyup paste cut", "#name_postav", function() {
+            if (timer) {
+                clearTimeout(timer);
+            }
+            timer = setTimeout(function() {
+                $("#search-form").submit();
+            }, 700);
+            setTimeout(function() {
+                $(\'.editCatalogButtons\').removeAttr(\'disabled\');
+            }, 2000);
+});
+    });
+');
 
 function renderButton($id)
 {
@@ -59,7 +96,59 @@ function renderButton($id)
                     <i class="fa fa-save"></i> Сохранить
                 </a>
             </div>
+
             <div class="box-body">
+                <?php
+                Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
+                $form = ActiveForm::begin([
+                    'options' => [
+                        'data-pjax' => true,
+                        'id' => 'search-form',
+                        'role' => 'search',
+
+                    ],
+                    'enableClientValidation' => false,
+                    'method' => 'get',
+                ]);
+                ?>
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6">
+                        <?php
+                            echo $form->field($searchModel, 'number')
+                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
+                                ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru'=>'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
+                        ?>
+                    </div>
+                    <div class="col-lg-3 col-md-5 col-sm-9">
+                        <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru'=>'Дата: Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <div class="form-group" style="width: 300px; height: 44px;">
+                            <?=
+                            DatePicker::widget([
+                                'model' => $searchModel,
+                                'attribute' => 'date_from',
+                                'attribute2' => 'date_to',
+                                'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru'=>'Дата']), 'id' => 'dateFrom'],
+                                'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru'=>'Конечная дата']), 'id' => 'dateTo'],
+                                'separator' => '-',
+                                'type' => DatePicker::TYPE_RANGE,
+                                'pluginOptions' => [
+                                    'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                    'autoclose' => true,
+                                    'endDate' => "0d",
+                                ]
+                            ])
+                            ?>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6">
+                        <?php
+                        echo $form->field($searchModel, 'name_postav')
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav'])
+                            ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru'=>'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
+                        ?>
+                    </div>
+                </div>
+                <?php ActiveForm::end(); ?>
                 <div class="col-sm-12">
                     <?php try {
                         echo GridView::widget([
@@ -381,7 +470,7 @@ $js = <<<JS
         var button = $(this);
 
         if(button.attr('disabled') === 'disabled') {
-            alert('Идет обработка накладной, подождите...');
+            alert('Идёт обработка накладной, подождите...');
             return;
         }
 
@@ -413,7 +502,7 @@ $js = <<<JS
             create_order = false;
             swal({
                 title: 'Будет создан новый заказ?',
-                text: "Вы уверены что не хотите прикрепить накладную к существующему заказу.",
+                text: "Вы уверены, что не хотите прикрепить накладную к существующему заказу.",
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',

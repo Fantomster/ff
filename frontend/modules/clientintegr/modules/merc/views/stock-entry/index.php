@@ -71,22 +71,6 @@ Modal::widget([
             },
         ],
         [
-            'attribute' => 'status',
-            'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return '<span class="status">'.\api\common\models\merc\MercStockEntry::$statuses[$data['status']].'</span>';
-            },
-        ],
-        /*[
-            'attribute' => 'producer_name',
-            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['product_name'];
-            },
-        ],*/
-        [
             'attribute' => 'product_name',
             'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
             'format' => 'raw',
@@ -104,20 +88,61 @@ Modal::widget([
         ],
         [
             'attribute' => 'production_date',
-            'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
+            'label' => Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производство']),
             'format' => 'raw',
             'value' => function ($data) {
-            $res = $data['production_date'];
-            try{
-                $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
-            }
-            catch (Exception $e)
-            {
                 $res = $data['production_date'];
-            }
+                try{
+                    $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+                }
+                catch (Exception $e)
+                {
+                    $res = $data['production_date'];
+                }
                 return $res;
             },
         ],
+        [
+            'attribute' => 'expiry_date',
+            'label' => Yii::t('message', 'frontend.client.integration.expiry_date', ['ru' => 'Срок годности']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                $res = $data['expiry_date'];
+                try{
+                    $res = Yii::$app->formatter->asDatetime($data['expiry_date'], "php:j M Y");
+                }
+                catch (Exception $e)
+                {
+                    $res = $data['expiry_datee'];
+                }
+                return $res;
+            },
+        ],
+        /*[
+            'attribute' => 'status',
+            'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return '<span class="status">'.\api\common\models\merc\MercStockEntry::$statuses[$data['status']].'</span>';
+            },
+        ],*/
+        /*[
+            'attribute' => 'producer_name',
+            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return $data['product_name'];
+            },
+        ],*/
+
+        /*[
+            'attribute' => 'amount',
+            'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
+            'format' => 'raw',
+            'value' => function ($data) {
+                return $data['amount']." ".$data['unit'];
+            },
+        ],*/
         [
             'attribute' => 'producer_country',
             'label' => Yii::t('message', 'frontend.client.integration.producer_country', ['ru' => 'Страна происхождения']),
@@ -134,14 +159,14 @@ Modal::widget([
                 return $data['producer_name'];
             },
         ],
-        [
+        /*[
             'attribute' => 'product_marks',
             'label' => Yii::t('message', 'frontend.client.integration.product_marks', ['ru' => 'Маркировка/клеймо']),
             'format' => 'raw',
             'value' => function ($data) {
                 return $data['product_marks'];
             },
-        ],
+        ],*/
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],

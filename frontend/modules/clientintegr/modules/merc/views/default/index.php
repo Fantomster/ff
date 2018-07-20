@@ -203,7 +203,7 @@ Modal::widget([
 </section>
 <?php
 $user = Yii::$app->user->identity;
-if ($user->role_id == \common\models\Role::ROLE_SUPPLIER_MANAGER) {
+if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) {
 echo "<section class=\"content-header\">";
 echo $this->render('/default/_menu.php');
 echo "</section>";

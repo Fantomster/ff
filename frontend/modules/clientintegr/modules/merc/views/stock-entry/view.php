@@ -149,17 +149,6 @@ $timestamp_now=time();
                             ],
                         ],
                     ]) ?>
-                    <?php/*
-                    if ($document->status == MercVsd::DOC_STATUS_CONFIRMED
-                    && (\api\common\models\merc\MercVsd::getType($document->UUID) == 1) && ($lic_merc==1)) { ?>
-                        <div class="col-md-12">
-                            <?php
-                            echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                            Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning']).' '.
-                            Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger']);
-                            ?>
-                        </div>
-                    <?php* }*/ ?>
                 </div>
             </div>
         </div>

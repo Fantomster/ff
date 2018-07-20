@@ -16,8 +16,7 @@ $urlExport = Url::to(['/order/export-to-xls']);
 $urlReport = Url::to(['/order/grid-report']);
 $urlSaveSelected = Url::to(['/order/save-selected-orders']);
 $urlGetVSDList = Url::to(['/order/ajax-get-vsd-list']);
-$js = <<<JS
-
+$this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
         $(".box-body").on("change", "#statusFilter", function() {
@@ -106,8 +105,7 @@ $js = <<<JS
            
            current_page = $(this).attr("data-page")
     });
-JS;
-$this->registerJs($js);
+');
 
 
 $this->registerCss("

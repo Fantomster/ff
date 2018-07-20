@@ -85,7 +85,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             <div class="col-md-offset-10 col-md-2 alVatFilter">
                                 <?=
                                 $form->field($searchModel, 'vat')
-                                    ->dropDownList($wmodel->getVatList(), ['id' => 'vatFilter'])
+                                    ->dropDownList($vatData, ['id' => 'vatFilter'])
                                     ->label('НДС', ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>

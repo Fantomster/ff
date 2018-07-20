@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
 use api\common\models\iiko\iikoPconst;
+use api\common\models\VatData;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\Organization;
 use common\models\search\OrderSearch;
@@ -112,6 +113,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap()
     {
         $model = iikoWaybill::findOne(Yii::$app->request->get('waybill_id'));
+        $vatData = VatData::getVatList();
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
@@ -138,6 +140,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'wmodel' => $model,
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
+            'vatData' => $vatData,
         ];
 
         if (Yii::$app->request->isPjax) {

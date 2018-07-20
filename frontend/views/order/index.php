@@ -16,13 +16,17 @@ $urlExport = Url::to(['/order/export-to-xls']);
 $urlReport = Url::to(['/order/grid-report']);
 $urlSaveSelected = Url::to(['/order/save-selected-orders']);
 $urlGetVSDList = Url::to(['/order/ajax-get-vsd-list']);
-$this->registerJs('
+$js = <<<JS
+
     $("document").ready(function(){
         var justSubmitted = false;
         $(".box-body").on("change", "#statusFilter", function() {
             $("#search-form").submit();
         });
-        $(".box-body").on("change", "#orgFilter", function() {
+        $(".box-body").on("change", "#ordersearch-vendor_id", function() {
+            $("#search-form").submit();
+        });
+        $(".box-body").on("change", "#ordersearch-client_id", function() {
             $("#search-form").submit();
         });
         $(".box-body").on("change", "#dateFrom, #dateTo", function() {
@@ -102,13 +106,15 @@ $this->registerJs('
            
            current_page = $(this).attr("data-page")
     });
-');
+JS;
+$this->registerJs($js);
 
 
 $this->registerCss("
     tr:hover{cursor: pointer;}
     #orderHistory a:not(.btn){color: #333;}
     .dataTable a{width: 100%; min-height: 17px; display: inline-block;}
+    #select2-ordersearch-vendor_id-container, #select2-ordersearch-client_id-container{margin-top:0;}
         ");
 ?>
 <section class="content-header">
@@ -196,13 +202,20 @@ $this->registerCss("
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <?php
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                        echo $form->field($searchModel, 'vendor_id')
-                            ->dropDownList($organization->getSuppliers(), ['id' => 'orgFilter'])
-                            ->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
+                        echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
+                            'data' => $organization->getSuppliers(),
+                            'pluginOptions' => [
+                                'allowClear' => true
+                            ],
+                            'id' => 'orgFilter'
+                        ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
                     } else {
-                        echo $form->field($searchModel, 'client_id')
-                            ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
-                            ->label(Yii::t('message', 'frontend.views.order.rest', ['ru' => 'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
+                        echo $form->field($searchModel, 'client_id')->widget(\kartik\select2\Select2::classname(), [
+                            'data' => $organization->getClients(),
+                            'pluginOptions' => [
+                                'allowClear' => true
+                            ],
+                        ])->label(Yii::t('message', 'frontend.views.order.rest', ['ru' => 'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
                     }
                     ?>
                 </div>

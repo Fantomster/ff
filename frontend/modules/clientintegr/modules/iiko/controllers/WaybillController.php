@@ -88,12 +88,14 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $lic = iikoService::getLicense();
         $view = $lic ? 'index' : '/default/_nolic';
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
         $params = [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
             'visible' => iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
+            'organization' => $organization,
         ];
 
         if (Yii::$app->request->isPjax) {

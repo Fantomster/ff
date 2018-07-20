@@ -70,7 +70,7 @@ class getStockEntry extends Model
         } else
             return null;
 
-        require_once (__DIR__ ."\Mercury.php");
+        require_once (__DIR__ ."/Mercury.php");
         $data_raw = unserialize($stockEntry->raw_data);
 
         if ($raw) {

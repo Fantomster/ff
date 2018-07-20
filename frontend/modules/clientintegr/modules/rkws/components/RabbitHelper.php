@@ -93,7 +93,7 @@ class RabbitHelper
 
     private function fullmap($data) {
 
-        $query = "INSERT into all_maps (service_id, supp_id, cat_id, product_id, org_id, koef, is_active)".
+        $query = "INSERT into all_map (service_id, supp_id, cat_id, product_id, org_id, koef, is_active)".
         " values (1, ".$data["supp_id"].", ".$data["cat_id"].", ".$data["product_id"].", ".$data["org_id"].",1,1)";
 
         \Yii::$app->db_api->createCommand($query)->execute();

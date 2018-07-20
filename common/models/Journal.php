@@ -67,7 +67,12 @@ class Journal extends \yii\db\ActiveRecord
             'response' => Yii::t('app', 'Response'),
             'log_guide' => Yii::t('app', 'Log Guide'),
             'type' => Yii::t('app', 'Результат'),
+            'operation.denom' => Yii::t('app', 'Операция'),
+            'operation.comment' => Yii::t('app', 'Комментарий к операции'),
             'record.response' => Yii::t('app', 'Ответ сервера'),
+            'record.request' => Yii::t('app', 'Запрос'),
+            'record.request_at' => Yii::t('app', 'Дата запроса'),
+            'record.response_at' => Yii::t('app', 'Дата ответа'),
             'created_at' => Yii::t('app', 'Created At')
         ];
     }

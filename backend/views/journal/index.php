@@ -13,6 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="journal-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    <?php yii\widgets\Pjax::begin(['id' => 'table_journal', 'timeout' => 10000]) ?>
     <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -38,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Дата операции',
                 'value' => function ($data) {
-                    return $data->record['response_at'];
+                    return $data->record['response_at'] ?? $data->record['created_at'];
                 }
             ],
             [
@@ -47,4 +48,5 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+    <?php yii\widgets\Pjax::end(); ?>
 </div>

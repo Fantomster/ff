@@ -173,9 +173,6 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                 $out['results'] = $res;
 
         }
-        /* elseif ($id > 0) {
-             $out['results'] = ['id' => $id, 'text' => City::find($id)->name];
-         }*/
         return $out;
     }
 

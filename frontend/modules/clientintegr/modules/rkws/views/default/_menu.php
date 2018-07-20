@@ -29,6 +29,7 @@ use yii\helpers\Html;
                             <?= Html::a('Настройки интеграции', ['settings/index'], ['class'=>'btn btn-md fk-button']); ?>
 
                              <?= Html::a('Каталоги поставщиков', ['fullmap/index'], ['class'=>'btn btn-md fk-button']); ?>
+                            <?= Html::a('Журнал', ['journal/index'], ['class' => 'btn btn-md fk-button']); ?>
                             <!--        <?= Html::a('Журнал интеграции', ['#'], ['class'=>'btn btn-md fk-button']); ?>
                             -->
                         </div>

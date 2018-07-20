@@ -15,6 +15,11 @@ use yii\web\BadRequestHttpException;
 
 class rkeeperService extends WebApi implements ServiceInterface
 {
+    public static function getServiceId()
+    {
+        return 1;
+    }
+
     /**
      * Название сервиса
      * @return string

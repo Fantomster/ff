@@ -25,7 +25,7 @@ Modal::widget([
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -201,6 +201,13 @@ Modal::widget([
     }
     ?>
 </section>
+<?php
+$user = Yii::$app->user->identity;
+if ($user->role_id == \common\models\Role::ROLE_SUPPLIER_MANAGER) {
+echo "<section class=\"content-header\">";
+echo $this->render('/default/_menu.php');
+echo "</section>";
+} ?>
 <section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru' => 'Список ВСД"']) ?>:</h4>
 </section>
@@ -519,4 +526,3 @@ $(document).on("click", ".hand_loading", function(e) {
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
-

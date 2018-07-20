@@ -18,6 +18,9 @@ $form = ActiveForm::begin([
             ],
             'method' => 'post',
         ]);
+$this->registerCss('
+    .bootstrap-touchspin {width:180px;}
+        ');
 ?>
 <div class="row">
     <div class="col-md-6">

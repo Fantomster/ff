@@ -61,14 +61,14 @@ $menuItems = [
         'options' => ['class' => 'hidden-xs'],
         'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
         //'visible' => isset($licenses['mercury'])
-        'items' => [
+        /*'items' => [
             [
                 'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
                 'icon' => 'circle-o',
                 'url' => ['/clientintegr/merc/stock-entry'],
                 //'visible' => in_array($user->role_id,$roles)
             ],
-        ],
+        ],*/
     ],
 ];
 if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) || Yii::$app->user->can('manage')) {

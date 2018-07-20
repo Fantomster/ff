@@ -29,7 +29,7 @@ class RabbitHelper
 
         $curr =  \Yii::$app->db_api->createCommand($sel)->queryOne();
 
-        
+
         $cache = \Yii::$app->cache;
         $clientUsers = $cache->get('clientUsers_'.$mess['id']);
 

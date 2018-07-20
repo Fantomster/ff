@@ -7,6 +7,10 @@ use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
 $this->title = 'Редактирование заказа';
+$this->params['breadcrumbs'] = [
+    ['label' => 'Заказы с прикрепленными файлами', 'url' => ['with-attachments']],
+    $this->title
+];
 
 $this->registerCss('
         .container{width:100% !important;}

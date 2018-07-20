@@ -125,14 +125,14 @@ $this->registerJs('
                             return "<div class='guid_block_create_title'><p>" . $data["product"] . "</p></div>"
                                     . "<div class='guid_block_create_counts'><p>" . $data["name"] . "</p></div>";
                         },
-                        'contentOptions' => ['style' => 'width: 40%;'],
+                        //'contentOptions' => ['style' => 'width: 40%;'],
                     ],
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
                             return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
                         },
-                        'contentOptions' => ['style' => 'width: 20%;'],
+                        'contentOptions' => ['style' => 'width: 150px;'],
                     ],
                     [
                         'attribute' => 'quantity2',
@@ -155,7 +155,7 @@ $this->registerJs('
                                         'options' => ['class' => 'quantityAdd form-control ', 'id' => 'addp' . $data["cbg_id"]],
                             ]);
                         },
-                        'contentOptions' => ['style' => 'width: 20%;'],
+                        'contentOptions' => ['style' => 'width: 180px;'],
                     ],
                     [
                         'format' => 'raw',
@@ -167,7 +167,7 @@ $this->registerJs('
                                         'title' => Yii::t('message', 'frontend.views.order.guides.add_to_order', ['ru'=>'Добавить в заказ']),
                             ]);
                         },
-                        'contentOptions' => ['style' => 'width: 10%;'],
+                        'contentOptions' => ['style' => 'width: 155px;'],
                     ],
                 ],
             ]);

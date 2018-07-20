@@ -28,7 +28,7 @@ class RabbitHelper
                 $mess['body']['org_id']."' and action = '".$mess['id'];
         }
 
-        Yii::$app->db_api->createCommand($query)->execute();
+        \Yii::$app->db_api->createCommand($query)->execute();
 
         $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where org_id = ".
             $mess['body']['org_id']."' and action = '".$mess['id'];

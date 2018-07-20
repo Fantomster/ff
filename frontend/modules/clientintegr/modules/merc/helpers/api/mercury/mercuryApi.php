@@ -301,7 +301,7 @@ class mercuryApi extends baseApi
             var_dump($log->getErrors());
 
         if ($log->status == mercLog::REJECTED) {
-            throw new \Exception($log->id);
+            throw new \Exception($log->id, 600);
         }
     }
 

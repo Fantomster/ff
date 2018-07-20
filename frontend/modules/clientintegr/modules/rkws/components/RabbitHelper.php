@@ -75,7 +75,7 @@ class RabbitHelper
         }
 
         foreach ($clientUsers as $clientUser) {
-            $channel = 'user' . $clientUser->id;
+            $channel = 'user' . $clientUser['id'];
             var_dump($channel);
             \Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',

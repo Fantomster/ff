@@ -16,8 +16,7 @@ $urlExport = Url::to(['/order/export-to-xls']);
 $urlReport = Url::to(['/order/grid-report']);
 $urlSaveSelected = Url::to(['/order/save-selected-orders']);
 $urlGetVSDList = Url::to(['/order/ajax-get-vsd-list']);
-$js = <<<JS
-
+$this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
         $(".box-body").on("change", "#statusFilter", function() {
@@ -106,8 +105,7 @@ $js = <<<JS
            
            current_page = $(this).attr("data-page")
     });
-JS;
-$this->registerJs($js);
+');
 
 
 $this->registerCss("
@@ -115,6 +113,7 @@ $this->registerCss("
     #orderHistory a:not(.btn){color: #333;}
     .dataTable a{width: 100%; min-height: 17px; display: inline-block;}
     #select2-ordersearch-vendor_id-container, #select2-ordersearch-client_id-container{margin-top:0;}
+    .select2-selection__clear{display: none;}
         ");
 ?>
 <section class="content-header">

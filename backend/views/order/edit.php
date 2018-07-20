@@ -6,7 +6,7 @@ use yii2assets\pdfjs\PdfJs;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = 'Редактирование заказа';
+$this->title = 'Редактирование заказа ' .  $order->id;
 $this->params['breadcrumbs'] = [
     ['label' => 'Заказы с прикрепленными файлами', 'url' => ['with-attachments']],
     $this->title

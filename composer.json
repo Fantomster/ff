@@ -85,7 +85,8 @@
         "vyants/yii2-daemon": "^0.1.0",
         "cboden/ratchet": "^0.4.1",
         "react/zmq": "^0.4.0",
-        "darkdrim/yii2-simplehtmldom": "*"
+        "darkdrim/yii2-simplehtmldom": "*",
+        "unclead/yii2-multiple-input": "~2.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSPconst;
 use api\common\models\OneSWaybillDataSearch;
+use api\common\models\VatData;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
@@ -83,18 +84,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
        // $dataProvider->pagination->pageSize=3;
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
 
 
         $lic = OneSService::getLicense();
         $view = $lic ? 'index' : '/default/_nolic';
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
         $params = [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'lic' => $lic,
             //'visible' =>OneSPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
-            'organization' => $organization,
+            'organization' => $organization
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -111,6 +112,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap()
     {
         $model = OneSWaybill::findOne(Yii::$app->request->get('waybill_id'));
+        $vatData = VatData::getVatList();
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
@@ -136,6 +138,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
             'isAndroid' => $isAndroid,
+            'searchModel' => $searchModel,
+            'vatData' => $vatData
         ];
 
         if (Yii::$app->request->isPjax) {

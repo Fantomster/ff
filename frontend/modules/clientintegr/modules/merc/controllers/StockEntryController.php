@@ -65,17 +65,17 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function actionView($uuid)
     {
-        //try {
+        try {
         $document = new getStockEntry();
         $document->loadStockEntry($uuid);
-        /*}catch (\Error $e) {
+        }catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
         catch (\Exception $e){
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }*/
+        }
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -139,43 +139,44 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         }
     }
 
-    public function actionProducersList($q = null)
+    public function actionProducersList($q = null, $c=null)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
         if (!is_null($q)) {
-            $res = [];
-            $list = cerberApi::getInstance()->getForeignEnterpriseList($q);
-            if (isset($list->enterpriseList->enterprise)) {
+            if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1') {
                 $res = [];
-                foreach ($list->enterpriseList->enterprise as $item) {
-                    if (($item->last) && ($item->active))
-                        $res[] = ['id' => $item->guid,
-                            'text' => $item->name . '(' .
-                                $item->address->addressView
-                                . ')'
-                        ];
+                $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
+                if (isset($list->enterpriseList->enterprise)) {
+                    $res = [];
+                    foreach ($list->enterpriseList->enterprise as $item) {
+                        if (($item->last) && ($item->active))
+                            $res[] = ['id' => $item->guid,
+                                'text' => $item->name . '(' .
+                                    $item->address->addressView
+                                    . ')'
+                            ];
+                    }
                 }
             }
-            $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
-            if (isset($list->enterpriseList->enterprise)) {
+            else {
+                $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
+                if (isset($list->enterpriseList->enterprise)) {
 
-                foreach ($list->enterpriseList->enterprise as $item) {
-                    if (($item->last) && ($item->active))
-                        $res[] = ['id' => $item->guid,
-                            'text' => $item->name . '(' .
-                                $item->address->addressView
-                                . ')'
-                        ];
+                    foreach ($list->enterpriseList->enterprise as $item) {
+                        if (($item->last) && ($item->active))
+                            $res[] = ['id' => $item->guid,
+                                'text' => $item->name . '(' .
+                                    $item->address->addressView
+                                    . ')'
+                            ];
+                    }
                 }
             }
             if (count($res) > 0)
                 $out['results'] = $res;
 
         }
-        /* elseif ($id > 0) {
-             $out['results'] = ['id' => $id, 'text' => City::find($id)->name];
-         }*/
         return $out;
     }
 

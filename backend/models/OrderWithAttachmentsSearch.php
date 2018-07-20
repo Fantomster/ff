@@ -62,7 +62,7 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            //'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['order_id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20]
         ]);
 
@@ -73,7 +73,7 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
         $query->where(["order.status" => $editableOrders]);
 
         $query->select([
-            "$orderTable.id as order_id",
+            "$attachmentTable.order_id",
             "$attachmentTable.id as id",
             "$attachmentTable.file as file",
             "$attachmentTable.created_at as created_at",
@@ -82,8 +82,8 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
         ]);
 
         $dataProvider->sort->attributes['order_id'] = [
-            'asc' => ["$orderTable.id as order_id" => SORT_ASC],
-            'desc' => ["$orderTable.id as order_id" => SORT_DESC],
+            'asc' => ["$attachmentTable.order_id" => SORT_ASC],
+            'desc' => ["$attachmentTable.order_id" => SORT_DESC],
         ];
         $dataProvider->sort->attributes['assigned_to'] = [
             'asc' => ["$assignmentTable.assigned_to as assigned_to" => SORT_ASC],
@@ -105,7 +105,9 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
         $query->andFilterWhere([
             "$orderTable.id" => $this->order_id,
             "$assignmentTable.assigned_to" => $this->assigned_to,
-        ]);
+            "$assignmentTable.is_processed" => $this->is_processed,
+        ])
+        ->andFilterWhere(['like', "$attachmentTable.file", $this->file]);
 
         if (!empty($this->created_at_range) && strpos($this->created_at_range, '-') !== false) {
             list($start_date, $end_date) = explode(' - ', $this->created_at_range);

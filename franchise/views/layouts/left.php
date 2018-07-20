@@ -26,7 +26,6 @@
                                 'items' => [
                                     ['label' => Yii::t('app', 'franchise.views.layouts.custom', ['ru'=>'Общие']), 'icon' => 'circle-o', 'url' => ['site/settings']],
                                     ['label' => Yii::t('app', 'franchise.views.layouts.employees', ['ru'=>'Сотрудники']), 'icon' => 'circle-o', 'url' => ['site/users']],
-                                    ['label' => Yii::t('app', 'notifications', ['ru'=>'Уведомления']), 'icon' => 'circle-o', 'url' => ['organization/notifications']],
                                 ]
                             ],
                         ],

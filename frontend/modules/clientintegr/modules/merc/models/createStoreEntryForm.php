@@ -118,7 +118,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->unitList->unit as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[$item->uuid] = $item->name;
         }
         return $res;
@@ -137,7 +137,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->productList->product as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[$item->guid] = $item->name;
         }
         return $res;
@@ -155,7 +155,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->subProductList->subProduct as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[$item->guid] = $item->name. " (".$item->code.")";
         }
         return $res;
@@ -173,7 +173,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->productItemList->productItem as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[] = ['value' => $item->name,
                     'label' => $item->name
                     ];
@@ -192,7 +192,7 @@ class createStoreEntryForm extends Model {
         do {
             $list = ikarApi::getInstance()->getAllCountryList($listOptions);
             foreach ($list->countryList->country as $item) {
-                if ($item->last)
+                if ($item->last && $item->active)
                     $res[$item->uuid] = $item->name;
             }
 

@@ -250,4 +250,15 @@ class iikoWaybill extends \yii\db\ActiveRecord
 
         return $xml->asXML();
     }
+
+
+    public function getVatList(): array
+    {
+        return [
+            '1' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']),
+            '0' => 0,
+            '1000' => 10,
+            '1800' => 18
+        ];
+    }
 }

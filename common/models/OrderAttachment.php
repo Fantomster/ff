@@ -72,7 +72,7 @@ class OrderAttachment extends \yii\db\ActiveRecord {
         return [
             'id' => 'ID',
             'order_id' => 'Order ID',
-            'file' => 'File',
+            'file' => 'Файл',
             'created_at' => 'Created At',
         ];
     }

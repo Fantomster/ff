@@ -63,6 +63,7 @@ class UnitList{
 var $unit;//Unit
 }
 class Country{
+var $guid; //UUID
 var $name;//String255
 var $fullName;//String255
 var $englishName;//String255

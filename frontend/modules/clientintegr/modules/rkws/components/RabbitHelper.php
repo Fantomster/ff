@@ -27,7 +27,7 @@ class RabbitHelper
 
         $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where id = ".$mess['id'];
 
-        $curr =  \Yii::$app->db->createCommand($sel)->queryOne();
+        $curr =  \Yii::$app->db_api->createCommand($sel)->queryOne();
 
         // 'UPDATE account SET forum=:newValue WHERE forum=:oldValue', [':newValue' => 300, ':oldValue' => 200])->execute();
 

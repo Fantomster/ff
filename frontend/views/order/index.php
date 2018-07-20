@@ -115,6 +115,7 @@ $this->registerCss("
     #orderHistory a:not(.btn){color: #333;}
     .dataTable a{width: 100%; min-height: 17px; display: inline-block;}
     #select2-ordersearch-vendor_id-container, #select2-ordersearch-client_id-container{margin-top:0;}
+    .select2-selection__clear{display: none;}
         ");
 ?>
 <section class="content-header">

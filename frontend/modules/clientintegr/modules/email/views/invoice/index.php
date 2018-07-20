@@ -337,7 +337,7 @@ $js = <<<JS
                                         } else {
                                             sel = 'Нет данных.';
                                         }
-                                        $('#bukv-postav').append(sel);
+                                        $('#bukv-postav2').html(sel);
                                 });
                             } else {
                                 $('#bukv-postav2').text('');

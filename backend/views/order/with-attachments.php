@@ -25,10 +25,18 @@ $columns = [
         'filter' => DateRangePicker::widget([
             'model' => $searchModel,
             'attribute' => 'created_at_range',
+            'options' => [
+                'id' => 'dateRangeFilter',
+            ],
             'pluginOptions' => [
                 'format' => 'd-m-Y',
                 'autoUpdateInput' => false
             ],
+            'pluginEvents' => [
+                "cancel.daterangepicker" => "function(ev, picker) { 
+                    //alert(1);
+                    $('#dateRangeFilter').val('').trigger('change');
+                }"],
             'hideInput' => true,
             'pjaxContainerId' => 'orderList',
         ]),

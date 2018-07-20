@@ -105,7 +105,9 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
         $query->andFilterWhere([
             "$orderTable.id" => $this->order_id,
             "$assignmentTable.assigned_to" => $this->assigned_to,
-        ]);
+            "$assignmentTable.is_processed" => $this->is_processed,
+        ])
+        ->andFilterWhere(['like', "$attachmentTable.file", $this->file]);
 
         if (!empty($this->created_at_range) && strpos($this->created_at_range, '-') !== false) {
             list($start_date, $end_date) = explode(' - ', $this->created_at_range);

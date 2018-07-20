@@ -15,7 +15,7 @@ class LoadStockEntryList extends Model
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
         $owner_guid = mercDicconst::getSetting('enterprise_guid');
-
+        $list = is_array($list) ? $list : [$list->stockEntry];
         foreach ($list as $item)
         {
             if(!$cache->get('stockEntryRaw_'.$item->guid))

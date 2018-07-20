@@ -102,6 +102,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
                     try {
                         $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($model);
+                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
+                        return $this->redirect(['index']);
                         if(!isset($result))
                             throw new \Exception('Error create Stock entry');
 

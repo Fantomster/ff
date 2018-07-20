@@ -2,6 +2,7 @@
 
 namespace api\common\models\iiko;
 
+use api\common\models\iikoWaybillDataSearch;
 use Yii;
 
 /**
@@ -66,7 +67,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            [['koef', 'sum', 'quant'], 'number', 'min' => 0.0001],
+            [['koef', 'quant'], 'number', 'min' => 0.0001],
         ];
     }
 
@@ -78,7 +79,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'waybill_id' => Yii::t('app', 'Waybill ID'),
-            'product_id' => Yii::t('app', 'ID в F-keeper'),
+            'product_id' => Yii::t('app', 'ID в Mixcart'),
             'product_rid' => Yii::t('app', 'Product Rid'),
             'munit' => Yii::t('app', 'Munit'),
             'org' => Yii::t('app', 'Org'),
@@ -91,6 +92,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'koef' => Yii::t('app', 'Коэфф.'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
         ];
     }
 
@@ -108,7 +110,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
                     $this->koef = round($this->quant / $this->defquant, 10);
                 }
             } else { // Создание
-            //    $this->koef = 1;
+                //    $this->koef = 1;
             }
             return true;
         } else {
@@ -146,14 +148,33 @@ class iikoWaybillData extends \yii\db\ActiveRecord
 
     public function getFproductname()
     {
-        $prod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id]);
-        return $prod;
+        return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
+    }
+
+    public function getFproductnameProduct()
+    {
+        return $this->fproductname->product;
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProduct() {
+    public function getProduct()
+    {
         return $this->hasOne(iikoProduct::className(), ['id' => 'product_rid']);
+    }
+
+    /**
+     * @return double
+     */
+    public function getSumByWaybillid($number)
+    {
+        Yii::$app->get('db_api');
+        $sum=0;
+        $summes = iikoWaybillData::find()->where(['waybill_id' => $number])->all();
+        foreach ($summes as $summa) {
+            $sum+=$summa->sum;
+        }
+        return $sum;
     }
 }

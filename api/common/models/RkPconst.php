@@ -77,5 +77,20 @@ class RkPconst extends \yii\db\ActiveRecord
        return \Yii::$app->db_api;
     }
 
+    public static function getSettingsColumn($organization)
+    {
+        $res = self::find()
+            ->select('*')
+            ->join('LEFT JOIN', 'rk_dicconst', '`rk_dicconst`.`denom` = "column_number_invoice"')
+            ->where(['org' => $organization])
+            ->andWhere('`rk_pconst`.`const_id` = `rk_dicconst`.`id`')
+            ->one();
+        if($res)
+        {
+            return ($res->value == 1)? true:false;
+        }
+
+    }
+
 
 }

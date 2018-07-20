@@ -4,8 +4,7 @@ namespace common\models;
 
 use common\components\EComIntegration;
 use Yii;
-use yii\base\ExitException;
-use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -43,6 +42,8 @@ use yii\web\BadRequestHttpException;
  * @property string $rawPrice
  * @property User[] $recipientsList
  * @property Currency $currency
+ * @property OrderAttachment[] $attachments
+ * @property OrderAssignment $assignment
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -93,7 +94,7 @@ class Order extends \yii\db\ActiveRecord
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date'], 'safe'],
+            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -122,6 +123,7 @@ class Order extends \yii\db\ActiveRecord
             'vendor' => Yii::t('app', 'Поставщик'),
             'create_user' => Yii::t('app', 'Заказ создал'),
             'plan_price' => Yii::t('app', 'План'),
+            'waybill_number' => Yii::t('app', 'Номер накладной'),
         ];
     }
 
@@ -293,17 +295,20 @@ class Order extends \yii\db\ActiveRecord
         return $statusList[$this->status];
     }
 
-    public static function getStatusList()
+    public static function getStatusList($short = false)
     {
-        return [
+        $result = [
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru' => 'Ожидает подтверждения поставщика']),
             Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
             Order::STATUS_PROCESSING => Yii::t('app', 'common.models.in_process_two', ['ru' => 'Выполняется']),
             Order::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
             Order::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
             Order::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
-            Order::STATUS_FORMING => Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']),
         ];
+        if (!$short) {
+            $result[Order::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);
+        }
+        return $result;
     }
 
     public static function getStatusColors()
@@ -429,6 +434,9 @@ class Order extends \yii\db\ActiveRecord
                 $recipients = array_merge($recipients, $associatedManagers);
             }
         }
+        $franchiseeClientsManagers = $this->client->getRelatedFranchisee();
+        $franchiseeVendorsManagers = $this->vendor->getRelatedFranchisee();
+        $recipients = array_merge($recipients, $franchiseeClientsManagers, $franchiseeVendorsManagers);
 
         //Получаем дополнительные Емайлы для рассылки
         //Для заказчика
@@ -496,19 +504,20 @@ class Order extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if (isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0)))
+            if (isset($changedAttributes['discount']) && (($changedAttributes['discount'] == $this->discount) && (count($changedAttributes) == 0))) {
                 if ($this->status != self::STATUS_FORMING) {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
                 } else {
                     \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id, $insert);
                 }
+            }
         }
 
         if ($this->status != self::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == self::STATUS_DONE)) {
             $vendor = Organization::findOne(['id' => $this->vendor_id]);
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
-            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code)  && isset($vendor->ediOrganization->login)  && isset($vendor->ediOrganization->pass) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
+            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $eComIntegration = new EComIntegration();
                 $login = $vendor->ediOrganization->login;
                 $pass = $vendor->ediOrganization->pass;
@@ -532,8 +541,9 @@ class Order extends \yii\db\ActiveRecord
     {
         parent::afterDelete(); // TODO: Change the autogenerated stub
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if ($this->status == self::STATUS_FORMING)
+            if ($this->status == self::STATUS_FORMING) {
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id);
+            }
         }
     }
 
@@ -545,10 +555,14 @@ class Order extends \yii\db\ActiveRecord
     {
         if ($user instanceof User) {
 
-            $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                "/order/view",
-                "id" => $this->id
-            ]);
+            if (Yii::$app instanceof Yii\console\Application){
+                return Yii::$app->params['url'] . "/order/view" . $this->id;
+            }else{
+                $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                    "/order/view/",
+                    "id" => $this->id
+                ]);
+            }
 
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
@@ -599,4 +613,18 @@ class Order extends \yii\db\ActiveRecord
         return $this->total_price . " " . $this->currency->symbol;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttachments()
+    {
+        return $this->hasMany(OrderAttachment::className(), ['order_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignment() {
+        return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
+    }
 }

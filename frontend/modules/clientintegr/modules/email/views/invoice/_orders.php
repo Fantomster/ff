@@ -1,4 +1,19 @@
-<b>Выберите заказ для связи с накладной:</b><br>
+<style>
+    #alShowAllWaybills {
+        margin-top: 4px;
+        position: absolute;
+        margin-left: -10px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-3">
+        <b>Выберите заказ для связи с накладной:</b>
+    </div>
+    <div class="col-md-5">
+        <?= \yii\helpers\Html::checkbox('show_all_waybills', $showAll, ['label' => "<span style='min-height: 20px; padding-left: 20px; margin-bottom: 0;'>" . Yii::t('app', 'franchise.views.anal.all_orders_four', ['ru' => 'Все заказы']) . "</span>", 'id' => 'alShowAllWaybills']); ?>
+    </div>
+</div>
+<br>
 <?php
 use \common\models\Order;
 use yii\web\View;
@@ -16,8 +31,15 @@ $columns = [
     ],
     [
         'attribute' => 'id',
-        'value' => 'id',
+        'format' => 'raw',
+        'value' => function($data){
+            return \yii\helpers\Html::a($data->id, Url::to(['/order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0", 'target' => '_blank']);
+        },
         'label' => '№',
+    ],
+    [
+        'attribute' => 'waybill_number',
+        'value' => 'waybill_number',
     ],
     [
         'attribute' => 'vendor.name',
@@ -110,7 +132,7 @@ echo \kartik\grid\GridView::widget([
     'columns' => $columns
 ]);
 
-
+$url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
 $js = <<< 'SCRIPT'
 /* To initialize BS3 tooltips set this below */
 // $(function () {
@@ -135,9 +157,28 @@ $("[data-toggle='popover']").popover({
 //        });
 //    }
 // });
+
 SCRIPT;
 // Register tooltip/popover initialization javascript
 $this->registerJs($js,View::POS_END);
+
+$customJs = <<< JS
+ $('#alShowAllWaybills').on('click', function(e) {
+     var checked = $(this).prop('checked');
+     $.get('$url/get-orders', {
+                    OrderSearch: {vendor_search_id: $vendor_id, vendor_id: $vendor_id},
+                    invoice_id:"$invoice_id",
+                    show_waybill: checked
+                }, function (data) {
+                    $('#invoice-orders').html(data);
+                    $('.orders').show();
+                    //     $(this).data('vendor_id', result.value);
+                    // $(this).html(vendors[result.value]);
+                });
+     });
+JS;
+$this->registerJs($customJs, View::POS_READY);
+
 ?>
 
 <?php

@@ -52,7 +52,27 @@ class OrderNotice
             FireBase::getInstance()->update([
                 'user' => $user->id,
                 'organization' => $client->id
-            ], ['cart_count' => (int) $client->getCartCount()]);
+            ], [
+                'cart_count' => (int)$client->getCartCount()
+            ]);
+        }
+        return true;
+    }
+
+    /**
+     * @param User $userSend
+     * @return bool
+     */
+    public function sendLastUserCartAdd(User $userSend) {
+        $client = $userSend->organization;
+        $clientUsers = $client->users;
+        foreach ($clientUsers as $user) {
+            FireBase::getInstance()->update([
+                'user' => $user->id,
+                'organization' => $client->id
+            ], [
+                'last_add_cart_user_name' => $userSend->profile->full_name
+            ]);
         }
         return true;
     }
@@ -177,7 +197,7 @@ class OrderNotice
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            foreach ($orgs as $org ) {
+            foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_done) {
@@ -289,7 +309,8 @@ class OrderNotice
      * @param Organization $organizaion
      * @return int
      */
-    private function getNotificationCount(Organization $organizaion) {
-        return (int) OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
+    private function getNotificationCount(Organization $organizaion)
+    {
+        return (int)OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
     }
 }

@@ -40,8 +40,8 @@ class EmailIntegrationController extends Controller
 
     public function actionTest() {
 
-        $temp_file[1] = '/app/console/runtime/testnac.xls';
-        $temp_file[2] = '/app/console/runtime/testnac2.xls';
+        //$temp_file[1] = '/app/console/runtime/testnac.xls';
+        /*$temp_file[2] = '/app/console/runtime/testnac2.xls';
         $temp_file[3] = '/app/console/runtime/testnac3.xls';
         $temp_file[4] = '/app/console/runtime/testnac4.xls';
         $temp_file[5] = '/app/console/runtime/testnac10.xlsx';
@@ -52,6 +52,30 @@ class EmailIntegrationController extends Controller
         $temp_file[10] = '/app/console/runtime/testnac23.xls';
         $temp_file[11] = '/app/console/runtime/testnac24.xls';
         $temp_file[12] = '/app/console/runtime/testnac25.xlsx';
+        $temp_file[13] = '/app/console/runtime/testnac26.xlsx';
+        $temp_file[14] = '/app/console/runtime/testnac27.xlsx';
+        $temp_file[15] = '/app/console/runtime/testnac28.xlsx';
+        $temp_file[16] = '/app/console/runtime/ЕКТД 22007.xls';
+        $temp_file[17] = '/app/console/runtime/ЕКТД 22010.xls';
+        $temp_file[18] = '/app/console/runtime/ЕКТД 22015.xls';
+        $temp_file[19] = '/app/console/runtime/ЕКТД 22016.xls';
+        $temp_file[20] = '/app/console/runtime/ЕКТД 22017.xls';
+        $temp_file[21] = '/app/console/runtime/ЕКТД 22018.xls';
+        $temp_file[22] = '/app/console/runtime/ЕКТД 22028.xls';
+        $temp_file[23] = '/app/console/runtime/ЕКТД 22029.xls';
+        $temp_file[24] = '/app/console/runtime/ЕКТД 22030.xls';
+        $temp_file[25] = '/app/console/runtime/ЕКТД 22031.xls';
+        $temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
+        $temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
+        $temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
+        $temp_file[29] = '/app/console/runtime/testnac29.xls';
+        $temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
+        $temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
+        $temp_file[32] = '/app/console/runtime/id7905.xlsx';
+        $temp_file[33] = '/app/console/runtime/testnac30.xlsx';*/
+        //$temp_file[34] = '/app/console/runtime/testnac31.xlsx';
+        $temp_file[35] = '/app/console/runtime/testnac32.xls';
+        $temp_file[36] = '/app/console/runtime/testnac33.xlsx';
 
 
         $i =1;
@@ -80,10 +104,14 @@ class EmailIntegrationController extends Controller
             print_r("Result name:".$result[$i-1]['invoice']['namePostav'].PHP_EOL);
             print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
             print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
+            print_r("Result consignee:".$result[$i-1]['invoice']['nameConsignee'].PHP_EOL);
+            print_r("Result price_without_tax_sum:".$result[$i-1]['invoice']['price_without_tax_sum'].PHP_EOL);
+            print_r("Result price_with_tax_sum:".$result[$i-1]['invoice']['price_with_tax_sum'].PHP_EOL);
             print_r("=================================".PHP_EOL);
+            //print_r($result[$i-1]['invoice']['rows']);
 
-            file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
-            file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
+            //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
+            //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
             $i++;
         }
     }
@@ -125,7 +153,7 @@ class EmailIntegrationController extends Controller
                     if (empty($email['attachment'])) {
                         continue;
                     }
-                    //Получаем только одходящие нам вложения из емайла
+                    //Получаем только подходящие нам вложения из емэйла
                     if ($files = $this->getAttachments($email, $setting)) {
                         foreach ($files as $file) {
                             $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
@@ -216,9 +244,9 @@ class EmailIntegrationController extends Controller
         ];
 
         foreach ($email['attachment'] as $name_file => $file) {
-            //Узнаме тип вложения
+            //Узнаём тип вложения
             $mime_type = array_keys($file)[0];
-            //Собираем только разрешенные вложения
+            //Собираем только разрешённые вложения
             if (!in_array(trim($mime_type), $allow_mime_types)) {
                 //echo '- Missed File MIME-TYPE:' . $mime_type . PHP_EOL;
                 continue;

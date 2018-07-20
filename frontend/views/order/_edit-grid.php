@@ -55,7 +55,7 @@ echo GridView::widget([
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['class' => 'view-data', 'id' => 'qnty' . $data->id],
+                            'options' => ['class' => 'quantity view-data', 'id' => 'qnty' . $data->id],
                         ]) . Html::hiddenInput("OrderContent[$data->id][id]", $data->id);
             },
             'contentOptions' => ['class' => 'width150'],
@@ -78,7 +78,7 @@ echo GridView::widget([
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['class' => 'view-data'],
+                            'options' => ['class' => 'price view-data'],
                 ]);
             },
             'contentOptions' => ['class' => 'width150'],
@@ -194,13 +194,5 @@ if ($priceEditable) {
     </div>
     <?php
 }
-echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru'=>'Сохранить']) . ' </span>', [
-    'class' => 'btn btn-success pull-right btnSave',
-    'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru'=>'Сохраняем...']),
-]);
-echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_two', ['ru'=>'Повторить заказ']), ['order/repeat', 'id' => $order->id], [
-            'class' => 'btn btn-default pull-right',
-            'style' => 'margin-right: 7px;'
-        ]) : "";
 ActiveForm::end();
 

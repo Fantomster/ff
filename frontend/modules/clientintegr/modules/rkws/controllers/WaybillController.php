@@ -2,6 +2,11 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use api\common\models\iiko\iikoPconst;
+use api\common\models\RkDicconst;
+use api\common\models\RkPconst;
+use api\common\models\rkws\RkWaybilldataSearch;
+use api_web\classes\RkeeperWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
@@ -87,8 +92,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionIndex() {
-
-        $way = Yii::$app->request->get('way') ? Yii::$app->request->get('way') : 0;
+        $way = Yii::$app->request->get('way',0);
        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
 
@@ -104,16 +108,20 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
 
       //  $dataProvider->pagination->pageSize=3;
-        
-        $lic = $this->checkLic();       
-        
-        $vi = $lic ? 'index' : '/default/_nolic';
+
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                'visible' =>RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
+                        'licucs' => $licucs,
                         'way' => $way,
             ]);
         } else {
@@ -121,6 +129,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'lic' => $lic,
+                    'visible' =>RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
+                        'licucs' => $licucs,
                         'way' => $way,
 
             ]);
@@ -129,8 +139,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
 
     public function actionMap($waybill_id) {
-
-        $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product', 'rk_product.id = product_rid');
         
         $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $waybill_id])->one();
 
@@ -151,9 +159,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             die();
         }
 
-        $dataProvider = new ActiveDataProvider(['query' => $records,
-            'sort' => ['defaultOrder' => ['munit_rid' => SORT_ASC]],
-        ]);
+        $searchModel = new RkWaybilldataSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         
         $lic = $this->checkLic();       
         $vi = $lic ? 'indexmap' : '/default/_nolic';
@@ -337,9 +344,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     ->limit(20);
             */
 
-            $sql = "( select id, denom as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-            " union ( select id, denom as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-            "union ( select id, denom as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            $sql = "( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
+            " union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
+            "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
             "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
@@ -451,27 +458,65 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $url; // Возвращаем итоговый URL
     }
 
-    public function actionSendws($waybill_id) {
+    public function actionSendws() {
 
-        //  $resres = ApiHelper::getAgents();     
+
+        $waybill_id = Yii::$app->request->post('id');
+        $model = $this->findModel($waybill_id);
 
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
         $res->sendWaybill($waybill_id);
 
-        $this->redirect('/clientintegr/rkws/waybill/index');
+        return 'true';
+       //$this->redirect('/clientintegr/rkws/waybill/index');
     }
-    
+
+
+    /**
+     * Отправляем накладную по нажатию кнопки при соспоставлении товаров
+     */
+    public function actionSendwsByButton()
+    {
+        /**
+        header ("Content-Type:text/xml");
+        $id = Yii::$app->request->get('id');
+        $model = $this->findModel($id);
+        echo $model->getXmlDocument();
+        exit;
+         */
+
+            $id = Yii::$app->request->post('id');
+            $model = $this->findModel($id);
+            $error='';
+
+
+            if (!$model) $error.= 'Не удалось найти накладную. ';
+
+            if ($model->readytoexport==0) $error.= 'Не все товары сопоставлены! ';
+            if ($error=='') {
+                $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
+                $res->sendWaybill($id);
+                $model = $this->findModel($id);
+                if ($model->status_id!=2) $error.= 'Ошибка при отправке. ';
+            }
+
+        if ($error=='') {
+                Yii::$app->session->set("rkws_waybill", $model->order_id);
+                return 'true';}
+                else return $error;
+    }
+
     protected function checkLic() {
 
         $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
     if ($lic) {
-       if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
+       /*if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) {*/
        $res = $lic; 
-    } else { 
+    /*} else {
        $res = 0; 
-    }
+    }*/
     } else 
        $res = 0; 
     
@@ -500,7 +545,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
 
-    return $eDate->updated_at;
+    return isset($eDate) ?  $eDate->updated_at : null;
 
     }
 

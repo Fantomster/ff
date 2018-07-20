@@ -123,8 +123,8 @@ class Catalog extends \yii\db\ActiveRecord
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
 
-    public function addCatalog($arrCatalog){
-        if ($arrCatalog === Array()) {
+    public function addCatalog($arrCatalog, bool $isWebApi = false){
+        if ($arrCatalog === Array() && !$isWebApi) {
             throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
         }
 

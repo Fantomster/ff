@@ -39,35 +39,39 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             'access' => [
                 'class' => AccessControl::className(),
                 'rules' => [[
-                'actions' => ['confirm','resend', 'logout'],
+                'actions' => ['confirm', 'resend', 'logout'],
                 'allow' => true,
                 'roles' => ['?', '@'],
                     ],
                     [
-                        'actions' => ['login','register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
+                        'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index','profile', 'account', 'cancel', 'resend-change'],
+                        'actions' => ['index', 'profile', 'account', 'cancel', 'resend-change'],
                         'allow' => false,
                     ],
                     [
-                        'actions' => ['ajax-invite-friend', 'business','change-form','change','create'],
+                        'actions' => ['ajax-invite-friend', 'business', 'change-form', 'change', 'create', 'delete-business'],
                         'allow' => true,
                         'roles' => ['@'],
-                    ]
+                    ],
+                    [
+                        'actions' => ['confirm-additional-email',],
+                        'allow' => true,
+                    ],
                 ],
                 'denyCallback' => function($rule, $action) {
                     $this->redirect(['/site/index']);
-                }                
+                }
             ]
         ];
     }
 
     public function actionAjaxRegister() {
         if (!Yii::$app->request->isAjax) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.user.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.user.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
         Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -86,7 +90,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
             // validate for existing email
             if (User::findOne(['email' => $user->email])) {
-                return ['result' => 'fail', 'message' => Yii::t('message', 'frontend.controllers.user.email_busy', ['ru'=>'Email занят'])];
+                return ['result' => 'fail', 'message' => Yii::t('message', 'frontend.controllers.user.email_busy', ['ru' => 'Email занят'])];
             }
 
             // validate for normal request
@@ -98,17 +102,18 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
                     $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+                    $profile->email = $user->getEmail();
                     if ($profile->setUser($user->id)->save() && $organization->save() && $user->setOrganization($organization, true)->save()) {
                         $transaction->commit();
                         $this->afterRegister($user);
-                        return ['result' => 'success', 'message' => Yii::t('message', 'frontend.controllers.user.success', ['ru'=>'Регистрация прошла успешно'])];
+                        return ['result' => 'success', 'message' => Yii::t('message', 'frontend.controllers.user.success', ['ru' => 'Регистрация прошла успешно'])];
                     } else {
                         $transaction->rollBack();
-                        return ['result' => 'fail', 'message' => Yii::t('error', 'frontend.controllers.user.error', ['ru'=>'Неизвестная ошибка'])];
+                        return ['result' => 'fail', 'message' => Yii::t('error', 'frontend.controllers.user.error', ['ru' => 'Неизвестная ошибка'])];
                     }
                 } catch (Exception $ex) {
                     $transaction->rollBack();
-                    return ['result' => 'fail', 'message' => Yii::t('error', 'frontend.controllers.user.error_two', ['ru'=>'Неизвестная ошибка'])];
+                    return ['result' => 'fail', 'message' => Yii::t('error', 'frontend.controllers.user.error_two', ['ru' => 'Неизвестная ошибка'])];
                 }
             }
         }
@@ -188,7 +193,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function actionConfirm($token) {
         /** @var \amnah\yii2\user\models\UserToken $userToken */
-        /** @var \amnah\yii2\user\models\User $user */
+        /** @var common\models\User $user */
         // search for userToken
         $success = false;
         $email = "";
@@ -200,6 +205,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             //   for example, user registered another account before confirming change of email
             $user = $this->module->model("User");
             $user = $user::findOne($userToken->user_id);
+            $user->setNotifications();
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;
@@ -210,7 +216,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 //$user->sendWelcome();
             }
             // set email and delete token
-            $email = $newEmail ? : $user->email;
+            $email = $newEmail ?: $user->email;
             $userToken->delete();
             $this->performLogin($user, true);
             return $this->redirect(['/site/index', 'new' => true]);
@@ -218,6 +224,24 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         $invalidToken = true;
         return $this->render("reset", compact("invalidToken"));
+    }
+
+    public function actionConfirmAdditionalEmail($token) {
+        $additionalEmail = \common\models\AdditionalEmail::findOne(['token' => $token]);
+        if (empty($additionalEmail)) {
+            $success = false;
+        } else {
+            $additionalEmail->order_created = 1;
+            $additionalEmail->order_canceled = 1;
+            $additionalEmail->order_changed = 1;
+            $additionalEmail->order_processing = 1;
+            $additionalEmail->order_done = 1;
+            $additionalEmail->confirmed = 1;
+            $additionalEmail->token = null;
+            $additionalEmail->save();
+            $success = true;
+        }
+        return $this->render('additional-email', compact("success"));
     }
 
     /**
@@ -245,6 +269,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         if ($user->load(Yii::$app->request->post()) && $user->validate() && $profile->validate() && $organization->validate()) {
             $user->status = $user::STATUS_ACTIVE;
             $user->save();
+            $profile->email = $user->getEmail();
             $profile->save();
             $organization->save();
             // delete userToken and set success = true
@@ -277,25 +302,25 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         //ajax
         if ($model->load($post) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
+            $test = ActiveForm::validate($model);
+            return $test;
         }
 
         if ($model->load($post) && $model->validate()) {
             $user = $model->getUser();
 
-            $rel = RelationUserOrganization::findAll(['user_id'=>$user->id]);
-            if(!empty($user->organization_id)){
-                if(count($rel) > 1 || (
-                      (
-                       $user->role_id == Role::ROLE_ADMIN ||
-                       $user->role_id == Role::ROLE_FKEEPER_MANAGER))){
-                   $returnUrl = $this->performLogin($user, 1);
-                   return $this->redirect(['business']); 
+            $rel = RelationUserOrganization::findAll(['user_id' => $user->id]);
+            if (!empty($user->organization_id)) {
+                if (count($rel) > 1 || (
+                        (
+                        $user->role_id == Role::ROLE_ADMIN ||
+                        $user->role_id == Role::ROLE_FKEEPER_MANAGER))) {
+                    $returnUrl = $this->performLogin($user, 1);
+                    return $this->redirect(['business']);
                 }
             }
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);
-            
         }
 
         $registerFirst = false;
@@ -305,10 +330,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Forgot password
      */
-    public function actionForgot()
-    {
+    public function actionForgot() {
         /** @var \amnah\yii2\user\models\forms\ForgotForm $model */
-
         // load post data and send email
         $model = $this->module->model("ForgotForm");
         $post = Yii::$app->request->post();
@@ -327,15 +350,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         return $this->render("forgot", compact("model"));
     }
-    
+
     /**
      * Reset password
      */
-    public function actionReset($token)
-    {
+    public function actionReset($token) {
         /** @var \amnah\yii2\user\models\User $user */
         /** @var \amnah\yii2\user\models\UserToken $userToken */
-
         // get user token and check expiration
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::findByToken($token, $userToken::TYPE_PASSWORD_RESET);
@@ -353,13 +374,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $user->setScenario("reset");
 
         $post = Yii::$app->request->post();
-        
+
         // ajax
         if ($user->load($post) && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($user);
         }
-        
+
         // load post data and reset user password
         if ($user->load($post) && $user->save()) {
 
@@ -381,9 +402,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $email = Yii::$app->request->post('email');
             //$validator = new \yii\validators\EmailValidator();
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            if(preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/",$email)  && $currentUser->sendInviteToFriend($email))
-            {
-               return [
+            if (preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $email) && $currentUser->sendInviteToFriend($email)) {
+                return [
                     'success' => true,
                 ];
             }
@@ -391,8 +411,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return ['success' => false];
     }
 
-    public function actionChangeForm(): String
-    {
+    public function actionChangeForm(): String {
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = new Organization();
         $searchModel = new BusinessSearch();
@@ -400,12 +419,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $params['GuideSearch'] = Yii::$app->request->get("searchString");
         $dataProvider = $searchModel->search($params, null);
 
-        return $this->renderAjax('_changeForm', compact('user','dataProvider','organization', 'searchModel'));
+        return $this->renderAjax('_changeForm', compact('user', 'dataProvider', 'organization', 'searchModel'));
     }
 
-
-    public function actionBusiness(): String
-    {
+    public function actionBusiness(): String {
         $user = User::findIdentity(Yii::$app->user->id);
         $searchModel = new BusinessSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -414,29 +431,47 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         $loginRedirect = $this->module->loginRedirect;
         $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
-        return $this->render('business', compact('user','dataProvider', 'returnUrl', 'searchModel'));
+        return $this->render('business', compact('user', 'dataProvider', 'returnUrl', 'searchModel'));
     }
 
+    public function actionDeleteBusiness($id) {
+        $user = User::findIdentity(Yii::$app->user->id);
+        $currentOrganization = $user->organization;
+        $organizationToDelete = Organization::findOne(['id' => $id]);
 
-    public function actionChange(int $id)
-    {
+        $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id']);
+
+        if (empty($relationUserOrg) && !(in_array($relationUserOrg->role_id, [
+                    Role::ROLE_ADMIN,
+                    Role::ROLE_FKEEPER_MANAGER,
+                    Role::ROLE_RESTAURANT_MANAGER,
+                    Role::ROLE_SUPPLIER_MANAGER
+                ]))) {
+            return false;
+        }
+
+        if ($currentOrganization->setPrimary() && $organizationToDelete->wipeBusiness()) {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ["title" => Yii::t('app', 'frontend.controllers.user.business_deleted', ['ru' => "Бизнес успешно удален!"]), "type" => "success"];
+        }
+    }
+
+    public function actionChange(int $id) {
         return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
 
-
-    public function actionCreate(): void
-    {
+    public function actionCreate(): void {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization;
-        
+
         $sql = "select distinct parent_id as `parent_id` from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
         union all
         select id, parent_id from organization where id = " . $user->organization_id . ")tb";
-        if(!empty(Organization::findBySql($sql)->one()->parent_id)){
-          $parent_id = Organization::findBySql($sql)->one()->parent_id;   
-        }else{
-          $parent_id = $user->organization_id; 
+        if (!empty(Organization::findBySql($sql)->one()->parent_id)) {
+            $parent_id = Organization::findBySql($sql)->one()->parent_id;
+        } else {
+            $parent_id = $user->organization_id;
         }
         $sql = "
         select distinct id as `id`,`name`,`type_id` from (
@@ -453,12 +488,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         )tb where id is not null";
         $networks = \Yii::$app->db->createCommand($sql)->queryAll();
         $organization = new Organization();
-        if (Yii::$app->request->isAjax && 
-                ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
-                 $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
-                 $user->role_id == Role::ROLE_ADMIN ||
-                 $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR))
-        {
+        if (Yii::$app->request->isAjax &&
+                ($user->role_id == Role::ROLE_RESTAURANT_MANAGER ||
+                $user->role_id == Role::ROLE_SUPPLIER_MANAGER ||
+                $user->role_id == Role::ROLE_ADMIN ||
+                $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR)) {
             $post = Yii::$app->request->post();
             if ($organization->load($post)) {
                 $organization->parent_id = $parent_id;
@@ -466,44 +500,44 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                     TestVendors::setGuides($organization);
                 }
-                    
-                    foreach($networks as $network){
-                        $relationSuppRest = new \common\models\RelationSuppRest();
-                        if($network['type_id'] == Organization::TYPE_RESTAURANT &&
-                          $organization->type_id == Organization::TYPE_SUPPLIER){
-                            $relationSuppRest->rest_org_id = $network['id'];
-                            $relationSuppRest->supp_org_id = $organization->id;
-                            $relationSuppRest->status = 1;
-                            $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
-                            $relationSuppRest->save(); 
-                        }
-                        if($network['type_id'] == Organization::TYPE_SUPPLIER &&
-                          $organization->type_id == Organization::TYPE_RESTAURANT){
-                            $relationSuppRest->rest_org_id = $organization->id;
-                            $relationSuppRest->supp_org_id = $network['id']; 
-                            $relationSuppRest->status = 1;
-                            $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
-                            $relationSuppRest->save(); 
-                        }
-                           
+
+                foreach ($networks as $network) {
+                    $relationSuppRest = new \common\models\RelationSuppRest();
+                    if ($network['type_id'] == Organization::TYPE_RESTAURANT &&
+                            $organization->type_id == Organization::TYPE_SUPPLIER) {
+                        $relationSuppRest->rest_org_id = $network['id'];
+                        $relationSuppRest->supp_org_id = $organization->id;
+                        $relationSuppRest->status = 1;
+                        $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
+                        $relationSuppRest->save();
                     }
+                    if ($network['type_id'] == Organization::TYPE_SUPPLIER &&
+                            $organization->type_id == Organization::TYPE_RESTAURANT) {
+                        $relationSuppRest->rest_org_id = $organization->id;
+                        $relationSuppRest->supp_org_id = $network['id'];
+                        $relationSuppRest->status = 1;
+                        $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
+                        $relationSuppRest->save();
+                    }
+                }
                 $roleID = ($organization->type_id == Organization::TYPE_RESTAURANT) ? Role::ROLE_RESTAURANT_MANAGER : Role::ROLE_SUPPLIER_MANAGER;
-                if($user->role_id == Role::ROLE_ADMIN || $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
-                    $rel = RelationUserOrganization::findOne(['organization_id'=>$user->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]) ?? RelationUserOrganization::findOne(['organization_id'=>$this->organization_id, 'role_id'=>[Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_EMPLOYEE]]);
+                if ($user->role_id == Role::ROLE_ADMIN || $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR) {
+                    $rel = RelationUserOrganization::findOne(['organization_id' => $user->organization_id, 'role_id' => [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]) ?? RelationUserOrganization::findOne(['organization_id' => $this->organization_id, 'role_id' => [Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_EMPLOYEE]]);
                     $userID = $rel->user_id;
-                }else{
+                } else {
                     $userID = $user->id;
                 }
 
                 User::createRelationUserOrganization($userID, $organization->id, $roleID);
                 $currentOrganizationID = $currentOrganization->id;
-                $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id'=>[Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
-                foreach ($relations as $relation){
+                $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id' => [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
+                foreach ($relations as $relation) {
                     User::createRelationUserOrganization($relation->user_id, $organization->id, $roleID);
                 }
             }
         }
     }
+
     /*
      * initDemoData
      * 
@@ -515,7 +549,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      * 
      * @return bool
      */
-    
+
     private function initDemoData($user, $profile, $organization) {
         $transaction = Yii::$app->dbDemo->beginTransaction();
         try {

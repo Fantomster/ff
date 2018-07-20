@@ -59,7 +59,9 @@ if (!Yii::$app->user->isGuest) {
     }
             
    socket.on('connect', function(){
+                
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
+        
     });
     socket.on('user$user->id', function (data) {
 
@@ -106,6 +108,24 @@ if (!Yii::$app->user->isGuest) {
                 try {
                     $.pjax.reload({container: "#checkout",timeout:30000});
                 } catch(e) {
+                }
+            }
+        }
+
+        
+        if (message.isRabbit == 1) {
+            if (message.action == 'fullmap') {
+                
+                $('#fullmapconsole').show();
+                $('#fullmapbutton').hide();
+                
+                $('#fmtotal').progressTo(Math.round((message.success + message.failed)*100/message.total))
+                $('#fmsuccess').progressTo(Math.round(message.success*100/message.total));
+                $('#fmfailed').progressTo(Math.round(message.failed*100/message.total));
+                
+                if(message.total == (message.success + message.failed)) //Все обработано
+                {
+                    $.pjax.reload("#map_grid1", {timeout:30000});
                 }
             }
         }
@@ -348,7 +368,7 @@ JS;
                 <ul class="nav navbar-nav">
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
-                            <a class="basket_a" href="<?= Url::to(['order/checkout']) ?>">
+                            <a class="basket_a" href="<?= Url::to(['/order/checkout']) ?>">
                                 <i class="fa fa-shopping-cart"></i><span class="label label-primary cartCount"><?= $organization->getCartCount() ?></span>
                             </a>
                         </li>

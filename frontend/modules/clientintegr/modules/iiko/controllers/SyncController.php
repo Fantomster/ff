@@ -4,31 +4,30 @@ namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
 use api\common\models\iiko\iikoAgent;
 use api\common\models\iiko\iikoCategory;
-use api\common\models\iiko\iikoDic;
-use api\common\models\iiko\iikoDictype;
 use api\common\models\iiko\iikoProduct;
 use api\common\models\iiko\iikoStore;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use api_web\modules\integration\modules\iiko\models\iikoSync as WebApiIikoSync;
+use common\models\User;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
-use yii\filters\ContentNegotiator;
 use yii\web\Response;
 
 class SyncController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
     public $enableCsrfValidation = false;
     public $organisation_id;
-    public $ajaxActions = ['goods-get', 'category-get', 'store-get', 'agent-get'];
+    public $ajaxActions = ['run'];
 
     public function beforeAction($action)
     {
-        $this->organisation_id = \Yii::$app->user->identity->organization_id;
+        $user = User::findOne(\Yii::$app->user->id);
+        $this->organisation_id = $user->organization_id;
 
-        if(empty($this->organisation_id)) {
+        if (empty($this->organisation_id)) {
             return false;
         }
 
-        if(in_array($this->action->id, $this->ajaxActions)) {
+        if (in_array($this->action->id, $this->ajaxActions)) {
             \Yii::$app->response->format = Response::FORMAT_JSON;
             set_time_limit(3600);
         }
@@ -112,279 +111,16 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     }
 
     /**
-     * Синхронизация товаров
+     * Синхронизация всего, по типам
      * @return array
      */
-    public function actionGoodsGet()
+    public function actionRun()
     {
         $id = \Yii::$app->request->post('id');
-        $transaction = \Yii::$app->get('db_api')->beginTransaction();
         try {
-            $api = iikoApi::getInstance();
-            if ($api->auth()) {
-                $dicModel = iikoDic::findOne($id);
-                //Получаем список продуктов и категорий из АПИ
-                //Хреновое апи = хреновой реализации!!!
-                $items = $api->getProducts();
-                //Отключаемся от АПИ
-                $api->logout();
-                //Проставим признак всем категориям, что они не активны
-                //поскольку мы не можем отследить изменения на стороне провайдера
-                iikoProduct::updateAll(['is_active' => 0], ['org_id' => $this->organisation_id]);
-                //Если пришли категории, обновляем их
-                if (!empty($items['products'])) {
-                    foreach ($items['products'] as $uuid => $item) {
-                        $model = iikoProduct::findOne(['uuid' => $uuid, 'org_id' => $this->organisation_id]);
-                        //Если нет категории у нас, создаем
-                        if (empty($model)) {
-                            $model = new iikoProduct(['uuid' => $uuid]);
-                            $model->org_id = $this->organisation_id;
-                        }
-                        //Родительская категория если есть
-                        if (isset($item['parentId'])) {
-                            $model->parent_uuid = $item['parentId'];
-                        }
-                        $model->is_active = 1;
-
-
-                        if (isset($item['name'])) {
-                            $model->denom = $item['name'];
-                        }
-                        if (isset($item['productType'])) {
-                            $model->product_type = $item['productType'];
-                        }
-                        if (isset($item['mainUnit'])) {
-                            $model->unit = $item['mainUnit'];
-                        }
-                        if (isset($item['num'])) {
-                            $model->num = $item['num'];
-                        }
-                        /*
-                        if (isset($item['code'])) {
-                            $model->code = $item['code'];
-                        }
-                        */
-                        if (isset($item['cookingPlaceType'])) {
-                            $model->cooking_place_type = $item['cookingPlaceType'];
-                        }
-
-                        if (isset($item['containers'])) {
-                            $model->containers = \GuzzleHttp\json_encode($item['containers']);
-                        }
-
-
-                        //    var_dump($model->code);
-
-                        //Валидируем сохраняем
-
-                        if (!$model->validate() || !$model->save()) {
-                            throw new \Exception(print_r($model->getErrors(), 1));
-                        }
-
-
-                    }
-                }
-                //Обновляем колличество полученных объектов
-                $count = iikoProduct::find()->where(['is_active' => 1, 'org_id' => $dicModel->org_id])->count();
-                if (!$dicModel->updateSuccessSync($count)) {
-                    throw new \Exception(print_r($dicModel->getErrors(), 1));
-                }
-                //Сохраняем изменения
-                $transaction->commit();
-                return ['success' => true];
-            } else {
-                throw new \Exception('Не удалось авторизоваться');
-            }
+            return (new WebApiIikoSync())->run($id);
         } catch (\Exception $e) {
-            $transaction->rollBack();
-            iikoDic::errorSync($id);
             return ['success' => false, 'error' => $e->getMessage(), 'line' => $e->getLine(), 'file' => $e->getFile(), 'trace' => $e->getTraceAsString()];
-            }
-    }
-
-    /**
-     * Синхронизация категорий организации
-     * @return array
-     */
-    public function actionCategoryGet()
-    {
-        $id = \Yii::$app->request->post('id');
-        $transaction = \Yii::$app->get('db_api')->beginTransaction();
-        try {
-            $api = iikoApi::getInstance();
-            if ($api->auth()) {
-                $dicModel = iikoDic::findOne($id);
-                //Получаем список продуктов и категорий из АПИ
-                //Хреновое апи = хреновой реализации!!!
-                $items = $api->getProducts();
-                //Отключаемся от АПИ
-                $api->logout();
-                //Проставим признак всем категориям, что они не активны
-                //поскольку мы не можем отследить изменения на стороне провайдера
-                iikoCategory::updateAll(['is_active' => 0], ['org_id' => $this->organisation_id]);
-                //Если пришли категории, обновляем их
-                if (!empty($items['categories'])) {
-                    foreach ($items['categories'] as $uuid => $category) {
-                        $model = iikoCategory::findOne(['uuid' => $uuid, 'org_id' => $this->organisation_id]);
-                        //Если нет категории у нас, создаем
-                        if (empty($model)) {
-                            $model = new iikoCategory(['uuid' => $uuid]);
-                            $model->org_id = $this->organisation_id;
-                        }
-                        //Родительская категория если есть
-                        if (isset($category['parentId'])) {
-                            $model->parent_uuid = $category['parentId'];
-                        }
-
-                        $model->is_active = 1;
-                        if (isset($category['name'])) {
-                            $model->denom = $category['name'];
-                        }
-                        if (isset($category['productGroupType'])) {
-                            $model->group_type = $category['productGroupType'];
-                        }
-
-                        if (!$model->validate() || !$model->save()) {
-                            throw new \Exception(print_r($model->getFirstErrors(), 1));
-                        }
-                    }
-                }
-
-                //Обновляем колличество полученных объектов
-                $count = iikoCategory::find()->where(['is_active' => 1, 'org_id' => $dicModel->org_id])->count();
-                if (!$dicModel->updateSuccessSync($count)) {
-                    throw new \Exception(print_r($dicModel->getFirstErrors(), 1));
-                }
-                //Сохраняем изменения
-                $transaction->commit();
-                return ['success' => true];
-            } else {
-                throw new \Exception('Не удалось авторизоваться');
-            }
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage(),'line' => $e->getLine()];
-        }
-    }
-
-    /**
-     * Синхронизация складов
-     * @return array|mixed
-     */
-    public function actionStoreGet()
-    {
-        $id = \Yii::$app->request->post('id');
-        $transaction = \Yii::$app->get('db_api')->beginTransaction();
-        try {
-            $api = iikoApi::getInstance();
-            if ($api->auth()) {
-                $dicModel = iikoDic::findOne($id);
-                //Получаем список складов
-                $stores = $api->getStores();
-                //Отключаемся от АПИ
-                $api->logout();
-                //Проставим признак всем категориям, что они не активны
-                //поскольку мы не можем отследить изменения на стороне провайдера
-                iikoStore::updateAll(['is_active' => 0], ['org_id' => $this->organisation_id]);
-                //Если пришли категории, обновляем их
-                if (!empty($stores['corporateItemDto'])) {
-                    foreach ($stores['corporateItemDto'] as $store) {
-                        $model = iikoStore::findOne(['uuid' => $store['id'], 'org_id' => $this->organisation_id]);
-                        //Если нет категории у нас, создаем
-                        if (empty($model)) {
-                            $model = new iikoStore(['uuid' => $store['id']]);
-                            $model->org_id = $this->organisation_id;
-                        }
-                        $model->is_active = 1;
-
-                        if(!empty($store['name'])){
-                            $model->denom = $store['name'];
-                        }
-
-                        if(!empty($store['code'])){
-                            $model->store_code = $store['code'];
-                        }
-                        
-                        if(!empty($store['type'])){
-                            $model->store_type = $store['type'];
-                        }
-
-                        //Валидируем сохраняем
-                        if (!$model->validate() || !$model->save()) {
-                            throw new \Exception(print_r($model->getFirstErrors(), 1));
-                        }
-                    }
-                }
-                //Обновляем колличество полученных объектов
-                $count = iikoStore::find()->where(['is_active' => 1, 'org_id' => $dicModel->org_id])->count();
-                if (!$dicModel->updateSuccessSync($count)) {
-                    throw new \Exception(print_r($dicModel->getFirstErrors(), 1));
-                }
-                //Сохраняем изменения
-                $transaction->commit();
-                return ['success' => true];
-            } else {
-                throw new \Exception('Не удалось авторизоваться');
-            }
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage()];
-        }
-    }
-
-    /**
-     * Синхронизация контрагентов
-     * @return array|mixed
-     */
-    public function actionAgentGet()
-    {
-        $id = \Yii::$app->request->post('id');
-        $transaction = \Yii::$app->get('db_api')->beginTransaction();
-        try {
-            $api = iikoApi::getInstance();
-            if ($api->auth()) {
-                $dicModel = iikoDic::findOne($id);
-                //Получаем список складов
-                $agents = $api->getSuppliers();
-                //Отключаемся от АПИ
-                $api->logout();
-                //Проставим признак всем категориям, что они не активны
-                //поскольку мы не можем отследить изменения на стороне провайдера
-                iikoAgent::updateAll(['is_active' => 0], ['org_id' => $this->organisation_id]);
-                //Если пришли категории, обновляем их
-                if (!empty($agents['employee'])) {
-                    foreach ($agents['employee'] as $agent) {
-                        $model = iikoAgent::findOne(['uuid' => $agent['id'], 'org_id' => $this->organisation_id]);
-                        //Если нет у нас, создаем
-                        if (empty($model)) {
-                            $model = new iikoAgent(['uuid' => $agent['id']]);
-                            $model->org_id = $this->organisation_id;
-                        }
-                        $model->is_active = 1;
-                        $model->denom = $agent['name'];
-                        //Валидируем сохраняем
-                        if (!$model->validate() || !$model->save()) {
-                            throw new \Exception(print_r($model->getFirstErrors(), 1));
-                        }
-                    }
-                }
-                //Обновляем колличество полученных объектов
-                $count = iikoAgent::find()->where(['is_active' => 1, 'org_id' => $dicModel->org_id])->count();
-                if (!$dicModel->updateSuccessSync($count)) {
-                    throw new \Exception(print_r($dicModel->getFirstErrors(), 1));
-                }
-                //Сохраняем изменения
-                $transaction->commit();
-                return ['success' => true];
-            } else {
-                throw new \Exception('Не удалось авторизоваться');
-            }
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            iikoDic::errorSync($id);
-            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 }

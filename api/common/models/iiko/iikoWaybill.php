@@ -2,6 +2,7 @@
 
 namespace api\common\models\iiko;
 
+use common\models\Order;
 use common\models\OrderContent;
 use Yii;
 
@@ -25,6 +26,7 @@ use Yii;
  * @property string $created_at
  * @property string $exported_at
  * @property string $updated_at
+ * @property Order $order;
  */
 class iikoWaybill extends \yii\db\ActiveRecord
 {
@@ -87,13 +89,13 @@ class iikoWaybill extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
+        //if (parent::beforeSave($insert)) {
 
-            if ($this->doc_date) {
-                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
-            } else {
-                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
-            }
+//            if ($this->doc_date) {
+//                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
+//            } else {
+//                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
+//            }
 
             if (empty($this->text_code)) {
                 $this->text_code = 'mixcart';
@@ -104,7 +106,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
             }
 
             return parent::beforeSave($insert);
-        }
+        //}
     }
 
     public function afterSave($insert, $changedAttributes)
@@ -115,7 +117,6 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
                 $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
-
                 foreach ($records as $record) {
                     $wdmodel = new iikoWaybillData();
                     $wdmodel->waybill_id = $this->id;
@@ -172,14 +173,32 @@ class iikoWaybill extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getStatus() {
+    public function getStatus()
+    {
         return $this->hasOne(iikoWaybillStatus::className(), ['id' => 'status_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrder()
+    {
+        return $this->hasOne(Order::className(), ['id' => 'order_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getWaybillData()
+    {
+        return $this->hasMany(iikoWaybillData::className(), ['waybill_id' => 'id']);
     }
 
     /**
      * @return mixed
      */
-    public function getXmlDocument() {
+    public function getXmlDocument()
+    {
         $model = $this;
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><document></document>');
 
@@ -187,6 +206,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $xml->addChild('documentNumber', $model->num_code);
         $datetime = new \DateTime($model->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
+        $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
         $xml->addChild('invoice', $model->text_code);
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
@@ -200,11 +220,11 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $records = iikoWaybillData::findAll(['waybill_id' => $model->id]);
         $vatPercent = 0;
         $discount = 0;
-      //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-      //  if($vatModel) {
-      //      $vatPercent = $vatModel->getPconstValue() / 100;
-      //  }
-        
+        //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
+        //  if($vatModel) {
+        //      $vatPercent = $vatModel->getPconstValue() / 100;
+        //  }
+
         foreach ($records as $i => $row) {
             $item = $items->addChild('item');
 
@@ -215,10 +235,11 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('amountUnit', $row->munit);
             $item->addChild('discountSum', $discount);
             $item->addChild('sumWithoutNds', $row->sum);
-            $item->addChild('vatPercent', $row->vat/100);
+            $item->addChild('vatPercent', $row->vat / 100);
+            $item->addChild('ndsPercent', $row->vat / 100);
 
-            $item->addChild('sum', round($row->sum + ($row->sum*$row->vat/10000),2));
-            $item->addChild('price', round($row->sum/$row->quant, 2));
+            $item->addChild('sum', round($row->sum + ($row->sum * $row->vat / 10000), 2));
+            $item->addChild('price', round($row->sum / $row->quant, 2));
             $item->addChild('isAdditionalExpense', false);
             $item->addChild('store', $model->store->uuid);
 

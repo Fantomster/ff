@@ -32,8 +32,21 @@
                 </div>
             </div>
         </div>
+
     </div>
     <div class="col-sm-12">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">1C "Общепит"</h3>
+                </div>
+                <div class="panel-body">
+                    <a href="/odinsobsh" class="btn btn-success">
+                        Список лицензий
+                    </a>
+                </div>
+            </div>
+        </div>
         <div class="col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">

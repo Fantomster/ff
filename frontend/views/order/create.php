@@ -141,6 +141,10 @@ $this->registerJs(
                 clearTimeout(timer);
                 return true;
             });
+            $(document).on("change", ".quantity", function(e) {
+                value = $(this).val();
+                $(this).val(value.replace(",", "."));
+            });
         });'
 );
 ?>

@@ -19,13 +19,11 @@ class OrderSearch extends Order {
     public $client_manager;
     public $vendor_manager;
     public $client_city;
-    private $blacklist = '(1,2,5,16,63,88,99,100,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037)'; 
 
     /**
      * @inheritdoc
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'discount_type'], 'integer'],
             [['total_price', 'discount'], 'number'],
@@ -79,7 +77,7 @@ class OrderSearch extends Order {
                 ], true);
 
         // add conditions that should always apply here
-        $query->where("`$orderTable`.client_id not in $this->blacklist");
+        $query->where("vendor.blacklisted = 0");
         $query->andWhere("`$orderTable`.status <> " . Order::STATUS_FORMING);
 
         $dataProvider = new ActiveDataProvider([

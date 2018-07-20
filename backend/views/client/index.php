@@ -35,7 +35,24 @@ $gridColumns = [
         'value' => 'profile.phone',
         'label' => 'Телефон',
     ],
-    'status',
+    [
+        'attribute' => 'status',
+        'value' => function ($data) {
+            switch ($data['status']) {
+                case 0:
+                    return 'Не активен';
+                    break;
+                case 1:
+                    return 'Активен';
+                    break;
+                case 2:
+                    return 'Ожидается подтверждение E-mail';
+                    break;
+            }
+            return $status;
+        },
+        'label' => 'Статус',
+    ],
     'email',
     [
         'format' => 'raw',
@@ -56,20 +73,7 @@ $gridColumns = [
         'value' => 'role.name',
         'label' => 'Роль',
     ],
-    [
-        'attribute' => '',
-        'label' => '',
-        'format' => 'raw',
-        'headerOptions' => ['style' => 'width:40px'],
-        'value' => function ($data) use ($exceptionArray) {
-            if(in_array($data['role_id'], $exceptionArray))return '';
-            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/client/update',
-                'id' => $data['id']], [
-                'class' => 'btn btn-xs btn-default'
-            ]);
-            return $link;
-        },
-    ],
+    ['class' => 'yii\grid\ActionColumn'],
 
 //            'created_at',
 //            'logged_in_at',
@@ -84,8 +88,11 @@ $gridColumns = [
         'columns' => $gridColumns,
         'target' => ExportMenu::TARGET_SELF,
         'exportConfig' => [
-            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_HTML => false,
+            ExportMenu::FORMAT_TEXT => false,
             ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_CSV => false,
             ExportMenu::FORMAT_EXCEL_X => [
                 'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
                 'icon' => 'floppy-remove',
@@ -95,7 +102,7 @@ $gridColumns = [
                 'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
                 'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'extension' => 'xlsx',
-                'writer' => 'Excel2007'
+                'writer' => 'Xlsx'
             ],
         ],
         'batchSize' => 200,

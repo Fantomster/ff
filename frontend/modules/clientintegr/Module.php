@@ -22,6 +22,9 @@ class Module extends \yii\base\Module
             'merc' => [
                 'class' => 'frontend\modules\clientintegr\modules\merc\Module',
             ],
+            'odinsobsh' => [
+                'class' => 'frontend\modules\clientintegr\modules\odinsobsh\Module',
+            ],
 /*            
             'supp' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен

@@ -28,7 +28,8 @@ class EdiOrderContent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_content_id', 'doc_type'], 'integer'],
+            [['order_content_id', 'doc_type', 'barcode'], 'integer'],
+            [['pricewithvat', 'taxrate'], 'number'],
             [['order_content_id'], 'unique'],
             [['edi_supplier_article'], 'safe'],
         ];

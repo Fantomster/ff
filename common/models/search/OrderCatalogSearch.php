@@ -87,6 +87,10 @@ class OrderCatalogSearch extends \yii\base\Model {
             $where .= ' AND category_id IN (' .$this->searchCategory. ') ';
         }
 
+        if($this->searchCategory === 0) {
+            $where .= ' AND category_id IS NULL ';
+        }
+
         if(!empty($this->searchPrice)) {
             if(isset($this->searchPrice['from'])) {
                 $params_sql[':price_start'] = $this->searchPrice['from'];

@@ -134,6 +134,14 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Менеджеры MixCart',
                                     'url' => ['/client/managers'],
                                 ],
+                                [
+                                    'label' => 'Сотрудники поставщиков',
+                                    'url' => ['/client/postavs'],
+                                ],
+                                [
+                                    'label' => 'Сотрудники ресторанов',
+                                    'url' => ['/client/restors'],
+                                ],
                             ],
                         ],
                         [
@@ -173,6 +181,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             'label' => 'Заказы и заявки',
                             'items' => [
                                 ['label' => 'Заказы', 'url' => ['/order/index']],
+                                ['label' => 'Заказы с прикрепленными файлами', 'url' => ['/order/with-attachments']],
                                 ['label' => 'Заявки', 'url' => ['/request/index']],
                             ],
                         ],
@@ -204,6 +213,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     [
                                         'label' => 'Лицензии MixCart',
                                         'url' => ['/integration/index'],
+                                    ],
+                                    [
+                                        'label' => 'Журнал',
+                                        'url' => ['/journal/index'],
                                     ],
                                 //  [
                                 //      'label' => 'Загруженные каталоги',

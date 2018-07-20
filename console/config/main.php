@@ -21,8 +21,13 @@ return [
             ],
         ],
         'urlManager' => [
-            'hostInfo' => 'https://mixcart.ru',
-        ],
+            'baseUrl' => 'http://example.com/'
+        ]
+    ],
+    'controllerMap' => [
+        'iiko-daemon' => [
+            'class' => 'console\modules\daemons\controllers\IikodaemonController'
+        ]
     ],
     'aliases' => [
           '@baseUrl'=>'https://mixcart.ru'

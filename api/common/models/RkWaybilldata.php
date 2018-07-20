@@ -62,7 +62,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            [['koef', 'sum', 'quant'], 'number', 'min' => 0.0001],
+            [['koef', 'quant'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [['waybill_id', 'product_rid', 'product_id', 'munit_rid', 'updated_at', 'quant', 'sum', 'vat', 'pdenom', 'koef', 'org', 'vat_included', 'linked_at'], 'safe']
         ];
@@ -77,8 +77,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             'fid' => 'FID',
             'sum' => 'Сумма б/н',
             'quant' => 'Количество',
-            'product_id' => 'ID в F-keeper',
+            'product_id' => 'ID в Mixcart',
             'koef' => 'Коэфф.',
+            'fproductnameProduct'=>'Наименование продукции'
         ];
     }
 
@@ -112,14 +113,15 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
-    public function getFproductname() {
+    public function getFproductname()
+    {
 
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        $rprod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id])->one();
+        return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
+    }
 
-        return $rprod;
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    public function getFproductnameProduct()
+    {
+        return $this->fproductname->product;
     }
 
     public function beforeSave($insert) {
@@ -196,6 +198,20 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
 
     public static function getDb() {
         return \Yii::$app->db_api;
+    }
+
+    /**
+     * @return double
+     */
+    public function getSumByWaybillid($number)
+    {
+        Yii::$app->get('db_api');
+        $sum=0;
+        $summes = RkWaybillData::find()->where(['waybill_id' => $number])->all();
+        foreach ($summes as $summa) {
+            $sum+=$summa->sum;
+        }
+        return $sum;
     }
 
 }

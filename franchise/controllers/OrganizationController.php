@@ -4,10 +4,14 @@ namespace franchise\controllers;
 
 use common\models\Currency;
 use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\Order;
 use common\models\RelationSuppRest;
+use common\models\RelationUserOrganization;
 use common\models\UserToken;
 use Yii;
+use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -42,7 +46,7 @@ class OrganizationController extends DefaultController {
                 'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent', 'ajax-update-currency'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization', 'ajax-update-currency'],
+                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization', 'ajax-update-currency', 'update-notifications'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -61,9 +65,9 @@ class OrganizationController extends DefaultController {
                         ],
                     ],
                 ],
-            /* 'denyCallback' => function($rule, $action) {
-              throw new HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
-              } */
+                /* 'denyCallback' => function($rule, $action) {
+                  throw new HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
+                  } */
             ],
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -81,6 +85,7 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionClients() {
+        Url::remember();
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
@@ -120,6 +125,45 @@ class OrganizationController extends DefaultController {
         }
     }
 
+    public function actionNotifications()
+    {
+        $query = (new \yii\db\Query())
+            ->select(['organization.id', 'organization.name', 'organization.contact_name', 'organization.email', 'organization.phone', 'email_notification.order_created'])
+            ->from('organization')
+            ->join('LEFT JOIN', 'franchisee_associate', 'organization.id = franchisee_associate.organization_id')
+            ->join('LEFT JOIN', 'relation_user_organization', 'organization.id = relation_user_organization.organization_id')
+            ->join('LEFT JOIN', 'email_notification', 'relation_user_organization.id = email_notification.rel_user_org_id')
+            ->where(['franchisee_id'=>$this->currentFranchisee->id, 'organization.type_id'=>1])
+            ->groupBy('organization.id')
+            ->orderBy(['organization.id' => SORT_ASC]);
+        if(Yii::$app->request->isAjax)
+        {
+            $rel_user_org_id = RelationUserOrganization::findOne(['organization_id'=>Yii::$app->request->post('id_org')])->id;
+            $emailNotifications = EmailNotification::findAll(['rel_user_org_id'=>$rel_user_org_id]);
+            //die(print_r($emailNotifications));
+            foreach($emailNotifications as $emailNotification)
+            {
+                $emailNotification->order_created = Yii::$app->request->post('order_created');
+
+                if($emailNotification->save())
+                {
+                    \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                    return [
+                        'msg'=>'OK'
+                    ];
+                }
+            }
+        }
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        return $this->render('notofications_clients',['dataProvider'=>$dataProvider]);
+    }
+
 
     public function actionAjaxUpdateCurrency()
     {
@@ -139,9 +183,9 @@ class OrganizationController extends DefaultController {
 
     public function actionAjaxShowClient($id) {
         $client = Organization::find()
-                ->joinWith("franchiseeAssociate")
-                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
-                ->one();
+            ->joinWith("franchiseeAssociate")
+            ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+            ->one();
         $showEditButton = true;
         if (empty($client)) {
             $client = Organization::find()
@@ -236,9 +280,9 @@ class OrganizationController extends DefaultController {
     public function actionUpdateClient($id) {
         $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $client = Organization::find()
-                ->joinWith("franchiseeAssociate")
-                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
-                ->one();
+            ->joinWith("franchiseeAssociate")
+            ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+            ->one();
         if (empty($client)) {
             throw new HttpException(404, Yii::t('app', 'franchise.controllers.get_out_seven', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
@@ -277,6 +321,7 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionVendors() {
+        Url::remember();
         $searchModel = new \franchise\models\VendorSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
@@ -354,9 +399,9 @@ class OrganizationController extends DefaultController {
 
     public function actionAjaxShowVendor($id) {
         $vendor = Organization::find()
-                ->joinWith("franchiseeAssociate")
-                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
-                ->one();
+            ->joinWith("franchiseeAssociate")
+            ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
+            ->one();
         $showEditButton = true;
         if (empty($vendor)) {
             $vendor = Organization::find()
@@ -457,9 +502,9 @@ class OrganizationController extends DefaultController {
     public function actionUpdateVendor($id) {
         $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $vendor = Organization::find()
-                ->joinWith("franchiseeAssociate")
-                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
-                ->one();
+            ->joinWith("franchiseeAssociate")
+            ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
+            ->one();
         if (empty($vendor)) {
             throw new HttpException(404, Yii::t('app', 'franchise.controllers.get_out_eight', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
@@ -559,7 +604,8 @@ class OrganizationController extends DefaultController {
             $showButton = true;
             $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
         }
-        return $this->render("show-".$type, compact('organization','dataProvider', 'searchModel', 'managersDataProvider', 'catalog', 'showButton', 'currencyData'));
+        $exportColumns = (new Organization())->getOrganizationManagersExportColumns();
+        return $this->render("show-".$type, compact('organization','dataProvider', 'searchModel', 'managersDataProvider', 'catalog', 'showButton', 'currencyData', 'exportColumns'));
     }
 
 
@@ -589,5 +635,41 @@ class OrganizationController extends DefaultController {
 
         $redirectURL = Yii::$app->params['staticUrl'][Yii::$app->language]['home'] . "user/login";
         return $this->redirect($redirectURL);
+    }
+
+
+    public function actionUpdateNotifications(int $id){
+        $organization = Organization::findOne(['id' => $id]);
+        $user = $this->currentUser;
+        $emailNotification = $user->getEmailNotification($id, true);
+        $smsNotification = $user->getSmsNotification($id, true);
+        if (count(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post();
+            $emails = $post['Email'];
+            foreach ($emails as $userId => $fields){
+                $user = User::findOne(['id' => $user->id]);
+                if(isset($post['User'][$userId]['subscribe'])){
+                    $user->subscribe = $post['User'][$userId]['subscribe'];
+                    $user->save();
+                }
+                foreach ($fields as $key => $value){
+                    $emailNotification->$key = $value;
+                }
+                $emailNotification->save();
+                unset($user);
+            }
+            $sms = $post['Sms'];
+            foreach ($sms as $userId => $fields){
+                $user = User::findOne(['id' => $userId]);
+                foreach ($fields as $key => $value){
+                    $smsNotification->$key = $value;
+                }
+                $smsNotification->save();
+                unset($user);
+            }
+            $url = (strpos(Url::previous(), 'clients')) ? Url::to('organization/clients') : Url::to('organization/vendors');
+            return $this->redirect([$url]);
+        }
+        return $this->render('notifications', compact('user','emailNotification', 'smsNotification', 'organization'));
     }
 }

@@ -17,6 +17,42 @@ class SiteController extends Controller
 
     public function actions()
     {
+        $scanDir = [
+            Yii::getAlias('@api_web/components/definitions/'),
+            Yii::getAlias('@api_web/components/WebApiController.php'),
+            Yii::getAlias('@api_web/controllers/UserController.php'),
+            Yii::getAlias('@api_web/controllers/MarketController.php'),
+            Yii::getAlias('@api_web/controllers/PaymentController.php'),
+            Yii::getAlias('@api_web/controllers/CartController.php'),
+            Yii::getAlias('@api_web/controllers/OrderController.php'),
+            Yii::getAlias('@api_web/controllers/ClientController.php'),
+            Yii::getAlias('@api_web/controllers/VendorController.php'),
+            Yii::getAlias('@api_web/controllers/GuideController.php'),
+            Yii::getAlias('@api_web/controllers/ChatController.php'),
+            Yii::getAlias('@api_web/controllers/RequestController.php'),
+            Yii::getAlias('@api_web/controllers/NotificationController.php'),
+            Yii::getAlias('@api_web/modules/integration/controllers/DefaultController.php')
+        ];
+
+
+        /**
+         * Добавление интеграционных контроллеров происходит автоматически
+         */
+        $module = Yii::$app->getModule('integration');
+        foreach ($module->modules as $keyModule => $class) {
+            $subModule = $module->getModule($keyModule);
+
+            $controllers = array_filter(scandir($subModule->getControllerPath()), function ($name) {
+                return strstr($name, 'Controller.php');
+            });
+
+            foreach ($controllers as $file) {
+                $scanDir[] = $subModule->getControllerPath() . '/' . $file;
+            }
+        }
+
+        $scanDir = array_unique($scanDir);
+
         return [
             'doc' => [
                 'class' => \api_web\components\MySwaggerAction::className(),
@@ -24,22 +60,7 @@ class SiteController extends Controller
             ],
             'api' => [
                 'class' => 'light\swagger\SwaggerApiAction',
-                'scanDir' => [
-                    Yii::getAlias('@api_web/components/definitions/'),
-                    Yii::getAlias('@api_web/components/WebApiController.php'),
-                    Yii::getAlias('@api_web/controllers/UserController.php'),
-                    Yii::getAlias('@api_web/controllers/MarketController.php'),
-                    Yii::getAlias('@api_web/controllers/PaymentController.php'),
-                    Yii::getAlias('@api_web/controllers/CartController.php'),
-                    Yii::getAlias('@api_web/controllers/OrderController.php'),
-                    Yii::getAlias('@api_web/controllers/ClientController.php'),
-                    Yii::getAlias('@api_web/controllers/VendorController.php'),
-                    Yii::getAlias('@api_web/controllers/GuideController.php'),
-                    Yii::getAlias('@api_web/controllers/ChatController.php'),
-                    Yii::getAlias('@api_web/controllers/RequestController.php'),
-                    Yii::getAlias('@api_web/controllers/NotificationController.php'),
-                    Yii::getAlias('@api_web/controllers/IntegrationController.php')
-                ],
+                'scanDir' => $scanDir,
                 'cache' => 'cache',
                 'cacheKey' => 'api-web-swagger-cache'
             ],

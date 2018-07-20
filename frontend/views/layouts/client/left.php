@@ -31,6 +31,8 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
+$vsdCount = $user->organization->getVsdCount();
+
 $licenses = $user->organization->getLicenseList();
 ?>
 
@@ -72,8 +74,18 @@ $licenses = $user->organization->getLicenseList();
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.mercury', ['ru'=>'ВЕТИС "Меркурий"']),
                             'url' => ['/clientintegr/merc/default'],
                             'options' => ['class' => 'hidden-xs'],
-                            'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}</a>',
-                            'visible' => isset($licenses['mercury'])],
+                            'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
+                            //'visible' => isset($licenses['mercury'])
+                            /*'items' => [
+                                [
+                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
+                                    'icon' => 'circle-o',
+                                    'url' => ['/clientintegr/merc/stock-entry'],
+                                    //'visible' => in_array($user->role_id,$roles)
+                                ],
+                            ],*/
+                        ],
+
                         [
                             'label' => Yii::t('message', 'frontend.views.layouts.client.left.settings', ['ru'=>'Настройки']),
                             'icon' => 'gears',

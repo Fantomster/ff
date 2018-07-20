@@ -6,7 +6,8 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\search\mercDicconstSearch;
-use frontend\modules\clientintegr\modules\merc\helpers\mercApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\models\ActivityLocationList;
 use Yii;
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -74,13 +75,19 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $org = [];
             if($dicConst->denom == 'enterprise_guid')
             {
-                $list = mercApi::getInstance()->getActivityLocationList();
-
-                foreach ($list->soapenvBody->v2getActivityLocationListResponse->dtactivityLocationList->dtlocation as $item)
-                {
-                    $org[$item->dtenterprise->bsguid->__toString()] = $item->dtenterprise->dtname->__toString(). ' ('.$item->dtenterprise->dtaddress->dtaddressView->__toString().')';
+                $list = cerberApi::getInstance()->getActivityLocationList();
+                if(isset($list->activityLocationList->location)) {
+                    foreach ($list->activityLocationList->location as $item) {
+                        if (isset($item->enterprise)) {
+                            $org[] = [
+                                'value' => $item->enterprise->guid,
+                                'label' => $item->enterprise->name .
+                                    ' (' . $item->enterprise->address->addressView . ')'];
+                        }
+                    }
                 }
-
+                if(count($org) == 0)
+                    Yii::$app->session->setFlash('error', 'Не удалось выгрузить связанные с данным ХС предприятия, проверьте наличие связей предприятия с ХС или добавьте GUD предприятия вручную');
             }
             if(Yii::$app->request->isAjax)
                 return $this->renderAjax($vi, [

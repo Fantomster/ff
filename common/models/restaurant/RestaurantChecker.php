@@ -16,7 +16,8 @@ class RestaurantChecker
     const THIS_IS_RESTAURANT = 4; //email ресторана
     const NEW_VENDOR = 5; //нет в базе такого email
     const AUTH_SEND_INVITE = 6; //поставщик авторизован invite
-    
+    const WE_DONT_KNOW_WHO_THE_USER_IS = 7; //пользователь не завершил регистрацию, хз кто он, ресторан или поставщик
+
     public static function checkEmail($email)
     {           
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -24,6 +25,11 @@ class RestaurantChecker
 		if(User::find()->select('email')->where(['email' => $email])->exists())
 		{
                     $vendor = User::find()->where(['email' => $email])->one();
+
+                    if(empty($vendor->organization_id)) {
+                        return ['eventType' => self::WE_DONT_KNOW_WHO_THE_USER_IS];
+                    }
+
                     $userProfileFullName = $vendor->profile->full_name;
                     $userProfilePhone = $vendor->profile->phone;
                     $userOrgId = $vendor->organization_id;

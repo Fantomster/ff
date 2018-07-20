@@ -14,6 +14,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
+use common\models\Job;
 
 /**
  * UserController implements the CRUD actions for User model.
@@ -38,7 +39,7 @@ class ClientController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update', 'managers', 'delete'],
+                        'actions' => ['index', 'view', 'update', 'managers', 'postavs', 'restors', 'delete'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -58,6 +59,8 @@ class ClientController extends Controller {
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $exceptionArray = Role::getExceptionArray();
+        Yii::$app->session->set("clients", 'index');
+        Yii::$app->session->set("clients_name", 'Пользователи');
         return $this->render('index', compact('searchModel', 'dataProvider', 'exceptionArray'));
     }
 
@@ -68,10 +71,42 @@ class ClientController extends Controller {
     public function actionManagers() {
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_FKEEPER_MANAGER);
-
+        Yii::$app->session->set("clients", 'managers');
+        Yii::$app->session->set("clients_name", 'Менеджеры MixCart');
         return $this->render('managers', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Возвращает список всех сотрудников поставщиков.
+     * @return mixed
+     */
+    public function actionPostavs() {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE]);
+        Yii::$app->session->set("clients", 'postavs');
+        Yii::$app->session->set("clients_name", 'Сотрудники поставщиков');
+
+        return $this->render('postavs', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Возвращает список всех сотрудников ресторанов.
+     * @return mixed
+     */
+    public function actionRestors() {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_ONE_S_INTEGRATION]);
+        Yii::$app->session->set("clients", 'restors');
+        Yii::$app->session->set("clients_name", 'Сотрудники ресторанов');
+        return $this->render('restors', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -142,7 +177,9 @@ class ClientController extends Controller {
                 if (($user->organization_id == 1) && (Yii::$app->user->identity->id !== 76)) {
                     throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.moon_three', ['ru'=>'Добавление пользователей в эту организацию отключено во имя Луны!']));
                 }
+
                 $user->save();
+                //$profile->email = $user->getEmail();
                 $profile->save();
                 return $this->redirect(['client/view', 'id' => $user->id]);
             } else {
@@ -160,18 +197,37 @@ class ClientController extends Controller {
      * @return mixed
      */
     public function actionDelete($id) {
-        $model = User::findOne(['id' => $id, 'role_id' => Role::ROLE_FKEEPER_MANAGER]);
+        $model = User::findOne(['id' => $id/*, 'role_id' => Role::ROLE_FKEEPER_MANAGER*/]);
 
         if (empty($model)) {
             throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин!']));
         }
 
+        $role = $model->role_id;
         $model->role_id = Role::ROLE_USER;
         $model->organization_id = null;
         $model->status = User::STATUS_INACTIVE;
         $model->save();
 
-        return $this->redirect(['managers']);
+        switch ($role) {
+            case Role::ROLE_RESTAURANT_MANAGER:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_RESTAURANT_EMPLOYEE:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_ONE_S_INTEGRATION:
+                return $this->redirect(['restors']);
+                break;
+            case Role::ROLE_SUPPLIER_MANAGER:
+                return $this->redirect(['postavs']);
+                break;
+            case Role::ROLE_SUPPLIER_EMPLOYEE:
+                return $this->redirect(['postavs']);
+                break;
+            default:
+                return $this->redirect(['managers']);
+        }
     }
 
     /**

@@ -61,12 +61,14 @@ class InvoiceController extends Controller
 
         $vendor_id = $params['OrderSearch']['vendor_id'];
         $invoice_id = $params['invoice_id'];
+        $showAll = (isset($params['show_waybill']) && $params['show_waybill'] == 'true') ? 1 : 0;
 
         return $this->renderAjax('_orders', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'vendor_id' => $vendor_id,
             'invoice_id' => $invoice_id,
+            'showAll' => $showAll
         ]);
     }
 
@@ -168,5 +170,14 @@ class InvoiceController extends Controller
         } else {
             throw new Exception('Not access this invoice.');
         }
+    }
+
+    public function actionListPostav()
+    {
+        $org_id = $_POST["org_id"];
+        $stroka = $_POST["stroka"];
+        $res = Organization::getSuppliersByString($org_id,$stroka);
+        $res = json_encode($res);
+        return $res;
     }
 }

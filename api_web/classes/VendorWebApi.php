@@ -14,7 +14,9 @@ use common\models\Catalog;
 use common\models\CatalogTemp;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 use yii\web\UploadedFile;
 use api_web\helpers\Excel;
 
@@ -30,14 +32,19 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
+     * @throws ValidationException
      */
     public function create(array $post) {
         $email = $post['user']['email'];
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
-
+        $vendorID = $post['user']['vendor_id'] ?? null;
         $check = RestaurantChecker::checkEmail($email);
+
+        if ($check['eventType'] == 7) {
+            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+        }
 
         if ($check['eventType'] != 5) {
             $user = User::find()->where(['email' => $email])->one();
@@ -45,7 +52,19 @@ class VendorWebApi extends \api_web\components\WebApi {
             $user = new User();
         }
         $relationSuppRest = new RelationSuppRest();
-        $organization = new Organization();
+        if($vendorID){
+            $validator = new NumberValidator();
+            if (!$validator->validate($vendorID, $error)) {
+                throw new ValidationException(['Field vendor_id mast be integer']);
+            }
+            $organization = Organization::findOne(['id'=>$vendorID]);
+            if(!$organization){
+                throw new BadRequestHttpException('No such organization');
+            }
+        }else{
+            $organization = new Organization();
+        }
+
         $profile = new Profile();
         $profile->scenario = "invite";
 
@@ -56,9 +75,8 @@ class VendorWebApi extends \api_web\components\WebApi {
 
         $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
         $currentUser = $this->user;
-        $arrCatalog = $post['catalog']['products'];
-        Catalog::addCatalog($arrCatalog);
-
+        $arrCatalog = $post['catalog']['products'] ?? [];
+        Catalog::addCatalog($arrCatalog, true);
 
         if (in_array($check['eventType'], [1, 2, 4, 6])) {
             throw new BadRequestHttpException(Yii::t('app', 'common.models.already_in_use', ['ru' => 'Данный email не может быть использован']));
@@ -88,13 +106,15 @@ class VendorWebApi extends \api_web\components\WebApi {
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    $organization->name = $org;
+                    if(!$vendorID) {
+                        $organization->name = $org;
+                    }
 
-                    if (!empty($post['user']['inn'])) {
+                    if (!empty($post['user']['inn']) && !$vendorID) {
                         $organization->inn = $post['user']['inn'];
                     }
 
-                    if (!empty($post['user']['contact_name'])) {
+                    if (!empty($post['user']['contact_name']) && !$vendorID) {
                         $organization->contact_name = $post['user']['contact_name'];
                     }
 
@@ -114,8 +134,11 @@ class VendorWebApi extends \api_web\components\WebApi {
                     $get_supp_org_id = $check['org_id'];
                 }
 
-                $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
-
+                if(count($arrCatalog)){
+                    $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
+                }else{
+                    $lastInsert_cat_id = 0;
+                }
                 /**
                  *
                  * 5) Связь ресторана и поставщика
@@ -155,17 +178,17 @@ class VendorWebApi extends \api_web\components\WebApi {
                 ];
 
                 if ($check['eventType'] == 5) {
-                    $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
-                            $organization->name .
-                            Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) .
-                            $email;
+                    $result['message'] =
+                        Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                        $organization->name .
+                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
                 } else {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
                 return $result;
             } catch (\Exception $e) {
                 $transaction->rollback();
-                throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.no_save', ['ru' => 'сбой сохранения, попробуйте повторить действие еще раз']));
+                throw $e;
             }
         }
     }
@@ -178,7 +201,7 @@ class VendorWebApi extends \api_web\components\WebApi {
      */
     public function search(array $post) {
         if (empty($post['email'])) {
-            throw new BadRequestHttpException('Empty search attribute email');
+            throw new BadRequestHttpException('empty_param|search attribute email');
         }
 
         $result = [];
@@ -224,12 +247,12 @@ class VendorWebApi extends \api_web\components\WebApi {
      */
     public function update(array $post) {
         if (empty($post['id'])) {
-            throw new BadRequestHttpException('Empty attribute id');
+            throw new BadRequestHttpException('empty_param|id');
         }
         //Поиск поставщика в системе
         $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('Vendor not found');
+            throw new BadRequestHttpException('vendor_not_found');
         }
 
         //Если запрос от ресторана
@@ -352,16 +375,16 @@ class VendorWebApi extends \api_web\components\WebApi {
      */
     public function uploadLogo(array $post) {
         if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('Empty attribute vendor_id');
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
 
         $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
-            throw new BadRequestHttpException('Vendor not found');
+            throw new BadRequestHttpException('vendor_not_found');
         }
 
         if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('Empty image_source');
+            throw new BadRequestHttpException('empty_param|image_source');
         }
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {

@@ -14,6 +14,7 @@ use yii\data\ActiveDataProvider;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
+use common\models\Organization;
 
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController {
@@ -24,21 +25,25 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $lic = $this->checkLic();       
-        
-        $vi = $lic ? 'index' : '/default/_nolic';
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
-                        'lic' => $lic,
+            return $this->renderPartial($vi,[
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'lic' => $lic,
+                'licucs' => $licucs,
             ]);
         } else {
-            return $this->render($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
-                        'lic' => $lic,
+            return $this->render($vi,[
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'lic' => $lic,
+                'licucs' => $licucs,
             ]);
         }
     }
@@ -100,11 +105,11 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
     if ($lic) {
-       if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
+       /*if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) {*/
        $res = $lic; 
-    } else { 
+    /*} else {
        $res = 0; 
-    }
+    }*/
     } else 
        $res = 0; 
     

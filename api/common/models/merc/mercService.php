@@ -7,7 +7,7 @@ use common\models\Organization;
 use yii\db\Expression;
 
 /**
- * This is the model class for table "iiko_service".
+ * This is the model class for table "merc_service".
  *
  * @property integer $id
  * @property integer $org
@@ -134,10 +134,10 @@ class mercService extends \yii\db\ActiveRecord
     public static function getLicense()
     {
         return self::find()
-            ->where(['status_id' => 2])
-            ->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])
-            ->andOnCondition('td >= NOW()')
-            ->andOnCondition('fd <= NOW()')
+            //->where(['status_id' => 2])
+            ->andWhere('org = :org', ['org' => (Yii::$app->user->identity)->organization_id])
+            //->andOnCondition('td >= NOW()')
+            //->andOnCondition('fd <= NOW()')
             ->one();
     }
 }

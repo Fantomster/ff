@@ -2,11 +2,14 @@
 
 namespace api\modules\v1\modules\odinsrest\controllers;
 
+use api\common\models\one_s\OneSContragent;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSStore;
+use api\common\models\one_s\OneSWaybill;
 use api\common\models\one_s\OneSСontragent;
 use Yii;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\web\Controller;
 use api\common\models\one_s\OneSRestAccess;
 use api\common\models\ApiSession;
@@ -92,29 +95,24 @@ class DefaultController extends Controller
      */
     public function getWaybills($sessionId)
     {
-
         if ($this->check_session($sessionId)) {
-
-            return "OK";
-
-            /*
-            if ($lang == 'ENG') {
-                $catview = 'api_units_eng_v';
-            } else {
-                $catview = 'api_units_rus_v';
-            }
-
-            $cats = Yii::$app->db_api->createCommand('SELECT fid, denom FROM ' . $catview)
-                ->queryAll();
-
-            $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
-            return $cats;
-            */
+            $session = ApiSession::findOne(['token' => $sessionId]);
+            $organizationID = $session->acc;
+            $db = Yii::$app->get('db_api');
+            $dbName = $this->getDsnAttribute('dbname', $db->dsn);
+            $rows = (new Query())->select([$dbName . '.one_s_waybill.*', $dbName . '.one_s_waybill_data.*', $dbName . '.one_s_good.name as one_s_product_name', $dbName . '.one_s_good.cid as one_s_product_cid', $dbName . '.one_s_good.parent_id as one_s_product_parent_id', $dbName . '.one_s_good.measure as one_s_product_measure', $dbName . '.one_s_store.cid as one_s_store_cid', $dbName . '.one_s_contragent.cid as one_s_contragent_cid', $dbName . '.one_s_contragent.inn_kpp as one_s_inn_kpp', 'catalog_base_goods.product as mixcart_product_name'])->from($dbName . '.one_s_waybill')
+                ->where([$dbName . '.one_s_waybill.org' => $organizationID, $dbName . '.one_s_waybill.readytoexport' => 1])
+                ->leftJoin($dbName . '.one_s_waybill_data', $dbName . '.one_s_waybill_data.waybill_id = ' . $dbName . '.one_s_waybill.id')
+                ->leftJoin($dbName . '.one_s_good', $dbName . '.one_s_good.id = ' . $dbName . '.one_s_waybill_data.product_rid')
+                ->leftJoin($dbName . '.one_s_contragent', $dbName . '.one_s_contragent.id = ' . $dbName . '.one_s_waybill.agent_uuid')
+                ->leftJoin($dbName . '.one_s_store', $dbName . '.one_s_store.id = ' . $dbName . '.one_s_waybill.store_id')
+                ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = ' . $dbName . '.one_s_waybill_data.product_id')
+                ->all();
+            return json_encode($rows, JSON_UNESCAPED_UNICODE);
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);
             return 'Session error. Active session is not found.';
         }
-
     }
 
 
@@ -155,8 +153,8 @@ class DefaultController extends Controller
     {
         return $this->handleData($sessionId, $body, 3);
     }
-    
-    
+
+
     private function handleData(String $sessionId, String $body, int $type): String
     {
         $res = $this->check_session($sessionId);
@@ -172,7 +170,7 @@ class DefaultController extends Controller
                         $modelName = OneSStore::className();
                         break;
                     case 3:
-                        $modelName = OneSСontragent::className();
+                        $modelName = OneSContragent::class;
                         break;
                     default:
                         $modelName = OneSGood::className();
@@ -192,12 +190,13 @@ class DefaultController extends Controller
                         case 1:
                             $oneSPosition->parent_id = $position->parent_id;
                             $oneSPosition->measure = $position->measure;
+                            $oneSPosition->is_category = $position->is_category ?? 0;
                             break;
                         case 2:
                             $oneSPosition->address = $position->address;
                             break;
                         case 3:
-                            $oneSPosition->inn = $position->inn;
+                            $oneSPosition->inn_kpp = $position->inn_kpp;
                             break;
                         default:
                             $oneSPosition->parent_id = $position->parent_id;
@@ -380,6 +379,16 @@ class DefaultController extends Controller
             return $act->errors;
         } else {
             return true;
+        }
+    }
+
+
+    private function getDsnAttribute($name, $dsn)
+    {
+        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
+            return $match[1];
+        } else {
+            return null;
         }
     }
 }

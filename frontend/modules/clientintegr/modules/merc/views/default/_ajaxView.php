@@ -1,8 +1,14 @@
 <?php
 
-use yii\widgets\Breadcrumbs;
 use yii\widgets\DetailView;
 use yii\helpers\Html;
+use api\common\models\merc\mercService;
+use api\common\models\merc\MercVsd;
+?>
+<?php
+$lic = mercService::getLicense();
+$timestamp_now=time();
+($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -12,12 +18,21 @@ use yii\helpers\Html;
         <div class="box-header with-border">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
+                        <div class="alert alert-success alert-dismissable">
+                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                            <h4>
+                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
+                            </h4>
+                            <?= Yii::$app->session->getFlash('success') ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (Yii::$app->session->hasFlash('error')): ?>
                         <div class="alert alert-danger alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                             <h4>
-                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
+                                <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
                             </h4>
-                            <?= Yii::$app->session->getFlash('success') ?>
+                            <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
                     <h4>Сведения о ВСД: </h4>
@@ -27,12 +42,12 @@ use yii\helpers\Html;
                             [
                                 'attribute' => 'status',
                                 'format' => 'raw',
-                                'value' => $document->statuses[$document->status],
+                                'value' => Mercvsd::$statuses[$document->status],
                             ],
                             [
                                 'label' => 'Номер',
                                 'format' => 'raw',
-                                'value' => $document->getNumber(),
+                                'value' => MercVsd::getNumber($document->issueSeries, $document->issueNumber),
                             ],
                             [
                                 'attribute' => 'issueDate',
@@ -42,12 +57,12 @@ use yii\helpers\Html;
                             [
                                 'attribute' => 'form',
                                 'format' => 'raw',
-                                'value' => $document->forms[$document->form],
+                                'value' => MercVsd::$forms[$document->form],
                             ],
                             [
                                 'attribute' => 'type',
                                 'format' => 'raw',
-                                'value' => $document->types[$document->type],
+                                'value' => MercVsd::$types[$document->type],
                             ],
                         ],
                     ]) ?>
@@ -156,7 +171,7 @@ use yii\helpers\Html;
                     if(isset($document->transportStorageType))
                         $attributes[] = [
                                 'attribute' => 'transportStorageType',
-                                'value' => $document->storage_types[$document->transportStorageType]
+                                'value' => MercVsd::$storage_types[$document->transportStorageType]
                         ];
 
                     if(isset($document->cargoExpertized))
@@ -165,11 +180,11 @@ use yii\helpers\Html;
                             'value' => ($document->cargoExpertized == 'true') ? 'Да' : 'Нет',
                         ];
 
-                    if(isset($document->expertiseInfo))
+                    /*if(isset($document->expertiseInfo))
                         $attributes[] = [
                             'attribute' => 'expertiseInfo',
                             'value' => (empty($document->expertiseInfo)) ? null : $document->expertiseInfo,
-                        ];
+                        ];*/
 
                     if(isset($document->locationProsperity))
                         $attributes[] = [
@@ -191,7 +206,8 @@ use yii\helpers\Html;
         </div>
 </div>
 <div class="modal-footer">
-    <?php if ($document->status == \frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest::DOC_STATUS_CONFIRMED) {
+    <?php if ($document->status == MercVsd::DOC_STATUS_CONFIRMED
+        && (\api\common\models\merc\MercVsd::getType($document->UUID) == 1) && ($lic_merc==1)) {
             echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
                 Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
                     //'pjax'=>0,

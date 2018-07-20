@@ -126,13 +126,14 @@ use yii\helpers\Html;
                   <p><?= $vendor->buisinessInfo->info ?></p>
               </div>-->
         <div class="modal-footer" style="background-color: #fff; border-top: 1px solid #e5e5e5;">
-            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i
+            <button type="button" class="btn btn-sm btn-default pull-left" data-dismiss="modal"><i
                         class="fa fa-fw fa-close"></i> <?= Yii::t('app', 'franchise.views.organization.close_two', ['ru'=>'Закрыть']) ?>
             </button>
-            <?= Html::a('<i class="fa fa-fw fa-mail-forward"></i> ' . Yii::t('app', 'franchise.views.organization.watch_two', ['ru'=>'Просмотр']) . ' ', ['organization/show-vendor', 'id' => $vendor->id], ['class' => 'btn btn-info']) ?>
+            <?= Html::a('<i class="fa fa-fw fa-mail-forward"></i> ' . Yii::t('app', 'franchise.views.organization.watch_two', ['ru'=>'Просмотр']) . ' ', ['organization/show-vendor', 'id' => $vendor->id], ['class' => 'btn btn-sm btn-info']) ?>
             <?php if ($showEditButton): ?>
-                <?= Html::a('<i class="fa fa-fw fa-pencil"></i> ' . Yii::t('app', 'franchise.views.organization.edit_two', ['ru'=>'Редактировать']) . ' ', ['organization/update-vendor', 'id' => $vendor->id], ['class' => 'btn btn-primary']) ?>
+                <?= Html::a('<i class="fa fa-fw fa-pencil"></i> ' . Yii::t('app', 'franchise.views.organization.edit_two', ['ru'=>'Редактировать']) . ' ', ['organization/update-vendor', 'id' => $vendor->id], ['class' => 'btn btn-sm btn-primary']) ?>
             <?php endif; ?>
+            <?= Html::a('Настройка уведомлений', ['update-notifications', 'id' => $vendor->id], ['class' => 'btn btn-sm btn-danger']) ?>
         </div>
     </div>
     <!-- /.modal-content -->

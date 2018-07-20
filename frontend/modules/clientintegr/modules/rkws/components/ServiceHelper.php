@@ -39,17 +39,32 @@ class ServiceHelper extends AuthHelper {
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
-    // var_dump($res);
+     //print "<pre>";
+     //print_r ($res);
+     //print "</pre>";
+     //var_dump($res);
 
      yii::$app->db_api-> // Set all records to deleted
      createCommand()->
-     update('rk_service', ['is_deleted' => '1', 'status_id' => '1'])
+     update('rk_service', ['is_deleted' => '1', 'status_id' => '0'])
      ->execute();
        
                // Обновление списка доступных объектов
     foreach($res['resp'] as $obj) {
 
      $rcount = RkService::findone(['code' => $obj['code']]);
+
+        $xml2 = '<?xml version="1.0" encoding="utf-8"?>
+     <RQ cmd="get_objectinfo" guid="'.$guid.'">
+     <PARAM name="object_id" val="'.$obj['code'].'" />
+     </RQ>';
+
+        $res2 = ApiHelper::sendCurl($xml2,$this->restr);
+
+        //print "<pre>";
+        //print_r ($res2);
+        //print "</pre>";
+        //var_dump($res);
 
         
     if (!$rcount) {
@@ -58,14 +73,14 @@ class ServiceHelper extends AuthHelper {
         
         $nmodel->code = $obj['code'] ? $obj['code'] : 0;
         $nmodel->name = $obj['name'] ? $obj['name'] : 'Не задано';  
-        $nmodel->address = isset($obj['address']) ? $obj['address'] : 'Не задано';
+        $nmodel->address = isset($res2['resp']['address']) ? $res2['resp']['address'] : 'Не задано';
         $nmodel->phone  = isset($obj['phone']) ? $obj['phone'] : 'Не задано';
         $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $nmodel->is_deleted = 0;
 
-        $nmodel->status_id=1;
+        $nmodel->status_id=0;
 
-        
+        //var_dump($nmodel);
         
         if (!$nmodel->save()) {
             echo "Can't save the service model";
@@ -86,7 +101,9 @@ class ServiceHelper extends AuthHelper {
         $rcount->is_deleted = 0;
         $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
         $rcount->last_active = Yii::$app->formatter->asDate($lastDate, 'yyyy-MM-dd HH:mm:ss');
-        $rcount->status_id = $statLic+1;
+        $rcount->address = isset($res2['resp']['address']) ? $res2['resp']['address'] : 'Не задано';
+        $rcount->status_id = $statLic;
+        //var_dump($rcount);
 
         if (!$rcount->save()) {
             echo "Can't save the service model";
@@ -110,7 +127,7 @@ class ServiceHelper extends AuthHelper {
         } else {
             
             $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
-            $rmodel->dicstatus_id= 2;
+            $rmodel->dicstatus_id= 1;
             $rmodel->obj_count = 0;
     
             if (!$rmodel->save()) {
@@ -119,7 +136,7 @@ class ServiceHelper extends AuthHelper {
         }
     */ 
      // var_dump($res);
-     
+     //die();
      return true;
     
     }

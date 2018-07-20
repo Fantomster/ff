@@ -220,7 +220,7 @@ class MarketWebApi extends WebApi
 
             $model = CatalogBaseGoods::findOne(['id' => $post['id']]);
             if (empty($model)) {
-                throw new BadRequestHttpException('Нет продукта с таким id');
+                throw new BadRequestHttpException('product_not_found');
             }
 
             $currentUser = $this->user;
@@ -245,7 +245,7 @@ class MarketWebApi extends WebApi
 
             return $this->prepareProduct($model);
         } else {
-            throw new BadRequestHttpException('Пустое значение id');
+            throw new BadRequestHttpException('empty_param|id');
         }
     }
 
@@ -417,8 +417,7 @@ class MarketWebApi extends WebApi
      * @param $id
      * @return string
      */
-    private
-    function getCategoryImage($id)
+    public function getCategoryImage($id)
     {
         if (file_exists(\Yii::getAlias('@market') . '/web/fmarket/images/image-category/' . $id . ".jpg")) {
             return Url::to('@market_web/fmarket/images/image-category/' . $id . ".jpg", true);

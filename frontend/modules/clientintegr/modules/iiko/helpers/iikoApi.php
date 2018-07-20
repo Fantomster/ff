@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\iiko\helpers;
 
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoWaybill;
+use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use yii\helpers\ArrayHelper;
 
 class iikoApi
@@ -44,11 +45,11 @@ class iikoApi
      */
     public function auth($login = null, $password = null)
     {
-        if(is_null($login)) {
+        if (is_null($login)) {
             $login = $this->login;
         }
 
-        if(is_null($password)) {
+        if (is_null($password)) {
             $password = $this->pass;
         }
 
@@ -57,7 +58,7 @@ class iikoApi
             'pass' => hash('sha1', $password)
         ];
 
-        if($this->token = $this->sendAuth('/auth', $params)) {
+        if ($this->token = $this->sendAuth('/auth', $params)) {
             return true;
         } else {
             return false;
@@ -110,7 +111,8 @@ class iikoApi
      * Список складов
      * @return mixed
      */
-    public function getStores() {
+    public function getStores()
+    {
         return self::xmlToArray($this->send('/corporation/stores/'));
     }
 
@@ -118,7 +120,8 @@ class iikoApi
      * Список контрагентов
      * @return mixed
      */
-    public function getSuppliers() {
+    public function getSuppliers()
+    {
         return self::xmlToArray($this->send('/suppliers/'));
     }
 
@@ -126,7 +129,8 @@ class iikoApi
      * @param iikoWaybill $model
      * @return mixed
      */
-    public function sendWaybill(iikoWaybill $model) {
+    public function sendWaybill(iikoWaybill $model)
+    {
         $url = '/documents/import/incomingInvoice';
         return $this->sendXml($url, $model->getXmlDocument());
     }
@@ -139,9 +143,14 @@ class iikoApi
      * @param string $method
      * @param array $headers
      * @return mixed
+     * @throws \Exception
      */
     private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
     {
+        $logger = new iikoLogger();
+        $logger->setOperation($url);
+        $logger->request($params);
+
         $header = ['Content-Type: application/x-www-form-urlencoded'];
         $header = ArrayHelper::merge($header, $headers);
 
@@ -160,37 +169,12 @@ class iikoApi
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
 
-        /**
-         * Logger
-         */
-        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
-            $org_id  = \Yii::$app->user->identity->organization_id;
-            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
-                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
-                $message = [
-                    '(AUTH PROCEDURE!)',
-                    'DATE: ' . date('d.m.Y H:i:s'),
-                    'URL: ' . $url,
-                    'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'],
-                    'HTTP_URL: ' . $info['url'],
-                    'RESPONSE: ' . $response,
-                    'RESP_SIZE:' . sizeof($response),
-                    'KEY: ' . $this->token,
-                    str_pad('', 200, '-') . PHP_EOL
-                ];
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
-                file_put_contents($file, print_r($info,true).PHP_EOL, FILE_APPEND);
-
-            }
+        if ($info['http_code'] != 200) {
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
-
-        if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '.curl_error($ch));
-        }
-
+        $logger->response($response);
         return $response;
     }
 
@@ -199,15 +183,20 @@ class iikoApi
      * @param array $params
      * @param string $method
      * @param array $headers
-     * @return mixed
+     * @return mixed|string
+     * @throws \Exception
      */
     private function send($url, $params = [], $method = 'GET', $headers = [])
     {
+        $logger = new iikoLogger();
+        $logger->setOperation($url);
+        $logger->request($params);
+
         $header = ['Content-Type: application/x-www-form-urlencoded'];
         $header = ArrayHelper::merge($header, $headers);
 
         $chunked = false; // Признак разбиения BODY на chunked куски
-        $response = &$this -> response;
+        $response = &$this->response;
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
@@ -226,46 +215,22 @@ class iikoApi
         $info = curl_getinfo($ch);
         $headerArray = self::getHeadersCurl($response);
 
-        if (array_key_exists('Transfer-Encoding',$headerArray)) {
+        if (array_key_exists('Transfer-Encoding', $headerArray)) {
             if ($headerArray['Transfer-Encoding'] == 'chunked')
                 $chunked = true;
         }
 
-        /**
-         * Chunked Logger
-         */
-        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
-            $org_id  = \Yii::$app->user->identity->organization_id;
-            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
-                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
-                $message = [
-                    '(Chunked mode detection...)',
-                    'DATE: ' . date('d.m.Y H:i:s'),
-                    'URL: ' . $url,
-                    'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'],
-                    'HTTP_URL: ' . $info['url'],
-                    'RESPONSE: ' . $response,
-                    'RESP_SIZE:' . sizeof($response),
-                    'KEY: ' . $this->token,
-                    'CHUNKED MODE DETECTED :' . $chunked,
-                    str_pad('', 200, '-') . PHP_EOL
-                ];
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-            }
+        if ($info['http_code'] != 200) {
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
 
-        if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '. curl_error($ch));
-        }
-
-        $response ='';
+        $response = '';
         unset($info);
         curl_close($ch);
 
         // Start real request with BODY onboard
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -287,43 +252,15 @@ class iikoApi
 
         $info = curl_getinfo($ch);
 
-
-
-        /**
-         * Logger
-         */
-
-        if(isset(\Yii::$app->params['iikoLogOrganization'])) {
-            $org_id  = \Yii::$app->user->identity->organization_id;
-            if(in_array($org_id, \Yii::$app->params['iikoLogOrganization'])){
-                $file = \Yii::$app->basePath . '/runtime/logs/iiko_api_response_'. $org_id .'.log';
-                $message = [
-                    '(Normal request)',
-                    'DATE: ' . date('d.m.Y H:i:s'),
-                    'URL: ' . $url,
-                    'HTTP_CODE: ' . $info['http_code'],
-                    'LENGTH: '. $info['download_content_length'],
-                    'SIZE_DOWNLOAD: '. $info['size_download'],
-                    'HTTP_URL: ' . $info['url'],
-                    'RESP_SIZE:' . sizeof($response),
-                    'KEY: ' . $this->token,
-                    str_pad('', 200, '-') . PHP_EOL
-                ];
-                file_put_contents($file, implode(PHP_EOL, $message), FILE_APPEND);
-                file_put_contents($file, '************!', FILE_APPEND);
-                file_put_contents($file, print_r($response,true).PHP_EOL, FILE_APPEND);
-                file_put_contents($file, '!************'.PHP_EOL.curl_error($ch).'!'.PHP_EOL, FILE_APPEND);
-
-            }
-        }
-
         curl_close($ch);
 
-        if($info['http_code'] != 200) {
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | '.curl_error($ch));
+        if ($info['http_code'] != 200) {
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
 
-
+        $logger->response($response);
         return $response;
     }
 
@@ -333,9 +270,10 @@ class iikoApi
      * @return int
      */
 
-    function Callback($ch, $str){
-       $response = &$this -> response;
-       $response .= $str;
+    function Callback($ch, $str)
+    {
+        $response = &$this->response;
+        $response .= $str;
 
         return strlen($str);
     }
@@ -348,6 +286,10 @@ class iikoApi
      */
     private function sendXml($url, $body, $headers = [])
     {
+        $logger = new iikoLogger();
+        $logger->setOperation($url);
+        $logger->request($body);
+
         $header = [
             "Content-type: application/xml",
             "Content-length: " . strlen($body),
@@ -370,18 +312,16 @@ class iikoApi
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
-
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
-        $info1 = curl_getinfo($ch, CURLINFO_HEADER_OUT);
-        if($info['http_code'] !== 200) {
-            print_r($response);
-            //print_r(['r' => $response,'header' => $header, 'info' => $info1]);
-            //\Yii::info('error: ' . print_r($info, 1), 'iiko_api');
-            return false;
+        if ($info['http_code'] !== 200) {
+            $logger->setType('error');
+            $logger->response(['info' => $info, 'response' => $response]);
+            return $response;
         }
 
-        return $response;
+        $logger->response($response);
+        return true;
     }
 
     /**
@@ -398,13 +338,14 @@ class iikoApi
      * @return array
      */
 
-    public static function getHeadersCurl($response){
+    public static function getHeadersCurl($response)
+    {
         $headers = array();
         $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
-        foreach (explode("\r\n", $header_text) as $i => $line){
+        foreach (explode("\r\n", $header_text) as $i => $line) {
             if ($i === 0)
                 $headers['http_code'] = $line;
-            else{
+            else {
                 list ($key, $value) = explode(': ', $line);
                 $headers[$key] = $value;
             }

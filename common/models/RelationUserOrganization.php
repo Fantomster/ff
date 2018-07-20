@@ -79,12 +79,18 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     }
 
 
-    public function getRelationRole(int $organizationID, int $userID):int
+    /**
+     * @param int $organizationID
+     * @param int $userID
+     * @return int|null|string
+     */
+    public static function getRelationRole(int $organizationID, int $userID)
     {
         $user = User::findIdentity($userID);
-        if($user->role_id == Role::ROLE_ADMIN || $user->role_id == Role::ROLE_FKEEPER_MANAGER || $user->role_id == Role::ROLE_FRANCHISEE_OWNER || $user->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
+        if(in_array($user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR])) {
             return $user->role_id;
         }
+
         $rel = self::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
         return $rel->role_id ?? null;
     }

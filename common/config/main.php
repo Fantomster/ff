@@ -93,6 +93,9 @@ return [
                     'class' => 'yii\i18n\DbMessageSource',
                     'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
+                'api_web' => [
+                    'class' => 'yii\i18n\DbMessageSource'
+                ],
             ],
         ],
 //        'mailer' => [
@@ -148,7 +151,6 @@ return [
             'baseUrl' => '//app.mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-
             'rules' => [
                 'product/<id:\d+>' => 'site/product',
                 'restaurant/<id:\d+>' => 'site/restaurant',
@@ -212,11 +214,22 @@ return [
         ],
         'siteApi' => [
             'class' => 'mongosoft\soapclient\Client',
-            'url' => 'https://soap.edi.su/soap/?wsdl',
+            'url' => 'https://ru-soap.edi.su/soap/?wsdl',
             'options' => [
                 'cache_wsdl' => WSDL_CACHE_NONE,
             ],
-        ]
+        ],
+        //Rabbit MQ
+        'rabbit' => [
+            'class' => 'console\modules\daemons\components\RabbitService',
+            'host' => 'server_ip',    #host - имя хоста, на котором запущен сервер RabbitMQ
+            'port' => 5672,        #port - номер порта сервиса, по умолчанию - 5672
+            'user' => 'login',        #user - имя пользователя для соединения с сервером
+            'password' => 'password',
+            'queue_prefix' => 'prod_',
+            'queue' => 'empty',
+            'exchange' => 'router'
+        ],
     ],
     'modules' => [
         'user' => [
@@ -253,6 +266,9 @@ return [
         // enter other module properties if needed
         // for advanced/personalized configuration
         // (refer module properties available below)
-        ]
+        ],
+        'pdfjs' => [
+            'class' => '\yii2assets\pdfjs\Module',
+        ],
     ],
 ];

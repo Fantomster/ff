@@ -45,7 +45,7 @@ class WebApiErrorHandler extends ErrorHandler
         $error = [
             'code' => (int)$exception->getCode(),
             'type' => (string)$this->get_class_name($exception),
-            'message' => (string)$exception->getMessage()
+            'message' => (string)$this->prepareMessage($exception->getMessage())
         ];
 
         if (YII_DEBUG === true) {
@@ -65,6 +65,26 @@ class WebApiErrorHandler extends ErrorHandler
         }
 
         return $error;
+    }
+
+    /**
+     * @param $msg
+     * @return string
+     */
+    private function prepareMessage($msg)
+    {
+        try {
+            if (strstr($msg, '|') !== false) {
+                $msg = explode('|', $msg);
+                $message = \Yii::t('api_web', $msg[0]);
+                unset($msg[0]);
+                return vsprintf($message, $msg);
+            } else {
+                return \Yii::t('api_web', $msg);
+            }
+        } catch (\Exception $e) {
+            return $msg;
+        }
     }
 
     /**

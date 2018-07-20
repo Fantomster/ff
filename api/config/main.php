@@ -20,6 +20,7 @@ return [
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-api',
+            'cookieValidationKey' => 'SKJDHJSKY7656ast676a5s26zzz',
         ],
         'user' => [
 

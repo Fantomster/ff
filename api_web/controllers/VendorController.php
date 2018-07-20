@@ -26,6 +26,7 @@ class VendorController extends WebApiController
      *                  property="request",
      *                  default={
      *                               "user":{
+     *                                   "vendor_id": 1,
      *                                   "email":"test@test.ru",
      *                                   "fio":"Donald Trump",
      *                                   "phone": "+79182225588",

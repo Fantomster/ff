@@ -11,7 +11,7 @@ use Yii;
  * @property string $denom
  * @property string $created_at
  * @property string $comment
- * @property string $contr
+ * @property string $method
  */
 class iikoDictype extends \yii\db\ActiveRecord
 {
@@ -39,7 +39,7 @@ class iikoDictype extends \yii\db\ActiveRecord
         return [
             [['created_at'], 'safe'],
             [['denom', 'comment'], 'string', 'max' => 255],
-            [['contr'], 'string', 'max' => 128],
+            [['method'], 'string', 'max' => 128],
         ];
     }
 
@@ -53,7 +53,7 @@ class iikoDictype extends \yii\db\ActiveRecord
             'denom' => Yii::t('app', 'Denom'),
             'created_at' => Yii::t('app', 'Created At'),
             'comment' => Yii::t('app', 'Comment'),
-            'contr' => Yii::t('app', 'Contr'),
+            'method' => Yii::t('app', 'Method'),
         ];
     }
 }

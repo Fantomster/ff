@@ -377,7 +377,8 @@ Modal::widget([
                         ?>
                     </div>
                     <?php Pjax::end(); ?>
-                    <?= '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
+                    <?= '<div class="col-md-6">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
+                    <?= '<div class="col-md-6">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
                 </div>
             </div>
         </div>

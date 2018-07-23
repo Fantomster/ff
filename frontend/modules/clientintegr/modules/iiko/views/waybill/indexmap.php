@@ -99,7 +99,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false]],
                             'filterPosition' => false,
                             'columns' => [
-                                'product_id',
+                                [
+                                    'attribute' => 'product_id',
+                                    'label' => 'ID в Mixcart',
+                                ],
                                 [
                                     'attribute' => 'fproductnameProduct',
                                     'label' => 'Наименование продукции',

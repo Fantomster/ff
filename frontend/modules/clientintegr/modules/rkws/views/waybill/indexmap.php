@@ -138,8 +138,14 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                         <?php Pjax::begin(['enablePushState' => false, 'id' => 'map_grid1',]); ?>
                         <?php
                         $columns = array(
-                            'product_id',
-                            'fproductnameProduct',
+                            [
+                                'attribute' => 'product_id',
+                                'label' => 'ID в Mixcart',
+                            ],
+                            [
+                                'attribute' => 'fproductnameProduct',
+                                'label' => 'Наименование продукции',
+                            ],
                             [
                                 'attribute' => 'product_id',
                                 'value' => function ($model) {

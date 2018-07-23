@@ -210,12 +210,12 @@ class VetDocumentDone extends Component
         $retuned->transportStorageType = $doc->certifiedConsignment->transportStorageType;
 
         $accompanyingForms = new ConsignmentDocumentList();
-        if(isset($this->doc->referencedDocument)) {
+        if(isset($doc->referencedDocument)) {
             $docs = null;
-            if (!is_array($this->doc->referencedDocument))
-                $docs[] = $this->doc->referencedDocument;
+            if (!is_array($doc->referencedDocument))
+                $docs[] = $doc->referencedDocument;
             else
-                $docs = $this->doc->referencedDocument;
+                $docs = $doc->referencedDocument;
 
             foreach ($docs as $item) {
                 if (($item->type >= 1) && ($item->type <= 5)) {

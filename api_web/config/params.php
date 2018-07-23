@@ -13,6 +13,7 @@ return [
         '/user/password-recovery',
         '/market/product',
         '/market/products',
+        '/market/categories',
         '/market/organizations',
         '/payment/currency-list'
     ]

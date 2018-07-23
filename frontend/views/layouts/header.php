@@ -123,9 +123,9 @@ if (!Yii::$app->user->isGuest) {
                 $('#fmsuccess').progressTo(Math.round(message.success*100/message.total));
                 $('#fmfailed').progressTo(Math.round(message.failed*100/message.total));
                 
-                $('#fmtotal_dig').text = message.total;
-                $('#fmsuccess_dig').text = message.success;
-                $('#fmfailed_dig').text = message.failed;
+                $('#fmtotal_dig').text(message.total);
+                $('#fmsuccess_dig').text(message.success);
+                $('#fmfailed_dig').text(message.failed);
                 
                 if(message.total == (message.success + message.failed)) //Все обработано
                 {

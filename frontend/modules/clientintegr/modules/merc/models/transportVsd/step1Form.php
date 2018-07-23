@@ -38,7 +38,7 @@ class step1Form extends MercStockEntry
     public function checkNax($attribute, $params)
     {
 
-            if ($this->$attribute > $this->amount)
+            if ($this->$attribute >= $this->amount)
                 $this->addError($attribute, 'Введенное количество больше доступного.');
     }
 }

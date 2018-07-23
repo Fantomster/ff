@@ -5,7 +5,6 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
-use Mpdf\Tag\U;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -708,7 +707,7 @@ class mercuryApi extends baseApi
         $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntryList;
+            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
         } else
             $result = null;
 

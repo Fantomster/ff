@@ -281,9 +281,9 @@ class Catalog extends \yii\db\ActiveRecord {
             $newSnapshot->currency_id = $this->currency_id;
             $newSnapshot->save();
             $sql = "INSERT INTO catalog_snapshot_content "
-                    . "(snapshot_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price) "
+                    . "(snapshot_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
                     . "(SELECT :snapshot_id"
-                    . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price "
+                    . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
                     . "FROM catalog_base_goods WHERE cat_id = :cat_id AND deleted = 0)";
             \Yii::$app->db->createCommand($sql)
                     ->bindValues([":snapshot_id" => $newSnapshot->id, ":cat_id" => $this->id])
@@ -307,10 +307,16 @@ class Catalog extends \yii\db\ActiveRecord {
             $this->main_index = $lastSnapshot->main_index;
             $this->currency_id = $this->currency_id;
             if ($this->save()) {
-                if ($this->updateAll(['deleted' => 0], ['cat_id' => $lastSnapshot->cat_id])) {
-                    $transaction->commit();
-                    return true;
-                }
+                $sql = "INSERT INTO catalog_base_goods "
+                        . "(cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
+                        . "(SELECT :cat_id"
+                        . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
+                        . "FROM catalog_snapshot_content WHERE snapshot_id = :snapshot_id)";
+                \Yii::$app->db->createCommand($sql)
+                        ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id])
+                        ->execute();
+                $transaction->commit();
+                return true;
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -319,6 +325,9 @@ class Catalog extends \yii\db\ActiveRecord {
     }
 
     public function deleteAllProducts($save = true) {
+        if ($this->positionsCount == 0) {
+            return true;
+        }
         if ($save && $this->makeSnapshot()) {
             CatalogBaseGoods::updateAll(["deleted" => 1], ["cat_id" => $this->id]);
             return true;
@@ -343,7 +352,8 @@ class Catalog extends \yii\db\ActiveRecord {
         if ($this->type == self::BASE_CATALOG) {
             return CatalogBaseGoods::find()->where(['cat_id' => $this->id, 'deleted' => 0])->count();
         } else {
-            return CatalogGoods::find()->joinWith('baseProduct')->where([CatalogGoods::tableName().'.cat_id' => $this->cat_id, 'deleted' => 0])->count();
+            return CatalogGoods::find()->joinWith('baseProduct')->where([CatalogGoods::tableName() . '.cat_id' => $this->cat_id, 'deleted' => 0])->count();
         }
     }
+
 }

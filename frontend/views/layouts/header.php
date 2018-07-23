@@ -134,11 +134,13 @@ if (!Yii::$app->user->isGuest) {
             }
         }
 
+        if (message.isSystem) {
         $.get(
             '$refreshStatsUrl'
         ).done(function(result) {
             refreshMenu(result);
         });
+        }
     });
             
     $(document).on("pjax:complete", "#checkout", function() {

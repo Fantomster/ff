@@ -18,24 +18,14 @@ use yii\widgets\ActiveForm;
     ]); ?>
     <div class="col-sm-5">
         <?php
-        $organizations = \common\models\Journal::find()
-            ->distinct()->select('organization_id')->all();
-        $items = ['' => 'Все'];
-        if (!empty($organizations)) {
-            foreach ($organizations as $organization) {
-                $items[$organization->organization_id] = \common\models\Organization::findOne($organization->organization_id)->name;
-            }
-        }
-
         echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
-            'data' => $items,
+            'data' => \yii\helpers\ArrayHelper::map($user->getAllOrganization(null, 1), 'id', 'name'),
             'attribute' => 'organization_id',
             'pluginOptions' => [
                 'selected' => \Yii::$app->request->get('organization_id') ?? '',
                 'allowClear' => false,
             ],
         ]);
-
         ?>
     </div>
     <div class="col-sm-5">

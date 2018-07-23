@@ -103,7 +103,7 @@ class cerberApi extends baseApi
         return $result;
     }
 
-    public function getForeignEnterpriseList ($name)
+    public function getForeignEnterpriseList ($name, $country_guid)
     {
         $client = $this->getSoapClient('cerber');
 
@@ -113,6 +113,9 @@ class cerberApi extends baseApi
         $request->listOptions = new ListOptions();
         $request->listOptions->count = 10;
         $request->listOptions->offset = 0;
+        $request->enterprise->address = new Address();
+        $request->enterprise->address->country = new Country();
+        $request->enterprise->address->country->guid = $country_guid;
 
         $result = $client->GetForeignEnterpriseList($request);
 

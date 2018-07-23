@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
+use common\models\User;
 use yii\web\Controller;
 use common\models\Journal;
 use common\models\search\JournalSearch;
@@ -14,6 +15,7 @@ class JournalController extends Controller
 
     public function actionIndex()
     {
+        $user = User::findOne(\Yii::$app->user->getId());
         $searchModel = new JournalSearch();
         $searchModel->service_id = rkeeperService::getServiceId();
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
@@ -25,6 +27,7 @@ class JournalController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'user' => $user
         ]);
     }
 

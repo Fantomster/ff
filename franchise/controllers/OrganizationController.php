@@ -668,7 +668,7 @@ class OrganizationController extends DefaultController {
                 unset($user);
             }
             $url = (strpos(Url::previous(), 'clients')) ? Url::to('organization/clients') : Url::to('organization/vendors');
-            return $this->redirect([$url]);
+            return $this->redirect([Url::previous()]);
         }
         return $this->render('notifications', compact('user','emailNotification', 'smsNotification', 'organization'));
     }

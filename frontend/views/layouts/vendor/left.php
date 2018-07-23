@@ -79,7 +79,12 @@ if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) ||
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
             ['label' => Yii::t('message', 'frontend.views.layouts.left.custom', ['ru' => 'Общие']), 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
-            //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
+            [
+                'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
+                'icon' => 'circle-o',
+                'url' => ['/clientintegr/default'],
+                'visible' => (!empty($licenses))
+            ],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.employees', ['ru' => 'Сотрудники']), 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.notifications', ['ru' => 'Уведомления']), 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.delivery', ['ru' => 'Доставка']), 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],

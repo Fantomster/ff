@@ -85,7 +85,7 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionClients() {
-        Url::remember();
+        Yii::$app->session->set('partner_url', Url::current());
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
@@ -321,7 +321,7 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionVendors() {
-        Url::remember();
+        Yii::$app->session->set('partner_url', Url::current());
         $searchModel = new \franchise\models\VendorSearch();
         $params = Yii::$app->request->getQueryParams();
         $today = new \DateTime();
@@ -667,8 +667,9 @@ class OrganizationController extends DefaultController {
                 $smsNotification->save();
                 unset($user);
             }
-            $url = (strpos(Url::previous(), 'clients')) ? Url::to('organization/clients') : Url::to('organization/vendors');
-            return $this->redirect([Url::previous()]);
+            $partnerUrl = Yii::$app->session->get('partner_url');
+            $url = (isset($partnerUrl) && strpos($partnerUrl, 'vendor')) ? Url::to('organization/vendors') : Url::to('organization/clients');
+            return $this->redirect([$url]);
         }
         return $this->render('notifications', compact('user','emailNotification', 'smsNotification', 'organization'));
     }

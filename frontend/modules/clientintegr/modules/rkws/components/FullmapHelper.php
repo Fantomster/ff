@@ -99,7 +99,7 @@ class FullmapHelper extends yii\base\BaseObject  {
                 'is_active' => 1,
             ];
 
-            \Yii::$app->rkwsmq->addRabbitQueue(serialize($mess));
+            //\Yii::$app->rkwsmq->addRabbitQueue(serialize($mess));
 
             try {
                 \Yii::$app->get('rabbit')

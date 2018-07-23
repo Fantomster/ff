@@ -245,8 +245,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'vAlign' => 'middle',
                                 // 'width'=>'100px',
                                 'format' => ['decimal', 6],
-
-                                'pageSummary' => true
+                                'pageSummary' => true,
+                                'label' => 'Коэфф.'
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
@@ -266,7 +266,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 // 'width'=>'100px',
                                 'format' => ['decimal'],
                                 'footer' => 'Итого сумма без НДС:',
-                                'pageSummary' => true
+                                'pageSummary' => true,
+                                'label' => 'Количество'
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
@@ -287,7 +288,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'format' => ['decimal', 2],
                                 //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                 'footer' => \api\common\models\RkWaybilldata::getSumByWaybillid($wmodel->id),
-                                'pageSummary' => true
+                                'pageSummary' => true,
+                                'label' => 'Сумма б/н'
                             ]);
 
 

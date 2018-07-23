@@ -6,6 +6,7 @@ use api\common\models\one_s\OneSContragent;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSStore;
 use api\common\models\one_s\OneSWaybill;
+use api\common\models\one_s\OneSWaybillData;
 use api\common\models\one_s\OneSСontragent;
 use Yii;
 use yii\db\Expression;
@@ -100,16 +101,18 @@ class DefaultController extends Controller
             $organizationID = $session->acc;
             $db = Yii::$app->get('db_api');
             $dbName = $this->getDsnAttribute('dbname', $db->dsn);
-            //, 'catalog_base_goods.product as mixcart_product_name'
             $rows = (new Query())->select([$dbName . '.one_s_waybill.*', $dbName . '.one_s_waybill_data.*', $dbName . '.one_s_good.name as one_s_product_name', $dbName . '.one_s_good.cid as one_s_product_cid', $dbName . '.one_s_good.parent_id as one_s_product_parent_id', $dbName . '.one_s_good.measure as one_s_product_measure', $dbName . '.one_s_store.cid as one_s_store_cid', $dbName . '.one_s_contragent.cid as one_s_contragent_cid', $dbName . '.one_s_contragent.inn_kpp as one_s_inn_kpp'])->from($dbName . '.one_s_waybill')
                 ->where([$dbName . '.one_s_waybill.org' => $organizationID, $dbName . '.one_s_waybill.readytoexport' => 1])
                 ->leftJoin($dbName . '.one_s_waybill_data', $dbName . '.one_s_waybill_data.waybill_id = ' . $dbName . '.one_s_waybill.id')
                 ->leftJoin($dbName . '.one_s_good', $dbName . '.one_s_good.id = ' . $dbName . '.one_s_waybill_data.product_rid')
                 ->leftJoin($dbName . '.one_s_contragent', $dbName . '.one_s_contragent.id = ' . $dbName . '.one_s_waybill.agent_uuid')
                 ->leftJoin($dbName . '.one_s_store', $dbName . '.one_s_store.id = ' . $dbName . '.one_s_waybill.store_id')
-                //->leftJoin('catalog_base_goods', 'catalog_base_goods.id = ' . $dbName . '.one_s_waybill_data.product_id')
                 ->all();
-            //da($rows);
+            foreach ($rows as &$row){
+                $productID = $row['product_id'];
+                $catalogBaseGood = CatalogBaseGoods::findOne(['id' => $productID]);
+                $row['mixcart_product_name'] = $catalogBaseGood->product ?? '';
+            }
             return json_encode($rows, JSON_UNESCAPED_UNICODE);
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);

@@ -50,7 +50,7 @@ use yii\widgets\Breadcrumbs;
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php yii\widgets\Pjax::begin(['id' => 'table_journal', 'timeout' => 10000]) ?>
-                    <?php echo $this->render('_search', ['model' => $searchModel]); ?>
+                    <?php echo $this->render('_search', ['model' => $searchModel, 'user' => $user]); ?>
                     <?= \kartik\grid\GridView::widget([
                         'dataProvider' => $dataProvider,
                         'rowOptions' => function ($model) {

@@ -68,10 +68,14 @@ class iikoLogger
             'response_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
         ]);
 
-        \Yii::$app->get('rabbit')
-            ->setQueue(self::getNameQueue())
-            ->setExchange('log')
-            ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
+        try {
+            \Yii::$app->get('rabbit')
+                ->setQueue(self::getNameQueue())
+                ->setExchange('log')
+                ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
+        } catch(\Exception $e) {
+            Yii::error($e->getMessage());
+        }
     }
 
     /**

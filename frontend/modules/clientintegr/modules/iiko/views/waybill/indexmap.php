@@ -100,7 +100,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             'filterPosition' => false,
                             'columns' => [
                                 'product_id',
-                                'fproductnameProduct',
+                                [
+                                    'attribute' => 'fproductnameProduct',
+                                    'label' => 'Наименование продукции',
+                                ],
                                 [
                                     'attribute' => 'product_id',
                                     'value' => function ($model) {
@@ -177,8 +180,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'hAlign' => 'right',
                                     'vAlign' => 'middle',
                                     'format' => ['decimal', 6],
-
-                                    'pageSummary' => true
+                                    'pageSummary' => true,
+                                    'label' => 'Коэфф.'
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -199,6 +202,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 
                                     'pageSummary' => true,
                                     'footer' => 'Итого сумма без НДС:',
+                                    'label' => 'Количество'
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -219,6 +223,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'pageSummary' => true,
                                     //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                     'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
+                                    'label' => 'Сумма б/н'
                                 ],
                                 [
                                     'attribute' => 'vat',

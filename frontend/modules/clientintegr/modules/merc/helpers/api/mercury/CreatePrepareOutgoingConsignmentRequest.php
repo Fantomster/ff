@@ -116,7 +116,7 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         $delivery->transportStorageType = $this->step4['storage_type'];
 
         $delivery->accompanyingForms = new ConsignmentDocumentList();
-        if($this->step4['isTTN']) {
+        if($this->step3['isTTN']) {
             $delivery->accompanyingForms->waybill = new Waybill();
             $delivery->accompanyingForms->waybill->issueSeries = $this->step3['seriesTTN'];
             $delivery->accompanyingForms->waybill->issueNumber = $this->step3['numberTTN'];

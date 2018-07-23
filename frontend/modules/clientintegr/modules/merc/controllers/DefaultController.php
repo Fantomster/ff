@@ -222,9 +222,9 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionGetPdf($uuid) {
         $vsdHttp = new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
-            'authLink' => Yii::$app->params['authLink'],
-            'vsdLink' => Yii::$app->params['vsdLink'],
-            'pdfLink' => Yii::$app->params['pdfLink'],
+            'authLink' => Yii::$app->params['vtsHttp']['authLink'],
+            'vsdLink' => Yii::$app->params['vtsHttp']['vsdLink'],
+            'pdfLink' => Yii::$app->params['vtsHttp']['pdfLink'],
             'username' => mercDicconst::getSetting("vetis_login"),
             'password' => mercDicconst::getSetting("vetis_password"), //'2wsx2WSX', //
         ]);

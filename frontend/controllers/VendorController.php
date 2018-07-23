@@ -2429,4 +2429,16 @@ class VendorController extends DefaultController
         }
     }
 
+    public function actionAjaxChangeMainIndex($cat_id, $main_index) {
+        $currentUser = $this->currentUser;
+        $catalog = Catalog::findOne(['cat_id' => $cat_id, 'type' => Catalog::BASE_CATALOG]);
+        if (!Catalog::isMainIndexValid($main_index) || empty($catalog)) {
+            return false;
+        }
+        if ($catalog->positionsCount > 0) {
+            return false;
+        }
+        $catalog->main_index = $main_index;
+        return $catalog->save();
+    }
 }

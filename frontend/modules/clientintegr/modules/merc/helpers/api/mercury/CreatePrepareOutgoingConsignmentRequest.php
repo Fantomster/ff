@@ -120,8 +120,8 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
             $delivery->accompanyingForms->waybill = new Waybill();
             $delivery->accompanyingForms->waybill->issueSeries = $this->step3['seriesTTN'];
             $delivery->accompanyingForms->waybill->issueNumber = $this->step3['numberTTN'];
-            $delivery->accompanyingForms->waybill->issueDate = date('Y-m-d', $this->step3['dateTTN']);
-            $delivery->accompanyingForms->waybill->type = $this->typeTTN;
+            $delivery->accompanyingForms->waybill->issueDate = date('Y-m-d', strtotime($this->step3['dateTTN']));
+            $delivery->accompanyingForms->waybill->type = $this->step['typeTTN'];
         }
 
         $delivery->accompanyingForms->vetCertificate = $vetCertificates;

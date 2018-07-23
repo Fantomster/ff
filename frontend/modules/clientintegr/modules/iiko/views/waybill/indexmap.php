@@ -71,13 +71,19 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             ]); ?>
                         </div>
                         <?php
+                            $pjax = "$('#search-pjax').on('pjax:end', function(){
+                                            $.pjax.reload('#map_grid1',{'timeout':10000});
+                                    });";
+                            $this->registerJs($pjax);
+                        ?>
+                        <?php Pjax::begin(['enablePushState' => true, 'timeout' => 10000, 'id' => 'search-pjax']); ?>
+                        <?php
                         $form = ActiveForm::begin([
                             'options' => [
                                 'data-pjax' => true,
                                 'id' => 'search-form',
                                 'role' => 'search',
                             ],
-                            'enableClientValidation' => false,
                             'method' => 'get',
                         ]);
                         ?>
@@ -91,12 +97,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             </div>
                         </div>
                         <div style="clear: both;"></div>
-                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'map_grid1',]); ?>
+                        <?php ActiveForm::end(); ?>
+                        <?php Pjax::end(); ?>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
                             'pjax' => true,
-                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false]],
+                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
                             'filterPosition' => false,
                             'columns' => [
                                 [
@@ -374,8 +381,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'data-oid' => $wmodel->order_id,
                                 ])
                             ?>
-                            <?php Pjax::end() ?>
-                            <?php ActiveForm::end(); ?>
                         </div>
                     </div>
                 </div>

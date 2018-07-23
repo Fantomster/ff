@@ -113,7 +113,7 @@ Modal::widget([
                 }
                 catch (Exception $e)
                 {
-                    $res = $data['expiry_datee'];
+                    $res = $data['expiry_date'];
                 }
                 return $res;
             },

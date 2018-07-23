@@ -100,14 +100,14 @@ class DefaultController extends Controller
             $session = ApiSession::findOne(['token' => $sessionId]);
             $organizationID = $session->acc;
             $db = Yii::$app->get('db_api');
-            $dbName = $this->getDsnAttribute('dbname', $db->dsn);
-            $rows = (new Query())->select([$dbName . '.one_s_waybill.*', $dbName . '.one_s_waybill_data.*', $dbName . '.one_s_good.name as one_s_product_name', $dbName . '.one_s_good.cid as one_s_product_cid', $dbName . '.one_s_good.parent_id as one_s_product_parent_id', $dbName . '.one_s_good.measure as one_s_product_measure', $dbName . '.one_s_store.cid as one_s_store_cid', $dbName . '.one_s_contragent.cid as one_s_contragent_cid', $dbName . '.one_s_contragent.inn_kpp as one_s_inn_kpp'])->from($dbName . '.one_s_waybill')
-                ->where([$dbName . '.one_s_waybill.org' => $organizationID, $dbName . '.one_s_waybill.readytoexport' => 1])
-                ->leftJoin($dbName . '.one_s_waybill_data', $dbName . '.one_s_waybill_data.waybill_id = ' . $dbName . '.one_s_waybill.id')
-                ->leftJoin($dbName . '.one_s_good', $dbName . '.one_s_good.id = ' . $dbName . '.one_s_waybill_data.product_rid')
-                ->leftJoin($dbName . '.one_s_contragent', $dbName . '.one_s_contragent.id = ' . $dbName . '.one_s_waybill.agent_uuid')
-                ->leftJoin($dbName . '.one_s_store', $dbName . '.one_s_store.id = ' . $dbName . '.one_s_waybill.store_id')
-                ->all();
+            $rows = (new Query())->select(['one_s_waybill.*', 'one_s_waybill_data.*', 'one_s_good.name as one_s_product_name', 'one_s_good.cid as one_s_product_cid', 'one_s_good.parent_id as one_s_product_parent_id', 'one_s_good.measure as one_s_product_measure', 'one_s_store.cid as one_s_store_cid', 'one_s_contragent.cid as one_s_contragent_cid', 'one_s_contragent.inn_kpp as one_s_inn_kpp'])
+                ->from('one_s_waybill')
+                ->where(['one_s_waybill.org' => $organizationID, 'one_s_waybill.readytoexport' => 1])
+                ->leftJoin('one_s_waybill_data', 'one_s_waybill_data.waybill_id = ' . 'one_s_waybill.id')
+                ->leftJoin('one_s_good', 'one_s_good.id = ' . 'one_s_waybill_data.product_rid')
+                ->leftJoin('one_s_contragent', 'one_s_contragent.id = ' . 'one_s_waybill.agent_uuid')
+                ->leftJoin('one_s_store', 'one_s_store.id = ' . 'one_s_waybill.store_id')
+                ->all($db);
             foreach ($rows as &$row){
                 $productID = $row['product_id'];
                 $catalogBaseGood = CatalogBaseGoods::findOne(['id' => $productID]);

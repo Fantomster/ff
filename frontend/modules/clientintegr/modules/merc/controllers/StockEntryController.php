@@ -161,7 +161,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                     }
                 }
             }
-            else {
+
+            if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
                 if (isset($list->enterpriseList->enterprise)) {
 

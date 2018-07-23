@@ -360,9 +360,9 @@ array_push($columns,
 ?>
 
                         <div style="width: 50%; margin: 0 auto;" id="fullmapconsole">
-                            <span id="fmtotal" >0</span>
-                            <span id="fmsuccess" >0</span>
-                            <span id="fmfailed" >0</span>
+                            <span id="fmtotal_dig" ></span><span id="fmtotal" ></span>
+                            <span id="fmsuccess_dig" ></span><span id="fmsuccess" ></span>
+                            <span id="fmfailed_dig" ></span><span id="fmfailed" ></span>
                         </div>
 
 <div align="right">

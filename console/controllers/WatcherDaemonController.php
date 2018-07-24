@@ -9,40 +9,21 @@
 namespace console\controllers;
 
 
-use console\modules\daemons\controllers\iikoLogDaemonController;
-
 class WatcherDaemonController extends \vyants\daemon\controllers\WatcherDaemonController
 {
-    /**
-     * @var string subfolder in console/controllers
-     */
-    public $daemonFolder = 'daemons';
 
-    /**
-     * @var boolean flag for first iteration
-     */
-    protected $firstIteration = true;
-
-    /**
-     * @var int
-     */
-    protected $sleep = 4;
-
-    /**
-     * @return bool
-     */
-    protected function renewConnections() {
-        return true;
-    }
-
+    public $daemons= [];
     /**
      * @return array
      */
     protected function defineJobs()
     {
         sleep($this->sleep);
-        return [
-            ['className' => iikoLogDaemonController::className(), 'enabled' => true]
-        ];
+        //TODO: modify list, or get it from config, it does not matter
+        /*$daemons = [
+            ['className' => 'OneDaemonController', 'enabled' => true],
+            ['className' => 'AnotherDaemonController', 'enabled' => false]
+        ];*/
+        return $this->daemons;
     }
 }

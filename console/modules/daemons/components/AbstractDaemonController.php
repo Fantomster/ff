@@ -26,6 +26,11 @@ abstract class AbstractDaemonController extends DaemonController
     private $channel = null;
 
     /**
+     * @var int
+     */
+    public $maxChildProcesses = 5;
+
+    /**
      * @return array|bool
      */
     protected function defineJobs()

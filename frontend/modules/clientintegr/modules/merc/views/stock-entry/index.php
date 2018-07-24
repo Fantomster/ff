@@ -378,7 +378,7 @@ Modal::widget([
                     </div>
                     <?php Pjax::end(); ?>
                     <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
-
+                    <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.conversion', ['ru' => 'Переработка']), ['class' => 'btn btn-primary create_vsd_conversion']) . '</div>' ?>
                 </div>
             </div>
         </div>
@@ -387,12 +387,19 @@ Modal::widget([
 
 <?php
 $urlCreateVSD = Url::to(['transport-vsd/step-1']);
+$urlCreateVSDConversion = Url::to(['transport-vsd/conversion-step-1']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".create_vsd", function(e) {
         if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
             window.location.href =  "$urlCreateVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
+        }
+    });
+
+$(document).on("click", ".create_vsd_conversion", function(e) {
+        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
+            window.location.href =  "$urlCreateVSDConversion?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
         }
     });
 

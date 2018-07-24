@@ -7,8 +7,13 @@ use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreatePrepareOutgoingConsignmentRequest;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreateRegisterProductionRequest;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\MultiModel;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
+use frontend\modules\clientintegr\modules\merc\models\expiryDate;
+use frontend\modules\clientintegr\modules\merc\models\inputDate;
+use frontend\modules\clientintegr\modules\merc\models\productionDate;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step1Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step2Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step3Form;
@@ -223,5 +228,116 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
         else
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
+    }
+
+
+    public function actionConversionStep1()
+    {
+        $session = Yii::$app->session;
+        if(Yii::$app->request->isGet) {
+            $get = Yii::$app->request->get();
+            if (isset($get['selected'])) {
+                $selected = Yii::$app->request->get('selected');
+                $session->remove('TrVsd_step1');
+            }
+            else
+            {
+                $selected = $session->get('TrVsd_step1');
+                $attributes = $selected;
+                $session->remove('TrVsd_step1');
+                $selected = implode(",", array_keys($selected));
+                $list = step1Form::find()->where("id in ($selected)")->all();
+                foreach ($list as $key => $item)
+                {
+                    $list[$key]->attributes = $attributes[$item->id];
+                }
+            }
+        }
+        else {
+            $post = Yii::$app->request->post('step1Form');
+            $res = [];
+            foreach ($post as $item)
+            {
+                $res[] = $item['id'];
+            }
+            $selected = implode(",", $res);
+        }
+
+        if(!isset($list))
+            $list = step1Form::find()->where("id in ($selected)")->all();
+        if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
+            $attributes = [];
+            foreach ($list as $item)
+            {
+                $attributes[$item->id] = $item->getAttributes(['product_name','select_amount']);
+            }
+            $session->set('TrVsd_step1', $attributes);
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return (['success' => true]);
+            }
+            return $this->redirect(['conversion-step-2']);
+
+        }
+
+        if (Yii::$app->request->isAjax)
+            return $this->renderAjax('conversion-step-1', ['list' => $list]);
+        return $this->render('conversion-step-1', ['list' => $list]);
+    }
+
+
+    public function actionConversionStep2()
+    {
+        $session = Yii::$app->session;
+        $model = new createStoreEntryForm();
+        $productionDate = new productionDate();
+        $expiryDate = new expiryDate();
+        $inputDate = new inputDate();
+        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post()) && $inputDate->load(Yii::$app->request->post())) {
+            if (!Yii::$app->request->isAjax) {
+                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate() && $inputDate->validate();
+                if ($res) {
+                    $model->dateOfProduction = $productionDate;
+                    $model->expiryDate = $expiryDate;
+                    $model->vsd_issueDate = $inputDate;
+                    $request = new CreateRegisterProductionRequest();
+                    $request->step2 = $model->attributes;
+                    $request->step1 = $session->get('TrVsd_step1');
+                    //try {
+                        $result = mercuryApi::getInstance()->registerProductionOperation($request);
+                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
+                        return $this->redirect(['index']);
+                        if(!isset($result))
+                            throw new \Exception('Error');
+
+//                    } catch (\Error $e) {
+//                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
+//                        return $this->redirect(['conversion-step-2']);
+//                    } catch (\Exception $e) {
+//                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
+//                        return $this->redirect(['conversion-step-2']);
+//                    }
+                }
+            }
+        }
+        $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
+
+//        $model->attributes = $session->get('TrVsd_step2');
+//        $session->remove('TrVsd_step2');
+//
+//        $post = Yii::$app->request->post();
+//        if ($model->load($post)) {
+//            if ($model->validate()) {
+//                $session->set('TrVsd_step2', $model->attributes);
+//                if (Yii::$app->request->isAjax) {
+//                    Yii::$app->response->format = Response::FORMAT_JSON;
+//                    return (['success' => true]);
+//                }
+//                return $this->redirect(['step-3']);
+//            }
+//        }
+        if (Yii::$app->request->isAjax)
+            return $this->renderAjax('conversion-step-2', $params);
+        return $this->render('conversion-step-2', $params);
     }
 }

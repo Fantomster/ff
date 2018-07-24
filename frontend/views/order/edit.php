@@ -37,21 +37,21 @@ $refreshUrl = Url::to(['/order/edit', "id" => $order->id]);
 $attachment = new common\models\OrderAttachment;
 
 $arr = [
-    Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохраненные изменения!']),
+    Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохранённые изменения!']),
     Yii::t('message', 'frontend.views.order.var2', ['ru' => 'Вы изменили заказ, но не сохранили изменения!']),
     Yii::t('message', 'frontend.views.order.var3', ['ru' => 'Уйти']),
     Yii::t('message', 'frontend.views.order.var4', ['ru' => 'Остаться']),
     Yii::t('message', 'frontend.views.order.var5', ['ru' => 'Удаление позиции из заказа']),
-    Yii::t('message', 'frontend.views.order.var6', ['ru' => 'Товар будет удален из заказа. Продолжить?']),
+    Yii::t('message', 'frontend.views.order.var6', ['ru' => 'Товар будет удалён из заказа. Продолжить?']),
     Yii::t('message', 'frontend.views.order.var7', ['ru' => 'Да, удалить']),
     Yii::t('message', 'frontend.views.order.var8', ['ru' => 'Отмена']),
-    Yii::t('message', 'frontend.views.order.var9', ['ru' => 'Товар удален из заказа!']),
+    Yii::t('message', 'frontend.views.order.var9', ['ru' => 'Товар удалён из заказа!']),
     Yii::t('message', 'frontend.views.order.var10', ['ru' => 'Действительно отменить заказ?']),
     Yii::t('message', 'frontend.views.order.var11', ['ru' => 'Комментарий']),
     Yii::t('message', 'frontend.views.order.var12', ['ru' => 'Нет']),
     Yii::t('message', 'frontend.views.order.var13', ['ru' => 'Да']),
     Yii::t('message', 'frontend.views.order.var14', ['ru' => 'Ошибка!']),
-    Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте еще раз']),
+    Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте ещё раз']),
 ];
 
 $js = <<<JS
@@ -148,7 +148,7 @@ $js = <<<JS
                 if (result.dismiss === "cancel") {
                     swal.close();
                 } else {
-                    $(target).val(0);
+                    $(target).val(-1);
                     $(target).closest('tr').hide();
                     $("#cancelChanges").show();
                     dataEdited = 1;

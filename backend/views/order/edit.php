@@ -40,7 +40,7 @@ $js = <<<JS
         $(document).on('click', '.deletePosition', function(e) {
             e.preventDefault();
             target = $(this).data("target");
-            $(target).val(0);
+            $(target).val(-1);
             $(target).closest('tr').hide();
             $("#cancelChanges").show();
         });

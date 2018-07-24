@@ -488,10 +488,12 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
+                $date = (!empty($date) ? \Yii::$app->formatter->asDate($date, "dd.MM.yyyy") : null);
+
                 $orders[] = [
                     'id' => (int)$model->id,
                     'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
-                    'completion_date' => \Yii::$app->formatter->asDate($date, "dd.MM.yyyy"),
+                    'completion_date' => $date,
                     'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,

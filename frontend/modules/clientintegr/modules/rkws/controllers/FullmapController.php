@@ -115,7 +115,7 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionRenewcats() {
-
+        return true; //for great justice!
         $helper = new FullmapHelper();
 
         $helper->getcats();

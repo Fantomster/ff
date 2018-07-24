@@ -372,20 +372,26 @@ function getRowsFromObjects(queryResult) {
     return rows;
   }
 
-  Handsontable.Dom.addEvent(searchFiled, 'keyup', function(event) {
-    //                    debugger
+function search(searchText) {
     hot.loadData(data);
 
-    var queryResult = hot.search.query(this.value);
+    var queryResult = hot.search.query(searchText);
     rows = getRowsFromObjects(queryResult);
     var filtered = data.filter(function(_, index) {
-      return !searchFiled.value || rows.indexOf(index) >= 0;
+      return !searchText || rows.indexOf(index) >= 0;
     });
 
     hot.loadData(filtered);
-    hot.render();
+    hot.render();        
+}
+        
+  Handsontable.Dom.addEvent(searchFiled, 'keyup', function(event) {
+    //                    debugger
+        search(searchFiled.value);
   });        
 Handsontable.Dom.addEvent(save, 'click', function() {
+        $("#search_field").val('');
+        search('');
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
   var cols = [1,'goods_id',3, 4, 5,6,7,8,'total_price'];

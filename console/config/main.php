@@ -25,8 +25,8 @@ return [
         ]
     ],
     'controllerMap' => [
-        'iiko-daemon' => [
-            'class' => 'console\modules\daemons\controllers\IikodaemonController'
+        'watcher-daemon' => [
+            'class' => "\console\controllers\WatcherController"
         ]
     ],
     'aliases' => [

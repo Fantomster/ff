@@ -9,7 +9,20 @@ use PhpAmqpLib\Channel\AMQPChannel;
 
 abstract class AbstractDaemonController extends DaemonController
 {
+    /**
+     * Description
+     * @var RabbitService
+     */
+    private $rabbit;
+    /**
+     * Description
+     * @var AMQPStreamConnection
+     */
     private $connect;
+    /**
+     * Description
+     * @var AMQPChannel
+     */
     private $channel = null;
 
     /**
@@ -17,8 +30,25 @@ abstract class AbstractDaemonController extends DaemonController
      */
     protected function defineJobs()
     {
-        $this->stdout("Daemon " . get_class($this) . " job running and working fine." . PHP_EOL);
+        $this->rabbit = \Yii::$app->get('rabbit');
+        $consumerTag = get_class($this);
+
+        //Получаем канал, если нет, создаем
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
+        //Цепляем канал к очереди
+        $channel->queue_bind($this->getQueueName(), $this->getExchangeName(), $this->getQueueName());
+        //Цепляем консьюмера
+        $channel->basic_consume($this->getQueueName(), $consumerTag, false, false, false, false, [$this, 'doJob']);
+
+        /**
+         * Инофрмация о подключении
+         */
+        \Yii::trace("HOST: " . $this->rabbit->host . PHP_EOL);
+        \Yii::trace("V_HOST: " . $this->rabbit->vhost . PHP_EOL);
+        \Yii::trace("Exchange: " . $this->getExchangeName() . PHP_EOL);
+        \Yii::trace("Queue: " . $this->getQueueName() . PHP_EOL);
+        \Yii::trace("Consumer: " . $consumerTag . PHP_EOL);
+
         while (count($channel->callbacks)) {
             try {
                 $channel->wait(null, true, 5);
@@ -37,23 +67,13 @@ abstract class AbstractDaemonController extends DaemonController
      */
     protected function getChannel($queue, $exchange = '')
     {
-        if ($this->channel == null) {
-            /**
-             * @var $rabbit AMQPStreamConnection
-             */
+        if ($this->channel === null) {
             if ($this->connect == null) {
-                $rabbit = $this->connect = \Yii::$app->get('rabbit')->connect();
+                $this->connect = $this->rabbit->connect();
             }
-
-            if ($rabbit->channel() == null) {
-                $rabbit->channel()->exchange_declare($exchange, 'direct', false, true, false);
-                $this->stdout("Daemon create chanel" . PHP_EOL);
-            }
-            $this->channel = $rabbit->channel();
-            list($queue, ,) = $this->channel->queue_declare($queue, false, true, false, false);
-            $this->channel->queue_bind($queue, $exchange, $queue);
-            $consumerTag = get_class($this) . '_consumer';
-            $this->channel->basic_consume($queue, $consumerTag, false, false, false, false, [$this, 'doJob']);
+            $this->channel = $this->connect->channel();
+            $this->channel->exchange_declare($exchange, 'direct', false, true, false);
+            $this->channel->queue_declare($queue, false, true, false, false);
         }
         return $this->channel;
     }
@@ -83,14 +103,18 @@ abstract class AbstractDaemonController extends DaemonController
     }
 
     /**
+     * Exchange name
+     * @return string
+     */
+    protected function getExchangeName()
+    {
+        return 'amq.direct';
+    }
+
+    /**
      * Queue name
      * @return string
      */
     abstract protected function getQueueName();
 
-    /**
-     * Exchange name
-     * @return string
-     */
-    abstract protected function getExchangeName();
 }

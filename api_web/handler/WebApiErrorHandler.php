@@ -54,7 +54,13 @@ class WebApiErrorHandler extends ErrorHandler
         }
 
         if ($exception instanceof ValidationException) {
-            $error['errors'] = $exception->validation;
+            $validation = $exception->validation;
+            foreach ($validation as $key => &$value) {
+                if(is_string($value)) {
+                    $value = (string) $this->prepareMessage($value);
+                }
+            }
+            $error['errors'] = $validation;
         }
 
         if ($exception instanceof NotFoundHttpException) {

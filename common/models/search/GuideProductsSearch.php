@@ -10,8 +10,9 @@ use yii\data\SqlDataProvider;
  *
  * @author elbabuino
  */
-class GuideProductsSearch extends \yii\base\Model {
-    
+class GuideProductsSearch extends \yii\base\Model
+{
+
     public $searchString;
     public $vendor_id;
     public $price_from;
@@ -27,7 +28,7 @@ class GuideProductsSearch extends \yii\base\Model {
             [['searchString', 'guide_id', 'cbg_id'], 'safe'],
         ];
     }
-    
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -40,7 +41,7 @@ class GuideProductsSearch extends \yii\base\Model {
     public function search(array $params, int $guideId, int $clientId): SqlDataProvider
     {
         $this->load($params);
-        if(empty($this->searchString) || $this->searchString == ''){
+        if (empty($this->searchString) || $this->searchString == '') {
             $this->searchString = $params['search_string'] ?? '';
         }
 
@@ -48,19 +49,23 @@ class GuideProductsSearch extends \yii\base\Model {
 
         $where = [];
 
-        if($this->vendor_id) {
+        if (isset($this->vendor_id) && is_array($this->vendor_id)) {
+            $where[] = ['cbg.supp_org_id', 'IN', '(' . implode(',', $this->vendor_id) . ')'];
+        }
+
+        if (isset($this->vendor_id) && is_string($this->vendor_id)) {
             $where[] = ['cbg.supp_org_id', '=', $this->vendor_id];
         }
 
-        if($this->price_from) {
+        if ($this->price_from) {
             $where[] = ['cbg.price', '>=', $this->price_from];
         }
 
-        if($this->price_to) {
+        if ($this->price_to) {
             $where[] = ['cbg.price', '<=', $this->price_to];
         }
 
-        if(!empty($where)) {
+        if (!empty($where)) {
             $s = '';
             foreach ($where as $field => $condition) {
                 $s .= $condition[0] . ' ' . $condition[1] . ' ' . $condition[2] . ' AND ';

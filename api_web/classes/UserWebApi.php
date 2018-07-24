@@ -589,11 +589,11 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         if (!$this->user->validatePassword($post['password'])) {
-            throw new BadRequestHttpException('Bad password');
+            throw new BadRequestHttpException('bad_password');
         }
 
         if ($post['password'] == $post['new_password']) {
-            throw new BadRequestHttpException('You have sent the same password.');
+            throw new BadRequestHttpException('same_password');
         }
 
         $tr = \Yii::$app->db->beginTransaction();
@@ -636,13 +636,13 @@ class UserWebApi extends \api_web\components\WebApi
         }
         //Проверяем телефон
         if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+            throw new ValidationException(['phone' => 'bad_format_phone']);
         }
 
         //Проверяем код, если прилетел
         if (!empty($post['code'])) {
             if (!preg_match('#^\d{4}$#', $post['code'])) {
-                throw new ValidationException(['code' => 'Bad format. (9999)']);
+                throw new ValidationException(['code' => 'bad_format_code']);
             }
         }
 
@@ -650,7 +650,7 @@ class UserWebApi extends \api_web\components\WebApi
         $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
         //Если нет модели, но прилетел какой то код, даем отлуп
         if (empty($model) && !empty($post['code'])) {
-            throw new BadRequestHttpException('Вы еще не запросили код для смены телефона.');
+            throw new BadRequestHttpException('not_code_to_change_phone');
         }
 
         //Если нет модели

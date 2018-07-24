@@ -187,7 +187,7 @@ class GuideWebApi extends \api_web\components\WebApi
              * Фильтр по поставщику
              */
             if (!empty($post['search']['vendor_id'])) {
-                $search->vendor_id = (int)$post['search']['vendor_id'];
+                $search->vendor_id = $post['search']['vendor_id'];
             }
             /**
              * Фильтр по цене

@@ -10,9 +10,11 @@ return [
     'allow_methods' => [
         '/user/registration',
         '/user/registration-confirm',
+        '/user/registration-repeat-sms',
         '/user/password-recovery',
         '/market/product',
         '/market/products',
+        '/market/categories',
         '/market/organizations',
         '/payment/currency-list'
     ]

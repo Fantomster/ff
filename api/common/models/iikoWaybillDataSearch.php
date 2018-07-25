@@ -50,7 +50,12 @@ class iikoWaybillDataSearch extends iikoWaybillData
         $query = iikoWaybillData::find()
             ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
             ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
-            ->where(['waybill_id' => Yii::$app->request->get('waybill_id')])->all();
+            ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
+        if(isset($params['iikoWaybillDataSearch']['vat']) && $params['iikoWaybillDataSearch']['vat'] != 1){
+            $vat = $params['iikoWaybillDataSearch']['vat'];
+            $query = $query->andWhere(['vat' => $vat]);
+        }
+        $query = $query->all();
 
         foreach ($query as $key=>$value)
         {

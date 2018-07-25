@@ -16,9 +16,10 @@ use common\components\Torg12Invoice;
 
 $this->title = 'Интеграция с iiko Office';
 
-$sLinkzero = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>0]);
-$sLinkten = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>1000]);
-$sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id,'vat' =>1800]);
+$sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
+$sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
+$sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
+$this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-top:-30px;}');
 ?>
 
 <section class="content-header">
@@ -69,15 +70,50 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                 }'],
                             ]); ?>
                         </div>
+                        <?php
+                            $pjax = "$('#search-pjax').on('pjax:end', function(){
+                                            $.pjax.reload('#map_grid1',{'timeout':10000});
+                                    });";
+                            $this->registerJs($pjax);
+                        ?>
+                        <?php Pjax::begin(['enablePushState' => true, 'timeout' => 10000, 'id' => 'search-pjax']); ?>
+                        <?php
+                        $form = ActiveForm::begin([
+                            'options' => [
+                                'data-pjax' => true,
+                                'id' => 'search-form',
+                                'role' => 'search',
+                            ],
+                            'method' => 'get',
+                        ]);
+                        ?>
+                        <div class="row">
+                            <div class="col-md-offset-10 col-md-2 alVatFilter">
+                                <?=
+                                $form->field($searchModel, 'vat')
+                                    ->dropDownList($vatData, ['id' => 'vatFilter'])
+                                    ->label('НДС', ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <?php ActiveForm::end(); ?>
+                        <?php Pjax::end(); ?>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
-                            'pjax' => false,
-                            'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
+                            'pjax' => true,
+                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
                             'filterPosition' => false,
                             'columns' => [
-                                'product_id',
-                                'fproductnameProduct',
+                                [
+                                    'attribute' => 'product_id',
+                                    'label' => 'ID в Mixcart',
+                                ],
+                                [
+                                    'attribute' => 'fproductnameProduct',
+                                    'label' => 'Наименование продукции',
+                                ],
                                 [
                                     'attribute' => 'product_id',
                                     'value' => function ($model) {
@@ -154,8 +190,8 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'hAlign' => 'right',
                                     'vAlign' => 'middle',
                                     'format' => ['decimal', 6],
-
-                                    'pageSummary' => true
+                                    'pageSummary' => true,
+                                    'label' => 'Коэфф.'
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -176,6 +212,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
 
                                     'pageSummary' => true,
                                     'footer' => 'Итого сумма без НДС:',
+                                    'label' => 'Количество'
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -194,7 +231,9 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'vAlign' => 'middle',
                                     'format' => ['decimal', 2],
                                     'pageSummary' => true,
-                                    'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+                                    //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
+                                    'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
+                                    'label' => 'Сумма б/н'
                                 ],
                                 [
                                     'attribute' => 'vat',
@@ -202,25 +241,22 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'label' => 'НДС',
                                     'contentOptions' => ['class' => 'text-right'],
                                     'value' => function ($model) {
-                                      //   $const = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-                                      //  if($const) {
-                                      //      $result = $const->getPconstValue() / 100;
-                                      //  }
-                                        return isset($model->vat) ? $model->vat/100 : null;
+                                        //   $const = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
+                                        //  if($const) {
+                                        //      $result = $const->getPconstValue() / 100;
+                                        //  }
+                                        return isset($model->vat) ? $model->vat / 100 : null;
                                     }
                                 ],
-                       //
+                                //
                                 [
                                     'class' => 'yii\grid\ActionColumn',
-                                    'contentOptions'=>['style'=>'width: 6%;'],
-                                    'template'=>'{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                    'contentOptions' => ['style' => 'width: 6%;'],
+                                    'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
                                     // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
-                                    'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\''.$sLinkzero.'\';" class="btn btn-xs btn-link" style="color:green;">0</button>'.
-                                        '<button id="btnTen" type="button" onClick="location.href=\''.$sLinkten.'\';" class="btn btn-xs btn-link" style="color:green;">10</button>'.
-                                        '<button id="btnEight" type="button" onClick="location.href=\''.$sLinkeight.'\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
-
-                                    //  'sort' => false,
-                                    //  '' => false,
+                                    'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                        '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
+                                        '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
 
                                     'visibleButtons' => [
                                         'zero' => function ($model, $key, $index) {
@@ -228,24 +264,31 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             return true;
                                         },
                                     ],
-                                    'buttons'=>[
-                                        'zero' =>  function ($url, $model) {
+                                    'buttons' => [
+                                        'zero' => function ($url, $model) {
 
                                             if ($model->vat == 0) {
                                                 $tClass = "label label-success";
                                                 $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-
                                             } else {
                                                 $tClass = "label label-default";
                                                 $tStyle = "";
                                             }
 
-                                            //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id'=>$model->id, 'vat' =>0]);
-                                            return \yii\helpers\Html::a( '&nbsp;0', $customurl,
-                                                ['title' => Yii::t('backend', '0%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl([
+                                                'clientintegr/iiko/waybill/chvat',
+                                                'id' => $model->id,
+                                                'vat' => 0
+                                            ]);
+
+                                            return \yii\helpers\Html::a('&nbsp;0', $customurl, [
+                                                'title' => Yii::t('backend', '0%'),
+                                                'data-pjax' => 0,
+                                                'class' => $tClass,
+                                                'style' => $tStyle
+                                            ]);
                                         },
-                                        'ten' =>  function ($url, $model) {
+                                        'ten' => function ($url, $model) {
 
                                             if ($model->vat == 1000) {
                                                 $tClass = "label label-success";
@@ -256,11 +299,11 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id'=>$model->id, 'vat' => '1000']);
-                                            return \yii\helpers\Html::a( '10', $customurl,
-                                                ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'vat' => '1000']);
+                                            return \yii\helpers\Html::a('10', $customurl,
+                                                ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                         },
-                                        'eighteen' =>  function ($url, $model) {
+                                        'eighteen' => function ($url, $model) {
 
                                             if ($model->vat == 1800) {
                                                 $tClass = "label label-success";
@@ -271,9 +314,9 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id'=>$model->id, 'vat' => '1800']);
-                                            return \yii\helpers\Html::a( '18', $customurl,
-                                                ['title' => Yii::t('backend', '18%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'vat' => '1800']);
+                                            return \yii\helpers\Html::a('18', $customurl,
+                                                ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                         },
                                     ]
                                 ],
@@ -289,12 +332,12 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'buttons' => [
                                         'clear' => function ($url, $model) {
                                             return \yii\helpers\Html::a(
-                                                    '<i class="fa fa-sign-in" aria-hidden="true"></i>',
-                                                    Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/clear-data', 'id' => $model->id]),
-                                                    [
-                                                        'title' => Yii::t('backend', 'Вернуть начальные данные'),
-                                                        'data-pjax' => "0"
-                                                    ]
+                                                '<i class="fa fa-sign-in" aria-hidden="true"></i>',
+                                                Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/clear-data', 'id' => $model->id]),
+                                                [
+                                                    'title' => Yii::t('backend', 'Вернуть начальные данные'),
+                                                    'data-pjax' => "0"
+                                                ]
                                             );
                                         },
                                     ]
@@ -316,27 +359,28 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                         ]);
                         ?>
                         <div class="sendonbutton">
-                        <?php
-                                echo Html::a('Вернуться',
-                            [$this->context->getLastUrl().'way='.$wmodel->order_id],
-                            ['class' => 'btn btn-success btn-export']);
-                        ?>
-                        <?php
-                        echo \yii\helpers\Html::a(
-                        Html::tag('b','Выгрузить накладную',
-                            [
-                            'class' => 'btn btn-success',
-                            'aria-hidden' => true
-                        ]),
-                        '#',
-                        [
-                            'class' => 'export-waybill-btn',
-                            'title' => Yii::t('backend', 'Выгрузить'),
-                            'data-pjax' => "0",
-                            'data-id' => $wmodel->id,
-                            'data-oid' => $wmodel->order_id,
-                        ])
-                 ?>
+                            <?php
+                            echo Html::a('Вернуться',
+                                [$this->context->getLastUrl() . 'way=' . $wmodel->order_id],
+                                ['class' => 'btn btn-success btn-export']);
+                            ?>
+                            <?php
+                            echo \yii\helpers\Html::a(
+                                Html::tag('b', 'Выгрузить накладную',
+                                    [
+                                        'class' => 'btn btn-success',
+                                        'aria-hidden' => true
+                                    ]),
+                                '#',
+                                [
+                                    'onclick' => 'return false;',
+                                    'class' => 'export-waybill-btn',
+                                    'title' => Yii::t('backend', 'Выгрузить'),
+                                    'data-pjax' => "0",
+                                    'data-id' => $wmodel->id,
+                                    'data-oid' => $wmodel->order_id,
+                                ])
+                            ?>
                         </div>
                     </div>
                 </div>
@@ -402,6 +446,12 @@ $js = <<< JS
                 }
             })
         });
+        
+        $(document).on("change", "#vatFilter", function() {
+            console.log(1);
+            $("#search-form").submit();
+        });
+        
     });
 JS;
 

@@ -26,14 +26,14 @@ class Torg12Invoice extends Invoice
     public $date;
 
     /**
-     * Сумма накладной без учета НДС
+     * Сумма накладной без учёта НДС
      *
      * @var float
      */
     public $price_without_tax_sum = 0;
 
     /**
-     * Сумма накладной с учетом НДС
+     * Сумма накладной с учётом НДС
      *
      * @var float
      */
@@ -46,6 +46,7 @@ class Torg12Invoice extends Invoice
      */
 
     public $rows = [];
+
     /**
      * Массив координат ячеек, содержащих имя поставщика в накладной
      *
@@ -53,6 +54,14 @@ class Torg12Invoice extends Invoice
      */
 
     public $tmpMassivsNames;
+
+    /**
+     * Массив координат ячеек, содержащих имя грузополучателя в накладной
+     *
+     * @var array
+     */
+
+    public $tmpMassivsConsignees;
 
     /**
      * Массив координат ячеек, содержащих ИНН и КПП (если есть) поставщика в накладной
@@ -81,6 +90,13 @@ class Torg12Invoice extends Invoice
      * @var string
      */
     public $kppPostav;
+
+    /**
+     * Наименование грузополучателя вместе с формой собственности, приведённое к верхнему регистру
+     *
+     * @var string
+     */
+    public $nameConsignee;
 
     /**
      * Возвращает по ID накладной сумму без НДС

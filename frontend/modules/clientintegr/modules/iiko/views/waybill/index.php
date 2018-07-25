@@ -6,8 +6,14 @@ use common\models\Order;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\widgets\Pjax;
+use yii\widgets\ActiveForm;
 
 $this->title = 'Интеграция с iiko Office';
+$this->registerCss("
+    #select2-ordersearch-vendor_id-container{margin-top:0;}
+        .select2-selection__clear{display: none;}
+");
 
 ?>
 <section class="content-header">
@@ -38,17 +44,21 @@ $this->title = 'Интеграция с iiko Office';
     $columns = array(
         [
             'attribute' => 'id',
-            'contentOptions' => function($data) {
-                return ["id" => "way".$data->id];
+            'contentOptions' => function ($data) {
+                return ["id" => "way" . $data->id];
+            },
+            'format' => 'raw',
+            'value' => function ($data) {
+                return \yii\helpers\Html::a($data->id, Url::to(['/order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0", 'target' => '_blank']);
             }
         ],
         [
-            'attribute'=>'invoice_relation',
-            'format'=>'raw',
-            'visible'=>$visible,
-            'header'=>'№ Накладной',
-            'value'=>function($data){
-                return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
+            'attribute' => 'invoice_relation',
+            'format' => 'raw',
+            'visible' => $visible,
+            'header' => '№ Накладной',
+            'value' => function ($data) {
+                return ($data->invoice) ? \yii\helpers\Html::encode($data->invoice->number) : '';
             }
         ],
         [
@@ -75,15 +85,15 @@ $this->title = 'Интеграция с iiko Office';
         [
             'attribute' => 'positionCount',
             'label' => 'Кол-во позиций',
-            'format'=>'raw',
+            'format' => 'raw',
             'value' => function ($data) {
                 return $data->positionCount .
-                    '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
-                    'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
-                    'data-toggle="popover"  data-trigger="focus" data-url="'.
-                    Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
-                    '/getpopover" role="button" tabindex="0" '.
-                    'data-original-title="" title="" data-model="'.$data->id.'"> '.
+                    '<a class="ajax-popover" data-container="body" data-content="Loading..." ' .
+                    'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" ' .
+                    'data-toggle="popover"  data-trigger="focus" data-url="' .
+                    Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']) .
+                    '/getpopover" role="button" tabindex="0" ' .
+                    'data-original-title="" title="" data-model="' . $data->id . '"> ' .
                     '<i class="fa fa-info-circle"></i></a>';
             }
         ],
@@ -106,8 +116,8 @@ $this->title = 'Интеграция с iiko Office';
         [
             'class' => 'kartik\grid\ExpandRowColumn',
             'width' => '50px',
-            'value'=>function ($model, $key, $index, $column) use ($way) {
-                if (($model->id == $way) or (Yii::$app->session->get('iiko_waybill')==$model->id))  {
+            'value' => function ($model, $key, $index, $column) use ($way) {
+                if (($model->id == $way) or (Yii::$app->session->get('iiko_waybill') == $model->id)) {
                     Yii::$app->session->set("iiko_waybill", 0);
                     return GridView::ROW_EXPANDED;
                 }
@@ -137,12 +147,39 @@ $this->title = 'Интеграция с iiko Office';
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
+                <?php
+                Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
+                $form = ActiveForm::begin([
+                    'options' => [
+                        'data-pjax' => true,
+                        'id' => 'search-form',
+                        //'class' => "navbar-form",
+                        'role' => 'search',
+                    ],
+                    'enableClientValidation' => false,
+                    'method' => 'get',
+                ]);
+                ?>
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding orders-table">
+                        <div class="row">
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <?php echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
+                                    'data' => $organization->getSuppliers(),
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                        'name' => 'sd',
+                                    ],
+                                    'id' => 'orgFilter',
+
+                                ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']); ?>
+                            </div>
+                        </div>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
                             'pjax' => true,
+                            'summary' => '',
                             'filterPosition' => false,
                             'columns' => $columns,
                             'options' => ['class' => 'table-responsive'],
@@ -161,6 +198,8 @@ $this->title = 'Интеграция с iiko Office';
                         ?>
                     </div>
                 </div>
+                <?php ActiveForm::end(); ?>
+                <?php Pjax::end() ?>
             </div>
         </div>
     </div>
@@ -220,6 +259,7 @@ $js = <<< JS
             })
         });
     });
+
 JS;
 
 $this->registerJs($js);
@@ -251,7 +291,7 @@ $("[data-toggle='popover']").popover({
 // });
 SCRIPT;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 
 <?php
@@ -281,7 +321,7 @@ $('.ajax-popover').click(function() {
   }
 });
 SCRIPT;
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 <?php
 $js = <<< 'SCRIPT'
@@ -324,7 +364,7 @@ $('.ajax-popover').click(function() {
 })
 SCRIPT;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 
 <?php
@@ -336,8 +376,12 @@ $(document).ready(function () {
         }, 1000);
        // jQuery('#w2').dropdown();
     }
+    
+        $(document).on("change", "#ordersearch-vendor_id", function() {
+            $("#search-form").submit();
+        });
 });    
 JS;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>

@@ -576,7 +576,11 @@ class ClientController extends DefaultController {
                             } else {
                                 $price = str_replace('.', '', $price);
                             }
-                            $newProduct = new CatalogBaseGoods();
+                            
+                            $newProduct = CatalogBaseGoods::findOne(['product' => $product]);
+                            if (empty($newProduct)) {
+                                $newProduct = new CatalogBaseGoods();
+                            }
                             $newProduct->scenario = "import";
                             $newProduct->cat_id = $lastInsert_base_cat_id;
                             $newProduct->supp_org_id = $get_supp_org_id;
@@ -1863,7 +1867,6 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dateFrom = date('Y-m-d', strtotime($post['filter_from_date_price_stat']));
         $dateTo = date('Y-m-d', strtotime($post['filter_from_date_price_stat'] . " + 14 days"));
         $orderContent = OrderContent::find()->joinWith('order')->where(['order.status' => Order::STATUS_DONE])->andWhere(['between', 'order.created_at', $dateFrom, $dateTo]);
-
         $businessArray = [];
         if(empty($businessId)){
             $relations = RelationUserOrganization::find()->where(['relation_user_organization.user_id' => Yii::$app->user->id])->leftJoin('organization', 'organization.id = relation_user_organization.organization_id')->andWhere(['organization.type_id' => Organization::TYPE_RESTAURANT])->all();

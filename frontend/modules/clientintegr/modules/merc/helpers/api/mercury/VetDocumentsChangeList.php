@@ -1,22 +1,17 @@
 <?php
 
-namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;;
+namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
-use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocument;
-use frontend\modules\clientintegr\modules\merc\models\getVetDocumentByUUIDRequest;
 use yii\base\Model;
 
 class VetDocumentsChangeList extends Model
 {
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
-        $guid = mercDicconst::getSetting('enterprise_guid');
-
+        $list = is_array($list) ? $list : [$list->vetDocument];
         foreach ($list as $item)
         {
             if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
@@ -39,7 +34,7 @@ class VetDocumentsChangeList extends Model
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'number' => (isset($item->issueSeries) && (isset($item->issueNumber))) ? MercVsd::getNumber($item->issueSeries, $item->issueNumber) : null,
-                'date_doc' => $item->issueDate,
+                'date_doc' => date('Y-m-d h:i:s',strtotime($item->issueDate)),
                 'type' => $item->vetDType,
                 'form' => $item->vetDForm,
                 'status' => $item->vetDStatus,

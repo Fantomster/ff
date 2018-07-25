@@ -51,7 +51,7 @@ $this->title = 'Интеграция с 1С Общепит';
                                 'id',
                                 'cid',
                                 'name',
-                                'inn',
+                                'inn_kpp',
                                 'updated_at',
                             ],
                             'filterPosition' => false,

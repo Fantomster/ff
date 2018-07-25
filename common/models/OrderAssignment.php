@@ -30,6 +30,22 @@ class OrderAssignment extends \yii\db\ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+                'updatedAtAttribute' => false,
+            ],
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()
@@ -52,9 +68,9 @@ class OrderAssignment extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'order_id' => 'Order ID',
-            'assigned_to' => 'Assigned To',
-            'assigned_by' => 'Assigned By',
-            'is_processed' => 'Is Processed',
+            'assigned_to' => 'Назначен (кому)',
+            'assigned_by' => 'Назначен (кем)',
+            'is_processed' => 'Обработан',
             'created_at' => 'Created At',
             'processed_at' => 'Processed At',
         ];

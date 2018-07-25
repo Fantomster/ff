@@ -22,6 +22,7 @@ class baseApi extends Component
     protected $_client;
     protected $enterpriseGuid;
     protected $wsdls;
+    protected $query_timeout;
 
     protected static $_instance = [];
 
@@ -36,6 +37,7 @@ class baseApi extends Component
             self::$_instance[static::class]->issuerID = mercDicconst::getSetting('issuer_id');
             self::$_instance[static::class]->vetisLogin = mercDicconst::getSetting('vetis_login');
             self::$_instance[static::class]->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+            self::$_instance[static::class]->query_timeout = Yii::$app->params['merc_settings']['query_timeout'];
             self::$_instance[static::class]->service_id = Yii::$app->params['merc_settings']['mercury']['service_id'];
         }
         return self::$_instance[static::class];

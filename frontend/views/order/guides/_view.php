@@ -11,7 +11,7 @@ $js = <<<SCRIPT
 /* To initialize BS3 tooltips set this below */
 $(function () { 
     $("[data-toggle='tooltip']").tooltip(); 
-});;
+});
 SCRIPT;
 // Register tooltip/popover initialization javascript
 $this->registerJs($js);
@@ -165,11 +165,12 @@ $this->registerJs('
                     [
                         'attribute' => 'quantity',
                         'content' => function($data){
+                            $units = $data['units'] ?? 0.100;
                             return TouchSpin::widget([
                                         'name' => 'GuideProduct[' . $data["id"] . ']',
                                         'pluginOptions' => [
-                                            'initval' => $_SESSION['GuideProductCount.' . $data["id"]] ?? 0, //0.100,
-                                            'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,
+                                            'initval' => $_SESSION['GuideProductCount.' . $data["id"]] ?? 0.100,
+                                            'min' => (isset($units) && ($units > 0)) ? $units : 0.001,
                                             'max' => PHP_INT_MAX,
                                             'step' => (isset($units) && ($units)) ? $units : 1,
                                             'decimals' => (empty($units) || (fmod($units, 1) > 0)) ? 3 : 0,
@@ -203,11 +204,16 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.in_basket_two', ['ru'=>'В корзину']) . ' </span></i>', [
-                                        'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
-                                        'data-id' => $data["cbg_id"],
-                                        'data-cat' => $data["cat_id"],
-                                        'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru'=>'Добавить в корзину']),
+                            if (isset($_SESSION['GuideProductCount.' . $data["id"]]) && $_SESSION['GuideProductCount.' . $data["id"]] > 0 && $_SESSION['GuideProductCount.' . $data["id"]] != '0.000') {
+                                $disabled = '';
+                            } else {
+                                $disabled = ' disabled';
+                            }
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.in_basket_two', ['ru' => 'В корзину']) . ' </span></i>', [
+                                'class' => 'add-to-cart btn btn-md btn-success pull-right' . $disabled,
+                                'data-id' => $data["cbg_id"],
+                                'data-cat' => $data["cat_id"],
+                                'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru' => 'Добавить в корзину']),
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 10%;'],

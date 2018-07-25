@@ -5,7 +5,7 @@ namespace api\common\models\one_s;
 use Yii;
 
 /**
- * This is the model class for table "{{%iiko_pconst}}".
+ * This is the model class for table "{{%one_s_pconst}}".
  *
  * @property integer $id
  * @property integer $const_id
@@ -14,7 +14,7 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  *
- * @property iikoDicconst $const
+ * @property one_sDicconst $const
  */
 class OneSPconst extends \yii\db\ActiveRecord
 {
@@ -71,13 +71,13 @@ class OneSPconst extends \yii\db\ActiveRecord
         return $this->hasOne(OneSDicconst::className(), ['id' => 'const_id']);
     }
 
-    public static function getSettingsColumn($organization)
+    public static function getSettingsColumn(int $organizationID)
     {
         $res = self::find()
             ->select('*')
-            ->join('LEFT JOIN', 'iiko_dicconst', '`iiko_dicconst`.`denom` = "column_number_invoice"')
-            ->where(['org' => $organization])
-            ->andWhere('`iiko_pconst`.`const_id` = `iiko_dicconst`.`id`')
+            ->join('LEFT JOIN', 'one_s_dicconst', '`one_s_dicconst`.`denom` = "useAcceptedDocs"')
+            ->where(['org' => $organizationID])
+            ->andWhere('`one_s_pconst`.`const_id` = `one_s_dicconst`.`id`')
             ->one();
         if($res)
         {

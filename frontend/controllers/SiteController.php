@@ -297,7 +297,8 @@ class SiteController extends Controller {
             CURLINFO_HEADER_OUT => true,
             CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_COOKIE => $cookiesIn
+            CURLOPT_COOKIE => $cookiesIn,
+            CURLOPT_HTTPHEADER => ['User-Agent: Mozilla/5.0 (X11; Ubuntu; Linu…) Gecko/20100101 Firefox/61.0'],
         );
 
         $ch = curl_init($url);
@@ -402,16 +403,32 @@ class SiteController extends Controller {
 
         $step5 = $this->getPage($step4['redirect_url'], true, $step4['cookies']);
 
-        $test = [];
-
-        $data3 = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step5['content']);
-        $radios = $data3->find("input[name=commonEnterpriseNumber]");
-
-        foreach ($radios as $radio) {
-            $test[] = $radio->value;
+        $getVsdUrl = 'https://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid=b06d3137-befe-46d6-b7d4-ceb3777e8b12';
+        $step5 = $this->getPage($getVsdUrl, true);
+        $data5 = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step5['content']);
+        $rows = $data5->find('.profile-info-row');
+        foreach ($rows as $row) {
+            $itemName = $row->find('.profile-info-name')[0];
+            if ($itemName->innertext == 'Номер ВСД') {
+                $vsdNum = $row->find('.profile-info-value')[0]->find('span')[0]->innertext;
+            }
         }
+        
+        $urlGetPdf = 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&printPk='.$vsdNum.'&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=';
+        $step7 = $this->getPage($urlGetPdf, true, $step4['cookies']);
+        $data7 = $step7['content'];
 
-        return $this->render('test-auth', compact('test'));
+        
+
+        Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        header("Content-type:application/pdf");
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        flush();
+        echo $data7;
+
+        //return $this->render('test-auth', compact('data6', 'step7', 'vsdNum'));
     }
 
 }

@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSPconst;
 use api\common\models\OneSWaybillDataSearch;
+use api\common\models\VatData;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
@@ -83,6 +84,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
        // $dataProvider->pagination->pageSize=3;
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
 
 
         $lic = OneSService::getLicense();
@@ -93,6 +95,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'lic' => $lic,
             //'visible' =>OneSPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
             'way' => $way,
+            'organization' => $organization
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -109,6 +112,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap()
     {
         $model = OneSWaybill::findOne(Yii::$app->request->get('waybill_id'));
+        $vatData = VatData::getVatList();
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
@@ -134,6 +138,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
             'isAndroid' => $isAndroid,
+            'searchModel' => $searchModel,
+            'vatData' => $vatData
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -274,11 +280,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($id);
         $lic = OneSService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
             if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
             }
+            $model->save();
             return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
         } else {
             return $this->render($vi, [
@@ -293,6 +300,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionCreate($order_id)
     {
+        $user = $this->currentUser;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
         if (!$ord) {
@@ -304,6 +312,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;
+        $model->discount = $ord->discount;
+        $model->discount_type = $ord->discount_type;
+        $is_invoice = OneSPconst::getSettingsColumn($user->organization_id);
+        $model->is_invoice = $is_invoice;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             if ($model->getErrors()) {

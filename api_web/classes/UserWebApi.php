@@ -79,6 +79,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $organization = new Organization (["scenario" => "register"]);
             $organization->load($post, 'organization');
+            $organization->is_allowed_for_franchisee = 0;
 
             if ($organization->rating == null or empty($organization->rating) or empty(trim($organization->rating))) {
                 $organization->setAttribute('rating', 0);
@@ -91,6 +92,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
             $user->setOrganization($organization, true);
+            $user->setRelationUserOrganization($user->id, $organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
 
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
@@ -102,7 +104,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new ValidationException($e->validation);
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 
@@ -161,6 +163,57 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Повторная отправка СМС с кодом активации пользователя
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function registrationRepeatSms($post)
+    {
+        WebApiHelper::clearRequest($post);
+
+        if (!isset($post['user_id'])) {
+            throw new BadRequestHttpException('empty_param|user_id');
+        }
+
+        $model = User::findOne($post['user_id']);
+        if (empty($model)) {
+            throw new BadRequestHttpException('user_not_found');
+        }
+
+        $userToken = UserToken::findByUser($model->id, UserToken::TYPE_EMAIL_ACTIVATE);
+
+        if(empty($userToken)) {
+            $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, 'attempt|1|'.gmdate("Y-m-d H:i:s"));
+        } else {
+            if(!empty($userToken->data)) {
+                //Какая попытка
+                $attempt = explode('|', $userToken->data)[1] ?? 1;
+                if($attempt >= 10) {
+                    //Дата последней СМС
+                    $update_date = explode('|', $userToken->data)[2] ?? gmdate('Y-m-d H:i:s');
+                    //Сколько прошло времени
+                    $wait_time = round(strtotime(gmdate('Y-m-d H:i:s')) - strtotime($update_date));
+                    if($wait_time < 300 && $wait_time > 0) {
+                        throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$wait_time));
+                    }
+                    $attempt = 0;
+                }
+                $data = implode('|',[
+                    'attempt',
+                    ($attempt + 1),
+                    gmdate("Y-m-d H:i:s")
+                ]);
+                $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, $data);
+            }
+        }
+
+        Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $model->profile->phone);
+
+        return ['result' => 1];
+    }
+
+    /**
      * @param array $post
      * [
      *      'user_id' => 1,
@@ -197,7 +250,7 @@ class UserWebApi extends \api_web\components\WebApi
             return $user->access_token;
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 
@@ -206,7 +259,8 @@ class UserWebApi extends \api_web\components\WebApi
      * [
      *      'organization_id' => 12
      * ]
-     * @return int
+     * @param array $post
+     * @return bool
      * @throws BadRequestHttpException
      */
     public function setOrganization(array $post)
@@ -245,12 +299,15 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new \Exception('access denied.');
             }
 
-            $result = $this->user->save();
+            if (!$this->user->validate() || !$this->user->save()) {
+                throw new ValidationException($this->user->getFirstErrors());
+            }
+
             $transaction->commit();
-            return $result;
+            return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new BadRequestHttpException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 

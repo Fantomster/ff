@@ -150,7 +150,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         try {
-            $document = new getVetDocumentByUUIDRequest();
+            $document = new getVetDocumentByUUID();
             $document->getDocumentByUUID($uuid);
         } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));

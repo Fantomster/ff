@@ -250,7 +250,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
           url: '$supplierStartCatalogCreateUrl',
           type: 'POST',
           dataType: "json",
-          data: $.param({'catalog':JSON.stringify(data), 'currency':currentCurrency}),
+          data: $.param({'catalog':JSON.stringify(data), 'currency':currentCurrency, 'main_index':currentIndex}),
           cache: false,
           success: function (response) {
               if(response.success){ 
@@ -336,8 +336,8 @@ $("#instruction").on('show.bs.modal', function(){
         })        
     });
           
-    var indexes = $.map($indexesListJson, function(el) { return el });
-    var currentIndex = '$firstIndexValue';
+    var indexes = JSON.parse('$indexesListJson');
+    var currentIndex = '$firstIndexValue';console.log(indexes['product']);
 
     $(document).on("click", "#changeBaseIndex", function() {
         swal({
@@ -352,8 +352,8 @@ $("#instruction").on('show.bs.modal', function(){
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (value != currentIndex) {
-                        currentCurrency = value;
-                        $(".main-index").html(indexes[currentIndex-1]);
+                        currentIndex = value;
+                        $(".main-index").html(indexes[currentIndex]);
                         resolve();
                     } else {
                         swal({
@@ -371,8 +371,6 @@ $("#instruction").on('show.bs.modal', function(){
                     type: "success",
                     title: "$indexChanged",
                     allowOutsideClick: true,
-                }).then(function (result) {
-                    $.pjax.reload({container: "body", timeout:1000000});
                 });
             }
         })        

@@ -55,32 +55,31 @@ class ClientWebApi extends WebApi
         if (empty($model)) {
             throw new BadRequestHttpException('client_not_found');
         }
-
         //прошли все проверки, будем обновлять
         $transaction = \Yii::$app->db->beginTransaction();
         try {
 
-            if (!empty($post['legal_entity'])) {
+            if (isset($post['legal_entity']) && $post['legal_entity'] !== null) {
                 $model->legal_entity = $post['legal_entity'];
             }
 
-            if (!empty($post['about'])) {
+            if (isset($post['about']) && $post['about'] !== null) {
                 $model->about = $post['about'];
             }
 
-            if (!empty($post['contact_name'])) {
+            if (isset($post['contact_name']) && $post['contact_name'] !== null) {
                 $model->contact_name = $post['contact_name'];
             }
 
-            if (!empty($post['phone'])) {
+            if (isset($post['phone']) && $post['phone'] !== null) {
                 $model->phone = $post['phone'];
             }
 
-            if (!empty($post['email'])) {
+            if (isset($post['email']) && $post['email'] !== null) {
                 $model->email = $post['email'];
             }
 
-            if (!empty($post['name'])) {
+            if (isset($post['name']) && $post['name'] !== null) {
                 $model->name = $post['name'];
             }
 
@@ -88,30 +87,30 @@ class ClientWebApi extends WebApi
                 $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
             }
 
-            if (!empty($post['address'])) {
-                if (!empty($post['address']['country'])) {
+            if (isset($post['address']) && $post['address'] !== null) {
+                if (isset($post['address']['country']) && $post['address']['country'] !== null) {
                     $model->country = $post['address']['country'];
                 }
-                if (!empty($post['address']['region'])) {
+                if (isset($post['address']['region']) && $post['address']['region'] !== null) {
                     $model->administrative_area_level_1 = $post['address']['region'];
                 }
-                if (!empty($post['address']['locality'])) {
+                if (isset($post['address']['locality']) && $post['address']['locality'] !== null) {
                     $model->locality = $post['address']['locality'];
                     $model->city = $post['address']['locality'];
                 }
-                if (!empty($post['address']['route'])) {
+                if (isset($post['address']['route']) && $post['address']['route'] !== null) {
                     $model->route = $post['address']['route'];
                 }
-                if (!empty($post['address']['house'])) {
+                if (isset($post['address']['house']) && $post['address']['house'] !== null) {
                     $model->street_number = $post['address']['house'];
                 }
-                if (!empty($post['address']['lat'])) {
+                if (isset($post['address']['lat']) && $post['address']['lat'] !== null) {
                     $model->lat = $post['address']['lat'];
                 }
-                if (!empty($post['address']['lng'])) {
+                if (isset($post['address']['lng']) && $post['address']['lng'] !== null) {
                     $model->lng = $post['address']['lng'];
                 }
-                if (!empty($post['address']['place_id'])) {
+                if (isset($post['address']['place_id']) && $post['address']['place_id'] !== null) {
                     $model->place_id = $post['address']['place_id'];
                 }
                 unset($post['address']['lat']);
@@ -120,7 +119,6 @@ class ClientWebApi extends WebApi
                 $model->address = implode(', ', $post['address']);
                 $model->formatted_address = $model->address;
             }
-
 
             if (!$model->validate() || !$model->save()) {
                 throw new ValidationException($model->getFirstErrors());

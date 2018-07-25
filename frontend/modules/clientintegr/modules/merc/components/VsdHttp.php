@@ -54,7 +54,8 @@ class VsdHttp extends \yii\base\Component {
 
         $step1 = $this->getPage($step0['redirect_url'], true, $step0['cookies']);
 
-
+        $srv_id = explode(";", $step0['cookies'])[0] . ";";
+        
         $data = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step1['content']);
 
         $forms = $data->find('form');
@@ -66,12 +67,16 @@ class VsdHttp extends \yii\base\Component {
             $inputs[$input->name] = $input->value;
         }
 
-        $step2 = $this->postForm($action, $inputs, $step0['cookies']);
+        $step2 = $this->postForm($action, true, $inputs, $step1['cookies']);
 
         $authData = ['j_username' => $this->username, 'j_password' => $this->password, '_eventId_proceed' => ''];
 
-        $step3 = $this->postForm($step2['redirect_url'], $authData, $step2['cookies']);
+        $step3 = $this->postForm($step2['url'], false, $authData, $srv_id . $step2['cookies']);
 
+//        echo $step3['content'];
+//        
+//        return;
+        
         $data2 = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step3['content']);
 
         $forms2 = $data2->find("form");
@@ -84,7 +89,7 @@ class VsdHttp extends \yii\base\Component {
             $inputs2[$input->name] = $input->value;
         }
 
-        $step4 = $this->postForm($action2, $inputs2, $step0['cookies']);
+        $step4 = $this->postForm($action2, false, $inputs2, $step0['cookies']);
 
         $step5 = $this->getPage($step4['redirect_url'], true, $step4['cookies']);
         
@@ -130,12 +135,12 @@ class VsdHttp extends \yii\base\Component {
         return $header;
     }
 
-    private function postForm($url, $vars = [], $cookiesIn = '') {
+    private function postForm($url, $follow = false, $vars = [], $cookiesIn = '') {
 
         $options = [
             CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => true, //return headers in addition to content
-            CURLOPT_FOLLOWLOCATION => false, // follow redirects
+            CURLOPT_FOLLOWLOCATION => $follow, // follow redirects
             CURLOPT_POST => true, // handle all encodings
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response

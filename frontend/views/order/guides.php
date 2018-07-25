@@ -21,7 +21,7 @@ $this->registerJs('
         clicked = $(this);
         title = "' . Yii::t('message', 'frontend.views.order.deleting_guide', ['ru'=>'Удаление шаблона']) . ' ";
         text = "' . Yii::t('message', 'frontend.views.order.del_guide', ['ru'=>'Вы уверены, что хотите удалить шаблон?']) . ' ";
-        success = "' . Yii::t('message', 'frontend.views.order.guide_deleted', ['ru'=>'Шаблон удален!']) . ' ";
+        success = "' . Yii::t('message', 'frontend.views.order.guide_deleted', ['ru'=>'Шаблон удалён!']) . ' ";
         swal({
             title: title,
             text: text,
@@ -249,7 +249,7 @@ $this->registerJs('
     
     $(document).on("change paste keyup", ".quantity", function() {
         var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
-        if ($(this).val() > 0) {
+        if ($(this).val() >= 0) {
             btnAddToCart.removeClass("disabled");
         } else {
             btnAddToCart.addClass("disabled");
@@ -306,7 +306,7 @@ $this->registerJs('
             if (result.dismiss === "cancel") {
                 swal.close();
             } else if (result.value.type !== "success") {
-               swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru'=>'Ошибка!']) . '", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru'=>'Попробуйте еще раз']) . '", type: "error"});
+               swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru'=>'Ошибка!']) . '", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru'=>'Попробуйте ещё раз']) . '", type: "error"});
             }
         });
     });

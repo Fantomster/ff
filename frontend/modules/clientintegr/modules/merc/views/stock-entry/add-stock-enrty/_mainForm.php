@@ -15,10 +15,7 @@ use yii\web\JsExpression;
 
 <div class="dict-agent-form">
     <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']); ?>
-    <?php echo $form->errorSummary($model); ?>
-    <?php echo $form->errorSummary($productionDate); ?>
-    <?php echo $form->errorSummary($expiryDate); ?>
-    <?php echo $form->errorSummary($inputDate); ?>
+    <?php echo $form->errorSummary([$model, $productionDate, $expiryDate, $inputDate]); ?>
     <h4>Информация о продукции: </h4>
     <?= $form->field($model, 'batchID')->textInput(['maxlength' => true]); ?>
 
@@ -54,7 +51,6 @@ use yii\web\JsExpression;
     <?=
     $form->field($model, 'unit')
         ->dropDownList(createStoreEntryForm::getUnitList(),['prompt' => 'не указано'])
-        ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
     ?>
 
     <?php $model->perishable = isset($model->perishable) ? $model->perishable : true; ?>

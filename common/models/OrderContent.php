@@ -191,7 +191,7 @@ class OrderContent extends \yii\db\ActiveRecord
 
     public function beforeSave($insert) {
         $result = parent::beforeSave($insert);
-        if(!$insert){
+        /*if(!$insert){
             if($this->plan_quantity == 0.000){
                 $this->plan_quantity = $this->quantity;
             }
@@ -200,7 +200,7 @@ class OrderContent extends \yii\db\ActiveRecord
             }
         }else{
             $this->plan_price = $this->price;
-        }
+        }*/
         return $result;
     }
 

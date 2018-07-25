@@ -32,6 +32,8 @@ $newClientCount = Yii::$app->user->can('manage') ? $user->organization->getNewCl
 
 $vsdCount = $user->organization->getVsdCount();
 
+$licenses = $user->organization->getLicenseList();
+
 $menuItems = [
     ['label' => Yii::t('message', 'frontend.views.layouts.left.navi', ['ru' => 'НАВИГАЦИЯ']), 'options' => ['class' => 'header']],
     ['label' => Yii::t('message', 'frontend.views.layouts.left.desktop', ['ru' => 'Рабочий стол']), 'icon' => 'home', 'url' => ['/vendor/index']],

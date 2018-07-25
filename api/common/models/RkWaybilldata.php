@@ -62,7 +62,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            [['koef', 'quant'], 'number', 'min' => 0.0001],
+            //[['koef', 'quant'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [['waybill_id', 'product_rid', 'product_id', 'munit_rid', 'updated_at', 'quant', 'sum', 'vat', 'pdenom', 'koef', 'org', 'vat_included', 'linked_at'], 'safe']
         ];

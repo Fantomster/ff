@@ -39,6 +39,6 @@ class step1Form extends MercStockEntry
     {
 
             if ($this->$attribute > $this->amount)
-                $this->addError($attribute, 'Введенное количество больше доступного.');
+                $this->addError($attribute, 'Введенное количество больше доступного ('.$this->amount.').');
     }
 }

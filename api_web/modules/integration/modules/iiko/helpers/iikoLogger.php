@@ -71,7 +71,6 @@ class iikoLogger
         try {
             \Yii::$app->get('rabbit')
                 ->setQueue(self::getNameQueue())
-                ->setExchange('log')
                 ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
         } catch(\Exception $e) {
             Yii::error($e->getMessage());

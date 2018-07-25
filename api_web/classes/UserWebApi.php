@@ -163,6 +163,57 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Повторная отправка СМС с кодом активации пользователя
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function registrationRepeatSms($post)
+    {
+        WebApiHelper::clearRequest($post);
+
+        if (!isset($post['user_id'])) {
+            throw new BadRequestHttpException('empty_param|user_id');
+        }
+
+        $model = User::findOne($post['user_id']);
+        if (empty($model)) {
+            throw new BadRequestHttpException('user_not_found');
+        }
+
+        $userToken = UserToken::findByUser($model->id, UserToken::TYPE_EMAIL_ACTIVATE);
+
+        if(empty($userToken)) {
+            $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, 'attempt|1|'.gmdate("Y-m-d H:i:s"));
+        } else {
+            if(!empty($userToken->data)) {
+                //Какая попытка
+                $attempt = explode('|', $userToken->data)[1] ?? 1;
+                if($attempt >= 10) {
+                    //Дата последней СМС
+                    $update_date = explode('|', $userToken->data)[2] ?? gmdate('Y-m-d H:i:s');
+                    //Сколько прошло времени
+                    $wait_time = round(strtotime(gmdate('Y-m-d H:i:s')) - strtotime($update_date));
+                    if($wait_time < 300 && $wait_time > 0) {
+                        throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$wait_time));
+                    }
+                    $attempt = 0;
+                }
+                $data = implode('|',[
+                    'attempt',
+                    ($attempt + 1),
+                    gmdate("Y-m-d H:i:s")
+                ]);
+                $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, $data);
+            }
+        }
+
+        Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $model->profile->phone);
+
+        return ['result' => 1];
+    }
+
+    /**
      * @param array $post
      * [
      *      'user_id' => 1,
@@ -537,12 +588,12 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|new_password_confirm');
         }
 
-        if (!$this->user->validatePassword($post['password'])) {
-            throw new BadRequestHttpException('Bad password');
-        }
+        /*if (!$this->user->validatePassword($post['password'])) {
+            throw new BadRequestHttpException('bad_password');
+        }*/
 
         if ($post['password'] == $post['new_password']) {
-            throw new BadRequestHttpException('You have sent the same password.');
+            throw new BadRequestHttpException('same_password');
         }
 
         $tr = \Yii::$app->db->beginTransaction();
@@ -585,13 +636,13 @@ class UserWebApi extends \api_web\components\WebApi
         }
         //Проверяем телефон
         if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+            throw new ValidationException(['phone' => 'bad_format_phone']);
         }
 
         //Проверяем код, если прилетел
         if (!empty($post['code'])) {
             if (!preg_match('#^\d{4}$#', $post['code'])) {
-                throw new ValidationException(['code' => 'Bad format. (9999)']);
+                throw new ValidationException(['code' => 'bad_format_code']);
             }
         }
 
@@ -599,7 +650,7 @@ class UserWebApi extends \api_web\components\WebApi
         $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
         //Если нет модели, но прилетел какой то код, даем отлуп
         if (empty($model) && !empty($post['code'])) {
-            throw new BadRequestHttpException('Вы еще не запросили код для смены телефона.');
+            throw new BadRequestHttpException('not_code_to_change_phone');
         }
 
         //Если нет модели

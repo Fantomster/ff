@@ -81,7 +81,7 @@ use yii\web\JsExpression;
         $model->doc_date = $rdate;
     }
     ?>
-    <?= $form->field($model, 'doc_date')->label('Дата Документа')->
+    <?= $form->field($model, 'doc_date')->label('Дата документа')->
     widget(DatePicker::classname(), [
         'type' => DatePicker::TYPE_COMPONENT_APPEND,
         'convertFormat' => true,

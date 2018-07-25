@@ -18,8 +18,10 @@ class VsdHttp extends \yii\base\Component {
     public $authLink;
     public $vsdLink;
     public $pdfLink;
+    public $chooseFirmLink;
     public $username;
     public $password;
+    public $firmGuid;
     private $sessionName = 'vsd-http-cookie';
 
     public function getVsdNumberByUuid($uuid) {
@@ -92,6 +94,8 @@ class VsdHttp extends \yii\base\Component {
         $step4 = $this->postForm($action2, false, $inputs2, $step0['cookies']);
 
         $step5 = $this->getPage($step4['redirect_url'], true, $step4['cookies']);
+        
+        $step6 = $this->getPage($this->chooseFirmLink . $this->firmGuid, true, $step4['cookies']);
         
         \Yii::$app->session[$this->sessionName] = $step4['cookies'];
     }

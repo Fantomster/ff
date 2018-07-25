@@ -42,6 +42,7 @@ class RabbitService extends Component
         $connection = $this->connect();
 
         $channel = $connection->channel();
+        
         $channel->queue_declare(
             $this->queue,       #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
             false,              #passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
@@ -49,6 +50,8 @@ class RabbitService extends Component
             false,              #exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
             false               #autodelete - очередь удаляется, когда отписывается последний подписчик
         );
+
+        $channel->queue_bind($this->queue, $this->exchange, $this->queue);
 
         //Публикуем сообщение
         $channel->basic_publish(

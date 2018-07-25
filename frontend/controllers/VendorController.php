@@ -1669,7 +1669,7 @@ class VendorController extends DefaultController {
                     . " FROM `catalog` "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                    . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 "
+                    . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 and catalog_base_goods.status = 1 "
                     . "ORDER BY len DESC, i DESC, c_article_1 ASC, article ASC ";
 
 

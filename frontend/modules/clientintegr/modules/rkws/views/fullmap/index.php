@@ -15,6 +15,7 @@ use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
+use frontend\assets\ProgressBarAsset;
 
 
 ?>
@@ -22,6 +23,7 @@ use api\common\models\RkDicconst;
 
 // $productDesc = empty($model->product_rid) ? '' : $model->product->denom;
 
+ProgressBarAsset::register($this);
 
 ?>
 
@@ -356,15 +358,21 @@ array_push($columns,
     ]);
 */
 ?>
+
+                        <div style="width: 50%; margin: 0 auto;" id="fullmapconsole">
+                            <span id="fmtotal_dig" ></span><span id="fmtotal" ></span>
+                            <span id="fmsuccess_dig" ></span><span id="fmsuccess" ></span>
+                            <span id="fmfailed_dig" ></span><span id="fmfailed" ></span>
+                        </div>
+
 <div align="right">
     <?php
     $loadUrl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/renewcats']);
 
-    echo Html::a('Обновить данные каталогов', $loadUrl, ['class' => 'btn btn-success btn-export']);
+    echo Html::button('Обновить данные каталогов', ['id' => 'fullmapbutton', 'class' => 'btn btn-success btn-export']);
 
     ?>
 </div>
-
                         <?=
 GridView::widget([
     'dataProvider' => $dataProvider,
@@ -401,30 +409,29 @@ GridView::widget([
 </section>
 
 <?php 
-/*
+
 $js = "
-  $('#s_1').on('change', function(){
+  $('#fullmapbutton').on('click', function(){
   
-    alert($('#s_1').checked);
-    return true;
-  /*
+    // alert('Hello');
+  
     $.ajax({
-      url: 'changevat', // путь к php-обработчику
+      url: '".$loadUrl."', // путь к php-обработчику
       type: 'POST', // метод передачи данных
-      dataType: 'json', // тип ожидаемых данных в ответе
-      data: {key: 1}, // данные, которые передаем на сервер
-      beforeSend: function(){ // Функция вызывается перед отправкой запроса
-        output.text('Запрос отправлен. Ждите ответа.');
-      },
+     // dataType: 'json', // тип ожидаемых данных в ответе
+     // data: {key: 1}, // данные, которые передаем на сервер
+     // beforeSend: function(){ // Функция вызывается перед отправкой запроса
+     //   console.log('Запрос отправлен. Ждите ответа.');
+     // },
       error: function(req, text, error){ // отслеживание ошибок во время выполнения ajax-запроса
-        output.text('Хьюстон, У нас проблемы! ' + text + ' | ' + error);
+      console.log('Хьюстон, У нас проблемы! ' + text + ' | ' + error);
       },
-      complete: function(){ // функция вызывается по окончании запроса
-        output.append('<p>Запрос полностью завершен!</p>');
-      },
+     // complete: function(){ // функция вызывается по окончании запроса
+     //   output.append('<p>Запрос полностью завершен!</p>');
+     // },
       success: function(json){ // функция, которая будет вызвана в случае удачного завершения запроса к серверу
         // json - переменная, содержащая данные ответа от сервера. Обзывайте её как угодно ;)
-        output.html(json); // выводим на страницу данные, полученные с сервера
+        console.log(json); // выводим на страницу данные, полученные с сервера
       }
     });
 
@@ -432,7 +439,33 @@ $js = "
 
 ";
     
-$this->registerJs($js);  
-*/
+$this->registerJs($js);
 ?>
 
+<?php
+$customJs = <<< JS
+$('#fmtotal').LineProgressbar({
+		percentage:0,
+		radius: '3px',
+		height: '20px',
+		});
+$('#fmsuccess').LineProgressbar({
+		percentage:0,
+		radius: '3px',
+		height: '20px',
+		fillBackgroundColor: '#DA4453' //цвет бара
+		});
+$('#fmfailed').LineProgressbar({
+		percentage:0,
+		radius: '3px',
+		height: '20px',
+		fillBackgroundColor: '#E0C341' //цвет бара
+		});
+		
+$( document ).ready(function() {
+$('#fullmapconsole').hide();
+});
+
+JS;
+$this->registerJs($customJs, $this::POS_READY);
+?>

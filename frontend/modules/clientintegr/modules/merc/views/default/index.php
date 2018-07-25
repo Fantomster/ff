@@ -10,6 +10,8 @@ use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\widgets\DatePicker;
 use api\common\models\merc\MercVsd;
+
+common\assets\SweetAlertAsset::register($this);
 ?>
 
 <?=
@@ -23,7 +25,7 @@ Modal::widget([
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -32,10 +34,10 @@ Modal::widget([
         ],
         'links' => [
             [
-                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru' => 'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
-            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
@@ -46,26 +48,26 @@ Modal::widget([
     ?>
     <?php
     $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
-    $timestamp_now=time();
-    ($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
-    $columns = array (
+    $timestamp_now = time();
+    ($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))) ? $lic_merc = 1 : $lic_merc = 0;
+    $columns = array(
         [
             'class' => 'yii\grid\CheckboxColumn',
-            'contentOptions'   =>   ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
-            'headerOptions'    =>   ['style' => 'text-align:center; '.$checkBoxColumnStyle],
-            'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
+            'contentOptions' => ['class' => 'small_cell_checkbox', 'style' => $checkBoxColumnStyle],
+            'headerOptions' => ['style' => 'text-align:center; ' . $checkBoxColumnStyle],
+            'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel) {
                 $enable = !($model->status == MercVsd::DOC_STATUS_CONFIRMED) || $searchModel->type == 2;
                 $style = ($enable ) ? "visibility:hidden" : "";
-                return ['value' => $model->uuid,'class'=>'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style ];
+                return ['value' => $model->uuid, 'class' => 'checkbox-group_operations', 'disabled' => $enable, 'readonly' => $enable, 'style' => $style];
             }
         ],
-        /*[
-            'attribute' => 'number',
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['number'];
-            },
-        ],*/
+        /* [
+          'attribute' => 'number',
+          'format' => 'raw',
+          'value' => function ($data) {
+          return $data['number'];
+          },
+          ], */
         [
             'attribute' => 'date_doc',
             'label' => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
@@ -79,7 +81,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status ' . MercVsd::$status_color[$data['status']] . '">'.MercVsd::$statuses[$data['status']].'</span>';
+                return '<span class="status ' . MercVsd::$status_color[$data['status']] . '">' . MercVsd::$statuses[$data['status']] . '</span>';
             },
         ],
         [
@@ -95,7 +97,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['amount']." ".$data['unit'];
+                return $data['amount'] . " " . $data['unit'];
             },
         ],
         [
@@ -103,14 +105,12 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
             'format' => 'raw',
             'value' => function ($data) {
-            $res = $data['production_date'];
-            try{
-                $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
-            }
-            catch (Exception $e)
-            {
                 $res = $data['production_date'];
-            }
+                try {
+                    $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
+                } catch (Exception $e) {
+                    $res = $data['production_date'];
+                }
                 return $res;
             },
         ],
@@ -125,7 +125,7 @@ Modal::widget([
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
-            'template' => '{view}&nbsp;&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;&nbsp;{rejected}',
+            'template' => '{view}&nbsp;&nbsp;{pdf}&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;{rejected}',
             'buttons' => [
                 'view' => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
@@ -137,11 +137,11 @@ Modal::widget([
                             'toggle' => 'modal',
                             'backdrop' => 'static'
                         ],
-                        //'data-pjax' => '0',
+                            //'data-pjax' => '0',
                     ];
                     $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
-                        'style' => 'width: 16px'
+                                'src' => Yii::$app->request->baseUrl . '/img/view_vsd.png',
+                                'style' => 'width: 16px'
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
@@ -159,8 +159,8 @@ Modal::widget([
                         ],
                     ];
                     $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
-                        'style' => 'width: 24px'
+                                'src' => Yii::$app->request->baseUrl . '/img/partial_confirmed.png',
+                                'style' => 'width: 24px'
                     ]);
                     return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
                 },
@@ -178,19 +178,38 @@ Modal::widget([
                         ],
                     ];
                     $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
-                        'style' => 'width: 18px'
+                                'src' => Yii::$app->request->baseUrl . '/img/back_vsd.png',
+                                'style' => 'width: 18px'
                     ]);
-                    return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
+                    return Html::a($icon, ['done-partial', 'uuid' => $model->uuid, 'reject' => true], $options);
+                },
+                'pdf' => function ($url, $model, $key) {
+                    return Html::a('<i class="fa fa-file-pdf-o" aria-hidden="true"></i>', '#', [
+                        'data-pjax' => 0, 
+                        'class' => 'download-pdf', 
+                        'data-url' => Url::to(['get-pdf', 'uuid' => $model->uuid]),
+                        'data-name' => str_replace(' ', '_', $model->product_name . '_' . Yii::$app->formatter->asDatetime($model->date_doc, "php:j M Y") . '.pdf'),
+                        'title' => Yii::t('message', 'frontend.client.integration.pdf', ['ru' => 'Загрузка PDF']),
+                        ]);
                 },
             ]
         ]
     );
-    if ($lic_merc==0) {unset($columns[7]['buttons']['done-partial']);unset($columns[7]['buttons']['rejected']);}
+    if ($lic_merc == 0) {
+        unset($columns[7]['buttons']['done-partial']);
+        unset($columns[7]['buttons']['rejected']);
+    }
     ?>
 </section>
+<?php
+$user = Yii::$app->user->identity;
+if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) {
+echo "<section class=\"content-header\">";
+echo $this->render('/default/_menu.php');
+echo "</section>";
+} ?>
 <section class="content-header">
-    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru'=>'Список ВСД"']) ?>:</h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru' => 'Список ВСД"']) ?>:</h4>
 </section>
 <section class="content-header">
     <div class="box box-info">
@@ -198,71 +217,71 @@ Modal::widget([
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]); ?>
-                    <?php if (Yii::$app->session->hasFlash('success')): ?>
+<?php if (Yii::$app->session->hasFlash('success')): ?>
                         <div class="alert alert-success alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                             <h4>
                                 <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
                             </h4>
-                            <?= Yii::$app->session->getFlash('success') ?>
+                        <?= Yii::$app->session->getFlash('success') ?>
                         </div>
                     <?php endif; ?>
-                    <?php if (Yii::$app->session->hasFlash('error')): ?>
+<?php if (Yii::$app->session->hasFlash('error')): ?>
                         <div class="alert alert-danger alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
                             <h4>
                                 <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
                             </h4>
-                            <?= Yii::$app->session->getFlash('error') ?>
+                        <?= Yii::$app->session->getFlash('error') ?>
                         </div>
                     <?php endif; ?>
-                    <?=
-                    Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
+                    <?= Html::button('<i class="fa fa-upload"></i> ' . Yii::t('app', 'frontend.client.integration.mercury.hand_loading', ['ru' => 'Ручная загрузка ВСД']), ['class' => 'btn btn-success hand_loading']) ?>
                     <?php
                     $searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
-                        'options' => [
-                            'data-pjax' => true,
-                            'id' => 'search-form',
-                            'role' => 'search',
-                        ],
-                        'enableClientValidation' => false,
-                        'method' => 'get',
-                    ]); ?>
+                                'options' => [
+                                    'data-pjax' => true,
+                                    'id' => 'search-form',
+                                    'role' => 'search',
+                                ],
+                                'enableClientValidation' => false,
+                                'method' => 'get',
+                    ]);
+                    ?>
                     <div class="col-md-12">
                         <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'type')
-                                    ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
-                                        [
-                                            1 => ['selected' => true]
-                                        ]
-                                    ])
-                                    ->label(Yii::t('message', 'frontend.views.order.type', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
+                                        $form->field($searchModel, 'type')
+                                        ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
+                                            [
+                                                1 => ['selected' => true]
+                                            ]
+                                        ])
+                                        ->label(Yii::t('message', 'frontend.views.order.type', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
                         <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'status')
-                                    ->dropDownList(MercVsd::$statuses, ['id' => 'statusFilter'])
-                                    ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
+                                        $form->field($searchModel, 'status')
+                                        ->dropDownList(MercVsd::$statuses, ['id' => 'statusFilter'])
+                                        ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
                         <div class="col-sm-3 col-md-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, 'sender_name')
-                                    ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
-                                    ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
+                                        $form->field($searchModel, 'sender_name')
+                                        ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
+                                        ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-6">
-                            <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                                <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                             <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
@@ -285,27 +304,27 @@ Modal::widget([
                         <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, "product_name", [
-                                    'addon' => [
-                                        'append' => [
-                                            'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
-                                            'options' => [
-                                                'class' => 'append',
+                                        $form->field($searchModel, "product_name", [
+                                            'addon' => [
+                                                'append' => [
+                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'options' => [
+                                                        'class' => 'append',
+                                                    ],
+                                                ],
                                             ],
-                                        ],
-                                    ],
-                                ])
-                                    ->textInput(['prompt' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), 'class' => 'form-control', 'id' => 'product_name'])
-                                    ->label(Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), ['class' => 'label search_string', 'style' => 'color:#555'])
+                                        ])
+                                        ->textInput(['prompt' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), 'class' => 'form-control', 'id' => 'product_name'])
+                                        ->label(Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), ['class' => 'label search_string', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
                         <div class="col-sm-3 col-md-2 col-lg-1">
-                            <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-                            <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
+<?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
                     </div>
-                    <?php ActiveForm::end(); ?>
+                        <?php ActiveForm::end(); ?>
                     <div class="col-md-12">
                         <?php
                         $checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
@@ -320,13 +339,13 @@ Modal::widget([
                             'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                             'columns' => $columns
                         ]);
-                        if ($lic_merc==1) {
+                        if ($lic_merc == 1) {
                             if ($searchModel->type != 2 && ($searchModel->status == 'CONFIRMED' || $searchModel->status == null))
                                 echo '<div class="col-md-12">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['class' => 'btn btn-success done_all']) . '</div>';
                         }
                         ?>
                     </div>
-                    <?php Pjax::end(); ?>
+<?php Pjax::end(); ?>
                 </div>
             </div>
         </div>
@@ -341,6 +360,7 @@ $cancelButtonText = Yii::t('message', 'frontend.views.order.close_three', ['ru' 
 $confirmButtonText = Yii::t('message', 'frontend.client.integration.load', ['ru' => 'Загрузить']);
 $error = Yii::t('error', 'frontend.views.order.error_four', ['ru' => 'Ошибка!']);
 $error_text = Yii::t('message', 'frontend.views.order.try_again_four', ['ru' => 'Попробуйте еще раз']);
+$preparePdfText = Yii::t('message', 'frontend.client.integration.pdf_prepare', ['ru' => 'Формируем PDF...']);
 $loadUrl = Url::to(['ajax-load-vsd']);
 $customJs = <<< JS
 var justSubmitted = false;
@@ -478,7 +498,31 @@ $(document).on("click", ".hand_loading", function(e) {
                     }
                 });
             }); 
+    $(document).on('click', '.download-pdf', function(e) {
+        e.preventDefault();
+        url = $(this).data('url');
+        filename = $(this).data('name');
+        swal({
+            title: '$preparePdfText'
+        });
+        swal.showLoading();
+        $.ajax({
+            url: url,
+            method: 'GET',
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (data) {
+                var a = document.createElement('a');
+                var url = window.URL.createObjectURL(data);
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                swal.close();
+            }
+        });
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
-

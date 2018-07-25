@@ -59,7 +59,9 @@ if (!Yii::$app->user->isGuest) {
     }
             
    socket.on('connect', function(){
+                
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
+        
     });
     socket.on('user$user->id', function (data) {
 
@@ -110,11 +112,35 @@ if (!Yii::$app->user->isGuest) {
             }
         }
 
+        
+        if (message.isRabbit == 1) {
+            if (message.action == 'fullmap') {
+                
+                $('#fullmapconsole').show();
+                $('#fullmapbutton').hide();
+                
+                $('#fmtotal').progressTo(Math.round((message.success + message.failed)*100/message.total))
+                $('#fmsuccess').progressTo(Math.round(message.success*100/message.total));
+                $('#fmfailed').progressTo(Math.round(message.failed*100/message.total));
+                
+                $('#fmtotal_dig').text(message.total);
+                $('#fmsuccess_dig').text(message.success);
+                $('#fmfailed_dig').text(message.failed);
+                
+                if(message.total == (message.success + message.failed)) //Все обработано
+                {
+                    $.pjax.reload("#map_grid1", {timeout:30000});
+                }
+            }
+        }
+
+        if (message.isSystem) {
         $.get(
             '$refreshStatsUrl'
         ).done(function(result) {
             refreshMenu(result);
         });
+        }
     });
             
     $(document).on("pjax:complete", "#checkout", function() {

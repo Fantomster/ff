@@ -164,6 +164,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->name_postav = $invoice['invoice']['namePostav'];
         $this->inn_postav = $invoice['invoice']['innPostav'];
         $this->kpp_postav = $invoice['invoice']['kppPostav'];
+        $this->consignee = $invoice['invoice']['nameConsignee'];
 
         if($this->date == '1970-01-01') {
             $this->date = null;
@@ -207,6 +208,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
      */
     public function getBaseGoods(Organization $vendor)
     {
+        $rel = RelationSuppRest::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $vendor->id]);
+        $catalogID = $rel->cat_id ?? null;
         $models = [];
         /**
          * @var $row IntegrationInvoiceContent
@@ -220,16 +223,26 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
 
             if (empty($model)) {
                 $model = new CatalogBaseGoods();
-                $model->cat_id = $vendor->baseCatalog->id;
+                $model->cat_id = $catalogID ?? $vendor->baseCatalog->id;
                 $model->article = $row->article;
                 $model->product = $row->title;
                 $model->supp_org_id = $vendor->id;
                 $model->ed = $row->ed;
+                $model->status = 1;
                 $model->units = 1;
               //  $model->price = $row->price_nds;  // Hotfix 1.5.14
                 $model->price = round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2);
                 if ($model->validate()) {
                     $model->save();
+                    $catalogGood = new CatalogGoods();
+                    $catalogGood->cat_id = $catalogID ?? $vendor->baseCatalog->id;
+                    $catalogGood->base_goods_id = $model->id;
+                    $catalogGood->price = $model->price;
+                    if ($catalogGood->validate()) {
+                        $catalogGood->save();
+                    }else {
+                        throw new \yii\db\Exception(print_r($catalogGood->getFirstErrors(), 1));
+                    }
                 } else {
                     throw new \yii\db\Exception(print_r($model->getFirstErrors(), 1));
                 }

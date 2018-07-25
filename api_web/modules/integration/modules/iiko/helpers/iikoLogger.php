@@ -4,7 +4,6 @@ namespace api_web\modules\integration\modules\iiko\helpers;
 
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use Yii;
-use yii\db\Expression;
 use yii\db\Query;
 use common\models\User;
 use yii\helpers\ArrayHelper;
@@ -12,19 +11,9 @@ use yii\helpers\ArrayHelper;
 class iikoLogger
 {
 
-    private static $tableName = '{{%iiko_log}}';
+    public static $tableName = '{{%iiko_log}}';
     private static $guide;
     private static $row;
-
-    private static $instance;
-
-    function __clone()
-    {
-    }
-
-    function __wakeup()
-    {
-    }
 
     function __construct()
     {
@@ -36,20 +25,12 @@ class iikoLogger
         $this->setUser(\Yii::$app->user->id);
     }
 
-    public static function getInstance()
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
     /**
      * @param $denom
      * @return array|bool
      * @throws \Exception
      */
-    public static function setOperation($denom)
+    public function setOperation($denom)
     {
         $operation = (new Query())
             ->select('code')
@@ -68,11 +49,11 @@ class iikoLogger
      * @param $request
      * @throws \Exception
      */
-    public static function request($request)
+    public function request($request)
     {
         self::update([
             'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
-            'request_at' => Yii::$app->formatter->asDatetime(time(),'yyyy-MM-dd HH:i:ss')
+            'request_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
         ]);
     }
 
@@ -80,20 +61,27 @@ class iikoLogger
      * @param $response
      * @throws \Exception
      */
-    public static function response($response)
+    public function response($response)
     {
         self::update([
             'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
-            'response_at' => Yii::$app->formatter->asDatetime(time(),'yyyy-MM-dd HH:i:ss')
+            'response_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
         ]);
 
-        self::saveToFile();
+        try {
+            \Yii::$app->get('rabbit')
+                ->setQueue(self::getNameQueue())
+                ->setExchange('log')
+                ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
+        } catch(\Exception $e) {
+            Yii::error($e->getMessage());
+        }
     }
 
     /**
      * @param string $type
      */
-    public static function setType($type)
+    public function setType($type)
     {
         self::update([
             'type' => $type
@@ -104,7 +92,7 @@ class iikoLogger
      * @param $user_id
      * @throws \Exception
      */
-    private static function setUser($user_id)
+    private function setUser($user_id)
     {
         $user = User::findOne($user_id);
         if (!empty($user)) {
@@ -143,31 +131,10 @@ class iikoLogger
     }
 
     /**
-     * логируем запросы к базе, в файл, чтобы не попасть в транзакцию.
+     * @return string
      */
-    private static function saveToFile()
+    public static function getNameQueue()
     {
-        //$row = \Yii::$app->db_api->createCommand()->insert(self::$tableName, self::$row[self::$guide])->getRawSql() . ';' . PHP_EOL;
-        //file_put_contents(Yii::getAlias('@runtime') . '/iiko_log.log', $row, FILE_APPEND);
-        self::$instance = null;
-    }
-
-    /**
-     * Сохранение действий в базу
-     */
-    public static function save()
-    {
-        /*$file = Yii::getAlias('@runtime') . '/iiko_log.log';
-        if (file_exists($file)) {
-            $sql = file($file);
-            if (!empty($sql)) {
-                $sql_raw = '';
-                foreach ($sql as $insert) {
-                    $sql_raw .= $insert;
-                }
-                \Yii::$app->db_api->createCommand($sql_raw)->execute();
-            }
-            unlink($file);
-        }*/
+        return 'log_service_' . iikoService::getServiceId();
     }
 }

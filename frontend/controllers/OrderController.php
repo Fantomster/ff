@@ -77,7 +77,8 @@ class OrderController extends DefaultController {
                             'get-attachment',
                             'delete-attachment',
                             'ajax-get-vsd-list',
-                            'ajax-add-good-quantity-to-session'
+                            'ajax-add-good-quantity-to-session',
+                            'ajax-clear-session'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -121,6 +122,7 @@ class OrderController extends DefaultController {
                             'ajax-remove-from-guide',
                             'ajax-show-guide',
                             'ajax-select-vendor',
+                            'ajax-order-update-waybill',
                             'complete-obsolete',
                             'pjax-cart',
                         ],
@@ -670,6 +672,13 @@ class OrderController extends DefaultController {
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
         $guideDataProvider = $guideSearchModel->search($params, $guide->id, $this->currentUser->organization_id);
         $guideDataProvider->pagination = false; //['pageSize' => 8];
+        if (!Yii::$app->request->isPjax){
+            foreach ($_SESSION as $key => &$item) {
+                if (strpos($key, 'uideProductCount')){
+                    unset($_SESSION[$key]);
+                }
+            }
+        }
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'session'));
@@ -2145,7 +2154,7 @@ class OrderController extends DefaultController {
 
         $order = $position->order;
         if ($order->status == 6)
-            throw new BadRequestHttpException('Access denided');
+            throw new BadRequestHttpException('Access denied');
 
         if (!$position->save(false))
             throw new BadRequestHttpException('SaveError');
@@ -2383,6 +2392,26 @@ class OrderController extends DefaultController {
         $value = Yii::$app->request->get('quantity');
         $session = Yii::$app->session;
         $session['GuideProductCount.'.$key] = $value;
+    }
+
+
+    public function actionAjaxOrderUpdateWaybill(){
+        $waybillNumber = Yii::$app->request->post('waybill_number') ?? null;
+        $orderID = Yii::$app->request->post('order_id') ?? null;
+        if(!$orderID) return 0;
+        $order = Order::findOne(['id' => $orderID]);
+        $order->waybill_number = $waybillNumber;
+        $order->save();
+        return $waybillNumber;
+    }
+
+
+    public function actionAjaxClearSession(){
+        foreach ($_SESSION as $key => &$item) {
+            if (strpos($key, 'uideProductCount')){
+                unset($_SESSION[$key]);
+            }
+        }
     }
     
 }

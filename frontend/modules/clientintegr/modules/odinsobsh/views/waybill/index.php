@@ -6,9 +6,14 @@ use common\models\Order;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\widgets\Pjax;
+use yii\widgets\ActiveForm;
 
 $this->title = 'Интеграция с 1С Общепит';
-
+$this->registerCss("
+    #select2-ordersearch-vendor_id-container{margin-top:0;}
+        .select2-selection__clear{display: none;}
+");
 ?>
 <section class="content-header">
     <h1>
@@ -40,6 +45,10 @@ $this->title = 'Интеграция с 1С Общепит';
             'attribute' => 'id',
             'contentOptions' => function($data) {
                 return ["id" => "way".$data->id];
+            },
+            'format' => 'raw',
+            'value' => function($data){
+                return \yii\helpers\Html::a($data->id, Url::to(['/order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0", 'target' => '_blank']);
             }
         ],
 //        [
@@ -134,12 +143,39 @@ $this->title = 'Интеграция с 1С Общепит';
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
+                <?php
+                Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
+                $form = ActiveForm::begin([
+                    'options' => [
+                        'data-pjax' => true,
+                        'id' => 'search-form',
+                        //'class' => "navbar-form",
+                        'role' => 'search',
+                    ],
+                    'enableClientValidation' => false,
+                    'method' => 'get',
+                ]);
+                ?>
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding orders-table">
+                        <div class="row">
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <?php echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
+                                    'data' => $organization->getSuppliers(),
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                        'name' => 'sd',
+                                    ],
+                                    'id' => 'orgFilter',
+
+                                ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']); ?>
+                            </div>
+                        </div>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
                             'pjax' => true,
+                            'summary' => '',
                             'filterPosition' => false,
                             'columns' => $columns,
                             'options' => ['class' => 'table-responsive'],
@@ -158,6 +194,8 @@ $this->title = 'Интеграция с 1С Общепит';
                         ?>
                     </div>
                 </div>
+                <?php ActiveForm::end(); ?>
+                <?php Pjax::end() ?>
             </div>
         </div>
     </div>
@@ -332,6 +370,10 @@ $(document).ready(function () {
         }, 1000);
        // jQuery('#w2').dropdown();
     }
+    
+        $(document).on("change", "#ordersearch-vendor_id", function() {
+            $("#search-form").submit();
+        });
 });    
 JS;
 // Register tooltip/popover initialization javascript

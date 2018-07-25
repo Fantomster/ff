@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\modules\integration\interfaces\ServiceInterface;
+use api_web\modules\integration\modules\one_s\models\one_sService;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use yii\base\Exception;
@@ -13,7 +14,8 @@ class IntegrationWebApi extends WebApi
 
     private static $service = [
         iikoService::class,
-        rkeeperService::class
+        rkeeperService::class,
+        one_sService::class
     ];
 
     /**

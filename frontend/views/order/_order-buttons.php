@@ -4,6 +4,8 @@ use common\models\Order;
 use common\models\Organization;
 use yii\helpers\Html;
 
+$url = \yii\helpers\Url::to(['order/ajax-order-update-waybill']);
+
 $this->registerJs('
         $(document).on("click", ".completeEdi", function(e) {
             e.preventDefault();
@@ -21,6 +23,45 @@ $this->registerJs('
                     swal.close();
                 } else {
                     document.location = clicked.data("url")
+                }
+            });
+        });
+        
+        $(document).on("click", "#alWaybillNumber", function(e) {
+            e.preventDefault();
+            var clicked = $(this);
+            var title = "' . Yii::t('app', 'Номер накладной') . ' ";
+            var waybillNumber = $("#alHiddenWaybillNumber").val();
+            swal({
+                title: title,
+                showCancelButton: true,
+                html:"<input type=text id=swal-input1 value=" + waybillNumber + " class=swal2-input>",
+                confirmButtonText: "' . Yii::t('app', 'Сохранить') . ' ",
+                cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel', ['ru' => 'Отмена']) . ' ",
+            }).then(function(result) {
+                if (result.dismiss === "cancel") {
+                    swal.close();
+                } else {
+                    $("#alWaybillNumber").prop("disabled", "disabled");
+                    var val = $("#swal-input1").val();
+                    $.ajax({
+                        url: "'. $url . '",
+                        "data": { "waybill_number": val, "order_id": ' . $order->id . ' },
+                        "type": "POST",
+                        "cache": false,
+                        "success": function () {
+                           if(val == ""){
+                                val = "' . Yii::t('app', 'common.config.main.empty', ['ru' => 'пусто']) . '"
+                            }
+                            $("#alHiddenWaybillNumber").val(val);
+                        },
+                        "error": function () {
+                            alert( "Error detected when sending table data to server" );
+                        }
+			        });
+			        setTimeout(function(){
+			            $("#alWaybillNumber").prop("disabled", false);
+			        }, 3000);
                 }
             });
         });
@@ -178,6 +219,7 @@ if ($order->isObsolete) {
         <p class="ppp"><?= Yii::t('message', 'frontend.views.order.full_sum', ['ru' => 'Общая сумма']) ?></p>
 
         <p class="pppp"><?= $order->total_price ?> <?= $currencySymbol ?></i></p><br>
+        <p class="ps"><?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Номер накладной'), ['class' => 'btn btn-success btnWaybillNumber', 'id' => 'alWaybillNumber']) ?><input type="hidden" value="<?= ($order->waybill_number != null && $order->waybill_number != '') ? $order->waybill_number : Yii::t('app', 'common.config.main.empty', ['ru' => 'пусто']) ?>" id="alHiddenWaybillNumber"></p>
         <p class="ps"><?= Yii::t('message', 'frontend.views.order.including_delivery', ['ru' => 'включая доставку']) ?></p>
         <p class="ps"><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
         <p class="ps"><?= Yii::t('message', 'frontend.views.order.creating_date_three', ['ru' => 'дата создания ']) ?></p>

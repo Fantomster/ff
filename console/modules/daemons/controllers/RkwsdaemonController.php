@@ -10,7 +10,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 /**
  * Class SomeRabbitQueueController
  */
-class DeductionDaemonController extends DaemonController
+class RkwsdaemonController extends DaemonController
 {
     public $host = '91.239.26.33';      #host - имя хоста, на котором запущен сервер RabbitMQ
     public $port = 5672;                #port - номер порта сервиса, по умолчанию - 5672
@@ -34,8 +34,8 @@ class DeductionDaemonController extends DaemonController
      */
     protected function defineJobs()
     {
-        \Yii::trace('Daemon famwork running and working fine');
-        echo "Daemon famwork job running and working fine".PHP_EOL;
+        \Yii::trace('Daemon rkws running and working fine');
+        echo "Daemon rkws job running and working fine".PHP_EOL;
         $channel = $this->getQueue();
         while (count($channel->callbacks)) {
             try {
@@ -59,17 +59,17 @@ class DeductionDaemonController extends DaemonController
      */
     public function doJob($job)
     {
-        \Yii::trace('Daemon famwork job stop');
-        echo "Daemon famwork job running and working fine".PHP_EOL;
+        \Yii::trace('Daemon rkws amqp job stop');
+        echo "Daemon rkws job running and working fine".PHP_EOL;
         if ($job->body === 'quit') {
             $this->ask($job);
             $this->cancel($job);
             return true;
-            \Yii::trace('Daemon famwork close chanel');
-            echo "Daemon famwork close chanel".PHP_EOL;
+            \Yii::trace('Daemon rkws amqp close chanel');
+            echo "Daemon rkws close chanel".PHP_EOL;
         }
 
-        $result =  Yii::$app->deductions->process_deduction($job);
+        $result =  \Yii::$app->rkwsmq->process_rkws($job);
 
         if ($result) {
             $this->ask($job);
@@ -77,8 +77,8 @@ class DeductionDaemonController extends DaemonController
             $this->nask($job);
         }
 
-        \Yii::trace('Daemon famwork job stop');
-        echo "Daemon famwork job stop".PHP_EOL;
+        \Yii::trace('Daemon rkws job stop');
+        echo "Daemon rkws job stop".PHP_EOL;
         return $result;
     }
 
@@ -88,8 +88,8 @@ class DeductionDaemonController extends DaemonController
      */
     protected function getQueue()
     {
-        \Yii::trace('Daemon famwork get queue');
-        echo "Daemon famwork get queue".PHP_EOL;
+        \Yii::trace('Daemon rkws get queue');
+        echo "Daemon rkws get queue".PHP_EOL;
         $exchange = 'router';
         $queue = $this->queue;
         $consumerTag = 'consumer';
@@ -131,8 +131,8 @@ class DeductionDaemonController extends DaemonController
            // $channel->basic_consume($queue, $consumerTag, false, false, false, false, [$this, 'process_message']);
         }
 
-        \Yii::trace('Daemon famwork create chanel');
-        echo "Daemon famwork create chanel".PHP_EOL;
+        \Yii::trace('Daemon rkws create chanel');
+        echo "Daemon rkws create chanel".PHP_EOL;
         return $this->channel;
     }
 

@@ -2,6 +2,7 @@
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
 use api\common\models\AllMaps;
+use api\common\models\RabbitJournal;
 use api\common\models\RkServicedata;
 use yii;
 use api\common\models\RkSession;
@@ -20,6 +21,8 @@ class FullmapHelper extends yii\base\BaseObject  {
 
     public $org;
     public $restr;
+
+    const LIMIT = 100;
     
     public function init() {
 
@@ -37,45 +40,84 @@ class FullmapHelper extends yii\base\BaseObject  {
 
     public function getcats() {
 
+        $sql = "SELECT count(*) FROM `catalog_goods` a left join `catalog_base_goods` b on b.id = a.base_goods_id
+                left join `relation_supp_rest` c on a.cat_id = c.cat_id
+                where a.cat_id IN
+                                  (SELECT cat_id FROM `relation_supp_rest`
+                                  where rest_org_id = ".$this->org." and deleted = 0)
+                                  LIMIT 5";
+
+        $newProdscount = Yii::$app->db->createCommand($sql)->queryScalar();
+
+        if ( $newProdscount == 0)
+            return false;
+
+        $jmodel = new RabbitJournal();
+
+        $jmodel->org_id = $this->org;
+        $jmodel->action = 'fullmap';
+        $jmodel->total_count = $newProdscount;
+        $jmodel->success_count = 0;
+        $jmodel->fail_count = 0;
+
+        if (!$jmodel->save()) {
+            echo "Cant save rabbit journal model";
+            var_dump($jmodel->getErrors());
+            die();
+        }
+
+        $offset = 0;
+        $counter = 0;
+
+        do {
+
         $sql = "SELECT a.*, b.product as product_name, c.supp_org_id as supp_id FROM `catalog_goods` a left join `catalog_base_goods` b on b.id = a.base_goods_id
                 left join `relation_supp_rest` c on a.cat_id = c.cat_id
                 where a.cat_id IN
                                   (SELECT cat_id FROM `relation_supp_rest`
-                                  where rest_org_id = ".$this->org." and deleted = 0)";
+                                  where rest_org_id = ".$this->org." and deleted = 0)
+                                  LIMIT ".self::LIMIT." OFFSET ".$offset;
 
         $newProds = Yii::$app->db->createCommand($sql)->queryAll();
 
-        $counter = 0;
+ //       $counter = 0;
+            $counter = $counter + count($newProds);
+
 
         foreach ($newProds as $prod) {
 
-          $ch = AllMaps::find()->andWhere(["product_id" => $prod['base_goods_id']])->one();
+            $mess['action'] = 'fullmap';
+            $mess['id'] = $jmodel->id;
 
-          if(!empty($ch))
-              continue;
+            $mess['body'] = [
+                'service_id' => 1,
+                'supp_id' => $prod['supp_id'],
+                'cat_id' => $prod['cat_id'],
+                'product_id' => $prod['base_goods_id'],
+                'org_id' => $this->org,
+                'koef' => 1,
+                'is_active' => 1,
+            ];
 
-          $model = new AllMaps();
+            //\Yii::$app->rkwsmq->addRabbitQueue(serialize($mess));
 
-          $model->service_id = 1;
-          $model->supp_id = $prod["supp_id"];
-          $model->cat_id = $prod["cat_id"];
-          $model->product_id = $prod["base_goods_id"];
-          $model->org_id = $this->org;
-          $model->koef = 1;
-          $model->is_active = 1;
-
-          if (!$model->save()) {
-              echo "Can't save catalog model";
-              die();
-          }
-
-           $counter++;
+            try {
+                \Yii::$app->get('rabbit')
+                    ->setQueue('rkws')
+                    ->setExchange('router')
+                    ->addRabbitQueue(serialize($mess));
+            } catch(\Exception $e) {
+                Yii::error($e->getMessage());
+            }
 
         }
 
-        return $counter;
-    }
+            $offset += self::LIMIT;
 
-    
+        } while (count($newProds) == self::LIMIT || $counter == 2000);
+
+
+        }
+
     
 }

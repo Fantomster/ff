@@ -465,8 +465,8 @@ class GuideController extends WebApiController
      *                                   "vendor_id": 1,
      *                                   "product": "Название товара",
      *                                   "price": {
-     *                                          "start": 100,
-     *                                          "end": 300,
+     *                                          "from": 100,
+     *                                          "to": 300,
      *                                    }
      *                               },
      *                               "pagination":{

@@ -43,8 +43,10 @@ class ChatWebApi extends WebApi
 
         $search = Order::find()->select([
             'order.*',
-            '(SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id and viewed = 0 AND recipient_id = `order`.client_id) as  last_message_date'
-        ])->where($where);
+            '(
+                SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id AND recipient_id = :org_id
+             ) as last_message_date'
+        ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {
             throw new BadRequestHttpException("Нет диалогов");
@@ -60,7 +62,7 @@ class ChatWebApi extends WebApi
             }
         }
 
-        $search->orderBy('last_message_date desc, order.created_at DESC');
+        $search->orderBy("last_message_date DESC");
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()
@@ -130,7 +132,7 @@ class ChatWebApi extends WebApi
         foreach ($dataProvider->models as $model) {
             $message = $this->prepareMessage($model);
 
-            if($message['is_my_message'] === false && $message['viewed'] === false) {
+            if ($message['is_my_message'] === false && $message['viewed'] === false) {
                 $model->viewed = true;
                 $model->save();
             }
@@ -269,14 +271,68 @@ class ChatWebApi extends WebApi
     /**
      * Отмечаем все сообщения прочитаными
      * @return array
+     * @throws \Exception
      */
     public function readAllMessages()
     {
-        $result = ['result' => (int)OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->user->organization->id, 'viewed' => 0])];
-        Notice::init('Chat')->readAllMessages($this->user->organization->id);
-        return $result;
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            OrderChat::updateAll(['viewed' => 1], [
+                'recipient_id' => $this->user->organization->id,
+                'viewed' => 0
+            ]);
+            $transaction->commit();
+            Notice::init('Chat')->readAllMessages($this->user->organization->id);
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
+    /**
+     * Пометить сообщения прочитанными
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function readMessages($post)
+    {
+        if (empty($post['dialog_id'])) {
+            throw new BadRequestHttpException("empty_param|dialog_id");
+        }
+
+        $order = Order::find()->where(['id' => $post['dialog_id']])->andWhere([
+            'or',
+            ['client_id' => $this->user->organization_id],
+            ['vendor_id' => $this->user->organization_id]
+        ])->one();
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            OrderChat::updateAll(['viewed' => 1], [
+                'recipient_id' => $this->user->organization->id,
+                'viewed' => 0,
+                'order_id' => $order->id
+            ]);
+            $transaction->commit();
+            Notice::init('Chat')->readAllMessages($this->user->organization->id);
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @param null $r_id
+     * @return int
+     */
     public function getUnreadMessageCount($r_id = null)
     {
         $recipient_id = $r_id ?? $this->user->organization->id;
@@ -320,7 +376,7 @@ class ChatWebApi extends WebApi
             'vendor_id' => (int)$model->vendor->id,
             'image' => $model->vendor->pictureUrl ?? '',
             'count_message' => (int)$model->orderChatCount ?? 0,
-            'unread_message' => (int)$model->getOrderChatUnreadCount($model->client->id) ?? 0,
+            'unread_message' => (int)$model->getOrderChatUnreadCount($this->user->organization_id) ?? 0,
             'last_message' => $last_message,
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];

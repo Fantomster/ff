@@ -7,6 +7,11 @@
 ?>
 <main class="content content-inner ">
 <?php
-var_dump($test);
+var_dump($step7['content']);
+//echo \yii\helpers\HtmlPurifier::process($data6);
+//echo yii2assets\pdfjs\PdfJs::widget([
+//    'data' => $step7['content'],
+//]);
+var_dump($vsdNum);
 ?>
 </main><!-- .content -->

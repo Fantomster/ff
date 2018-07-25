@@ -358,7 +358,6 @@ class ClientWebApi extends WebApi
 
                 if ($model->validate() && $model->save()) {
                     $t->commit();
-                    return $this->notificationList();
                 } else {
                     throw new ValidationException($model->getFirstErrors());
                 }
@@ -367,6 +366,8 @@ class ClientWebApi extends WebApi
                 throw $e;
             }
         }
+
+        return $this->notificationList();
     }
 
     /**
@@ -655,14 +656,14 @@ class ClientWebApi extends WebApi
             }
 
             if (!empty($post['phone'])) {
-                $user->profile->setAttribute('phone', $post['phone']);
-            }
-
-            if (!empty($post['email']) && $post['email'] != $user->email) {
-                if (User::find()->where(['email' => $post['email']])->exists()) {
-                    throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+                $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
+                if (mb_substr($phone, 0, 1) == '8') {
+                    $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
                 }
-                $user->email = $post['email'];
+                if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+                    throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+                }
+                $user->profile->setAttribute('phone', $phone);
             }
 
             if (!empty($post['role_id'])) {
@@ -712,6 +713,10 @@ class ClientWebApi extends WebApi
 
         if (empty($post['id'])) {
             throw new BadRequestHttpException('empty_param|id');
+        }
+
+        if ($post['id'] === $this->user->id) {
+            throw new BadRequestHttpException('Удаление себя из списка сотрудников недоступно.');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();

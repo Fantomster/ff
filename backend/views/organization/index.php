@@ -60,7 +60,7 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($data) {
             if(!empty($data->franchiseeAssociate)){
-                return '<span class="text-success">Да</span>';
+              return '<span class="text-success">Да</span>';
             }
             return '';
         }
@@ -92,52 +92,52 @@ $gridColumns = [
     // 'step',
 ];
 ?>
-    <div class="organization-index">
+<div class="organization-index">
 
-        <h1><?= Html::encode($this->title) ?> .</h1>
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <h1><?= Html::encode($this->title) ?> .</h1>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-        <?php
-        echo ExportMenu::widget([
-            'dataProvider' => $dataProvider,
-            'columns' => $gridColumns,
-            'target' => ExportMenu::TARGET_SELF,
-            'batchSize' => 200,
-            'timeout' => 0,
-            'noExportColumns' => [
-                6,
-                7
+    <?php
+    echo ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'columns' => $gridColumns,
+        'target' => ExportMenu::TARGET_SELF,
+        'batchSize' => 200,
+        'timeout' => 0,
+        'noExportColumns' => [
+            6,
+            7
+        ],
+        'exportConfig' => [
+            ExportMenu::FORMAT_HTML => false,
+            ExportMenu::FORMAT_TEXT => false,
+            ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_CSV => false,
+            ExportMenu::FORMAT_EXCEL_X => [
+                'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
+                'icon' => 'floppy-remove',
+                'iconOptions' => ['class' => 'text-success'],
+                'linkOptions' => [],
+                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
+                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'extension' => 'xlsx',
+                'writer' => 'Xlsx'
             ],
-            'exportConfig' => [
-                ExportMenu::FORMAT_HTML => false,
-                ExportMenu::FORMAT_TEXT => false,
-                ExportMenu::FORMAT_EXCEL => false,
-                ExportMenu::FORMAT_PDF => false,
-                ExportMenu::FORMAT_CSV => false,
-                ExportMenu::FORMAT_EXCEL_X => [
-                    'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
-                    'icon' => 'floppy-remove',
-                    'iconOptions' => ['class' => 'text-success'],
-                    'linkOptions' => [],
-                    'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
-                    'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
-                    'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'extension' => 'xlsx',
-                    'writer' => 'Xlsx'
-                ],
-            ],
-        ]);
-        ?>
+        ],
+    ]);
+    ?>
 
-        <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
-        <?=
-        GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
-            'columns' => $gridColumns,
-        ]);
-        ?>
-        <?php Pjax::end(); ?></div>
+    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
+    <?=
+    GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+    ]);
+    ?>
+    <?php Pjax::end(); ?></div>
 <?php
 $customJs = <<< JS
 

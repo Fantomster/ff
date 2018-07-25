@@ -685,7 +685,6 @@ class mercuryApi extends baseApi
         $appData->any['ns3:prepareOutgoingConsignmentRequest'] = $data->getPrepareOutgoingConsignmentRequest();
 
         $request->application->data = $appData;
-        dd($request);
         //Делаем запрос
         $result = $client->submitApplicationRequest($request);
 

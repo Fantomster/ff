@@ -588,9 +588,9 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|new_password_confirm');
         }
 
-        if (!$this->user->validatePassword($post['password'])) {
+        /*if (!$this->user->validatePassword($post['password'])) {
             throw new BadRequestHttpException('bad_password');
-        }
+        }*/
 
         if ($post['password'] == $post['new_password']) {
             throw new BadRequestHttpException('same_password');

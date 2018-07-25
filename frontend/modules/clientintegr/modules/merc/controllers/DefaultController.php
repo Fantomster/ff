@@ -225,8 +225,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             'authLink' => Yii::$app->params['vtsHttp']['authLink'],
             'vsdLink' => Yii::$app->params['vtsHttp']['vsdLink'],
             'pdfLink' => Yii::$app->params['vtsHttp']['pdfLink'],
+            'chooseFirmLink' => Yii::$app->params['vtsHttp']['chooseFirmLink'],
             'username' => mercDicconst::getSetting("vetis_login"),
             'password' => mercDicconst::getSetting("vetis_password"), //'2wsx2WSX', //
+            'firmGuid' => mercDicconst::getSetting("issuer_id"),
         ]);
         $data = $vsdHttp->getPdfData($uuid);
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;

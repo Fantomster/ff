@@ -448,6 +448,7 @@ class VendorController extends DefaultController {
             }
 
             $currency = Currency::findOne(['id' => Yii::$app->request->post('currency')]);
+            $mainIndex = Currency::findOne(['id' => Yii::$app->request->post('main_index')]);
 
             $newBaseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
             if (empty($newBaseCatalog)) {
@@ -460,6 +461,7 @@ class VendorController extends DefaultController {
             if (!empty($currency)) {
                 $newBaseCatalog->currency_id = $currency->id;
             }
+            $newBaseCatalog->main_index = $mainIndex;
             $newBaseCatalog->save();
 
             $lastInsert_base_cat_id = $newBaseCatalog->id;

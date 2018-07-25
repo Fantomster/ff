@@ -18,6 +18,13 @@ $currencySymbolList = Json::encode($currencySymbolListList);
 $indexesList = \common\models\Catalog::getMainIndexesList();
 $indexesListJson = Json::encode($indexesList);
 $firstIndex = array_shift($indexesList);
+$firstIndexValue = 'product';
+
+$titleChangeIndex = Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']);
+$indexReject = Yii::t('message', 'frontend.views.vendor.index_reject', ['ru' => 'Этот индекс уже используется']);
+$cancelText = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
+$indexChanged = Yii::t('message', 'frontend.views.vendor.index_changed', ['ru' => 'Индекс изменен!']);
+$next = Yii::t('message', 'frontend.views.vendor.farther', ['ru' => 'Далее']);
 
 /*
  * 
@@ -330,7 +337,7 @@ $("#instruction").on('show.bs.modal', function(){
     });
           
     var indexes = $.map($indexesListJson, function(el) { return el });
-    var currentIndex = '$firstIndex';
+    var currentIndex = '$firstIndexValue';
 
     $(document).on("click", "#changeBaseIndex", function() {
         swal({
@@ -339,7 +346,7 @@ $("#instruction").on('show.bs.modal', function(){
             inputOptions: $indexesListJson,
             showCancelButton: true,
             showLoaderOnConfirm: true,
-            confirmButtonText: '$var13',
+            confirmButtonText: '$next',
             cancelButtonText: '$cancelText',
             allowOutsideClick: false,
             inputValidator: function (value) {

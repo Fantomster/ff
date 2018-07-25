@@ -46,7 +46,7 @@ echo GridView::widget([
                             'name' => "OrderContent[$data->id][quantity]",
                             'pluginOptions' => [
                                 'initval' => $data->quantity,
-                                'min' => 0.001,
+                                'min' => 0,
                                 'max' => PHP_INT_MAX,
                                 'decimals' => 3,
                                 'forcestepdivisibility' => 'none',

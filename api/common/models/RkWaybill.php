@@ -203,22 +203,24 @@ class RkWaybill extends \yii\db\ActiveRecord {
                         $wdmodel->vat = $ch->vat;
 
                     }
-                    
-               
+
+
                     if (!$wdmodel->save()) {
-                        
-                        var_dump($wdmodel->getErrors());
-                        
-                        throw new Exception();
+
+                        //AD: made those changes locally for debug
+                        //var_dump($wdmodel->getErrors());
+                        \Yii::error(serialize($wdmodel->getErrors()));
+                        throw new \Exception();
                     }
                 }
 
                 $transaction->commit();
-            } catch (Exception $ex) {
-                
-                 var_dump($ex);
+            } catch (\Exception $ex) {
 
+                //AD: and also this changes
+                //var_dump($ex);
                 $transaction->rollback();
+                throw new \Exception("Send error code to developer", 31789);
             }
         } 
         

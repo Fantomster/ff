@@ -20,7 +20,7 @@ if (!empty($order->invoice)) {
 
 if (!empty($order->invoiceRelation)) {
     $link = \yii\helpers\Html::a($order->invoiceRelation->order_id, '/order/' . $order->invoiceRelation->order_id);
-    $lang = Yii::t('message', 'frontend.views.order.order_invoice_change', ['ru' => 'заменен заказом на основании накладной 1С']);
+    $lang = Yii::t('message', 'frontend.views.order.order_invoice_change', ['ru' => 'заменён заказом на основании накладной 1С']);
     $title = $this->title . " $lang №" . $link;
 }
 
@@ -44,21 +44,21 @@ $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $edit = false;
 
 $arr = [
-    Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохраненные изменения!']),
+    Yii::t('message', 'frontend.views.order.var1', ['ru' => 'Несохранённые изменения!']),
     Yii::t('message', 'frontend.views.order.var2', ['ru' => 'Вы изменили заказ, но не сохранили изменения!']),
     Yii::t('message', 'frontend.views.order.var3', ['ru' => 'Уйти']),
     Yii::t('message', 'frontend.views.order.var4', ['ru' => 'Остаться']),
     Yii::t('message', 'frontend.views.order.var5', ['ru' => 'Удаление позиции из заказа']),
-    Yii::t('message', 'frontend.views.order.var6', ['ru' => 'Товар будет удален из заказа. Продолжить?']),
+    Yii::t('message', 'frontend.views.order.var6', ['ru' => 'Товар будет удалён из заказа. Продолжить?']),
     Yii::t('message', 'frontend.views.order.var7', ['ru' => 'Да, удалить']),
     Yii::t('message', 'frontend.views.order.var8', ['ru' => 'Отмена']),
-    Yii::t('message', 'frontend.views.order.var9', ['ru' => 'Товар удален из заказа!']),
+    Yii::t('message', 'frontend.views.order.var9', ['ru' => 'Товар удалён из заказа!']),
     Yii::t('message', 'frontend.views.order.var10', ['ru' => 'Действительно отменить заказ?']),
     Yii::t('message', 'frontend.views.order.var11', ['ru' => 'Комментарий']),
     Yii::t('message', 'frontend.views.order.var12', ['ru' => 'Нет']),
     Yii::t('message', 'frontend.views.order.var13', ['ru' => 'Да']),
     Yii::t('message', 'frontend.views.order.var14', ['ru' => 'Ошибка!']),
-    Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте еще раз']),
+    Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте ещё раз']),
 ];
 
 $js = <<<JS
@@ -144,7 +144,7 @@ $js = <<<JS
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
             target = $(this).data("target");
-            $(target).val(0);
+            $(target).val(-1);
             var form = $("#editOrder");
             swal({
                 title: "$arr[4]",

@@ -729,7 +729,7 @@ class OrderController extends DefaultController {
         $data = [];
         foreach ($guideProducts as $productId => $quantity) {
 
-            if ($quantity <= 0) {
+            if ($quantity < 0) {
                 continue;
             }
 
@@ -773,7 +773,7 @@ class OrderController extends DefaultController {
     public function actionAjaxAddToCart() {
         $post = Yii::$app->request->post();
         $quantity = $post['quantity'];
-        if ($quantity <= 0) {
+        if ($quantity < 0) {
             return false;
         }
 
@@ -1189,7 +1189,7 @@ class OrderController extends DefaultController {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
-                        if ($position['quantity'] == 0) {
+                        if ($position['quantity'] == -1) {
                             $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $product->product_name]);
                         } else {
                             $oldQuantity = $product->quantity + 0;
@@ -1205,7 +1205,7 @@ class OrderController extends DefaultController {
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
-                    if ($product->quantity == 0) {
+                    if ($product->quantity == -1) {
                         $product->delete();
                     } else {
                         $product->save();
@@ -1330,7 +1330,7 @@ class OrderController extends DefaultController {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
-                        if ($position['quantity'] == 0) {
+                        if ($position['quantity'] == -1) {
                             $message .= Yii::t('message', 'frontend.controllers.del_two', ['ru' => '<br/> удалил {prod} из заказа', 'prod' => $product->product_name]);
                         } else {
                             $oldQuantity = $product->quantity + 0;
@@ -1355,7 +1355,7 @@ class OrderController extends DefaultController {
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
-                    if ($product->quantity == 0) {
+                    if ($product->quantity == -1) {
                         $deleted[$product->id] = $product;
                         $product->delete();
                     } else {

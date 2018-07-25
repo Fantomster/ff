@@ -57,7 +57,7 @@ $this->registerJs('
             e.preventDefault();
             clicked = $(this);
             if($(this).hasClass("completeEdi")){
-                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приеме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете, корректность данных?']) . ' ";
+                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приёме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете корректность данных?']) . ' ";
             }else{
                 var title = clicked.data("original-title") + "?";
             }
@@ -194,7 +194,7 @@ $this->registerCss("
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <?=
                     $form->field($searchModel, 'status')
-                        ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru' => 'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru' => 'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru' => 'Завершен'])], ['id' => 'statusFilter'])
+                        ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru' => 'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru' => 'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru' => 'Завершён'])], ['id' => 'statusFilter'])
                         ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                     ?>
                 </div>

@@ -16,6 +16,7 @@ $currencyList = Json::encode(Currency::getList());
 $currencySymbolList = Json::encode($currencySymbolListList);
 
 $indexesList = \common\models\Catalog::getMainIndexesList();
+$indexesListJson = Json::encode($indexesList);
 $firstIndex = array_shift($indexesList);
 
 /*
@@ -117,7 +118,7 @@ if (false) {
                 )
                 ?>
                 <?=
-                Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']) . ' </span> <span class="base_index">' . $firstIndex . '</span>', [
+                Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']) . ' </span> <span class="main-index">' . $firstIndex . '</span>', [
                     'class' => 'btn btn-default pull-right',
                     'style' => ['margin' => '0 5px;'],
                     'id' => 'changeBaseIndex',
@@ -328,9 +329,47 @@ $("#instruction").on('show.bs.modal', function(){
         })        
     });
           
-    var indexes = $.map($indexesList, function(el) { return el });
+    var indexes = $.map($indexesListJson, function(el) { return el });
     var currentIndex = '$firstIndex';
-   
+
+    $(document).on("click", "#changeBaseIndex", function() {
+        swal({
+            title: '$titleChangeIndex',
+            input: 'select',
+            inputOptions: $indexesListJson,
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            confirmButtonText: '$var13',
+            cancelButtonText: '$cancelText',
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (value != currentIndex) {
+                        currentCurrency = value;
+                        $(".main-index").html(indexes[currentIndex-1]);
+                        resolve();
+                    } else {
+                        swal({
+                            type: "error",
+                            title: "$indexReject"
+                        });
+                    }
+                })
+            }
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    type: "success",
+                    title: "$indexChanged",
+                    allowOutsideClick: true,
+                }).then(function (result) {
+                    $.pjax.reload({container: "body", timeout:1000000});
+                });
+            }
+        })        
+    });
         
 JS;
 $this->registerJs($customJs, View::POS_READY);

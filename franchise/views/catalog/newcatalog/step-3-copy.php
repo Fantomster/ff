@@ -89,7 +89,6 @@ $this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.edit_products_t
 ])
 ?>
 <?php
-//dd($array);
 $arr0= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
 

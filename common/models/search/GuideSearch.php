@@ -110,7 +110,6 @@ class GuideSearch extends Guide
         if (isset($this->vendors)) {
             $query->andWhere(['IN', CatalogBaseGoods::tableName() . '.supp_org_id', $this->vendors]);
         }
-        //dd($query);
 
         return $dataProvider;
     }

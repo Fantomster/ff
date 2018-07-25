@@ -39,10 +39,6 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
         <div class="box-body">
 
             <div class="panel-body">
-                <ul class="nav fk-tab nav-tabs  pull-left">
-                    <?= '<li class="">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции'])) . '</li>';?>
-                    <?= '<li class="active">'.Html::a(Yii::t('app', 'frontend.client.integration.store_entry.conversion', ['ru' => 'Переработка']).' <i class="fa fa-fw fa-hand-o-right"></i>',['step-2'],['class'=>'btn btn-default']).'</li>';?>
-                </ul>
                 <ul class="fk-prev-next pull-right">
                     <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru'=>'Назад']), ['conversion-step-1']) . '</li>' ?>
                 </ul>
@@ -177,7 +173,7 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                     ?>
                 </div>
                 <div class="form-group">
-                    <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' => 'btn btn-success']) ?>
+                    <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' => 'btn btn-success', 'disabled' => 'disabled', 'id' => 'alSubmitVSDButton']) ?>
                 </div>
             </div>
         </div>
@@ -245,7 +241,13 @@ $("document").ready(function(){
                         form.replaceWith(result);
                     });
      }); 
- });     
+ });
+
+$("document").ready(function() {
+  $("#StockEntryForm").on("change", "#inputdate-first_date", function() {
+    $("#alSubmitVSDButton").prop('disabled', false);
+  })
+})
 
 JS;
 $this->registerJs($customJs, $this::POS_READY);

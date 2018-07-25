@@ -41,12 +41,6 @@ CSS;
 <div class="box box-info">
     <div class="box-body">
             <div class="panel-body">
-                <ul class="nav fk-tab nav-tabs  pull-left">
-                    <?= '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_select_product', ['ru'=>' Выбор продукции']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['step-1'],['class'=>'btn btn-default']).'</li>';?>
-                    <?= '<li class="">'.Html::a(Yii::t('message', 'frontend.views.mercury.new_transport_vsd_vet_info', ['ru'=>'Ветеринарная Экспертиза'])).'</li>';?>
-                </ul>
-
-
                 <ul class="fk-prev-next pull-right">
                   <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>

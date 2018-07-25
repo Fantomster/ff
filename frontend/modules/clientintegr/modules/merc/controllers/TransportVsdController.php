@@ -305,6 +305,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                     $request->step1 = $session->get('TrVsd_step1');
                     //try {
                         $result = mercuryApi::getInstance()->registerProductionOperation($request);
+                        //dd($result);
                         Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
                         return $this->redirect(['index']);
                         if(!isset($result))

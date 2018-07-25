@@ -733,7 +733,7 @@ class mercuryApi extends baseApi
         $data->initiator = new User();
         $data->initiator->login = $this->vetisLogin;
 
-        $appData->any['ns3:prepareOutgoingConsignmentRequest'] = $data->getRegisterProductionRequest();
+        $appData->any['ns3:prepareRegisterProductionOperationRequest'] = $data->getRegisterProductionRequest();
 
         $request->application->data = $appData;
 

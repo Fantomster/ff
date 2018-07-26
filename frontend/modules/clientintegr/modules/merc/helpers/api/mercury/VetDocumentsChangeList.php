@@ -11,7 +11,7 @@ class VetDocumentsChangeList extends Model
 {
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
-        $list = is_array($list) ? $list : [$list->vetDocument];
+        $list = is_array($list) ? $list : [$list];
         foreach ($list as $item)
         {
             if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)

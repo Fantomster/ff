@@ -43,50 +43,48 @@ class CreateRegisterProductionRequest extends Component{
         ];
 
         $array['productiveBatch'] = [
-            'productType' => 1,
-            'sourceStockEntry' => [
+            'product' => [
                 'uuid' => $this->step2['product']
+            ],
+            'subProduct' => [
+                'uuid' => $this->step2['subProduct']
             ],
             'volume' => $this->step2['volume'],
             'unit' => [
                 'uuid' => $this->step2['unit']
             ],
         ];
+        $request->productionOperation = $array;
 
-
-        $request->productionOperation->rawBatch = 1;
         //dd($request);
 
         $consigments = [];
         $vetCertificates = [];
         foreach ($this->step1 as $id => $product) {
-            $consigment = new Consignment();
-            $consigment->id = 'con'.$id;
-            $stock = MercStockEntry::findOne(['id' => $id]);
-            $stock_raw = unserialize($stock->raw_data);
-            if($stock->product_name != $product['product_name'])
-            {
-
-            }
-            $consigment->volume = $product['select_amount'];
-            $consigment->unit = new Unit();
-            $consigment->unit = $stock_raw->batch->unit;
-
-            $consigment->sourceStockEntry = new StockEntry();
-            $consigment->sourceStockEntry->uuid = $stock->uuid;
-            $consigment->sourceStockEntry->guid = $stock->guid;
-
-            $consigments[] = $consigment;
-
-            $vetCertificate = new VetDocument();
-            $vetCertificate->for = 'con'.$id;
-            $vetCertificate->authentication = new VeterinaryAuthentication();
-            $vetCertificate->authentication->purpose = new Purpose();
-//            $vetCertificate->authentication->purpose->guid = $this->step2['purpose'];
-//            $vetCertificate->authentication->cargoExpertized = $this->step2['cargoExpertized'];
-//            $vetCertificate->authentication->locationProsperity = $this->step2['locationProsperity'];
-
-            $vetCertificates[] = $vetCertificate;
+//            $consigment = new Consignment();
+//            $consigment->id = 'con'.$id;
+//            $stock = MercStockEntry::findOne(['id' => $id]);
+//            $stock_raw = unserialize($stock->raw_data);
+//            if($stock->product_name != $product['product_name'])
+//            {
+//
+//            }
+//            $consigment->volume = $product['select_amount'];
+//            $consigment->unit = new Unit();
+//            $consigment->unit = $stock_raw->batch->unit;
+//
+//            $consigment->sourceStockEntry = new StockEntry();
+//            $consigment->sourceStockEntry->uuid = $stock->uuid;
+//            $consigment->sourceStockEntry->guid = $stock->guid;
+//
+//            $consigments[] = $consigment;
+//
+//            $vetCertificate = new VetDocument();
+//            $vetCertificate->for = 'con'.$id;
+//            $vetCertificate->authentication = new VeterinaryAuthentication();
+//            $vetCertificate->authentication->purpose = new Purpose();
+//
+//            $vetCertificates[] = $vetCertificate;
         }
         //dd($request);
         return $request;

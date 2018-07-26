@@ -105,10 +105,6 @@ if (!Yii::$app->user->isGuest) {
                 });
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);
-                try {
-                    $.pjax.reload({container: "#checkout",timeout:30000});
-                } catch(e) {
-                }
             }
         }
 

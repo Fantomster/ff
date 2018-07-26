@@ -228,7 +228,7 @@ class CartWebApi extends \api_web\components\WebApi
             $order->created_by_id = $this->user->id;
             $order->vendor_id = $vendor->id;
             $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-            $order->currency_id = $vendor->baseCatalog->currency_id;
+            $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
             $order->created_at = gmdate("Y-m-d H:i:s");
 
             if (!empty($post['delivery_date'])) {

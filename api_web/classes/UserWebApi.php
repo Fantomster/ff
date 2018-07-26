@@ -331,7 +331,6 @@ class UserWebApi extends \api_web\components\WebApi
         return $result;
     }
 
-
     /**
      * Список поставщиков пользователя
      * @param array $post
@@ -588,9 +587,9 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|new_password_confirm');
         }
 
-        /*if (!$this->user->validatePassword($post['password'])) {
-            throw new BadRequestHttpException('bad_password');
-        }*/
+        if (!$this->user->validatePassword($post['password'])) {
+            throw new BadRequestHttpException('bad_old_password');
+        }
 
         if ($post['password'] == $post['new_password']) {
             throw new BadRequestHttpException('same_password');
@@ -602,6 +601,10 @@ class UserWebApi extends \api_web\components\WebApi
             $this->user->newPassword = $post['new_password'];
             $this->user->newPasswordConfirm = $post['new_password_confirm'];
 
+            if(!$this->user->validate(['newPassword'])) {
+                throw new BadRequestHttpException('bad_password|' . $this->randomPassword());
+            }
+
             if (!$this->user->validate() || !$this->user->save()) {
                 throw new ValidationException($this->user->getFirstErrors());
             }
@@ -610,7 +613,7 @@ class UserWebApi extends \api_web\components\WebApi
             return ['result' => true];
         } catch (\Exception $e) {
             $tr->rollBack();
-            return ['result' => false];
+            throw $e;
         }
 
     }
@@ -739,5 +742,17 @@ class UserWebApi extends \api_web\components\WebApi
             'rating' => $model->vendor->rating ?? 0,
             'allow_editing' => $model->vendor->allow_editing
         ];
+    }
+
+    private function randomPassword() {
+        $pass = '';
+        $alphabet = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,w,x,y,z,";
+        $alphabet .= "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,W,X,Y,Z,";
+        $alphabet = explode(',', $alphabet);
+        for ($i = 0; $i < 6; $i++) {
+            $n = rand(0, count($alphabet)-1);
+            $pass .= $alphabet[$n];
+        }
+        return $pass . rand(111,999);
     }
 }

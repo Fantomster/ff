@@ -51,6 +51,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             ['vat', 'in', 'allowArray' => true,  'range' => [0, 1000, 1800] ],
             //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
+            ['vat', 'in', 'allowArray' => true,  'range' => [0, 1000, 1800] ],
             ['koef', 'filter', 'filter' => function ($value) {
                         $newValue = 0 + str_replace(',', '.', $value);
                         return $newValue;

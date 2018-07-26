@@ -27,6 +27,7 @@ class UserWebApi extends \api_web\components\WebApi
 {
 
     /**
+     * Информация о пользователе
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -55,22 +56,11 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Создание пользователя
      * @param array $post
-     * [
-     *      'user' => [
-     *          'email' => 'email@email.ru',
-     *          'password' => '123123'
-     *      ],
-     *      'profile' => [
-     *          'phone' => '+79276665544'
-     *      ],
-     *      'organization' => [
-     *          'type_id' => 1
-     *      ]
-     * ]
      * @return string
-     * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \Exception
      */
     public function create(array $post)
     {
@@ -214,13 +204,10 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Подтверждение регистрации
      * @param array $post
-     * [
-     *      'user_id' => 1,
-     *      'code' => 2233
-     * ]
      * @return string
-     * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function confirm(array $post)
     {
@@ -255,13 +242,11 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Выбор бизнеса
      * @param array $post
-     * [
-     *      'organization_id' => 12
-     * ]
      * @param array $post
      * @return bool
-     * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function setOrganization(array $post)
     {
@@ -312,6 +297,7 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Список бизнесов пользователя
      * @return array
      * @throws BadRequestHttpException
      */
@@ -527,6 +513,7 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Отключить поставщика
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -572,6 +559,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function changePassword($post)
     {

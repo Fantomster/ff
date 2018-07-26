@@ -183,23 +183,23 @@ class UserWebApi extends \api_web\components\WebApi
 
         $userToken = UserToken::findByUser($model->id, UserToken::TYPE_EMAIL_ACTIVATE);
 
-        if(empty($userToken)) {
-            $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, 'attempt|1|'.gmdate("Y-m-d H:i:s"));
+        if (empty($userToken)) {
+            $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, 'attempt|1|' . gmdate("Y-m-d H:i:s"));
         } else {
-            if(!empty($userToken->data)) {
+            if (!empty($userToken->data)) {
                 //Какая попытка
                 $attempt = explode('|', $userToken->data)[1] ?? 1;
-                if($attempt >= 10) {
+                if ($attempt >= 10) {
                     //Дата последней СМС
                     $update_date = explode('|', $userToken->data)[2] ?? gmdate('Y-m-d H:i:s');
                     //Сколько прошло времени
                     $wait_time = round(strtotime(gmdate('Y-m-d H:i:s')) - strtotime($update_date));
-                    if($wait_time < 300 && $wait_time > 0) {
+                    if ($wait_time < 300 && $wait_time > 0) {
                         throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$wait_time));
                     }
                     $attempt = 0;
                 }
-                $data = implode('|',[
+                $data = implode('|', [
                     'attempt',
                     ($attempt + 1),
                     gmdate("Y-m-d H:i:s")
@@ -330,7 +330,6 @@ class UserWebApi extends \api_web\components\WebApi
 
         return $result;
     }
-
 
     /**
      * Список поставщиков пользователя
@@ -588,9 +587,9 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|new_password_confirm');
         }
 
-        /*if (!$this->user->validatePassword($post['password'])) {
-            throw new BadRequestHttpException('bad_password');
-        }*/
+        if (!$this->user->validatePassword($post['password'])) {
+            throw new BadRequestHttpException('bad_old_password');
+        }
 
         if ($post['password'] == $post['new_password']) {
             throw new BadRequestHttpException('same_password');
@@ -602,6 +601,10 @@ class UserWebApi extends \api_web\components\WebApi
             $this->user->newPassword = $post['new_password'];
             $this->user->newPasswordConfirm = $post['new_password_confirm'];
 
+            if (!$this->user->validate(['newPassword'])) {
+                throw new BadRequestHttpException('bad_password|' . $this->randomPassword());
+            }
+
             if (!$this->user->validate() || !$this->user->save()) {
                 throw new ValidationException($this->user->getFirstErrors());
             }
@@ -610,7 +613,7 @@ class UserWebApi extends \api_web\components\WebApi
             return ['result' => true];
         } catch (\Exception $e) {
             $tr->rollBack();
-            return ['result' => false];
+            throw $e;
         }
 
     }
@@ -739,5 +742,22 @@ class UserWebApi extends \api_web\components\WebApi
             'rating' => $model->vendor->rating ?? 0,
             'allow_editing' => $model->vendor->allow_editing
         ];
+    }
+
+    /**
+     * Генератор случайного пароля
+     * @return string
+     */
+    private function randomPassword()
+    {
+        $pass = '';
+        $alphabet = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,w,x,y,z,";
+        $alphabet .= "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,W,X,Y,Z,";
+        $alphabet = explode(',', $alphabet);
+        for ($i = 0; $i < 6; $i++) {
+            $n = rand(0, count($alphabet) - 1);
+            $pass .= $alphabet[$n];
+        }
+        return $pass . rand(111, 999);
     }
 }

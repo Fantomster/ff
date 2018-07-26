@@ -1,1 +1,0 @@
-2018/06/14 18:25:40 [error] 1807#1807: *181 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 192.168.83.1, server: backend.mixcart.loc, request: "GET /integration HTTP/1.1", upstream: "fastcgi://unix:/var/run/php/php7.1-fpm.sock", host: "backend.mixcart.loc", referrer: "http://backend.mixcart.loc/iiko/index"

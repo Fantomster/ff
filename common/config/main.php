@@ -74,9 +74,9 @@ return [
 //                'prequest' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
-//                'yii' => [
-//                    'class' => 'yii\i18n\PhpMessageSource'
-//                ],
+                'yii' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
                 'app' => [
                     'class' => 'yii\i18n\DbMessageSource',
                     'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']

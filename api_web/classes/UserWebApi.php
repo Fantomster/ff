@@ -183,23 +183,23 @@ class UserWebApi extends \api_web\components\WebApi
 
         $userToken = UserToken::findByUser($model->id, UserToken::TYPE_EMAIL_ACTIVATE);
 
-        if(empty($userToken)) {
-            $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, 'attempt|1|'.gmdate("Y-m-d H:i:s"));
+        if (empty($userToken)) {
+            $userToken = UserToken::generate($model->id, UserToken::TYPE_EMAIL_ACTIVATE, 'attempt|1|' . gmdate("Y-m-d H:i:s"));
         } else {
-            if(!empty($userToken->data)) {
+            if (!empty($userToken->data)) {
                 //Какая попытка
                 $attempt = explode('|', $userToken->data)[1] ?? 1;
-                if($attempt >= 10) {
+                if ($attempt >= 10) {
                     //Дата последней СМС
                     $update_date = explode('|', $userToken->data)[2] ?? gmdate('Y-m-d H:i:s');
                     //Сколько прошло времени
                     $wait_time = round(strtotime(gmdate('Y-m-d H:i:s')) - strtotime($update_date));
-                    if($wait_time < 300 && $wait_time > 0) {
+                    if ($wait_time < 300 && $wait_time > 0) {
                         throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$wait_time));
                     }
                     $attempt = 0;
                 }
-                $data = implode('|',[
+                $data = implode('|', [
                     'attempt',
                     ($attempt + 1),
                     gmdate("Y-m-d H:i:s")
@@ -601,7 +601,7 @@ class UserWebApi extends \api_web\components\WebApi
             $this->user->newPassword = $post['new_password'];
             $this->user->newPasswordConfirm = $post['new_password_confirm'];
 
-            if(!$this->user->validate(['newPassword'])) {
+            if (!$this->user->validate(['newPassword'])) {
                 throw new BadRequestHttpException('bad_password|' . $this->randomPassword());
             }
 
@@ -744,15 +744,20 @@ class UserWebApi extends \api_web\components\WebApi
         ];
     }
 
-    private function randomPassword() {
+    /**
+     * Генератор случайного пароля
+     * @return string
+     */
+    private function randomPassword()
+    {
         $pass = '';
         $alphabet = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,w,x,y,z,";
         $alphabet .= "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,W,X,Y,Z,";
         $alphabet = explode(',', $alphabet);
         for ($i = 0; $i < 6; $i++) {
-            $n = rand(0, count($alphabet)-1);
+            $n = rand(0, count($alphabet) - 1);
             $pass .= $alphabet[$n];
         }
-        return $pass . rand(111,999);
+        return $pass . rand(111, 999);
     }
 }

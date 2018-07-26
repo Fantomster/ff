@@ -243,7 +243,12 @@ $this->registerJs('
             url,
             form.serialize()
         ).done(function(result) {
-            $("#guideModal").modal("toggle");
+            console.log(result);
+            if(result == false){
+                $("#guideModal .modal-header").append("<p class=bg-danger>' . Yii::t('message', 'frontend.views.order.guides.quantity', ['ru'=>'Кол-во товаров:']) . ' 0</p>");
+            }else{
+                $("#guideModal").modal("toggle");
+            }
         });
     });
     

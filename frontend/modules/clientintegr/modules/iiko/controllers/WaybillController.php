@@ -62,7 +62,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         return $model->$attribute / 100;
                     } else {
                         $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-                        $model->save(false);
+                        //$model->save(false);
                         return round($model->$attribute, 6);
                     }
                 },

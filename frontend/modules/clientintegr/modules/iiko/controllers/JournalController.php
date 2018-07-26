@@ -18,6 +18,7 @@ class JournalController extends Controller
         $user = User::findOne(\Yii::$app->user->getId());
         $searchModel = new JournalSearch();
         $searchModel->service_id = iikoService::getServiceId();
+        $searchModel->organizations = array_keys(\yii\helpers\ArrayHelper::map($user->getAllOrganization(null, 1), 'id', 'name'));
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
 
         $sort = new Sort();

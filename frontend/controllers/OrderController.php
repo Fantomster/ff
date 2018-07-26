@@ -727,14 +727,18 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $guideProducts = Yii::$app->request->post("GuideProduct");
         $data = [];
+        $totalQuantity = 0;
         foreach ($guideProducts as $productId => $quantity) {
-
-            if ($quantity < 0) {
+            $totalQuantity += $quantity;
+            if ($quantity <= 0) {
                 continue;
             }
 
             $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
             $data[] = ['product_id' => $guideProduct->cbg_id, 'quantity' => $quantity];
+        }
+        if($totalQuantity == 0){
+            return false;
         }
 
         try {

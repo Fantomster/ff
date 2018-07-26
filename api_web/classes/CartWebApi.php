@@ -378,7 +378,7 @@ class CartWebApi extends \api_web\components\WebApi
     {
         foreach ($cart->cartContents as $position) {
             if ($position->product_id == $product['id']) {
-                if ($quantity <= 0) { //test
+                if ($quantity <= 0) {
                     $position->delete();
                     return true;
                 } else {

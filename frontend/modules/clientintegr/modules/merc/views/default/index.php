@@ -515,11 +515,13 @@ $(document).on("click", ".hand_loading", function(e) {
             success: function (data) {
                 var a = document.createElement('a');
                 var url = window.URL.createObjectURL(data);
+                document.body.appendChild(a);
                 a.href = url;
                 a.download = filename;
+                a.class = "pdf-download";
                 a.click();
                 window.URL.revokeObjectURL(url);
-                swal.close();
+                swal.close()
             }
         });
     });

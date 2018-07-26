@@ -46,7 +46,7 @@ $this->registerJs(
                             ).done(function (result) {
                                 if (result) {
                                     resolve(result);
-                                     $.pjax.reload("#checkout", {timeout:30000});
+                                    $.pjax.reload("#checkout", {timeout:30000});
                                 } else {
                                     resolve(false);
                                 }

@@ -170,7 +170,7 @@ Modal::widget([
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
-            'template' => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{rejected}',
+            'template' => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{inventory}',
             'buttons' => [
                 'view' => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
@@ -195,12 +195,10 @@ Modal::widget([
                     return \yii\helpers\Html::a( '<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax'=>"0"]);
                 },
-               /* 'done-partial' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
-                        return "";
+                'inventory' => function ($url, $model, $key) use ($searchModel) {
                     $options = [
-                        'title' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
-                        'aria-label' => Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приёмка']),
+                        'title' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
+                        'aria-label' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
                         'data' => [
                             //'pjax'=>0,
                             'target' => '#ajax-load',
@@ -212,9 +210,9 @@ Modal::widget([
                         'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
                         'style' => 'width: 24px'
                     ]);
-                    return Html::a($icon, ['done-partial', 'uuid' => $model->uuid], $options);
+                    return Html::a($icon, ['inventory', 'id' => $model->id], $options);
                 },
-                'rejected' => function ($url, $model, $key) use ($searchModel) {
+                /*'rejected' => function ($url, $model, $key) use ($searchModel) {
                     if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
                         return "";
                     $options = [
@@ -377,6 +375,7 @@ Modal::widget([
                         ?>
                     </div>
                     <?php Pjax::end(); ?>
+                    <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.inventory_all', ['ru' => 'Списать все']), ['class' => 'btn btn-danger inventory_all']) . '</div>' ?>
                     <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
                     <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.conversion', ['ru' => 'Переработка']), ['class' => 'btn btn-primary create_vsd_conversion']) . '</div>' ?>
                 </div>
@@ -389,6 +388,7 @@ Modal::widget([
 $urlCreateVSD = Url::to(['transport-vsd/step-1']);
 $urlCreateVSDConversion = Url::to(['transport-vsd/conversion-step-1']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
+$urlInventoryVSD = Url::to(['inventory-all']);
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".create_vsd", function(e) {
@@ -400,6 +400,12 @@ $(document).on("click", ".create_vsd", function(e) {
 $(document).on("click", ".create_vsd_conversion", function(e) {
         if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
             window.location.href =  "$urlCreateVSDConversion?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
+        }
+    });
+
+$(document).on("click", ".inventory_all", function(e) {
+        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
+            window.location.href =  "$urlInventoryVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
         }
     });
 

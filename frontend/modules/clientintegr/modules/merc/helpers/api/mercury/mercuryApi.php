@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -600,7 +601,7 @@ class mercuryApi extends baseApi
         return $doc;
     }
 
-    public function resolveDiscrepancyOperation($model)
+    public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;
 
@@ -627,12 +628,20 @@ class mercuryApi extends baseApi
         $report->responsible = new User();
         $report->responsible->login = $this->vetisLogin;
 
-        $ID = 'report1';
-        $report->stockDiscrepancy = $model->getStockDiscrepancy($ID);
-        $report->discrepancyReport = new DiscrepancyReport();
-        $report->discrepancyReport->id = $ID;
-        $report->discrepancyReport->reason = new DiscrepancyReason();
-        $report->discrepancyReport->reason->name = 'Добавление по бумажному ВСД';
+        $count = isset($data_raws) ? count($data_raws) : 1;
+        for ($i = 0; $i < $count; $i++) {
+            $ID = 'report'.$i;
+            $model->raw_stock_entry = isset($data_raws) ? unserialize($data_raws[$i]) : null;
+            $model->type = $type;
+            $report->stockDiscrepancy[] = $model->getStockDiscrepancy($ID);
+            $discrepancyReport = new DiscrepancyReport();
+            $discrepancyReport->id = $ID;
+            $discrepancyReport->reason = new DiscrepancyReason();
+            $discrepancyReport->reason->name = $model->getReason();
+            //$discrepancyReport->description = $model->getDescription();
+
+            $report->discrepancyReport[] = $discrepancyReport;
+        }
 
         $appData->any['ns3:resolveDiscrepancyRequest'] = $report;
 

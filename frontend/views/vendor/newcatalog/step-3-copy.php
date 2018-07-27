@@ -361,6 +361,7 @@ beforeChangeRender: function (changes, source) {
 });
 colWidths[1] = 0.1;
 hot.updateSettings({colWidths: colWidths});
+search('');
 function getRowsFromObjects(queryResult) {
     rows = [];
     for (var i = 0, l = queryResult.length; i < l; i++) {
@@ -390,8 +391,8 @@ function search(searchText) {
         search(searchFiled.value);
   });        
 Handsontable.Dom.addEvent(save, 'click', function() {
-        $("#search_field").val('');
-        search('');
+            $("#search_field").val('');
+            search('');
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
   var cols = [1,'goods_id',3, 4, 5,6,7,8,'total_price'];
@@ -431,17 +432,17 @@ Handsontable.Dom.addEvent(save, 'click', function() {
     });
 });
 $('#save').click(function(e){	
-e.preventDefault();
+    e.preventDefault();
 });
 $(document).on("click", ".set", function() {
-var form = $("#set_discount_percent");
-$.post(
-    form.attr("action"),
-        form.serialize()
-    ).done(function(result) {
-        form.replaceWith(result);
-    });
-return false;
+    var form = $("#set_discount_percent");
+    $.post(
+        form.attr("action"),
+            form.serialize()
+        ).done(function(result) {
+            form.replaceWith(result);
+        });
+    return false;
 })
         
     var currencies = $.map($currencySymbolList, function(el) { return el });

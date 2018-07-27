@@ -37,23 +37,27 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = $lic0['rkws'];
         $licucs = $lic0['rkws_ucs'];
         $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+        $spravoch_zagruzhen = RkDicSearch::getDicsLoad();
 
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($vi,[
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic,
-            'licucs' => $licucs,
-        ]);
+        if ($spravoch_zagruzhen) {
+            return Yii::$app->response->redirect(['clientintegr/rkws/waybill/index']);
         } else {
-            return $this->render($vi,[
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic,
-            'licucs' => $licucs,
-        ]);
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial($vi, [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                    'lic' => $lic,
+                    'licucs' => $licucs,
+                ]);
+            } else {
+                return $this->render($vi, [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                    'lic' => $lic,
+                    'licucs' => $licucs,
+                ]);
+            }
         }
-        
     }
       
     
@@ -202,7 +206,34 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                      
         }
 
-  }  
+  }
+
+    public function actionMain()
+    {
+        $searchModel = new RkDicSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial($vi, [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                    'lic' => $lic,
+                    'licucs' => $licucs,
+                ]);
+            } else {
+                return $this->render($vi, [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                    'lic' => $lic,
+                    'licucs' => $licucs,
+                ]);
+            }
+    }
   
    
 }

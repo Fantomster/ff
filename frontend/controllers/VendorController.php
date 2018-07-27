@@ -1175,6 +1175,9 @@ class VendorController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
+            if(isset($post['CatalogBaseGoods']['units']) && strpos($post['CatalogBaseGoods']['units'], ',')){
+                $post['CatalogBaseGoods']['units'] = str_replace(',', '.', $post['CatalogBaseGoods']['units']);
+            }
             if ($catalogBaseGoods->load($post)) {
                 $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'deleted' => 0])->andWhere(['<>', 'id', $id])->all();
                 if (count($checkBaseGood)) {

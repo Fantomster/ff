@@ -261,7 +261,7 @@ class ClientController extends DefaultController {
             $post = Yii::$app->request->post();
             $email = $user->email;
             if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
-                //$profile->load($post);
+                $profile->load($post);
 
 
                 if ($user->validate() && $profile->validate()) {

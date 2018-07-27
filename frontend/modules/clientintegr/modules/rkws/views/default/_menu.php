@@ -17,7 +17,7 @@ use yii\helpers\Html;
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-8 text-left">
-                            <?= Html::a('Главная', ['/clientintegr/rkws/default'], ['class'=>'btn btn-md fk-button']); ?>   
+                            <?= Html::a('Главная', ['/clientintegr/rkws/default/main'], ['class'=>'btn btn-md fk-button']); ?>
                       <!--      <?= Html::a('Доступы', ['access/index'], ['class'=>'btn btn-md fk-button']); ?>   
                             <?= Html::a('Контрагенты', ['agent/index'], ['class'=>'btn btn-md fk-button']); ?>   
                             <?= Html::a('Склады', ['store/index'], ['class'=>'btn btn-md fk-button']); ?>   

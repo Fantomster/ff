@@ -35,7 +35,7 @@ $this->title = 'Интеграция с iiko Office';
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    Контрагетны iikoOffice
+    Контрагенты iikoOffice
 </section>
 <section class="content">
     <div class="catalog-index">

@@ -629,10 +629,10 @@ class mercuryApi extends baseApi
         $report->responsible->login = $this->vetisLogin;
 
         $count = isset($data_raws) ? count($data_raws) : 1;
-
-        for ($i = 0; $i <= $count; $i++) {
+        for ($i = 0; $i < $count; $i++) {
             $ID = 'report'.$i;
-            $model->raw_stock_entry = isset($data_raws) ? $data_raws[$i] : null;
+            $model->raw_stock_entry = isset($data_raws) ? unserialize($data_raws[$i]) : null;
+            $model->type = $type;
             $report->stockDiscrepancy[] = $model->getStockDiscrepancy($ID);
             $discrepancyReport = new DiscrepancyReport();
             $discrepancyReport->id = $ID;

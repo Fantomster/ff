@@ -10,6 +10,7 @@ use api\common\models\merc\search\mercStockEntrySearch;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\dateForm;
@@ -134,10 +135,10 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         $volume = $data->amount." ".$data->unit;
         if ($model->load(Yii::$app->request->post())) {
                 if ($model->validate()) {
-                    try {
+                   try {
                         $form = new createStoreEntryForm();
                         $form->attributes = $model->attributes;
-                        $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [unserialize($data->raw_data)]);
+                        $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [$data->raw_data]);
                         if(!isset($result))
                             throw new \Exception('Error create Stock entry');
                         Yii::$app->session->setFlash('success', 'Позиция изменена!');
@@ -166,7 +167,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             $selected = explode(',', $selected);
             $datas = [];
             foreach ($selected as $id) {
-                $datas[] = MercStockEntry::findOne(['id' => $id]);
+                $datas[] = (MercStockEntry::findOne(['id' => $id]))->raw_data;
             }
 
             $form = new createStoreEntryForm();

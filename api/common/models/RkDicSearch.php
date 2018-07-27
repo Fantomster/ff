@@ -79,6 +79,21 @@ class RkDicSearch extends RkDic
 */
         return $dataProvider;
     }
+
+    /**
+     * Проверяет, загружены ли справочники.
+     *
+     * @return boolean
+     */
+    public function getDicsLoad()
+    {
+        $query = RkDic::find()->andWhere('org_id = :org',[':org' => User::findOne([Yii::$app->user->id])->organization_id])->all();
+        $ret = true;
+        foreach($query as $elem) {
+            if ($elem['dicstatus_id']!=RkDic::STATUS_DATA_IS_LOADED) $ret = false;
+        }
+        return $ret;
+    }
     
 
 }

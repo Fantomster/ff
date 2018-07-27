@@ -211,7 +211,7 @@ class OrderController extends ActiveController {
         }
 
         $OrderContents = $newOrder->orderContent;
-        $Order = $newOrder;
+        $Order = \common\models\Order::findOne(['id' => $newOrder->id]);
         $GoodsNotes = $res;
         /* $result = [ 'Order'=> compact('Order'),
           'OrderContents' => compact('OrderContents'),

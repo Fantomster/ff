@@ -324,9 +324,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionChvat($id, $vat) {
 
         $model = $this->findDataModel($id);
-
-        $rress = Yii::$app->db_api
-            ->createCommand('UPDATE rk_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+        $model->vat = $vat;
+        $model->save();
 
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
 

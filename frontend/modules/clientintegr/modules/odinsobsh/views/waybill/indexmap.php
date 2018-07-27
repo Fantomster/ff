@@ -92,6 +92,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ?>
                                 </div>
                             </div>
+                            <?php ActiveForm::end(); ?>
                             <div style="clear: both;"></div>
                             <?php Pjax::begin(['enablePushState' => false, 'id' => 'map_grid1',]); ?>
 
@@ -342,7 +343,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             ]);
                             ?>
                             <?php Pjax::end() ?>
-                            <?php ActiveForm::end(); ?>
+
                             <?= Html::a('Вернуться',
                                 [$this->context->getLastUrl() . 'way=' . $wmodel->order_id],
                                 ['class' => 'btn btn-success btn-export']);

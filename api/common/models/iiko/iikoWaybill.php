@@ -140,6 +140,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
                         $wdmodel->munit = $ch->munit;
                         $wdmodel->koef = $ch->koef;
                         $wdmodel->vat = $ch->vat;
+                        $wdmodel->quant = $wdmodel->quant * $ch->koef;
                     }
                     if (!$wdmodel->save()) {
                         var_dump($wdmodel->getErrors());

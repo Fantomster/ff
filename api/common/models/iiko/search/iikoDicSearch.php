@@ -36,7 +36,7 @@ class iikoDicSearch extends iikoDic
     /**
      * Creates data provider instance with search query applied
      *
-     * @param array $params
+     * @params array $params
      *
      * @return ActiveDataProvider
      */
@@ -79,5 +79,19 @@ class iikoDicSearch extends iikoDic
         return $dataProvider;
     }
 
+    /**
+     * Проверяет, загружены ли справочники.
+     *
+     * @return boolean
+     */
+    public function getDicsLoad()
+    {
+        $query = iikoDic::find()->andWhere('org_id = :org',[':org' => User::findOne([Yii::$app->user->id])->organization_id])->all();
+        $ret = true;
+        foreach($query as $elem) {
+            if ($elem['dicstatus_id']!=iikoDic::STATUS_SUCCESS) $ret = false;
+        }
+        return $ret;
+    }
 
 }

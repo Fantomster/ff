@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
+use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
@@ -15,6 +16,7 @@ use frontend\modules\clientintegr\modules\merc\models\dateForm;
 use frontend\modules\clientintegr\modules\merc\models\expiryDate;
 use frontend\modules\clientintegr\modules\merc\models\inputDate;
 use frontend\modules\clientintegr\modules\merc\models\productionDate;
+use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 
 class StockEntryController extends \frontend\modules\clientintegr\controllers\DefaultController
@@ -102,11 +104,11 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
                     try {
                         $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($model);
-                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
-                        return $this->redirect(['index']);
                         if(!isset($result))
                             throw new \Exception('Error create Stock entry');
 
+                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
+                        return $this->redirect(['index']);
                     } catch (\Error $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
                         return $this->redirect(['index']);
@@ -122,6 +124,63 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             return $this->renderAjax('add-stock-enrty/_mainForm', $params);
         } else {
             return $this->render('add-stock-enrty/create', $params);
+        }
+    }
+
+    public function actionInventory($id)
+    {
+        $model = new rejectedForm();
+        $data = MercStockEntry::findOne(['id' => $id]);
+        $volume = $data->amount." ".$data->unit;
+        if ($model->load(Yii::$app->request->post())) {
+                if ($model->validate()) {
+                    try {
+                        $form = new createStoreEntryForm();
+                        $form->attributes = $model->attributes;
+                        $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [unserialize($data->raw_data)]);
+                        if(!isset($result))
+                            throw new \Exception('Error create Stock entry');
+                        Yii::$app->session->setFlash('success', 'Позиция изменена!');
+                        return $this->redirect(['index']);
+                    } catch (\Error $e) {
+                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                        return $this->redirect(['index']);
+                    } catch (\Exception $e) {
+                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                        return $this->redirect(['index']);
+                    }
+                }
+        }
+        $params = ['model' => $model, 'volume' => $volume];
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('inventory-stock-enrty/_ajaxForm', $params);
+        } else {
+            return $this->render('inventory-stock-enrty/create', $params);
+        }
+    }
+
+    public function actionInventoryAll()
+    {
+        $selected = Yii::$app->request->get('selected');
+        try {
+            $selected = explode(',', $selected);
+            $datas = [];
+            foreach ($selected as $id) {
+                $datas[] = MercStockEntry::findOne(['id' => $id]);
+            }
+
+            $form = new createStoreEntryForm();
+            $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT_ALL, $datas);
+            if(!isset($result))
+                throw new \Exception('Error create Stock entry');
+            Yii::$app->session->setFlash('success', 'Позиции списаны!');
+            return $this->redirect(['index']);
+        } catch (\Error $e) {
+            Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            return $this->redirect(['index']);
+        } catch (\Exception $e) {
+            Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            return $this->redirect(['index']);
         }
     }
 

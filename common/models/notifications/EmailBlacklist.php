@@ -9,6 +9,8 @@ use Yii;
  *
  * @property integer $id
  * @property string $email
+ * @property string $created_at
+ * 
  */
 class EmailBlacklist extends \yii\db\ActiveRecord
 {
@@ -29,6 +31,7 @@ class EmailBlacklist extends \yii\db\ActiveRecord
             [['email'], 'required'],
             [['email'], 'string', 'max' => 255],
             [['email'], 'unique'],
+            [['created_at'], 'safe'],
         ];
     }
 
@@ -40,6 +43,7 @@ class EmailBlacklist extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'email' => Yii::t('app', 'Email'),
+            'created_at' => Yii::t('app', 'Created At'),
         ];
     }
 }

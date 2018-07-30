@@ -11,6 +11,7 @@ use Yii;
  * @property integer $type
  * @property string $email
  * @property string $body
+ * @property string $created_at
  *
  */
 class EmailFails extends \yii\db\ActiveRecord
@@ -36,6 +37,7 @@ class EmailFails extends \yii\db\ActiveRecord
             [['email', 'body'], 'required'],
             [['body'], 'string'],
             [['email'], 'string', 'max' => 255],
+            [['created_at'], 'safe'],
         ];
     }
 
@@ -49,6 +51,7 @@ class EmailFails extends \yii\db\ActiveRecord
             'type' => Yii::t('app', 'Type'),
             'email' => Yii::t('app', 'Email'),
             'body' => Yii::t('app', 'Body'),
+            'created_at' => Yii::t('app', 'Created At'),
         ];
     }
 }

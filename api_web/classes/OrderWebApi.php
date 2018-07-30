@@ -489,6 +489,11 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
+                if($model->completion_date != $date) {
+                    $model->completion_date = $date;
+                    $model->save(false);
+                }
+
                 $date = (!empty($date) ? \Yii::$app->formatter->asDate($date, "dd.MM.yyyy") : null);
 
                 $orders[] = [

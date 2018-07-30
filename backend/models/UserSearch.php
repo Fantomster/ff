@@ -10,6 +10,7 @@ use common\models\Role;
 use common\models\Profile;
 use common\models\Organization;
 use common\models\Job;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -139,6 +140,7 @@ class UserSearch extends User {
             'updated_at' => $this->updated_at,
             'organization_id' => $this->organization_id,
             'role_id' => $role_id,
+            'language' => $this->language
         ]);
 
         $query->andFilterWhere(['like', 'user.email', $this->email])
@@ -163,7 +165,7 @@ class UserSearch extends User {
      *
      * @return array
      */
-    public static function getList() {
+    public static function getListToStatus() {
 
         $models[]=['id'=>'0','name_allow'=>'Не активен'];
         $models[]=['id'=>'1','name_allow'=>'Активен'];
@@ -173,5 +175,33 @@ class UserSearch extends User {
             ArrayHelper::map($models, 'id', 'name_allow');
         // );
     }
+
+    /**
+     * Возвращает пользователей по их языку
+     *
+     * @return array
+     */
+    public static function getListToLanguage() {
+
+        $sql = 'SELECT DISTINCT `language` FROM `user` ORDER BY `language`';
+        $models0 = \Yii::$app->db->createCommand($sql)->queryAll();
+        $models = array();
+        foreach($models0 as $m) {
+            $models[]=['id'=>$m['language'],'name_allow'=>$m['language']];
+        }
+
+        /*print "<pre>";
+        print_r($models);
+        print "</pre>";
+        die();*/
+            /*$models = User::find()
+            ->select(['language'])
+            ->asArray()
+            ->all();
+            $models = ActiveQuery::removeDuplicateModels($models);*/
+
+            return
+                ArrayHelper::map($models, 'id','name_allow');
+        }
 
 }

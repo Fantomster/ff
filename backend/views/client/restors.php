@@ -126,6 +126,7 @@ $gridColumns = [
         'attribute' => 'language',
         'value' => 'language',
         'label' => 'Язык',
+        'filter' => \backend\models\UserSearch::getListToLanguage(),
     ],
     ['class' => 'yii\grid\ActionColumn'],
     [

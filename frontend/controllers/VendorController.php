@@ -410,7 +410,7 @@ class VendorController extends DefaultController {
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             $arrEd = \common\models\MpEd::dropdown();
-            //$articleArray = [];
+            $productArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -418,7 +418,11 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                //array_push($articleArray, (string) $article);
+                if(in_array($product, $productArray)){
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!')]];
+                    return $result;
+                }
+                array_push($productArray, (string) $product);
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_name', ['ru' => 'Не указано <strong>Наименование</strong>'])]];
                     return $result;

@@ -188,17 +188,17 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     private function updateStockEntryList()
     {
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-        $transaction = Yii::$app->db_api->beginTransaction();
-        try {
+        /*$transaction = Yii::$app->db_api->beginTransaction();
+        try {*/
             $vsd = new LoadStockEntryList();
             if (isset($visit))
                 $visit = gmdate("Y-m-d H:i:s", strtotime($visit) - 60 * 30);
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-            $transaction->commit();
+        /*    $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();
-        }
+        }*/
     }
 
     public function actionProducersList($q = null, $c=null)

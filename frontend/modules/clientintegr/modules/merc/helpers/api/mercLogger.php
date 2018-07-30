@@ -55,7 +55,7 @@ class mercLogger extends Component
         $journal->organization_id = (\Yii::$app->user->identity)->organization_id;
         $journal->response = serialize($response);
         $journal->log_guide = $localTransactionId;
-        $journal->type = $response->application->status;
+        $journal->type = ($response->application->status == 'COMPLETED') ? 'success' : 'error';
         $journal->created_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
         $journal->save();

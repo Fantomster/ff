@@ -18,7 +18,8 @@ class JournalController extends Controller
         $user = User::findOne(\Yii::$app->user->getId());
         $searchModel = new JournalSearch();
         $searchModel->service_id = mercLogger::service_id;
-        $searchModel->organizations = array_keys(\yii\helpers\ArrayHelper::map($user->getAllOrganization(null, 1), 'id', 'name'));
+        $searchModel->organizations = array_keys(\yii\helpers\ArrayHelper::map($user->getAllOrganization(null), 'id', 'name'));
+        $searchModel->organization_id = (\Yii::$app->user->identity)->organization_id;
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
 
         $sort = new Sort();

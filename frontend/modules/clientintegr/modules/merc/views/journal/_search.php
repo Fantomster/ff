@@ -18,11 +18,12 @@ use yii\widgets\ActiveForm;
     ]); ?>
     <div class="col-sm-5">
         <?php
+        $model->organization_id = isset($model->organization_id ) ? $model->organization_id : (\Yii::$app->user->identity)->organization_id;
         echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
-            'data' => \yii\helpers\ArrayHelper::map($user->getAllOrganization(null, 1), 'id', 'name'),
+            'data' => \yii\helpers\ArrayHelper::map($user->getAllOrganization(null), 'id', 'name'),
             'attribute' => 'organization_id',
+            'value' => (\Yii::$app->user->identity)->organization_id,
             'pluginOptions' => [
-                'selected' => \Yii::$app->request->get('organization_id') ?? '',
                 'allowClear' => false,
             ],
         ]);

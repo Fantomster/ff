@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\JournalSearch */
@@ -12,7 +13,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <?php
-
 use yii\widgets\Breadcrumbs;
 
 ?>
@@ -57,17 +57,7 @@ use yii\widgets\Breadcrumbs;
                                 'attribute' => 'response',
                                 'type' => 'raw',
                                 'value' => function ($data) {
-                                    if($data['type'] == 'COMPLETED')
                                     return $data['response'];
-
-                                    $response = unserialize($data['response']);
-                                    $data = is_array($response->application->errors) ? $response->application->errors : [$response->application->errors];
-                                    $result = [];
-
-                                    foreach ($data as $item)
-                                        $result[] = $item->code." : ".$item->_;
-
-                                    return implode("</br>", $result);
                                 }
                             ],
                             'log_guide',

@@ -50,7 +50,7 @@ class mercLogger extends Component
         $operation = $this->getServiceOperation($method);
         $journal = new Journal();
         $journal->service_id = self::service_id;
-        $journal->operation_code = $operation->code;
+        $journal->operation_code = $operation->code."";
         $journal->user_id = \Yii::$app->user->id;
         $journal->organization_id = (\Yii::$app->user->identity)->organization_id;
         $journal->response = serialize($response);
@@ -59,6 +59,8 @@ class mercLogger extends Component
         $journal->created_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
         $journal->save();
+
+        $journal->getErrors();
 
         $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml);
     }

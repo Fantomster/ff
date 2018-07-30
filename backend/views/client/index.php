@@ -52,6 +52,7 @@ $gridColumns = [
             return $status;
         },
         'label' => 'Статус',
+        'filter' => \backend\models\UserSearch::getList(),
     ],
     'email',
     [

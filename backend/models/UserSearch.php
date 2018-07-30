@@ -10,6 +10,7 @@ use common\models\Role;
 use common\models\Profile;
 use common\models\Organization;
 use common\models\Job;
+use yii\helpers\ArrayHelper;
 
 /**
  * UserSearch represents the model behind the search form about `common\models\User`.
@@ -155,6 +156,22 @@ class UserSearch extends User {
                 ->andFilterWhere(['like', "$jobTable.name_job", $this->job_name]);
 
         return $dataProvider;
+    }
+
+    /**
+     * Возвращает пользователей по их статусу
+     *
+     * @return array
+     */
+    public static function getList() {
+
+        $models[]=['id'=>'0','name_allow'=>'Не активен'];
+        $models[]=['id'=>'1','name_allow'=>'Активен'];
+        $models[]=['id'=>'2','name_allow'=>'Ожидается подтверждение E-mail'];
+
+        return
+            ArrayHelper::map($models, 'id', 'name_allow');
+        // );
     }
 
 }

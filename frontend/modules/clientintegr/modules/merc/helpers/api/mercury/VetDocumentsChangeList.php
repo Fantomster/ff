@@ -86,7 +86,8 @@ class VetDocumentsChangeList extends Model
                 $vetDocumentList = $result->application->result->any['getVetDocumentListResponse']->vetDocumentList;
             }
 
-            $this->updateDocumentsList($vetDocumentList->vetDocument);
+            if ($vetDocumentList->count > 0)
+                $this->updateDocumentsList($vetDocumentList->vetDocument);
 
             if($vetDocumentList->count < $vetDocumentList->total)
                 $listOptions->offset += $vetDocumentList->count;

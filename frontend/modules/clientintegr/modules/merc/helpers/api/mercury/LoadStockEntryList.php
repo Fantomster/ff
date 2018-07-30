@@ -83,7 +83,8 @@ class LoadStockEntryList extends Model
                 $stockEntryList = $result->application->result->any['getStockEntryListResponse']->stockEntryList;
             }
 
-            $this->updateDocumentsList($stockEntryList->stockEntry);
+            if($stockEntryList->count > 0)
+                $this->updateDocumentsList($stockEntryList->stockEntry);
 
             if($stockEntryList->count < $stockEntryList->total)
                 $listOptions->offset += $stockEntryList->count;

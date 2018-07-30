@@ -167,7 +167,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
             try {
 
-                $taxVat = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+                $taxVat = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 18;
 
                 foreach ($records as $record) {
 

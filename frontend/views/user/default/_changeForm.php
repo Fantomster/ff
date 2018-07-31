@@ -30,6 +30,10 @@ $js = <<<JS
         if(businessChecked == 'false'){
             $('.new-network').removeAttr('disabled');
         }
+        var orgName = $('#organization-name').val();
+        if(orgName.length == 0){
+            $('.new-network').attr('disabled', 'disabled');
+        } 
     });
     
     $(document).on("click", ".new-network", function(e) {

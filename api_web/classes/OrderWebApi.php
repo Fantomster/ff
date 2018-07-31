@@ -31,7 +31,7 @@ use api_web\exceptions\ValidationException;
  */
 class OrderWebApi extends \api_web\components\WebApi
 {
-     /**
+    /**
      * Редактирование заказа
      * @param $post
      * @return array
@@ -101,6 +101,17 @@ class OrderWebApi extends \api_web\components\WebApi
                         throw new BadRequestHttpException("Discount amount > Total Price");
                     }
 
+                    if ($order->positionCount == 0) {
+                        switch ($this->user->organization->type_id) {
+                            case Organization::TYPE_SUPPLIER:
+                                $order->status = Order::STATUS_REJECTED;
+                                break;
+                            case Organization::TYPE_RESTAURANT:
+                                $order->status = Order::STATUS_CANCELLED;
+                                break;
+                        }
+
+                    }
                 } else {
                     throw new BadRequestHttpException("products not array");
                 }
@@ -489,7 +500,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
-                if($model->completion_date != $date) {
+                if ($model->completion_date != $date) {
                     $model->completion_date = $date;
                     $model->save(false);
                 }

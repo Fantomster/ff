@@ -939,7 +939,10 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
-            $catalog = Catalog::findOne(['id' => $id]);
+            $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization->id]);
+            if(!$catalog){
+                $catalog = new Catalog();
+            }
             $catalog->makeSnapshot();
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();

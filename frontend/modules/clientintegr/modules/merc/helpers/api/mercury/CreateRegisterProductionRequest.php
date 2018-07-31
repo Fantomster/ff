@@ -30,7 +30,10 @@ class CreateRegisterProductionRequest extends Component{
         $request->initiator = $this->initiator;
         $enterprise = mercDicconst::getSetting('enterprise_guid');
         $request->enterprise = $enterprise;
-        //dd($this);
+        $firstDate = new \DateTime($this->step2['dateOfProduction']['first_date']);
+        $secondDate = new \DateTime($this->step2['dateOfProduction']['second_date']);
+        $firstDateExpire = new \DateTime($this->step2['expiryDate']['first_date']);
+        $secondDateExpire = new \DateTime($this->step2['expiryDate']['second_date']);
         $array = [];
         $array['rawBatch'] = [
             'sourceStockEntry' => [
@@ -49,14 +52,49 @@ class CreateRegisterProductionRequest extends Component{
             'subProduct' => [
                 'uuid' => $this->step2['subProduct']
             ],
+            'productItem' => [
+                'uuid' => $this->step2['product_name']
+            ],
             'volume' => $this->step2['volume'],
             'unit' => [
                 'uuid' => $this->step2['unit']
             ],
+            'dateOfProduction' =>
+            [
+                'firstDate' => [
+                    'year' => $firstDate->format('Y'),
+                    'month' => $firstDate->format('m'),
+                    'day' => $firstDate->format('d'),
+                    'hour' => $firstDate->format('h')
+                ],
+                'secondDate' => [
+                    'year' => $secondDate->format('Y'),
+                    'month' => $secondDate->format('m'),
+                    'day' => $secondDate->format('d'),
+                    'hour' => $secondDate->format('h')
+                ]
+            ],
+            'expiryDate' =>
+                [
+                    'firstDate' => [
+                        'year' => $firstDateExpire->format('Y'),
+                        'month' => $firstDateExpire->format('m'),
+                        'day' => $firstDateExpire->format('d'),
+                        'hour' => $firstDateExpire->format('h')
+                    ],
+                    'secondDate' => [
+                        'year' => $secondDateExpire->format('Y'),
+                        'month' => $secondDateExpire->format('m'),
+                        'day' => $secondDateExpire->format('d'),
+                        'hour' => $secondDateExpire->format('h')
+                    ]
+                ],
+            'batchID' => $this->step2['batchID'],
+            'perishable' => 'perishable'
         ];
         $request->productionOperation = $array;
 
-        //dd($request);
+        //dd($this);
 
         $consigments = [];
         $vetCertificates = [];

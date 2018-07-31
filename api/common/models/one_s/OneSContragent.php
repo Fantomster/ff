@@ -4,6 +4,7 @@ namespace api\common\models\one_s;
 
 use Yii;
 use common\models\Organization;
+use yii\helpers\ArrayHelper;
 
 
 /**
@@ -74,5 +75,29 @@ class OneSContragent extends \yii\db\ActiveRecord
         return \Yii::$app->db_api;
     }
 
+    /**
+     * get list of agents
+     *
+     * @return array
+     */
+    public function getAgents($org_id, $all = true, $notMap=true) {
+        $query = OneSContragent::find()
+            ->select(['id', 'name'])->where(['org_id' => $org_id]);
 
+        if($notMap){
+            $agents = ArrayHelper::map($query->orderBy(['name' => SORT_ASC])
+                ->asArray()
+                ->all(), 'id', 'name');
+        }else{
+            $agents = $query->orderBy(['name' => SORT_ASC])
+                ->asArray()
+                ->all();
+        }
+
+        if ($all) {
+            $agents[''] = '';
+        }
+        ksort($agents);
+        return $agents;
+    }
 }

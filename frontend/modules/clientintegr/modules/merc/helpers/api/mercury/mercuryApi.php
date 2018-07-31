@@ -741,6 +741,7 @@ class mercuryApi extends baseApi
         $data->localTransactionId = $localTransactionId;
         $data->initiator = new User();
         $data->initiator->login = $this->vetisLogin;
+        //dd($data);
 
         $appData->any['ns3:prepareRegisterProductionOperationRequest'] = $data->getRegisterProductionRequest();
 

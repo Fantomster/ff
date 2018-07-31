@@ -81,7 +81,7 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                 <?=
                 $form->field($model, 'unit')
                     ->dropDownList(createStoreEntryForm::getUnitList(), ['prompt' => 'не указано'])
-                    ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
+                    ->label('Единица измерения', ['class' => 'label', 'style' => 'color:#555'])
                 ?>
 
                 <?php $model->perishable = isset($model->perishable) ? $model->perishable : true; ?>

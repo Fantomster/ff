@@ -70,7 +70,7 @@ class FavoriteSearch extends \yii\base\Model
         //Валюта
         $query->innerJoin('currency AS curr', 'cat.currency_id = curr.id');
         //Условия отбора
-        $query->where('cbg.status = 1 AND cbg.deleted = 0');
+        $query->where('cbg.deleted = 0');
         //Только эти заказы
         $query->andWhere(['in', 'ord.status', [
             Order::STATUS_PROCESSING,

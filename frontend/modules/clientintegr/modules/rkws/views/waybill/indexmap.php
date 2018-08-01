@@ -11,9 +11,6 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
-
-//use api\common\models\RkAccess;
-//use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
 use common\components\Torg12Invoice;
@@ -21,11 +18,10 @@ use common\components\Torg12Invoice;
 
 ?>
 <?php
+$sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
+$sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
+$sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
 $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-top:-30px;}');
-
-// $productDesc = empty($model->product_rid) ? '' : $model->product->denom;
-
-
 ?>
 
 <style>
@@ -64,12 +60,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
 </section>
 <section class="content">
     <div class="catalog-index">
-
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
@@ -115,13 +109,20 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             ]); ?>
                         </div>
                         <?php
+                        $pjax = "$('#search-pjax').on('pjax:end', function(){
+                                            $.pjax.reload('#map_grid1',{'timeout':10000});
+                                    });";
+                        $this->registerJs($pjax);
+                        ?>
+                        <?php Pjax::begin(['enablePushState' => true, 'timeout' => 10000, 'id' => 'search-pjax']); ?>
+                        <?php
                         $form = ActiveForm::begin([
                             'options' => [
                                 'data-pjax' => true,
                                 'id' => 'search-form',
                                 'role' => 'search',
                             ],
-                            'enableClientValidation' => false,
+                            //'enableClientValidation' => false,
                             'method' => 'get',
                         ]);
                         ?>
@@ -135,8 +136,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             </div>
                         </div>
                         <?php ActiveForm::end(); ?>
+                        <?php Pjax::end() ?>
                         <div style="clear: both;"></div>
-                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'map_grid1',]); ?>
+
+
                         <?php
                         $columns = array(
                             [
@@ -155,18 +158,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'format' => 'raw',
                                 'label' => 'Ед. изм. Mixcart',
                             ],
-
-                            //   'munit_rid',
-
                             [
                                 'class' => 'kartik\grid\EditableColumn',
                                 'attribute' => 'pdenom',
-                                //       'value' => function ($model) {
-                                //       $model->pdenom = $model->product->denom;
-                                //       return $model->pdenom;
-                                //       },
                                 'label' => 'Наименование в Store House',
-                                //  'pageSummary' => 'Total',
                                 'vAlign' => 'middle',
                                 'width' => '210px',
                                 'refreshGrid' => true,
@@ -177,13 +172,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'header' => 'Продукт R-keeper',
                                     'size' => 'md',
                                     'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
-                                    //'widgetClass'=> 'kartik\datecontrol\DateControl',
                                     'options' => [
-                                        //   'initValueText' => $productDesc,
-
-                                        //'data' => $pdenom,
-                                        'options' => ['placeholder' => 'Выберите продукт из списка',
-                                        ],
+                                        'options' => ['placeholder' => 'Выберите продукт из списка'],
                                         'pluginOptions' => [
                                             'minimumInputLength' => 2,
                                             'ajax' => [
@@ -194,7 +184,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             'allowClear' => true
                                         ],
                                         'pluginEvents' => [
-                                            //"select2:select" => "function() { alert(1);}",
                                             "select2:select" => "function() {
                         if($(this).val() == 0)
                         {
@@ -205,19 +194,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 
                                     ]
                                 ]],
-                            /*   [
-                               'attribute' => 'product_rid',
-                               'value' => function ($model) {
-                                    if (!empty($model->product)) {
-
-                                        return $model->product->denom;
-                                    }
-
-                                   return 'Не задано';
-                               },
-                               'format' => 'raw',
-                               'label' => 'Наименование StoreHouse',
-                               ], */
                             [
                                 'attribute' => 'munit_rid',
                                 'value' => function ($model) {
@@ -322,9 +298,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             }
                            ], */
 
-                        $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
-                        $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
-                        $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
+
 
                         array_push($columns,
                             [
@@ -419,13 +393,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
-                            'pjax' => false, // pjax is set to always true for this demo
-                            'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
+                            'pjax' => true, // pjax is set to always true for this demo
+                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
                             'filterPosition' => false,
                             'columns' => $columns,
-                            /* 'rowOptions' => function ($data, $key, $index, $grid) {
-                              return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
-                              }, */
                             'showFooter' => true,
                             'options' => ['class' => 'table-responsive'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
@@ -441,7 +412,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             ],
                         ]);
                         ?>
-                        <?php Pjax::end() ?>
+
 
                         <div class="sendonbutton">
                             <?= Html::a('Вернуться',
@@ -538,41 +509,5 @@ $js = <<< JS
 JS;
 
 $this->registerJs($js);
-?>
-
-<?php
-/*
-$js = "
-  $('#s_1').on('change', function(){
-  
-    alert($('#s_1').checked);
-    return true;
-  /*
-    $.ajax({
-      url: 'changevat', // путь к php-обработчику
-      type: 'POST', // метод передачи данных
-      dataType: 'json', // тип ожидаемых данных в ответе
-      data: {key: 1}, // данные, которые передаем на сервер
-      beforeSend: function(){ // Функция вызывается перед отправкой запроса
-        output.text('Запрос отправлен. Ждите ответа.');
-      },
-      error: function(req, text, error){ // отслеживание ошибок во время выполнения ajax-запроса
-        output.text('Хьюстон, У нас проблемы! ' + text + ' | ' + error);
-      },
-      complete: function(){ // функция вызывается по окончании запроса
-        output.append('<p>Запрос полностью завершен!</p>');
-      },
-      success: function(json){ // функция, которая будет вызвана в случае удачного завершения запроса к серверу
-        // json - переменная, содержащая данные ответа от сервера. Обзывайте её как угодно ;)
-        output.html(json); // выводим на страницу данные, полученные с сервера
-      }
-    });
-
-  });
-
-";
-    
-$this->registerJs($js);  
-*/
 ?>
 

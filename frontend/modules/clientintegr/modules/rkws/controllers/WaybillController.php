@@ -170,6 +170,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
                         'dataProvider' => $dataProvider,
+                        'searchModel' => $searchModel,
                         'wmodel' => $wmodel,
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData

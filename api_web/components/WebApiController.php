@@ -149,9 +149,9 @@ class WebApiController extends \yii\rest\Controller
 
             if (isset($this->request)) {
                 //Глобально ограничиваем page_size
-                if(isset($this->request['pagination'])) {
-                    if(isset($this->request['pagination']['page_size'])) {
-                        if($this->request['pagination']['page_size'] > 200) {
+                if (isset($this->request['pagination'])) {
+                    if (isset($this->request['pagination']['page_size'])) {
+                        if ($this->request['pagination']['page_size'] > 200) {
                             throw new \yii\web\BadRequestHttpException('param_value_to_large|page_size|200');
                         }
                     }

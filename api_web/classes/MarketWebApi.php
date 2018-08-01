@@ -408,7 +408,7 @@ class MarketWebApi extends WebApi
         if (strstr($url, 'amazon') === false && strstr($url, 'data:image') === false) {
             return \Yii::$app->params['web'] . preg_replace('#http(.+?)\/\/(.+?)\/(.+?)#', '$3', $url);
         } else {
-            return \Yii::$app->params['web'].'site/image-base?id='.$model->id.'&type=product';
+            return \Yii::$app->params['web'] . 'site/image-base?id=' . $model->id . '&type=product';
         }
     }
 

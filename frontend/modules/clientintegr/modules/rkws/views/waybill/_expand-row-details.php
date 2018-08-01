@@ -13,8 +13,9 @@
     // var_dump($model);   
 
     if(empty($model)) {
-        
-         echo Html::a('Создать накладную', ['create','order_id'=>$order_id], ['class'=>'btn btn-md fk-button']);   
+        echo "<div style=\"text-align:right;\">";
+         echo Html::a('Создать накладную', ['create','order_id'=>$order_id], ['class'=>'btn btn-md fk-button']);
+         echo "</div>";
     } else {
         $columns = array (
             'id',

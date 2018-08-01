@@ -120,7 +120,7 @@ class RequestWebApi extends WebApi
                 if ($urgent === 1) {
                     $query->andWhere(['rush_order' => 1]);
                 } else {
-                    $query->andWhere(['OR',['=', 'rush_order', 0],['is', 'rush_order', null]]);
+                    $query->andWhere(['OR', ['=', 'rush_order', 0], ['is', 'rush_order', null]]);
                 }
             }
         }

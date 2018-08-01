@@ -27,8 +27,8 @@ class PaymentWebApi extends \api_web\components\WebApi
             ->asArray()
             ->all();
 
-        foreach($list as &$item) {
-            $item['id'] = (int) $item['id'];
+        foreach ($list as &$item) {
+            $item['id'] = (int)$item['id'];
         }
 
         return $list;

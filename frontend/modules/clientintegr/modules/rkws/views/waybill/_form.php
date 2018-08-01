@@ -43,47 +43,12 @@ use api\common\models\RkDicconst;
 
     <?php echo $form->field($model, 'num_code')->textInput(['maxlength' => true]) ?>
 
-    <?php // echo $form->field($model, 'corr_rid')->dropDownList(ArrayHelper::map(api\common\models\RkAgent::find()->all(), 'rid', 'denom')) ?>
-
-    <?php echo $form->field($model, 'corr_rid')->widget(Select2::classname(), [
-        'data' => $data,
-        'options' => ['placeholder' => 'Выберите контрагента...'],
+    <?php echo $form->field($model, 'corr_rid')->widget(\kartik\select2\Select2::classname(), [
+        'data' => \api\common\models\RkAgent::getAgents($org),
         'pluginOptions' => [
-            'minimumInputLength' => 2,
-            'ajax' => [
-                'url' => Url::toRoute('waybill/autocompleteagent'),
-                'dataType' => 'json',
-                'data' => new JsExpression('function(params) { return {term:params.term, org:' . $org . '}; }')
-            ],
-            'allowClear' => true
-        ],
-        'pluginEvents' => [
-            //"select2:select" => "function() { alert(1);}",
-            "select2:select" => "function() {
-    if($(this).val() == 0)
-    {
-    $('#contract-modal').modal('show');
-    }else
-    {
-    var form = jQuery('#add');
-
-    jQuery.ajax({
-    url: form.attr('action'),
-    type: 'POST',
-    dataType: 'html',
-    data: form.serialize(),
-    success: function(response) {
-    $.pjax.reload({container:'#request_pjax', timeout: 16000});
-    },
-    error: function(response) {
-    console.log('server error');
-    }
-    });
-    }
-    }",
-        ]
-    ]);
-
+            'allowClear' => true],
+            'id' => 'orgFilter'
+        ]);
     ?>
 
     <?php // echo $form->field($model, 'store_rid')->dropDownList(ArrayHelper::map(api\common\models\RkStore::find()->all(), 'rid', 'denom')) ?>

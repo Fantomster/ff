@@ -43,8 +43,8 @@ class RkeeperWebApi extends WebApi
      * @param array $post
      * @return array
      */
-     public function getStoreList(array $post): array
-     {
-         return (new rkeeperStore())->getStoreList($post);
-     }
+    public function getStoreList(array $post): array
+    {
+        return (new rkeeperStore())->getStoreList($post);
+    }
 }

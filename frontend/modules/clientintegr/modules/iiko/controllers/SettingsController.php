@@ -56,7 +56,19 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
 
-        if ($pConst->load(Yii::$app->request->post()) && $pConst->save()) {
+        $post = Yii::$app->request->post();
+        if(isset($post['Stores'])){
+            $stores = $post['Stores'];
+            $arr = [];
+            foreach ($stores as $storeID => $selected){
+                if($selected == '1'){
+                    $arr[] = $storeID;
+                }
+            }
+            $post['iikoPconst']['value'] = serialize($arr);
+        }
+
+        if ($pConst->load($post) && $pConst->save()) {
             if ($pConst->getErrors()) {
                 var_dump($pConst->getErrors());
                 exit;

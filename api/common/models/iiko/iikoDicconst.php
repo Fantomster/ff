@@ -18,6 +18,7 @@ class iikoDicconst extends \yii\db\ActiveRecord
 {
     const TYPE_DROP = 1;
     const TYPE_PASSWORD = 3;
+    const TYPE_CHECKBOX = 5;
     /**
      * @inheritdoc
      */

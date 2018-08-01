@@ -57,18 +57,14 @@ class FavoriteSearch extends \yii\base\Model
         $query->innerJoin('`order` as ord', 'oc.order_id = ord.id');
         //Товар из главного каталога
         $query->innerJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
-        //Каталоги, с которыми работает ресторан
-        $query->innerJoin('`catalog` as cat', 'cbg.cat_id = cat.id AND (
-           cbg.cat_id IN (
-                SELECT cat_id FROM relation_supp_rest WHERE supp_org_id=cbg.supp_org_id AND rest_org_id = :client_id
-           )
-        )', [':client_id' => $clientId]);
         //Индивидуальный каталог
-        $query->leftJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id and cg.cat_id = cat.id');
+        $query->innerJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id and cg.cat_id IN (
+            SELECT DISTINCT cat_id FROM relation_supp_rest WHERE supp_org_id=cbg.supp_org_id AND rest_org_id = :client_id
+        )', [':client_id' => $clientId]);
         //Организация
         $query->innerJoin('organization AS org', 'cbg.supp_org_id = org.id');
         //Валюта
-        $query->innerJoin('currency AS curr', 'cat.currency_id = curr.id');
+        $query->innerJoin('currency AS curr', 'ord.currency_id = curr.id');
         //Условия отбора
         $query->where('cbg.deleted = 0');
         //Только эти заказы

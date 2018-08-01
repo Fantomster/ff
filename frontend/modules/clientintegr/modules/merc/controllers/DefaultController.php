@@ -44,9 +44,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = mercService::getLicense();
         $searchModel = new mercVSDSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $user = Yii::$app->getUser()->identity;
         $params = ['searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $lic];
+            'lic' => $lic,
+            'user' => $user
+            ];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);

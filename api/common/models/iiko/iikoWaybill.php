@@ -13,7 +13,7 @@ use Yii;
  * @property string $agent_uuid
  * @property integer $org
  * @property integer $order_id
- * @property integer $num_code
+ * @property string $num_code
  * @property string $text_code
  * @property integer $readytoexport
  * @property integer $status_id
@@ -52,11 +52,11 @@ class iikoWaybill extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['org', 'order_id', 'num_code', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
-            [['doc_date', 'created_at', 'exported_at', 'updated_at'], 'safe'],
+            [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
+            [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code'], 'safe'],
             [['org', 'store_id', 'agent_uuid'], 'required'],
             [['agent_uuid'], 'string', 'max' => 36],
-            [['text_code'], 'string', 'max' => 128],
+            [['text_code', 'num_code'], 'string', 'max' => 128],
             [['note'], 'string', 'max' => 255],
         ];
     }
@@ -140,6 +140,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
                         $wdmodel->munit = $ch->munit;
                         $wdmodel->koef = $ch->koef;
                         $wdmodel->vat = $ch->vat;
+                        $wdmodel->quant = $wdmodel->quant * $ch->koef;
                     }
                     if (!$wdmodel->save()) {
                         var_dump($wdmodel->getErrors());
@@ -249,5 +250,16 @@ class iikoWaybill extends \yii\db\ActiveRecord
 //        die();
 
         return $xml->asXML();
+    }
+
+
+    public function getVatList(): array
+    {
+        return [
+            '1' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']),
+            '0' => 0,
+            '1000' => 10,
+            '1800' => 18
+        ];
     }
 }

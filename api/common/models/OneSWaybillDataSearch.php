@@ -50,7 +50,12 @@ class OneSWaybillDataSearch extends OneSWaybillData
         $query = OneSWaybillData::find()
             ->select('one_s_waybill_data.*, one_s_good.name as pdenom')
             ->leftJoin('one_s_good', 'one_s_good.id = product_rid')
-            ->where(['waybill_id' => Yii::$app->request->get('waybill_id')])->all();
+            ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
+        if(isset($params['OneSWaybillDataSearch']['vat']) && $params['OneSWaybillDataSearch']['vat'] != 1){
+            $vat = $params['OneSWaybillDataSearch']['vat'];
+            $query = $query->andWhere(['vat' => $vat]);
+        }
+        $query = $query->all();
 
         foreach ($query as $key=>$value)
         {

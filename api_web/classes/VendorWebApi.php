@@ -52,16 +52,16 @@ class VendorWebApi extends \api_web\components\WebApi {
             $user = new User();
         }
         $relationSuppRest = new RelationSuppRest();
-        if($vendorID){
+        if ($vendorID) {
             $validator = new NumberValidator();
             if (!$validator->validate($vendorID, $error)) {
                 throw new ValidationException(['Field vendor_id mast be integer']);
             }
-            $organization = Organization::findOne(['id'=>$vendorID]);
-            if(!$organization){
+            $organization = Organization::findOne(['id' => $vendorID]);
+            if (!$organization) {
                 throw new BadRequestHttpException('No such organization');
             }
-        }else{
+        } else {
             $organization = new Organization();
         }
 
@@ -106,7 +106,7 @@ class VendorWebApi extends \api_web\components\WebApi {
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    if(!$vendorID) {
+                    if (!$vendorID) {
                         $organization->name = $org;
                     }
 
@@ -134,9 +134,9 @@ class VendorWebApi extends \api_web\components\WebApi {
                     $get_supp_org_id = $check['org_id'];
                 }
 
-                if(count($arrCatalog)){
+                if (count($arrCatalog)) {
                     $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
-                }else{
+                } else {
                     $lastInsert_cat_id = 0;
                 }
                 /**
@@ -221,9 +221,9 @@ class VendorWebApi extends \api_web\components\WebApi {
                 $r = WebApiHelper::prepareOrganization($model);
 
                 if ($user = RelationUserOrganization::find()->joinWith('user')->where([
-                            'relation_user_organization.organization_id' => $model->id,
-                            'user.email' => $email
-                        ])->one()) {
+                    'relation_user_organization.organization_id' => $model->id,
+                    'user.email' => $email
+                ])->one()) {
                     $r['user'] = [
                         'email' => $user->user->email,
                         'name' => $user->user->profile->full_name,

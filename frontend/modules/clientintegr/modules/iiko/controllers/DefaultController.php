@@ -22,11 +22,30 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $license = iikoService::getLicense();
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $params);
+        $spravoch_zagruzhen = iikoDicSearch::getDicsLoad();
+        if ($spravoch_zagruzhen) {
+            return Yii::$app->response->redirect(['clientintegr/iiko/waybill/index']);
         } else {
-            return $this->render($view, $params);
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial($view, $params);
+            } else {
+                return $this->render($view, $params);
+            }
         }
+    }
+
+    public function actionMain()
+    {
+        $searchModel = new iikoDicSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $license = iikoService::getLicense();
+        $view = $license ? 'index' : '/default/_nolic';
+        $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial($view, $params);
+            } else {
+                return $this->render($view, $params);
+            }
     }
 
     public function actionTest() {

@@ -41,10 +41,15 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $license = OneSService::getLicense();
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $params);
+        $spravoch_zagruzhen = OneSDicSearch::getDicsLoad();
+        if ($spravoch_zagruzhen) {
+            return Yii::$app->response->redirect(['clientintegr/odinsobsh/waybill/index']);
         } else {
-            return $this->render($view, $params);
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial($view, $params);
+            } else {
+                return $this->render($view, $params);
+            }
         }
     }
 
@@ -88,6 +93,20 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->render('agent-view', [
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionMain()
+    {
+        $searchModel = new OneSDicSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $license = OneSService::getLicense();
+        $view = $license ? 'index' : '/default/_nolic';
+        $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial($view, $params);
+            } else {
+                return $this->render($view, $params);
+            }
     }
 
     public function actionTest() {

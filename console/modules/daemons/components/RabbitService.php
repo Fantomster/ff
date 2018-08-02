@@ -13,19 +13,10 @@ class RabbitService extends Component
     public $port = 5672;    #port - номер порта сервиса, по умолчанию - 5672
     public $user;           #user - имя пользователя для соединения с сервером
     public $password;       #password
-    public $queue;          #queue - очередь
-    public $exchange = 'router';
-    public $queue_prefix;
-
-    public function __set($name, $value)
-    {
-
-        if ($name == 'queue') {
-            $value = ($this->queue_prefix ?? '') . $value;
-        }
-
-        return parent::__set($name, $value);
-    }
+    public $queue = 'empty';          #queue - очередь
+    public $exchange = 'amq.direct';
+    public $queue_prefix = '';
+    public $vhost = '/';
 
     public function addRabbitQueue($message)
     {
@@ -40,8 +31,8 @@ class RabbitService extends Component
         }
 
         $connection = $this->connect();
-
         $channel = $connection->channel();
+        
         $channel->queue_declare(
             $this->queue,       #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
             false,              #passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
@@ -49,6 +40,8 @@ class RabbitService extends Component
             false,              #exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
             false               #autodelete - очередь удаляется, когда отписывается последний подписчик
         );
+
+        $channel->queue_bind($this->queue, $this->exchange, $this->queue);
 
         //Публикуем сообщение
         $channel->basic_publish(
@@ -99,7 +92,8 @@ class RabbitService extends Component
             $this->host,        #host - имя хоста, на котором запущен сервер RabbitMQ
             $this->port,        #port - номер порта сервиса, по умолчанию - 5672
             $this->user,        #user - имя пользователя для соединения с сервером
-            $this->password     #password
+            $this->password,    #password
+            $this->vhost
         );
     }
 }

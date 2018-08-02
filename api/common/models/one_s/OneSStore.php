@@ -4,6 +4,7 @@ namespace api\common\models\one_s;
 
 use Yii;
 use common\models\Organization;
+use yii\helpers\ArrayHelper;
 
 
 /**
@@ -74,5 +75,29 @@ class OneSStore extends \yii\db\ActiveRecord
         return \Yii::$app->db_api;
     }
 
+    /**
+     * get list of stores
+     *
+     * @return array
+     */
+    public function getStores($org_id, $all = true, $notMap=true) {
+        $query = OneSStore::find()
+            ->select(['id', 'name'])->where(['org_id' => $org_id]);
 
+        if($notMap){
+            $stores = ArrayHelper::map($query->orderBy(['name' => SORT_ASC])
+                ->asArray()
+                ->all(), 'id', 'name');
+        }else{
+            $stores = $query->orderBy(['name' => SORT_ASC])
+                ->asArray()
+                ->all();
+        }
+
+        if ($all) {
+            $stores[''] = '';
+        }
+        ksort($stores);
+        return $stores;
+    }
 }

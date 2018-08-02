@@ -116,7 +116,10 @@ class VendorController extends DefaultController {
                             'remove-delivery-region',
                             'ajax-change-currency',
                             'ajax-calculate-prices',
-                            'chkmail'
+                            'chkmail',
+                            'ajax-change-main-index',
+                            'ajax-delete-main-catalog',
+                            'ajax-restore-main-catalog-latest-snapshot',
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -166,9 +169,7 @@ class VendorController extends DefaultController {
         }
     }
 
-
-    public function actionEmployees(): String
-    {
+    public function actionEmployees(): String {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
@@ -183,9 +184,7 @@ class VendorController extends DefaultController {
         }
     }
 
-
-    public function actionDelivery()
-    {
+    public function actionDelivery() {
         $organization = $this->currentUser->organization;
         $supplier = $organization->id;
         $regionsList = DeliveryRegions::find()->where(['supplier_id' => $supplier])->all();
@@ -216,9 +215,7 @@ class VendorController extends DefaultController {
         }
     }
 
-
-    public function actionRemoveDeliveryRegion(int $id): void
-    {
+    public function actionRemoveDeliveryRegion(int $id): void {
         $organization = $this->currentUser->organization;
         $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
         if ($deliveryRegions) {
@@ -284,6 +281,7 @@ class VendorController extends DefaultController {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
                         $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
                         if ($success) {
+
                             $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                             $existingUser->setRole($post['User']['role_id'])->save();
                             $message = Yii::t('app', 'Пользователь добавлен!');
@@ -304,8 +302,7 @@ class VendorController extends DefaultController {
      *  User update
      */
 
-    public function actionAjaxUpdateUser(int $id): String
-    {
+    public function actionAjaxUpdateUser(int $id): String {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
         $oldRole = $user->role_id;
@@ -319,7 +316,7 @@ class VendorController extends DefaultController {
             $email = $user->email;
             if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 $profile->load($post);
-                
+
                 if ($user->validate() && $profile->validate()) {
 
                     if (!in_array($user->role_id, User::getAllowedRoles($oldRole))) {
@@ -344,61 +341,55 @@ class VendorController extends DefaultController {
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
-
-    public function actionCatalogs()
-    {
+    public function actionCatalogs() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
         if (!Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             $step = $currentUser->organization->step;
-            $newBaseCatalog = new Catalog();
-            $newBaseCatalog->type = Catalog::BASE_CATALOG;
-            $newBaseCatalog->supp_org_id = $currentUser->organization_id;
-            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
-            $newBaseCatalog->status = Catalog::STATUS_ON;
-            $newBaseCatalog->currency_id = 1;
-            $newBaseCatalog->save();
+            return $this->render("catalogs/createBaseCatalog", compact("Catalog", "step"));
+        } else {
+            $currentOrganization = $currentUser->organization;
+            if ($currentOrganization->step == Organization::STEP_ADD_CATALOG) {
+                $currentOrganization->step = Organization::STEP_OK;
+                $currentOrganization->save();
+            }
+            $searchString = "";
+            $restaurant = "";
+            $type = "";
+            $relation_supp_rest = new RelationSuppRest;
+            $relation = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
+                                    where(['in', 'id', \common\models\RelationSuppRest::find()->
+                                        select('rest_org_id')->
+                                        where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1', 'deleted' => false])])->all(), 'id', 'name');
+            $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
+                            where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->all();
 
-            //return $this->render("catalogs/firstCatalog", compact("Catalog", "step"));
-        }
-        //{
-        $currentOrganization = $currentUser->organization;
-        if ($currentOrganization->step == Organization::STEP_ADD_CATALOG) {
-            $currentOrganization->step = Organization::STEP_OK;
-            $currentOrganization->save();
-        }
-        $searchString = "";
-        $restaurant = "";
-        $type = "";
-        $relation_supp_rest = new RelationSuppRest;
-        $relation = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                                    select('rest_org_id')->
-                                    where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1', 'deleted' => false])])->all(), 'id', 'name');
-        $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
-                        where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->all();
-
-        if (Yii::$app->request->isPost) {
-            $searchString = htmlspecialchars(trim(\Yii::$app->request->post('searchString')));
-            $restaurant = htmlspecialchars(trim(\Yii::$app->request->post('restaurant')));
-            //echo $restaurant;
-            if (!empty($restaurant)) {
-                $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'type', 'id'])->
-                                where(['supp_org_id' => $currentUser->organization_id])->
-                                andFilterWhere(['id' => \common\models\RelationSuppRest::find()->
-                                    select(['cat_id'])->
-                                    where(['supp_org_id' => $currentUser->organization_id,
-                                        'rest_org_id' => $restaurant, 'deleted' => false])])->one();
-                if (empty($arrCatalog)) {
-                    $arrCatalog == "";
-                } else {
-                    if ($arrCatalog->type == 1) {
-                        $type = 1;  //ресторан подключен к главному каталогу
+            if (Yii::$app->request->isPost) {
+                $searchString = htmlspecialchars(trim(\Yii::$app->request->post('searchString')));
+                $restaurant = htmlspecialchars(trim(\Yii::$app->request->post('restaurant')));
+                //echo $restaurant;
+                if (!empty($restaurant)) {
+                    $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'type', 'id'])->
+                                    where(['supp_org_id' => $currentUser->organization_id])->
+                                    andFilterWhere(['id' => \common\models\RelationSuppRest::find()->
+                                        select(['cat_id'])->
+                                        where(['supp_org_id' => $currentUser->organization_id,
+                                            'rest_org_id' => $restaurant, 'deleted' => false])])->one();
+                    if (empty($arrCatalog)) {
+                        $arrCatalog == "";
                     } else {
-                        $catalog_id = $arrCatalog->id;
-                        $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
-                                        where(['supp_org_id' => $currentUser->organization_id, 'id' => $catalog_id])->all();
+                        if ($arrCatalog->type == 1) {
+                            $type = 1;  //ресторан подключен к главному каталогу
+                        } else {
+                            $catalog_id = $arrCatalog->id;
+                            $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
+                                            where(['supp_org_id' => $currentUser->organization_id, 'id' => $catalog_id])->all();
+                        }
                     }
+                } else {
+                    $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
+                                    where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
+                                    andFilterWhere(['LIKE', 'name', $searchString])->all();
                 }
             } else {
                 $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
@@ -425,7 +416,7 @@ class VendorController extends DefaultController {
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             $arrEd = \common\models\MpEd::dropdown();
-            //$articleArray = [];
+            $productArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -433,7 +424,11 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                //array_push($articleArray, (string) $article);
+                if(in_array($product, $productArray)){
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!')]];
+                    return $result;
+                }
+                array_push($productArray, (string) $product);
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_name', ['ru' => 'Не указано <strong>Наименование</strong>'])]];
                     return $result;
@@ -463,6 +458,7 @@ class VendorController extends DefaultController {
             }
 
             $currency = Currency::findOne(['id' => Yii::$app->request->post('currency')]);
+            $mainIndex = Yii::$app->request->post('main_index');
 
             $newBaseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
             if (empty($newBaseCatalog)) {
@@ -474,6 +470,9 @@ class VendorController extends DefaultController {
             }
             if (!empty($currency)) {
                 $newBaseCatalog->currency_id = $currency->id;
+            }
+            if (Catalog::isMainIndexValid($mainIndex)) {
+                $newBaseCatalog->main_index = $mainIndex;
             }
             $newBaseCatalog->save();
 
@@ -559,9 +558,7 @@ class VendorController extends DefaultController {
         }
     }
 
-
-    public function actionBasecatalog()
-    {
+    public function actionBasecatalog() {
         $sort = \Yii::$app->request->get('sort') ?? '';
 
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -580,15 +577,6 @@ class VendorController extends DefaultController {
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id', 'currentUser'));
     }
 
-    public function actionImportBaseCatalog($id) {
-        $cat_id = $id;
-        $currentUser = $this->currentUser;
-        $tempCatalog = \common\models\CatalogTemp::findOne(['cat_id' => $id, 'user_id' => $currentUser->id]);
-        $first20 = \api_web\helpers\Excel::get20RowsFromTempUploaded($tempCatalog);
-
-        return $this->renderAjax('catalogs/apiBased/_importPopup', compact('tempCatalog', 'first20', 'cat_id', 'currentUser'));
-    }
-    
     public function actionImport($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
@@ -599,6 +587,8 @@ class VendorController extends DefaultController {
                         ->one()
                 ->vendor;
         if (Yii::$app->request->isPost) {
+            $catalog = Catalog::findOne(['id' => $id]);
+            $catalog->makeSnapshot();
             $importType = \Yii::$app->request->post('UploadForm')['importType'];
             //$unique = 'product'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select(['id', 'product'])->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
@@ -954,7 +944,11 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
-
+            $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization->id]);
+            if(!$catalog){
+                $catalog = new Catalog();
+            }
+            $catalog->makeSnapshot();
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -1193,6 +1187,9 @@ class VendorController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
+            if(isset($post['CatalogBaseGoods']['units']) && strpos($post['CatalogBaseGoods']['units'], ',')){
+                $post['CatalogBaseGoods']['units'] = str_replace(',', '.', $post['CatalogBaseGoods']['units']);
+            }
             if ($catalogBaseGoods->load($post)) {
                 $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'deleted' => 0])->andWhere(['<>', 'id', $id])->all();
                 if (count($checkBaseGood)) {
@@ -1412,7 +1409,7 @@ class VendorController extends DefaultController {
                     }
 
                     $isExists = User::deleteUserFromOrganization($post['id'], $this->currentUser->organization_id);
-                    if($isExists && $user->id != $this->currentUser->id){
+                    if ($isExists && $user->id != $this->currentUser->id) {
                         $message = Yii::t('message', 'frontend.controllers.client.user_deleted', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
@@ -1615,10 +1612,8 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-2', compact('dataProvider', 'cat_id', 'baseCurrencySymbol'));
     }
 
-
-    public function actionStep3Copy($id)
-    {
-        ini_set('memory_limit','256M');
+    public function actionStep3Copy($id) {
+        ini_set('memory_limit', '256M');
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
@@ -1693,7 +1688,7 @@ class VendorController extends DefaultController {
                     . " FROM `catalog` "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                    . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 "
+                    . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 and catalog_base_goods.status = 1 "
                     . "ORDER BY len DESC, i DESC, c_article_1 ASC, article ASC ";
 
 
@@ -1732,9 +1727,7 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'dataProvider'));
     }
 
-
-    public function actionStep3UpdateProduct($id)
-    {
+    public function actionStep3UpdateProduct($id) {
         $catalogGoods = CatalogGoods::find()->where(['id' => $id])->one();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -2393,6 +2386,44 @@ class VendorController extends DefaultController {
             $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
             return $result;
         }
+    }
+
+    public function actionAjaxChangeMainIndex() {
+        $post = Yii::$app->request->post();
+        if (isset($post['cat_id']) && isset($post['main_index'])) {
+            $cat_id = $post['cat_id'];
+            $main_index = $post['main_index'];
+        } else {
+            return false;
+        }
+        $currentUser = $this->currentUser;
+        $catalog = Catalog::findOne(['id' => $cat_id, 'type' => Catalog::BASE_CATALOG]);
+        if (!Catalog::isMainIndexValid($main_index) || empty($catalog)) {
+            return false;
+        }
+        if ($catalog->positionsCount > 0) {
+            return false;
+        }
+        $catalog->main_index = $main_index;
+        return $catalog->save();
+    }
+
+    public function actionAjaxDeleteMainCatalog() {
+        $currentUser = $this->currentUser;
+        $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (!empty($catalog)) {
+            return $catalog->deleteAllProducts();
+        }
+        return false;
+    }
+
+    public function actionAjaxRestoreMainCatalogLatestSnapshot() {
+        $currentUser = $this->currentUser;
+        $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (!empty($catalog)) {
+            return $catalog->restoreLastSnapshot();
+        }
+        return false;
     }
 
 }

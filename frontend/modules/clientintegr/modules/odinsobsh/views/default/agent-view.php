@@ -35,7 +35,7 @@ $this->title = 'Интеграция с 1С Общепит';
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    Контрагетны 1С
+    Контрагенты 1С
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -51,7 +51,7 @@ $this->title = 'Интеграция с 1С Общепит';
                                 'id',
                                 'cid',
                                 'name',
-                                'inn',
+                                'inn_kpp',
                                 'updated_at',
                             ],
                             'filterPosition' => false,

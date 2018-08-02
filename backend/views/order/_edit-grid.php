@@ -18,6 +18,9 @@ $form = ActiveForm::begin([
             ],
             'method' => 'post',
         ]);
+$this->registerCss('
+    .bootstrap-touchspin {width:180px;}
+        ');
 ?>
 <div class="row">
     <div class="col-md-6">
@@ -70,7 +73,7 @@ $form = ActiveForm::begin([
                                     'name' => "OrderContent[$data->id][quantity]",
                                     'pluginOptions' => [
                                         'initval' => $data->quantity,
-                                        'min' => 0.001,
+                                        'min' => 0,
                                         'max' => PHP_INT_MAX,
                                         'decimals' => 3,
                                         'forcestepdivisibility' => 'none',

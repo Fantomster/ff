@@ -6,6 +6,7 @@ use api\common\models\iiko\iikoPconst;
 use api\common\models\RkDicconst;
 use api\common\models\RkPconst;
 use api\common\models\rkws\RkWaybilldataSearch;
+use api\common\models\VatData;
 use api_web\classes\RkeeperWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
@@ -141,6 +142,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap($waybill_id) {
         
         $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $waybill_id])->one();
+        $vatData = VatData::getVatList();
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
 
@@ -168,14 +170,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
                         'dataProvider' => $dataProvider,
+                        'searchModel' => $searchModel,
                         'wmodel' => $wmodel,
                         'isAndroid' => $isAndroid,
+                        'vatData' => $vatData
             ]);
         } else {
             return $this->render($vi, [
+                        'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'wmodel' => $wmodel,
                         'isAndroid' => $isAndroid,
+                        'vatData' => $vatData
             ]);
         }
     }
@@ -319,9 +325,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionChvat($id, $vat) {
 
         $model = $this->findDataModel($id);
-
-        $rress = Yii::$app->db_api
-            ->createCommand('UPDATE rk_waybill_data set vat = :vat, linked_at = now() where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+        $model->vat = $vat;
+        $model->save();
 
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
 

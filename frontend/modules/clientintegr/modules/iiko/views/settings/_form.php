@@ -33,6 +33,17 @@ use common\models\User;
         case \api\common\models\iiko\iikoDicconst::TYPE_PASSWORD:
             echo $form->field($model, 'value')->passwordInput(['maxlength' => true]);
         break;
+        case \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX:
+            $arr = [];
+            $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_stores_list"')->andWhere('iiko_pconst.org='.$org)->one();
+            if($iikoPconst){
+                $arr = unserialize($iikoPconst->value);
+            }
+            $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org]);
+            foreach ($iikoStores as $store){
+                echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => in_array($store->id, $arr) ? true : false]);
+            }
+        break;
         default:
             echo $form->field($model, 'value')->textInput(['maxlength' => true]);
     }

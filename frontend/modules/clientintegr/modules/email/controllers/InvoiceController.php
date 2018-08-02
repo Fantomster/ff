@@ -15,16 +15,39 @@ use yii\web\Controller;
 use yii\web\Response;
 use common\models\search\IntegrationInvoiceSearch;
 use yii;
+use yii\helpers\Url;
 
 class InvoiceController extends Controller
 {
 
     public function actionIndex()
     {
-        $models = new IntegrationInvoiceSearch();
-        $dataProvider = $models->search(Yii::$app->request->queryParams);
+        Url::remember();
+        $searchModel = new IntegrationInvoiceSearch();
 
-        return $this->render('index', ['searchMOdel' => $models, 'dataProvider' => $dataProvider]);
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
+
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
+
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $vi = 'index';
+
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial($vi, [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            return $this->render($vi, [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        }
+
+        //return $this->render('index', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
 
     }
 
@@ -108,11 +131,11 @@ class InvoiceController extends Controller
             $user = \Yii::$app->user->identity;
 
             if (empty($vendor)) {
-                throw new Exception('Поставщик не определен.');
+                throw new Exception('Поставщик не определён.');
             }
 
             if (empty($invoice)) {
-                throw new Exception('Нам не удалось найти эту накладную');
+                throw new Exception('Нам не удалось найти эту накладную.');
             }
 
             //Создаем товары для накладных, и получаем их модели
@@ -179,5 +202,13 @@ class InvoiceController extends Controller
         $res = Organization::getSuppliersByString($org_id,$stroka);
         $res = json_encode($res);
         return $res;
+    }
+
+    protected function getEarliestOrder($org_id) {
+
+        $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
+
+        return isset($eDate) ?  $eDate->updated_at : null;
+
     }
 }

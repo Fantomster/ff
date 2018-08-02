@@ -11,7 +11,9 @@ use yii\helpers\Html;
 <?php
 
 if (empty($model)) {
+    echo "<div  style=\"text-align:right;\">";
     echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
+    echo "</div>";
 } else {
     $columns = array(
         'id',

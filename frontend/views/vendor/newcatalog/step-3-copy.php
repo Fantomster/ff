@@ -361,6 +361,7 @@ beforeChangeRender: function (changes, source) {
 });
 colWidths[1] = 0.1;
 hot.updateSettings({colWidths: colWidths});
+search('');
 function getRowsFromObjects(queryResult) {
     rows = [];
     for (var i = 0, l = queryResult.length; i < l; i++) {
@@ -372,20 +373,26 @@ function getRowsFromObjects(queryResult) {
     return rows;
   }
 
-  Handsontable.Dom.addEvent(searchFiled, 'keyup', function(event) {
-    //                    debugger
+function search(searchText) {
     hot.loadData(data);
 
-    var queryResult = hot.search.query(this.value);
+    var queryResult = hot.search.query(searchText);
     rows = getRowsFromObjects(queryResult);
     var filtered = data.filter(function(_, index) {
-      return !searchFiled.value || rows.indexOf(index) >= 0;
+      return !searchText || rows.indexOf(index) >= 0;
     });
 
     hot.loadData(filtered);
-    hot.render();
+    hot.render();        
+}
+        
+  Handsontable.Dom.addEvent(searchFiled, 'keyup', function(event) {
+    //                    debugger
+        search(searchFiled.value);
   });        
 Handsontable.Dom.addEvent(save, 'click', function() {
+            $("#search_field").val('');
+            search('');
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
   var cols = [1,'goods_id',3, 4, 5,6,7,8,'total_price'];
@@ -425,17 +432,17 @@ Handsontable.Dom.addEvent(save, 'click', function() {
     });
 });
 $('#save').click(function(e){	
-e.preventDefault();
+    e.preventDefault();
 });
 $(document).on("click", ".set", function() {
-var form = $("#set_discount_percent");
-$.post(
-    form.attr("action"),
-        form.serialize()
-    ).done(function(result) {
-        form.replaceWith(result);
-    });
-return false;
+    var form = $("#set_discount_percent");
+    $.post(
+        form.attr("action"),
+            form.serialize()
+        ).done(function(result) {
+            form.replaceWith(result);
+        });
+    return false;
 })
         
     var currencies = $.map($currencySymbolList, function(el) { return el });

@@ -9,57 +9,48 @@ use Yii;
  *
  * @property int $id
  * @property int $cat_id
+ * @property string $main_index
+ * @property int $currency_id
  * @property string $created_at
  *
  * @property Catalog $cat
- * @property CatalogSnapshotContent[] $catalogSnapshotContents
+ * @property CatalogSnapshotContent[] $catalogSnapshotContent
  */
 class CatalogSnapshot extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
         return 'catalog_snapshot';
     }
 
-    //auto created_at
-    public function behaviors()
-    {
-        return [
-            'timestamp' => [
-                'class' => \yii\behaviors\TimestampBehavior::className(),
-                'attributes' => [
-                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
-                ],
-                'value' => new \yii\db\Expression('NOW()'),
-            ],
-        ];
-    }
-    
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['cat_id'], 'required'],
-            [['cat_id'], 'integer'],
+            [['cat_id', 'main_index', 'currency_id'], 'required'],
+            [['cat_id', 'currency_id'], 'integer'],
             [['created_at'], 'safe'],
+            [['main_index'], 'string', 'max' => 255],
             [['cat_id'], 'exist', 'skipOnError' => true, 'targetClass' => Catalog::className(), 'targetAttribute' => ['cat_id' => 'id']],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'cat_id' => 'Cat ID',
-            'created_at' => 'Created At',
+            'id' => Yii::t('app', 'ID'),
+            'cat_id' => Yii::t('app', 'Cat ID'),
+            'main_index' => Yii::t('app', 'Main Index'),
+            'currency_id' => Yii::t('app', 'Currency ID'),
+            'created_at' => Yii::t('app', 'Created At'),
         ];
     }
 
@@ -74,7 +65,7 @@ class CatalogSnapshot extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCatalogSnapshotContents()
+    public function getCatalogSnapshotContent()
     {
         return $this->hasMany(CatalogSnapshotContent::className(), ['snapshot_id' => 'id']);
     }

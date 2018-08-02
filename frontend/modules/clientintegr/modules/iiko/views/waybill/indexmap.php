@@ -19,6 +19,7 @@ $this->title = 'Интеграция с iiko Office';
 $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
 $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
 $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
+$this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-top:-30px;}');
 ?>
 
 <section class="content-header">
@@ -69,15 +70,50 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                 }'],
                             ]); ?>
                         </div>
+                        <?php
+                            $pjax = "$('#search-pjax').on('pjax:end', function(){
+                                            $.pjax.reload('#map_grid1',{'timeout':10000});
+                                    });";
+                            $this->registerJs($pjax);
+                        ?>
+                        <?php Pjax::begin(['enablePushState' => true, 'timeout' => 10000, 'id' => 'search-pjax']); ?>
+                        <?php
+                        $form = ActiveForm::begin([
+                            'options' => [
+                                'data-pjax' => true,
+                                'id' => 'search-form',
+                                'role' => 'search',
+                            ],
+                            'method' => 'get',
+                        ]);
+                        ?>
+                        <div class="row">
+                            <div class="col-md-offset-10 col-md-2 alVatFilter">
+                                <?=
+                                $form->field($searchModel, 'vat')
+                                    ->dropDownList($vatData, ['id' => 'vatFilter'])
+                                    ->label('НДС', ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div style="clear: both;"></div>
+                        <?php ActiveForm::end(); ?>
+                        <?php Pjax::end(); ?>
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
                             'pjax' => true,
-                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false]],
+                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
                             'filterPosition' => false,
                             'columns' => [
-                                'product_id',
-                                'fproductnameProduct',
+                                [
+                                    'attribute' => 'product_id',
+                                    'label' => 'ID в Mixcart',
+                                ],
+                                [
+                                    'attribute' => 'fproductnameProduct',
+                                    'label' => 'Наименование продукции',
+                                ],
                                 [
                                     'attribute' => 'product_id',
                                     'value' => function ($model) {
@@ -154,8 +190,8 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                     'hAlign' => 'right',
                                     'vAlign' => 'middle',
                                     'format' => ['decimal', 6],
-
-                                    'pageSummary' => true
+                                    'pageSummary' => true,
+                                    'label' => 'Коэфф.'
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -176,6 +212,7 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
 
                                     'pageSummary' => true,
                                     'footer' => 'Итого сумма без НДС:',
+                                    'label' => 'Количество'
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -196,6 +233,7 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                     'pageSummary' => true,
                                     //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                     'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
+                                    'label' => 'Сумма б/н'
                                 ],
                                 [
                                     'attribute' => 'vat',
@@ -408,6 +446,12 @@ $js = <<< JS
                 }
             })
         });
+        
+        $(document).on("change", "#vatFilter", function() {
+            console.log(1);
+            $("#search-form").submit();
+        });
+        
     });
 JS;
 

@@ -25,7 +25,6 @@ section>h3>small {
     font-weight: 300;
 }
 ');
-//dd($deliveryRegions);
 ?>
 <section class='content-header'>
     <h1>

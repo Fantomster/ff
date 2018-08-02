@@ -49,7 +49,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             //  [['koef'], 'number'],
             //  
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
+            ['vat', 'in', 'allowArray' => true,  'range' => [0, 1000, 1800] ],
             //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
+            ['vat', 'in', 'allowArray' => true,  'range' => [0, 1000, 1800] ],
             ['koef', 'filter', 'filter' => function ($value) {
                         $newValue = 0 + str_replace(',', '.', $value);
                         return $newValue;
@@ -62,7 +64,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            [['koef', 'quant'], 'number', 'min' => 0.0001],
+            //[['koef', 'quant'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [['waybill_id', 'product_rid', 'product_id', 'munit_rid', 'updated_at', 'quant', 'sum', 'vat', 'pdenom', 'koef', 'org', 'vat_included', 'linked_at'], 'safe']
         ];

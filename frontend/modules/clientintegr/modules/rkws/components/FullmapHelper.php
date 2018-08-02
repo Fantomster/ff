@@ -22,7 +22,7 @@ class FullmapHelper extends yii\base\BaseObject  {
     public $org;
     public $restr;
 
-    const LIMIT = 2;
+    const LIMIT = 100;
     
     public function init() {
 
@@ -67,6 +67,7 @@ class FullmapHelper extends yii\base\BaseObject  {
         }
 
         $offset = 0;
+        $counter = 0;
 
         do {
 
@@ -79,12 +80,14 @@ class FullmapHelper extends yii\base\BaseObject  {
 
         $newProds = Yii::$app->db->createCommand($sql)->queryAll();
 
-        $counter = 0;
+ //       $counter = 0;
+            $counter = $counter + count($newProds);
 
 
         foreach ($newProds as $prod) {
 
             $mess['action'] = 'fullmap';
+            $mess['id'] = $jmodel->id;
 
             $mess['body'] = [
                 'service_id' => 1,
@@ -96,14 +99,22 @@ class FullmapHelper extends yii\base\BaseObject  {
                 'is_active' => 1,
             ];
 
+            //\Yii::$app->rkwsmq->addRabbitQueue(serialize($mess));
 
-            \Yii::$app->rkwsmq->addRabbitQueue(serialize($mess));
+            try {
+                \Yii::$app->get('rabbit')
+                    ->setQueue('rkws')
+                    ->setExchange('router')
+                    ->addRabbitQueue(serialize($mess));
+            } catch(\Exception $e) {
+                Yii::error($e->getMessage());
+            }
 
         }
 
             $offset += self::LIMIT;
 
-        } while (count($newProds) == self::LIMIT);
+        } while (count($newProds) == self::LIMIT || $counter == 2000);
 
 
         }

@@ -44,9 +44,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = mercService::getLicense();
         $searchModel = new mercVSDSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $user = Yii::$app->getUser()->identity;
         $params = ['searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $lic];
+            'lic' => $lic,
+            'user' => $user
+            ];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
@@ -150,7 +153,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         try {
-            $document = new getVetDocumentByUUIDRequest();
+            $document = new getVetDocumentByUUID();
             $document->getDocumentByUUID($uuid);
         } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
@@ -222,11 +225,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionGetPdf($uuid) {
         $vsdHttp = new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
-            'authLink' => Yii::$app->params['authLink'],
-            'vsdLink' => Yii::$app->params['vsdLink'],
-            'pdfLink' => Yii::$app->params['pdfLink'],
+            'authLink' => Yii::$app->params['vtsHttp']['authLink'],
+            'vsdLink' => Yii::$app->params['vtsHttp']['vsdLink'],
+            'pdfLink' => Yii::$app->params['vtsHttp']['pdfLink'],
+            'chooseFirmLink' => Yii::$app->params['vtsHttp']['chooseFirmLink'],
             'username' => mercDicconst::getSetting("vetis_login"),
             'password' => mercDicconst::getSetting("vetis_password"), //'2wsx2WSX', //
+            'firmGuid' => mercDicconst::getSetting("issuer_id"),
         ]);
         $data = $vsdHttp->getPdfData($uuid);
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
@@ -246,19 +251,19 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return true;
 
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
-        $transaction = Yii::$app->db_api->beginTransaction();
-       try {
+        //$transaction = Yii::$app->db_api->beginTransaction();
+       //try {
             $vsd = new VetDocumentsChangeList();
             if(isset($visit))
                 $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*30);
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
-            $transaction->commit();
-        }catch (\Exception $e)
-        {
-           $transaction->rollback();
-            Yii::error($e->getMessage());
-        }
+          //  $transaction->commit();
+        //}catch (\Exception $e)
+        //{
+        //   $transaction->rollback();
+        //    Yii::error($e->getMessage());
+        //}
     }
 
     private function getErrorText($e)

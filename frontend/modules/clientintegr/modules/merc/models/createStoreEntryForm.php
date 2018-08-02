@@ -33,6 +33,10 @@ use yii\base\Model;
 
 class createStoreEntryForm extends Model {
 
+    const ADD_PRODUCT = 1;
+    const INV_PRODUCT = 2;
+    const INV_PRODUCT_ALL = 3;
+
     public $batchID;
     public $productType;
     public $product;
@@ -51,6 +55,10 @@ class createStoreEntryForm extends Model {
     public $vsd_issueDate;
     public $vsd_issueSeries;
     public $vsd_issueNumber;
+    public $type = createStoreEntryForm::ADD_PRODUCT;
+    public $raw_stock_entry;
+    public $reason;
+    public $description;
 
     public function rules()
     {
@@ -118,7 +126,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->unitList->unit as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[$item->uuid] = $item->name;
         }
         return $res;
@@ -137,7 +145,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->productList->product as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[$item->guid] = $item->name;
         }
         return $res;
@@ -155,7 +163,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->subProductList->subProduct as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[$item->guid] = $item->name. " (".$item->code.")";
         }
         return $res;
@@ -173,7 +181,7 @@ class createStoreEntryForm extends Model {
         $res = [];
         foreach ($list->productItemList->productItem as $item)
         {
-            if($item->last)
+            if($item->last && $item->active)
                 $res[] = ['value' => $item->name,
                     'label' => $item->name
                     ];
@@ -192,7 +200,7 @@ class createStoreEntryForm extends Model {
         do {
             $list = ikarApi::getInstance()->getAllCountryList($listOptions);
             foreach ($list->countryList->country as $item) {
-                if ($item->last)
+                if ($item->last && $item->active)
                     $res[$item->uuid] = $item->name;
             }
 
@@ -203,6 +211,14 @@ class createStoreEntryForm extends Model {
     }
 
     public function getStockDiscrepancy($ID)
+    {
+        if($this->type == createStoreEntryForm::ADD_PRODUCT)
+            return $this->getAddStockDiscrepancy($ID);
+
+        return $this->getInvStockDiscrepancy($ID);
+    }
+
+    public function getAddStockDiscrepancy($ID)
     {
         $stockDiscrepancy = new StockDiscrepancy();
         $stockDiscrepancy->id = $ID;
@@ -248,6 +264,19 @@ class createStoreEntryForm extends Model {
         return $stockDiscrepancy;
     }
 
+    public function getInvStockDiscrepancy($ID)
+    {
+        $stockDiscrepancy = new StockDiscrepancy();
+        $stockDiscrepancy->id = $ID;
+        $stockDiscrepancy->resultingList = new StockEntryList();
+
+        $stockEntry = $this->raw_stock_entry;
+        $stockEntry->batch->volume = ($this->type == createStoreEntryForm::INV_PRODUCT) ? $this->volume : 0;
+
+        $stockDiscrepancy->resultingList->stockEntry = $stockEntry;
+        return $stockDiscrepancy;
+    }
+
     private function convertDate($date)
     {
         $time = strtotime($date->first_date);
@@ -270,6 +299,28 @@ class createStoreEntryForm extends Model {
             $res->secondDate->hour = date('h', $time);
         }
         return $res;
+    }
+
+    public function getReason()
+    {
+        if ($this->type == createStoreEntryForm::ADD_PRODUCT)
+            return "Добавление по бумажному ВСД";
+
+        if ($this->type == createStoreEntryForm::INV_PRODUCT)
+            return $this->reason;
+
+        return "dsdsds";
+    }
+
+    public function getDescription()
+    {
+        if ($this->type == createStoreEntryForm::ADD_PRODUCT)
+            return "Добавление по бумажному ВСД";
+
+        if ($this->type == createStoreEntryForm::INV_PRODUCT)
+            return $this->description;
+
+        return "Некачественный товар";
     }
 
 }

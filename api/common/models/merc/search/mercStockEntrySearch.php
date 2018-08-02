@@ -39,7 +39,7 @@ class mercStockEntrySearch extends MercStockEntry
     public function search($params)
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
-        $query = MercStockEntry::find()->where(['owner_guid' => $guid]);
+        $query = MercStockEntry::find()->where(['owner_guid' => $guid])->andWhere('amount > 0');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

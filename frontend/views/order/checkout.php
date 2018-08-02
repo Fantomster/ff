@@ -20,11 +20,11 @@ $this->registerJs(
                 if (clicked.hasClass("remove")) {
                     title = "' . Yii::t('message', 'frontend.views.order.del', ['ru' => 'Удаление товара из корзины']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.sure', ['ru' => 'Вы уверены, что хотите удалить товар из заказа?']) . ' ";
-                    success = "' . Yii::t('message', 'frontend.views.order.good_deleted', ['ru' => 'Товар удален!']) . ' ";
+                    success = "' . Yii::t('message', 'frontend.views.order.good_deleted', ['ru' => 'Товар удалён!']) . ' ";
                 } else if (clicked.hasClass("delete")){
                     title = "' . Yii::t('message', 'frontend.views.order.order_del', ['ru' => 'Удаление заказа']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.sure_two', ['ru' => 'Вы уверены, что хотите удалить заказ из корзины?']) . ' ";
-                    success = "' . Yii::t('message', 'frontend.views.order.order_deleted', ['ru' => 'Заказ удален!']) . ' ";
+                    success = "' . Yii::t('message', 'frontend.views.order.order_deleted', ['ru' => 'Заказ удалён!']) . ' ";
                 } else if (clicked.hasClass("deleteAll")){
                     title = "' . Yii::t('message', 'frontend.views.order.clean_basket', ['ru' => 'Очистка корзины']) . ' ";
                     text = "' . Yii::t('message', 'frontend.views.order.sure_del', ['ru' => 'Вы уверены, что хотите удалить все заказы из корзины?']) . ' ";
@@ -46,7 +46,7 @@ $this->registerJs(
                             ).done(function (result) {
                                 if (result) {
                                     resolve(result);
-                                     $.pjax.reload("#checkout", {timeout:30000});
+                                    $.pjax.reload("#checkout", {timeout:30000});
                                 } else {
                                     resolve(false);
                                 }
@@ -232,7 +232,7 @@ $this->registerJs(
                     if ($(this).data("internal") != 1) {
                         if (link != "#") {
                             swal({
-                                title: "' . Yii::t('message', 'frontend.views.order.unsaved_changes', ['ru' => 'Несохраненные изменения!']) . ' ",
+                                title: "' . Yii::t('message', 'frontend.views.order.unsaved_changes', ['ru' => 'Несохранённые изменения!']) . ' ",
                                 text: "' . Yii::t('message', 'frontend.views.order.not_saved_changes', ['ru' => 'Вы изменили заказ, но не сохранили изменения!']) . ' ",
                                 type: "warning",
                                 showCancelButton: true,
@@ -418,6 +418,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         ]
                                     ]);
                                     ?>
+                                    <div class="pull-right">
                                     <?php
                                     $lang = (Yii::$app->language == 'md') ? 'ro' : Yii::$app->language;
                                     $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_'.$cart['id']);
@@ -442,6 +443,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         ]
                                     ])
                                     ?>
+                                    </div>
                                 </div>
                             </div>
                             <?= $this->render('_checkout-content', ['cart' => $cart]) ?>

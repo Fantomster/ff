@@ -4,10 +4,11 @@ namespace api\common\models;
 
 use Yii;
 use common\models\Organization;
+use yii\helpers\ArrayHelper;
 
 
 /**
- * This is the model class for table "rk_access".
+ * This is the model class for table "rk_agent".
  *
  * @property integer $id
  * @property integer $fid
@@ -94,5 +95,29 @@ class RkAgent extends \yii\db\ActiveRecord
        return \Yii::$app->db_api;
     }
 
+    /**
+     * get list of agents
+     *
+     * @return array
+     */
+    public function getAgents($org_id, $all = true, $notMap=true) {
+        $query = RkAgent::find()
+            ->select(['rid', 'denom'])->where(['acc' => $org_id]);
 
+        if($notMap){
+            $agents = ArrayHelper::map($query->orderBy(['denom' => SORT_ASC])
+                ->asArray()
+                ->all(), 'rid', 'denom');
+        }else{
+            $agents = $query->orderBy(['denom' => SORT_ASC])
+                ->asArray()
+                ->all();
+        }
+
+        if ($all) {
+            $agents[''] = '';
+        }
+        ksort($agents);
+        return $agents;
+    }
 }

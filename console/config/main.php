@@ -25,8 +25,13 @@ return [
         ]
     ],
     'controllerMap' => [
-        'iiko-daemon' => [
-            'class' => 'console\modules\daemons\controllers\IikodaemonController'
+        'watcher-daemon' => [
+            'class' => "\console\controllers\WatcherDaemonController",
+            'maxChildProcesses' => 5,
+            'isMultiInstance' => false,
+            'daemons' => [
+                ['className' => 'iikoLogDaemonController', 'enabled' => true]
+            ]
         ]
     ],
     'aliases' => [

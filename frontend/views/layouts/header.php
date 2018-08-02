@@ -105,10 +105,6 @@ if (!Yii::$app->user->isGuest) {
                 });
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);
-                try {
-                    $.pjax.reload({container: "#checkout",timeout:30000});
-                } catch(e) {
-                }
             }
         }
 
@@ -123,6 +119,10 @@ if (!Yii::$app->user->isGuest) {
                 $('#fmsuccess').progressTo(Math.round(message.success*100/message.total));
                 $('#fmfailed').progressTo(Math.round(message.failed*100/message.total));
                 
+                $('#fmtotal_dig').text(message.total);
+                $('#fmsuccess_dig').text(message.success);
+                $('#fmfailed_dig').text(message.failed);
+                
                 if(message.total == (message.success + message.failed)) //Все обработано
                 {
                     $.pjax.reload("#map_grid1", {timeout:30000});
@@ -130,11 +130,13 @@ if (!Yii::$app->user->isGuest) {
             }
         }
 
+        if (message.isSystem) {
         $.get(
             '$refreshStatsUrl'
         ).done(function(result) {
             refreshMenu(result);
         });
+        }
     });
             
     $(document).on("pjax:complete", "#checkout", function() {

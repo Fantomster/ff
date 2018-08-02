@@ -58,6 +58,8 @@ class AllMaps extends \yii\db\ActiveRecord {
             [[ 'product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id',
                 'vat_included', 'linked_at', 'pdenom', 'munit_rid'], 'safe']
         ];
+
+        // test git
     }
 
     /**

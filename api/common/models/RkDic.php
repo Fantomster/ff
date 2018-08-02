@@ -31,6 +31,13 @@ class RkDic extends \yii\db\ActiveRecord
     
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
+
+    const STATUS_NO_DATA_AVAILABLE = 1;
+    const STATUS_REQUEST_IS_SENT = 2;
+    const STATUS_ERROR_QUERY_DATA = 3;
+    const STATUS_ERROR_GETTING_DATA = 4;
+    const STATUS_ANSWER_IS_NOT_RECEIVED_WITHIN_5_MINUTES = 5;
+    const STATUS_DATA_IS_LOADED = 6;
       
     
     /**

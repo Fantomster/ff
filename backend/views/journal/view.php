@@ -28,7 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Ответ системы',
                 'attribute' => 'record.response',
                 'value' => function ($data) {
-                    return print_r(json_decode($data->record['response']),1);
+                    if(!isset($data->record['response'])) {
+                        $r = $data->response;
+                    } else {
+                        $r = print_r(json_decode($data->record['response']),1);
+                    }
+                    return $r;
                 }
             ],
             'log_guide',
@@ -37,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Дата операции',
                 'attribute' => 'record.response_at',
                 'value' => function ($data) {
-                    return $data->record['response_at'];
+                    return Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y  H:i:s");
                 }
             ]
         ],

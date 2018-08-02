@@ -641,7 +641,6 @@ class CatalogController extends DefaultController
                 }
             }
         }
-        //dd($dataProvider);
         return $this->render('newcatalog/step-4', compact('searchModel', 'dataProvider', 'currentCatalog', 'cat_id', 'vendor_id'));
     }
 

@@ -210,14 +210,25 @@ class VetDocumentDone extends Component
         $retuned->transportStorageType = $doc->certifiedConsignment->transportStorageType;
 
         $accompanyingForms = new ConsignmentDocumentList();
-        if(isset($doc->referencedDocument))
-            if($doc->referencedDocument->type == 1) {
-                $accompanyingForms->waybill = new Waybill();
-                $accompanyingForms->waybill->issueSeries = $doc->referencedDocument->issueSeries;
-                $accompanyingForms->waybill->issueNumber = $doc->referencedDocument->issueNumber;
-                $accompanyingForms->waybill->issueDate = $doc->referencedDocument->issueDate;
-                $accompanyingForms->waybill->type = $doc->referencedDocument->type;
+        if(isset($doc->referencedDocument)) {
+            $docs = null;
+            if (!is_array($doc->referencedDocument))
+                $docs[] = $doc->referencedDocument;
+            else
+                $docs = $doc->referencedDocument;
+
+            foreach ($docs as $item) {
+                if (($item->type >= 1) && ($item->type <= 5)) {
+                    $accompanyingForms->waybill = new Waybill();
+                    $accompanyingForms->waybill->issueSeries = isset($item->issueSeries) ? $item->issueSeries : null;
+                    $accompanyingForms->waybill->issueNumber = $item->issueNumber;
+                    $accompanyingForms->waybill->issueDate = $item->issueDate;
+                    $accompanyingForms->waybill->type = $item->type;
+                    break;
+                }
             }
+        }
+
         $accompanyingForms->vetCertificate = new VetDocument();
         $accompanyingForms->vetCertificate->uuid = $this->UUID;
         $accompanyingForms->vetCertificate->authentication = $doc->authentication;

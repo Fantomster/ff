@@ -126,21 +126,5 @@ $timestamp_now=time();
         </div>
 </div>
 <div class="modal-footer">
-    <?php if ($document->status == MercVsd::DOC_STATUS_CONFIRMED
-        && (\api\common\models\merc\MercVsd::getType($document->UUID) == 1) && ($lic_merc==1)) {
-            echo Html::a(Yii::t('message', 'frontend.client.integration.done', ['ru' => 'Погасить']), ['done', 'uuid'=>$document->UUID], ['class' => 'btn btn-success']).' '.
-                Html::a(Yii::t('message', 'frontend.client.integration.done_partial', ['ru' => 'Частичная приемка']), ['done-partial', 'uuid'=>$document->UUID], ['class' => 'btn btn-warning', 'data' => [
-                    //'pjax'=>0,
-                    'target' => '#ajax-load',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                ],]).' '.
-                Html::a(Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']), ['done-partial', 'uuid'=>$document->UUID, 'reject' => true], ['class' => 'btn btn-danger', 'data' => [
-                    //'pjax'=>0,
-                    'target' => '#ajax-load',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                ],]);
-            } ?>
-              <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.client.supp.close_four', ['ru'=>'Закрыть']) ?></a>
+   <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.client.supp.close_four', ['ru'=>'Закрыть']) ?></a>
 </div>

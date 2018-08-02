@@ -19,11 +19,19 @@ kartik\select2\Select2Asset::register($this);
 
 $currencyList = Json::encode(Currency::getList());
 $currencySymbolList = Json::encode(Currency::getSymbolList());
-$indexesList = Json::encode(\common\models\Catalog::getBaseIndexTitleList());
+$indexesList = Json::encode(\common\models\Catalog::getMainIndexesList());
 $titleDeleteAll = Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']);
 $cancelText = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
 $catalogDeleted = Yii::t('message', 'frontend.views.vendor.catalog_deleted', ['ru' => 'Каталог удален!']);
 $indexChanged = Yii::t('message', 'frontend.views.vendor.index_changed', ['ru' => 'Индекс изменен!']);
+$catalogNotEmpty = Yii::t('message', 'frontend.views.vendor.catalog_not_empty', ['ru' => 'Каталог не пустой']);
+$catalogDeletionFailed = Yii::t('message', 'frontend.views.vendor.catalog_deletion_failed', ['ru' => 'Не удалось удалить каталог']);
+$buttonDeleteRestore = Yii::t('message', 'frontend.views.vendor.btn_delete_restore', ['ru' => 'Удалить/восстановить каталог']);
+$buttonDelete = Yii::t('message', 'frontend.views.vendor.btn_delete', ['ru' => 'Удалить каталог']);
+$buttonRestore = Yii::t('message', 'frontend.views.vendor.btn_restore', ['ru' => 'Восстановить последнюю сохраненную копию каталога']);
+$titleRestoreCatalog = Yii::t('message', 'frontend.views.vendor.restore_catalog', ['ru' => 'Восстановить каталог']);
+$catalogRestorationFailed = Yii::t('message', 'frontend.views.vendor.catalog_restoration_failed', ['ru' => 'Не удалось восстановить каталог']);
+$catalogRestored = Yii::t('message', 'frontend.views.vendor.catalog_restored', ['ru' => 'Каталог восстановлен!']);
 
 $changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
 $calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
@@ -209,12 +217,25 @@ Modal::end();
                         ],
                     ])
                     ?>
-                    <?=
-                    Html::button('<span class="text-label">' . $titleDeleteAll, [
-                        'class' => 'btn btn-outline-default btn-sm pull-right delete-all-products',
-                        'style' => ['margin-right' => '10px;'],
-                    ])
+                    <?= ''
                     ?>
+                    <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
+                        <div class="btn-group" role="group">
+                            <div class="btn-group">
+                                <button id="delete_restore" class="btn btn-outline-default btn-sm pull-right btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="glyphicon glyphicon-export"></i> <span class="text-label"><?= $buttonDeleteRestore ?></span> <span class="caret"></span>
+                                </button>
+                                <ul id="delete_menu" class="dropdown-menu">
+                                    <li><a id="delete_item" class="delete-all-products" href="#" tabindex="-1">
+                                            <?= $buttonDelete ?>
+                                        </a></li>
+                                    <li><a id="restore_item" class="restore-catalog" href="#" tabindex="-1">
+                                            <?= $buttonRestore ?>
+                                        </a></li>
+                                </ul>
+                            </div>
+                        </div>                    
+                    </div>
                     <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                         <?=
                         ExportMenu::widget([
@@ -228,7 +249,6 @@ Modal::end();
                             'showColumnSelector' => false,
                             'batchSize' => 200,
                             'timeout' => 0,
-
                             'dropdownOptions' => [
                                 'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . ' </span>',
                                 'class' => ['btn btn-outline-default btn-sm pull-right'],
@@ -289,7 +309,7 @@ Modal::end();
                     ])
                     ?>
                     <?=
-                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']) . ' </span> <span class="base_index">' . \common\models\Catalog::getBaseIndexTitleList()[$currentCatalog->index_column] . '</span>', [
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']) . ' </span> <span class="base_index">' . common\models\Catalog::getMainIndexesList()["$currentCatalog->main_index"] . '</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeBaseIndex',
@@ -544,9 +564,10 @@ $baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
-$deleteAllUrl = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/delete-main-catalog"]);
-$restoreCatalogLastSnapshot = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/restore-catalog-last-snapshot"]);
-$changeMainIndexUrl = Yii::$app->urlManagerWebApi->createAbsoluteUrl(["/vendor/change-main-index"]);
+$deleteAllUrl = Url::to(["/vendor/ajax-delete-main-catalog"]);
+$restoreCatalogLastSnapshot = Url::to(["/vendor/ajax-restore-main-catalog-last-snapshot"]);
+$changeMainIndexUrl = Url::to(["/vendor/ajax-change-main-index"]);
+$restoreCatalogUrl = Url::to(["/vendor/ajax-restore-main-catalog-latest-snapshot"]);
 
 $var1 = Yii::t('message', 'frontend.views.vendor.del_good', ['ru' => 'Удалить этот продукт?']);
 $var2 = Yii::t('message', 'frontend.views.vendor.will_remove', ['ru' => 'Продукт будет удален из всех каталогов']);
@@ -846,8 +867,8 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
 
     var indexes = $indexesList;
     
-    var newIndex = {$currentCatalog->index_column};
-    var currentIndex = {$currentCatalog->index_column};
+    var newIndex = '{$currentCatalog->main_index}';
+    var currentIndex = '{$currentCatalog->main_index}';
         
     $(document).on("click", "#changeBaseIndex", function() {
         swal({
@@ -877,20 +898,17 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                     $.post(
                         "{$changeMainIndexUrl}",
                         {
-                            "user":{"language": "RU", "token":"{$currentUser->access_token}"},
-                            "request":{
-                                "cat_id": {$cat_id},
-                                "index": newIndex
-                            }
+                            "cat_id": {$cat_id},
+                            "main_index": newIndex
                         }
                     ).done(function (response) {
-                        if (response.result) {
+                        if (response) {
                             resolve();
                         } else {
-//                            swal({
-//                                type: response.result,
-//                                title: response.message
-//                            });
+                            swal({
+                                type: "error",
+                                title: "$catalogNotEmpty"
+                            });
                         }
                     });
                 })
@@ -910,7 +928,8 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
         })        
     });
    
-    $(document).on("click", ".delete-all-products", function() {
+    $(document).on("click", ".delete-all-products", function(e) {
+        e.preventDefault();                            
         swal({
             title: '$titleDeleteAll',
             showCancelButton: true,
@@ -921,24 +940,16 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
                     $.post(
-                        "{$deleteAllUrl}",
-                        {
-                            "user":{"language": "RU", "token":"{$currentUser->access_token}"},
-                            "request":{
-                                "cat_id": {$cat_id}
-                            }
-                        }
+                        "{$deleteAllUrl}"
                     ).done(function (response) {
-                        if (response.result) {
-                          //  alert("success!");
+                        if (response) {
                             $.pjax.reload({container: "#kv-unique-id-1"}); 
                             resolve();
                         } else {
-                            alert("fail!");
-//                            swal({
-//                                type: response.result,
-//                                title: response.message
-//                            });
+                            swal({
+                                type: "error",
+                                title: "$catalogDeletionFailed"
+                            });
                         }
                     });
                 })
@@ -950,6 +961,45 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                 swal({
                     type: "success",
                     title: "$catalogDeleted",
+                    allowOutsideClick: true,
+                });
+            }
+        })        
+    });
+   
+    $(document).on("click", ".restore-catalog", function(e) {
+        e.preventDefault();                            
+        swal({
+            title: '$titleRestoreCatalog',
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            confirmButtonText: '$var13',
+            cancelButtonText: '$cancelText',
+            allowOutsideClick: false,
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        "{$restoreCatalogUrl}"
+                    ).done(function (response) {
+                        if (response) {
+                            $.pjax.reload({container: "#kv-unique-id-1"}); 
+                            resolve();
+                        } else {
+                            swal({
+                                type: "error",
+                                title: "$catalogRestorationFailed"
+                            });
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    type: "success",
+                    title: "$catalogRestored",
                     allowOutsideClick: true,
                 });
             }

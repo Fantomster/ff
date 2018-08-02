@@ -25,7 +25,7 @@ echo Html::hiddenInput('product_id', $product_id);
                             'id' => "qty$product_id",
                             'pluginOptions' => [
                                 'initval' => $quantity,
-                                'min' => (isset($units) && ($units > 0)) ? $units : 0.001,
+                                'min' => (isset($units) && ($units > 0)) ? $units : 0,
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($units) && ($units)) ? $units : 1,
                                 'decimals' => (empty($units) || (fmod($units, 1) > 0)) ? 3 : 0,

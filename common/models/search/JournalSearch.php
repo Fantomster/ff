@@ -12,6 +12,7 @@ use common\models\Journal;
  */
 class JournalSearch extends Journal
 {
+    public $organizations = [];
     /**
      * {@inheritdoc}
      */
@@ -65,6 +66,10 @@ class JournalSearch extends Journal
             'organization_id' => $this->organization_id,
             'created_at' => $this->created_at,
         ]);
+
+        if(!empty($this->organizations)) {
+            $query->andFilterWhere(['in', 'organization_id', $this->organizations]);
+        }
 
         $query->andFilterWhere(['like', 'operation_code', $this->operation_code])
             ->andFilterWhere(['like', 'response', $this->response])

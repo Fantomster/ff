@@ -24,13 +24,16 @@ use Yii;
  * @property string $region
  * @property string $weight
  * @property int $mp_show_price
+ * @property int $barcode
+ * @property string $edi_supplier_article
+ * @property string $ssid
  *
  * @property CatalogSnapshot $snapshot
  */
 class CatalogSnapshotContent extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
@@ -38,42 +41,46 @@ class CatalogSnapshotContent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['snapshot_id'], 'required'],
-            [['snapshot_id', 'status', 'market_place', 'deleted', 'category_id', 'mp_show_price'], 'integer'],
+            [['snapshot_id', 'status', 'market_place', 'deleted', 'category_id', 'mp_show_price', 'barcode'], 'integer'],
             [['price', 'units'], 'number'],
-            [['article', 'product', 'note', 'ed', 'image', 'brand', 'region', 'weight'], 'string', 'max' => 255],
+            [['article', 'product', 'note', 'ed', 'image', 'brand', 'region', 'weight', 'ssid'], 'string', 'max' => 255],
+            [['edi_supplier_article'], 'string', 'max' => 30],
             [['snapshot_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogSnapshot::className(), 'targetAttribute' => ['snapshot_id' => 'id']],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'snapshot_id' => 'Snapshot ID',
-            'article' => 'Article',
-            'product' => 'Product',
-            'status' => 'Status',
-            'market_place' => 'Market Place',
-            'deleted' => 'Deleted',
-            'price' => 'Price',
-            'units' => 'Units',
-            'category_id' => 'Category ID',
-            'note' => 'Note',
-            'ed' => 'Ed',
-            'image' => 'Image',
-            'brand' => 'Brand',
-            'region' => 'Region',
-            'weight' => 'Weight',
-            'mp_show_price' => 'Mp Show Price',
+            'id' => Yii::t('app', 'ID'),
+            'snapshot_id' => Yii::t('app', 'Snapshot ID'),
+            'article' => Yii::t('app', 'Article'),
+            'product' => Yii::t('app', 'Product'),
+            'status' => Yii::t('app', 'Status'),
+            'market_place' => Yii::t('app', 'Market Place'),
+            'deleted' => Yii::t('app', 'Deleted'),
+            'price' => Yii::t('app', 'Price'),
+            'units' => Yii::t('app', 'Units'),
+            'category_id' => Yii::t('app', 'Category ID'),
+            'note' => Yii::t('app', 'Note'),
+            'ed' => Yii::t('app', 'Ed'),
+            'image' => Yii::t('app', 'Image'),
+            'brand' => Yii::t('app', 'Brand'),
+            'region' => Yii::t('app', 'Region'),
+            'weight' => Yii::t('app', 'Weight'),
+            'mp_show_price' => Yii::t('app', 'Mp Show Price'),
+            'barcode' => Yii::t('app', 'Barcode'),
+            'edi_supplier_article' => Yii::t('app', 'Edi Supplier Article'),
+            'ssid' => Yii::t('app', 'Ssid'),
         ];
     }
 

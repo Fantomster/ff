@@ -22,7 +22,10 @@ $this->registerJs('
         $(".box-body").on("change", "#statusFilter", function() {
             $("#search-form").submit();
         });
-        $(".box-body").on("change", "#orgFilter", function() {
+        $(".box-body").on("change", "#ordersearch-vendor_id", function() {
+            $("#search-form").submit();
+        });
+        $(".box-body").on("change", "#ordersearch-client_id", function() {
             $("#search-form").submit();
         });
         $(".box-body").on("change", "#dateFrom, #dateTo", function() {
@@ -54,7 +57,7 @@ $this->registerJs('
             e.preventDefault();
             clicked = $(this);
             if($(this).hasClass("completeEdi")){
-                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приеме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете, корректность данных?']) . ' ";
+                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приёме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете корректность данных?']) . ' ";
             }else{
                 var title = clicked.data("original-title") + "?";
             }
@@ -109,6 +112,8 @@ $this->registerCss("
     tr:hover{cursor: pointer;}
     #orderHistory a:not(.btn){color: #333;}
     .dataTable a{width: 100%; min-height: 17px; display: inline-block;}
+    #select2-ordersearch-vendor_id-container, #select2-ordersearch-client_id-container{margin-top:0;}
+    .select2-selection__clear{display: none;}
         ");
 ?>
 <section class="content-header">
@@ -189,20 +194,27 @@ $this->registerCss("
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <?=
                     $form->field($searchModel, 'status')
-                        ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru' => 'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru' => 'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru' => 'Завершен'])], ['id' => 'statusFilter'])
+                        ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru' => 'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru' => 'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru' => 'Завершён'])], ['id' => 'statusFilter'])
                         ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                     ?>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <?php
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                        echo $form->field($searchModel, 'vendor_id')
-                            ->dropDownList($organization->getSuppliers(), ['id' => 'orgFilter'])
-                            ->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
+                        echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
+                            'data' => $organization->getSuppliers(),
+                            'pluginOptions' => [
+                                'allowClear' => true
+                            ],
+                            'id' => 'orgFilter'
+                        ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
                     } else {
-                        echo $form->field($searchModel, 'client_id')
-                            ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
-                            ->label(Yii::t('message', 'frontend.views.order.rest', ['ru' => 'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
+                        echo $form->field($searchModel, 'client_id')->widget(\kartik\select2\Select2::classname(), [
+                            'data' => $organization->getClients(),
+                            'pluginOptions' => [
+                                'allowClear' => true
+                            ],
+                        ])->label(Yii::t('message', 'frontend.views.order.rest', ['ru' => 'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
                     }
                     ?>
                 </div>

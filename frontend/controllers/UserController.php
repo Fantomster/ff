@@ -460,7 +460,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
 
-    public function actionCreate(): void {
+    public function actionCreate() {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization;
 

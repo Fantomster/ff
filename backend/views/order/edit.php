@@ -6,7 +6,11 @@ use yii2assets\pdfjs\PdfJs;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = 'Редактирование заказа';
+$this->title = 'Редактирование заказа ' .  $order->id;
+$this->params['breadcrumbs'] = [
+    ['label' => 'Заказы с прикрепленными файлами', 'url' => ['with-attachments']],
+    $this->title
+];
 
 $this->registerCss('
         .container{width:100% !important;}
@@ -36,7 +40,7 @@ $js = <<<JS
         $(document).on('click', '.deletePosition', function(e) {
             e.preventDefault();
             target = $(this).data("target");
-            $(target).val(0);
+            $(target).val(-1);
             $(target).closest('tr').hide();
             $("#cancelChanges").show();
         });

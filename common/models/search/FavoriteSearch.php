@@ -40,7 +40,7 @@ class FavoriteSearch extends \yii\base\Model
         $this->load($params);
         //Создаем запрос
         $query = (new Query())->select([
-            'cbg.id as cbg_id',
+            'oc.product_id as cbg_id',
             'cbg.product',
             'cbg.units',
             'COALESCE(cg.price, cbg.price) as price',
@@ -49,28 +49,22 @@ class FavoriteSearch extends \yii\base\Model
             'cbg.ed',
             'curr.symbol',
             'cbg.note',
-            'count(ord.id) as count'
+            'count(oc.id) as count'
         ]);
         //Толео заказа
         $query->from('`order_content` AS oc');
         //Заказ
         $query->innerJoin('`order` as ord', 'oc.order_id = ord.id');
         //Товар из главного каталога
-        $query->innerJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
-        //Каталоги, с которыми работает ресторан
-        $query->innerJoin('`catalog` as cat', 'cbg.cat_id = cat.id AND (
-           cbg.cat_id IN (
-                SELECT cat_id FROM relation_supp_rest WHERE supp_org_id=cbg.supp_org_id AND rest_org_id = :client_id
-           )
-        )', [':client_id' => $clientId]);
+        $query->leftJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
         //Индивидуальный каталог
-        $query->leftJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id and cg.cat_id = cat.id');
+        $query->leftJoin('`catalog_goods` as cg', 'oc.product_id = cg.base_goods_id');
         //Организация
         $query->innerJoin('organization AS org', 'cbg.supp_org_id = org.id');
         //Валюта
-        $query->innerJoin('currency AS curr', 'cat.currency_id = curr.id');
+        $query->innerJoin('currency AS curr', 'ord.currency_id = curr.id');
         //Условия отбора
-        $query->where('cbg.status = 1 AND cbg.deleted = 0');
+        $query->where('cbg.deleted = 0');
         //Только эти заказы
         $query->andWhere(['in', 'ord.status', [
             Order::STATUS_PROCESSING,
@@ -84,6 +78,7 @@ class FavoriteSearch extends \yii\base\Model
         }
         //Группируем по товару
         $query->groupBy('cbg_id');
+        $query->having("cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)", [':cid' => $clientId]);
 
         //Выдача в датапровайдер
         $dataProvider = new SqlDataProvider([

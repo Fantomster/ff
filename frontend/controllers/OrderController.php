@@ -77,7 +77,8 @@ class OrderController extends DefaultController {
                             'get-attachment',
                             'delete-attachment',
                             'ajax-get-vsd-list',
-                            'ajax-add-good-quantity-to-session'
+                            'ajax-add-good-quantity-to-session',
+                            'ajax-clear-session'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -447,10 +448,7 @@ class OrderController extends DefaultController {
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
-
-        if (Yii::$app->request->post("OrderCatalogSearch")) {
-            
-        }
+        
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
@@ -671,6 +669,13 @@ class OrderController extends DefaultController {
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
         $guideDataProvider = $guideSearchModel->search($params, $guide->id, $this->currentUser->organization_id);
         $guideDataProvider->pagination = false; //['pageSize' => 8];
+        if (!Yii::$app->request->isPjax){
+            foreach ($_SESSION as $key => &$item) {
+                if (strpos($key, 'uideProductCount')){
+                    unset($_SESSION[$key]);
+                }
+            }
+        }
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'session'));
@@ -719,14 +724,18 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $guideProducts = Yii::$app->request->post("GuideProduct");
         $data = [];
+        $totalQuantity = 0;
         foreach ($guideProducts as $productId => $quantity) {
-
+            $totalQuantity += $quantity;
             if ($quantity <= 0) {
                 continue;
             }
 
             $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
             $data[] = ['product_id' => $guideProduct->cbg_id, 'quantity' => $quantity];
+        }
+        if($totalQuantity == 0){
+            return false;
         }
 
         try {
@@ -765,7 +774,7 @@ class OrderController extends DefaultController {
     public function actionAjaxAddToCart() {
         $post = Yii::$app->request->post();
         $quantity = $post['quantity'];
-        if ($quantity <= 0) {
+        if ($quantity < 0) {
             return false;
         }
 
@@ -1181,7 +1190,7 @@ class OrderController extends DefaultController {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
-                        if ($position['quantity'] == 0) {
+                        if ($position['quantity'] == -1) {
                             $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $product->product_name]);
                         } else {
                             $oldQuantity = $product->quantity + 0;
@@ -1197,7 +1206,7 @@ class OrderController extends DefaultController {
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
-                    if ($product->quantity == 0) {
+                    if ($product->quantity == -1) {
                         $product->delete();
                     } else {
                         $product->save();
@@ -1322,7 +1331,7 @@ class OrderController extends DefaultController {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
-                        if ($position['quantity'] == 0) {
+                        if ($position['quantity'] == -1) {
                             $message .= Yii::t('message', 'frontend.controllers.del_two', ['ru' => '<br/> удалил {prod} из заказа', 'prod' => $product->product_name]);
                         } else {
                             $oldQuantity = $product->quantity + 0;
@@ -1347,7 +1356,7 @@ class OrderController extends DefaultController {
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
-                    if ($product->quantity == 0) {
+                    if ($product->quantity == -1) {
                         $deleted[$product->id] = $product;
                         $product->delete();
                     } else {
@@ -2395,6 +2404,15 @@ class OrderController extends DefaultController {
         $order->waybill_number = $waybillNumber;
         $order->save();
         return $waybillNumber;
+    }
+
+
+    public function actionAjaxClearSession(){
+        foreach ($_SESSION as $key => &$item) {
+            if (strpos($key, 'uideProductCount')){
+                unset($_SESSION[$key]);
+            }
+        }
     }
     
 }

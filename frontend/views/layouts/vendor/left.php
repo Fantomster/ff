@@ -32,6 +32,8 @@ $newClientCount = Yii::$app->user->can('manage') ? $user->organization->getNewCl
 
 $vsdCount = $user->organization->getVsdCount();
 
+$licenses = $user->organization->getLicenseList();
+
 $menuItems = [
     ['label' => Yii::t('message', 'frontend.views.layouts.left.navi', ['ru' => 'НАВИГАЦИЯ']), 'options' => ['class' => 'header']],
     ['label' => Yii::t('message', 'frontend.views.layouts.left.desktop', ['ru' => 'Рабочий стол']), 'icon' => 'home', 'url' => ['/vendor/index']],
@@ -61,14 +63,14 @@ $menuItems = [
         'options' => ['class' => 'hidden-xs'],
         'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
         //'visible' => isset($licenses['mercury'])
-        'items' => [
+        /*'items' => [
             [
                 'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
                 'icon' => 'circle-o',
                 'url' => ['/clientintegr/merc/stock-entry'],
                 //'visible' => in_array($user->role_id,$roles)
             ],
-        ],
+        ],*/
     ],
 ];
 if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) || Yii::$app->user->can('manage')) {
@@ -79,7 +81,12 @@ if (in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()) ||
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
             ['label' => Yii::t('message', 'frontend.views.layouts.left.custom', ['ru' => 'Общие']), 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
-            //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
+            [
+                'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
+                'icon' => 'circle-o',
+                'url' => ['/clientintegr/default'],
+                'visible' => (!empty($licenses))
+            ],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.employees', ['ru' => 'Сотрудники']), 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.notifications', ['ru' => 'Уведомления']), 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
             ['label' => Yii::t('message', 'frontend.views.layouts.left.delivery', ['ru' => 'Доставка']), 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],

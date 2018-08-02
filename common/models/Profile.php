@@ -59,6 +59,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['full_name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
         $rules[] = [['phone'], 'string', 'max' => 255];
         $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className(), 'on' => ['register', 'invite'], 'message' => Yii::t('app', 'common.models.incorrect_number', ['ru'=>'Некорректный номер'])];
+        $rules[] = [['phone'], 'match', 'pattern' => '/^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/', 'message' => Yii::t('app', 'common.models.incorrect_number', ['ru'=>'Некорректный номер'])];
         $rules[] = [['phone'], 'default', 'value' => null];
         $rules[] = [['phone'], 'required', 'on' => ['register'], 'message' => Yii::t('app', 'common.models.fill_phone', ['ru'=>'Пожалуйста, введите свой номер телефона'])];
         $rules[] = [['phone'], 'required', 'on' => ['invite'], 'message' => Yii::t('app', 'common.models.plefse_phone', ['ru'=>'Пожалуйста, введите номер телефона'])];

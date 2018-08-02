@@ -67,7 +67,12 @@ class Journal extends \yii\db\ActiveRecord
             'response' => Yii::t('app', 'Response'),
             'log_guide' => Yii::t('app', 'Log Guide'),
             'type' => Yii::t('app', 'Результат'),
+            'operation.denom' => Yii::t('app', 'Операция'),
+            'operation.comment' => Yii::t('app', 'Комментарий к операции'),
             'record.response' => Yii::t('app', 'Ответ сервера'),
+            'record.request' => Yii::t('app', 'Запрос'),
+            'record.request_at' => Yii::t('app', 'Дата запроса'),
+            'record.response_at' => Yii::t('app', 'Дата ответа'),
             'created_at' => Yii::t('app', 'Created At')
         ];
     }
@@ -109,14 +114,14 @@ class Journal extends \yii\db\ActiveRecord
      * @return array
      */
     public function getRecord() {
-        $tableLog = (new Query())->select('log_table')
+        $log = (new Query())->select('log_table, log_field')
             ->from('all_service')
             ->where(['id' => $this->service_id])
-            ->column(\Yii::$app->db_api);
+            ->one(\Yii::$app->db_api);
 
         return (new Query())->select('*')
-            ->from($tableLog)
-            ->where(['guide' => $this->log_guide])
+            ->from($log['log_table'])
+            ->where([$log['log_field'] => $this->log_guide])
             ->one(\Yii::$app->db_api);
     }
 }

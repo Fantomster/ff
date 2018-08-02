@@ -151,7 +151,6 @@ class OrderSearch extends Order {
                 ['vendor.manager_id'=>$searchArr],
             ]);
         }
-        //dd($this->status_array);
 
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,

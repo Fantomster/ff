@@ -676,11 +676,11 @@ class OrderController extends DefaultController {
                 }
             }
         }
-
+        $cart = $client->_getCart();
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'session'));
+            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'cart'));
         } else {
-            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'session'));
+            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide', 'params', 'cart'));
         }
     }
 

@@ -40,7 +40,7 @@ class FavoriteSearch extends \yii\base\Model
         $this->load($params);
         //Создаем запрос
         $query = (new Query())->select([
-            'cbg.id as cbg_id',
+            'oc.product_id as cbg_id',
             'cbg.product',
             'cbg.units',
             'COALESCE(cg.price, cbg.price) as price',
@@ -49,18 +49,16 @@ class FavoriteSearch extends \yii\base\Model
             'cbg.ed',
             'curr.symbol',
             'cbg.note',
-            'count(ord.id) as count'
+            'count(oc.id) as count'
         ]);
         //Толео заказа
         $query->from('`order_content` AS oc');
         //Заказ
         $query->innerJoin('`order` as ord', 'oc.order_id = ord.id');
         //Товар из главного каталога
-        $query->innerJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
+        $query->leftJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
         //Индивидуальный каталог
-        $query->innerJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id and cg.cat_id IN (
-            SELECT DISTINCT cat_id FROM relation_supp_rest WHERE supp_org_id=cbg.supp_org_id AND rest_org_id = :client_id
-        )', [':client_id' => $clientId]);
+        $query->leftJoin('`catalog_goods` as cg', 'oc.product_id = cg.base_goods_id');
         //Организация
         $query->innerJoin('organization AS org', 'cbg.supp_org_id = org.id');
         //Валюта
@@ -80,6 +78,7 @@ class FavoriteSearch extends \yii\base\Model
         }
         //Группируем по товару
         $query->groupBy('cbg_id');
+        $query->having("cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)", [':cid' => $clientId]);
 
         //Выдача в датапровайдер
         $dataProvider = new SqlDataProvider([

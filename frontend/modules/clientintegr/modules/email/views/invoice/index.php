@@ -241,9 +241,8 @@ function renderButton($id)
                                     }
                                 ],
                                 [
-                                    'attribute' => 'organization_id',
+                                    'attribute' => 'consignee',
                                     'value' => function ($data) {
-                                        //return $data->organization->name;
                                         if ($data->consignee) return $data->consignee;
                                         else return $data->organization->name;
                                     }

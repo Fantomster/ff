@@ -448,10 +448,7 @@ class OrderController extends DefaultController {
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
-
-        if (Yii::$app->request->post("OrderCatalogSearch")) {
-            
-        }
+        
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;

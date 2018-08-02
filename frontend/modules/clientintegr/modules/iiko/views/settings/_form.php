@@ -40,8 +40,10 @@ use common\models\User;
                 $arr = unserialize($iikoPconst->value);
             }
             $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org]);
-            foreach ($iikoStores as $store){
-                echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => in_array($store->id, $arr) ? true : false]);
+            if($iikoStores){
+                foreach ($iikoStores as $store){
+                    echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => in_array($store->id, $arr) ? true : false]);
+                }
             }
         break;
         default:

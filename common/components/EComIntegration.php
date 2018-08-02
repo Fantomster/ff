@@ -190,7 +190,10 @@ class EComIntegration
     private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $isAlcohol = false)
     {
         $orderID = $simpleXMLElement->NUMBER;
-        $order = Order::findOne(['id' => $orderID]);
+        $supplier = $simpleXMLElement->HEAD->SUPPLIER;
+        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
+        if(!$ediOrganization)return false;
+        $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
         $message = "";
         if (!$order) {
             Yii::error('No such order ID: ' . $orderID);

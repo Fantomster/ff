@@ -34,6 +34,11 @@ class CartWidget extends Widget {
     $(document).on("click", ".maska1, .hide_basket", function () {
         $(".maska1").fadeOut(300);
         $(".block_right_basket").animate({"right": "-100%"}, 400);
+        try {
+            $.pjax.reload("#checkout", {timeout:30000});
+        } catch (e) {
+            //
+        }
     });
     $(document).on("click", ".cart-delete-position", function(e) {
         e.preventDefault();

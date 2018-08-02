@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
+use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
@@ -222,6 +223,39 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
         return false;
     }
+
+
+    public function actionAjaxCheckVetisPass(){
+        $user = Yii::$app->user->identity;
+        $mercPConst = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_password"')->one();
+        if($mercPConst && $mercPConst->value != ''){
+            return true;
+        }
+        $mercPConstLogin = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_login"')->one();
+        if($mercPConstLogin){
+            return $mercPConstLogin->value;
+        }
+        return false;
+    }
+
+
+    public function actionAjaxUpdateVetisAccessData(){$user = Yii::$app->user->identity;
+        $pass = Yii::$app->request->get('pass');
+        $mercPConst = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_password"')->one();
+        if($mercPConst){
+            $mercPConst->value = $pass;
+            $mercPConst->save();
+        }
+
+        $login = Yii::$app->request->get('login');
+        $mercPConstLogin = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_login"')->one();
+        if($mercPConstLogin){
+            $mercPConstLogin->value = $login;
+            $mercPConstLogin->save();
+        }
+    }
+
+
 
     public function actionGetPdf($uuid) {
         $vsdHttp = new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([

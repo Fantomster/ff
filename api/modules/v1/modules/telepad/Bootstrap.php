@@ -17,7 +17,11 @@ class Bootstrap implements BootstrapInterface
     {
         /** @var Module $module */
         /** @var \yii\db\ActiveRecord $modelName */
-        if ($app->getModule('v1')->hasModule('telepad') && ($module = $app->getModule('v1')->getModule('telepad')) instanceof Module) {
+
+        $hasModule = $app->getModule('v1')->hasModule('telepad');
+        $module = $app->getModule('v1')->getModule('telepad');
+
+        if ($hasModule && ($module instanceof Module)) {
 
           //  var_dump($module);
             

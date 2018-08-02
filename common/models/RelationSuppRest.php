@@ -15,6 +15,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $supp_org_id
  * @property integer $cat_id
  * @property integer $invite
+ * @property integer $status
  * @property string $created_at
  * @property string $updated_at
  * @property string $uploaded_catalog
@@ -75,7 +76,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
-            [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
+            [['rest_org_id', 'supp_org_id', 'cat_id', 'status'], 'integer'],
             [['uploaded_catalog'], 'file'],
             [['uploaded_processed', 'vendor_manager_id'], 'safe'],
         ];

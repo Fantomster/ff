@@ -16,7 +16,8 @@ use api_web\components\WebApi;
  * Class CatalogWebApi
  * @package api_web\classes
  */
-class CatalogWebApi extends WebApi {
+class CatalogWebApi extends WebApi
+{
 
     /**
      * Смена уникального индекса главного каталога
@@ -25,7 +26,8 @@ class CatalogWebApi extends WebApi {
      * @return array
      * @throws BadRequestHttpException
      */
-    public function changeMainIndex($catalog, $index) {
+    public function changeMainIndex($catalog, $index)
+    {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
             $catalog->index_column = $index;
@@ -44,7 +46,8 @@ class CatalogWebApi extends WebApi {
      * @return array
      * @throws BadRequestHttpException
      */
-    public function deleteMainCatalog($catalog) {
+    public function deleteMainCatalog($catalog)
+    {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
             throw new BadRequestHttpException('Catalog is empty');

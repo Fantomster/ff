@@ -8,7 +8,8 @@ use yii\web\UploadedFile;
  *
  * @author elbabuino
  */
-class File {
+class File
+{
 
     /**
      * @param string $base64
@@ -18,7 +19,8 @@ class File {
      * Return uploaded file temporary path
      * @return \yii\web\UploadedFile
      */
-    public static function getFromBase64($base64, $type, $extension = '') {
+    public static function getFromBase64($base64, $type, $extension = '')
+    {
         $data = substr($base64, strlen($type));
         $mime_type = $type;
         $data = base64_decode($data);
@@ -36,14 +38,15 @@ class File {
 
         return $upload;
     }
-    
+
     /**
      * @param string $url
      * 
      * Return file temporary path
      * @return \yii\web\UploadedFile
      */
-    public static function getFromUrl($url) {
+    public static function getFromUrl($url)
+    {
         $temp_filename = uniqid();
         $temp_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $temp_filename;
         @file_put_contents($temp_path, file_get_contents($url));
@@ -56,5 +59,5 @@ class File {
 
         return $file;
     }
-    
+
 }

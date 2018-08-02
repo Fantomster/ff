@@ -24,7 +24,8 @@ use api_web\helpers\Excel;
  * Class VendorWebApi
  * @package api_web\classes
  */
-class VendorWebApi extends \api_web\components\WebApi {
+class VendorWebApi extends \api_web\components\WebApi
+{
 
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
@@ -34,7 +35,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws \Exception
      * @throws ValidationException
      */
-    public function create(array $post) {
+    public function create(array $post)
+    {
         $email = $post['user']['email'];
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
@@ -178,10 +180,9 @@ class VendorWebApi extends \api_web\components\WebApi {
                 ];
 
                 if ($check['eventType'] == 5) {
-                    $result['message'] =
-                        Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
-                        $organization->name .
-                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
+                    $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                            $organization->name .
+                            Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
                 } else {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
@@ -199,7 +200,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @return array
      * @throws BadRequestHttpException
      */
-    public function search(array $post) {
+    public function search(array $post)
+    {
         if (empty($post['email'])) {
             throw new BadRequestHttpException('empty_param|search attribute email');
         }
@@ -221,9 +223,9 @@ class VendorWebApi extends \api_web\components\WebApi {
                 $r = WebApiHelper::prepareOrganization($model);
 
                 if ($user = RelationUserOrganization::find()->joinWith('user')->where([
-                    'relation_user_organization.organization_id' => $model->id,
-                    'user.email' => $email
-                ])->one()) {
+                            'relation_user_organization.organization_id' => $model->id,
+                            'user.email' => $email
+                        ])->one()) {
                     $r['user'] = [
                         'email' => $user->user->email,
                         'name' => $user->user->profile->full_name,
@@ -245,7 +247,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function update(array $post) {
+    public function update(array $post)
+    {
         if (empty($post['id'])) {
             throw new BadRequestHttpException('empty_param|id');
         }
@@ -373,7 +376,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadLogo(array $post) {
+    public function uploadLogo(array $post)
+    {
         if (empty($post['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
@@ -420,7 +424,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadMainCatalog(array $request) {
+    public function uploadMainCatalog(array $request)
+    {
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -463,7 +468,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function importMainCatalog(array $request) {
+    public function importMainCatalog(array $request)
+    {
         //сохранение файла с s3 на локальный диск
         //валидация
         //удаление локального файла
@@ -478,7 +484,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function uploadCustomCatalog(array $request) {
+    public function uploadCustomCatalog(array $request)
+    {
         //
     }
 
@@ -489,7 +496,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function importCustomCatalog(array $request) {
+    public function importCustomCatalog(array $request)
+    {
         //
     }
 
@@ -500,7 +508,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function deleteMainCatalog(array $request) {
+    public function deleteMainCatalog(array $request)
+    {
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -514,7 +523,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @return array
      * @throws BadRequestHttpException
      */
-    public function changeMainIndex(array $request) {
+    public function changeMainIndex(array $request)
+    {
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -527,7 +537,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @param array $request
      * @return array
      */
-    public function deleteTempMainCatalog(array $request) {
+    public function deleteTempMainCatalog(array $request)
+    {
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
@@ -541,7 +552,8 @@ class VendorWebApi extends \api_web\components\WebApi {
      * @param array $request
      * @return array
      */
-    public function getTempMainCatalog(array $request) {
+    public function getTempMainCatalog(array $request)
+    {
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             return [

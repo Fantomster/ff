@@ -6,20 +6,22 @@ namespace api_web\helpers;
  *
  * @author elbabuino
  */
-class Excel {
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+class Excel
+{
 
     const excelTempFolder = "excelTemp";
-    
+
     /**
      * @param string $excelFile
      * 
      * @return array
      */
-    public static function get20Rows($excelFile) {
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFile);
+    public static function get20Rows($excelFile)
+    {
+        $spreadsheet = IOFactory::load($excelFile);
         $worksheet = $spreadsheet->getActiveSheet();
-        unset($objReader);
-        unset($objPHPExcel);
 
         $rows = [];
         $rowsCount = 0;
@@ -36,7 +38,7 @@ class Excel {
                 return $rows;
             }
         }
-        
+
         return $rows;
     }
 
@@ -45,7 +47,8 @@ class Excel {
      * @param \common\models\CatalogTemp $tempCatalog
      * @return array
      */
-    public static function get20RowsFromTempUploaded($tempCatalog) {
+    public static function get20RowsFromTempUploaded($tempCatalog)
+    {
         if (empty($tempCatalog)) {
             return [];
         }
@@ -53,17 +56,16 @@ class Excel {
         $file = File::getFromUrl($url);
         return self::get20Rows($file->tempName);
     }
-    
+
     /**
      * @param string $excelFile
      * @param integer $tmpCatId
      * @param array $mapping
      */
-    public static function writeToTempTable($excelFile, $tmpCatId, $mapping) {
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFile);
+    public static function writeToTempTable($excelFile, $tmpCatId, $mapping)
+    {
+        $spreadsheet = IOFactory::load($excelFile);
         $worksheet = $spreadsheet->getActiveSheet();
-        unset($objReader);
-        unset($objPHPExcel);
 
         $rows = [];
         $rowsCount = 0;
@@ -77,4 +79,5 @@ class Excel {
             $rows[] = $cells;
         }
     }
+
 }

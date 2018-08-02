@@ -12,6 +12,8 @@ use Yii;
  * @property string $quantity
  * @property string $initial_quantity
  * @property string $price
+ * @property string $plan_price
+ * @property string $plan_quantity
  * @property string $product_name
  * @property string $article
  * @property integer $units

@@ -164,12 +164,18 @@ $this->registerJs('
                     ],
                     [
                         'attribute' => 'quantity',
-                        'content' => function($data){
+                        'content' => function($data) use ($cart){
+                            $initVal = $_SESSION['GuideProductCount.' . $data["id"]] ?? 0;
+                            foreach($cart as $one){
+                                if($data['cbg_id'] == $one['product_id']){
+                                    $initVal = $one['quantity'];
+                                }
+                            }
                             $units = $data['units'] ?? 0.100;
                             return TouchSpin::widget([
                                         'name' => 'GuideProduct[' . $data["id"] . ']',
                                         'pluginOptions' => [
-                                            'initval' => $_SESSION['GuideProductCount.' . $data["id"]] ?? 0,
+                                            'initval' => $initVal,
                                             'min' => 0,
                                             'max' => PHP_INT_MAX,
                                             'step' => (isset($units) && ($units)) ? $units : 1,

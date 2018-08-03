@@ -3,6 +3,9 @@
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use api\common\models\AllMaps;
+use api\common\models\rkws\OrderCatalogSearchMap;
+use api\modules\v1\modules\mobile\resources\OrderCatalogSearch;
+use api_web\classes\CartWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
@@ -16,9 +19,9 @@ use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use common\models\Organization;
-use common\models\Order;
 use yii\helpers\Url;
 use frontend\modules\clientintegr\modules\rkws\components\FullmapHelper;
+
 
 
 // use yii\mongosoft\soapserver\Action;
@@ -83,6 +86,58 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionIndex() {
 
+        $session = Yii::$app->session;
+        $client = $this->currentUser->organization;
+        $searchModel = new OrderCatalogSearchMap();
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("OrderCatalogSearchMap")) {
+            $params['OrderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
+            $session['orderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
+        }
+
+        $selectedCategory = null;
+        $selectedVendor = null;
+
+        if (isset($params['OrderCatalogSearchMap'])) {
+            $selectedVendor = !empty($params['OrderCatalogSearchMap']['selectedVendor']) ? (int) $params['OrderCatalogSearchMap']['selectedVendor'] : null;
+        }
+        $vendors = $client->getSuppliers($selectedCategory);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+
+        $searchModel->client = $client;
+        $searchModel->catalogs = $catalogs;
+
+        $params['OrderCatalogSearchMap'] = $session['orderCatalogSearchMap'];
+        $dataProvider = $searchModel->search($params);
+
+        $dataProvider->pagination->params['OrderCatalogSearchMap[searchString]'] = isset($params['OrderCatalogSearchMap']['searchString']) ? $params['OrderCatalogSearchMap']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearchMap[selectedVendor]'] = $selectedVendor;
+        $dataProvider->pagination->params['OrderCatalogSearchMap[selectedCategory]'] = $selectedCategory;
+
+        $cart = (new CartWebApi())->items(); //$client->getCart();
+        // Вывод по 10
+        $dataProvider->pagination->pageSize = 10;
+
+        $lic0 = Organization::getLicenseList();
+        //$lic = $this->checkLic();
+        $lic = $lic0['rkws'];
+        $licucs = $lic0['rkws_ucs'];
+        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+
+        // $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
+        // $selected = $session = Yii::$app->session->get('selectedmap', []);
+        // $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
+
+        $selected = $session->get('selectedmap', []);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'lic', 'licucs', 'selected'));
+        } else {
+            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'lic', 'licucs','selected'));
+        }
+
+/*
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
 
         $records =  AllMaps::find()->select('*')->andWhere('org_id = :org',["org" => $organization])
@@ -111,7 +166,7 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
                 'licucs' => $licucs,
             ]);
         }
-
+*/
     }
 
     public function actionRenewcats() {
@@ -212,9 +267,62 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
         return $res ? $res : null;
 
+    }
 
-        return $res ? $res : null;
 
+    public function actionApplyFullmap() {
+
+        $session = Yii::$app->session;
+
+        $selected = $session->get('selectedmap', []);
+        if (empty($selected))
+            return true;
+
+        $selected = implode(',', $selected);
+
+        // Update where eta hernya
+
+        $session->remove('selectedmap');
+        return true;
+
+    }
+
+    public function actionClearFullmap() {
+
+       $session = Yii::$app->session;
+
+        $session->remove('selectedmap');
+        return true;
+
+    }
+
+    public function actionSaveSelectedMaps() {
+        $selected = Yii::$app->request->get('selected');
+        $state = Yii::$app->request->get('state');
+
+        var_dump ($state);
+
+        $session = Yii::$app->session;
+
+        $list = $session->get('selectedmap', []);
+
+        $current = !empty($selected) ? explode(",", $selected) : [];
+
+        foreach ($current as $item) {
+
+            if ($state)
+            {
+               if (!in_array($item,$list))
+                $list[] = $item;
+            } else {
+                $key = array_search ($item, $list);
+                unset($list[$key]);
+            }
+
+        }
+
+        $session->set('selectedmap', $list);
+        return true;
     }
 
     protected function findModel($id) {

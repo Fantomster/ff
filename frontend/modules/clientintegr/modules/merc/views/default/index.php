@@ -569,6 +569,7 @@ $(document).on("click", ".hand_loading", function(e) {
                         },
                         success: function (data) {
                             if (navigator.msSaveBlob) { // IE10+ : (has Blob, but not a[download] or URL)
+                                swal.close();
                                 return navigator.msSaveBlob(data, filename);
                             } else {
                                 var a = document.createElement('a');
@@ -579,8 +580,8 @@ $(document).on("click", ".hand_loading", function(e) {
                                 a.class = "pdf-download";
                                 a.click();
                                 window.URL.revokeObjectURL(url);
+                                swal.close();
                             }
-                            swal.close()
                         }
                     });
                 }

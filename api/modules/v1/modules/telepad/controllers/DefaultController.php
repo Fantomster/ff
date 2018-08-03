@@ -88,4 +88,38 @@ class DefaultController extends Controller
     }
 
 
+    /**
+     * @param $func
+     * @param $sess
+     * @param $result
+     * @param $comment
+     * @param $ip
+     * @return array|bool
+     */
+    public function save_action($func, $sess, $result, $comment, $ip)
+    {
+        $act = new ApiActions;
+        $currSess = ApiSession::find()->where('token = :token', [':token' => $sess])->one();
+
+        if ($currSess) {
+            $act->session = $currSess->fid;
+            $act->ip = $currSess->ip;
+        } else {
+            $act->session = 0;
+            $act->ip = $ip;
+        }
+
+        $act->action = $func;
+        $act->created = gmdate('Y-m-d H:i:s');
+        $act->result = $result;
+        $act->comment = $comment;
+
+        if (!$act->save()) {
+            return $act->errors;
+        } else {
+            return true;
+        }
+    }
+
+
 }

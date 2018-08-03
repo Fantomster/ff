@@ -182,8 +182,9 @@ class createStoreEntryForm extends Model {
         foreach ($list->productItemList->productItem as $item)
         {
             if($item->last && $item->active)
-                $res[] = ['value' => $item->name,
-                    'label' => $item->name
+                $res[] = ['value' => $item->name . " | " . $item->uuid,
+                    'label' => $item->name,
+                    'uuid' => $item->uuid,
                     ];
         }
         return $res;

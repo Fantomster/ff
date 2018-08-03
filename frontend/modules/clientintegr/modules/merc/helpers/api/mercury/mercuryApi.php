@@ -741,9 +741,8 @@ class mercuryApi extends baseApi
         $data->localTransactionId = $localTransactionId;
         $data->initiator = new User();
         $data->initiator->login = $this->vetisLogin;
-        //dd($data);
 
-        $appData->any['ns3:prepareRegisterProductionOperationRequest'] = $data->getRegisterProductionRequest();
+        $appData->any['ns3:registerProductionOperationRequest'] = $data->getRegisterProductionRequest();
 
         $request->application->data = $appData;
 
@@ -762,7 +761,6 @@ class mercuryApi extends baseApi
             $status = $result->application->status;
 
         } while ($status == 'IN_PROCESS');
-        //dd($result);
 
         //Пишем лог
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());

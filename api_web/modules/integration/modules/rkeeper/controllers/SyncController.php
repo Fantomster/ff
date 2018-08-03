@@ -8,7 +8,7 @@ use yii\web\BadRequestHttpException;
 
 class SyncController extends WebApiController
 {
-    #Синхронизация iiko
+    #Синхронизация r-keeper
     /**
      * @SWG\Post(path="/integration/rkeeper/sync/run",
      *     tags={"Integration/rkeeper/sync"},

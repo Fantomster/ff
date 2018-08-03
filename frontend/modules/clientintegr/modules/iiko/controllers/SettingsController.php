@@ -57,6 +57,14 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();
+        if(isset($post['selection'])){
+            $goods = $post['selection'];
+            $arr = [];
+            foreach ($goods as $selected){
+                    $arr[] = $selected;
+            }
+            $post['iikoPconst']['value'] = serialize($arr);
+        }
         if(isset($post['Stores'])){
             $stores = $post['Stores'];
             $arr = [];
@@ -79,6 +87,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             return $this->render($vi, [
                 'model' => $pConst,
                 'dicConst' => $dicConst,
+                'id' => $id
             ]);
         }
 

@@ -183,10 +183,10 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
             $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
-                    ->setCellValue('A1', Yii::t('message', 'frontend.controllers.order.art', ['ru' => 'Артикул']))
-                    ->setCellValue('B1', Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']))
-                    ->setCellValue('C1', Yii::t('message', 'frontend.controllers.order.amo', ['ru' => 'Кол-во']))
-                    ->setCellValue('D1', Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']));
+                ->setCellValue('A1', Yii::t('message', 'frontend.controllers.order.art', ['ru' => 'Артикул']))
+                ->setCellValue('B1', Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']))
+                ->setCellValue('C1', Yii::t('message', 'frontend.controllers.order.amo', ['ru' => 'Кол-во']))
+                ->setCellValue('D1', Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']));
             $row = 2;
             foreach ($model as $foo) {
                 $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
@@ -220,8 +220,8 @@ class OrderController extends DefaultController
         $objPHPExcel = new \PHPExcel();
 
         $objPHPExcel->getProperties()->setCreator("MixCart")
-                ->setLastModifiedBy("MixCart")
-                ->setTitle("order_" . $id);
+            ->setLastModifiedBy("MixCart")
+            ->setTitle("order_" . $id);
 
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
@@ -237,14 +237,13 @@ class OrderController extends DefaultController
 
         $objPHPExcel->getActiveSheet()->mergeCells('A1:H1');
         $objPHPExcel->getActiveSheet()->setTitle(Yii::t('message', 'frontend.controllers.order.rep', ['ru' => 'отчет']))
-                ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
+            ->setCellValue('A1', Yii::t('message', 'frontend.views.order.order_number', ['ru' => 'Заказ №']) . " " . $id);
         $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getRowDimension(1)->setRowHeight(25);
 
         $objPHPExcel->getActiveSheet()->mergeCells('A2:H2');
         $objPHPExcel->getActiveSheet()->setCellValue('A2', Yii::t('app', 'от') . " " . Yii::$app->formatter->asDate($order->created_at, "dd.MM.yyyy, HH:mm"));
-        $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        ;
+        $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);;
         $objPHPExcel->getActiveSheet()->getRowDimension(2)->setRowHeight(18);
 
         $requestedDelivery = isset($order->requested_delivery) ? " " . Yii::$app->formatter->asDate($order->requested_delivery, 'dd.MM.yyyy') . " " . Yii::t('app', 'frontend.excel.year') : "";
@@ -255,8 +254,8 @@ class OrderController extends DefaultController
 
         $objPHPExcel->getActiveSheet()->getRowDimension(4)->setRowHeight(5);
         $objPHPExcel->getActiveSheet()->getStyle('A5:H5')->getBorders()
-                ->getTop()
-                ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+            ->getTop()
+            ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
 
         $objPHPExcel->getActiveSheet()->mergeCells('A6:D6');
         $objPHPExcel->getActiveSheet()->setCellValue('A6', Yii::t('message', 'frontend.views.order.customer'));
@@ -286,8 +285,8 @@ class OrderController extends DefaultController
         $objPHPExcel->getActiveSheet()->getRowDimension(11)->setRowHeight(50);
 
         $objPHPExcel->getActiveSheet()->getStyle('A13:H13')->getBorders()
-                ->getTop()
-                ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+            ->getTop()
+            ->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
 
         $objPHPExcel->getActiveSheet()->setCellValue('A14', Yii::t('app', 'Комментарий к заказу:'));
         $objPHPExcel->getActiveSheet()->getStyle('A14')->applyFromArray(['font' => ['bold' => true]]);
@@ -357,9 +356,9 @@ class OrderController extends DefaultController
             $comment_length = mb_strlen($good->comment);
             if ($product_name_length > $width || $comment_length > $width) {
                 if ($product_name_length > $comment_length) {
-                    $i = ceil((float) $product_name_length / $width);
+                    $i = ceil((float)$product_name_length / $width);
                 } else {
-                    $i = ceil((float) $comment_length / $width);
+                    $i = ceil((float)$comment_length / $width);
                 }
                 $height *= $i;
             }
@@ -449,14 +448,14 @@ class OrderController extends DefaultController
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int) $params['OrderCatalogSearch']['selectedVendor'] : null;
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
         }
         $vendors = $client->getSuppliers($selectedCategory);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
-        
+
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
@@ -543,12 +542,14 @@ class OrderController extends DefaultController
         endif;
     }
 
+
     public function actionAjaxGetVsdList()
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
         $mercVSDs = MercVsd::find()->where("guid = '$guid'")->groupBy('consignor')->asArray()->all();
         return $this->renderPartial('_vds_list', compact('mercVSDs'));
     }
+
 
     public function actionEditGuide(int $id)
     {
@@ -1148,33 +1149,33 @@ class OrderController extends DefaultController
                 $orderTable = Order::tableName();
                 $maTable = ManagerAssociate::tableName();
                 $newCount = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'vendor_id' => $organization->id,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
-                        ->count();
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'vendor_id' => $organization->id,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                    ->count();
                 $processingCount = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'vendor_id' => $organization->id,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'status' => Order::STATUS_PROCESSING])
-                        ->count();
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'vendor_id' => $organization->id,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'status' => Order::STATUS_PROCESSING])
+                    ->count();
                 $fulfilledCount = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'vendor_id' => $organization->id,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'status' => Order::STATUS_DONE])
-                        ->count();
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'vendor_id' => $organization->id,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'status' => Order::STATUS_DONE])
+                    ->count();
                 $totalPrice = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                        ->where([
-                            'status' => Order::STATUS_DONE,
-                            "$maTable.manager_id" => $this->currentUser->id,
-                            'vendor_id' => $organization->id])
-                        ->sum("total_price");
+                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                    ->where([
+                        'status' => Order::STATUS_DONE,
+                        "$maTable.manager_id" => $this->currentUser->id,
+                        'vendor_id' => $organization->id])
+                    ->sum("total_price");
             }
         }
         $dataProvider = $searchModel->search($params);
@@ -1933,9 +1934,9 @@ class OrderController extends DefaultController
                 if ($notification)
                     if ($notification->order_changed) {
                         $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "changed", "deleted"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 $notification = $recipient->getSmsNotification($org);
                 if ($notification)
@@ -1978,9 +1979,9 @@ class OrderController extends DefaultController
                 if ($notification)
                     if ($notification->order_done) {
                         $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
 
                 $notification = $recipient->getSmsNotification($org);
@@ -2027,9 +2028,9 @@ class OrderController extends DefaultController
                 if ($notification)
                     if ($notification->order_created) {
                         $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 $notification = $recipient->getSmsNotification($org);
                 if ($notification)
@@ -2072,9 +2073,9 @@ class OrderController extends DefaultController
                 if ($notification)
                     if ($notification->order_processing) {
                         $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 $notification = $recipient->getSmsNotification($org);
                 if ($notification)
@@ -2117,9 +2118,9 @@ class OrderController extends DefaultController
                 if ($notification)
                     if ($notification->order_canceled) {
                         $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 $notification = $recipient->getSmsNotification($org);
                 if ($notification)
@@ -2156,10 +2157,10 @@ class OrderController extends DefaultController
             $maTable = ManagerAssociate::tableName();
             $orderTable = Order::tableName();
             $order = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = $orderTable.client_id")
-                    ->where($condition)
-                    ->andWhere(["$maTable.manager_id" => $this->currentUser->id])
-                    ->one();
+                ->leftJoin("$maTable", "$maTable.organization_id = $orderTable.client_id")
+                ->where($condition)
+                ->andWhere(["$maTable.manager_id" => $this->currentUser->id])
+                ->one();
         }
         return $order;
     }
@@ -2226,7 +2227,7 @@ class OrderController extends DefaultController
             throw new BadRequestHttpException('SaveError');
 
         $message = Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "<br/>добавил {prod} {quantity} {ed} по цене {productPrice} {currencySymbol}/{ed} ",
-                    'prod' => $position->product_name, 'productPrice' => $position->price, 'currencySymbol' => $order->currency->symbol, 'ed' => $position->product->ed, 'quantity' => $position->quantity]);
+            'prod' => $position->product_name, 'productPrice' => $position->price, 'currencySymbol' => $order->currency->symbol, 'ed' => $position->product->ed, 'quantity' => $position->quantity]);
 
         $user = Yii::$app->user->getIdentity();
         $organizationType = $user->organization->type_id;
@@ -2331,12 +2332,12 @@ class OrderController extends DefaultController
                 $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
 
                 $objPHPExcel->getActiveSheet()->getStyle($start_grid_col . '2')->applyFromArray(
-                        [
-                            'fill' => [
-                                'type' => PHPExcel_Style_Fill::FILL_SOLID,
-                                'color' => ['rgb' => $color]
-                            ]
+                    [
+                        'fill' => [
+                            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                            'color' => ['rgb' => $color]
                         ]
+                    ]
                 );
 
                 $grid++;
@@ -2421,14 +2422,14 @@ class OrderController extends DefaultController
         if ($attachment && $attachment->validate() && isset($attachment->dirtyAttributes['file']) && $attachment->file) {
             $attachment->save();
             return ['files' => [
-                    [
-                        'name' => $uploadedFile->name,
-                        'size' => $uploadedFile->size,
-                        'url' => Url::to(['order/get-attachment', 'id' => $attachment->id], true),
-                        'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
-                        'deleteType' => 'POST',
-                    ],
+                [
+                    'name' => $uploadedFile->name,
+                    'size' => $uploadedFile->size,
+                    'url' => Url::to(['order/get-attachment', 'id' => $attachment->id], true),
+                    'deleteUrl' => Url::to(['order/delete-attachment', 'id' => $attachment->id]),
+                    'deleteType' => 'POST',
                 ],
+            ],
             ];
         }
 
@@ -2457,6 +2458,7 @@ class OrderController extends DefaultController
         return $attachment->delete();
     }
 
+
     public function actionAjaxAddGoodQuantityToSession()
     {
         $key = str_replace('GuideProduct[', '', str_replace(']', '', Yii::$app->request->get('name')));
@@ -2465,17 +2467,21 @@ class OrderController extends DefaultController
         $session['GuideProductCount.' . $key] = $value;
     }
 
+
     public function actionAjaxOrderUpdateWaybill()
     {
         $waybillNumber = Yii::$app->request->post('waybill_number') ?? null;
         $orderID = Yii::$app->request->post('order_id') ?? null;
+
         if (!$orderID)
             return 0;
+
         $order = Order::findOne(['id' => $orderID]);
         $order->waybill_number = $waybillNumber;
         $order->save();
         return $waybillNumber;
     }
+
 
     public function actionAjaxClearSession()
     {

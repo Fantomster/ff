@@ -20,12 +20,11 @@ $this->registerCss("
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $org])->one();
-if($iikoPconst){
+if ($iikoPconst) {
     $arr = unserialize($iikoPconst->value);
 }
 
 Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
-$currentUrl = \yii\helpers\Url::current();
 $form = ActiveForm::begin([
     'options' => [
         'data-pjax' => true,
@@ -65,9 +64,9 @@ echo \kartik\grid\GridView::widget([
             'contentOptions' => ['class' => 'small_cell_checkbox'],
             'headerOptions' => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {
-                if(is_iterable($arr) && in_array($model->id, $arr)){
+                if (is_iterable($arr) && in_array($model->id, $arr)) {
                     $checked = true;
-                }else{
+                } else {
                     $checked = false;
                 }
                 return ['value' => $model->id, 'class' => 'checkbox-group_operations', 'checked' => $checked];
@@ -102,7 +101,6 @@ echo \kartik\grid\GridView::widget([
 ]);
 ActiveForm::end();
 Pjax::end();
-$url = \yii\helpers\Url::to();
 $customJs = <<< JS
 
  $("document").ready(function(){
@@ -111,44 +109,28 @@ $customJs = <<< JS
         });
      });
 
-
  $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-product_type", function() {
             var val = $('#iikoproductsearch-product_type').val();
-            var url = "$currentUrl&productSearch="+val
-           $.ajax({
-            url: url,
-            type: "GET",
-            success: function(){
-                $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
-            }
-          });
+            var currentUrl = $(location).attr('href');
+            var url = currentUrl + "&productSearch="+val;
+            $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
         });
      });
   $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-cooking_place_type", function() {
             var val = $('#iikoproductsearch-cooking_place_type').val();
-            var url = "$currentUrl&cookingPlaceSearch="+val
-           $.ajax({
-            url: url,
-            type: "GET",
-            success: function(){
-                $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
-            }
-          });
+            var currentUrl = $(location).attr('href');
+            var url = currentUrl + "&cookingPlaceSearch="+val;
+            $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
         });
      });
    $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-unit", function() {
             var val = $('#iikoproductsearch-unit').val();
-            var url = "$currentUrl&unitSearch="+val
-           $.ajax({
-            url: url,
-            type: "GET",
-            success: function(){
-                $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
-            }
-          });
+            var currentUrl = $(location).attr('href');
+            var url = currentUrl + "&unitSearch="+val;
+            $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
         });
      }); 
  
@@ -196,6 +178,7 @@ $customJs = <<< JS
 
 JS;
 $this->registerJs($customJs, \yii\web\View::POS_READY);
+\yii\helpers\Url::remember();
 ?>
 
 

@@ -35,6 +35,7 @@ class CreateRegisterProductionRequest extends Component{
         $firstDateExpire = new \DateTime($this->step2['expiryDate']['first_date']);
         $secondDateExpire = new \DateTime($this->step2['expiryDate']['second_date']);
         $array = [];
+
         foreach ($this->step1 as $id => $value){
             $stockEntry = MercStockEntry::findOne(['id' => $id]);
             $rawData = unserialize($stockEntry->raw_data);
@@ -50,6 +51,8 @@ class CreateRegisterProductionRequest extends Component{
                 ];
             }
         }
+
+
         $array['rawBatch'] = [
             'sourceStockEntry' => [
                 'uuid' => $this->step2['product']
@@ -66,6 +69,7 @@ class CreateRegisterProductionRequest extends Component{
         }else{
             $productUUID = $this->step2['product_name'];
         }
+
         $array['productiveBatch'] = [
             'product' => [
                 'uuid' => $this->step2['product']

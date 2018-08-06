@@ -136,8 +136,8 @@ class Guide extends \yii\db\ActiveRecord
      */
     public function getGuideProductsIds()
     {
-        $result = GuideProduct::find()->where(['guide_id' => $this->id])->select('cbg_id')->orderBy(['id' => 'desc'])->asArray()->all();
-        return \yii\helpers\ArrayHelper::getColumn($result, 'cbg_id');
+        $query = (new \yii\db\Query)->select('cbg_id')->where(['guide_id' => $this->id])->from(GuideProduct::tableName())->orderBy(['id' => 'desc'])->createCommand()->queryColumn();
+        return array_map('intval', $query);
     }
 
     /**

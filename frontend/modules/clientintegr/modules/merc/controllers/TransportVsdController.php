@@ -305,11 +305,11 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                     $request->step1 = $session->get('TrVsd_step1');
                     try {
                         $result = mercuryApi::getInstance()->registerProductionOperation($request);
+
                         Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
                         return $this->redirect(['index']);
                         if(!isset($result))
                             throw new \Exception('Error');
-
                     } catch (\Error $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
                         return $this->redirect(['conversion-step-2']);
@@ -321,7 +321,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
         }
         $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
-
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('conversion-step-2', $params);
         return $this->render('conversion-step-2', $params);

@@ -70,7 +70,7 @@ class iikoAgent extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if($insert) {
+        if ($insert) {
             $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
 
@@ -80,17 +80,20 @@ class iikoAgent extends \yii\db\ActiveRecord
     }
 
 
-    public function getStore(){
+    public function getStore()
+    {
         return $this->hasOne(iikoStore::className(), ['id' => 'store_id']);
     }
 
 
-    public function getVendor(){
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
 
-    public function getOrganization(){
+    public function getOrganization()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'org_id']);
     }
 
@@ -99,15 +102,19 @@ class iikoAgent extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getAgents($org_id, $all = true, $notMap=true) {
-        $query = iikoAgent::find()
-            ->select(['uuid', 'denom'])->where(['org_id' => $org_id]);
+    public function getAgents($org_id, $all = true, $notMap = true, $is_active = true)
+    {
+        $query = iikoAgent::find()->select(['uuid', 'denom'])->where(['org_id' => $org_id]);
 
-        if($notMap){
+        if ($is_active) {
+            $query->andWhere(['is_active' => 1]);
+        }
+
+        if ($notMap) {
             $agents = ArrayHelper::map($query->orderBy(['denom' => SORT_ASC])
                 ->asArray()
                 ->all(), 'uuid', 'denom');
-        }else{
+        } else {
             $agents = $query->orderBy(['denom' => SORT_ASC])
                 ->asArray()
                 ->all();

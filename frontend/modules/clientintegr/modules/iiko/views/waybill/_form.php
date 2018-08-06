@@ -40,13 +40,7 @@ use yii\web\JsExpression;
         ]);
     ?>
 
-    <?php echo $form->field($model, 'store_id')->widget(\kartik\select2\Select2::classname(), [
-        'data' => \api\common\models\iiko\iikoStore::getStores($org),
-        'pluginOptions' => [
-            'allowClear' => true],
-        'id' => 'orgFilter'
-        ]);
-    ?>
+    <?php echo $form->field($model, 'store_id')->dropDownList(ArrayHelper::map(\api\common\models\iiko\iikoStore::find()->where(['org_id' => $org, 'is_active' => 1])->all(), 'id', 'denom')) ?>
     <?php
 
     if (!$model->doc_date) {

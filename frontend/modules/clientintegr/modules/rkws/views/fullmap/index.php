@@ -331,39 +331,13 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                     </div>
                 </div>
                 <div class="col-md-5" align="right">
-                        <div class="guid-header" align="right">
-
-                        <?php
-                        $form = ActiveForm::begin([
-                            'action' => Url::to('index'),
-                            'options' => [
-                                'id' => 'applyMapForm',
-                                'data-pjax' => true,
-                                'class' => "navbar-form no-padding no-margin",
-                                'role' => 'search',
-                            ],
-                        ]);
-                        ?>
-
-                        <?=
-                        $form->field($searchModel, 'selectedVendor')
-                            ->dropDownList($vendors, ['id' => 'selectedVendor', 'options'=>[$selectedVendor=>['selected'=>true]]])
-                            ->label(false)
-                        ?>
-                        <?=
-                        $form->field($searchModel, 'selectedVendor')
-                            ->dropDownList($vendors, ['id' => 'selectedVendor', 'options'=>[$selectedVendor=>['selected'=>true]]])
-                            ->label(false)
-                        ?>
-                        <?=
-                        $form->field($searchModel, 'selectedVendor')
-                            ->dropDownList($vendors, ['id' => 'selectedVendor', 'options'=>[$selectedVendor=>['selected'=>true]]])
-                            ->label(false)
-                        ?>
-                        <?php ActiveForm::end(); ?>
-                        </div>
-
+                    <div class="navbar-form no-padding" align="right" style="no-wrap">
+                        <?php echo Html::dropDownList('store_set', null, $stores,['class' => 'form-control', 'style'=>'width:40%']); ?>
+                        <?php echo  Html::textInput("koef_set",'',['class' => 'form-control','style'=>'width:20%;'])?>
+                        <?php echo Html::dropDownList('vat_set', null,[-1 => 'Не менять', 0 => '0%', 1000 =>'10%', 1800 => '18%'], ['class' => 'form-control', 'style'=>'width:20%']); ?>
                     </div>
+                </div>
+
                 <div class="col-md-3"  align="right">
                     <div class="guid-header">
                         <?= Html::submitButton('<i class="fa fa-th"></i> Применить', ['class' => 'btn btn-success apply-fullmap']) ?>
@@ -446,7 +420,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'editableOptions' => [
                                         'asPopover' => true,
                                         'name' => 'pdenom',
-                                        'formOptions' => ['action' => ['edit']],
+                                        'formOptions' => ['action' => ['editpdenom']],
                                         'header' => 'Продукт R-keeper',
                                         'size' => 'md',
                                         'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
@@ -456,6 +430,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
 
                                             //'data' => $pdenom,
                                             'options' => ['placeholder' => 'Выберите продукт из списка',
+
                                             ],
                                             'pluginOptions' => [
                                                 'minimumInputLength' => 2,
@@ -478,6 +453,18 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
 
                                         ]
                                     ]],
+                                [
+                                    'attribute' => 'unitname',
+                                    'value' => function ($model) {
+                                        if (!empty($model['unitname'])) {
+
+                                            return $model['unitname'];
+                                        }
+                                        return 'Не задано';
+                                    },
+                                    'format' => 'raw',
+                                    'label' => 'Ед.изм. SH',
+                                ],
 
                                 [
                                     'class'=>'kartik\grid\EditableColumn',
@@ -517,11 +504,22 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'hAlign'=>'right',
                                     'vAlign'=>'middle',
                                     // 'width'=>'100px',
-                                    'format'=>['decimal',6],
+                                    // 'format'=>['decimal',6],
 
                                     'pageSummary'=>true
                                 ],
-                                'vat',
+                                [
+                                    'attribute' => 'vat',
+                                    'value' => function ($model) {
+                                        if (!empty($model['vat'])) {
+
+                                            return $model['vat']/100;
+                                        }
+                                        return 'Не задано';
+                                    },
+                                    'format' => 'raw',
+                                    'label' => 'Ставка НДС',
+                                ],
 
                                 [
                                     'class' => 'yii\grid\ActionColumn',

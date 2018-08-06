@@ -11,22 +11,20 @@ use yii\base\Exception;
 /**
  * This is the model class for table "rk_access".
  *
- * @property integer $id
- * @property integer $service_id
- * @property integer $supp_id
- * @property integer $cat_id
- * @property integer $product_id
- * @property integer $product_rid
- * @property integer $org_id
- * @property integer $vat
- * @property integer $vat_included
- * @property double $koef
- * @property integer $store_rid
- * @property integer $is_active
- * @property datetime $created_at
- * @property datetime $updated_at
- * @property datetime $linked_at
- *
+ * @property  integer $id
+ * @property  integer $service_id
+ * @property  integer $org_id
+ * @property  integer $product_id
+ * @property  integer $supp_id
+ * @property  integer $product_rid
+ * @property  integer $unit_rid
+ * @property  integer $store_rid
+ * @property  double  $koef
+ * @property  integer $vat
+ * @property  integer $is_active
+ * @property  datetime $created_at
+ * @property  datetime $linked_at
+ * @property  datetime $updated_at
  *
  */
 class AllMaps extends \yii\db\ActiveRecord {
@@ -56,7 +54,7 @@ class AllMaps extends \yii\db\ActiveRecord {
             [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [[ 'product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id',
-                'vat_included', 'linked_at', 'pdenom', 'munit_rid'], 'safe']
+                'vat_included', 'linked_at', 'pdenom', 'munit_rid', 'store_rid'], 'safe']
         ];
 
         // test git
@@ -133,6 +131,8 @@ class AllMaps extends \yii\db\ActiveRecord {
 
             } else { // Создание
                // $this->koef = 1;
+                $this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                $this->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             }
 
 

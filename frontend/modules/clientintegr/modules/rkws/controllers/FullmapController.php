@@ -3,12 +3,14 @@
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use api\common\models\AllMaps;
+use api\common\models\RkStoretree;
 use api\common\models\rkws\OrderCatalogSearchMap;
 use api\modules\v1\modules\mobile\resources\OrderCatalogSearch;
 use api_web\classes\CartWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
+use yii\helpers\Json;
 use yii\web\Controller;
 use api\common\models\RkWaybill;
 use api\common\models\RkAgentSearch;
@@ -36,32 +38,7 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actions() {
         return ArrayHelper::merge(parent::actions(), [
-            'edit' => [
-                'class' => EditableColumnAction::className(),
-                'modelClass' => AllMaps::className(),
-                'outputValue' => function ($model, $attribute, $key, $index) {
-                    $value = $model->$attribute;
-                    if ($attribute === 'pdenom') {
 
-                        if (!is_numeric($model->pdenom))
-                            return '';
-
-                        $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
-                        $model->product_rid = $rkProd->id;
-                        $model->munit_rid = $rkProd->unit_rid;
-                        $model->pdenom = $rkProd->denom;
-                        $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-                        $model->save(false);
-
-                        return $rkProd->denom;
-                    }
-                    return '';                                   // empty is same as $value
-                },
-                'outputMessage' => function($model, $attribute, $key, $index) {
-                    return $model->errors;                                  // any custom error after model save
-                },
-            ],
             'changekoef' => [// identifier for your editable column action
                 'class' => EditableColumnAction::className(), // action class name
                 'modelClass' => AllMaps::className(), // the model for the record being edited
@@ -131,10 +108,16 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
         $selected = $session->get('selectedmap', []);
 
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'lic', 'licucs', 'selected'));
+        $stores = [-1 => 'Не менять'];
+        $stores +=  ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $client->id])->all(), 'rid', 'name');
+
+
+        if (Yii::$app->request->isAjax || Yii::$app->request->isPjax ) {
+            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client',
+                'cart', 'vendors', 'selectedVendor', 'lic', 'licucs', 'selected', 'stores'));
         } else {
-            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'lic', 'licucs','selected'));
+                return $this->render($vi, compact('dataProvider', 'searchModel', 'client',
+                    'cart', 'vendors', 'selectedVendor', 'lic', 'licucs','selected', 'stores'));
         }
 
 /*
@@ -167,6 +150,20 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
             ]);
         }
 */
+    }
+
+    public function actionEditpdenom() {
+        $attr = Yii::$app->request->post('editableAttribute');
+        $key = Yii::$app->request->post('editableKey');
+        $pdenom = Yii::$app->request->post('pdenom');
+
+      //  var_dump($attr);
+      //  var_dump($key);
+      //  var_dump($pdenom);
+
+        return Json::encode(['output' => 'Тмин', 'message' => '']);
+
+
     }
 
     public function actionRenewcats() {
@@ -234,9 +231,9 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
         if (!is_null($term)) {
 
-            $sql = "( select id, denom as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-                " union ( select id, denom as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-                "union ( select id, denom as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            $sql = "( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
+                " union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
+                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
                 "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;

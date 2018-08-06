@@ -56,7 +56,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
-            'curr.id as currency_id, 1800 as vat'
+            "curr.id as currency_id", "fmap.id as fmap_id", "fprod.denom as pdenom", "fmap.vat as vat",
+            "fstore.name as store", "fprod.unitname as unitname", "fmap.koef as koef"
         ];
         $fieldsCG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
@@ -64,7 +65,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
-            'curr.id as currency_id, 1800 as vat'
+            "curr.id as currency_id", "fmap.id as fmap_id", "fprod.denom as pdenom", "fmap.vat as vat",
+            "fstore.name as store", "fprod.unitname as unitname", "fmap.koef as koef"
         ];
 
         $where = '';
@@ -122,8 +124,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+             LEFT JOIN `mixcart_api`.`all_map` fmap ON cbg.id = fmap.product_id
+             LEFT JOIN `mixcart_api`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+             LEFT JOIN `mixcart_api`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc      
            WHERE
-           cat_id IN (" . $this->catalogs . ")
+           cbg.cat_id IN (" . $this->catalogs . ")
            ".$where."
            AND (cbg.status = 1 AND cbg.deleted = 0)
         UNION ALL
@@ -134,6 +139,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
            LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           LEFT JOIN `mixcart_api`.`all_map` fmap ON cbg.id = fmap.product_id
+           LEFT JOIN `mixcart_api`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+           LEFT JOIN `mixcart_api`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc 
           WHERE 
           cg.cat_id IN (" . $this->catalogs . ")
           ".$where."
@@ -180,5 +188,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         ]);
         return $dataProvider;
     }
+
+
 
 }

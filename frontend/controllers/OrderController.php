@@ -467,7 +467,7 @@ class OrderController extends DefaultController
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
         $cart = Cart::findOne(['organization_id' => $client->id]);
-        $cartItems = (new \yii\db\Query)
+        $cartItems = empty($cart) ? [] : (new \yii\db\Query)
                 ->select('product_id')
                 ->from(\common\models\CartContent::tableName())
                 ->where(['cart_id' => $cart->id])

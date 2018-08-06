@@ -52,7 +52,6 @@ class CreateRegisterProductionRequest extends Component{
             }
         }
 
-
         $array['rawBatch'] = [
             'sourceStockEntry' => [
                 'uuid' => $this->step2['product']
@@ -62,7 +61,6 @@ class CreateRegisterProductionRequest extends Component{
                 'uuid' => $this->step2['unit']
             ],
         ];
-
         $arr = explode('|', $this->step2['product_name']);
         if(isset($arr[1])){
             $productUUID = trim($arr[1]);

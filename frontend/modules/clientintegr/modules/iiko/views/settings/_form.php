@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\User;
+use yii\widgets\Pjax;
+
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
@@ -40,10 +42,15 @@ use common\models\User;
                 $arr = unserialize($iikoPconst->value);
             }
             $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org]);
-            foreach ($iikoStores as $store){
-                echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => in_array($store->id, $arr) ? true : false]);
+            if($iikoStores){
+                foreach ($iikoStores as $store){
+                    echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => in_array($store->id, $arr) ? true : false]);
+                }
             }
         break;
+        case \api\common\models\iiko\iikoDicconst::TYPE_LIST:
+            echo $this->render('_goods_list', ['org' => $org, 'id' => $id]);
+            break;
         default:
             echo $form->field($model, 'value')->textInput(['maxlength' => true]);
     }

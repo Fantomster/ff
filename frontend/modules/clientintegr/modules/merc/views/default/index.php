@@ -505,8 +505,10 @@ $(document).on("click", ".hand_loading", function(e) {
             }); 
     $(document).on('click', '.download-pdf', function(e) {
         e.preventDefault();
+
         var url = $(this).data('url');
         var filename = $(this).data('name');
+
         $.ajax({
             url: '$checkVetisPassUrl',
             method: 'GET',
@@ -622,6 +624,7 @@ $(document).on("click", ".hand_loading", function(e) {
                             }
                         }
                     });
+
                 }
             }
         });

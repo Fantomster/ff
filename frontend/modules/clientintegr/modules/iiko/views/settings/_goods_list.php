@@ -20,12 +20,12 @@ $this->registerCss("
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $org])->one();
-
 if($iikoPconst){
     $arr = unserialize($iikoPconst->value);
 }
 
 Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
+$currentUrl = \yii\helpers\Url::current();
 $form = ActiveForm::begin([
     'options' => [
         'data-pjax' => true,
@@ -39,19 +39,19 @@ $form = ActiveForm::begin([
 <div class="row">
     <div class="col-md-3">
         <?php
-        echo $form->field($searchModel, 'product_type')->dropDownList($searchModel->getProductType())->label(Yii::t('app', 'Тип продукта'), ['class' => 'label', 'style' => 'color:#555']);
+        echo $form->field($searchModel, 'product_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getProductType()))->label(Yii::t('app', 'Тип продукта'), ['class' => 'label', 'style' => 'color:#555']);
         ?>
     </div>
     <div class="col-md-3">
         <?php
-        echo $form->field($searchModel, 'cooking_place_type')->dropDownList($searchModel->getCoockingPlaceType())
+        echo $form->field($searchModel, 'cooking_place_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getCoockingPlaceType()))
             ->label(Yii::t('app', 'Тип места приготовления продукта'), ['class' => 'label', 'style' => 'color:#555']);
         ?>
     </div>
     <div class="col-md-3">
         <?php
         echo $form->field($searchModel, 'unit')
-            ->dropDownList($searchModel->getUnit())->label(Yii::t('app', 'Единица измерения товара в системе IIKO'), ['class' => 'label', 'style' => 'color:#555']);
+            ->dropDownList(array_merge(['all' => 'Все'], $searchModel->getUnit()))->label(Yii::t('app', 'Единица измерения товара в системе IIKO'), ['class' => 'label', 'style' => 'color:#555']);
         ?>
     </div>
 </div>
@@ -65,7 +65,7 @@ echo \kartik\grid\GridView::widget([
             'contentOptions' => ['class' => 'small_cell_checkbox'],
             'headerOptions' => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {
-                if(in_array($model->id, $arr)){
+                if(is_iterable($arr) && in_array($model->id, $arr)){
                     $checked = true;
                 }else{
                     $checked = false;
@@ -115,7 +115,7 @@ $customJs = <<< JS
  $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-product_type", function() {
             var val = $('#iikoproductsearch-product_type').val();
-            var url = "?id=$id&productSearch="+val
+            var url = "$currentUrl&productSearch="+val
            $.ajax({
             url: url,
             type: "GET",
@@ -128,7 +128,7 @@ $customJs = <<< JS
   $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-cooking_place_type", function() {
             var val = $('#iikoproductsearch-cooking_place_type').val();
-            var url = "?id=$id&cookingPlaceSearch="+val
+            var url = "$currentUrl&cookingPlaceSearch="+val
            $.ajax({
             url: url,
             type: "GET",
@@ -141,7 +141,7 @@ $customJs = <<< JS
    $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-unit", function() {
             var val = $('#iikoproductsearch-unit').val();
-            var url = "?id=$id&unitSearch="+val
+            var url = "$currentUrl&unitSearch="+val
            $.ajax({
             url: url,
             type: "GET",

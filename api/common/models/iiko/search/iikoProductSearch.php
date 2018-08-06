@@ -30,19 +30,19 @@ class iikoProductSearch extends iikoProduct
     {
         $query = iikoProduct::find();
 
-        if(isset($params['productSearch'])){
+        if(isset($params['productSearch']) && $params['productSearch'] != 'all'){
             $query->andWhere([
                 'product_type' => $params['productSearch']
             ]);
         }
 
-        if(isset($params['cookingPlaceSearch'])){
+        if(isset($params['cookingPlaceSearch']) && $params['cookingPlaceSearch'] != 'all'){
             $query->andWhere([
                 'cooking_place_type' => $params['cookingPlaceSearch']
             ]);
         }
 
-        if(isset($params['unitSearch'])){
+        if(isset($params['unitSearch']) && $params['unitSearch'] != 'all'){
             $query->andWhere([
                 'unit' => $params['unitSearch']
             ]);

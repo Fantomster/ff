@@ -15,8 +15,6 @@ use common\components\AccessRule;
 use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
 use api\common\models\RkService;
 
-//use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
-
 /**
  * OrganizationController implements the CRUD actions for Organization model.
  */
@@ -44,7 +42,6 @@ class RkwsController extends Controller {
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
-//                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
                     ],
                     [
@@ -69,6 +66,7 @@ class RkwsController extends Controller {
         $query0 = "select `created` from `rk_actions` where `id` = '1'";
         $a = Yii::$app->db_api->createCommand($query0)->queryScalar();
         $data_last_license = $a;
+        $dataProvider->pagination->pageParam = 'page_outer';
 
         return $this->render('index', [
                     'searchModel' => $searchModel,
@@ -90,8 +88,6 @@ class RkwsController extends Controller {
     
     public function actionGetws() {
         
-   //  $resres = ApiHelper::getAgents();     
-        
         $res = new ServiceHelper();
         $res->getObjects();
 
@@ -109,24 +105,6 @@ class RkwsController extends Controller {
             
     }
 
-//    /**
-//     * Creates a new Organization model.
-//     * If creation is successful, the browser will be redirected to the 'view' page.
-//     * @return mixed
-//     */
-//    public function actionCreate()
-//    {
-//        $model = new Organization();
-//
-//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->id]);
-//        } else {
-//            return $this->render('create', [
-//                'model' => $model,
-//            ]);
-//        }
-//    }
-//
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -163,38 +141,21 @@ class RkwsController extends Controller {
     
         public function actionAutocomplete($term = null) {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-       // $out = ['results' => ['id' => '0', 'text' => 'Создать контрагента']];
         if (!is_null($term)) {
             $query = new \yii\db\Query;
 
-           // $query->select("`id`, CONCAT(`inn`,`denom`) AS `text`")
-              $query->select(['id'=>'id','text' => 'CONCAT("(ID:",`id`,") ",`name`)']) 
+              $query->select(['id'=>'id','text' => 'CONCAT("(ID:",`id`,") ",`name`)'])
                     ->from('organization')
                     ->where('type_id = 1')  
                     ->andwhere("id like :id or `name` like :name",[':id' => '%'.$term.'%', ':name' => '%'.$term.'%'])
                     ->limit(20);
 
             $command = $query->createCommand();
-         //   $command->db = Yii::$app->db_api;
             $data = $command->queryAll();
             $out['results'] = array_values($data);
         } 
-        // $out['results'][] = ['id' => '0', 'text' => 'Создать контрагента'];
         return $out;
     }
-
-//    /**
-//     * Deletes an existing Organization model.
-//     * If deletion is successful, the browser will be redirected to the 'index' page.
-//     * @param integer $id
-//     * @return mixed
-//     */
-//    public function actionDelete($id)
-//    {
-//        $this->findModel($id)->delete();
-//
-//        return $this->redirect(['index']);
-//    }
 
     /**
      * Finds the Organization model based on its primary key value.

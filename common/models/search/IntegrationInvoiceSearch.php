@@ -25,6 +25,7 @@ use common\models\User;
  * @property string $created_at
  * @property string $updated_at
  * @property string $name_postav
+ * @property string $consignee
  *
  * @property IntegrationInvoiceContent[] $Content
  * @property Organization $organization
@@ -49,7 +50,7 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
     public function rules()
     {
         return [
-          [['date', 'created_at', 'total', 'updated_at', 'date_from', 'date_to', 'number', 'name_postav'], 'safe'],
+          [['date', 'created_at', 'total', 'updated_at', 'date_from', 'date_to', 'number', 'name_postav', 'consignee'], 'safe'],
 
         ];
     }
@@ -59,40 +60,6 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
      * @param array $params
      * @return ActiveDataProvider
      */
-    /*public function search($params): ActiveDataProvider
-    {
-
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
-
-        $query = IntegrationInvoice::find()
-            ->where(['organization_id' => $organization]);
-
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort'=>[
-                'defaultOrder'=>[
-                    'updated_at' => SORT_DESC
-                ],
-            ]
-        ]);
-
-
-        if (!($this->load($params) && $this->validate())) {
-            return $dataProvider;
-        }
-
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'organization_id' => $this->organization_id,
-            'date' => $this->date,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-
-        ]);
-
-        return $dataProvider;
-    }*/
 
     /**
      * Search
@@ -134,7 +101,6 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
                 $query->andWhere($this->tableName() . '.name_postav like "%'.$this->name_postav.'%"');
             }
         }
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],

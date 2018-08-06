@@ -462,14 +462,20 @@ class OrderController extends DefaultController
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
-        $cart = (new CartWebApi())->items(); //$client->getCart();
+        $cart = Cart::findOne(['organization_id' => $client->id]);
+        $cartItems = (new \yii\db\Query)
+                ->select('product_id')
+                ->from(\common\models\CartContent::tableName())
+                ->where(['cart_id' => $cart->id])
+                ->createCommand()
+                ->queryColumn();
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'cart', 'client', 'vendors', 'selectedVendor'));
+            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'cartItems', 'client', 'vendors', 'selectedVendor'));
         } else {
-            return $this->render('create', compact('dataProvider', 'searchModel', 'cart', 'client', 'vendors', 'selectedVendor'));
+            return $this->render('create', compact('dataProvider', 'searchModel', 'cartItems', 'client', 'vendors', 'selectedVendor'));
         }
     }
 
@@ -2466,7 +2472,10 @@ class OrderController extends DefaultController
     {
         $waybillNumber = Yii::$app->request->post('waybill_number') ?? null;
         $orderID = Yii::$app->request->post('order_id') ?? null;
-        if (!$orderID) return 0;
+
+        if (!$orderID)
+            return 0;
+
         $order = Order::findOne(['id' => $orderID]);
         $order->waybill_number = $waybillNumber;
         $order->save();

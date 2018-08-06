@@ -47,8 +47,6 @@ class InvoiceController extends Controller
             ]);
         }
 
-        //return $this->render('index', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
-
     }
 
     public function actionGetContent()
@@ -152,7 +150,7 @@ class InvoiceController extends Controller
             $order->total_price = 0;
             $order->currency_id = $vendor->baseCatalog->currency_id;
             if (!$order->save()) {
-                throw new Exception('Не вышло создать заказ, что то пошло не так.');
+                throw new Exception('Не вышло создать заказ, что-то пошло не так.');
             }
             //Создаем детальную часть заказа
             foreach ($content as $value) {
@@ -165,7 +163,7 @@ class InvoiceController extends Controller
                 $model->units = $value['units'];
                 $model->article = $value['article'];
                 if (!$model->save()) {
-                    throw new Exception('Кусок заказа не сохранился, давайте поробуем снова.');
+                    throw new Exception('Кусок заказа не сохранился, давайте попробуем снова.');
                 }
             }
             //Пересчитаем заказ

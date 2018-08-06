@@ -253,8 +253,10 @@ class CartWebApi extends \api_web\components\WebApi
                 $orderContent->order_id = $order->id;
                 $orderContent->product_id = $cartContent->product_id;
                 $orderContent->quantity = $cartContent->quantity;
+                $orderContent->plan_quantity = $cartContent->quantity;
                 $orderContent->initial_quantity = $cartContent->quantity;
                 $orderContent->price = $cartContent->price;
+                $orderContent->plan_price = $cartContent->price;
                 $orderContent->product_name = $cartContent->product_name;
                 $orderContent->units = $cartContent->units;
                 $orderContent->comment = $cartContent->comment;

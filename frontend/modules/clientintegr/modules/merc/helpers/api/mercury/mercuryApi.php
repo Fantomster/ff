@@ -744,6 +744,7 @@ class mercuryApi extends baseApi
 
         $appData->any['ns3:registerProductionOperationRequest'] = $data->getRegisterProductionRequest();
 
+
         $request->application->data = $appData;
 
         //Делаем запрос
@@ -761,6 +762,7 @@ class mercuryApi extends baseApi
             $status = $result->application->status;
 
         } while ($status == 'IN_PROCESS');
+        //dd($result);
 
         //Пишем лог
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());

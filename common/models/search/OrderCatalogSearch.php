@@ -11,7 +11,8 @@ use yii\db\Query;
 /**
  *  Model for order catalog search form
  */
-class OrderCatalogSearch extends \yii\base\Model {
+class OrderCatalogSearch extends \yii\base\Model
+{
 
     public $searchString;
     public $selectedCategory;
@@ -24,7 +25,8 @@ class OrderCatalogSearch extends \yii\base\Model {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['product', 'price', 'searchString', 'selectedCategory', 'selectedVendor'], 'safe'],
         ];
@@ -35,7 +37,8 @@ class OrderCatalogSearch extends \yii\base\Model {
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params)
+    {
         $this->load($params);
 
         $fieldsCBG = [
@@ -58,13 +61,13 @@ class OrderCatalogSearch extends \yii\base\Model {
         $where = '';
         $where_all = '';
         $params_sql = [];
-        if(!empty($this->searchString)) {
+        if (!empty($this->searchString)) {
             $where .= 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
             $params_sql[':searchString'] = "%" . $this->searchString . "%";
         }
 
-        if(!empty($this->selectedVendor)) {
-            if(is_array($this->selectedVendor)) {
+        if (!empty($this->selectedVendor)) {
+            if (is_array($this->selectedVendor)) {
                 foreach ($this->selectedVendor as $key => $supp_org_id) {
                     $this->selectedVendor[$key] = (int) $supp_org_id;
                 }
@@ -72,11 +75,11 @@ class OrderCatalogSearch extends \yii\base\Model {
             } else {
                 $this->selectedVendor = (int) $this->selectedVendor;
             }
-            $where .= ' AND `org`.id IN (' .$this->selectedVendor. ') ';
+            $where .= ' AND `org`.id IN (' . $this->selectedVendor . ') ';
         }
 
-        if(!empty($this->searchCategory)) {
-            if(is_array($this->searchCategory)) {
+        if (!empty($this->searchCategory)) {
+            if (is_array($this->searchCategory)) {
                 foreach ($this->searchCategory as $key => $category_id) {
                     $this->searchCategory[$key] = (int) $category_id;
                 }
@@ -84,19 +87,19 @@ class OrderCatalogSearch extends \yii\base\Model {
             } else {
                 $this->searchCategory = (int) $this->searchCategory;
             }
-            $where .= ' AND category_id IN (' .$this->searchCategory. ') ';
+            $where .= ' AND category_id IN (' . $this->searchCategory . ') ';
         }
 
-        if($this->searchCategory === 0) {
+        if ($this->searchCategory === 0) {
             $where .= ' AND category_id IS NULL ';
         }
 
-        if(!empty($this->searchPrice)) {
-            if(isset($this->searchPrice['from'])) {
+        if (!empty($this->searchPrice)) {
+            if (isset($this->searchPrice['from'])) {
                 $params_sql[':price_start'] = $this->searchPrice['from'];
                 $where_all .= ' AND price >= :price_start ';
             }
-            if(isset($this->searchPrice['to'])) {
+            if (isset($this->searchPrice['to'])) {
                 $params_sql[':price_end'] = $this->searchPrice['to'];
                 $where_all .= ' AND price <= :price_end ';
             }
@@ -112,7 +115,7 @@ class OrderCatalogSearch extends \yii\base\Model {
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
            WHERE
            cat_id IN (" . $this->catalogs . ")
-           ".$where."
+           " . $where . "
            AND (cbg.status = 1 AND cbg.deleted = 0)
         UNION ALL
           SELECT 
@@ -124,17 +127,15 @@ class OrderCatalogSearch extends \yii\base\Model {
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
           WHERE 
           cg.cat_id IN (" . $this->catalogs . ")
-          ".$where."
+          " . $where . "
           AND (cbg.status = 1 AND cbg.deleted = 0)
-        ) as c WHERE id != 0 ".$where_all;
-
-        $query = Yii::$app->db->createCommand($sql);
+        ) as c WHERE id != 0 " . $where_all;
 
         $dataProvider = new SqlDataProvider([
-            'sql' => $query->sql,
+            'sql' => $sql,
             'params' => $params_sql,
             'pagination' => [
-                'page' => isset($params['page']) ? ($params['page']-1) : 0,
+                'page' => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
                 'params' => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',

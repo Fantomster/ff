@@ -45,7 +45,7 @@ use yii\widgets\Pjax;
                     return $e->getMessage();
                 }
             }
-            $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org]);
+            $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org, 'is_active' => 1]);
             if ($iikoStores && is_iterable($iikoStores)) {
                 foreach ($iikoStores as $store) {
                     echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => (is_iterable($arr) && in_array($store->id, $arr)) ? true : false]);

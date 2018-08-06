@@ -64,7 +64,8 @@ class FavoriteSearch extends \yii\base\Model
         //Валюта
         $query->innerJoin('currency AS curr', 'ord.currency_id = curr.id');
         //Условия отбора
-        $query->where('cbg.deleted = 0 AND COALESCE(cbg.cat_id, cg.cat_id) != 0');
+        $query->where('cbg.deleted = 0 AND COALESCE(cg.cat_id, cbg.cat_id) != 0');
+
         //Только эти заказы
         $query->andWhere(['in', 'ord.status', [
             Order::STATUS_PROCESSING,
@@ -86,6 +87,7 @@ class FavoriteSearch extends \yii\base\Model
         ]);
         //Группируем по товару
         $query->groupBy('cbg_id');
+        $query->having("cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)", [':cid' => $clientId]);
 
         //Выдача в датапровайдер
         $dataProvider = new SqlDataProvider([

@@ -303,40 +303,25 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                     $request = new CreateRegisterProductionRequest();
                     $request->step2 = $model->attributes;
                     $request->step1 = $session->get('TrVsd_step1');
-                    //try {
+                    try {
                         $result = mercuryApi::getInstance()->registerProductionOperation($request);
-                        //dd($result);
+
                         Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
                         return $this->redirect(['index']);
                         if(!isset($result))
                             throw new \Exception('Error');
-
-//                    } catch (\Error $e) {
-//                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
-//                        return $this->redirect(['conversion-step-2']);
-//                    } catch (\Exception $e) {
-//                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
-//                        return $this->redirect(['conversion-step-2']);
-//                    }
+                    } catch (\Error $e) {
+                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                        return $this->redirect(['conversion-step-2']);
+                    } catch (\Exception $e) {
+                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                        return $this->redirect(['conversion-step-2']);
+                    }
                 }
             }
         }
         $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
 
-//        $model->attributes = $session->get('TrVsd_step2');
-//        $session->remove('TrVsd_step2');
-//
-//        $post = Yii::$app->request->post();
-//        if ($model->load($post)) {
-//            if ($model->validate()) {
-//                $session->set('TrVsd_step2', $model->attributes);
-//                if (Yii::$app->request->isAjax) {
-//                    Yii::$app->response->format = Response::FORMAT_JSON;
-//                    return (['success' => true]);
-//                }
-//                return $this->redirect(['step-3']);
-//            }
-//        }
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('conversion-step-2', $params);
         return $this->render('conversion-step-2', $params);

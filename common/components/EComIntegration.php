@@ -193,7 +193,9 @@ class EComIntegration
         $supplier = $simpleXMLElement->HEAD->SUPPLIER;
 
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
-        if(!$ediOrganization)return false;
+        if(!$ediOrganization){
+            return false;
+        }
         $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
         $message = "";
         if (!$order) {

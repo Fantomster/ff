@@ -76,6 +76,11 @@ CSS;
                         'type'  => \unclead\multipleinput\MultipleInputColumn::TYPE_HIDDEN_INPUT,
                     ],
                     [
+                        'name'  => 'uuid',
+                        'title' => 'uuid',
+                        'type'  => \unclead\multipleinput\MultipleInputColumn::TYPE_HIDDEN_INPUT,
+                    ],
+                    [
                         'name'  => 'product_name',
                         'title' =>  Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
                         'enableError' => true,

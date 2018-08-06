@@ -231,7 +231,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $arr = unserialize($iikoPconst->value);
             }
 
-            if (is_iterable($arr)) {
+            if (isset($arr) && is_iterable($arr)) {
                 $arrayString = '(';
                 $i = 1;
                 foreach ($arr as $one) {

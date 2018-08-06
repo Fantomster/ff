@@ -744,7 +744,6 @@ class mercuryApi extends baseApi
 
         $appData->any['ns3:registerProductionOperationRequest'] = $data->getRegisterProductionRequest();
 
-
         $request->application->data = $appData;
 
         //Делаем запрос

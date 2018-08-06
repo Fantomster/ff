@@ -515,7 +515,6 @@ $(document).on("click", ".hand_loading", function(e) {
             success: function (data) {
                 if(data != 1){
                     swal({
-
                       title: 'Печать ВСД',
                       showCancelButton: true,
                       cancelButtonText: "Отмена",
@@ -527,7 +526,6 @@ $(document).on("click", ".hand_loading", function(e) {
                       onOpen: function () {
                         $('#swal-input1').focus()
                       }
-
                         title: 'Печать ВСД',
                         showCancelButton: true,
                         cancelButtonText: "Отмена",
@@ -548,10 +546,8 @@ $(document).on("click", ".hand_loading", function(e) {
                             data: {login : login, pass : pass}
                         })
                         swal("Доступы изменены");
-
                         url = $(this).data('url');
                             filename = $(this).data('name');
-
                             swal({
                                 title: '$preparePdfText'
                             });
@@ -575,7 +571,6 @@ $(document).on("click", ".hand_loading", function(e) {
                                 }
                             });
                     })
-
                 }else{
                             url = $(this).data('url');
                             filename = $(this).data('name');
@@ -601,7 +596,6 @@ $(document).on("click", ".hand_loading", function(e) {
                                     swal.close()
                                 }
                             });
-
                 } else {
                     swal({
                         title: '$preparePdfText'

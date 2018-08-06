@@ -321,7 +321,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
         }
         $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
-
         if (Yii::$app->request->isAjax)
             return $this->renderAjax('conversion-step-2', $params);
         return $this->render('conversion-step-2', $params);

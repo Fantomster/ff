@@ -29,7 +29,6 @@ class CreateRegisterProductionRequest extends Component{
         $request->localTransactionId = $this->localTransactionId;
         $request->initiator = $this->initiator;
         $enterprise = mercDicconst::getSetting('enterprise_guid');
-
         $request->enterprise['uuid'] = $enterprise;
         $firstDate = new \DateTime($this->step2['dateOfProduction']['first_date']);
         $secondDate = new \DateTime($this->step2['dateOfProduction']['second_date']);
@@ -62,8 +61,6 @@ class CreateRegisterProductionRequest extends Component{
                 'uuid' => $this->step2['unit']
             ],
         ];
-
-
         $arr = explode('|', $this->step2['product_name']);
         if(isset($arr[1])){
             $productUUID = trim($arr[1]);

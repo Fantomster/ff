@@ -75,7 +75,11 @@ use kartik\grid\GridView;
 
                                         if ($model->type == \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX || $model->type == \api\common\models\iiko\iikoDicconst::TYPE_LIST) {
                                             $arr = unserialize($res);
-                                            return count($arr) ?? 0;
+                                            if ($res == '') {
+                                                $res = 0;
+                                            } else {
+                                                $res = count($arr);
+                                            }
                                         }
 
                                         return $res;

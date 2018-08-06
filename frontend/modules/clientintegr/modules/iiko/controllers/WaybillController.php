@@ -270,6 +270,7 @@ SQL;
             $query->select(['id' => 'uuid', 'text' => 'denom'])
                 ->from('iiko_agent')
                 ->where('org_id = :acc', [':acc' => $org])
+                ->andWhere(['is_active' => 1])
                 ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
                 ->limit(20);
 

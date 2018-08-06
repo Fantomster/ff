@@ -81,7 +81,6 @@ use kartik\grid\GridView;
                                                 $res = count($arr);
                                             }
                                         }
-
                                         return $res;
                                     },
                                     'label' => 'Текущее значение',

@@ -1865,7 +1865,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $businessId = $post['business'];
         $showNotChangedPrice = $post['show_not_changed_price'] ?? false;
         $dateFrom = date('Y-m-d', strtotime($post['filter_from_date_price_stat']));
-        $dateTo = date('Y-m-d', strtotime($post['filter_from_date_price_stat'] . " + 14 days"));
+        $dateTo = date('Y-m-d', strtotime($post['filter_from_date_price_stat'] . " + 7 days"));
         $orderContent = OrderContent::find()->joinWith('order')->where(['order.status' => Order::STATUS_DONE])->andWhere(['between', 'order.created_at', $dateFrom, $dateTo]);
         $businessArray = [];
         if(empty($businessId)){
@@ -1999,8 +1999,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin++, $goodRowBegin, $sixthArray['price_diff']);
                             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($goodBegin, $goodRowBegin, $sixthArray['total_price_diff']);
                             $dayTotalPriceDiff += $sixthArray['total_price_diff'];
-                            $businessBegin++;
                         }
+                        $businessBegin++;
                         $goodRowBegin++;
                     }
                     $goodIdIterator++;

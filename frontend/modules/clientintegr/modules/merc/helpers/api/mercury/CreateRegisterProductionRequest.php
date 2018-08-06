@@ -29,12 +29,14 @@ class CreateRegisterProductionRequest extends Component{
         $request->localTransactionId = $this->localTransactionId;
         $request->initiator = $this->initiator;
         $enterprise = mercDicconst::getSetting('enterprise_guid');
+
         $request->enterprise['uuid'] = $enterprise;
         $firstDate = new \DateTime($this->step2['dateOfProduction']['first_date']);
         $secondDate = new \DateTime($this->step2['dateOfProduction']['second_date']);
         $firstDateExpire = new \DateTime($this->step2['expiryDate']['first_date']);
         $secondDateExpire = new \DateTime($this->step2['expiryDate']['second_date']);
         $array = [];
+
         foreach ($this->step1 as $id => $value){
             $stockEntry = MercStockEntry::findOne(['id' => $id]);
             $rawData = unserialize($stockEntry->raw_data);
@@ -50,6 +52,7 @@ class CreateRegisterProductionRequest extends Component{
                 ];
             }
         }
+
         $array['rawBatch'] = [
             'sourceStockEntry' => [
                 'uuid' => $this->step2['product']
@@ -60,12 +63,14 @@ class CreateRegisterProductionRequest extends Component{
             ],
         ];
 
+
         $arr = explode('|', $this->step2['product_name']);
         if(isset($arr[1])){
             $productUUID = trim($arr[1]);
         }else{
             $productUUID = $this->step2['product_name'];
         }
+
         $array['productiveBatch'] = [
             'product' => [
                 'uuid' => $this->step2['product']

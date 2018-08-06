@@ -39,12 +39,14 @@ use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\helpers\Url;
 
-class OrderController extends DefaultController {
+class OrderController extends DefaultController
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -145,7 +147,8 @@ class OrderController extends DefaultController {
         ];
     }
 
-    public function actionExportToXls() {
+    public function actionExportToXls()
+    {
         $this->actionSaveSelectedOrders();
         $selected = Yii::$app->session->get('selected', []);
         if (!empty($selected)) {
@@ -202,7 +205,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionOrderToXls(int $id): void {
+    public function actionOrderToXls(int $id): void
+    {
         $order = Order::findOne($id);
         $styleArray = [
             'borders' => [
@@ -396,7 +400,8 @@ class OrderController extends DefaultController {
         exit;
     }
 
-    private function fillCellData(\PHPExcel $objPHPExcel, int $row, string $client_string, string $vendor_string): void {
+    private function fillCellData(\PHPExcel $objPHPExcel, int $row, string $client_string, string $vendor_string): void
+    {
         $objPHPExcel->getActiveSheet()->mergeCells("A$row:D$row");
         $objPHPExcel->getActiveSheet()->setCellValue("A$row", $client_string);
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:H$row");
@@ -404,13 +409,15 @@ class OrderController extends DefaultController {
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(20);
     }
 
-    private function fillCellHeaderData(\PHPExcel $objPHPExcel, string $column, string $data): void {
+    private function fillCellHeaderData(\PHPExcel $objPHPExcel, string $column, string $data): void
+    {
         $objPHPExcel->getActiveSheet()->setCellValue($column . "17", Yii::t('app', $data));
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
     }
 
-    private function fillCellBottomData(\PHPExcel $objPHPExcel, int $row, string $leftData, string $rightData, bool $bold = false): int {
+    private function fillCellBottomData(\PHPExcel $objPHPExcel, int $row, string $leftData, string $rightData, bool $bold = false): int
+    {
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:G$row");
         $objPHPExcel->getActiveSheet()->setCellValue("E$row", $leftData);
         $objPHPExcel->getActiveSheet()->getStyle("E$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
@@ -426,7 +433,8 @@ class OrderController extends DefaultController {
         return $row;
     }
 
-    public function actionCreate() {
+    public function actionCreate()
+    {
         $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
@@ -455,18 +463,25 @@ class OrderController extends DefaultController {
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
-        $cart = (new CartWebApi())->items(); //$client->getCart();
+        $cart = Cart::findOne(['organization_id' => $client->id]);
+        $cartItems = (new \yii\db\Query)
+                ->select('product_id')
+                ->from(\common\models\CartContent::tableName())
+                ->where(['cart_id' => $cart->id])
+                ->createCommand()
+                ->queryColumn();
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'cart', 'client', 'vendors', 'selectedVendor'));
+            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'cartItems', 'client', 'vendors', 'selectedVendor'));
         } else {
-            return $this->render('create', compact('dataProvider', 'searchModel', 'cart', 'client', 'vendors', 'selectedVendor'));
+            return $this->render('create', compact('dataProvider', 'searchModel', 'cartItems', 'client', 'vendors', 'selectedVendor'));
         }
     }
 
-    public function actionGuides(): String {
+    public function actionGuides(): String
+    {
         $client = $this->currentUser->organization;
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -481,7 +496,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxDeleteGuide(int $id) {
+    public function actionAjaxDeleteGuide(int $id)
+    {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
         if (isset($guide)) {
@@ -491,7 +507,8 @@ class OrderController extends DefaultController {
         return false;
     }
 
-    public function actionAjaxCreateGuide($name) {
+    public function actionAjaxCreateGuide($name)
+    {
         $client = $this->currentUser->organization;
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
@@ -507,7 +524,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxRenameGuide() {
+    public function actionAjaxRenameGuide()
+    {
         if (Yii::$app->request->isAjax):
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
@@ -525,15 +543,15 @@ class OrderController extends DefaultController {
         endif;
     }
 
-
-    public function actionAjaxGetVsdList() {
+    public function actionAjaxGetVsdList()
+    {
         $guid = mercDicconst::getSetting('enterprise_guid');
         $mercVSDs = MercVsd::find()->where("guid = '$guid'")->groupBy('consignor')->asArray()->all();
         return $this->renderPartial('_vds_list', compact('mercVSDs'));
     }
 
-
-    public function actionEditGuide(int $id) {
+    public function actionEditGuide(int $id)
+    {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
         $params['show_sorting'] = true;
@@ -613,7 +631,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionSaveGuide($id) {
+    public function actionSaveGuide($id)
+    {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
         $session = Yii::$app->session;
@@ -649,7 +668,8 @@ class OrderController extends DefaultController {
         return $this->redirect(['order/guides']);
     }
 
-    public function actionResetGuide() {
+    public function actionResetGuide()
+    {
         $session = Yii::$app->session;
         unset($session['guideProductList']);
         unset($session['selectedVendor']);
@@ -657,7 +677,8 @@ class OrderController extends DefaultController {
         return $this->redirect(['order/guides']);
     }
 
-    public function actionAjaxShowGuide(int $id): String {
+    public function actionAjaxShowGuide(int $id): String
+    {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
@@ -669,9 +690,9 @@ class OrderController extends DefaultController {
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
         $guideDataProvider = $guideSearchModel->search($params, $guide->id, $this->currentUser->organization_id);
         $guideDataProvider->pagination = false; //['pageSize' => 8];
-        if (!Yii::$app->request->isPjax){
+        if (!Yii::$app->request->isPjax) {
             foreach ($_SESSION as $key => &$item) {
-                if (strpos($key, 'uideProductCount')){
+                if (strpos($key, 'uideProductCount')) {
                     unset($_SESSION[$key]);
                 }
             }
@@ -684,13 +705,15 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSelectVendor($id) {
+    public function actionAjaxSelectVendor($id)
+    {
         $session = Yii::$app->session;
         $session['selectedVendor'] = $id;
         return true;
     }
 
-    public function actionAjaxAddToGuide($id) {
+    public function actionAjaxAddToGuide($id)
+    {
         $client = $this->currentUser->organization;
         $session = Yii::$app->session;
 
@@ -707,7 +730,8 @@ class OrderController extends DefaultController {
         return isset($product);
     }
 
-    public function actionAjaxRemoveFromGuide($id) {
+    public function actionAjaxRemoveFromGuide($id)
+    {
         $client = $this->currentUser->organization;
         $session = Yii::$app->session;
         $guideProductList = $session['guideProductList'];
@@ -720,7 +744,8 @@ class OrderController extends DefaultController {
         return false;
     }
 
-    public function actionAjaxAddGuideToCart($id) {
+    public function actionAjaxAddGuideToCart($id)
+    {
         $client = $this->currentUser->organization;
         $guideProducts = Yii::$app->request->post("GuideProduct");
         $data = [];
@@ -734,7 +759,7 @@ class OrderController extends DefaultController {
             $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
             $data[] = ['product_id' => $guideProduct->cbg_id, 'quantity' => $quantity];
         }
-        if($totalQuantity == 0){
+        if ($totalQuantity == 0) {
             return false;
         }
 
@@ -750,7 +775,8 @@ class OrderController extends DefaultController {
         return true; //$this->renderPartial('_orders', compact('orders'));
     }
 
-    public function actionFavorites() {
+    public function actionFavorites()
+    {
         $client = $this->currentUser->organization;
 
         $params = Yii::$app->request->getQueryParams();
@@ -762,7 +788,8 @@ class OrderController extends DefaultController {
         return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
 
-    public function actionPjaxCart() {
+    public function actionPjaxCart()
+    {
         if (Yii::$app->request->isPjax) {
             $carts = (new CartWebApi())->items();
             return $this->renderPartial('_pjax-cart', compact('carts'));
@@ -771,7 +798,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxAddToCart() {
+    public function actionAjaxAddToCart()
+    {
         $post = Yii::$app->request->post();
         $quantity = $post['quantity'];
         if ($quantity < 0) {
@@ -793,7 +821,8 @@ class OrderController extends DefaultController {
         return $post['id'];
     }
 
-    public function actionAjaxShowDetails() {
+    public function actionAjaxShowDetails()
+    {
         $get = Yii::$app->request->get();
         $productId = $get['id'];
         $catId = $get['cat_id'];
@@ -814,7 +843,8 @@ class OrderController extends DefaultController {
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
 
-    public function actionAjaxRemovePosition($product_id) {
+    public function actionAjaxRemovePosition($product_id)
+    {
 
         $client = $this->currentUser->organization;
         $data = ['product_id' => $product_id, 'quantity' => 0];
@@ -825,7 +855,8 @@ class OrderController extends DefaultController {
         return $product_id;
     }
 
-    public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {
+    public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null)
+    {
 
         $client = $this->currentUser->organization;
 
@@ -858,7 +889,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetComment($vendor_id) {
+    public function actionAjaxSetComment($vendor_id)
+    {
         if (Yii::$app->request->post()) {
             $comment = Yii::$app->request->post('comment');
             Yii::$app->response->cookies->add(new \yii\web\Cookie([
@@ -872,7 +904,8 @@ class OrderController extends DefaultController {
         return false;
     }
 
-    public function actionAjaxCancelOrder($order_id = null) {
+    public function actionAjaxCancelOrder($order_id = null)
+    {
 
         $initiator = $this->currentUser->organization;
 
@@ -906,7 +939,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetNote($product_id) {
+    public function actionAjaxSetNote($product_id)
+    {
 
         if (Yii::$app->request->post()) {
             $data['product_id'] = $product_id;
@@ -923,7 +957,8 @@ class OrderController extends DefaultController {
         return false;
     }
 
-    public function actionAjaxMakeOrder() {
+    public function actionAjaxMakeOrder()
+    {
         $cart = (new CartWebApi())->items();
         $cartCount = count($cart);
 
@@ -981,7 +1016,8 @@ class OrderController extends DefaultController {
         return false;
     }
 
-    public function actionAjaxCalculateTotal($id) {
+    public function actionAjaxCalculateTotal($id)
+    {
         if (Yii::$app->request->post()) {
             $content = Yii::$app->request->post('CartContent');
             $carts = (new CartWebApi())->items();
@@ -1024,7 +1060,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxDeleteOrder($vendor_id = null) {
+    public function actionAjaxDeleteOrder($vendor_id = null)
+    {
         $client = $this->currentUser->organization;
         $data = ['vendor_id' => $vendor_id];
         $items = (new CartWebApi())->clear($data);
@@ -1033,7 +1070,8 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    public function actionAjaxSetDelivery() {
+    public function actionAjaxSetDelivery()
+    {
         if (Yii::$app->request->post()) {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $vendor_id = Yii::$app->request->post('vendor_id');
@@ -1072,13 +1110,15 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionRefreshCart() {
+    public function actionRefreshCart()
+    {
         $client = $this->currentUser->organization;
         $orders = $client->getCart();
         return $this->renderAjax('_cart', compact('orders'));
     }
 
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $organization = $this->currentUser->organization;
         $searchModel = new OrderSearch();
         $today = new \DateTime();
@@ -1149,7 +1189,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionView($id) {
+    public function actionView($id)
+    {
         $user = $this->currentUser;
         $user->organization->markViewed($id);
 
@@ -1281,7 +1322,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionEdit($id) {
+    public function actionEdit($id)
+    {
         $user = $this->currentUser;
         $user->organization->markViewed($id);
 
@@ -1453,7 +1495,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionPdf($id) {
+    public function actionPdf($id)
+    {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
 
@@ -1498,7 +1541,8 @@ class OrderController extends DefaultController {
         return $pdf->render();
     }
 
-    public function actionCheckout() {
+    public function actionCheckout()
+    {
         $totalCart = 0;
 
         if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {
@@ -1520,7 +1564,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxOrderGrid($id) {
+    public function actionAjaxOrderGrid($id)
+    {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -1541,7 +1586,8 @@ class OrderController extends DefaultController {
         return $this->renderPartial('_view-grid', compact('dataProvider', 'order'));
     }
 
-    public function actionAjaxOrderAction() {
+    public function actionAjaxOrderAction()
+    {
         if (Yii::$app->request->post()) {
             $user_id = $this->currentUser->id;
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
@@ -1593,7 +1639,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionCompleteObsolete($id) {
+    public function actionCompleteObsolete($id)
+    {
         $currentOrganization = $this->currentUser->organization;
         if ($currentOrganization->type_id === Organization::TYPE_RESTAURANT) {
             $order = Order::findOne(['id' => $id, 'client_id' => $currentOrganization->id]);
@@ -1614,7 +1661,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionSendMessage() {
+    public function actionSendMessage()
+    {
         $user = $this->currentUser;
         if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
             $message = Yii::$app->request->post('message');
@@ -1623,7 +1671,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxRefreshButtons() {
+    public function actionAjaxRefreshButtons()
+    {
         if (Yii::$app->request->post()) {
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
@@ -1642,7 +1691,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxRefreshVendors() {
+    public function actionAjaxRefreshVendors()
+    {
         if (Yii::$app->request->post()) {
             $client = $this->currentUser->organization;
             $selectedCategory = Yii::$app->request->post("selectedCategory");
@@ -1651,7 +1701,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxRefreshStats($setMessagesRead = 0, $setNotificationsRead = 0) {
+    public function actionAjaxRefreshStats($setMessagesRead = 0, $setNotificationsRead = 0)
+    {
         $organization = $this->currentUser->organization;
         $newOrdersCount = $organization->getNewOrdersCount();
 
@@ -1687,7 +1738,8 @@ class OrderController extends DefaultController {
         ];
     }
 
-    public function actionRepeat($id) {
+    public function actionRepeat($id)
+    {
         $order = Order::findOne(['id' => $id]);
 
         $newContent = [];
@@ -1703,7 +1755,8 @@ class OrderController extends DefaultController {
         $this->redirect(['order/checkout']);
     }
 
-    private function sendChatMessage($user, $order_id, $message) {
+    private function sendChatMessage($user, $order_id, $message)
+    {
         $order = Order::findOne(['id' => $order_id]);
 
         $newMessage = new OrderChat(['scenario' => 'userSent']);
@@ -1764,7 +1817,8 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    public function sendSystemMessage($user, $order_id, $message, $danger = false) {
+    public function sendSystemMessage($user, $order_id, $message, $danger = false)
+    {
         $order = Order::findOne(['id' => $order_id]);
 
         $newMessage = new OrderChat();
@@ -1820,7 +1874,8 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendCartChange($client, $cartCount) {
+    private function sendCartChange($client, $cartCount)
+    {
         $clientUsers = $client->users;
 
         foreach ($clientUsers as $user) {
@@ -1834,7 +1889,8 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendNewOrder($vendor) {
+    private function sendNewOrder($vendor)
+    {
         $vendorUsers = $vendor->users;
 
         foreach ($vendorUsers as $user) {
@@ -1856,7 +1912,8 @@ class OrderController extends DefaultController {
      * @param OrderContent[] $changed
      * @param OrderContent[] $deleted
      */
-    private function sendOrderChange($senderOrg, $order, $changed = [], $deleted = []) {
+    private function sendOrderChange($senderOrg, $order, $changed = [], $deleted = [])
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1899,7 +1956,8 @@ class OrderController extends DefaultController {
      * @param User $sender
      * @param Order $order
      */
-    private function sendOrderDone($sender, $order) {
+    private function sendOrderDone($sender, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1944,7 +2002,8 @@ class OrderController extends DefaultController {
      * @param Organization $sender
      * @param Order $order
      */
-    private function sendOrderCreated($sender, $order) {
+    private function sendOrderCreated($sender, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1991,7 +2050,8 @@ class OrderController extends DefaultController {
      * @param Organization $senderOrg
      * @param Order $order
      */
-    public function sendOrderProcessing($senderOrg, $order) {
+    public function sendOrderProcessing($senderOrg, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -2035,7 +2095,8 @@ class OrderController extends DefaultController {
      * @param Organization $senderOrg
      * @param Order $order
      */
-    public function sendOrderCanceled($senderOrg, $order) {
+    public function sendOrderCanceled($senderOrg, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -2073,7 +2134,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    private function saveCartChanges($content) {
+    private function saveCartChanges($content)
+    {
         $data = [];
         foreach ($content as $key => $row)
             if (is_array(($row)))
@@ -2086,7 +2148,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    private function findOrder($condition, $canManage = false) {
+    private function findOrder($condition, $canManage = false)
+    {
         if ($canManage) {
             $order = Order::find()->where($condition)->one();
         } else {
@@ -2101,7 +2164,8 @@ class OrderController extends DefaultController {
         return $order;
     }
 
-    public function actionAjaxShowProducts($order_id) {
+    public function actionAjaxShowProducts($order_id)
+    {
         $order = Order::findOne(['id' => $order_id]);
 
         $params = Yii::$app->request->getQueryParams();
@@ -2117,7 +2181,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxAddToOrder() {
+    public function actionAjaxAddToOrder()
+    {
         $post = Yii::$app->request->post();
 
         if (OrderContent::findOne(['order_id' => $post['order_id'], 'product_id' => $post['product_id']]) != null)
@@ -2198,7 +2263,8 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    public function actionGridReport() {
+    public function actionGridReport()
+    {
         $this->actionSaveSelectedOrders();
         $selected = Yii::$app->session->get('selected', []);
         if (empty($selected))
@@ -2218,7 +2284,7 @@ class OrderController extends DefaultController {
 
         $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
         $sql = "SELECT cbg.product as '" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "', cbg.ed as '" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "', ";
-        $sql_ext = "SELECT `".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) ."`, `".Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) ."`, ";
+        $sql_ext = "SELECT `" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "`, `" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "`, ";
         foreach ($orgs as $org) {
             $sql .= "IF(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
             $sql_ext .= "SUM(`" . $org['client_name'] . "`) as '" . $org['client_name'] . "',";
@@ -2233,7 +2299,7 @@ class OrderController extends DefaultController {
                     left join organization as org on org.id = `order`.client_id
                     where `order`.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
 
-        $sql_ext .= " from ( ".$sql." ) ww group by `".Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) ."`";
+        $sql_ext .= " from ( " . $sql . " ) ww group by `" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "`";
 
         $report = \Yii::$app->db->createCommand($sql_ext)->queryAll();
 
@@ -2311,7 +2377,7 @@ class OrderController extends DefaultController {
         $last_col++;
         $i--;
 
-        $objPHPExcel->getActiveSheet()->getPageSetup()->setPrintArea('A1:'.$last_col.$i);
+        $objPHPExcel->getActiveSheet()->getPageSetup()->setPrintArea('A1:' . $last_col . $i);
         $objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE);
         $objPHPExcel->getActiveSheet()->getPageSetup()->setScale(60);
 
@@ -2324,7 +2390,8 @@ class OrderController extends DefaultController {
         exit();
     }
 
-    public function actionSaveSelectedOrders() {
+    public function actionSaveSelectedOrders()
+    {
         $selected = Yii::$app->request->get('selected');
         $page = Yii::$app->request->get('page') + 1;
 
@@ -2335,7 +2402,8 @@ class OrderController extends DefaultController {
         $session->set('selected', $list);
     }
 
-    public function actionUploadAttachment($id) {
+    public function actionUploadAttachment($id)
+    {
         $user = $this->currentUser;
         $order = Order::findOne(['id' => $id]);
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -2345,7 +2413,7 @@ class OrderController extends DefaultController {
         $attachment = new OrderAttachment;
         $uploadedFile = \yii\web\UploadedFile::getInstanceByName('attachment');
         //$uploadedFile->load(Yii::$app->request->post());
-        
+
         $attachment->order_id = $id;
         $attachment->file = $uploadedFile;
 
@@ -2377,42 +2445,45 @@ class OrderController extends DefaultController {
         return ['files' => $files];
     }
 
-    public function actionGetAttachment($id) {
+    public function actionGetAttachment($id)
+    {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         $attachment->getFile();
     }
 
-    public function actionDeleteAttachment($id) {
+    public function actionDeleteAttachment($id)
+    {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         return $attachment->delete();
     }
 
-
-    public function actionAjaxAddGoodQuantityToSession(){
+    public function actionAjaxAddGoodQuantityToSession()
+    {
         $key = str_replace('GuideProduct[', '', str_replace(']', '', Yii::$app->request->get('name')));
         $value = Yii::$app->request->get('quantity');
         $session = Yii::$app->session;
-        $session['GuideProductCount.'.$key] = $value;
+        $session['GuideProductCount.' . $key] = $value;
     }
 
-
-    public function actionAjaxOrderUpdateWaybill(){
+    public function actionAjaxOrderUpdateWaybill()
+    {
         $waybillNumber = Yii::$app->request->post('waybill_number') ?? null;
         $orderID = Yii::$app->request->post('order_id') ?? null;
-        if(!$orderID) return 0;
+        if (!$orderID)
+            return 0;
         $order = Order::findOne(['id' => $orderID]);
         $order->waybill_number = $waybillNumber;
         $order->save();
         return $waybillNumber;
     }
 
-
-    public function actionAjaxClearSession(){
+    public function actionAjaxClearSession()
+    {
         foreach ($_SESSION as $key => &$item) {
-            if (strpos($key, 'uideProductCount')){
+            if (strpos($key, 'uideProductCount')) {
                 unset($_SESSION[$key]);
             }
         }
     }
-    
+
 }

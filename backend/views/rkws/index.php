@@ -31,16 +31,6 @@ $gridColumns = [
         'label' => 'Адрес',
     ],
     'td',
-   /* [
-        'attribute' => 'org',
-        'label' => 'Организация MixCart',
-        'value' => function ($model) {
-            if (isset($model))
-                return $model->organization ? $model->organization->name : null;
-
-        },
-
-    ], */
     [
         'attribute' => 'last_active',
         'label' => 'Посл. Активность',
@@ -73,80 +63,7 @@ $gridColumns = [
         'headerOptions'=>['class'=>'kartik-sheet-style'],
         'expandOneOnly'=>true,
     ],
-   // 'org',
-    /*
-    [
-        'class' => 'yii\grid\ActionColumn',
-        'template' => '{update}',
-     //   'visibleButtons' => [
-     //       'update' => function ($model, $key, $index) {
-     //           // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-     //           return true;
-     //       },
-     //   ],
-        'buttons' => [
-            'update' => function ($url, $model) {
-                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                $customurl = Yii::$app->getUrlManager()->createUrl(['rkws/update', 'id' => $model->id]);
-                return \yii\helpers\Html::a('Изменить', $customurl, ['title' => 'Изменить', 'data-pjax' => "0"]);
-            },
-        ]
-    ]
-    */
 ];
-
-/*
-  $gridColumns = [
-  'id',
-  [
-  'attribute' => 'type_id',
-  'value' => 'type.name',
-  'label' => 'Тип',
-  'filter' => common\models\OrganizationType::getList(),
-  ],
-  [
-  'format' => 'raw',
-  'attribute' => 'name',
-  'value' => function ($data) {
-  return Html::a($data['name'], ['organization/view', 'id' => $data['id']]);
-  },
-  ],
-  'white_list',
-  'partnership',
-  'locality',
-  //    'address',
-  //    'zip_code',
-  'phone',
-  'email:email',
-  [
-  'attribute' => 'place_id',
-  'label' => 'GEO',
-  'format' => 'raw',
-  'value' => function ($data) {
-  if(empty($data->place_id)){
-  return  Html::a('<span class="text-danger">Добавить адрес</span>', ['update', 'id' => $data->id]);
-  }else{
-  return  Html::a('<span class="text-success">Актуализирован</span>', ['update', 'id' => $data->id]);
-  }
-  }
-  ],
-  [
-  'attribute' => 'place_id',
-  'label' => 'У франшизы',
-  'format' => 'raw',
-  'value' => function ($data) {
-  if(\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$data->id])->exists()){
-  return '<span class="text-success">Да</span>';
-  }
-  return '';
-  }
-  ],
-  //    'website',
-  // 'created_at',
-  // 'updated_at',
-  // 'step',
-  ];
- */
 ?>
 
 <div class="organization-index">
@@ -199,7 +116,9 @@ echo ExportMenu::widget([
     <div class="catalog-index">
         <div class="box-header with-border">
             <div class="box-title pull-left">
-                <?=
+                <?php
+                $dataProvider->pagination->pageParam = 'page_outer';
+                echo
                 GridView::widget([
                     'dataProvider' => $dataProvider,
                     'filterModel' => $searchModel,

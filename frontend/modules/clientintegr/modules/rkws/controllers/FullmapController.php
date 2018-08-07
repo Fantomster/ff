@@ -344,6 +344,12 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionApplyFullmap() {
 
+        $koef = Yii::$app->request->post('koef_set');
+        $store = Yii::$app->request->post('store_set');
+        $vat = Yii::$app->request->post('vat_set');
+
+        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
+
         $session = Yii::$app->session;
 
         $selected = $session->get('selectedmap', []);
@@ -352,7 +358,25 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
         $selected = implode(',', $selected);
 
-        // Update where eta hernya
+        if($koef != -1) {
+            $ress = Yii::$app->db_api
+                ->createCommand('UPDATE all_map set koef = :koef, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
+                    [':koef' => $koef, ':org' => $organization])->execute();
+
+        }
+
+        if($store != -1) {
+            $ress = Yii::$app->db_api
+                ->createCommand('UPDATE all_map set store_rid = :store, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
+                    [':store' => $store, ':org' => $organization])->execute();
+        }
+
+
+        if($vat != -1) {
+            $ress = Yii::$app->db_api
+                ->createCommand('UPDATE all_map set vat = :vat, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
+                    [':vat' => $vat, ':org' => $organization])->execute();
+        }
 
         $session->remove('selectedmap');
         return true;

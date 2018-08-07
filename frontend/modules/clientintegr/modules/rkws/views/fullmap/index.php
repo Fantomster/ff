@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
+// use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
@@ -27,6 +28,7 @@ yii\jui\JuiAsset::register($this);
 $urlSaveSelected = Url::to(['fullmap/save-selected-maps']);
 $urlApply = Url::to(['fullmap/apply-fullmap']);
 $urlClear = Url::to(['fullmap/clear-fullmap']);
+$selectedCount = count($selected);
 
 if ($client->isEmpty()) {
     $endMessage = Yii::t('message', 'frontend.views.request.continue_four', ['ru'=>'Продолжить']);
@@ -68,7 +70,14 @@ JS;
 }
 
 $this->registerJs(
-    '$(document).ready(function(){
+
+    '
+    var cnt = '.$selectedCount.';
+    
+    $(document).ready(function(){
+    
+     
+     
             $(document).on("change", "#selectedCategory", function(e) {
                 var form = $("#searchForm");
                 form.submit();
@@ -154,18 +163,43 @@ $this->registerJs(
         });
         
             $(document).on("click", ".apply-fullmap", function(e) {
-             if($("#fullmapGrid").yiiGridView("getSelectedRows").length > 0){  
+                       
+             if(($("#fullmapGrid").yiiGridView("getSelectedRows").length + cnt) == 0){  
+             alert("Ничего не выбрано!");
+             return false;
+             }
+            
+            store_set = $("#store_set").val();
+            koef_set =  $("#koef_set").val();
+            vat_set  =  $("#vat_set").val();
+            
+            if (typeof(koef_set) == "undefined" || koef_set == null || koef_set.length == 0 )
+            koef_set = -1;
+            
+            // console.log(store_set);
+            // console.log(koef_set);
+            // console.log(vat_set);
+            
+            // Check selection at least one
+            
+            if (store_set == -1 && koef_set == -1 && vat_set == -1) {
+            alert ("Не установлен ни один модификатор для массового применения");
+            return false;
+            }
             
             url = $(this).attr("href");
 
            $.ajax({
              url: "'.$urlApply.'",
-             type: "GET",
+             type: "POST",
+             dataType: "json",
+             data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set},
              success: function(){
-                 $.pjax.reload({container: "#createOrder", url: url, timeout:30000});
+                 cnt = 0;
+                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
              }
            });
-            }
+            
             });
             
             $(document).on("click", ".clear-fullmap", function(e) {
@@ -177,7 +211,8 @@ $this->registerJs(
              url: "'.$urlClear.'",
              type: "GET",
              success: function(){
-                 $.pjax.reload({container: "#createOrder", url: url, timeout:30000});
+                 cnt = 0;
+                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
              }
            });
             }
@@ -208,7 +243,7 @@ $this->registerJs(
              url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
              type: "GET",
              success: function(){
-                 //$.pjax.reload({container: "#createOrder", url: url, timeout:30000});
+                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
              }
            });
            
@@ -232,7 +267,7 @@ $this->registerJs(
              url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
              type: "GET",
              success: function(){
-                 //$.pjax.reload({container: "#createOrder", url: url, timeout:30000});
+                 //$.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
              }
            });
            
@@ -285,7 +320,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
-                    <?php Pjax::begin(['enablePushState' => true, 'id' => 'createOrder', 'timeout' => 5000]); ?>
+                    <?php // Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]); ?>
             <div class="row">
                 <div class="col-md-4" align="left">
                     <div class="guid-header">
@@ -332,9 +367,13 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                 </div>
                 <div class="col-md-5" align="right">
                     <div class="navbar-form no-padding" align="right" style="no-wrap">
-                        <?php echo Html::dropDownList('store_set', null, $stores,['class' => 'form-control', 'style'=>'width:40%']); ?>
-                        <?php echo  Html::textInput("koef_set",'',['class' => 'form-control','style'=>'width:20%;'])?>
-                        <?php echo Html::dropDownList('vat_set', null,[-1 => 'Не менять', 0 => '0%', 1000 =>'10%', 1800 => '18%'], ['class' => 'form-control', 'style'=>'width:20%']); ?>
+                        <?php echo Html::label('Склад:','store_set');?>
+                        <?php echo Html::dropDownList('store_set', null, $stores,['class' => 'form-control', 'style'=>'width:30%', 'id' => 'store_set']); ?>
+                        <?php echo Html::label('Коэф:','koef_set');?>
+                        <?php echo  Html::textInput("koef_set",'',['class' => 'form-control','style'=>'width:15%;', 'id' => 'koef_set'])?>
+                        <?php echo Html::label('НДС:','vat_set');?>
+                        <?php echo Html::dropDownList('vat_set', null,[-1 => 'Нет', 0 => '0%', 1000 =>'10%', 1800 => '18%'],
+                            ['class' => 'form-control', 'style'=>'width:15%', 'id' => 'vat_set']); ?>
                     </div>
                 </div>
 
@@ -357,6 +396,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                             'filterPosition' => false,
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             'summary' => '',
+                            'pjax' => true,
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
                             /* 'rowOptions'=>function($model) use ($cart){
@@ -385,6 +425,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                 [
                                     'format' => 'raw',
                                     'attribute' => 'product',
+                                    'width' => '400px',
                                     'value' => function ($data) {
                                         $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
                                         $productUrl = Html::a(Html::decode(Html::decode($data['product'])), Url::to(['/order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
@@ -420,6 +461,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'editableOptions' => [
                                         'asPopover' => true,
                                         'name' => 'pdenom',
+
                                         'formOptions' => ['action' => ['editpdenom']],
                                         'header' => 'Продукт R-keeper',
                                         'size' => 'md',
@@ -429,11 +471,14 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             //   'initValueText' => $productDesc,
 
                                             //'data' => $pdenom,
+                                            //'data' => [1 =>1, 2=>2],
+
                                             'options' => ['placeholder' => 'Выберите продукт из списка',
 
                                             ],
                                             'pluginOptions' => [
                                                 'minimumInputLength' => 2,
+
                                                 'ajax' => [
                                                     'url' => Url::toRoute('autocomplete'),
                                                     'dataType' => 'json',
@@ -476,7 +521,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                         'header'=>':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</srong>',
                                         'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
                                         'formOptions' => [
-                                            'action' => Url::toRoute('changekoef'),
+                                            'action' => Url::toRoute('editkoef'),
                                             'enableClientValidation' => false,
                                         ],
                                     ],
@@ -488,30 +533,63 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'pageSummary'=>true
                                 ],
                                 [
-                                    'class'=>'kartik\grid\EditableColumn',
-                                    'attribute'=>'store',
+                                    'class' => 'kartik\grid\EditableColumn',
+                                    'attribute' => 'store',
+                                    //       'value' => function ($model) {
+                                    //       $model->pdenom = $model->product->denom;
+                                    //       return $model->pdenom;
+                                    //       },
+                                    'label' => 'Склад SH',
+                                    //  'pageSummary' => 'Total',
+                                    'vAlign' => 'middle',
+                                    'width' => '210px',
                                     'refreshGrid' => true,
-                                    'editableOptions'=>[
-                                        'name' => 'store',
-                                        'asPopover' => true,
-                                        'header'=>':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</srong>',
-                                        'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
-                                        'formOptions' => [
-                                            'action' => Url::toRoute('changestore'),
-                                            'enableClientValidation' => false,
-                                        ],
-                                    ],
-                                    'hAlign'=>'right',
-                                    'vAlign'=>'middle',
-                                    // 'width'=>'100px',
-                                    // 'format'=>['decimal',6],
 
-                                    'pageSummary'=>true
-                                ],
+                                    'editableOptions' => [
+                                        'asPopover' => true,
+                                        'name' => 'store',
+                                        'data' => $stores,
+                                        'formOptions' => ['action' => ['editstore']],
+                                        'header' => 'Склад SH',
+                                        'size' => 'md',
+                                        'inputType' => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
+                                        //'widgetClass'=> 'kartik\datecontrol\DateControl',
+                                        'options' => [
+                                            //   'initValueText' => $productDesc,
+
+                                            //'data' => $pdenom,
+                                            //'data' => [1 =>1, 2=>2],
+
+                                            'options' => ['placeholder' => 'Выберите склад из списка',
+
+                                            ],
+                                         /*   'pluginOptions' => [
+                                                'minimumInputLength' => 2,
+
+                                                'ajax' => [
+                                                    'url' => Url::toRoute('autocomplete'),
+                                                    'dataType' => 'json',
+                                                    'data' => new JsExpression('function(params) { return {term:params.term}; }')
+                                                ],
+                                                'allowClear' => true
+                                            ],
+                                            'pluginEvents' => [
+                                                //"select2:select" => "function() { alert(1);}",
+                                                "select2:select" => "function() {
+                                                                if($(this).val() == 0)
+                                                                {
+                                                                     $('#agent-modal').modal('show');
+                                                                }
+                                                }",
+                                            ] */
+
+                                        ]
+                                    ]],
+
                                 [
                                     'attribute' => 'vat',
                                     'value' => function ($model) {
-                                        if (!empty($model['vat'])) {
+                                        if (isset($model['vat'])) {
 
                                             return $model['vat']/100;
                                         }
@@ -526,17 +604,20 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'contentOptions'=>['style'=>'width: 6%;'],
                                     'template'=>'{zero}&nbsp;{ten}&nbsp;{eighteen}',
                                     // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
-                                    'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\''.$sLinkzero.'\';" class="btn btn-xs btn-link" style="color:green;">0</button>'.
-                                        '<button id="btnTen" type="button" onClick="location.href=\''.$sLinkten.'\';" class="btn btn-xs btn-link" style="color:green;">10</button>'.
-                                        '<button id="btnEight" type="button" onClick="location.href=\''.$sLinkeight.'\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+                                  //  'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\''.$sLinkzero.'\';" class="btn btn-xs btn-link" style="color:green;">0</button>'.
+                                  //      '<button id="btnTen" type="button" onClick="location.href=\''.$sLinkten.'\';" class="btn btn-xs btn-link" style="color:green;">10</button>'.
+                                  //      '<button id="btnEight" type="button" onClick="location.href=\''.$sLinkeight.'\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
 
                                     //  'sort' => false,
                                     //  '' => false,
 
                                     'visibleButtons' => [
-                                        'zero' => function ($model, $key, $index) {
-                                            // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-                                            return true;
+                                        'zero' => function ($model) {
+                                        /*    if (!empty($model['pdenom']))
+                                                return true;
+                                            else
+                                                return false; */
+                                        return true;
                                         },
                                     ],
                                     'buttons'=>[
@@ -672,11 +753,10 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
 
                 </div>
             </div>
-                    <?php Pjax::end(); ?>
-                    </div></div>
-
+                    <?php // Pjax::end(); ?>
+                </div>
+            </div>
         </div>
-    </div>
     </div>
 </section>
 <?=

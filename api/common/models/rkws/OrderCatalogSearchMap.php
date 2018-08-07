@@ -50,6 +50,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     public function search($params) {
         $this->load($params);
 
+        $db_api = \Yii::$app->db_api;
+        $dbName = $this->getDsnAttribute('dbname', $db_api->dsn);
+
         $fieldsCBG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
@@ -124,9 +127,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-             LEFT JOIN `mixcart_api`.`all_map` fmap ON cbg.id = fmap.product_id
-             LEFT JOIN `mixcart_api`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-             LEFT JOIN `mixcart_api`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc      
+             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id
+             LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+             LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc      
            WHERE
            cbg.cat_id IN (" . $this->catalogs . ")
            ".$where."
@@ -139,9 +142,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
            LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-           LEFT JOIN `mixcart_api`.`all_map` fmap ON cbg.id = fmap.product_id
-           LEFT JOIN `mixcart_api`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-           LEFT JOIN `mixcart_api`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc 
+           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id
+           LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+           LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc 
           WHERE 
           cg.cat_id IN (" . $this->catalogs . ")
           ".$where."
@@ -177,7 +180,10 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                     'i',
                     'pdenom',
                     'vat',
-                    'store'
+                    'store',
+                    'unitname',
+                    'koef'
+
                 ],
                 'defaultOrder' => [
                     'product' => SORT_ASC,
@@ -190,5 +196,13 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     }
 
 
+    private function getDsnAttribute($name, $dsn)
+    {
+        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
+            return $match[1];
+        } else {
+            return null;
+        }
+    }
 
 }

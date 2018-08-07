@@ -16,7 +16,7 @@ use yii\base\Exception;
  * @property  integer $org_id
  * @property  integer $product_id
  * @property  integer $supp_id
- * @property  integer $product_rid
+ * @property  integer $serviceproduct_id
  * @property  integer $unit_rid
  * @property  integer $store_rid
  * @property  double  $koef
@@ -46,12 +46,12 @@ class AllMaps extends \yii\db\ActiveRecord {
             //  [['koef'], 'number'],
             //  
             [['koef'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
+            [['koef'], 'number', 'min' => 0.000001],
             ['koef', 'filter', 'filter' => function ($value) {
                         $newValue = 0 + str_replace(',', '.', $value);
                         return $newValue;
                     }],
-            [['koef'], 'number', 'min' => 0.0001],
+          //  [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [[ 'product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id',
                 'vat_included', 'linked_at', 'pdenom', 'munit_rid', 'store_rid'], 'safe']
@@ -102,7 +102,14 @@ class AllMaps extends \yii\db\ActiveRecord {
     }
 
     public function getProductrk() {
-        return RkProduct::find()->andWhere('id = :rid', [':rid' => $this->product_rid])->one();
+        return RkProduct::find()->andWhere('id = :id', [':id' => $this->serviceproduct_id])->one();
+    }
+
+    public function getStore() {
+        $acc = ($this->org_id === null) ? Yii::$app->user->identity->organization_id : $this->org_id;
+
+        return RkStoretree::find()->andWhere('rid = :rid', [':rid' => $this->store_rid])->
+        andWhere('acc = :acc', [':acc' => $acc])->one();
     }
 
 

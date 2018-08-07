@@ -78,7 +78,7 @@ abstract class AbstractProvider
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($post, '', '&'));
             $out = curl_exec($curl);
-            if ($gzip) {
+            if ($gzip && !empty($out)) {
                 $out = gzinflate(substr($out, 10));
             }
             curl_close($curl);

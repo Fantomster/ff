@@ -13,7 +13,8 @@ return [
     'bootstrap' => [
                     'log',
                     'api\modules\v1\modules\supp\Bootstrap',
-                    'api\modules\v1\modules\odinsrest\Bootstrap'
+                    'api\modules\v1\modules\odinsrest\Bootstrap',
+                    'api\modules\v1\modules\telepad\Bootstrap'
     ],
     'controllerNamespace' => 'api\common\controllers',
     'defaultRoute' => 'site',

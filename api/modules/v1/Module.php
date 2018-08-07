@@ -25,6 +25,11 @@ class Module extends \yii\base\Module
                 'class' => 'api\modules\v1\modules\odinsrest\Module',
             ],
 
+            'telepad' => [
+                // здесь имеет смысл использовать более лаконичное пространство имен
+                'class' => 'api\modules\v1\modules\telepad\Module',
+            ],
+
             'mobile' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен
                 'class' => 'api\modules\v1\modules\mobile\Module',

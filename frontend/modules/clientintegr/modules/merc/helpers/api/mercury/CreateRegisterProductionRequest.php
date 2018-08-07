@@ -29,12 +29,29 @@ class CreateRegisterProductionRequest extends Component{
         $request->localTransactionId = $this->localTransactionId;
         $request->initiator = $this->initiator;
         $enterprise = mercDicconst::getSetting('enterprise_guid');
-        $request->enterprise = $enterprise;
+        $request->enterprise['uuid'] = $enterprise;
         $firstDate = new \DateTime($this->step2['dateOfProduction']['first_date']);
         $secondDate = new \DateTime($this->step2['dateOfProduction']['second_date']);
         $firstDateExpire = new \DateTime($this->step2['expiryDate']['first_date']);
         $secondDateExpire = new \DateTime($this->step2['expiryDate']['second_date']);
         $array = [];
+
+        foreach ($this->step1 as $id => $value){
+            $stockEntry = MercStockEntry::findOne(['id' => $id]);
+            $rawData = unserialize($stockEntry->raw_data);
+            if($stockEntry){
+                $array['rawBatch'] = [
+                    'sourceStockEntry' => [
+                        'guid' => $stockEntry->guid
+                    ],
+                    'volume' => $value['select_amount'],
+                    'unit' => [
+                        'uuid' => $rawData->batch->unit->uuid
+                    ],
+                ];
+            }
+        }
+
         $array['rawBatch'] = [
             'sourceStockEntry' => [
                 'uuid' => $this->step2['product']
@@ -44,6 +61,12 @@ class CreateRegisterProductionRequest extends Component{
                 'uuid' => $this->step2['unit']
             ],
         ];
+        $arr = explode('|', $this->step2['product_name']);
+        if(isset($arr[1])){
+            $productUUID = trim($arr[1]);
+        }else{
+            $productUUID = $this->step2['product_name'];
+        }
 
         $array['productiveBatch'] = [
             'product' => [
@@ -53,7 +76,7 @@ class CreateRegisterProductionRequest extends Component{
                 'uuid' => $this->step2['subProduct']
             ],
             'productItem' => [
-                'uuid' => $this->step2['product_name']
+                'uuid' => $productUUID
             ],
             'volume' => $this->step2['volume'],
             'unit' => [
@@ -93,38 +116,6 @@ class CreateRegisterProductionRequest extends Component{
             'perishable' => 'perishable'
         ];
         $request->productionOperation = $array;
-
-        //dd($this);
-
-        $consigments = [];
-        $vetCertificates = [];
-        foreach ($this->step1 as $id => $product) {
-//            $consigment = new Consignment();
-//            $consigment->id = 'con'.$id;
-//            $stock = MercStockEntry::findOne(['id' => $id]);
-//            $stock_raw = unserialize($stock->raw_data);
-//            if($stock->product_name != $product['product_name'])
-//            {
-//
-//            }
-//            $consigment->volume = $product['select_amount'];
-//            $consigment->unit = new Unit();
-//            $consigment->unit = $stock_raw->batch->unit;
-//
-//            $consigment->sourceStockEntry = new StockEntry();
-//            $consigment->sourceStockEntry->uuid = $stock->uuid;
-//            $consigment->sourceStockEntry->guid = $stock->guid;
-//
-//            $consigments[] = $consigment;
-//
-//            $vetCertificate = new VetDocument();
-//            $vetCertificate->for = 'con'.$id;
-//            $vetCertificate->authentication = new VeterinaryAuthentication();
-//            $vetCertificate->authentication->purpose = new Purpose();
-//
-//            $vetCertificates[] = $vetCertificate;
-        }
-        //dd($request);
         return $request;
     }
 

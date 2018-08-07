@@ -75,7 +75,7 @@ class iikoStore extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if($insert) {
+        if ($insert) {
             $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
 
@@ -89,20 +89,25 @@ class iikoStore extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getStores($org_id, $all = true, $notMap=true) {
+    public function getStores($org_id, $all = true, $notMap = true, $is_active = true)
+    {
         $arr = [];
-        $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_stores_list"')->andWhere('iiko_pconst.org='.$org_id)->one();
-        if($iikoPconst){
+        $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_stores_list"')->andWhere('iiko_pconst.org=' . $org_id)->one();
+        if ($iikoPconst) {
             $arr = unserialize($iikoPconst->value);
         }
         $query = iikoStore::find()
             ->select(['id', 'denom'])->where(['in', 'id', $arr]);
 
-        if($notMap){
+        if ($is_active) {
+            $query->andWhere(['is_active' => 1]);
+        }
+
+        if ($notMap) {
             $stores = ArrayHelper::map($query->orderBy(['denom' => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'denom');
-        }else{
+        } else {
             $stores = $query->orderBy(['denom' => SORT_ASC])
                 ->asArray()
                 ->all();

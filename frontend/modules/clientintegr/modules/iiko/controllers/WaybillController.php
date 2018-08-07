@@ -224,8 +224,39 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = [];
         if (!is_null($term)) {
+            $organizationID = User::findOne(Yii::$app->user->id)->organization_id;
+            $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $organizationID])->one();
 
-            $sql = <<<SQL
+            if ($iikoPconst) {
+                $arr = unserialize($iikoPconst->value);
+            }
+
+            if (isset($arr) && is_iterable($arr)) {
+                $arrayString = '(';
+                $i = 1;
+                foreach ($arr as $one) {
+                    $arrayString .= $one;
+                    if ($i != count($arr)) {
+                        $arrayString .= ',';
+                    }
+                    $i++;
+                }
+                $arrayString .= ')';
+                $sql = <<<SQL
+            SELECT id, denom as text FROM (
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term AND id in $arrayString )
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ AND id in $arrayString LIMIT 10)
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ AND id in $arrayString LIMIT 5)
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                     THEN 1
+                     ELSE 2
+                  END
+            ) as t
+SQL;
+            } else {
+                $sql = <<<SQL
             SELECT id, denom as text FROM (
                   (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term )
                     UNION
@@ -238,6 +269,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                   END
             ) as t
 SQL;
+            }
+
 
             /**
              * @var $db Connection
@@ -248,7 +281,7 @@ SQL;
                     'term' => $term,
                     'term_' => $term . '%',
                     '_term_' => '%' . $term . '%',
-                    'org_id' => User::findOne(Yii::$app->user->id)->organization_id
+                    'org_id' => $organizationID
                 ])
                 ->queryAll();
             $out['results'] = array_values($data);
@@ -270,6 +303,7 @@ SQL;
             $query->select(['id' => 'uuid', 'text' => 'denom'])
                 ->from('iiko_agent')
                 ->where('org_id = :acc', [':acc' => $org])
+                ->andWhere(['is_active' => 1])
                 ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
                 ->limit(20);
 

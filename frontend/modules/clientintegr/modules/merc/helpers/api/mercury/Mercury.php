@@ -752,7 +752,6 @@ class PrepareOutgoingConsignmentResponse{
     var $vetDocument;//VetDocument
 }
 class RegisterProductionOperationRequest{
-    var $enterprise;//Enterprise
     var $productionOperation;//ProductionOperation
     var $vetDocument;//VetDocument
 }

@@ -20,8 +20,14 @@ $this->registerCss("
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $org])->one();
+$arr = Yii::$app->session->get('SelectedProduct');
 if ($iikoPconst) {
-    $arr = unserialize($iikoPconst->value);
+    $iikoArray = unserialize($iikoPconst->value);
+    if (is_array($arr)){
+        $arr = array_merge($arr, $iikoArray);
+    } else {
+        $arr = $iikoArray;
+    }
 }
 
 Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
@@ -64,7 +70,7 @@ echo \kartik\grid\GridView::widget([
             'contentOptions' => ['class' => 'small_cell_checkbox'],
             'headerOptions' => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {
-                if (is_iterable($arr) && in_array($model->id, $arr)) {
+                if (isset($arr) && is_array($arr) && in_array($model->id, $arr)) {
                     $checked = true;
                 } else {
                     $checked = false;
@@ -101,6 +107,7 @@ echo \kartik\grid\GridView::widget([
 ]);
 ActiveForm::end();
 Pjax::end();
+$sessionUrl = \yii\helpers\Url::to('ajax-add-product-to-session');
 $customJs = <<< JS
 
  $("document").ready(function(){
@@ -133,48 +140,19 @@ $customJs = <<< JS
             $.pjax.reload({container: "#w1-pjax", url: url, timeout:30000});
         });
      }); 
- 
-  $("document").ready(function(){
-        $(".box-body").on("change", "#filterProductType", function() {
-            $("#search-form").submit();
-        });
-     });  
- 
- $("document").ready(function(){
-        $(".box-body").on("change", "#recipientFilter", function() {
-            $("#search-form").submit();
-        });
-     });   
- 
- $(document).on("click", ".clear_filters", function () {
-           $('#product_name').val(''); 
-           $('#statusFilter').val(''); 
-           $('#typeFilter').val('1');
-           $('#dateFrom').val('');
-           $('#dateTo').val('');
-           $('#recipientFilter').val('');
-           $("#search_form").submit();
-    });
- 
- $(".box-body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#search-form").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
+  
+   $("document").ready(function(){
+        $(".dict-agent-form").on("click", ".checkbox-group_operations", function() { 
+            if ($(this).prop('checked')){
+                var productID = $(this).val();
+                $.ajax({
+                    url : '$sessionUrl',
+                    type: 'post',
+                    data : {productID : productID}
+                });
             }
-        }); 
- 
- $(document).on("change keyup paste cut", "#product_name", function() {
-     if (justSubmitted) {
-            clearTimeout(justSubmitted);
-        }
-        justSubmitted = setTimeout(function() {
-            justSubmitted = false;
-            $("#search-form").submit();
-        }, 700);
-    });
+        });
+     });
 
 JS;
 $this->registerJs($customJs, \yii\web\View::POS_READY);

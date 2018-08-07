@@ -57,7 +57,6 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();
-
         if(isset($post['selection'])){
             $goods = $post['selection'];
             $arr = [];
@@ -93,5 +92,13 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             ]);
         }
 
+    }
+
+
+    public function actionAjaxAddProductToSession()
+    {
+        $productID = Yii::$app->request->post('productID');
+        $session = Yii::$app->session;
+        $session['SelectedProduct.' . $productID] = $productID;
     }
 }

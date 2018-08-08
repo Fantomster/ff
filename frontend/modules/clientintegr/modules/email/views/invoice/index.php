@@ -114,9 +114,9 @@ function renderButton($id)
                 <div class="row">
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
-                            echo $form->field($searchModel, 'number')
-                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
-                                ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru'=>'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
+                        echo $form->field($searchModel, 'number')
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
+                            ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru'=>'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                     <div class="col-lg-3 col-md-5 col-sm-9">
@@ -151,8 +151,8 @@ function renderButton($id)
                 <?php ActiveForm::end(); ?>
                 <div class="col-sm-12">
                     <?php try {
+                        $dataProvider->pagination->pageParam = 'page_outer';
                         echo GridView::widget([
-                            // 'dataProvider' => new \yii\data\ArrayDataProvider(['allModels' => $models]),
                             'dataProvider' => $dataProvider,
                             'summary' => false,
                             'striped' => false,
@@ -197,14 +197,6 @@ function renderButton($id)
                                             $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
                                             if ($licenses['rkws']->status_id == 0) $rk_us = 0;
                                             if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) $link = 'rkws';
-
-                                            /*$sub0 = explode(' ',$licenses['rkws_ucs']->td);
-                                            $sub1 = explode('-',$sub0[0]);
-                                            $licenses['rkws_ucs']->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
-                                            if ($licenses['rkws_ucs']->status_id==0) $rk_lic=0;
-                                            if (($licenses['rkws_ucs']->status_id==1) and ($timestamp_now<=(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=3;
-                                            if (($licenses['rkws_ucs']->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=2;
-                                            if (($licenses['rkws_ucs']->status_id==1) and ($timestamp_now>(strtotime($licenses['rkws_ucs']->td)))) $rk_lic=1;*/
                                         }
                                         if (isset($licenses['iiko'])) {
                                             $sub0 = explode(' ', $licenses['iiko']->td);

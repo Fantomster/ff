@@ -11,12 +11,33 @@ $this->title = Yii::t('message', 'frontend.views.order.filter_product', ['ru' =>
 
 yii\jui\JuiAsset::register($this);
 
-$urlBlocked = Url::to(['blocked-products']);
+$urlBlocked = Url::to(['order/blocked-products']);
+$urlClearAll = Url::to(['order/clear-all-blocked']);
+
+$blockedCount = count($blockedItems);
 
 $this->registerJs('
+    var cnt = '.$blockedCount.';
+
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });
+    
+     $(document).on("click", ".clear-all-blocked", function(e) {
+          if(($("#productFilterGrid").yiiGridView("getSelectedRows").length + cnt) == 0)
+             return false;
+            
+            url = window.location.href;
+
+           $.ajax({
+             url: "'.$urlClearAll.'",
+             type: "GET",
+             success: function(){
+                 cnt = 0;
+                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
+             }
+           });
+        });
 ', View::POS_READY);
 ?>
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
@@ -30,12 +51,12 @@ $this->registerJs('
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="<?= Url::to(['order/favorites']) ?>">
                     <?= Yii::t('app', 'frontend.views.order.favorites.freq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li class="active">
-                <a href="<?= Url::to(['order/product-filter']) ?>">
+                <a href="#">
                     <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>
                     <small class="label bg-yellow">new</small>
                 </a>
@@ -84,19 +105,24 @@ $this->registerJs('
                     </div>
                 </div>
             </div>
+            <?php
+            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'productFilter', 'timeout' => 5000]);
+            ?>
             <div class="row">
                 <div class="col-md-12">
                     <hr>
+                    <?php
+                    $options = ($blockedCount == 0) ?  ['class' => 'btn btn-success clear-all-blocked', 'disabled' => 'disabled']: ['class' => 'btn btn-success clear-all-blocked'];
+                    ?>
+                    <?= Html::button('<i class="fa fa-unlock"></i> '.Yii::t('message', 'frontend.views.order.clear_blocked', ['ru' => 'Разблокировать все']), $options) ?>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'productFilter', 'timeout' => 5000]);
-                    ?>
                     <div id="products">
                         <?=
                         GridView::widget([
+                                'id'=>'productFilterGrid',
                             'dataProvider' => $dataProvider,
                             'filterModel' => $searchModel,
                             'filterPosition' => false,
@@ -132,7 +158,8 @@ $this->registerJs('
                                                            
                                                            $.ajax({
                                                              url: "'.$urlBlocked.'?selected=" +  value+"&state=" + state,
-                                                             type: "GET",
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
                                                              success: function(){
                                                                  $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
                                                              }
@@ -144,7 +171,8 @@ $this->registerJs('
                                                           
                                                            $.ajax({
                                                              url: "'.$urlBlocked.'?selected=" +  value+"&state=" + state,
-                                                             type: "GET",
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
                                                              success: function(){
                                                                  $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
                                                              }
@@ -197,9 +225,9 @@ $this->registerJs('
                         ])
                         ?>
                     </div>
-                    <?php Pjax::end(); ?>
                 </div>
             </div>
+            <?php Pjax::end(); ?>
         </div>
         <!-- /.tab-content -->
     </div>

@@ -16,16 +16,19 @@ class CheckboxColumn extends \yii\grid\CheckboxColumn
             'checkAll' => $this->grid->showHeader ? $this->getHeaderCheckBoxName() : null,
         ]);
 
-        if(!$this->grid->showHeader){
-        $this->grid->getView()->registerJs("
+        $pageCount = $this->grid->dataProvider->getCount();
+
+        if (!$this->grid->showHeader) {
+            $this->grid->getView()->registerJs("
         jQuery('#$id').yiiGridView('setSelectionColumn', $options);
         ");
-        }
-        else {
+        } else {
             $this->grid->getView()->registerJs("
             jQuery('#$id').yiiGridView('setSelectionColumn', $options);
             countSelected = $('#$id').yiiGridView('getSelectedRows');
-            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]')").prop("checked", false).change();
+            checked = (countSelected == $pageCount);
+            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').prop(\"checked\", checked);
+            ");
         }
     }
 }

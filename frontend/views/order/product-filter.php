@@ -11,10 +11,44 @@ $this->title = Yii::t('message', 'frontend.views.order.filter_product', ['ru' =>
 
 yii\jui\JuiAsset::register($this);
 
+$urlSaveSelected = Url::to(['fullmap/save-selected-maps']);
+
 $this->registerJs('
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });
+    
+     $(document).on("change", ".select-on-check-all", function(e) {
+     
+     alert(1);
+   
+          //  e.preventDefault();
+           // url = $(this).attr("href");
+         /*   url      = window.location.href;
+
+            var value = [];
+            state = $(this).prop("checked") ? 1 : 0;
+            
+           $(".checkbox-export").each(function() {
+                value.push($(this).val());
+            });    
+
+           value = value.toString();  
+           
+           console.log(value);
+           console.log(state);
+           console.log(url);
+          
+           $.ajax({
+             url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
+             type: "GET",
+             success: function(){
+                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+             }
+           });*/
+           
+    });
+    
 ', View::POS_READY);
 ?>
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">

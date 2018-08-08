@@ -85,7 +85,8 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
         $selected = $session->get('selectedmap', []);
 
         $stores = [-1 => 'Нет'];
-        $stores +=  ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $client->id])->all(), 'rid', 'name');
+        $stores +=  ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $client->id])->
+        andWhere('type = 2')->all(), 'rid', 'name');
 
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax ) {
@@ -351,14 +352,49 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
 
         $session = Yii::$app->session;
+        $hasProductsFinal = [];
 
         $selected = $session->get('selectedmap', []);
         if (empty($selected))
             return true;
 
+        $hasProducts = AllMaps::find()->select('product_id')->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
+            ->andWhere('service_id = 1 and is_active =1')
+            ->andWhere(['IN','product_id',$selected])->asArray()->all();
+
+        // Find Ids which are not in the all_map table but should be created as presents in $selected
+
+        if (!empty($hasProducts)) {   // Case we have intersection of arrays
+            foreach ($hasProducts as $p => $k) {
+                foreach($k as $t => $v) {
+                    array_push($hasProductsFinal,$v);
+                }
+            }
+            $noProducts = array_diff($selected,$hasProductsFinal);
+        } else {
+            $noProducts = $selected; // Case all are new
+        }
+
         $selected = implode(',', $selected);
 
+        foreach ($noProducts as $prod) {
+
+            $model = new AllMaps();
+
+            $model->service_id =1;
+            $model->org_id =  $organization;
+            $model->product_id = $prod;
+            $model->is_active = 1;
+            $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
+            if (!$model->save(false)){
+                throw new \RuntimeException('Cant save new allmaps model.');
+            }
+
+        }
+
         if($koef != -1) {
+
             $ress = Yii::$app->db_api
                 ->createCommand('UPDATE all_map set koef = :koef, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
                     [':koef' => $koef, ':org' => $organization])->execute();

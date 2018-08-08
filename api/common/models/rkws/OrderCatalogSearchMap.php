@@ -129,11 +129,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
              LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id
              LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-             LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc      
-           WHERE
+             LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc AND fstore.type = 2      
+           WHERE          
            cbg.cat_id IN (" . $this->catalogs . ")
            ".$where."
-           AND (cbg.status = 1 AND cbg.deleted = 0)
+           AND (cbg.status = 1 AND cbg.deleted = 0 )  
         UNION ALL
           SELECT 
           " . implode(',', $fieldsCG) . "
@@ -144,11 +144,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
            LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id
            LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-           LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc 
-          WHERE 
+           LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc AND fstore.type = 2
+          WHERE         
           cg.cat_id IN (" . $this->catalogs . ")
           ".$where."
-          AND (cbg.status = 1 AND cbg.deleted = 0)
+          AND (cbg.status = 1 AND cbg.deleted = 0) 
         ) as c WHERE id != 0 ".$where_all;
 
         $query = \Yii::$app->db->createCommand($sql);

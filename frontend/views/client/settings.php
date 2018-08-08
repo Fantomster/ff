@@ -243,15 +243,15 @@ $this->registerCss("
                                 ?>
                             </div>
                             <div id="map" style="width:100%;height:250px;"></div>
-                            <?= Html::activeHiddenInput($organization, 'lat'); //широта  ?>
-                            <?= Html::activeHiddenInput($organization, 'lng'); //долгота  ?>
-                            <?= Html::activeHiddenInput($organization, 'country'); //страна  ?>
-                            <?= Html::activeHiddenInput($organization, 'locality'); //Город  ?>
-                            <?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область  ?>
-                            <?= Html::activeHiddenInput($organization, 'route'); //улица  ?>
-                            <?= Html::activeHiddenInput($organization, 'street_number'); //дом  ?>
-                            <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места  ?>
-                            <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес  ?>
+                            <?= Html::activeHiddenInput($organization, 'lat'); //широта   ?>
+                            <?= Html::activeHiddenInput($organization, 'lng'); //долгота   ?>
+                            <?= Html::activeHiddenInput($organization, 'country'); //страна   ?>
+                            <?= Html::activeHiddenInput($organization, 'locality'); //Город   ?>
+                            <?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область   ?>
+                            <?= Html::activeHiddenInput($organization, 'route'); //улица   ?>
+                            <?= Html::activeHiddenInput($organization, 'street_number'); //дом   ?>
+                            <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места   ?>
+                            <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес   ?>
                             <script type="text/javascript">
 
                                 function stopRKey(evt) {
@@ -269,6 +269,27 @@ $this->registerCss("
                     </div>
                 </div>
             </div>
+            <fieldset>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?=
+                            $form->field($organization, 'inn')
+                                ->label(Yii::t('app', 'common.models.inn', ['ru' => 'ИНН']))
+                                ->textInput()
+                            ?>                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <?=
+                            $form->field($organization, 'kpp')
+                                ->label(Yii::t('app', 'common.models.kpp', ['ru' => "КПП"]))
+                                ->textInput()
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
             <fieldset>
                 <legend><?= Yii::t('message', 'frontend.views.client.settings.contact', ['ru' => 'Контактное лицо:']) ?></legend>
                 <div class="row">

@@ -6,12 +6,15 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+
 $this->title = Yii::t('message', 'frontend.views.order.order', ['ru' => 'Заказ №']) . $order->id;
 
 if (!empty($order->invoice)) {
     $title = $this->title . ' ' . Yii::t('message', 'frontend.views.order.order_invoice_create', ['ru' => 'создан на основании накладной 1С']);
 
-    if(!empty($order->invoice->orderRelation)){
+    $title .= ' №' . $order->invoice->number . ' ';
+
+    if (!empty($order->invoice->orderRelation)) {
         $link = \yii\helpers\Html::a($order->invoice->orderRelation->id, '/order/' . $order->invoice->orderRelation->id);
         $lang = Yii::t('message', 'frontend.views.order.order_invoice', ['ru' => 'первичный заказ']);
         $title .= " ($lang №$link)";
@@ -238,7 +241,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     <h1>
         <i class="fa fa-history"></i> <?= $title ?>
         <?php
-        if (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code>0) {
+        if (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) {
             $alt = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
             echo ' ' . Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt]);
         }

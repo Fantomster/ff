@@ -1295,7 +1295,7 @@ class ClientController extends DefaultController
                         $CatalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                         $CatalogBaseGoods->product = $product;
                         $CatalogBaseGoods->units = $units;
-                        $CatalogBaseGoods->price = $price;
+                        //$CatalogBaseGoods->price = $price;
                         $CatalogBaseGoods->ed = $ed;
                         $CatalogBaseGoods->save();
 
@@ -1387,7 +1387,7 @@ class ClientController extends DefaultController
                 'product' => Html::decode(Html::decode($catalog_elem->baseProduct->product)),
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
-                'price' => $catalog_elem->baseProduct->price,
+                'price' => $catalog_elem->price ?? $catalog_elem->baseProduct->price,
                 'note' => isset($catalog_elem->goodsNotes->note) ? $catalog_elem->goodsNotes->note : ''
             ]);
         }

@@ -515,17 +515,6 @@ $(document).on("click", ".hand_loading", function(e) {
             success: function (data) {
                 if(data != 1){
                     swal({
-                      title: 'Печать ВСД',
-                      showCancelButton: true,
-                      cancelButtonText: "Отмена",
-                      confirmButtonText: "Подтвердить",
-                      html:
-                        '<p style="color: gray;">Для продолжения печати документа, Вам необходимо ввести актуальные данные от Личного Кабинета ИС Меркурий</p>' +
-                         '<div class="row"><div class="col-md-3"><label style="padding-top: 30px;">Логин</label></div><div class="col-md-offset-3" style="padding-right: 20px"><input id="swal-input1" class="swal2-input" placeholder="Логин" value=' + data +' required></div></div>' +
-                        '<div class="row"><div class="col-md-3"><label style="padding-top: 30px;">Пароль</label></div><div class="col-md-offset-3" style="padding-right: 20px"><input id="swal-input2" class="swal2-input" placeholder="Пароль" required></div></div>',
-                      onOpen: function () {
-                        $('#swal-input1').focus()
-                      }
                         title: 'Печать ВСД',
                         showCancelButton: true,
                         cancelButtonText: "Отмена",
@@ -571,31 +560,6 @@ $(document).on("click", ".hand_loading", function(e) {
                                 }
                             });
                     })
-                }else{
-                            url = $(this).data('url');
-                            filename = $(this).data('name');
-                            swal({
-                                title: '$preparePdfText'
-                            });
-                            swal.showLoading();
-                            $.ajax({
-                                url: url,
-                                method: 'GET',
-                                xhrFields: {
-                                    responseType: 'blob'
-                                },
-                                success: function (data) {
-                                    var a = document.createElement('a');
-                                    var url = window.URL.createObjectURL(data);
-                                    document.body.appendChild(a);
-                                    a.href = url;
-                                    a.download = filename;
-                                    a.class = "pdf-download";
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    swal.close()
-                                }
-                            });
                 } else {
                     swal({
                         title: '$preparePdfText'

@@ -170,8 +170,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'dataProvider' => $dataProvider,
                         'searchModel' => $searchModel,
                         'wmodel' => $wmodel,
-                        'agentName' => $agentModel->denom,
-                        'storeName' => $storeModel->denom,
+                        'agentName' => $agentModel['denom'],
+                        'storeName' => $storeModel['denom'],
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData
             ]);
@@ -180,8 +180,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'wmodel' => $wmodel,
-                        'agentName' => $agentModel->denom,
-                        'storeName' => $storeModel->denom,
+                        'agentName' => $agentModel['denom'],
+                        'storeName' => $storeModel['denom'],
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData
             ]);

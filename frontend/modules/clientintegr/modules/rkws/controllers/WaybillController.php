@@ -3,8 +3,10 @@
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use api\common\models\iiko\iikoPconst;
+use api\common\models\RkAgent;
 use api\common\models\RkDicconst;
 use api\common\models\RkPconst;
+use api\common\models\RkStore;
 use api\common\models\rkws\RkWaybilldataSearch;
 use api\common\models\VatData;
 use api_web\classes\RkeeperWebApi;
@@ -163,6 +165,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new RkWaybilldataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+    
+        $agentModel = RkAgent::findOne(['rid' => $wmodel->corr_rid, 'acc' => $wmodel->org]);
+        $storeModel = RkStore::findOne(['rid' => $wmodel->store_rid]);
         
         $lic = $this->checkLic();       
         $vi = $lic ? 'indexmap' : '/default/_nolic';
@@ -172,6 +177,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'dataProvider' => $dataProvider,
                         'searchModel' => $searchModel,
                         'wmodel' => $wmodel,
+                        'agentName' => $agentModel->denom,
+                        'storeName' => $storeModel->denom,
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData
             ]);
@@ -180,6 +187,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'wmodel' => $wmodel,
+                        'agentName' => $agentModel->denom,
+                        'storeName' => $storeModel->denom,
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData
             ]);

@@ -2,8 +2,10 @@
 
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
+use api\common\models\one_s\OneSContragent;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSPconst;
+use api\common\models\one_s\OneSStore;
 use api\common\models\OneSWaybillDataSearch;
 use api\common\models\VatData;
 use common\models\Organization;
@@ -130,13 +132,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new OneSWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-
+    
+        $agentModel = OneSContragent::findOne(['id' => $model->agent_uuid]);
+        $storeModel = OneSStore::findOne(['id' => $model->store_id]);
+        
         $lic = OneSService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
+            'agentName' => $agentModel->denom,
+            'storeName' => $storeModel->denom,
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData

@@ -138,8 +138,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
-            'agentName' => $agentModel->denom,
-            'storeName' => $storeModel->denom,
+            'agentName' => $agentModel->name,
+            'storeName' => $storeModel->name,
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData

@@ -2,9 +2,11 @@
 
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
+use api\common\models\iiko\iikoAgent;
 use api\common\models\iiko\iikoPconst;
 use api\common\models\VatData;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
+use api\common\models\iiko\iikoStore;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
@@ -14,6 +16,8 @@ use yii\db\Connection;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
+use yii\helpers\BaseVarDumper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use api\common\models\iiko\iikoProduct;
 use api\common\models\iiko\iikoService;
@@ -131,13 +135,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new iikoWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
+        
+        $agentModel = iikoAgent::findOne(['uuid' => $model->agent_uuid, 'org_id' => $model->org]);
+        $storeModel = iikoStore::findOne(['id' => $model->store_id]);
 
         $lic = iikoService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
+            'agentName' => $agentModel->denom,
+            'storeName' => $storeModel->denom,
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData,

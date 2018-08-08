@@ -44,9 +44,15 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
+	<p>
+		<span>Контрагент: <?=$agentName?></span> |
+		<span>Номер заказа: <?=$wmodel->order_id?></span> |
+		<span>Номер накладной: <?=$wmodel->num_code?></span> |
+		<span>Склад: <?=$storeName?></span>
+	</p>
 </section>
 <section class="content">
-    <div class="catalog-index">
+	<div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">

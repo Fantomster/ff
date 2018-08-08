@@ -5,16 +5,9 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
-use api\common\models\RkAccess;
-use api\common\models\RkWaybill;
 use yii\web\JsExpression;
-use api\common\models\RkDicconst;
 
 $this->title = 'Интеграция с 1С Общепит';
 

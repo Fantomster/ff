@@ -141,7 +141,7 @@ $this->registerJs('
                             'columns' => [
                                 [
                                     // 'visible' => ($organization->type_id == Organization::TYPE_SUPPLIER) ? true : false,
-                                    'class' => 'frontend\widgets\multiCheck\CheckboxColumn',
+                                    'class' => 'common\components\multiCheck\CheckboxColumn',
                                     'contentOptions' => ['class' => 'small_cell_checkbox width150'],
                                     'headerOptions' => ['style' => 'text-align:center; width150'],
                                     'onChangeEvents' => [

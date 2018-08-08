@@ -35,6 +35,22 @@ class CatalogGoodsBlocked extends \yii\db\ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'updatedAtAttribute' => false,
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function attributeLabels()

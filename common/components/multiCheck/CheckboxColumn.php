@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\widgets\multiCheck;
+namespace common\components\multiCheck;
 
 use yii\helpers\Json;
 use yii\web\JsExpression;

@@ -112,6 +112,15 @@ $this->registerJs('
                             ],
                             'columns' => [
                                 [
+                                    // 'visible' => ($organization->type_id == Organization::TYPE_SUPPLIER) ? true : false,
+                                    'class' => 'frontend\widgets\multiCheck\CheckboxColumn',
+                                    'contentOptions' => ['class' => 'small_cell_checkbox width150'],
+                                    'headerOptions' => ['style' => 'text-align:center; width150'],
+                                    /*'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+                                        return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
+                                    }*/
+                                ],
+                                [
                                     'format' => 'raw',
                                     'attribute' => 'product',
                                     'value' => function ($data) {

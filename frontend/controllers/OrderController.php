@@ -10,6 +10,7 @@ use api_web\classes\RkeeperWebApi;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
 use common\models\Cart;
+use common\models\CatalogGoodsBlocked;
 use common\models\search\OrderProductsSearch;
 use Yii;
 use yii\db\Expression;
@@ -100,6 +101,7 @@ class OrderController extends DefaultController
                             'create',
                             'guides',
                             'favorites',
+                            'product-filter',
                             'edit-guide',
                             'reset-guide',
                             'save-guide',
@@ -127,6 +129,8 @@ class OrderController extends DefaultController
                             'ajax-order-update-waybill',
                             'complete-obsolete',
                             'pjax-cart',
+                            'blocked-products',
+                            'clear-all-blocked',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -2490,6 +2494,81 @@ class OrderController extends DefaultController
                 unset($_SESSION[$key]);
             }
         }
+    }
+
+    public function actionProductFilter()
+    {
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+        $searchModel = new OrderCatalogSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+
+        $selectedCategory = null;
+        $selectedVendor = null;
+
+        if (isset($params['OrderCatalogSearch'])) {
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
+        }
+        $vendors = $client->getSuppliers($selectedCategory);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+
+        $searchModel->client = $client;
+        $searchModel->catalogs = $catalogs;
+
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
+
+        $blockedItems = (new \yii\db\Query)
+            ->select('cbg_id')
+            ->from(\common\models\CatalogGoodsBlocked::tableName())
+            ->where(['owner_organization_id' => $client->id])
+            ->createCommand()
+            ->queryColumn();
+        //Вывод по 10
+        $dataProvider->pagination->pageSize = 10;
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
+        } else {
+            return $this->render('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
+        }
+    }
+
+    public function actionClearAllBlocked() {
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+
+        CatalogGoodsBlocked::deleteAll(['owner_organization_id' => $client->id]);
+        return true;
+    }
+
+    public function actionBlockedProducts() {
+        $selected = Yii::$app->request->post('selected');
+        $state = Yii::$app->request->post('state');
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+        $current = !empty($selected) ? explode(",", $selected) : [];
+
+        foreach ($current as $item) {
+            $model = CatalogGoodsBlocked::find()->where("cbg_id = $item and owner_organization_id = $client->id")->one();
+            if ($state) {
+                if (!isset($model)) {
+                    $model = new CatalogGoodsBlocked();
+                }
+                $model->cbg_id = $item;
+                $model->owner_organization_id = $client->id;
+                $model->save();
+            } else {
+                if (isset($model)) {
+                    $model->delete();
+                }
+            }
+        }
+
+        return true;
     }
 
 }

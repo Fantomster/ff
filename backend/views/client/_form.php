@@ -44,7 +44,11 @@ use kartik\checkbox\CheckboxX;
     }
     //$form->field($profile, 'job_id')
     ?>
-
+    <?php
+    if($currentUser->role_id == ROLE::ROLE_ADMIN) {
+        echo $form->field($user, 'role_id')->dropDownList($dropDown, ['options' => [$selected => ['Selected' => true]]])->label(Yii::t('message', 'frontend.views.client.settings.role', ['ru' => "Роль"]));
+    }
+      ?>
     <?php //echo $form->field($profile, 'email') ?>
 
     <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [

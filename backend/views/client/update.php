@@ -16,6 +16,6 @@ $this->params['breadcrumbs'][] = 'Редактирование пользова�
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_form', compact('user', 'profile')) ?>
+    <?= $this->render('_form', compact('user', 'profile', 'dropDown', 'selected', 'currentUser')) ?>
 
 </div>

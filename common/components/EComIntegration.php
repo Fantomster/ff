@@ -227,7 +227,7 @@ class EComIntegration
             } else {
                 $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = (float)$position->PRICE ?? (float)$position->PRICEWITHVAT;
+            $arr[$contID]['PRICE'] = (float)$position->PRICEWITHVAT ?? (float)$position->PRICE;
             $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
             $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
             $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;

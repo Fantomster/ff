@@ -349,8 +349,10 @@ SQL;
 
     /**
      * Отправляем накладную
+     * @var $id int|null
+     * @return array
      */
-    public function actionSend()
+    public function actionSend($id = null)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db_api->beginTransaction();
@@ -369,7 +371,9 @@ SQL;
                 throw new \Exception('Only ajax method');
             }
 
-            $id = Yii::$app->request->post('id');
+            if(is_null($id)){
+                $id = Yii::$app->request->post('id');
+            }
             $model = $this->findModel($id);
 
             if (!$model) {
@@ -394,6 +398,37 @@ SQL;
             $api->logout();
             return ['success' => false, 'error' => $e->getMessage()];
         }
+    }
+    
+    /**
+     *  Отправка нескольких накладных
+     */
+    public function actionMultiSend()
+    {
+        $ids = Yii::$app->request->post('ids');
+        $scsCount = 0;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        foreach ($ids as $id){
+            try{
+                $model = $this->findModel($id);
+                //Выставляем статус отправляется
+                $model->status_id = 3;
+                $model->save();
+                $res = $this->actionSend($id);
+                if($res['success'] === true){
+                    $scsCount++;
+                }
+                $transaction->commit();
+            } catch (\Exception $e){
+                //Выставляем статус обратно
+                $transaction->rollBack();
+                return ['success' => false, 'error' => $e->getMessage()];
+            }
+        }
+        if(count($ids) == $scsCount){
+            return ['success' => true, 'count' => $scsCount];
+        }
+        return ['success' => false, 'error' => 'Выгруженно только ' . $scsCount . ' накладных'];
     }
 
     /**
@@ -505,7 +540,7 @@ SQL;
 
 
     /**
-     * @param $id
+     * @param $id ИД накладной
      * @return iikoWaybill
      * @throws NotFoundHttpException
      */

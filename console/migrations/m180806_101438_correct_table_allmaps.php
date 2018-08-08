@@ -19,7 +19,7 @@ class m180806_101438_correct_table_allmaps extends Migration
      */
     public function safeUp()
     {
-     //   $this->dropTable('{{%all_map}}');
+        $this->dropTable('{{%all_map}}');
 
         $tableOptions = 'ENGINE=InnoDB';
 

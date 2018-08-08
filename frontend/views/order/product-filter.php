@@ -11,44 +11,12 @@ $this->title = Yii::t('message', 'frontend.views.order.filter_product', ['ru' =>
 
 yii\jui\JuiAsset::register($this);
 
-$urlSaveSelected = Url::to(['fullmap/save-selected-maps']);
+$urlBlocked = Url::to(['blocked-products']);
 
 $this->registerJs('
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });
-    
-     $(document).on("change", ".select-on-check-all", function(e) {
-     
-     alert(1);
-   
-          //  e.preventDefault();
-           // url = $(this).attr("href");
-         /*   url      = window.location.href;
-
-            var value = [];
-            state = $(this).prop("checked") ? 1 : 0;
-            
-           $(".checkbox-export").each(function() {
-                value.push($(this).val());
-            });    
-
-           value = value.toString();  
-           
-           console.log(value);
-           console.log(state);
-           console.log(url);
-          
-           $.ajax({
-             url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
-             type: "GET",
-             success: function(){
-                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-             }
-           });*/
-           
-    });
-    
 ', View::POS_READY);
 ?>
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
@@ -124,7 +92,7 @@ $this->registerJs('
             <div class="row">
                 <div class="col-md-12">
                     <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 5000]);
+                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'productFilter', 'timeout' => 5000]);
                     ?>
                     <div id="products">
                         <?=
@@ -150,9 +118,41 @@ $this->registerJs('
                                     'class' => 'frontend\widgets\multiCheck\CheckboxColumn',
                                     'contentOptions' => ['class' => 'small_cell_checkbox width150'],
                                     'headerOptions' => ['style' => 'text-align:center; width150'],
-                                    /*'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
-                                        return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
-                                    }*/
+                                    'onChangeEvents' => [
+                                            'changeAll' => 'function(e) {
+                                                            url      = window.location.href;
+                                                            var value = [];
+                                                            state = $(this).prop("checked") ? 1 : 0;
+                                                            
+                                                           $(".checkbox-export").each(function() {
+                                                                value.push($(this).val());
+                                                            });    
+                                                
+                                                           value = value.toString();  
+                                                           
+                                                           $.ajax({
+                                                             url: "'.$urlBlocked.'?selected=" +  value+"&state=" + state,
+                                                             type: "GET",
+                                                             success: function(){
+                                                                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
+                                                             }
+                                                           }); }',
+                                        'changeCell' => 'function(e) {
+                                                            url = window.location.href;
+                                                            var value = $(this).val();
+                                                            state = $(this).prop("checked") ? 1 : 0;
+                                                          
+                                                           $.ajax({
+                                                             url: "'.$urlBlocked.'?selected=" +  value+"&state=" + state,
+                                                             type: "GET",
+                                                             success: function(){
+                                                                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
+                                                             }
+                                                           });}'
+                                                     ],
+                                    'checkboxOptions' => function ($model, $key, $index, $widget) use ($blockedItems) {
+                                        return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $blockedItems)) ? 'checked' : ""];
+                                    },
                                 ],
                                 [
                                     'format' => 'raw',

@@ -5,14 +5,9 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
 use yii\web\JsExpression;
-use common\components\Torg12Invoice;
 
 $this->title = 'Интеграция с iiko Office';
 

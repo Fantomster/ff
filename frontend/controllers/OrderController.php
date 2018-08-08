@@ -100,6 +100,7 @@ class OrderController extends DefaultController
                             'create',
                             'guides',
                             'favorites',
+                            'product-filter',
                             'edit-guide',
                             'reset-guide',
                             'save-guide',
@@ -2489,6 +2490,50 @@ class OrderController extends DefaultController
             if (strpos($key, 'uideProductCount')) {
                 unset($_SESSION[$key]);
             }
+        }
+    }
+
+    public function actionProductFilter()
+    {
+        $session = Yii::$app->session;
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+        $searchModel = new OrderCatalogSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+
+        $selectedCategory = null;
+        $selectedVendor = null;
+
+        if (isset($params['OrderCatalogSearch'])) {
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
+        }
+        $vendors = $client->getSuppliers($selectedCategory);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+
+        $searchModel->client = $client;
+        $searchModel->catalogs = $catalogs;
+
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
+
+        $blockedItems = (new \yii\db\Query)
+            ->select('cbg_id')
+            ->from(\common\models\CatalogGoodsBlocked::tableName())
+            ->where(['owner_organization_id' => $client->id])
+            ->createCommand()
+            ->queryColumn();
+        //Вывод по 10
+        $dataProvider->pagination->pageSize = 10;
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
+        } else {
+            return $this->render('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
         }
     }
 

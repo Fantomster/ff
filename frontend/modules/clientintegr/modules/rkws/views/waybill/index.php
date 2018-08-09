@@ -77,6 +77,15 @@ $this->registerCss("
     <?php
     $columns = array (
         [
+            'class' => 'yii\grid\CheckboxColumn',
+            'checkboxOptions' => function ($model, $key, $index, $column) {
+                $nacl = RkWaybill::findOne(['order_id' => $model->id]);
+                if ($nacl['status_id'] !== 1 || $nacl['readytoexport'] === 0) {
+                    return ['disabled' => true];
+                }
+            }
+        ],
+        [
             'attribute' => 'id',
             'contentOptions' => function($data) {
                 return ["id" => "way".$data->id];
@@ -259,7 +268,7 @@ $this->registerCss("
                                             </div>
                                         </div>
                                         <div class="col-lg-5 col-md-6 col-sm-6">
-
+                                            <?= \yii\helpers\Html::a('Выгрузить выбранные', false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
                                         </div>
                                     </div>
                                     <?php ActiveForm::end(); ?>
@@ -303,6 +312,7 @@ $this->registerCss("
 </section>
 <?php
 $url = Url::toRoute('waybill/sendws');
+$miltipleUrl = Url::toRoute('waybill/multi-send');
 $js = <<< JS
     $(function () {
         $('.orders-table').on('click', '.export-waybill-btn', function () {
@@ -354,6 +364,70 @@ $js = <<< JS
                 }
             })
         });
+        
+        
+        
+        FF = {};
+        FF.sendCheckBoxes = {
+            init: function(){
+                $(document).on('click', '#mk-all-nakl', function () {
+                    var keys = $('#w0').yiiGridView('getSelectedRows'),
+                        ids = [],
+                        url = '$miltipleUrl';
+                    
+                    keys.map(function(value){
+                        ids.push($('div [data-key='+ value +'] tbody>tr').data('key'));
+                    });
+                    
+                    swal({
+                        title: 'Выполнить массовую выгрузку накладной?',
+                        type: 'info',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Выгрузить',
+                        cancelButtonText: 'Отмена',
+                    }).then((result) => {
+                        if(result.value)
+                        {
+                            swal({
+                                title: 'Идёт отправка',
+                                text: 'Подождите, пока закончится выгрузка...',
+                                onOpen: () => {
+                                    swal.showLoading();
+                                    $.post(url, {ids:ids}, function (data) {
+                                        console.log(data);
+                                        if (data.success === true) {
+                                            swal.close();
+                                            swal('Готово', 'Выгруженно ' + data.count + ' накладных', 'success')
+                                        } else {
+                                            console.log(data.error);
+                                            swal(
+                                                'Ошибка',
+                                                'Обратитесь в службу поддержки.',
+                                                'error'
+                                            )
+                                        }
+                                        // $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
+                                    })
+                                    .fail(function() {
+                                       swal(
+                                            'Ошибка',
+                                            'Обратитесь в службу поддержки.',
+                                            'error'
+                                        );
+                                       // $.pjax.reload({container:"#pjax_user_row_" + oid + '-pjax', timeout:1500});
+                                    });
+                                }
+                            })
+                        }
+                    })
+                });
+            }
+        };
+        
+        FF.sendCheckBoxes.init();
+
     });
 JS;
 

@@ -465,10 +465,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $url; // Возвращаем итоговый URL
     }
 
-    public function actionSendws() {
-
-
-        $waybill_id = Yii::$app->request->post('id');
+    public function actionSendws($waybill_id = null) {
+        if(is_null($waybill_id)){
+            $waybill_id = Yii::$app->request->post('id');
+        }
         $model = $this->findModel($waybill_id);
 
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
@@ -477,8 +477,23 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return 'true';
        //$this->redirect('/clientintegr/rkws/waybill/index');
     }
-
-
+    
+    /**
+     *  Отправка нескольких накладных
+     */
+    public function actionMultiSend()
+    {
+        $ids = Yii::$app->request->post('ids');
+        $succesCnt = 0;
+        foreach ($ids as $id){
+            $res = $this->actionSendws($id);
+            if ($res === 'true'){
+                $succesCnt++;
+            }
+        }
+        return ['success' => true, 'count' => $succesCnt];
+    }
+    
     /**
      * Отправляем накладную по нажатию кнопки при соспоставлении товаров
      */

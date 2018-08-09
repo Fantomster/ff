@@ -93,9 +93,17 @@ use api\common\models\RkWaybill;
 
                                         // В случае отображения автоматической выгрузки накладных
                                         if ($model->denom == 'auto_unload_invoice') {
-                                            if ($res == 0) return "Выключено";
-                                            if ($res == 1) return "Включено";
-                                            if ($res == 2) return "Полуавтомат";
+                                            switch ($res) {
+                                                case 0:
+                                                    return "Выключено";
+                                                    break;
+                                                case 1:
+                                                    return "Включено";
+                                                    break;
+                                                case 2:
+                                                    return "Полуавтомат";
+                                                    break;
+                                            }
                                         }
 
                                         $ret = ($model->denom == 'taxVat') ? $res : (($res == 1) ? "Включено" : "Выключено");

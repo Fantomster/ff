@@ -74,13 +74,10 @@ use kartik\grid\GridView;
                                             switch ($res) {
                                                 case 0:
                                                     return "Выключено";
-                                                    break;
                                                 case 1:
                                                     return "Включено";
-                                                    break;
                                                 case 2:
                                                     return "Полуавтомат";
-                                                    break;
                                             }
                                         }
 

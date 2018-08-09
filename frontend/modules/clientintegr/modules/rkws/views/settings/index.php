@@ -96,13 +96,10 @@ use api\common\models\RkWaybill;
                                             switch ($res) {
                                                 case 0:
                                                     return "Выключено";
-                                                    break;
                                                 case 1:
                                                     return "Включено";
-                                                    break;
                                                 case 2:
                                                     return "Полуавтомат";
-                                                    break;
                                             }
                                         }
 

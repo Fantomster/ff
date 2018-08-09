@@ -16,39 +16,41 @@ class MercuryCronController extends Controller
      */
     public function actionVetDocumentsChangeList($interval = 24)
     {
-
         $organizations = (new \yii\db\Query)
-            ->select('org_id')
+            ->select('org')
             ->from(mercService::tableName())
-            ->where('status = 1 and now() between fd and td')
-            ->createCommand()
+            ->where('status_id = 1 and now() between fd and td')
+            ->createCommand(Yii::$app->db_api)
             ->queryColumn();
 
         foreach ($organizations as $org_id) {
-            $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
+            try {
+                $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
-            if (!isset($locations->activityLocationList->location)) {
-                continue;
-            }
-
-            foreach ($locations->activityLocationList->location as $item) {
-                if (!isset($item->enterprise)) {
+                if (!isset($locations->activityLocationList->location)) {
                     continue;
                 }
-                $request = [
-                    'enterpriseGuid' => $item->enterprise->guid,
-                    'orgId' => $org_id,
-                    'intervalHours' => $interval,
-                ];
 
-                echo \json_encode($request);
-              /*  try {
-                    \Yii::$app->get('rabbit')
-                        ->setQueue('merc_load_vsd')
-                        ->addRabbitQueue(\json_encode($request));
-                } catch (\Exception $e) {
-                    Yii::error($e->getMessage());
-                }*/
+                foreach ($locations->activityLocationList->location as $item) {
+                    if (!isset($item->enterprise)) {
+                        continue;
+                    }
+                    $request = [
+                        'enterpriseGuid' => $item->enterprise->guid,
+                        'orgId' => $org_id,
+                        'intervalHours' => $interval,
+                    ];
+                    
+                      try {
+                          \Yii::$app->get('rabbit')
+                              ->setQueue('merc_load_vsd')
+                              ->addRabbitQueue(\json_encode($request));
+                      } catch (\Exception $e) {
+                          Yii::error($e->getMessage());
+                      }
+                }
+            }catch (\Exception $e) {
+                \Yii::error($e->getMessage());
             }
         }
     }

@@ -118,6 +118,7 @@ class WebApiController extends \yii\rest\Controller
 
         $this->enableCsrfValidation = false;
         $user = \Yii::$app->request->getBodyParam('user');
+        $wtf = \Yii::$app->request;
 
         if (isset($user['language'])) {
             \Yii::$app->language = mb_strtolower($user['language']);

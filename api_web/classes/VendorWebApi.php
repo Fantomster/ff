@@ -51,11 +51,11 @@ class VendorWebApi extends \api_web\components\WebApi
             }
 
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendorID, 'rest_org_id' => $this->user->organization->id]);
-            if(empty($relation)) {
+            if (empty($relation)) {
                 $relation = $this->createRelation($this->user->organization->id, $organization->id);
             }
 
-            if($relation->invite != RelationSuppRest::INVITE_ON) {
+            if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
                     $this->user->sendInviteToVendor($recipient);
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
@@ -210,8 +210,8 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if ($check['eventType'] == 5) {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
-                            $organization->name .
-                            Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
+                        $organization->name .
+                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
                 } else {
                     $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
                 }
@@ -263,22 +263,22 @@ class VendorWebApi extends \api_web\components\WebApi
         $email = $post['email'];
 
         $models = Organization::find()
-                        ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
-                        ->where(['organization.type_id' => Organization::TYPE_SUPPLIER])
-                        ->andWhere(['or', [
-                                'organization.email' => $email
-                            ], [
-                                'user.email' => $email
-                    ]])->all();
+            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
+            ->where(['organization.type_id' => Organization::TYPE_SUPPLIER])
+            ->andWhere(['or', [
+                'organization.email' => $email
+            ], [
+                'user.email' => $email
+            ]])->all();
 
         if (!empty($models)) {
             foreach ($models as $model) {
                 $r = WebApiHelper::prepareOrganization($model);
 
                 if ($user = RelationUserOrganization::find()->joinWith('user')->where([
-                            'relation_user_organization.organization_id' => $model->id,
-                            'user.email' => $email
-                        ])->one()) {
+                    'relation_user_organization.organization_id' => $model->id,
+                    'user.email' => $email
+                ])->one()) {
                     $r['user'] = [
                         'email' => $user->user->email,
                         'name' => $user->user->profile->full_name,
@@ -475,14 +475,23 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws \yii\base\Exception
      */
     public function uploadMainCatalog(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
+        if (empty($request['data'])) {
+            throw new BadRequestHttpException('empty_param|data');
+        }
+
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
+
         //проверка нет ли уже загруженного временного каталога
         //если есть - удаляем
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
@@ -493,8 +502,7 @@ class VendorWebApi extends \api_web\components\WebApi
         //сохранение и загрузка на s3
         $base64 = $request['data'];
         $type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
-        $is_xlsx = (strpos($base64, $type) !== false);
-        if ($is_xlsx) {
+        if (strpos($base64, $type) !== false) {
             try {
                 $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
                 Yii::$app->get('resourceManager')->save($file, Excel::excelTempFolder . DIRECTORY_SEPARATOR . $file->name);
@@ -503,14 +511,15 @@ class VendorWebApi extends \api_web\components\WebApi
                 $newTempCatalog->user_id = $this->user->id;
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
-                $first20Rows = Excel::get20Rows($file->tempName);
-                return ['result' => true, 'rows' => $first20Rows];
+                return [
+                    'result' => true,
+                    'rows' => Excel::get20Rows($file->tempName)
+                ];
             } catch (\yii\base\Exception $e) {
                 throw $e;
             }
-            return ['result' => false];
         } else {
-            return ['result' => false];
+            throw new BadRequestHttpException("The download format is different from XLSX");
         }
     }
 

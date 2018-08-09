@@ -226,17 +226,13 @@ class VendorController extends WebApiController
      *         name="post",
      *         in="body",
      *         required=true,
-     *         description="",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
      *                      "cat_id": 4,
-     *                      "data": "base64shit"
+     *                      "data": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
      *                  }
      *              )
      *         )
@@ -246,23 +242,31 @@ class VendorController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-     *                  "cat_id": 4,
-     *                  "uploaded_name": "dfg5fhbdhb",
-     *                  "sample_rows: {
-     *                      "1" : {
-     *                          "1": "data-1-1",
-     *                          "2": "data-1-2",
-     *                          "3": "data-1-3",
+     *                  "result": true,
+     *                  "rows": {
+     *                      {
+     *                          "Артикул",
+     *                          "Наименование",
+     *                          "Кратность",
+     *                          "Цена",
+     *                          "Единица измерения",
+     *                          "Комментарий"
      *                      },
-     *                      "2" : {
-     *                          "1": "data-2-1",
-     *                          "2": "data-2-2",
-     *                          "3": "data-2-3",
+     *                      {
+     *                          "10",
+     *                          "Товар 10",
+     *                          "",
+     *                          "100",
+     *                          "бутылка",
+     *                          ""
      *                      },
-     *                      "3" : {
-     *                          "1": "data-3-1",
-     *                          "2": "data-3-2",
-     *                          "3": "data-3-3",
+     *                      {
+     *                          "111004",
+     *                          "Балтика 7",
+     *                          "1.25",
+     *                          "45.5",
+     *                          "бутылка",
+     *                          ""
      *                      }
      *                  }
      *             }
@@ -283,7 +287,7 @@ class VendorController extends WebApiController
     }
     
     /**
-     * @SWG\Post(path="/vendor/upload-main-catalog",
+     * @SWG\Post(path="/vendor/import-main-catalog",
      *     tags={"Vendor"},
      *     summary="Маппинг, валидация и импорт основного каталога",
      *     description="Маппинг, валидация и импорт основного каталога",

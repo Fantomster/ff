@@ -15,7 +15,7 @@ class Excel
 
     /**
      * @param string $excelFile
-     * 
+     *
      * @return array
      */
     public static function get20Rows($excelFile)
@@ -43,7 +43,7 @@ class Excel
     }
 
     /**
-     * 
+     *
      * @param \common\models\CatalogTemp $tempCatalog
      * @return array
      */

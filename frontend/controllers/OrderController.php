@@ -493,9 +493,9 @@ class OrderController extends DefaultController
         $dataProvider = $searchModel->search($params, $client->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('guides', compact('dataProvider', 'searchModel'));
+            return $this->renderPartial('guides', compact('dataProvider', 'searchModel', 'client'));
         } else {
-            return $this->render('guides', compact('dataProvider', 'searchModel'));
+            return $this->render('guides', compact('dataProvider', 'searchModel', 'client'));
         }
     }
 
@@ -632,7 +632,7 @@ class OrderController extends DefaultController
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
             return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params','client'));
         }
     }
 

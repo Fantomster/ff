@@ -127,12 +127,14 @@ $this->registerJs('
                     <?= Yii::t('app', 'frontend.views.order.favorites.freq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
-            <li>
-                <a href="<?= Url::to(['order/product-filter']) ?>">
-                    <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>
-                    <small class="label bg-yellow">new</small>
-                </a>
-            </li>
+            <?php if ($client->parent_id == null) : ?>
+                <li>
+                    <a href="<?= Url::to(['order/product-filter']) ?>">
+                        <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>
+                        <small class="label bg-yellow">new</small>
+                    </a>
+                </li>
+            <?php endif; ?>
         </ul>
         <div class="tab-content">
             <div class="row">

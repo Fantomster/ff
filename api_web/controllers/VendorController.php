@@ -11,6 +11,14 @@ use api_web\components\WebApiController;
 class VendorController extends WebApiController
 {
     /**
+     * Отключение логирования
+     * @var array
+     */
+    public $not_log_actions = [
+        'upload-main-catalog'
+    ];
+
+    /**
      * @SWG\Post(path="/vendor/create",
      *     tags={"Vendor"},
      *     summary="Создание нового поставщика в системе, находясь в аккаунте ресторана",
@@ -215,7 +223,7 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('VendorWebApi')->uploadLogo($this->request);
     }
-    
+
     /**
      * @SWG\Post(path="/vendor/upload-main-catalog",
      *     tags={"Vendor"},
@@ -282,10 +290,11 @@ class VendorController extends WebApiController
      *     )
      * )
      */
-    public function actionUploadMainCatalog() {
+    public function actionUploadMainCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->uploadMainCatalog($this->request);
     }
-    
+
     /**
      * @SWG\Post(path="/vendor/import-main-catalog",
      *     tags={"Vendor"},
@@ -315,7 +324,7 @@ class VendorController extends WebApiController
      *                          "unit": 4,
      *                          "price": 6,
      *                          "multiplicity": 7
-     *                      }     
+     *                      }
      *                  }
      *              )
      *         )
@@ -340,31 +349,38 @@ class VendorController extends WebApiController
      *     )
      * )
      */
-    public function actionImportMainCatalog() {
+    public function actionImportMainCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->importMainCatalog($this->request);
     }
-    
-    public function actionUploadCustomCatalog() {
+
+    public function actionUploadCustomCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->uploadCustomCatalog($this->request);
     }
-    
-    public function actionImportCustomCatalog() {
+
+    public function actionImportCustomCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->importCustomCatalog($this->request);
     }
-    
-    public function actionDeleteMainCatalog() {
+
+    public function actionDeleteMainCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->deleteMainCatalog($this->request);
     }
-    
-    public function actionChangeMainIndex() {
+
+    public function actionChangeMainIndex()
+    {
         $this->response = $this->container->get('VendorWebApi')->changeMainIndex($this->request);
     }
-    
-    public function actionDeleteTempMainCatalog() {
+
+    public function actionDeleteTempMainCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->deleteTempMainCatalog($this->request);
     }
-    
-    public function actionGetTempMainCatalog() {
+
+    public function actionGetTempMainCatalog()
+    {
         $this->response = $this->container->get('VendorWebApi')->getTempMainCatalog($this->request);
     }
 }

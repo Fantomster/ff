@@ -53,6 +53,11 @@ class WebApiController extends \yii\rest\Controller
     public $container;
 
     /**
+     * @var array
+     */
+    public $not_log_actions = [];
+
+    /**
      * Получаем контейнер
      */
     public function init()
@@ -118,7 +123,6 @@ class WebApiController extends \yii\rest\Controller
 
         $this->enableCsrfValidation = false;
         $user = \Yii::$app->request->getBodyParam('user');
-        $wtf = \Yii::$app->request;
 
         if (isset($user['language'])) {
             \Yii::$app->language = mb_strtolower($user['language']);
@@ -145,8 +149,10 @@ class WebApiController extends \yii\rest\Controller
                 }
             }
 
-            Logger::getInstance()::setUser($this->user);
-            Logger::getInstance()::request($this->request);
+            if (!in_array($action->id, $this->not_log_actions)) {
+                Logger::getInstance()::setUser($this->user);
+                Logger::getInstance()::request($this->request);
+            }
 
             if (isset($this->request)) {
                 //Глобально ограничиваем page_size
@@ -175,7 +181,9 @@ class WebApiController extends \yii\rest\Controller
     {
         parent::afterAction($action, $result);
         if (!empty($this->response)) {
-            Logger::getInstance()::response($this->response);
+            if (!in_array($action->id, $this->not_log_actions)) {
+                Logger::getInstance()::response($this->response);
+            }
             return \api_web\helpers\WebApiHelper::response($this->response);
         } else {
             return [];

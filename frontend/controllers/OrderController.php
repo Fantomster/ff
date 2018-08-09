@@ -1750,6 +1750,8 @@ class OrderController extends DefaultController
         $order = Order::findOne(['id' => $id]);
 
         $newContent = [];
+        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($order->client_id));
+        $order->orderContent = OrderContent::find(['order_id' => 'id'])->andWhere(["AND", "product_id NOT IN ($blockedItems)"]);
         foreach ($order->orderContent as $position) {
             $attributes = $position->copyIfPossible();
             if ($attributes) {

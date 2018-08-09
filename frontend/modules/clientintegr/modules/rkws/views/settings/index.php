@@ -91,6 +91,13 @@ use api\common\models\RkWaybill;
 
                                         $res = $model->getPconstValue();
 
+                                        // В случае отображения автоматической выгрузки накладных
+                                        if ($model->denom == 'auto_unload_invoice') {
+                                            if ($res == 0) return "Выключено";
+                                            if ($res == 1) return "Включено";
+                                            if ($res == 2) return "Полуавтомат";
+                                        }
+
                                         $ret = ($model->denom == 'taxVat') ? $res : (($res == 1) ? "Включено" : "Выключено");
 
                                         if ($model->denom == 'defGoodGroup') $ret = 'Список';

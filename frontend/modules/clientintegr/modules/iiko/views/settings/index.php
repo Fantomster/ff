@@ -69,6 +69,13 @@ use kartik\grid\GridView;
                                             return $res;
                                         }
 
+                                        // В случае отображения автоматической выгрузки накладных
+                                        if ($model->denom == 'auto_unload_invoice') {
+                                            if ($res == 0) return "Выключено";
+                                            if ($res == 1) return "Включено";
+                                            if ($res == 2) return "Полуавтомат";
+                                        }
+
                                         if (is_numeric($res)) {
                                             return (($res == 1) ? "Включено" : "Выключено");
                                         }

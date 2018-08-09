@@ -26,17 +26,17 @@ class baseApi extends Component
 
     protected static $_instance = [];
 
-    public static function getInstance()
+    public static function getInstance($org = null)
     {
         if (!array_key_exists(static::class, self::$_instance)) {
             self::$_instance[static::class] = new static();
             self::$_instance[static::class]->wsdls = Yii::$app->params['merc_settings'];
-            self::$_instance[static::class]->login = mercDicconst::getSetting('auth_login');
-            self::$_instance[static::class]->pass = mercDicconst::getSetting('auth_password');
-            self::$_instance[static::class]->apiKey = mercDicconst::getSetting('api_key');
-            self::$_instance[static::class]->issuerID = mercDicconst::getSetting('issuer_id');
-            self::$_instance[static::class]->vetisLogin = mercDicconst::getSetting('vetis_login');
-            self::$_instance[static::class]->enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+            self::$_instance[static::class]->login = mercDicconst::getSetting('auth_login', $org);
+            self::$_instance[static::class]->pass = mercDicconst::getSetting('auth_password', $org);
+            self::$_instance[static::class]->apiKey = mercDicconst::getSetting('api_key', $org);
+            self::$_instance[static::class]->issuerID = mercDicconst::getSetting('issuer_id', $org);
+            self::$_instance[static::class]->vetisLogin = mercDicconst::getSetting('vetis_login', $org);
+            self::$_instance[static::class]->enterpriseGuid = mercDicconst::getSetting('enterprise_guid', $org);
             self::$_instance[static::class]->query_timeout = Yii::$app->params['merc_settings']['query_timeout'];
             self::$_instance[static::class]->service_id = Yii::$app->params['merc_settings']['mercury']['service_id'];
         }

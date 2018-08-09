@@ -74,12 +74,17 @@ class mercDicconst extends \yii\db\ActiveRecord
         return $res;
     }
 
-    public static function getSetting($denom)
+    public static function getSetting($denom, $org = null)
     {
         $iskl = ['hand_load_only','vetis_password'];
         $model = self::findOne(['denom' => $denom]);
         if ($model) {
-            $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+            if(is_a(Yii::$app,'yii\web\Application') && ($org == null)) {
+                $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+            }
+            else {
+                $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
+            }
             if (!empty($pConst) || (in_array($denom, $iskl))) {
                 return $pConst->value;
             } else {

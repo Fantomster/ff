@@ -459,6 +459,7 @@ class OrderController extends DefaultController
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
+        $searchModel->product_block = true;
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
@@ -609,6 +610,7 @@ class OrderController extends DefaultController
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
+        $productSearchModel->product_block = true;
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
         }
@@ -2523,12 +2525,7 @@ class OrderController extends DefaultController
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
-        $blockedItems = (new \yii\db\Query)
-            ->select('cbg_id')
-            ->from(\common\models\CatalogGoodsBlocked::tableName())
-            ->where(['owner_organization_id' => $client->id])
-            ->createCommand()
-            ->queryColumn();
+        $blockedItems = CatalogGoodsBlocked::getBlockedList($client->id);
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 

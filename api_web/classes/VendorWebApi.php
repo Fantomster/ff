@@ -11,12 +11,14 @@ use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;
+use common\models\CatalogTemp;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 use yii\web\UploadedFile;
+use api_web\helpers\Excel;
 
 /**
  * Class VendorWebApi
@@ -24,6 +26,7 @@ use yii\web\UploadedFile;
  */
 class VendorWebApi extends \api_web\components\WebApi
 {
+
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
      * @param array $post
@@ -48,11 +51,11 @@ class VendorWebApi extends \api_web\components\WebApi
             }
 
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendorID, 'rest_org_id' => $this->user->organization->id]);
-            if(empty($relation)) {
+            if (empty($relation)) {
                 $relation = $this->createRelation($this->user->organization->id, $organization->id);
             }
 
-            if($relation->invite != RelationSuppRest::INVITE_ON) {
+            if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
                     $this->user->sendInviteToVendor($recipient);
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
@@ -206,8 +209,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 ];
 
                 if ($check['eventType'] == 5) {
-                    $result['message'] =
-                        Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                    $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
                         $organization->name .
                         Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
                 } else {
@@ -418,8 +420,6 @@ class VendorWebApi extends \api_web\components\WebApi
             $transaction->rollBack();
             throw $e;
         }
-
-
     }
 
     /**
@@ -469,4 +469,163 @@ class VendorWebApi extends \api_web\components\WebApi
 
         return WebApiHelper::prepareOrganization($vendor);
     }
+
+    /**
+     * Загрузка основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\Exception
+     */
+    public function uploadMainCatalog(array $request)
+    {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
+        if (empty($request['data'])) {
+            throw new BadRequestHttpException('empty_param|data');
+        }
+
+        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('Catalog not found');
+        }
+
+        //проверка нет ли уже загруженного временного каталога
+        //если есть - удаляем
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (!empty($tempCatalog)) {
+            Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+            $tempCatalog->delete();
+        }
+        //сохранение и загрузка на s3
+        $base64 = $request['data'];
+        $type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
+        if (strpos($base64, $type) !== false) {
+            try {
+                $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
+                Yii::$app->get('resourceManager')->save($file, Excel::excelTempFolder . DIRECTORY_SEPARATOR . $file->name);
+                $newTempCatalog = new CatalogTemp();
+                $newTempCatalog->cat_id = $request['cat_id'];
+                $newTempCatalog->user_id = $this->user->id;
+                $newTempCatalog->excel_file = $file->name;
+                $newTempCatalog->save();
+                return [
+                    'result' => true,
+                    'rows' => Excel::get20Rows($file->tempName)
+                ];
+            } catch (\yii\base\Exception $e) {
+                throw $e;
+            }
+        } else {
+            throw new BadRequestHttpException("The download format is different from XLSX");
+        }
+    }
+
+    /**
+     * Валидация и импорт уже загруженного основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function importMainCatalog(array $request)
+    {
+        //сохранение файла с s3 на локальный диск
+        //валидация
+        //удаление локального файла
+        //сохранение
+        //удаление файла на s3
+    }
+
+    /**
+     * Загрузка индивидуального каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function uploadCustomCatalog(array $request)
+    {
+        //
+    }
+
+    /**
+     * Валидация и импорт уже загруженного основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function importCustomCatalog(array $request)
+    {
+        //
+    }
+
+    /**
+     * Удаление основного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function deleteMainCatalog(array $request)
+    {
+        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('Catalog not found');
+        }
+        return $this->container->get('CatalogWebApi')->deleteMainCatalog($catalog);
+    }
+
+    /**
+     * Смена уникального индекса главного каталога
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function changeMainIndex(array $request)
+    {
+        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('Catalog not found');
+        }
+        return $this->container->get('CatalogWebApi')->changeMainIndex($catalog, $request['index']);
+    }
+
+    /**
+     * Удаление загруженного необработанного каталога
+     * @param array $request
+     * @return array
+     */
+    public function deleteTempMainCatalog(array $request)
+    {
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (!empty($tempCatalog)) {
+            Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+            $tempCatalog->delete();
+        }
+        return ['result' => true];
+    }
+
+    /**
+     * Статус загруженного, но не импортированного каталога
+     * @param array $request
+     * @return array
+     */
+    public function getTempMainCatalog(array $request)
+    {
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (!empty($tempCatalog)) {
+            return [
+                'exists' => true,
+                'rows' => Excel::get20RowsFromTempUploaded($tempCatalog),
+                'mapping' => $tempCatalog->mapping,
+            ];
+        } else {
+            return ['exists' => false];
+        }
+    }
+
 }

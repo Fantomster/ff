@@ -77,7 +77,22 @@ class Role extends \amnah\yii2\user\models\Role {
      */
     const ROLE_ONE_S_INTEGRATION = 15;
 
-    
+    /**
+     * @var int restaurnat accountant role
+     */
+    const ROLE_RESTAURANT_ACCOUNTANT = 16;
+
+    /**
+     * @var int restaurnat accountant buyer
+     */
+    const ROLE_RESTAURANT_BUYER = 17;
+
+    /**
+     * @var int restaurnat accountant junior buyer
+     */
+    const ROLE_RESTAURANT_JUNIOR_BUYER = 18;
+
+
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [
             ':orgType' => $organization_type

@@ -109,6 +109,50 @@ class ClientController extends DefaultController
                             Role::getFranchiseeEditorRoles(),
                         ],
                     ],
+                    [
+                        'actions' => [
+                            'index',
+                            'suppliers',
+                            'tutorial',
+                            'analytics',
+                            'chkmail',
+                            'check-email',
+                            'create',
+                            'edit-catalog',
+                            'events',
+                            'invite',
+                            'messages',
+                            're-send-email-invite',
+                            'sidebar',
+                            'support',
+                            'view-catalog',
+                            'view-supplier',
+                            'payments',
+                            'price-stat'
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_ACCOUNTANT,
+                            Role::ROLE_RESTAURANT_BUYER,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'index',
+                            'tutorial',
+                            'events',
+                            'invite',
+                            'messages',
+                            'sidebar',
+                            'support',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                        ],
+                    ],
                 ],
                 /* 'denyCallback' => function($rule, $action) {
                   throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');

@@ -9,9 +9,40 @@ use common\models\Journal;
 use common\models\search\JournalSearch;
 use yii\data\Sort;
 use yii\web\NotFoundHttpException;
+use common\components\AccessRule;
+use yii\filters\AccessControl;
+use common\models\Role;
 
 class JournalController extends Controller
 {
+
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules' => [
+                    [
+                        'allow' => false,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_BUYER,
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                        ],
+                    ],
+                    [
+                        'allow' => TRUE,
+                        'roles' => ['@'],
+                    ],
+
+                ],
+            ],
+        ];
+    }
 
     public function actionIndex()
     {

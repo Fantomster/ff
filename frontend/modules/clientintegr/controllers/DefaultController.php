@@ -7,6 +7,10 @@ use yii\web\Controller;
 use common\models\Organization;
 use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
 // use yii\mongosoft\soapserver\Action;
+use common\components\AccessRule;
+use yii\filters\AccessControl;
+use common\models\Role;
+
 
 /**
  * Description of SiteController
@@ -23,6 +27,37 @@ class DefaultController extends \frontend\controllers\DefaultController {
     private $sessionId = '';
     private $username;
     private $password;
+
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules' => [
+                    [
+                        /*'actions' => [
+                            '*',
+                        ],*/
+                        'allow' => false,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_BUYER,
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                        ],
+                    ],
+                    [
+                        'allow' => TRUE,
+                        'roles' => ['@'],
+                    ],
+
+                ],
+            ],
+        ];
+    }
     
         
     public function actionIndex() {

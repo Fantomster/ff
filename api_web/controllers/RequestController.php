@@ -101,6 +101,7 @@ class RequestController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "status": 1,
+     *                                   "name": "продукт"
      *                               },
      *                               "pagination":{
      *                                   "page":1,
@@ -638,7 +639,8 @@ class RequestController extends WebApiController
      *     )
      * )
      */
-    public function actionSetContractor() {
+    public function actionSetContractor()
+    {
         $this->response = $this->container->get('RequestWebApi')->setContractor($this->request);
     }
 }

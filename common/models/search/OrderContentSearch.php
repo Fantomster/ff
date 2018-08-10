@@ -57,7 +57,7 @@ class OrderContentSearch extends OrderContent
         $contentTable = OrderContent::tableName();
 
         $contentTableAttributes= (new OrderContent())->attributes();
-        $contentTableFields = [];
+        $contentTableFields = [$contentTable.'.id'];
 
         foreach ($contentTableAttributes as $key=>$value) {
             if($key != 'article') {

@@ -223,31 +223,14 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'pageSummary' => true
                                     ],
                                     [
-                                        'attribute' => 'vat',
-                                        'format' => 'raw',
-                                        'label' => 'НДС',
-                                        'contentOptions' => ['class' => 'text-right'],
-                                        'value' => function ($model) {
-                                            //   $const = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-                                            //  if($const) {
-                                            //      $result = $const->getPconstValue() / 100;
-                                            //  }
-                                            return isset($model->vat) ? $model->vat / 100 : null;
-                                        }
-                                    ],
-                                    //
-                                    [
                                         'class' => 'yii\grid\ActionColumn',
-                                        'contentOptions' => ['style' => 'width: 6%;'],
+                                        'headerOptions' => ['style' => 'width: 6%; text-align:center'],
+                                        'contentOptions' => ['style' => 'width: 6%; text-align:center'],
                                         'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                        // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
-                                        'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                        'header' => '<span align="center">НДС</br>' .
+                                            ' <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
                                             '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
                                             '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
-
-                                        //  'sort' => false,
-                                        //  '' => false,
-
                                         'visibleButtons' => [
                                             'zero' => function ($model, $key, $index) {
                                                 // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
@@ -302,6 +285,15 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                     ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
                                         ]
+                                    ],
+                                    [
+                                        'label' => 'Сумма с НДС',
+                                        'format' => ['decimal', 2],
+                                        'hAlign' => 'right',
+                                        'value' =>  function ($model) {
+                                            $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
+                                            return $sumsnds;
+                                        }
                                     ],
                                     [
                                         'class' => 'yii\grid\ActionColumn',

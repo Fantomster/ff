@@ -133,6 +133,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             $wmodel->readytoexport = 0;
         } else {
             $wmodel->readytoexport = 1;
+            $wmodel->status_id = 4;
         }
 
         if (!$wmodel->save(false)) {

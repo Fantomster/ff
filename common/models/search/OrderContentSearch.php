@@ -56,7 +56,17 @@ class OrderContentSearch extends OrderContent
         $productTable = CatalogBaseGoods::tableName();
         $contentTable = OrderContent::tableName();
 
-        $query->select([$contentTable.'.*, product.product, (' . $contentTable.'.quantity * ' . $contentTable . '.price) AS total']);
+        $contentTableAttributes= (new OrderContent())->attributes();
+        $contentTableFields = [];
+
+        foreach ($contentTableAttributes as $key=>$value){
+            if($key != 'article') {
+                $contentTableFields[] = $contentTable.'.'.$value;
+            }
+        }
+
+        $contentTableFields = implode(", ", $contentTableFields);
+        $query->select([$contentTableFields.', product.product, COALESCE('.$contentTable.'.article, product.article) as article, (' . $contentTable.'.quantity *' . $contentTable . '.price) AS total']);
         
         // add conditions that should always apply here
         $query->joinWith(['product' => function ($query) use ($productTable) {

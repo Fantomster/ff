@@ -30,21 +30,27 @@ class iikoProductSearch extends iikoProduct
     {
         $query = iikoProduct::find();
 
-        if(isset($params['productSearch']) && $params['productSearch'] != 'all'){
+        if (isset($params['productSearch']) && $params['productSearch'] != 'all') {
             $query->andWhere([
                 'product_type' => $params['productSearch']
             ]);
         }
 
-        if(isset($params['cookingPlaceSearch']) && $params['cookingPlaceSearch'] != 'all'){
+        if (isset($params['cookingPlaceSearch']) && $params['cookingPlaceSearch'] != 'all') {
             $query->andWhere([
                 'cooking_place_type' => $params['cookingPlaceSearch']
             ]);
         }
 
-        if(isset($params['unitSearch']) && $params['unitSearch'] != 'all'){
+        if (isset($params['unitSearch']) && $params['unitSearch'] != 'all') {
             $query->andWhere([
                 'unit' => $params['unitSearch']
+            ]);
+        }
+
+        if (isset($params['org_id'])) {
+            $query->andWhere([
+                'org_id' => $params['org_id']
             ]);
         }
 
@@ -62,42 +68,45 @@ class iikoProductSearch extends iikoProduct
     }
 
 
-    public function getProductType(){
+    public function getProductType()
+    {
         $rows = (new \yii\db\Query())
             ->select(['product_type'])
             ->distinct()
             ->from('iiko_product')
             ->all(\Yii::$app->get('db_api'));
         $arr = [];
-        foreach ($rows as $row){
+        foreach ($rows as $row) {
             $arr[$row['product_type']] = $row['product_type'];
         }
         return $arr;
     }
 
 
-    public function getCoockingPlaceType(){
+    public function getCoockingPlaceType()
+    {
         $rows = (new \yii\db\Query())
             ->select(['cooking_place_type'])
             ->distinct()
             ->from('iiko_product')
             ->all(\Yii::$app->get('db_api'));
         $arr = [];
-        foreach ($rows as $row){
+        foreach ($rows as $row) {
             $arr[$row['cooking_place_type']] = $row['cooking_place_type'];
         }
         return $arr;
     }
 
 
-    public function getUnit(){
+    public function getUnit()
+    {
         $rows = (new \yii\db\Query())
             ->select(['unit'])
             ->distinct()
             ->from('iiko_product')
             ->all(\Yii::$app->get('db_api'));
         $arr = [];
-        foreach ($rows as $row){
+        foreach ($rows as $row) {
             $arr[$row['unit']] = $row['unit'];
         }
         return $arr;

@@ -18,10 +18,14 @@ $this->registerCss("
     .select2-selection__clear{display: none;}
         ");
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
-$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-$iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $org])->one();
-if ($iikoPconst) {
-    $arr = unserialize($iikoPconst->value);
+
+$dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org]));
+$arr = [];
+$iikoSelectedGoods = \api\common\models\iiko\iikoSelectedProduct::findAll(['organization_id' => $org]);
+if ($iikoSelectedGoods) {
+    foreach ($iikoSelectedGoods as $good) {
+        $arr[] = $good->product_id;
+    }
 }
 
 Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
@@ -54,6 +58,7 @@ $form = ActiveForm::begin([
         ?>
     </div>
 </div>
+<?php echo Html::hiddenInput('selected_goods'); ?>
 <?php
 echo \kartik\grid\GridView::widget([
     'dataProvider' => $dataProvider,

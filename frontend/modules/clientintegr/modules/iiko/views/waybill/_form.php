@@ -14,11 +14,15 @@ use yii\web\JsExpression;
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoWaybill */
 /* @var $form yii\bootstrap\ActiveForm */
+$org = User::findOne(Yii::$app->user->id)->organization_id;
+$selectedStore = ArrayHelper::map(\api\common\models\iiko\iikoSelectedStore::find()->with('iikoStore')->where(['organization_id' => $org])->all(), 'iikoStore.id', 'iikoStore.denom');
+if (!$selectedStore || count($selectedStore) == 0) {
+    $selectedStore = ArrayHelper::map(\api\common\models\iiko\iikoStore::find()->where(['org_id' => $org, 'is_active' => 1])->all(), 'id', 'denom');
+}
 ?>
 
 <div class="dict-agent-form">
 
-    <?php $org = User::findOne(Yii::$app->user->id)->organization_id;?>
     <?php $agentModel = \api\common\models\iiko\iikoAgent::findOne(['org_id' => $org, 'uuid' => $model->agent_uuid]); ?>
     <?php $data = ($agentModel) ? [$agentModel->uuid => $agentModel->denom] : []; ?>
 
@@ -37,10 +41,10 @@ use yii\web\JsExpression;
         'pluginOptions' => [
             'allowClear' => true],
         'id' => 'orgFilter'
-        ]);
+    ]);
     ?>
 
-    <?php echo $form->field($model, 'store_id')->dropDownList(ArrayHelper::map(\api\common\models\iiko\iikoStore::find()->where(['org_id' => $org, 'is_active' => 1])->all(), 'id', 'denom')) ?>
+    <?php echo $form->field($model, 'store_id')->dropDownList($selectedStore) ?>
     <?php
 
     if (!$model->doc_date) {

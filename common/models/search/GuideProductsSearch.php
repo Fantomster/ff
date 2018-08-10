@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\CatalogGoodsBlocked;
 use Yii;
 use yii\data\SqlDataProvider;
 
@@ -64,6 +65,10 @@ class GuideProductsSearch extends \yii\base\Model
         if ($this->price_to) {
             $where[] = ['cbg.price', '<=', $this->price_to];
         }
+
+        //Блокировка продуктов
+        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($clientId));
+        $where[] = ['cbg.id', 'NOT IN', '('.$blockedItems.')'];
 
         if (!empty($where)) {
             $s = '';

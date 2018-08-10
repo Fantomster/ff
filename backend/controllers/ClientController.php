@@ -159,6 +159,7 @@ class ClientController extends Controller {
     public function actionUpdate($id) {
         $user = User::findOne(['id' => $id]);
         $profile = Profile::findOne(['user_id' => $id]);
+        $currentUser = User::findOne(Yii::$app->user->identity->id);
 
         if(in_array($user->role_id, Role::getExceptionArray())){
             throw new HttpException(403, Yii::t('error', 'backend.controllers.client.moon', ['ru'=>'Редактирование этого аккаунта отключено во имя Луны!']));
@@ -181,9 +182,14 @@ class ClientController extends Controller {
                 $user->save();
                 //$profile->email = $user->getEmail();
                 $profile->save();
+                if($currentUser->role_id == ROLE::ROLE_ADMIN) {
+                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
+                }
                 return $this->redirect(['client/view', 'id' => $user->id]);
             } else {
-                return $this->render('update', compact('user', 'profile'));
+                $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $user->organization_id));
+                $selected = $user->getRelationUserOrganizationRoleID($id);
+                return $this->render('update', compact('user', 'profile', 'dropDown', 'selected', 'currentUser'));
             }
         } catch (Exception $e) {
             throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.this_is_it', ['ru'=>'Ошибочка вышла!']));

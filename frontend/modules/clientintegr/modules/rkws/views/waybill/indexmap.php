@@ -5,15 +5,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
-use common\components\Torg12Invoice;
 
 
 ?>
@@ -61,6 +56,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
+	<p>
+		<span>Контрагент: <?=$agentName?></span> |
+		<span>Номер заказа: <?=$wmodel->order_id?></span> |
+		<span>Номер накладной: <?=$wmodel->num_code?></span> |
+		<span>Склад: <?=$storeName?></span>
+	</p>
 </section>
 <section class="content">
     <div class="catalog-index">

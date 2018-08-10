@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoodsBlocked;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
@@ -21,6 +22,7 @@ class OrderCatalogSearch extends \yii\base\Model
     public $catalogs;
     public $client;
     public $searchCategory;
+    public $product_block = false;
 
     /**
      * @inheritdoc
@@ -103,6 +105,13 @@ class OrderCatalogSearch extends \yii\base\Model
                 $params_sql[':price_end'] = $this->searchPrice['to'];
                 $where_all .= ' AND price <= :price_end ';
             }
+        }
+
+        if($this->product_block)
+        {
+            $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
+            $blockedItems = empty($blockedList) ? '0' : implode(",", $blockedList);
+            $where_all .= ' AND id NOT IN ('.$blockedItems.')';
         }
 
         $sql = "

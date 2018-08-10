@@ -60,7 +60,7 @@ class Catalog extends \yii\db\ActiveRecord {
         return [
             [['name', 'supp_org_id', 'type'], 'required'],
             [['supp_org_id', 'type', 'status'], 'integer'],
-            [['created_at'], 'safe'],
+            [['created_at', 'mapping', 'index_column'], 'safe'],
             [['name'], 'string', 'max' => 255],
                 //['type', 'uniqueBaseCatalog'],
         ];

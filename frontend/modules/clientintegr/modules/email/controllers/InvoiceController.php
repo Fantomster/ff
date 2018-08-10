@@ -32,6 +32,7 @@ class InvoiceController extends Controller
         $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->pagination->pageParam = 'page_outer';
         $vi = 'index';
 
 

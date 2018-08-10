@@ -185,6 +185,3 @@ JS;
 $this->registerJs($customJs, \yii\web\View::POS_READY);
 \yii\helpers\Url::remember();
 ?>
-
-
-

@@ -14,6 +14,12 @@ $roles = [
     \common\models\Role::getFranchiseeEditorRoles(),
 ];
 
+$disabled_roles = [
+    \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT,
+    \common\models\Role::ROLE_RESTAURANT_BUYER,
+    \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+];
+
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
 if ($franchiseeManager && $franchiseeManager->phone_manager) {
     if ($franchiseeManager->additional_number_manager) {
@@ -59,15 +65,15 @@ $licenses = $user->organization->getLicenseList();
                             'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
                         ],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'], 'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER)],
 //                        [
 //                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']),
 //                            'icon' => 'envelope',
 //                            'url' => ['client/messages'],
 //                            ],
                         ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl'][Yii::$app->language]['market'], 'options' => ['class' => 'l-fmarket']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.requests', ['ru'=>'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.anal', ['ru'=>'Аналитика']), 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.requests', ['ru'=>'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket'], 'visible' => !in_array($user->role_id, $disabled_roles)],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.anal', ['ru'=>'Аналитика']), 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs'], 'visible' => !in_array($user->role_id, $disabled_roles)],
 //                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                      //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
@@ -75,7 +81,7 @@ $licenses = $user->organization->getLicenseList();
                             'url' => ['/clientintegr/merc/default'],
                             'options' => ['class' => 'hidden-xs'],
                             'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
-                            //'visible' => isset($licenses['mercury'])
+                            'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT),
                             /*'items' => [
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
@@ -91,12 +97,13 @@ $licenses = $user->organization->getLicenseList();
                             'icon' => 'gears',
                             'url' => '#', //['client/settings'],
                             'options' => ['class' => "hidden-xs"],
+                            'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT),
                             'items' => [
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.custom', ['ru'=>'Общие']),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/settings'],
-                                    //'visible' => in_array($user->role_id,$roles)
+                                    'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT)//in_array($user->role_id,$roles)
                                 ],
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
@@ -108,19 +115,19 @@ $licenses = $user->organization->getLicenseList();
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.employees', ['ru'=>'Сотрудники']),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/employees'],
-                                    //'visible' => in_array($user->role_id,$roles)
+                                    'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT)//in_array($user->role_id,$roles)
                                 ],
                                 [
                                     'label' => Yii::t('message', 'frontend.views.layouts.client.left.notifications', ['ru'=>'Уведомления']),
                                     'icon' => 'circle-o',
                                     'url' => ['/settings/notifications'],
-                                    //'visible' => in_array($user->role_id,$roles)
+                                    'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT) //in_array($user->role_id,$roles)
                                 ],
                                 [
                                     'label' => Yii::t('app', 'Платежи'),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/payments'],
-                                    //'visible' => in_array($user->role_id,$roles)
+                                    'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT)//in_array($user->role_id,$roles)
                                 ],
                             ]
                         ],

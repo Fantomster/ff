@@ -38,6 +38,12 @@ use common\models\User;
                     '1000' => '10',
                     '1800'=>'18'
                 ]);
+             } else if ($pConst->denom === 'auto_unload_invoice') {
+                 echo $form->field($model, 'value')->dropDownList([
+                     '0' => 'Выключено',
+                     '1' => 'Включено',
+                     '2' => 'Полуавтомат',
+                 ]);
             } else {
                 echo $form->field($model, 'value')->dropDownList([
                     '0' => Yii::t('app', 'frontend.modules.form.off', ['ru'=>'Выключено']),

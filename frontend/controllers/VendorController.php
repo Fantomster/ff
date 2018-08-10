@@ -93,6 +93,7 @@ class VendorController extends DefaultController {
                             'events',
                             'get-sub-cat',
                             'import-base-catalog-from-xls',
+                            'import-base-catalog',
                             'import',
                             'import-restaurant',
                             'list-catalog',
@@ -390,10 +391,15 @@ class VendorController extends DefaultController {
                                     where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
                                     andFilterWhere(['LIKE', 'name', $searchString])->all();
                 }
-                return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type'));
+            } else {
+                $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
+                                where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
+                                andFilterWhere(['LIKE', 'name', $searchString])->all();
             }
-            return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog'));
+            return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type'));
         }
+        return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog'));
+        //}
     }
 
     public function actionSupplierStartCatalogCreate() {
@@ -568,8 +574,7 @@ class VendorController extends DefaultController {
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         $cat_id = $baseCatalog->id;
-
-        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id'));
+        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id', 'currentUser'));
     }
 
     public function actionImport($id) {

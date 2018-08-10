@@ -291,6 +291,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
             return true;
         }
+        return false;
     }
 
     /**

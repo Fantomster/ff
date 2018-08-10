@@ -133,6 +133,7 @@ class OneSWaybillData extends \yii\db\ActiveRecord
             $wmodel->readytoexport = 0;
         } else {
             $wmodel->readytoexport = 1;
+            $wmodel->status_id = 3;
         }
 
         if (!$wmodel->save(false)) {

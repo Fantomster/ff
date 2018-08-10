@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
 use api\common\models\iiko\iikoAgent;
 use api\common\models\iiko\iikoPconst;
+use api\common\models\iiko\iikoSelectedProduct;
 use api\common\models\VatData;
 use api\common\models\iiko\iikoStore;
 use common\models\Organization;
@@ -229,23 +230,20 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $out = [];
         if (!is_null($term)) {
             $organizationID = User::findOne(Yii::$app->user->id)->organization_id;
-            $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $organizationID])->one();
-
-            if($iikoPconst){
-                $arr = unserialize($iikoPconst->value);
-            }
-            $arrayString = '(';
-            $i=1;
-            foreach ($arr as $one){
-                $arrayString.=$one;
-                if($i!=count($arr)){
-                    $arrayString.=',';
+            $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+            if (count($arr)) {
+                $arrayString = '(';
+                $i = 1;
+                foreach ($arr as $one) {
+                    $arrayString .= $one;
+                    if ($i != count($arr)) {
+                        $arrayString .= ',';
+                    }
+                    $i++;
                 }
-                $i++;
-            }
-            $arrayString.= ')';
+                $arrayString .= ')';
 
-            $sql = <<<SQL
+                $sql = <<<SQL
             SELECT id, denom as text FROM (
                   (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term AND id in $arrayString )
                     UNION
@@ -258,6 +256,22 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                   END
             ) as t
 SQL;
+            } else {
+                $sql = <<<SQL
+            SELECT id, denom as text FROM (
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term )
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ LIMIT 10)
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ LIMIT 5)
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                     THEN 1
+                     ELSE 2
+                  END
+            ) as t
+SQL;
+            }
+
 
             /**
              * @var $db Connection

@@ -43,12 +43,10 @@ use yii\widgets\Pjax;
             break;
         case \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX:
             $arr = [];
-            $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_stores_list"')->andWhere('iiko_pconst.org=' . $org)->one();
-            if ($iikoPconst && !empty($iikoPconst->value)) {
-                try {
-                    $arr = unserialize($iikoPconst->value);
-                } catch (Exception $e) {
-                    return $e->getMessage();
+            $iikoSelectedStores = \api\common\models\iiko\iikoSelectedStore::findAll(['organization_id' => $org]);
+            if ($iikoSelectedStores) {
+                foreach ($iikoSelectedStores as $store) {
+                    $arr[] = $store->store_id;
                 }
             }
             $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org, 'is_active' => 1]);

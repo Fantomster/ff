@@ -109,7 +109,8 @@ class OrderCatalogSearch extends \yii\base\Model
 
         if($this->product_block)
         {
-            $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($this->client->id));
+            $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
+            $blockedItems = empty($blockedList) ? '0' : implode(",", $blockedList);
             $where_all .= ' AND id NOT IN ('.$blockedItems.')';
         }
 

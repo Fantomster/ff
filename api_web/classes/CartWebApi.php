@@ -23,6 +23,7 @@ use api_web\exceptions\ValidationException;
  */
 class CartWebApi extends \api_web\components\WebApi
 {
+
     /**
      * Добавляем/Удаляем товар в заказе
      * @param array $post
@@ -270,17 +271,25 @@ class CartWebApi extends \api_web\components\WebApi
             $order->calculateTotalPrice();
             $cart->updated_at = new Expression('NOW()');
             $cart->save();
-            //Сообщение в очередь поставщику, что есть новый заказ
-            Notice::init('Order')->sendOrderToTurnVendor($vendor);
-            //Емайл и смс о новом заказе
-            Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
-            //Сообщение в очередь, Изменение количества товара в корзине
-            Notice::init('Order')->sendOrderToTurnClient($client);
             $transaction->commit();
-            return true;
+
+            $orderCreated = true;
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
+        }
+        if ($orderCreated) {
+            try {
+                //Сообщение в очередь поставщику, что есть новый заказ
+                Notice::init('Order')->sendOrderToTurnVendor($vendor);
+                //Емайл и смс о новом заказе
+                Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
+                //Сообщение в очередь, Изменение количества товара в корзине
+                Notice::init('Order')->sendOrderToTurnClient($client);
+            } catch (\Exception $e) {
+                \Yii::error($e->getMessage());
+            }
+            return true;
         }
     }
 
@@ -298,10 +307,10 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         $result = (new Query())->from('cart as c')
-            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
-            ->andWhere(['c.organization_id' => $this->user->organization->id])
-            ->andWhere(['cc.product_id' => $id])
-            ->one();
+                ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+                ->andWhere(['c.organization_id' => $this->user->organization->id])
+                ->andWhere(['cc.product_id' => $id])
+                ->one();
 
         if (!empty($result['quantity'])) {
             $return = round($result['quantity'], 3);
@@ -447,10 +456,10 @@ class CartWebApi extends \api_web\components\WebApi
     {
         $model = $row->product;
 
-        $item['id'] = (int)$model['id'];
+        $item['id'] = (int) $model['id'];
         $item['product'] = $model['product'];
-        $item['catalog_id'] = (int)$model['cat_id'];
-        $item['category_id'] = isset($model['model']->category) ? (int)$model['model']->category->id : 0;
+        $item['catalog_id'] = (int) $model['cat_id'];
+        $item['category_id'] = isset($model['model']->category) ? (int) $model['model']->category->id : 0;
         $item['price'] = round($model['price'], 2);
         $item['rating'] = round($model['model']->ratingStars, 1);
         $item['supplier'] = $row->vendor->name;
@@ -465,4 +474,5 @@ class CartWebApi extends \api_web\components\WebApi
         $item['comment'] = $row->comment;
         return $item;
     }
+
 }

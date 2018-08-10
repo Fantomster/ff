@@ -407,8 +407,8 @@ SQL;
     {
         $ids = Yii::$app->request->post('ids');
         $scsCount = 0;
-        $transaction = Yii::$app->db_api->beginTransaction();
         foreach ($ids as $id){
+            $transaction = Yii::$app->db_api->beginTransaction();
             try{
                 $model = $this->findModel($id);
                 //Выставляем статус отправляется
@@ -422,7 +422,7 @@ SQL;
             } catch (\Exception $e){
                 //Выставляем статус обратно
                 $transaction->rollBack();
-                return ['success' => false, 'error' => $e->getMessage()];
+                return ['success' => false, 'error' => $e->getMessage(), 'actionSendErrors' => $res['error']];
             }
         }
         if(count($ids) == $scsCount){

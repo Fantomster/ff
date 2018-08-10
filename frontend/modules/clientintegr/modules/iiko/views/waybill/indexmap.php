@@ -237,25 +237,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'label' => 'Сумма б/н'
                                 ],
                                 [
-                                    'attribute' => 'vat',
-                                    'format' => 'raw',
-                                    'label' => 'НДС',
-                                    'contentOptions' => ['class' => 'text-right'],
-                                    'value' => function ($model) {
-                                        //   $const = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);
-                                        //  if($const) {
-                                        //      $result = $const->getPconstValue() / 100;
-                                        //  }
-                                        return isset($model->vat) ? $model->vat / 100 : null;
-                                    }
-                                ],
-                                //
-                                [
                                     'class' => 'yii\grid\ActionColumn',
-                                    'contentOptions' => ['style' => 'width: 6%;'],
+                                    'headerOptions' => ['style' => 'width: 6%; text-align:center'],
+                                    'contentOptions' => ['style' => 'width: 6%; text-align:center'],
                                     'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                    // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
-                                    'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                    'header' => '<span align="center">НДС</br>' .
+                                        ' <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
                                         '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
                                         '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
 

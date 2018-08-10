@@ -435,13 +435,14 @@ SQL;
                 $res = $this->actionSend($id);
                 if($res['success'] === true){
                     $scsCount++;
+                } else {
+                    throw new \Exception($res['error']);
                 }
                 $transaction->commit();
-            } catch (\Exception $e){
+            } catch (\Throwable $e){
                 //Выставляем статус обратно
                 $transaction->rollBack();
-
-                return ['success' => false, 'error' => $e->getMessage(), 'actionSendErrors' => $res['error']];
+                return ['success' => false, 'error' => $e->getMessage()];
             }
         }
         if(count($ids) == $scsCount){

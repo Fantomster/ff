@@ -67,11 +67,12 @@ class CatalogGoodsBlocked extends \yii\db\ActiveRecord
     {
         $client = Organization::findOne($clientId);
         $root = isset($client->parent_id) ? Organization::findOne($client->parent_id) : $client;
-        return  (new \yii\db\Query)
+        $result =  (new \yii\db\Query)
             ->select('cbg_id')
             ->from(CatalogGoodsBlocked::tableName())
             ->where(['owner_organization_id' => $root->id])
             ->createCommand()
             ->queryColumn();
+        return !empty($result) ? $result : [0];
     }
 }

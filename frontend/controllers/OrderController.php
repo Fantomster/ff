@@ -1754,11 +1754,10 @@ class OrderController extends DefaultController
     public function actionRepeat($id)
     {
         $order = Order::findOne(['id' => $id]);
-
         $newContent = [];
         $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($order->client_id));
-        $order->orderContent = OrderContent::find(['order_id' => 'id'])->andWhere(["AND", "product_id NOT IN ($blockedItems)"]);
-        foreach ($order->orderContent as $position) {
+        $orderContent = OrderContent::find()->where(['order_id' => $id])->andWhere(["AND", "product_id NOT IN ($blockedItems)"])->all();
+        foreach ($orderContent as $position) {
             $attributes = $position->copyIfPossible();
             if ($attributes) {
                 $newContent[] = ['product_id' => $position->product_id, 'quantity' => $position->quantity];

@@ -59,53 +59,12 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();
-
-        if (isset($post['selection'])) {
-            $products = $post['selection'];
-            $allSelectedProducts = iikoSelectedProduct::findAll(['organization_id' => $org]);
-            foreach ($allSelectedProducts as &$product) {
-                if (!in_array($product->product_id, $products)) {
-                    $product->delete();
-                }
-            }
-            foreach ($products as $productID) {
-                $selectedProduct = iikoSelectedProduct::findOne(['product_id' => $productID, 'organization_id' => $org]);
-                if (!$selectedProduct) {
-                    $selectedProduct = new iikoSelectedProduct();
-                    $selectedProduct->product_id = $productID;
-                    $selectedProduct->organization_id = $org;
-                    $selectedProduct->save();
-                }
-            }
-            $post['iikoPconst']['value'] = iikoSelectedProduct::find()->where(['organization_id' => $org])->count();
-        } else {
-            if (isset($post['selected_goods'])) {
-                $allSelectedProducts = iikoSelectedProduct::findAll(['organization_id' => $org]);
-                foreach ($allSelectedProducts as &$product) {
-                    $product->delete();
-                }
-                $post['iikoPconst']['value'] = iikoSelectedProduct::find()->where(['organization_id' => $org])->count();
-            }
+        if (isset($post['selection']) || isset($post['selected_goods'])) {
+            $post['iikoPconst']['value'] = $this->handleSelectedProducts($post, $org);
         }
 
         if (isset($post['Stores'])) {
-            $stores = $post['Stores'];
-            foreach ($stores as $storeID => $selected) {
-                $selectedStore = iikoSelectedStore::findOne(['store_id' => $storeID, 'organization_id' => $org]);
-                if ($selected == '1') {
-                    if (!$selectedStore) {
-                        $selectedStore = new iikoSelectedStore();
-                        $selectedStore->store_id = $storeID;
-                        $selectedStore->organization_id = $org;
-                        $selectedStore->save();
-                    }
-                } else {
-                    if ($selectedStore) {
-                        $selectedStore->delete();
-                    }
-                }
-            }
-            $post['iikoPconst']['value'] = iikoSelectedStore::find()->where(['organization_id' => $org])->count();
+            $post['iikoPconst']['value'] = $this->handleSelectedStores($post, $org);
         }
 
         if ($pConst->load($post) && $pConst->save()) {
@@ -123,6 +82,61 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             ]);
         }
 
+    }
+
+
+    private function handleSelectedProducts($post, $org)
+    {
+        if (isset($post['selection'])) {
+            $products = $post['selection'];
+            $allSelectedProducts = iikoSelectedProduct::findAll(['organization_id' => $org]);
+            foreach ($allSelectedProducts as &$product) {
+                if (!in_array($product->product_id, $products)) {
+                    $product->delete();
+                }
+            }
+            foreach ($products as $productID) {
+                $selectedProduct = iikoSelectedProduct::findOne(['product_id' => $productID, 'organization_id' => $org]);
+                if (!$selectedProduct) {
+                    $selectedProduct = new iikoSelectedProduct();
+                    $selectedProduct->product_id = $productID;
+                    $selectedProduct->organization_id = $org;
+                    $selectedProduct->save();
+                }
+            }
+            $count = iikoSelectedProduct::find()->where(['organization_id' => $org])->count();
+        } else {
+            if (isset($post['selected_goods'])) {
+                $allSelectedProducts = iikoSelectedProduct::findAll(['organization_id' => $org]);
+                foreach ($allSelectedProducts as &$product) {
+                    $product->delete();
+                }
+                $count = iikoSelectedProduct::find()->where(['organization_id' => $org])->count();
+            }
+        }
+        return $count;
+    }
+
+
+    private function handleSelectedStores($post, $org)
+    {
+            $stores = $post['Stores'];
+            foreach ($stores as $storeID => $selected) {
+                $selectedStore = iikoSelectedStore::findOne(['store_id' => $storeID, 'organization_id' => $org]);
+                if ($selected == '1') {
+                    if (!$selectedStore) {
+                        $selectedStore = new iikoSelectedStore();
+                        $selectedStore->store_id = $storeID;
+                        $selectedStore->organization_id = $org;
+                        $selectedStore->save();
+                    }
+                } else {
+                    if ($selectedStore) {
+                        $selectedStore->delete();
+                    }
+                }
+            }
+            return iikoSelectedStore::find()->where(['organization_id' => $org])->count();
     }
 
 

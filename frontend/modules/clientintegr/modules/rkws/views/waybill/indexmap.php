@@ -5,15 +5,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
-use common\components\Torg12Invoice;
 
 
 ?>
@@ -61,6 +56,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
+	<p>
+		<span>Контрагент: <?=$agentName?></span> |
+		<span>Номер заказа: <?=$wmodel->order_id?></span> |
+		<span>Номер накладной: <?=$wmodel->num_code?></span> |
+		<span>Склад: <?=$storeName?></span>
+	</p>
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -145,10 +146,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             [
                                 'attribute' => 'product_id',
                                 'label' => 'ID в Mixcart',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'fproductnameProduct',
                                 'label' => 'Наименование продукции',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'product_id',
@@ -157,12 +160,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед. изм. Mixcart',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
                                 'attribute' => 'pdenom',
                                 'label' => 'Наименование в Store House',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 'width' => '210px',
                                 'refreshGrid' => true,
 
@@ -205,11 +209,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед.изм. StoreHouse',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'defquant',
                                 'format' => 'raw',
                                 'label' => 'Кол-во в Заказе',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
@@ -225,7 +231,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal', 6],
                                 'pageSummary' => true,
@@ -245,7 +251,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal'],
                                 'footer' => 'Итого сумма без НДС:',
@@ -266,7 +272,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal', 2],
                                 //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
@@ -274,44 +280,16 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'pageSummary' => true,
                                 'label' => 'Сумма б/н'
                             ]);
-
-
-                        array_push($columns,
-                            [
-                                'attribute' => 'vat',
-                                'format' => 'raw',
-                                'label' => 'НДС',
-                                'contentOptions' => ['class' => 'text-right'],
-                                'value' => function ($model) {
-                                    return $model->vat / 100;
-                                }
-                            ]);
-
-                        /*   [
-                            'attribute' => 'vat',
-                            'format' => 'raw',
-                            'label' => 'Ставка НДС',
-                            'contentOptions' => ['class' => 'text-right'],
-                            'value' => function($model) {
-                               $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue()/100;
-                               return $exportVAT;
-                            }
-                           ], */
-
-
-
                         array_push($columns,
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'contentOptions' => ['style' => 'width: 6%;'],
+                                'headerOptions' => ['style' => 'width: 6%; text-align:center'],
+                                'contentOptions' => ['style' => 'width: 6%; text-align:center'],
                                 'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
-                                'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                'header' => '<span align="center">НДС</br>' .
+                                    ' <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
                                     '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
                                     '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
-
-                                //  'sort' => false,
-                                //  '' => false,
 
                                 'visibleButtons' => [
                                     'zero' => function ($model, $key, $index) {
@@ -325,16 +303,23 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         if ($model->vat == 0) {
                                             $tClass = "label label-success";
                                             $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-
                                         } else {
                                             $tClass = "label label-default";
                                             $tStyle = "";
                                         }
 
-                                        //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => 0]);
-                                        return \yii\helpers\Html::a('&nbsp;0', $customurl,
-                                            ['title' => Yii::t('backend', '0%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                        $customurl = Yii::$app->getUrlManager()->createUrl([
+                                            'clientintegr/rkws/waybill/chvat',
+                                            'id' => $model->id,
+                                            'vat' => 0
+                                        ]);
+
+                                        return \yii\helpers\Html::a('&nbsp;0', $customurl, [
+                                            'title' => Yii::t('backend', '0%'),
+                                            'data-pjax' => 0,
+                                            'class' => $tClass,
+                                            'style' => $tStyle
+                                        ]);
                                     },
                                     'ten' => function ($url, $model) {
 
@@ -367,6 +352,16 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
                                 ]
+                            ],
+                            [
+                                'label' => 'Сумма с НДС',
+                                'format' => ['decimal', 2],
+                                'hAlign' => 'right',
+                                'vAlign' => 'bottom',
+                                'value' =>  function ($model) {
+                                    $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
+                                    return $sumsnds;
+                                }
                             ]);
 
                         array_push($columns,

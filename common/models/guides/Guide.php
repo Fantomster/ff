@@ -2,6 +2,7 @@
 
 namespace common\models\guides;
 
+use common\models\CatalogGoodsBlocked;
 use Yii;
 use common\models\Organization;
 use yii\db\Expression;
@@ -128,6 +129,10 @@ class Guide extends \yii\db\ActiveRecord
      */
     public function getGuideProducts()
     {
+        if (isset($this->client_id)) {
+            $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($this->client_id));
+            return $this->hasMany(GuideProduct::className(), ['guide_id' => 'id'])->andWhere(["AND", "cbg_id not in ($blockedItems)"]);
+        }
         return $this->hasMany(GuideProduct::className(), ['guide_id' => 'id']);
     }
 
@@ -136,7 +141,10 @@ class Guide extends \yii\db\ActiveRecord
      */
     public function getGuideProductsIds()
     {
-        $query = (new \yii\db\Query)->select('cbg_id')->where(['guide_id' => $this->id])->from(GuideProduct::tableName())->orderBy(['id' => 'desc'])->createCommand()->queryColumn();
+        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($this->client_id));
+        $query = (new \yii\db\Query)->select('cbg_id')->where(['guide_id' => $this->id])->from(GuideProduct::tableName())
+            ->andWhere(["AND","cbg_id not in ($blockedItems)"])
+            ->orderBy(['id' => 'desc'])->createCommand()->queryColumn();
         return array_map('intval', $query);
     }
 
@@ -145,7 +153,8 @@ class Guide extends \yii\db\ActiveRecord
      */
     public function getProductCount()
     {
-        return GuideProduct::find()->where(['guide_id' => $this->id])->count();
+        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($this->client_id));
+        return GuideProduct::find()->where(['guide_id' => $this->id])->andWhere(["AND","cbg_id not in ($blockedItems)"])->count();
     }
 
     /**

@@ -46,7 +46,7 @@ $this->registerCss("
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model, $key, $index, $column) {
                 $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $model->id]);
-        	    if ($nacl['status_id'] !== 1 || $nacl['readytoexport'] === 0) {
+        	    if ($nacl['status_id'] !== 4 || $nacl['readytoexport'] === 0) {
                     return ['disabled' => true];
                 }
             }

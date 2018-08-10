@@ -21,11 +21,42 @@ use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use Yii;
 use yii\bootstrap\ActiveForm;
 use yii\web\Response;
+use common\components\AccessRule;
+use yii\filters\AccessControl;
+use common\models\Role;
 
 class TransportVsdController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
     public $enableCsrfValidation = false;
     protected $authenticated = false;
+
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules' => [
+                    [
+                        'allow' => false,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_BUYER,
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                        ],
+                    ],
+                    [
+                        'allow' => TRUE,
+                        'roles' => ['@'],
+                    ],
+
+                ],
+            ],
+        ];
+    }
 
     public function beforeAction($action)
     {

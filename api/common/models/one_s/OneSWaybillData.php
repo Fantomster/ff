@@ -133,6 +133,7 @@ class OneSWaybillData extends \yii\db\ActiveRecord
             $wmodel->readytoexport = 0;
         } else {
             $wmodel->readytoexport = 1;
+            $wmodel->status_id = 3;
         }
 
         if (!$wmodel->save(false)) {
@@ -179,11 +180,12 @@ class OneSWaybillData extends \yii\db\ActiveRecord
     public function getSumByWaybillid($number)
     {
         Yii::$app->get('db_api');
-        $sum=0;
+        $sum = 0;
         $summes = OneSWaybillData::find()->where(['waybill_id' => $number])->all();
         foreach ($summes as $summa) {
-            $sum+=$summa->sum;
+            $sum += $summa->sum;
         }
+        $sum = number_format($sum, 2, ',', ' ');
         return $sum;
     }
 }

@@ -2,21 +2,16 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
-use api\common\models\iiko\iikoPconst;
-use api\common\models\RkDicconst;
+use api\common\models\RkAgent;
 use api\common\models\RkPconst;
+use api\common\models\RkStore;
 use api\common\models\rkws\RkWaybilldataSearch;
 use api\common\models\VatData;
-use api_web\classes\RkeeperWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
-use yii\web\Controller;
 use api\common\models\RkWaybill;
-use api\common\models\RkAgentSearch;
-use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use api\common\models\RkWaybilldata;
-use yii\data\ActiveDataProvider;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
@@ -163,6 +158,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new RkWaybilldataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+    
+        $agentModel = RkAgent::findOne(['rid' => $wmodel->corr_rid, 'acc' => $wmodel->org]);
+        $storeModel = RkStore::findOne(['rid' => $wmodel->store_rid]);
         
         $lic = $this->checkLic();       
         $vi = $lic ? 'indexmap' : '/default/_nolic';
@@ -172,6 +170,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'dataProvider' => $dataProvider,
                         'searchModel' => $searchModel,
                         'wmodel' => $wmodel,
+                        'agentName' => $agentModel['denom'],
+                        'storeName' => $storeModel['denom'],
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData
             ]);
@@ -180,6 +180,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'wmodel' => $wmodel,
+                        'agentName' => $agentModel['denom'],
+                        'storeName' => $storeModel['denom'],
                         'isAndroid' => $isAndroid,
                         'vatData' => $vatData
             ]);
@@ -463,10 +465,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $url; // Возвращаем итоговый URL
     }
 
-    public function actionSendws() {
-
-
-        $waybill_id = Yii::$app->request->post('id');
+    public function actionSendws($waybill_id = null) {
+        if(is_null($waybill_id)){
+            $waybill_id = Yii::$app->request->post('id');
+        }
         $model = $this->findModel($waybill_id);
 
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
@@ -475,8 +477,23 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return 'true';
        //$this->redirect('/clientintegr/rkws/waybill/index');
     }
-
-
+    
+    /**
+     *  Отправка нескольких накладных
+     */
+    public function actionMultiSend()
+    {
+        $ids = Yii::$app->request->post('ids');
+        $succesCnt = 0;
+        foreach ($ids as $id){
+            $res = $this->actionSendws($id);
+            if ($res === 'true'){
+                $succesCnt++;
+            }
+        }
+        return ['success' => true, 'count' => $succesCnt];
+    }
+    
     /**
      * Отправляем накладную по нажатию кнопки при соспоставлении товаров
      */

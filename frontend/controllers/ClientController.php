@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
 use common\models\OrderContent;
@@ -9,7 +10,6 @@ use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
 use common\models\UserToken;
-use Yii;
 use common\models\User;
 use common\models\Role;
 use common\models\Order;
@@ -107,6 +107,50 @@ class ClientController extends DefaultController
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
                             Role::getFranchiseeEditorRoles(),
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'index',
+                            'suppliers',
+                            'tutorial',
+                            'analytics',
+                            'chkmail',
+                            'check-email',
+                            'create',
+                            'edit-catalog',
+                            'events',
+                            'invite',
+                            'messages',
+                            're-send-email-invite',
+                            'sidebar',
+                            'support',
+                            'view-catalog',
+                            'view-supplier',
+                            'payments',
+                            'price-stat'
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_ACCOUNTANT,
+                            Role::ROLE_RESTAURANT_BUYER,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'index',
+                            'tutorial',
+                            'events',
+                            'invite',
+                            'messages',
+                            'sidebar',
+                            'support',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
                         ],
                     ],
                 ],

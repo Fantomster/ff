@@ -2,8 +2,7 @@
 
 namespace frontend\assets;
 
-use Yii;
-use Yii\web\AssetBundle;
+use yii\web\AssetBundle;
 
 class GoogleMapsRegionsAsset extends AssetBundle {
 
@@ -21,6 +20,6 @@ class GoogleMapsRegionsAsset extends AssetBundle {
                     'language' => Yii::$app->params['google-api']['language'],
                     'callback' => 'initAutocomplete'
         ));
-        Yii::$app->view->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()], 'async' => true, 'defer' => true, 'position' => \yii\web\View::POS_END]);
+        \Yii::$app->view->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()], 'async' => true, 'defer' => true, 'position' => \yii\web\View::POS_END]);
     }
 }

@@ -44,6 +44,10 @@ class RequestWebApi extends WebApi
             if (isset($post['search']['status'])) {
                 $query->andWhere(['active_status' => (int)$post['search']['status']]);
             }
+
+            if (isset($post['search']['name'])) {
+                $query->andWhere(['LIKE', 'product', $post['search']['name']]);
+            }
         }
 
         $dataProvider = new ArrayDataProvider([

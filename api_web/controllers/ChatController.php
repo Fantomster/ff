@@ -11,6 +11,14 @@ use api_web\components\WebApiController;
 class ChatController extends WebApiController
 {
     /**
+     * Список методов которые не нужно логировать
+     * @var array
+     */
+    public $not_log_actions = [
+        'dialog-unread-count'
+    ];
+
+    /**
      * @SWG\Post(path="/chat/dialog-list",
      *     tags={"Chat"},
      *     summary="Список диалогов",

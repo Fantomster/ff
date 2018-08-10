@@ -11,6 +11,14 @@ use api_web\components\WebApiController;
 class VendorController extends WebApiController
 {
     /**
+     * Отключение логирования
+     * @var array
+     */
+    public $not_log_actions = [
+        'upload-main-catalog'
+    ];
+
+    /**
      * @SWG\Post(path="/vendor/create",
      *     tags={"Vendor"},
      *     summary="Создание нового поставщика в системе, находясь в аккаунте ресторана",
@@ -214,5 +222,165 @@ class VendorController extends WebApiController
     public function actionUploadLogo()
     {
         $this->response = $this->container->get('VendorWebApi')->uploadLogo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/vendor/upload-main-catalog",
+     *     tags={"Vendor"},
+     *     summary="Загрузка основного каталога",
+     *     description="Загрузка основного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 4,
+     *                      "data": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true,
+     *                  "rows": {
+     *                      {
+     *                          "Артикул",
+     *                          "Наименование",
+     *                          "Кратность",
+     *                          "Цена",
+     *                          "Единица измерения",
+     *                          "Комментарий"
+     *                      },
+     *                      {
+     *                          "10",
+     *                          "Товар 10",
+     *                          "",
+     *                          "100",
+     *                          "бутылка",
+     *                          ""
+     *                      },
+     *                      {
+     *                          "111004",
+     *                          "Балтика 7",
+     *                          "1.25",
+     *                          "45.5",
+     *                          "бутылка",
+     *                          ""
+     *                      }
+     *                  }
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUploadMainCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->uploadMainCatalog($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/vendor/import-main-catalog",
+     *     tags={"Vendor"},
+     *     summary="Маппинг, валидация и импорт основного каталога",
+     *     description="Маппинг, валидация и импорт основного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(
+     *                  property="user",
+     *                  default= {"token":"111222333", "language":"RU"}
+     *              ),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 4,
+     *                      "uploaded_name": "dfg5fhbdhb",
+     *                      "index_field": "ssid",
+     *                      "mapping": {
+     *                          "ssid": 1,
+     *                          "article": 3,
+     *                          "product_name": 2,
+     *                          "unit": 4,
+     *                          "price": 6,
+     *                          "multiplicity": 7
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "cat_id": 4,
+     *                  "uploaded_name": "dfg5fhbdhb"
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionImportMainCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->importMainCatalog($this->request);
+    }
+
+    public function actionUploadCustomCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->uploadCustomCatalog($this->request);
+    }
+
+    public function actionImportCustomCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->importCustomCatalog($this->request);
+    }
+
+    public function actionDeleteMainCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->deleteMainCatalog($this->request);
+    }
+
+    public function actionChangeMainIndex()
+    {
+        $this->response = $this->container->get('VendorWebApi')->changeMainIndex($this->request);
+    }
+
+    public function actionDeleteTempMainCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->deleteTempMainCatalog($this->request);
+    }
+
+    public function actionGetTempMainCatalog()
+    {
+        $this->response = $this->container->get('VendorWebApi')->getTempMainCatalog($this->request);
     }
 }

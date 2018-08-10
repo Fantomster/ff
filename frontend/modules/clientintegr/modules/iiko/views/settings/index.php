@@ -69,16 +69,24 @@ use kartik\grid\GridView;
                                             return $res;
                                         }
 
-                                        if (is_numeric($res)) {
-                                            return (($res == 1) ? "Включено" : "Выключено");
+                                        if ($model->type == \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX || $model->type == \api\common\models\iiko\iikoDicconst::TYPE_LIST) {
+                                            return $res;
+                                        }
+                                        // В случае отображения автоматической выгрузки накладных
+                                        if ($model->denom == 'auto_unload_invoice') {
+                                            switch ($res) {
+                                                case 0:
+                                                    return "Выключено";
+                                                case 1:
+                                                    return "Включено";
+                                                case 2:
+                                                    return "Полуавтомат";
+                                            }
+
                                         }
 
-                                        if ($model->type == \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX || $model->type == \api\common\models\iiko\iikoDicconst::TYPE_LIST) {
-                                            if ($res == '' || $res == '[]') {
-                                                $res = 0;
-                                            } else {
-                                                $res = count(unserialize($res));
-                                            }
+                                        if (is_numeric($res)) {
+                                            return (($res == 1) ? "Включено" : "Выключено");
                                         }
 
                                         return $res;

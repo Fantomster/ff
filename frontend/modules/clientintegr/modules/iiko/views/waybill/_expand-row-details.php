@@ -67,7 +67,7 @@ if (empty($model)) {
                     return true;
                 },
                 'export' => function ($model, $key, $index) {
-                    return ($model->status_id == 1 && $model->readytoexport) ? true : false;
+                    return ($model->status_id == 4 && $model->readytoexport) ? true : false;
                 },
             ],
             'buttons' => [

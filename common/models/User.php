@@ -74,7 +74,7 @@ class User extends \amnah\yii2\user\models\User {
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
             // admin crud rules
             [['role_id', 'status'], 'required', 'on' => ['admin']],
-            [['role_id', 'status'], 'integer', 'on' => ['admin']],
+            [['role_id', 'status'], 'integer'],
             [['status', 'first_logged_in_at'], 'safe'],
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],

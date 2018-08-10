@@ -11,6 +11,15 @@ use api_web\components\WebApiController;
 class ClientController extends WebApiController
 {
     /**
+     * Список методов которые не нужно логировать
+     * Можно выключать передачу файлов в base64, так как бывает очень жирные файлы попадаются
+     * @var array
+     */
+    public $not_log_actions = [
+        'detail-update-logo'
+    ];
+
+    /**
      * @SWG\Post(path="/client/detail",
      *     tags={"Client"},
      *     summary="Данные ресторана",
@@ -183,6 +192,7 @@ class ClientController extends WebApiController
      */
     public function actionDetailUpdateLogo()
     {
+        //Отключаем логирование этого метода, картинки могут быть очень большими, в базу их не впихнешь
         $this->response = $this->container->get('ClientWebApi')->detailUpdateLogo($this->request);
     }
 

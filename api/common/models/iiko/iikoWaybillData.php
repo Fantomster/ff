@@ -176,6 +176,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
         foreach ($summes as $summa) {
             $sum+=$summa->sum;
         }
+        $sum = number_format($sum,2,',',' ');
         return $sum;
     }
 }

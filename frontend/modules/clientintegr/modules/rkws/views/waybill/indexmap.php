@@ -304,7 +304,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
 
                                         $customurl = Yii::$app->getUrlManager()->createUrl([
-                                            'clientintegr/iiko/waybill/chvat',
+                                            'clientintegr/rkws/waybill/chvat',
                                             'id' => $model->id,
                                             'vat' => 0
                                         ]);
@@ -327,7 +327,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
 
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'vat' => '1000']);
+                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1000']);
                                         return \yii\helpers\Html::a('10', $customurl,
                                             ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
@@ -342,7 +342,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
 
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'vat' => '1800']);
+                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1800']);
                                         return \yii\helpers\Html::a('18', $customurl,
                                             ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },

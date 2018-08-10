@@ -325,7 +325,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'label' => 'Сумма с НДС',
                                     'format' => ['decimal', 2],
                                     'hAlign' => 'right',
-                                    'value' =>  function ($model) {
+                                    'value' => function ($model) {
                                         $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
                                         return $sumsnds;
                                     }

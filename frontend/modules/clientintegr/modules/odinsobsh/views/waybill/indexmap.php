@@ -102,8 +102,14 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
                                 'filterPosition' => false,
                                 'columns' => [
-                                    'product_id',
-                                    'fproductnameProduct',
+                                    [
+                                        'attribute' => 'product_id',
+                                        'vAlign' => 'bottom',
+                                    ],
+                                    [
+                                        'attribute' => 'fproductnameProduct',
+                                        'vAlign' => 'bottom',
+                                    ],
                                     [
                                         'attribute' => 'product_id',
                                         'value' => function ($model) {
@@ -111,12 +117,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         },
                                         'format' => 'raw',
                                         'label' => 'Ед. изм. mixcart',
+                                        'vAlign' => 'bottom',
                                     ],
                                     [
                                         'class' => 'kartik\grid\EditableColumn',
                                         'attribute' => 'pdenom',
                                         'label' => 'Наименование в 1С Общепит',
-                                        'vAlign' => 'middle',
+                                        'vAlign' => 'bottom',
                                         'width' => '210px',
                                         'refreshGrid' => true,
 
@@ -158,11 +165,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         },
                                         'format' => 'raw',
                                         'label' => 'Ед.изм. 1С Общепит',
+                                        'vAlign' => 'bottom',
                                     ],
                                     [
                                         'attribute' => 'defquant',
                                         'format' => 'raw',
                                         'label' => 'Кол-во в Заказе',
+                                        'vAlign' => 'bottom',
                                     ],
                                     [
                                         'class' => 'kartik\grid\EditableColumn',
@@ -178,7 +187,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             ],
                                         ],
                                         'hAlign' => 'right',
-                                        'vAlign' => 'middle',
+                                        'vAlign' => 'bottom',
                                         'format' => ['decimal', 6],
 
                                         'pageSummary' => true
@@ -197,7 +206,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             ],
                                         ],
                                         'hAlign' => 'right',
-                                        'vAlign' => 'middle',
+                                        'vAlign' => 'bottom',
                                         'format' => ['decimal'],
                                         'footer' => 'Итого сумма без НДС:',
                                         'pageSummary' => true
@@ -216,7 +225,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             ],
                                         ],
                                         'hAlign' => 'right',
-                                        'vAlign' => 'middle',
+                                        'vAlign' => 'bottom',
                                         // 'width'=>'100px',
                                         'format' => ['decimal', 2],
                                         'footer' => \api\common\models\one_s\OneSWaybilldata::getSumByWaybillid($wmodel->id),
@@ -290,6 +299,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'label' => 'Сумма с НДС',
                                         'format' => ['decimal', 2],
                                         'hAlign' => 'right',
+                                        'vAlign' => 'bottom',
                                         'value' =>  function ($model) {
                                             $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
                                             return $sumsnds;

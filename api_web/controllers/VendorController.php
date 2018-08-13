@@ -296,6 +296,47 @@ class VendorController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/vendor/get-list-main-index",
+     *     tags={"Vendor"},
+     *     summary="Список ключей для загрузки каталога",
+     *     description="Список ключей для загрузки каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetListMainIndex()
+    {
+        $this->response = $this->container->get('VendorWebApi')->getListMainIndex($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/vendor/import-main-catalog",
      *     tags={"Vendor"},
      *     summary="Маппинг, валидация и импорт основного каталога",

@@ -41,7 +41,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
         if ($vendorID) {
             $validator = new NumberValidator();
-            if (!$validator->validate($vendorID, $error)) {
+            if (!$validator->validate($vendorID)) {
                 throw new ValidationException(['Field vendor_id mast be integer']);
             }
 
@@ -272,6 +272,9 @@ class VendorWebApi extends \api_web\components\WebApi
             ]])->all();
 
         if (!empty($models)) {
+            /**
+             * @var $model Organization
+             */
             foreach ($models as $model) {
                 $r = WebApiHelper::prepareOrganization($model);
 
@@ -607,6 +610,15 @@ class VendorWebApi extends \api_web\components\WebApi
             $tempCatalog->delete();
         }
         return ['result' => true];
+    }
+
+    /**
+     * Список ключей для выбора
+     * @return array
+     */
+    public function getListMainIndex()
+    {
+        return $this->container->get('CatalogWebApi')->getKeys();
     }
 
     /**

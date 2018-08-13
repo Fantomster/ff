@@ -15,6 +15,9 @@ use kartik\date\DatePicker;
 ?>
 
 <?php
+
+
+
 $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
 $this->registerJs('
     $("document").ready(function(){

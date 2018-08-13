@@ -39,7 +39,7 @@ class CatalogWebApi extends WebApi
             throw new BadRequestHttpException('Catalog not empty');
         }
     }
-
+ 
     /**
      * Удаление главного каталога
      * @param Catalog $catalog

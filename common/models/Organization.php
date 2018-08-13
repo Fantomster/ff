@@ -322,6 +322,35 @@ class Organization extends \yii\db\ActiveRecord {
         return $vendors;
     }
 
+
+    /**
+     * Get the list of organization type restaurant suppliers - filtered by categories
+     * @var $addAllOption bool "Don't use filter" indicator
+     * @createdBy Basil A Konakov
+     * @createdAt 2018-08-10
+     * @return array
+     */
+    public function getRestaurantSupplierAll($addAllOption = true): array
+    {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT && !$addAllOption) {
+            return [];
+        }
+        $query = RelationSuppRest::find()
+            ->select(['organization.id', 'organization.name'])
+            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+            ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+        $res = $query
+            ->orderBy(['organization.name' => SORT_ASC])
+            ->asArray()
+            ->all();
+        $res = ArrayHelper::map($res, 'id', 'name');
+        if ($addAllOption) {
+            $res[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+        }
+        ksort($res);
+        return $res;
+    }
+
     public function getSuppliersTorg12($category_id = '', $all = true, $notMap=true) {
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];

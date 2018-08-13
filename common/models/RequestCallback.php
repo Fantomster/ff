@@ -19,25 +19,27 @@ use Yii;
  * @property Organization $organization
  * @property Request $request
  */
-class RequestCallback extends \yii\db\ActiveRecord {
+class RequestCallback extends \yii\db\ActiveRecord
+{
 
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'request_callback';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['request_id', 'supp_org_id', 'price'], 'required'],
             [['request_id', 'supp_org_id', 'supp_user_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            [['price'], 'number', 'min' => 0.1],
+            [['price'], 'string', 'max' => 100],
             [['comment'], 'string', 'max' => 255],
             [['request_id'], 'exist', 'skipOnError' => true, 'targetClass' => Request::className(), 'targetAttribute' => ['request_id' => 'id']],
         ];
@@ -46,7 +48,8 @@ class RequestCallback extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
             'request_id' => 'Request ID',
@@ -62,23 +65,27 @@ class RequestCallback extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getRequest() {
+    public function getRequest()
+    {
         return $this->hasOne(Request::className(), ['id' => 'request_id']);
     }
 
-    public function getOrganization() {
+    public function getOrganization()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
-    public function getUser() {
+    public function getUser()
+    {
         return $this->hasOne(User::className(), ['id' => 'supp_user_id']);
     }
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-             if ($insert) {
+            if ($insert) {
                 \api\modules\v1\modules\mobile\components\notifications\NotificationRequest::actionRequestCallback($this, true);
             }
         }

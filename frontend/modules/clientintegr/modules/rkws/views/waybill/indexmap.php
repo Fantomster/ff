@@ -146,10 +146,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             [
                                 'attribute' => 'product_id',
                                 'label' => 'ID в Mixcart',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'fproductnameProduct',
                                 'label' => 'Наименование продукции',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'product_id',
@@ -158,12 +160,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед. изм. Mixcart',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
                                 'attribute' => 'pdenom',
                                 'label' => 'Наименование в Store House',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 'width' => '210px',
                                 'refreshGrid' => true,
 
@@ -206,11 +209,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед.изм. StoreHouse',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'defquant',
                                 'format' => 'raw',
                                 'label' => 'Кол-во в Заказе',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
@@ -226,7 +231,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal', 6],
                                 'pageSummary' => true,
@@ -246,7 +251,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal'],
                                 'footer' => 'Итого сумма без НДС:',
@@ -267,7 +272,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal', 2],
                                 //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
@@ -352,6 +357,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'label' => 'Сумма с НДС',
                                 'format' => ['decimal', 2],
                                 'hAlign' => 'right',
+                                'vAlign' => 'bottom',
                                 'value' =>  function ($model) {
                                     $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
                                     return $sumsnds;
@@ -417,6 +423,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ]),
                                 '#',
                                 [
+                                    'onclick' => 'return false;',
                                     'class' => 'export-waybill-btn',
                                     'title' => Yii::t('backend', 'Выгрузить'),
                                     'data-pjax' => "0",

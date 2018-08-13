@@ -43,11 +43,14 @@ $this->registerCss("
     <?php
     $columns = array(
         [
-            'class' => 'yii\grid\CheckboxColumn',
+            'class' => 'kartik\grid\CheckboxColumn',
             'checkboxOptions' => function ($model, $key, $index, $column) {
                 $nacl = \api\common\models\iiko\iikoWaybill::findOne(['order_id' => $model->id]);
         	    if ($nacl['status_id'] !== 4 || $nacl['readytoexport'] === 0) {
-                    return ['disabled' => true];
+                    return [
+                    		'disabled' => true,
+                            'style' => 'display: none;'
+                    ];
                 }
             }
         ],
@@ -182,7 +185,7 @@ $this->registerCss("
                                     'id' => 'orgFilter',
 
                                 ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']); ?>
-                                <?= \yii\helpers\Html::a('Выгрузить всё', false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
+                                <?= \yii\helpers\Html::a('Выгрузить выбранные', false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
                             </div>
                         </div>
                         <?=

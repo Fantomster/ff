@@ -22,10 +22,6 @@ use common\models\Organization;
 /* @var $organization common\models\Organization **/
 /* @var $licucs \api\common\models\RkService ??? **/
 
-
-if (!$searchModel->date_to) {$today = new \DateTime(); $searchModel->date_to = $today->format('d.m.Y');}
-if (!$searchModel->date_from) {$searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");}
-
 $visible = false; // for invoice_relation
 $widgetMasterDataColumns = array(
     [

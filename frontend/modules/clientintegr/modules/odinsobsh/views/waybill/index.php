@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @editedBy Basil A Konakov
+ * @editedByKonakovAt 2018-08-10(*)
+ */
 
 use yii\widgets\Breadcrumbs;
 use common\models\Order;
@@ -8,13 +12,59 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use kartik\date\DatePicker;
+use common\models\Organization;
+use yii\helpers\Html;
+
+/* @var $searchModel common\models\search\OrderSearch **/
+/* @var $organization common\models\Organization **/
+/* @var $dataProvider yii\data\ActiveDataProvider **/
+/* @var $visible bool ??? **/
+/* @var $way int ??? **/
+/* @var $licucs \api\common\models\RkService ??? **/
+
+$visible = false; // for invoice_relation
+
+if (!$searchModel->date_to) {$today = new \DateTime(); $searchModel->date_to = $today->format('d.m.Y');}
+if (!$searchModel->date_from) {$searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");}
 
 $this->title = 'Интеграция с 1С Общепит';
+
+$this->registerJs('
+    $("document").ready(function(){
+        var justSubmitted = false;
+        $(".box-body").on("change", "#statusFilter", function() {
+            $("#search-form").submit();
+        });
+        $(".box-body").on("change", "#orgFilter", function() {
+            $("#search-form").submit();
+        });
+        $(".box-body").on("change", "#dateFrom, #dateTo", function() {
+            if (!justSubmitted) {
+                $("#search-form").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 500);
+            }
+        });
+         $(".box-body").on("change", "#orderFilter", function() {
+            $("#search-form").submit();
+        });
+    });
+');
+
 $this->registerCss("
     #select2-ordersearch-vendor_id-container{margin-top:0;}
         .select2-selection__clear{display: none;}
 ");
+
 ?>
+
+<style>
+    .bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
+</style>
+
 <section class="content-header">
     <h1>
         <i class="fa fa-upload"></i> <?= $this->title ?>
@@ -90,7 +140,7 @@ $this->registerCss("
                     '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
                     'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
                     'data-toggle="popover"  data-trigger="focus" data-url="'.
-                    Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
+                    Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/']).
                     '/getpopover" role="button" tabindex="0" '.
                     'data-original-title="" title="" data-model="'.$data->id.'"> '.
                     '<i class="fa fa-info-circle"></i></a>';
@@ -139,10 +189,19 @@ $this->registerCss("
     ?>
     ЗАВЕРШЁННЫЕ ЗАКАЗЫ
 </section>
+
 <section class="content">
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
+                <div class="panel-body">
+                    <div class="box-body table-responsive no-padding orders-table">
+
+
+
+
+
+
                 <?php
                 Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
                 $form = ActiveForm::begin([
@@ -156,20 +215,97 @@ $this->registerCss("
                     'method' => 'get',
                 ]);
                 ?>
-                <div class="panel-body">
-                    <div class="box-body table-responsive no-padding orders-table">
                         <div class="row">
-                            <div class="col-lg-2 col-md-3 col-sm-6">
-                                <?php echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
-                                    'data' => $organization->getSuppliers(),
-                                    'pluginOptions' => [
-                                        'allowClear' => true,
-                                        'name' => 'sd',
-                                    ],
-                                    'id' => 'orgFilter',
 
-                                ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']); ?>
+                            <div class="col-lg-1 col-md-2 col-sm-6">
+                                <?php
+                                # 1. INPUT ORDER ID Filter field
+                                $label = Yii::t('message', 'frontend.views.order.id',
+                                    ['ru' => 'Номер заказа']);
+                                echo
+                                $form->field($searchModel, 'id')
+                                    ->textInput(['id' => 'orderFilter', 'class' => 'form-control',
+                                        'style' => 'width: 130px', 'placeholder' => $label])
+                                    ->label($label, ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
                             </div>
+
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <?php
+                                # 2. SELECT SUPPLIER Filter field
+                                /** earlier - $organization->getSuppliers() */
+                                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                                    $label = Yii::t('message', 'frontend.views.order.vendors',
+                                        ['ru' => 'Поставщики']);
+                                    $associates = $organization->getRestaurantSupplierAll();
+                                } else {
+                                    $label = Yii::t('message', 'frontend.views.order.rest',
+                                        ['ru' => 'Рестораны']);
+                                    $associates = $organization->getClients();
+                                }
+                                echo $form->field($searchModel, 'vendor_id')
+                                    ->dropDownList($associates, ['id' => 'orgFilter'])
+                                    ->label($label, ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
+                            </div>
+
+
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <?php
+                                # 3. RANGE ORDER LAST_UPDATED Filter field
+                                $label = Yii::t('message', 'frontend.views.order.last_updated.range',
+                                    ['ru' => 'Обновлено: Начальная дата / Конечная дата ']);
+                                echo Html::label($label, null, ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
+                                <div class="form-group" style="width: 300px; height: 44px;">
+                                    <?php
+                                    $label_from = Yii::t('message', 'frontend.views.order.date',
+                                        ['ru' => 'Дата']);
+                                    $label_to = Yii::t('message', 'frontend.views.order.date_to',
+                                        ['ru' => 'Конечная дата']);
+                                    echo DatePicker::widget([
+                                        'model' => $searchModel,
+                                        'attribute' => 'date_from',
+                                        'attribute2' => 'date_to',
+                                        'options' => ['placeholder' => $label_from, 'id' => 'dateFrom'],
+                                        'options2' => ['placeholder' => $label_to, 'id' => 'dateTo'],
+                                        'separator' => '-',
+                                        'type' => DatePicker::TYPE_RANGE,
+                                        'pluginOptions' => [
+                                            'format' => 'dd.mm.yyyy',
+                                            'autoclose' => true,
+                                            'endDate' => "0d",
+                                        ]
+                                    ]);
+                                    ?>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <?php
+                                # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
+                                $waybillStatusesLabel = Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.status');
+                                $waybillStatusesValues = [
+                                    '0' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.allstat'),
+                                    '1' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.nodoc'),
+                                    '2' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.ready'),
+                                    '3' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.completed'),
+                                    // '4' => Yii::t('message', $pref.'cancelled', ['ru'=>'Отменено'])
+                                ];
+                                echo $form->field($searchModel, 'docStatus')
+                                    ->dropDownList($waybillStatusesValues, ['id' => 'statusFilter'])
+                                    ->label($waybillStatusesLabel, ['class' => 'label', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+
+
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br />
+                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/odinsobsh/waybill/index']) ?>">Сбросить фильтры</a>
+                            </div>
+
+
+
                         </div>
                         <?=
                         GridView::widget([
@@ -192,10 +328,12 @@ $this->registerCss("
                             ],
                         ]);
                         ?>
+                        <?php ActiveForm::end(); ?>
+                        <?php Pjax::end() ?>
+
+
                     </div>
                 </div>
-                <?php ActiveForm::end(); ?>
-                <?php Pjax::end() ?>
             </div>
         </div>
     </div>

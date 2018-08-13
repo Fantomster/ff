@@ -194,7 +194,7 @@ $this->registerJs('
             {"id": $(this).data("id"), "quantity": quantityInput.val(), "cat_id": $(this).data("cat")}
         ).done(function(result) {
         });
-        quantityInput.val(0);
+        //quantityInput.val(0);
         btnAddToCart.addClass("disabled");
     });
 

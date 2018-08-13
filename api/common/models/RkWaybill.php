@@ -186,7 +186,8 @@ class RkWaybill extends \yii\db\ActiveRecord {
                     
                     
                     // Check previous
-                    
+
+                    /*
                     $ch = RkWaybilldata::find()
                             ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
                             ->andWhere('org = :org',['org' => $wdmodel->org]) 
@@ -203,7 +204,28 @@ class RkWaybill extends \yii\db\ActiveRecord {
                         $wdmodel->vat = $ch->vat;
 
                     }
+*/
+                    // New check with mass mapping...
 
+                    $ch = AllMaps::find()
+                        ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ])
+                        ->andWhere('org_id = :org',['org' => $wdmodel->org])
+                        ->limit(1)
+                        ->one();
+
+                    if ($ch) {
+
+                        if (isset($ch->serviceproduct_id))
+                        $wdmodel->product_rid = $ch->serviceproduct_id;
+
+                        if (isset($ch->koef))
+                            $wdmodel->koef = $ch->koef;
+
+                        // $wdmodel->munit_rid = $ch->munit_rid;
+
+                        if (isset($ch->vat))
+                            $wdmodel->vat = $ch->vat;
+                    }
 
                     if (!$wdmodel->save()) {
 
@@ -218,7 +240,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
             } catch (\Exception $ex) {
 
                 //AD: and also this changes
-                //var_dump($ex);
+               // var_dump($ex);
                 $transaction->rollback();
                 throw new \Exception("Send error code to developer", 31789);
             }

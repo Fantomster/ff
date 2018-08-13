@@ -423,6 +423,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ]),
                                 '#',
                                 [
+                                    'onclick' => 'return false;',
                                     'class' => 'export-waybill-btn',
                                     'title' => Yii::t('backend', 'Выгрузить'),
                                     'data-pjax' => "0",

@@ -132,7 +132,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new iikoWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        
+
         $agentModel = iikoAgent::findOne(['uuid' => $model->agent_uuid, 'org_id' => $model->org]);
         $storeModel = iikoStore::findOne(['id' => $model->store_id]);
 
@@ -230,48 +230,25 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $out = [];
         if (!is_null($term)) {
             $organizationID = User::findOne(Yii::$app->user->id)->organization_id;
+            $andWhere = '';
             $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
             if (count($arr)) {
-                $arrayString = '(';
-                $i = 1;
-                foreach ($arr as $one) {
-                    $arrayString .= $one;
-                    if ($i != count($arr)) {
-                        $arrayString .= ',';
-                    }
-                    $i++;
-                }
-                $arrayString .= ')';
-
-                $sql = <<<SQL
-            SELECT id, denom as text FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term AND id in $arrayString )
-                    UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ AND id in $arrayString LIMIT 10)
-                    UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ AND id in $arrayString LIMIT 5)
-                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
-                     THEN 1
-                     ELSE 2
-                  END
-            ) as t
-SQL;
-            } else {
-                $sql = <<<SQL
-            SELECT id, denom as text FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term )
-                    UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ LIMIT 10)
-                    UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ LIMIT 5)
-                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
-                     THEN 1
-                     ELSE 2
-                  END
-            ) as t
-SQL;
+                $andWhere = 'AND id in (' . implode(',', $arr) . ')';
             }
 
+            $sql = <<<SQL
+            SELECT id, denom as text FROM (
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 10)
+                    UNION
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 5)
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                     THEN 1
+                     ELSE 2
+                  END
+            ) as t
+SQL;
 
             /**
              * @var $db Connection
@@ -389,7 +366,7 @@ SQL;
                 throw new \Exception('Only ajax method');
             }
 
-            if(is_null($id)){
+            if (is_null($id)) {
                 $id = Yii::$app->request->post('id');
             }
             $model = $this->findModel($id);
@@ -417,7 +394,7 @@ SQL;
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
-    
+
     /**
      *  Отправка нескольких накладных
      */
@@ -425,27 +402,27 @@ SQL;
     {
         $ids = Yii::$app->request->post('ids');
         $scsCount = 0;
-        foreach ($ids as $id){
+        foreach ($ids as $id) {
             $transaction = Yii::$app->db_api->beginTransaction();
-            try{
+            try {
                 $model = $this->findModel($id);
                 //Выставляем статус отправляется
                 $model->status_id = 3;
                 $model->save();
                 $res = $this->actionSend($id);
-                if($res['success'] === true){
+                if ($res['success'] === true) {
                     $scsCount++;
                 } else {
                     throw new \Exception($res['error']);
                 }
                 $transaction->commit();
-            } catch (\Throwable $e){
+            } catch (\Throwable $e) {
                 //Выставляем статус обратно
                 $transaction->rollBack();
                 return ['success' => false, 'error' => $e->getMessage()];
             }
         }
-        if(count($ids) == $scsCount){
+        if (count($ids) == $scsCount) {
             return ['success' => true, 'count' => $scsCount];
         }
         return ['success' => false, 'error' => 'Выгруженно только ' . $scsCount . ' накладных'];

@@ -2,14 +2,10 @@
 
 namespace api_web\classes;
 
+use Yii;
 use common\models\Catalog;
-use yii\web\HttpException;
-use common\models\CatalogGoods;
-use common\models\Organization;
-use common\models\RelationSuppRest;
 use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
-use api_web\exceptions\ValidationException;
 use api_web\components\WebApi;
 
 /**
@@ -62,4 +58,17 @@ class CatalogWebApi extends WebApi
         }
     }
 
+
+    /**
+     * Список ключей
+     * @return array
+     */
+    public function getKeys()
+    {
+        return [
+            'product' => Yii::t('api_web', 'api_web.catalog.key.product', ['ru' => 'Нименование товара']),
+            'article' => Yii::t('api_web', 'api_web.catalog.key.article', ['ru' => 'Артикул']),
+            'other' => Yii::t('api_web', 'api_web.catalog.key.other', ['ru' => 'Другое']),
+        ];
+    }
 }

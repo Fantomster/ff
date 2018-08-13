@@ -77,7 +77,6 @@
                     },
                     'export' => function ($model, $key, $index) {
                         return $model->readytoexport ? true : false;
-                        return true;
                     },
 
                 ],

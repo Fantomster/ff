@@ -5,12 +5,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use common\models\Order;
 use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
-use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use common\models\User;
 use common\models\Organization;
@@ -77,11 +73,14 @@ $this->registerCss("
     <?php
     $columns = array (
         [
-            'class' => 'yii\grid\CheckboxColumn',
+            'class' => 'kartik\grid\CheckboxColumn',
             'checkboxOptions' => function ($model, $key, $index, $column) {
                 $nacl = RkWaybill::findOne(['order_id' => $model->id]);
-                if ($nacl['status_id'] !== 1 || $nacl['readytoexport'] === 0) {
-                    return ['disabled' => true];
+                if ($nacl['status_id'] !== 5 || $nacl['readytoexport'] === 0) {
+                    return [
+                    		'disabled' => true,
+                            'style' => 'display: none;'
+                    ];
                 }
             }
         ],

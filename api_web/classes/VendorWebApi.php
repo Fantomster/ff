@@ -34,11 +34,58 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function create(array $post)
     {
+        $vendorID = $post['user']['vendor_id'] ?? null;
+
+        if ($vendorID) {
+            $validator = new NumberValidator();
+            if (!$validator->validate($vendorID, $error)) {
+                throw new ValidationException(['Field vendor_id mast be integer']);
+            }
+
+            $organization = Organization::findOne(['id' => $vendorID]);
+            if (!$organization) {
+                throw new BadRequestHttpException('No such organization');
+            }
+
+            $relation = RelationSuppRest::findOne(['supp_org_id' => $vendorID, 'rest_org_id' => $this->user->organization->id]);
+            if(empty($relation)) {
+                $relation = $this->createRelation($this->user->organization->id, $organization->id);
+            }
+
+            if($relation->invite != RelationSuppRest::INVITE_ON) {
+                foreach ($organization->users as $recipient) {
+                    $this->user->sendInviteToVendor($recipient);
+                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                        $text = Yii::$app->sms->prepareText('sms.client_invite_repeat', [
+                            'name' => $this->user->organization->name
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                    }
+                }
+                $relation->invite = RelationSuppRest::INVITE_ON;
+                $relation->save();
+                $result = [
+                    'success' => true,
+                    'organization_id' => $organization->id,
+                    'message' => "Приглашение отправлено."
+                ];
+            } else {
+                $result = [
+                    'success' => true,
+                    'organization_id' => $organization->id,
+                    'message' => "Приглашение уже было отправлено."
+                ];
+            }
+            return $result;
+        } else {
+            $organization = new Organization();
+        }
+
         $email = $post['user']['email'];
         $fio = $post['user']['fio'];
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
-        $vendorID = $post['user']['vendor_id'] ?? null;
+
         $check = RestaurantChecker::checkEmail($email);
 
         if ($check['eventType'] == 7) {
@@ -49,19 +96,6 @@ class VendorWebApi extends \api_web\components\WebApi
             $user = User::find()->where(['email' => $email])->one();
         } else {
             $user = new User();
-        }
-        $relationSuppRest = new RelationSuppRest();
-        if($vendorID){
-            $validator = new NumberValidator();
-            if (!$validator->validate($vendorID, $error)) {
-                throw new ValidationException(['Field vendor_id mast be integer']);
-            }
-            $organization = Organization::findOne(['id'=>$vendorID]);
-            if(!$organization){
-                throw new BadRequestHttpException('No such organization');
-            }
-        }else{
-            $organization = new Organization();
         }
 
         $profile = new Profile();
@@ -105,7 +139,7 @@ class VendorWebApi extends \api_web\components\WebApi
                         throw new ValidationException($profile->getFirstErrors());
                     }
                     $profile->save();
-                    if(!$vendorID) {
+                    if (!$vendorID) {
                         $organization->name = $org;
                     }
 
@@ -133,9 +167,9 @@ class VendorWebApi extends \api_web\components\WebApi
                     $get_supp_org_id = $check['org_id'];
                 }
 
-                if(count($arrCatalog)){
+                if (count($arrCatalog)) {
                     $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
-                }else{
+                } else {
                     $lastInsert_cat_id = 0;
                 }
                 /**
@@ -143,21 +177,16 @@ class VendorWebApi extends \api_web\components\WebApi
                  * 5) Связь ресторана и поставщика
                  *
                  * */
-                $relationSuppRest->rest_org_id = $currentUser->organization_id;
-                $relationSuppRest->supp_org_id = $get_supp_org_id;
-                $relationSuppRest->cat_id = $lastInsert_cat_id;
-                $relationSuppRest->status = 1;
-                $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
-                if (isset($relationSuppRest->uploaded_catalog)) {
-                    $relationSuppRest->uploaded_processed = 0;
-                }
-                $relationSuppRest->save();
+                $relation = $this->createRelation($currentUser->organization_id, $get_supp_org_id, $lastInsert_cat_id);
                 /**
                  *
                  * Отправка почты
                  *
                  * */
                 $currentUser->sendInviteToVendor($user);
+                $relation->invite = RelationSuppRest::INVITE_ON;
+                $relation->save();
+
                 $currentOrganization = $currentUser->organization;
                 $currentOrganization->step = Organization::STEP_OK;
                 $currentOrganization->save();
@@ -193,6 +222,30 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * @param $client_id
+     * @param $vendor_id
+     * @param int $cat_id
+     * @return RelationSuppRest
+     * @throws ValidationException
+     */
+    private function createRelation($client_id, $vendor_id, $cat_id = 0)
+    {
+        $relationSuppRest = new RelationSuppRest();
+        $relationSuppRest->rest_org_id = $client_id;
+        $relationSuppRest->supp_org_id = $vendor_id;
+        $relationSuppRest->cat_id = $cat_id;
+        $relationSuppRest->status = 1;
+        $relationSuppRest->invite = RelationSuppRest::INVITE_OFF;
+        if (isset($relationSuppRest->uploaded_catalog)) {
+            $relationSuppRest->uploaded_processed = 0;
+        }
+        if (!$relationSuppRest->save()) {
+            throw new ValidationException($relationSuppRest->getFirstErrors());
+        }
+        return $relationSuppRest;
+    }
+
+    /**
      * Поиск поставщика по емайл
      * @param array $post
      * @return array
@@ -217,10 +270,10 @@ class VendorWebApi extends \api_web\components\WebApi
             ]])->all();
 
         if (!empty($models)) {
-            foreach($models as $model) {
+            foreach ($models as $model) {
                 $r = WebApiHelper::prepareOrganization($model);
 
-                if($user = RelationUserOrganization::find()->joinWith('user')->where([
+                if ($user = RelationUserOrganization::find()->joinWith('user')->where([
                     'relation_user_organization.organization_id' => $model->id,
                     'user.email' => $email
                 ])->one()) {

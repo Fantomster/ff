@@ -13,10 +13,45 @@ $cancelText = Yii::t('app', 'frontend.controllers.user.business_cancel_btn', ['r
 $confirmText = Yii::t('app', 'frontend.controllers.user.business_confirm_btn', ['ru' => "Удалить"]);
 $errorTitle = Yii::t('app', 'frontend.controllers.user.business_error_title', ['ru' => "Ошибка!"]);
 $errorText = Yii::t('app', 'frontend.controllers.user.business_error_text', ['ru' => "Произошла неизвестная ошибка"]);
+$success = Yii::t('app', 'Готово!');
 
 $changeFormUrl = Url::to(['/user/default/change-form']);
 
 $js = <<<JS
+    $(document).on("change", "#organization-type_id", function() {
+        var orgName = $('#organization-name').val();
+        if(orgName.length > 0){
+            $('.new-network').removeAttr('disabled');
+        }
+    });
+
+    $(document).on("input", "#organization-name", function() {
+        var businessChecked = $('#organization-type_id').attr('aria-invalid');
+        if(businessChecked == 'false'){
+            $('.new-network').removeAttr('disabled');
+        }
+        var orgName = $('#organization-name').val();
+        if(orgName.length == 0){
+            $('.new-network').attr('disabled', 'disabled');
+        } 
+    });
+    
+    $(document).on("click", ".new-network", function(e) {
+        var orgName = $('#organization-name').val();
+        swal({
+            title: "$success",
+            type: "info",
+            showCancelButton: false,
+            confirmButtonText: "OK",
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false
+        }).then(function (result) {
+                var url = "$changeFormUrl" + "?BusinessSearch[searchString]=" + orgName;
+                $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:40000, async: false, url: url});
+                $('#searchString').val(orgName);
+        });
+    });
+    
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });
@@ -59,6 +94,7 @@ $js = <<<JS
             }
         });
     });
+
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 $grid = [
@@ -86,14 +122,14 @@ $grid = [
             if ($data['id'] == \common\models\User::findIdentity(Yii::$app->user->id)->organization_id) {
 
                 return Html::a('<i class="fa fa-toggle-on"  style="margin-top:8px;"></i>', '#', [
-                            'class' => 'disabled pull-right',
-                            'style' => 'font-size:26px;color:#84bf76;padding-right:10px;'
+                    'class' => 'disabled pull-right',
+                    'style' => 'font-size:26px;color:#84bf76;padding-right:10px;'
                 ]);
             }
             return Html::a('<i class="fa fa-toggle-on" style="transform: scale(-1, 1);margin-top:8px;"></i>', '#', [
-                        'class' => 'change-net-org pull-right',
-                        'style' => 'font-size:26px;color:#ccc;padding-right:10px;',
-                        'data' => ['id' => $data['id']],
+                'class' => 'change-net-org pull-right',
+                'style' => 'font-size:26px;color:#ccc;padding-right:10px;',
+                'data' => ['id' => $data['id']],
             ]);
         },
         'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
@@ -105,9 +141,9 @@ $grid = [
             if ($data['id'] != \common\models\User::findIdentity(Yii::$app->user->id)->organization_id) {
 
                 return Html::a('<i class="glyphicon glyphicon-trash"></i>', '#', [
-                            'class' => 'btn btn-danger deleteBusiness',
-                            'data-url' => Url::to(['/user/delete-business', 'id' => $data['id']]),
-                            'data-pjax' => 0,
+                    'class' => 'btn btn-danger deleteBusiness',
+                    'data-url' => Url::to(['/user/delete-business', 'id' => $data['id']]),
+                    'data-pjax' => 0,
                 ]);
             } else {
                 return '';
@@ -118,20 +154,44 @@ $grid = [
 ];
 ?>
 <style>
-    #searchString{height:35px; width: 100%; display: inline-block;}
-    .input-group, .form-group{width: 100%;}
-    @media (max-width: 600px){
+    #searchString {
+        height: 35px;
+        width: 100%;
+        display: inline-block;
+    }
+
+    .input-group, .form-group {
+        width: 100%;
+    }
+
+    @media (max-width: 600px) {
         .network-list .table {
             overflow-x: scroll;
             display: table;
         }
     }
-    @media (max-width: 480px){
-        .network-list .table a{float:none !important;padding: 0 !important;}
-        .network-list .kv-table-wrap tr > td{border:0;}   
-        .network-list .kv-table-wrap tr > td:last-child{border-bottom: 1px solid #ccc;}
-        .network-list .kv-table-wrap tr:last-child > td:last-child{border-bottom: 0} 
-        .network-list .kv-table-wrap th, .kv-table-wrap td {width: inherit !important; }
+
+    @media (max-width: 480px) {
+        .network-list .table a {
+            float: none !important;
+            padding: 0 !important;
+        }
+
+        .network-list .kv-table-wrap tr > td {
+            border: 0;
+        }
+
+        .network-list .kv-table-wrap tr > td:last-child {
+            border-bottom: 1px solid #ccc;
+        }
+
+        .network-list .kv-table-wrap tr:last-child > td:last-child {
+            border-bottom: 0
+        }
+
+        .network-list .kv-table-wrap th, .kv-table-wrap td {
+            width: inherit !important;
+        }
     }
 </style>
 <div id="changeBusinessModal" class="modal fade data-modal">
@@ -140,8 +200,11 @@ $grid = [
             <div class="modal-body network-modal">
                 <div class="row">
                     <div class="col-md-12">
-                        <h3 class="pull-left"><?= Yii::t('message', 'frontend.views.user.default.business', ['ru' => 'БИЗНЕС']) ?> <span style="color:#84bf76;margin-top:5px;"><?= $user->organization->name; ?></span></h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="padding-bottom: 10px;">×</button>
+                        <h3 class="pull-left"><?= Yii::t('message', 'frontend.views.user.default.business', ['ru' => 'БИЗНЕС']) ?>
+                            <span style="color:#84bf76;margin-top:5px;"><?= $user->organization->name; ?></span></h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                style="padding-bottom: 10px;">×
+                        </button>
                     </div>
                 </div>
                 <div class="row">
@@ -154,36 +217,36 @@ $grid = [
                     <div class="col-md-8">
 
 
-                        <br />
+                        <br/>
                         <?php
                         $form = ActiveForm::begin([
-                                    'method' => 'get',
-                                    'options' => [
-                                        'id' => 'searchForm',
-                                        'class' => "navbar-form no-padding no-margin",
-                                        'role' => 'search',
-                                    ],
+                            'method' => 'get',
+                            'options' => [
+                                'id' => 'searchForm',
+                                'class' => "navbar-form no-padding no-margin",
+                                'role' => 'search',
+                            ],
                         ]);
                         ?>
                         <?=
-                                $form->field($searchModel, 'searchString', [
-                                    'addon' => [
-                                        'append' => [
-                                            'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
-                                            'options' => [
-                                                'class' => 'append',
-                                            ],
-                                        ],
-                                    ],
+                        $form->field($searchModel, 'searchString', [
+                            'addon' => [
+                                'append' => [
+                                    'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
                                     'options' => [
-                                        'class' => "margin-right-15 form-group",
+                                        'class' => 'append',
                                     ],
-                                ])
-                                ->textInput([
-                                    'id' => 'searchString',
-                                    'class' => 'form-control',
-                                    'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru' => 'Поиск'])])
-                                ->label(false)
+                                ],
+                            ],
+                            'options' => [
+                                'class' => "margin-right-15 form-group",
+                            ],
+                        ])
+                            ->textInput([
+                                'id' => 'searchString',
+                                'class' => 'form-control',
+                                'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru' => 'Поиск'])])
+                            ->label(false)
                         ?>
                         <?php ActiveForm::end(); ?>
 
@@ -206,23 +269,23 @@ $grid = [
                                 'showHeader' => false,
                                 'resizableColumns' => false,
                             ]);
-                            ?> 
-                            <?php Pjax::end(); ?> 
+                            ?>
+                            <?php Pjax::end(); ?>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <h5><?= Yii::t('message', 'frontend.views.user.default.create', ['ru' => 'Создать бизнес']) ?></h5>
                         <?php
                         $form = ActiveForm::begin([
-                                    'id' => 'create-network-form',
-                                    'action' => Url::to(['/user/default/create']),
+                            'id' => 'create-network-form',
+                            'action' => Url::to(['/user/default/create']),
                         ]);
                         ?>
                         <?=
-                                $form->field($organization, 'type_id')
-                                ->radioList(
-                                        [\common\models\Organization::TYPE_RESTAURANT => Yii::t('message', 'frontend.views.user.default.buyer_two', ['ru' => ' Закупщик']), \common\models\Organization::TYPE_SUPPLIER => Yii::t('message', 'frontend.views.user.default.vendor_two', ['ru' => ' Поставщик'])], [
-                                    'item' => function($index, $label, $name, $checked, $value) use ($organization) {
+                        $form->field($organization, 'type_id')
+                            ->radioList(
+                                [\common\models\Organization::TYPE_RESTAURANT => Yii::t('message', 'frontend.views.user.default.buyer_two', ['ru' => ' Закупщик']), \common\models\Organization::TYPE_SUPPLIER => Yii::t('message', 'frontend.views.user.default.vendor_two', ['ru' => ' Поставщик'])], [
+                                    'item' => function ($index, $label, $name, $checked, $value) use ($organization) {
 
                                         $checked = $checked ? 'checked' : '';
                                         $return = '<label>';
@@ -232,16 +295,16 @@ $grid = [
 
                                         return $return;
                                     }
-                                        ]
-                                )
-                                ->label(false);
+                                ]
+                            )
+                            ->label(false);
                         ?>
                         <?=
-                                $form->field($organization, 'name')
-                                ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.org_name', ['ru' => 'Название организации'])]);
+                        $form->field($organization, 'name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.org_name', ['ru' => 'Название организации'])]);
                         ?>
-                        <?= Html::submitButton(Yii::t('message', 'frontend.views.user.default.create_business', ['ru' => 'Создать бизнес']), ['class' => 'btn btn-md btn-success new-network']) ?>
+                        <?= Html::submitButton(Yii::t('message', 'frontend.views.user.default.create_business', ['ru' => 'Создать бизнес']), ['class' => 'btn btn-md btn-success new-network', 'disabled' => 'disabled']) ?>
                         <?php ActiveForm::end(); ?>
                     </div>
                 </div>

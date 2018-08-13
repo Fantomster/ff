@@ -5,6 +5,7 @@ namespace api\common\models\iiko;
 use common\models\Organization;
 use Yii;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "iiko_agent".
@@ -69,7 +70,7 @@ class iikoAgent extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        if($insert) {
+        if ($insert) {
             $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
 
@@ -79,17 +80,50 @@ class iikoAgent extends \yii\db\ActiveRecord
     }
 
 
-    public function getStore(){
+    public function getStore()
+    {
         return $this->hasOne(iikoStore::className(), ['id' => 'store_id']);
     }
 
 
-    public function getVendor(){
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
 
-    public function getOrganization(){
+    public function getOrganization()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'org_id']);
+    }
+
+    /**
+     * get list of agents
+     *
+     * @return array
+     */
+    public function getAgents($org_id, $all = true, $notMap = true, $is_active = true)
+    {
+        $query = iikoAgent::find()->select(['uuid', 'denom'])->where(['org_id' => $org_id]);
+
+        if ($is_active) {
+            $query->andWhere(['is_active' => 1]);
+        }
+
+        if ($notMap) {
+            $agents = ArrayHelper::map($query->orderBy(['denom' => SORT_ASC])
+                ->asArray()
+                ->all(), 'uuid', 'denom');
+        } else {
+            $agents = $query->orderBy(['denom' => SORT_ASC])
+                ->asArray()
+                ->all();
+        }
+
+        if ($all) {
+            $agents[''] = '';
+        }
+        ksort($agents);
+        return $agents;
     }
 }

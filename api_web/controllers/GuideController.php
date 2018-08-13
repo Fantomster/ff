@@ -462,7 +462,7 @@ class GuideController extends WebApiController
      *                  default={
      *                               "guide_id": 1,
      *                               "search":{
-     *                                   "vendor_id": 1,
+     *                                   "vendor_id": {1},
      *                                   "product": "Название товара",
      *                                   "price": {
      *                                          "from": 100,

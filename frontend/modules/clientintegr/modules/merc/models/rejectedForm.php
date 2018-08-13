@@ -22,7 +22,7 @@ class rejectedForm extends Model {
     public function rules()
     {
         return [
-            [['volume', 'reason', 'description'], 'required'],
+            [['volume', 'reason'], 'required'],
             [['volume'], 'double'],
             [['reason', 'description'], 'string', 'max' => 255],
             [['uuid'], 'safe']

@@ -418,6 +418,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         ]
                                     ]);
                                     ?>
+                                    <div class="pull-right">
                                     <?php
                                     $lang = (Yii::$app->language == 'md') ? 'ro' : Yii::$app->language;
                                     $delivery_date = Yii::$app->request->cookies->getValue('requested_delivery_'.$cart['id']);
@@ -442,6 +443,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                         ]
                                     ])
                                     ?>
+                                    </div>
                                 </div>
                             </div>
                             <?= $this->render('_checkout-content', ['cart' => $cart]) ?>

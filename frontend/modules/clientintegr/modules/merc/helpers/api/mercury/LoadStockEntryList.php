@@ -15,7 +15,7 @@ class LoadStockEntryList extends Model
     public function updateDocumentsList($list) {
         $cache = \Yii::$app->cache;
         $owner_guid = mercDicconst::getSetting('enterprise_guid');
-        $list = is_array($list) ? $list : [$list->stockEntry];
+        $list = is_array($list) ? $list : [$list];
         foreach ($list as $item)
         {
             if(!$cache->get('stockEntryRaw_'.$item->guid))
@@ -83,7 +83,8 @@ class LoadStockEntryList extends Model
                 $stockEntryList = $result->application->result->any['getStockEntryListResponse']->stockEntryList;
             }
 
-            $this->updateDocumentsList($stockEntryList->stockEntry);
+            if($stockEntryList->count > 0)
+                $this->updateDocumentsList($stockEntryList->stockEntry);
 
             if($stockEntryList->count < $stockEntryList->total)
                 $listOptions->offset += $stockEntryList->count;

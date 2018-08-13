@@ -80,5 +80,19 @@ class OneSDicSearch extends OneSDic
         return $dataProvider;
     }
 
+    /**
+     * Проверяет, загружены ли справочники.
+     *
+     * @return boolean
+     */
+    public function getDicsLoad()
+    {
+        $query = OneSDic::find()->andWhere('org_id = :org',[':org' => User::findOne([Yii::$app->user->id])->organization_id])->all();
+        $ret = true;
+        foreach($query as $elem) {
+            if ($elem['dicstatus_id']!=OneSDic::STATUS_SUCCESS) $ret = false;
+        }
+        return $ret;
+    }
 
 }

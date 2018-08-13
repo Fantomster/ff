@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Дата операции',
                 'value' => function ($data) {
-                    return $data->record['response_at'] ?? $data->record['created_at'];
+                    return Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y  H:i:s");
                 }
             ],
             [

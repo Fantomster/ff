@@ -113,6 +113,11 @@ class DefaultController extends Controller
                 $catalogBaseGood = CatalogBaseGoods::findOne(['id' => $productID]);
                 $row['mixcart_product_name'] = $catalogBaseGood->product ?? '';
             }
+            $wayBills = OneSWaybill::find()->where(['org' => $organizationID, 'readytoexport' => 1])->all();
+            foreach ($wayBills as &$one){
+                $one->status_id = 2;
+                $one->save();
+            }
             return json_encode($rows, JSON_UNESCAPED_UNICODE);
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);

@@ -22,8 +22,6 @@ use yii\web\JsExpression;
     <?php $agentModel = \api\common\models\one_s\OneSContragent::findOne(['org_id' => $org, 'id' => $model->agent_uuid]); ?>
     <?php $data = ($agentModel) ? [$agentModel->id => $agentModel->name] : []; ?>
 
-    <?php if (empty($model->store_id)) $model->store_id = 1; ?>
-
     <?php $form = ActiveForm::begin(); ?>
 
     <?php echo $form->errorSummary($model); ?>
@@ -32,44 +30,22 @@ use yii\web\JsExpression;
 
     <?php echo $form->field($model, 'num_code')->textInput(['maxlength' => true]) ?>
 
-    <?php echo $form->field($model, 'agent_uuid')->widget(Select2::classname(), [
-        'data' => $data,
-        'options' => ['placeholder' => 'Выберите контрагента...'],
+    <?php echo $form->field($model, 'agent_uuid')->widget(\kartik\select2\Select2::classname(), [
+        'data' => \api\common\models\one_s\OneSContragent::getAgents($org),
         'pluginOptions' => [
-            'minimumInputLength' => 2,
-            'ajax' => [
-                'url' => Url::toRoute('waybill/auto-complete-agent'),
-                'dataType' => 'json',
-                'data' => new JsExpression('function(params) { return {term:params.term, org:' . $org . '}; }')
-            ],
-            'allowClear' => true,
-        ],
-        'pluginEvents' => [
-            "select2:select" => "function() {
-                if($(this).val() == 0) {
-                    $('#contract-modal').modal('show');
-                } else {
-                    var form = jQuery('#add');
-                    jQuery.ajax({
-                        url: form.attr('action'),
-                        type: 'POST',
-                        dataType: 'html',
-                        data: form.serialize(),
-                        success: function(response) {
-                            $.pjax.reload({container:'#request_pjax', timeout: 16000});
-                        },
-                        error: function(response) {
-                            console.log('server error');
-                        }
-                    });
-                }
-            }",
-        ]
-    ]);
-
+            'allowClear' => true],
+            'id' => 'orgFilter'
+        ]);
     ?>
 
-    <?php echo $form->field($model, 'store_id')->dropDownList(ArrayHelper::map(\api\common\models\one_s\OneSStore::find()->where(['org_id' => $org])->all(), 'id', 'name')) ?>
+    <?php echo $form->field($model, 'store_id')->widget(\kartik\select2\Select2::classname(), [
+        'data' => \api\common\models\one_s\OneSStore::getStores($org),
+        'pluginOptions' => [
+            'allowClear' => true],
+        'id' => 'orgFilter'
+    ]);
+    ?>
+
     <?php
 
     if (!$model->doc_date) {

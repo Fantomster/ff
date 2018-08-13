@@ -31,7 +31,7 @@ use api_web\exceptions\ValidationException;
  */
 class OrderWebApi extends \api_web\components\WebApi
 {
-     /**
+    /**
      * Редактирование заказа
      * @param $post
      * @return array
@@ -67,10 +67,6 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
 
-            if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
-                throw new BadRequestHttpException("Discount amount > Total Price");
-            }
-
             if ($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
                 throw new BadRequestHttpException("Discount amount > 100%");
             }
@@ -99,6 +95,22 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $this->editProduct($order, $product);
                                 break;
                         }
+                    }
+
+                    if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
+                        throw new BadRequestHttpException("Discount amount > Total Price");
+                    }
+
+                    if ($order->positionCount == 0) {
+                        switch ($this->user->organization->type_id) {
+                            case Organization::TYPE_SUPPLIER:
+                                $order->status = Order::STATUS_REJECTED;
+                                break;
+                            case Organization::TYPE_RESTAURANT:
+                                $order->status = Order::STATUS_CANCELLED;
+                                break;
+                        }
+
                     }
                 } else {
                     throw new BadRequestHttpException("products not array");
@@ -488,10 +500,17 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
+                if ($model->completion_date != $date) {
+                    $model->completion_date = $date;
+                    $model->save(false);
+                }
+
+                $date = (!empty($date) ? \Yii::$app->formatter->asDate($date, "dd.MM.yyyy") : null);
+
                 $orders[] = [
                     'id' => (int)$model->id,
                     'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
-                    'completion_date' => \Yii::$app->formatter->asDate($date, "dd.MM.yyyy"),
+                    'completion_date' => $date,
                     'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,

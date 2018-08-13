@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\controllers;
 
 use api\common\models\merc\mercDicconst;
+use api\common\models\merc\mercPconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
@@ -44,9 +45,12 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = mercService::getLicense();
         $searchModel = new mercVSDSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $user = Yii::$app->getUser()->identity;
         $params = ['searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $lic];
+            'lic' => $lic,
+            'user' => $user
+            ];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
@@ -220,6 +224,39 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         return false;
     }
 
+
+    public function actionAjaxCheckVetisPass(){
+        $user = Yii::$app->user->identity;
+        $mercPConst = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_password"')->one();
+        if($mercPConst && $mercPConst->value != ''){
+            return true;
+        }
+        $mercPConstLogin = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_login"')->one();
+        if($mercPConstLogin){
+            return $mercPConstLogin->value;
+        }
+        return false;
+    }
+
+
+    public function actionAjaxUpdateVetisAccessData(){$user = Yii::$app->user->identity;
+        $pass = Yii::$app->request->get('pass');
+        $mercPConst = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_password"')->one();
+        if($mercPConst){
+            $mercPConst->value = $pass;
+            $mercPConst->save();
+        }
+
+        $login = Yii::$app->request->get('login');
+        $mercPConstLogin = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_login"')->one();
+        if($mercPConstLogin){
+            $mercPConstLogin->value = $login;
+            $mercPConstLogin->save();
+        }
+    }
+
+
+
     public function actionGetPdf($uuid) {
         $vsdHttp = new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
             'authLink' => Yii::$app->params['vtsHttp']['authLink'],
@@ -248,19 +285,19 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             return true;
 
         $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
-        $transaction = Yii::$app->db_api->beginTransaction();
-       try {
+        //$transaction = Yii::$app->db_api->beginTransaction();
+       //try {
             $vsd = new VetDocumentsChangeList();
             if(isset($visit))
                 $visit = gmdate("Y-m-d H:i:s",strtotime($visit) - 60*30);
             $vsd->updateData($visit);
             MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
-            $transaction->commit();
-        }catch (\Exception $e)
-        {
-           $transaction->rollback();
-            Yii::error($e->getMessage());
-        }
+          //  $transaction->commit();
+        //}catch (\Exception $e)
+        //{
+        //   $transaction->rollback();
+        //    Yii::error($e->getMessage());
+        //}
     }
 
     private function getErrorText($e)

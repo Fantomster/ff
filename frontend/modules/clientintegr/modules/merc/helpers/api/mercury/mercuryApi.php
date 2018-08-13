@@ -5,6 +5,8 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
+use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -73,7 +75,7 @@ class mercuryApi extends baseApi
 
         //Пишем лог
         $client = $this->getSoapClient('mercury');
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
         } catch(\SoapFault $e) {
             Yii::error($e->detail);
         }
@@ -128,7 +130,7 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
         } catch(\SoapFault $e) {
             Yii::error($e->detail);
         }
@@ -188,7 +190,7 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
@@ -251,7 +253,7 @@ class mercuryApi extends baseApi
             } while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
             if ($status == 'COMPLETED') {
                 $doc = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
@@ -281,7 +283,7 @@ class mercuryApi extends baseApi
         return $result;
     }
 
-    private function addEventLog($response, $method, $localTransactionId, $request_xml, $response_xml)
+    /*private function addEventLog($response, $method, $localTransactionId, $request_xml, $response_xml)
     {
         //Пишем лог
         $log = new mercLog();
@@ -302,7 +304,7 @@ class mercuryApi extends baseApi
         if ($log->status == mercLog::REJECTED) {
             throw new \Exception($log->id, 600);
         }
-    }
+    }*/
 
     public function getReceiveApplicationResult($applicationId)
     {
@@ -366,7 +368,7 @@ class mercuryApi extends baseApi
 
         //Пишем лог
         $client = $this->getSoapClient('mercury');
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
         return $result;
     }
@@ -418,7 +420,7 @@ class mercuryApi extends baseApi
 
         //Пишем лог
         $client = $this->getSoapClient('mercury');
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
         return $result;
     }
@@ -470,7 +472,7 @@ class mercuryApi extends baseApi
 
         //Пишем лог
         $client = $this->getSoapClient('mercury');
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
         return $result;
     }
@@ -527,7 +529,7 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $doc = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
@@ -589,7 +591,7 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $doc = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
@@ -600,7 +602,7 @@ class mercuryApi extends baseApi
         return $doc;
     }
 
-    public function resolveDiscrepancyOperation($model)
+    public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;
 
@@ -627,12 +629,20 @@ class mercuryApi extends baseApi
         $report->responsible = new User();
         $report->responsible->login = $this->vetisLogin;
 
-        $ID = 'report1';
-        $report->stockDiscrepancy = $model->getStockDiscrepancy($ID);
-        $report->discrepancyReport = new DiscrepancyReport();
-        $report->discrepancyReport->id = $ID;
-        $report->discrepancyReport->reason = new DiscrepancyReason();
-        $report->discrepancyReport->reason->name = 'Добавление по бумажному ВСД';
+        $count = isset($data_raws) ? count($data_raws) : 1;
+        for ($i = 0; $i < $count; $i++) {
+            $ID = 'report'.$i;
+            $model->raw_stock_entry = isset($data_raws) ? unserialize($data_raws[$i]) : null;
+            $model->type = $type;
+            $report->stockDiscrepancy[] = $model->getStockDiscrepancy($ID);
+            $discrepancyReport = new DiscrepancyReport();
+            $discrepancyReport->id = $ID;
+            $discrepancyReport->reason = new DiscrepancyReason();
+            $discrepancyReport->reason->name = $model->getReason();
+            //$discrepancyReport->description = $model->getDescription();
+
+            $report->discrepancyReport[] = $discrepancyReport;
+        }
 
         $appData->any['ns3:resolveDiscrepancyRequest'] = $report;
 
@@ -655,13 +665,12 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList;
         } else
             $result = null;
-
         return $result;
     }
 
@@ -686,7 +695,6 @@ class mercuryApi extends baseApi
         $appData->any['ns3:prepareOutgoingConsignmentRequest'] = $data->getPrepareOutgoingConsignmentRequest();
 
         $request->application->data = $appData;
-
         //Делаем запрос
         $result = $client->submitApplicationRequest($request);
 
@@ -704,7 +712,59 @@ class mercuryApi extends baseApi
         } while ($status == 'IN_PROCESS');
 
         //Пишем лог
-        $this->addEventLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
+        } else
+            $result = null;
+
+        return $result;
+    }
+
+
+
+    public function registerProductionOperation($data)
+    {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $data->localTransactionId = $localTransactionId;
+        $data->initiator = new User();
+        $data->initiator->login = $this->vetisLogin;
+
+        $appData->any['ns3:registerProductionOperationRequest'] = $data->getRegisterProductionRequest();
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        $result = $client->submitApplicationRequest($request);
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+
+        } while ($status == 'IN_PROCESS');
+        //dd($result);
+
+        //Пишем лог
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;

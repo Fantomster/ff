@@ -34,7 +34,8 @@ use yii\widgets\Breadcrumbs;
                     <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
                         <?php echo $this->render('_form', [
                             'model' => $model,
-                            'dicConst' => $dicConst
+                            'dicConst' => $dicConst,
+                            'id' => $id
                         ]) ?>
                     </div>
                 </div>

@@ -36,6 +36,11 @@ Modal::widget([
     ])
     ?>
 </section>
+
+<section class="content-header">
+    <?= $this->render('_menu.php'); ?>
+
+</section>
 <?=
 $this->render('/default/_license_no_active.php', ['lic' => $lic]);
 ?>

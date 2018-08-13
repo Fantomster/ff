@@ -145,7 +145,7 @@ $js = <<< JS
                 {
                     swal({
                         title: 'Синхронизация',
-                        text: 'Подождите пока закончится загрузка...',
+                        text: 'Подождите, пока закончится загрузка...',
                         onOpen: () => {
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {

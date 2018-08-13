@@ -9,7 +9,12 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
-use common\models\Role;
+
+/* @var $organization common\models\Organization **/
+/* @var $newCount int ??? **/
+/* @var $processingCount int ??? **/
+/* @var $fulfilledCount int ??? **/
+/* @var $selected mixed ??? **/
 
 $this->title = Yii::t('message', 'frontend.views.order.order_four', ['ru' => 'Заказы']);
 $urlExport = Url::to(['/order/export-to-xls']);
@@ -37,6 +42,12 @@ $this->registerJs('
                 }, 500);
             }
         });
+        $(".box-body").on("change", "#orderFilter", function() {
+            $("#search-form").submit();
+        });
+
+        
+        
         $(".box-body").on("click", "td", function (e) {
             if($(this).find("input").hasClass("checkbox-export")){
                 return true;
@@ -76,8 +87,10 @@ $this->registerJs('
                 }
             });
         });
+        
 
     });
+    
     $(document).on("click", ".export-to-xls", function(e) {
         if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
             window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;  
@@ -175,6 +188,10 @@ $this->registerCss("
         </div>
         <!-- /.box-body -->
     </div>
+
+    <style>
+        .bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
+    </style>
     <div class="box box-info order-history">
         <div class="box-body">
             <?php
@@ -192,56 +209,84 @@ $this->registerCss("
             ?>
             <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6">
-                    <?=
-                    $form->field($searchModel, 'status')
-                        ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru' => 'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru' => 'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru' => 'Завершён'])], ['id' => 'statusFilter'])
-                        ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
-                    ?>
+
+                        <?php
+                        # 1. INPUT ORDER ID Filter field
+                        $label = Yii::t('message', 'frontend.views.order.id',
+                            ['ru' => 'Номер заказа']);
+                        echo
+                        $form->field($searchModel, 'id')
+                            ->textInput(['id' => 'orderFilter', 'class' => 'form-control',
+                                'style' => 'width: 130px', 'placeholder' => $label])
+                            ->label($label, ['class' => 'label', 'style' => 'color:#555']);
+                        ?>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <?php
-                    if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                        echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
-                            'data' => $organization->getSuppliers(),
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                            'id' => 'orgFilter'
-                        ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
-                    } else {
-                        echo $form->field($searchModel, 'client_id')->widget(\kartik\select2\Select2::classname(), [
-                            'data' => $organization->getClients(),
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ])->label(Yii::t('message', 'frontend.views.order.rest', ['ru' => 'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
-                    }
+                    # 2. SELECT SUPPLIER Filter field
+                    echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
+                        'data' => $organization->getSuppliers(),
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'name' => 'sd',
+                        ],
+                        'id' => 'orgFilter',
+
+                    ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
                     ?>
                 </div>
-                <div class="col-lg-5 col-md-6 col-sm-6">
-                    <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                <div class="col-lg-3 col-md-3 col-sm-6">
+                    <?php
+                    # 3. RANGE ORDER LAST_UPDATED Filter field
+                    $label = Yii::t('message', 'frontend.views.order.last_updated.range',
+                        ['ru' => 'Обновлено: Начальная дата / Конечная дата ']);
+                    echo Html::label($label, null, ['class' => 'label', 'style' => 'color:#555']);
+                    ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
-                        <?=
-                        DatePicker::widget([
+                        <?php
+                        $label_from = Yii::t('message', 'frontend.views.order.date',
+                            ['ru' => 'Дата']);
+                        $label_to = Yii::t('message', 'frontend.views.order.date_to',
+                            ['ru' => 'Конечная дата']);
+                        echo DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'date_from',
                             'attribute2' => 'date_to',
-                            'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
+                            'options' => ['placeholder' => $label_from, 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => $label_to, 'id' => 'dateTo'],
                             'separator' => '-',
                             'type' => DatePicker::TYPE_RANGE,
                             'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                'format' => 'dd.mm.yyyy',
                                 'autoclose' => true,
                                 'endDate' => "0d",
                             ]
-                        ])
+                        ]);
                         ?>
                     </div>
                 </div>
-                <div class="col-lg-5 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <?php
+                    # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
+                    $waybillStatusesLabel = Yii::t('message', 'frontend.views.order.status');
+                    $waybillStatusesValues = [
 
+                        '0' => Yii::t('message', 'frontend.views.order.all'),
+                        '1' => Yii::t('message', 'frontend.views.order.new'),
+                        '2' => Yii::t('message', 'frontend.views.order.canceled'),
+                        '3' => Yii::t('message', 'frontend.views.order.in_process_two'),
+                        '4' => Yii::t('message', 'frontend.views.order.completed'),
+                    ];
+                    echo $form->field($searchModel, 'docStatus')
+                        ->dropDownList($waybillStatusesValues, ['id' => 'statusFilter'])
+                        ->label($waybillStatusesLabel, ['class' => 'label', 'style' => 'color:#555'])
+                    ?>
                 </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br />
+                    <a class="btn btn-warning" href="<?= Url::to(['/orders']) ?>">Сбросить фильтры</a>
+                </div>
+
             </div>
             <?php ActiveForm::end(); ?>
             <?php if ($organization->type_id == Organization::TYPE_SUPPLIER) { ?>
@@ -265,7 +310,7 @@ $this->registerCss("
                                 'class' => 'yii\grid\CheckboxColumn',
                                 'contentOptions' => ['class' => 'small_cell_checkbox'],
                                 'headerOptions' => ['style' => 'text-align:center;'],
-                                'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+                                'checkboxOptions' => function ($model) use ($selected) {
                                     return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => in_array($model['id'], $selected)];
                                 }
                             ],

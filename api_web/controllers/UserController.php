@@ -4,6 +4,7 @@ namespace api_web\controllers;
 
 use api_web\components\Notice;
 use api_web\components\WebApiController;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class UserController
@@ -672,5 +673,57 @@ class UserController extends WebApiController
     public function actionMobileChange()
     {
         $this->response = $this->container->get('UserWebApi')->mobileChange($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/user/get-agreement",
+     *     tags={"User"},
+     *     summary="Пользовательское соглашение",
+     *     description="Пользовательское соглашение
+    1. UserAgreement
+    2. ConfidencialPolicy",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={"type":"UserAgreement"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={
+     *                   "text": "Текст соглашения"
+     *               }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     */
+    public function actionGetAgreement()
+    {
+        if (empty($this->request['type'])) {
+            throw new BadRequestHttpException('empty_param|type');
+        }
+        if (!in_array($this->request['type'], ['UserAgreement', 'ConfidencialPolicy'])) {
+            throw new BadRequestHttpException('page_not_found');
+        }
+        
+        $this->response['text'] = \Yii::t('api_web', 'api_web.user.agreement.' . $this->request['type']);
     }
 }

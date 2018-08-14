@@ -679,9 +679,7 @@ class UserController extends WebApiController
      * @SWG\Post(path="/user/get-agreement",
      *     tags={"User"},
      *     summary="Пользовательское соглашение",
-     *     description="Пользовательское соглашение
-    1. UserAgreement
-    2. ConfidencialPolicy",
+     *     description="Пользовательское соглашение (UserAgreement, ConfidencialPolicy)",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -723,7 +721,7 @@ class UserController extends WebApiController
         if (!in_array($this->request['type'], ['UserAgreement', 'ConfidencialPolicy'])) {
             throw new BadRequestHttpException('page_not_found');
         }
-        
+
         $this->response['text'] = \Yii::t('api_web', 'api_web.user.agreement.' . $this->request['type']);
     }
 }

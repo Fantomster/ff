@@ -3,6 +3,7 @@
 namespace api\modules\v1\modules\odinsrest\controllers;
 
 use api\common\models\one_s\OneSContragent;
+use api\common\models\one_s\OneSDic;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSStore;
 use api\common\models\one_s\OneSWaybill;
@@ -175,15 +176,19 @@ class DefaultController extends Controller
                 switch ($type){
                     case 1:
                         $modelName = OneSGood::className();
+                        $dictypeID = 3;
                         break;
                     case 2:
                         $modelName = OneSStore::className();
+                        $dictypeID = 2;
                         break;
                     case 3:
                         $modelName = OneSContragent::class;
+                        $dictypeID = 1;
                         break;
                     default:
                         $modelName = OneSGood::className();
+                        $dictypeID = 1;
                 }
                 $i = 0;
                 $returnArray = [];
@@ -230,6 +235,13 @@ class DefaultController extends Controller
                     'updated_count' => $i,
                     'data' => $returnArray
                 ];
+                $count = $modelName::find()->where(['org_id'=>$res])->count();
+                $oneSDic = OneSDic::findOne(['org_id'=>$res, 'dictype_id' => $dictypeID]);
+                if ($oneSDic){
+                    $oneSDic->dicstatus_id = 1;
+                    $oneSDic->obj_count = $count ?? 0;
+                    $oneSDic->save();
+                }
                 $decodedResponse = \GuzzleHttp\json_encode($arr);
                 $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
                 return $decodedResponse;

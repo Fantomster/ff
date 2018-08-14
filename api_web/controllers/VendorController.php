@@ -226,7 +226,7 @@ class VendorController extends WebApiController
 
     /**
      * @SWG\Post(path="/vendor/upload-main-catalog",
-     *     tags={"Vendor"},
+     *     tags={"Vendor/Catalog"},
      *     summary="Загрузка основного каталога",
      *     description="Загрузка основного каталога",
      *     produces={"application/json"},
@@ -251,6 +251,7 @@ class VendorController extends WebApiController
      *         @SWG\Schema(
      *              default={
      *                  "result": true,
+     *                  "temp_id": 2,
      *                  "rows": {
      *                      {
      *                          "Артикул",
@@ -297,7 +298,7 @@ class VendorController extends WebApiController
 
     /**
      * @SWG\Post(path="/vendor/get-list-main-index",
-     *     tags={"Vendor"},
+     *     tags={"Vendor/Catalog"},
      *     summary="Список ключей для загрузки каталога",
      *     description="Список ключей для загрузки каталога",
      *     produces={"application/json"},
@@ -338,7 +339,7 @@ class VendorController extends WebApiController
 
     /**
      * @SWG\Post(path="/vendor/import-main-catalog",
-     *     tags={"Vendor"},
+     *     tags={"Vendor/Catalog"},
      *     summary="Маппинг, валидация и импорт основного каталога",
      *     description="Маппинг, валидация и импорт основного каталога",
      *     produces={"application/json"},
@@ -348,10 +349,7 @@ class VendorController extends WebApiController
      *         required=true,
      *         description="",
      *         @SWG\Schema (
-     *              @SWG\Property(
-     *                  property="user",
-     *                  default= {"token":"111222333", "language":"RU"}
-     *              ),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -395,9 +393,50 @@ class VendorController extends WebApiController
         $this->response = $this->container->get('VendorWebApi')->importMainCatalog($this->request);
     }
 
-    public function actionUploadCustomCatalog()
+    /**
+     * @SWG\Post(path="/vendor/delete-position-temp-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Удаление позиции из временного каталога при загрузке",
+     *     description="Удаление позиции из временного каталога при загрузке",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "temp_id": 4,
+     *                      "position_id": 10
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDeletePositionTempCatalog()
     {
-        $this->response = $this->container->get('VendorWebApi')->uploadCustomCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->deletePositionTempCatalog($this->request);
     }
 
     public function actionImportCustomCatalog()

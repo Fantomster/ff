@@ -12,6 +12,7 @@ return [
         '/user/registration-confirm',
         '/user/registration-repeat-sms',
         '/user/password-recovery',
+        '/user/get-agreement',
         '/market/product',
         '/market/products',
         '/market/categories',

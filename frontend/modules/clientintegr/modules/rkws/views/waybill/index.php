@@ -30,7 +30,7 @@ $widgetMasterDataColumns = array (
         'class' => 'kartik\grid\CheckboxColumn',
         'checkboxOptions' => function ($model) {
             $nacl = RkWaybill::findOne(['order_id' => $model->id]);
-            if ($nacl['status_id'] !== 1 || $nacl['readytoexport'] === 0) {
+            if ($nacl['status_id'] !== 5 || $nacl['readytoexport'] === 0) {
                 return [
                     'disabled' => true,
                     'style' => 'display: none;'

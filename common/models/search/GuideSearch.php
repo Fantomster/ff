@@ -114,10 +114,10 @@ class GuideSearch extends Guide
         }
 
         //Добавляем блокировку запрещенных товаров
-        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($client_id));
-        $query->andWhere(["AND",
-            "cbg_id NOT IN ($blockedItems)"
-        ]);
+        $blockedItems = CatalogGoodsBlocked::getBlockedList($client_id);
+        if (!empty($blockedItems) && array_pop($blockedItems) != 0) {
+            $query->andWhere(["NOT IN", "cbg_id", $blockedItems]);
+        }
 
         return $dataProvider;
     }

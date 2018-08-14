@@ -42,7 +42,7 @@ use kartik\grid\GridView;
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php Pjax::begin(['id' => 'dics_pjax']);
-                    $columns = array (
+                    $columns = array(
                         [
                             'attribute' => 'dictype_id',
                             'value' => function ($model) {
@@ -52,7 +52,26 @@ use kartik\grid\GridView;
                             'contentOptions' => ['style' => 'width: 10%;']
                         ],
                         'updated_at',
-                        'obj_count',
+                        [
+                            'attribute' => 'obj_count',
+                            'value' => function ($model) {
+                                switch ($model->dictype_id) {
+                                    case 1:
+                                        $count = \api\common\models\one_s\OneSContragent::find()->where(['org_id' => $model->org_id])->count();
+                                        break;
+                                    case 2:
+                                        $count = \api\common\models\one_s\OneSStore::find()->where(['org_id' => $model->org_id])->count();
+                                        break;
+                                    case 3:
+                                        $count = \api\common\models\one_s\OneSGood::find()->where(['org_id' => $model->org_id])->count();
+                                        break;
+                                    default:
+                                        $count = 0;
+                                }
+                                return $count;
+                            },
+                            'format' => 'raw'
+                        ],
                         [
                             'class' => 'yii\grid\ActionColumn',
                             'contentOptions' => ['style' => 'width: 6%;'],
@@ -71,8 +90,10 @@ use kartik\grid\GridView;
                             ]
                         ]
                     );
-                    $timestamp_now=time();
-                    if (!(($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))))) {unset($columns[4]['buttons']['get']);}?>
+                    $timestamp_now = time();
+                    if (!(($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))))) {
+                        unset($columns[4]['buttons']['get']);
+                    } ?>
                     <?=
                     GridView::widget([
                         'dataProvider' => $dataProvider,

@@ -140,8 +140,8 @@ class Organization extends \yii\db\ActiveRecord {
             [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
-            [['inn'], 'integer', 'min' => 1000000000, 'max' => 999999999999, 'tooSmall' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов')],
-            [['kpp'], 'integer', 'min' => 100000000, 'max' => 999999999, 'tooSmall' => Yii::t('app', 'Поле должно состоять из 9 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 9 символов')],
+            [['inn'], 'integer', 'min' => 1000000000, 'max' => 999999999999, 'message' => Yii::t('app', 'Поле ИНН должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов')],
+            [['kpp'], 'integer', 'min' => 100000000, 'max' => 999999999, 'message' => Yii::t('app', 'Поле КПП должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 9 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 9 символов')],
         ];
     }
 

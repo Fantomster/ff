@@ -13,6 +13,7 @@ use common\models\Cart;
 use common\models\CatalogGoodsBlocked;
 use common\models\search\OrderProductsSearch;
 use Yii;
+use common\components\SearchOrdersComponent;
 use yii\db\Expression;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -24,6 +25,7 @@ use common\models\Role;
 use common\models\OrderContent;
 use common\models\Organization;
 use common\models\search\OrderSearch;
+use common\models\search\OrderSearch2;
 use common\models\search\OrderContentSearch;
 use common\models\ManagerAssociate;
 use common\models\OrderChat;
@@ -1132,74 +1134,45 @@ class OrderController extends DefaultController
 
     public function actionIndex()
     {
+
+
         $organization = $this->currentUser->organization;
-        $searchModel = new OrderSearch();
-        $today = new \DateTime();
-        $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");
 
-        $params = Yii::$app->request->getQueryParams();
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
+        $statuses = [
+            'new' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR],
+            'stopped' => [Order::STATUS_CANCELLED, Order::STATUS_REJECTED],
+            'processing' => Order::STATUS_PROCESSING,
+            'fulfilled' => Order::STATUS_DONE,
+        ];
+
+        $search = new SearchOrdersComponent();
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
-            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
-            $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
-            $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
-            $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and client_id=' . $organization->id)->queryOne();
-            $totalPrice = $query['total'];
+            $search->businessType = SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT;
+            $search->countForRestaurant($organization->id, $this->currentUser->organization_id, $statuses);
         } else {
-            $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
-            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
-            $canManage = Yii::$app->user->can('manage');
-            if ($canManage) {
-                $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
-                $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
-                $fulfilledCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-                $totalPrice = Order::find()->where(['status' => Order::STATUS_DONE, 'vendor_id' => $organization->id])->sum("total_price");
-            } else {
-                $params['OrderSearch']['manager_id'] = $this->currentUser->id;
-                $orderTable = Order::tableName();
-                $maTable = ManagerAssociate::tableName();
-                $newCount = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'vendor_id' => $organization->id,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
-                    ->count();
-                $processingCount = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'vendor_id' => $organization->id,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'status' => Order::STATUS_PROCESSING])
-                    ->count();
-                $fulfilledCount = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'vendor_id' => $organization->id,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'status' => Order::STATUS_DONE])
-                    ->count();
-                $totalPrice = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'status' => Order::STATUS_DONE,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'vendor_id' => $organization->id])
-                    ->sum("total_price");
-            }
+            $search->businessType = SearchOrdersComponent::BUSINESS_TYPE_VENDOR;
+            $search->countForOthers($organization->id, $this->currentUser->organization_id, $statuses, $this->currentUser->id);
         }
-        $dataProvider = $searchModel->search($params);
-        $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
-        $selected = $session = Yii::$app->session->get('selected', []);
-        $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
-
+        $search->finalize($searchModel, $statuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
+        $renderParams = [
+            'businessType' => $search->businessType,
+            'affiliated' => $search->affiliated,
+            'searchParams' => $search->searchParams,
+            'organization' => $organization,
+            'searchModel' => $searchModel,
+            'dataProvider' => $search->dataProvider,
+            'counts' => $search->counts,
+            'totalPrice' => $search->totalPrice,
+            'selected' => $search->selected,
+        ];
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
+            return $this->renderPartial('index', $renderParams);
         } else {
-            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
+            return $this->render('index', $renderParams);
         }
+
     }
 
     public function actionView($id)

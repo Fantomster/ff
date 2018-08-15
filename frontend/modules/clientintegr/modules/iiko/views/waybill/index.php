@@ -351,7 +351,6 @@ $miltipleUrl = Url::toRoute('waybill/multi-send');
 $js = <<< JS
     $(function () {
         $('.orders-table').on('click', '.export-waybill', function () {
-            console.log('Colonel');
             var url = '$url';
             var id = $(this).data('id');
             var oid = $(this).data('oid');
@@ -372,12 +371,10 @@ $js = <<< JS
                         onOpen: () => {
                             swal.showLoading();
                             $.post(url, {id:id}, function (data) {
-                                console.log(data);
                                 if (data.success === true) {
                                     swal.close();
                                     swal('Готово', '', 'success')
                                 } else {
-                                    console.log(data.error);
                                     swal(
                                         'Ошибка',
                                         'Обратитесь в службу поддержки.',
@@ -429,12 +426,10 @@ $js = <<< JS
 		                        onOpen: () => {
 		                            swal.showLoading();
 		                            $.post(url, {ids:ids}, function (data) {
-		                                console.log(data);
 		                                if (data.success === true) {
 		                                    swal.close();
 		                                    swal('Готово', 'Выгруженно ' + data.count + ' накладных', 'success')
 		                                } else {
-		                                    console.log(data.error);
 		                                    swal(
 		                                        'Ошибка',
 		                                        data.error,

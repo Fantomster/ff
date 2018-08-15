@@ -229,7 +229,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = [];
         if (!is_null($term)) {
-            $organizationID = User::findOne(Yii::$app->user->id)->organization_id;
+            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+            $parentId = iikoPconst::findOne(['const_id' => 8, 'org' => $orgId]);
+            $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
             $andWhere = '';
             $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
             if (count($arr)) {

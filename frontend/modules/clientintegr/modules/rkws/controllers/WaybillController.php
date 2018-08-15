@@ -352,8 +352,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             */
 
             $sql = "( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-            " union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-            "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            " union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 15 )".
+            "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 10 )".
             "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;

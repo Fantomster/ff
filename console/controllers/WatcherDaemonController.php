@@ -9,7 +9,7 @@ class WatcherDaemonController extends \vyants\daemon\controllers\WatcherDaemonCo
      * Список демонов
      * @var array
      */
-    public $daemons= [];
+    public $daemons = [];
 
     /**
      * Запускать как демон
@@ -28,7 +28,14 @@ class WatcherDaemonController extends \vyants\daemon\controllers\WatcherDaemonCo
      */
     protected function renewConnections()
     {
-        return true;
+        if (isset(\Yii::$app->db_api)) {
+            \Yii::$app->db_api->close();
+            \Yii::$app->db_api->open();
+        }
+        if (isset(\Yii::$app->db)) {
+            \Yii::$app->db->close();
+            \Yii::$app->db->open();
+        }
     }
 
     /**
@@ -49,7 +56,7 @@ class WatcherDaemonController extends \vyants\daemon\controllers\WatcherDaemonCo
 
         if (!empty($this->daemons)) {
             foreach ($this->daemons as $daemon) {
-                \Yii::$app->controllerMap[$daemon['className']] = ['class' => 'console\modules\daemons\controllers\\'.$daemon['className']];
+                \Yii::$app->controllerMap[$daemon['className']] = ['class' => 'console\modules\daemons\controllers\\' . $daemon['className']];
             }
         }
 

@@ -122,12 +122,15 @@ $columns = [
 
 echo \yii\helpers\Html::input('hidden', 'vendor_id', $vendor_id);
 echo \yii\helpers\Html::input('hidden', 'invoice_id', $invoice_id);
-
+$dataProvider->pagination->pageParam = 'page_order';
+$dataProvider->sort = false;
 echo \kartik\grid\GridView::widget([
     'filterModel' => $searchModel,
     'filterPosition' => false,
     'dataProvider' => $dataProvider,
+    'layout' => '{items}{pager}',
     'summary' => false,
+    'pjax' => true,
     'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
     'columns' => $columns
 ]);
@@ -189,7 +192,7 @@ $('.ajax-popover').click(function() {
         $.ajax({
       url: e.data('url'),
       type: "POST",
-      data: {key: e.data('model')}, // данные, которые передаем на сервер
+      data: {key: e.data('model')}, // данные, которые передаём на сервер
       dataType: 'html',
       // dataType: "json", // тип ожидаемых данных в ответе
       success: function(data) {

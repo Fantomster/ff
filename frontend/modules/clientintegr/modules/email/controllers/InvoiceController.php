@@ -32,6 +32,7 @@ class InvoiceController extends Controller
         $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->pagination->pageParam = 'page_outer';
         $vi = 'index';
 
 
@@ -84,6 +85,7 @@ class InvoiceController extends Controller
         $invoice_id = $params['invoice_id'];
         $showAll = (isset($params['show_waybill']) && $params['show_waybill'] == 'true') ? 1 : 0;
 
+        $dataProvider->pagination->pageParam = 'page_order';
         return $this->renderAjax('_orders', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
@@ -163,7 +165,7 @@ class InvoiceController extends Controller
                 $model->units = $value['units'];
                 $model->article = $value['article'];
                 if (!$model->save()) {
-                    throw new Exception('Кусок заказа не сохранился, давайте попробуем снова.');
+                    throw new Exception('Часть заказа не сохранилась, давайте попробуем снова.');
                 }
             }
             //Пересчитаем заказ

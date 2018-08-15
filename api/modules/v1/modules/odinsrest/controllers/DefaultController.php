@@ -109,16 +109,19 @@ class DefaultController extends Controller
                 ->leftJoin('one_s_contragent', 'one_s_contragent.id = ' . 'one_s_waybill.agent_uuid')
                 ->leftJoin('one_s_store', 'one_s_store.id = ' . 'one_s_waybill.store_id')
                 ->all($db);
-            foreach ($rows as &$row) {
+            foreach ($rows as $row) {
                 $productID = $row['product_id'];
                 $catalogBaseGood = CatalogBaseGoods::findOne(['id' => $productID]);
                 $row['mixcart_product_name'] = $catalogBaseGood->product ?? '';
             }
-            $wayBills = OneSWaybill::find()->where(['org' => $organizationID, 'readytoexport' => 1])->all();
-            foreach ($wayBills as &$one) {
-                $one->status_id = 2;
-                $one->save();
-            }
+            \Yii::$app->get('db_api')
+                ->createCommand()
+                ->update(OneSWaybill::tableName(), [
+                    'status' => 2
+                ], [
+                    'org' => $organizationID,
+                    'readytoexport' => 1
+                ])->execute();
             return json_encode($rows, JSON_UNESCAPED_UNICODE);
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);

@@ -8,6 +8,30 @@ use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\helpers\Url;
 
+function renderButton($id)
+{
+    return \yii\helpers\Html::tag('a', 'Задать', [
+        'class' => 'actions_icon view-relations',
+        'data-toggle' => "modal",
+        'data-target' => "#myModal",
+        'data-invoice_id' => $id,
+        'style' => 'cursor:pointer;align:center;color:red;',
+        'href' => '#'
+    ]);
+}
+
+Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
+$form = ActiveForm::begin([
+    'options' => [
+        'data-pjax' => true,
+        'id' => 'search-form',
+        'role' => 'search',
+
+    ],
+    'enableClientValidation' => false,
+    'method' => 'get',
+]);
+
 $this->title = 'Список накладных';
 $this->registerJs('
     $("document").ready(function(){
@@ -42,17 +66,6 @@ $this->registerJs('
     });
 ');
 
-function renderButton($id)
-{
-    return \yii\helpers\Html::tag('a', 'Задать', [
-        'class' => 'actions_icon view-relations',
-        'data-toggle' => "modal",
-        'data-target' => "#myModal",
-        'data-invoice_id' => $id,
-        'style' => 'cursor:pointer;align:center;color:red;',
-        'href' => '#'
-    ]);
-}
 
 ?>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
@@ -98,37 +111,25 @@ function renderButton($id)
             </div>
 
             <div class="box-body">
-                <?php
-                Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
-                $form = ActiveForm::begin([
-                    'options' => [
-                        'data-pjax' => true,
-                        'id' => 'search-form',
-                        'role' => 'search',
 
-                    ],
-                    'enableClientValidation' => false,
-                    'method' => 'get',
-                ]);
-                ?>
                 <div class="row">
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
                         echo $form->field($searchModel, 'number')
                             ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
-                            ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru'=>'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
+                            ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                     <div class="col-lg-3 col-md-5 col-sm-9">
-                        <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru'=>'Дата: Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Дата: Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                         <div class="form-group" style="width: 300px; height: 44px;">
                             <?=
                             DatePicker::widget([
                                 'model' => $searchModel,
                                 'attribute' => 'date_from',
                                 'attribute2' => 'date_to',
-                                'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru'=>'Дата']), 'id' => 'dateFrom'],
-                                'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru'=>'Конечная дата']), 'id' => 'dateTo'],
+                                'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
+                                'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
                                 'separator' => '-',
                                 'type' => DatePicker::TYPE_RANGE,
                                 'pluginOptions' => [
@@ -144,7 +145,7 @@ function renderButton($id)
                         <?php
                         echo $form->field($searchModel, 'name_postav')
                             ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav'])
-                            ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru'=>'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
+                            ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                 </div>
@@ -210,8 +211,6 @@ function renderButton($id)
                                         } else {
                                             return (!empty($data->order_id)) ? \yii\helpers\Html::a($data->number, ['/clientintegr/' . $link . '/waybill/index', 'way' => $data->order_id]) : $data->number;
                                         }
-
-
                                     }
                                 ],
                                 [
@@ -270,13 +269,6 @@ function renderButton($id)
                                     'template' => '{view_relations}',
                                     'contentOptions' => ['style' => 'text-align:center'],
                                     'buttons' => [
-                                        /*'view_content' => function ($url, $model) {
-                                            return \yii\helpers\Html::tag('span', '', [
-                                                'class' => 'actions_icon view-content fa fa-eye',
-                                                'data-invoice_id' => $model->id,
-                                                'style' => 'cursor:pointer'
-                                            ]);
-                                        },*/
                                         'view_relations' => function ($url, $model) {
                                             if (isset($model->order->vendor)) {
                                                 return $model->order->vendor->name;
@@ -354,42 +346,6 @@ $js = <<<JS
         var td = $(this).parents('tr').find('td:last-child');
         var this_ = $(this);
         var organization_id = $organization->id;
-
-        /*swal({
-            title: "Выбрать поставщика",
-            html: "<select style='width:100%;' class='search_post'></select>",
-            confirmButtonColor: '#26C281',
-            confirmButtonText: 'Выбрать',
-            confirmButtonColor: '#26C281',
-            showCancelButton: true,
-            cancelButtonText: 'Отменить',
-            cancelButtonColor: '#EF4836',
-            focusConfirm: false,
-            preConfirm: function () {
-                    if ($('.search_post').select2('val') != null){
-                        console.log($('.search_post').select2('data')[0]);
-                    }
-            },
-            onOpen: function () {
-               var data = $('.search_post').select2({
-                    placeholder: "Выбрать поставщика",
-                    dropdownParent: $('.swal2-container'),
-                    allowClear: true,
-                    language: "ru",
-                    ajax: {
-                        url: '$url/get-suppliers',
-                        dataType: 'json',
-                        processResults: function (data) {
-                            return {
-                                results: data
-                            };
-                        }
-                    },
-                });
-            },
-        }).then(function(result){
-            console.log(result);
-        });*/
 
         swal({
                 html: '<input type="text" id="bukv-postav" class="swal2-input" placeholder="Введите хотя бы две буквы названия поставщика" autofocus>'+'<div id="bukv-postav2"></div>',
@@ -560,3 +516,4 @@ $this->registerJsFile(
     ['depends' => [\yii\web\JqueryAsset::className()]]
 );
 ?>
+<?php \yii\widgets\Pjax::end(); ?>

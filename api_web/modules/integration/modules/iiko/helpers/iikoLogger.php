@@ -53,7 +53,7 @@ class iikoLogger
     {
         self::update([
             'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
-            'request_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
+            'request_at' => date('Y-m-d H:i:s', time())
         ]);
     }
 
@@ -65,7 +65,7 @@ class iikoLogger
     {
         self::update([
             'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
-            'response_at' => Yii::$app->formatter->asDatetime(time(), 'yyyy-MM-dd HH:i:ss')
+            'response_at' => date('Y-m-d H:i:s', time())
         ]);
 
         try {

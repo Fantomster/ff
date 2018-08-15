@@ -52,26 +52,7 @@ use kartik\grid\GridView;
                             'contentOptions' => ['style' => 'width: 10%;']
                         ],
                         'updated_at',
-                        [
-                            'attribute' => 'obj_count',
-                            'value' => function ($model) {
-                                switch ($model->dictype_id) {
-                                    case 1:
-                                        $count = \api\common\models\one_s\OneSContragent::find()->where(['org_id' => $model->org_id])->count();
-                                        break;
-                                    case 2:
-                                        $count = \api\common\models\one_s\OneSStore::find()->where(['org_id' => $model->org_id])->count();
-                                        break;
-                                    case 3:
-                                        $count = \api\common\models\one_s\OneSGood::find()->where(['org_id' => $model->org_id])->count();
-                                        break;
-                                    default:
-                                        $count = 0;
-                                }
-                                return $count;
-                            },
-                            'format' => 'raw'
-                        ],
+                        'obj_count',
                         [
                             'class' => 'yii\grid\ActionColumn',
                             'contentOptions' => ['style' => 'width: 6%;'],

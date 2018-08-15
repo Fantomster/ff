@@ -32,7 +32,7 @@ class RabbitService extends Component
 
         $connection = $this->connect();
         $channel = $connection->channel();
-        
+
         $channel->queue_declare(
             $this->queue,       #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
             false,              #passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера

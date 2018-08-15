@@ -48,11 +48,13 @@ abstract class AbstractDaemonController extends DaemonController
         /**
          * Инофрмация о подключении
          */
-        \Yii::trace("HOST: " . $this->rabbit->host . PHP_EOL);
-        \Yii::trace("V_HOST: " . $this->rabbit->vhost . PHP_EOL);
-        \Yii::trace("Exchange: " . $this->getExchangeName() . PHP_EOL);
-        \Yii::trace("Queue: " . $this->getQueueName() . PHP_EOL);
-        \Yii::trace("Consumer: " . $consumerTag . PHP_EOL);
+        $this->log([
+            "HOST" => $this->rabbit->host,
+            "V_HOST" => $this->rabbit->vhost,
+            "Exchange" => $this->getExchangeName(),
+            "Queue" => $this->getQueueName(),
+            "Consumer" => $consumerTag
+        ]);
 
         while (count($channel->callbacks)) {
             try {
@@ -63,6 +65,19 @@ abstract class AbstractDaemonController extends DaemonController
             }
         }
         return false;
+    }
+
+    /**
+     * @param $message array|string
+     */
+    public function log($message)
+    {
+        if (is_array($message)) {
+            $message = print_r($message, true);
+        }
+        $message = $message . PHP_EOL;
+        $message .= str_pad('', 80, '=') . PHP_EOL;
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . self::shortClassName() . '.log', $message, FILE_APPEND);
     }
 
     /**
@@ -103,7 +118,7 @@ abstract class AbstractDaemonController extends DaemonController
      */
     protected function ask($job)
     {
-        $job->delivery_info['channel']->basic_ack($job->delivery_info['delivery_tag']);
+        $this->channel->basic_ack($job->delivery_info['delivery_tag']);
     }
 
     /**
@@ -111,7 +126,7 @@ abstract class AbstractDaemonController extends DaemonController
      */
     protected function nask($job)
     {
-        $job->delivery_info['channel']->basic_nack($job->delivery_info['delivery_tag']);
+        $this->channel->basic_nack($job->delivery_info['delivery_tag'], false, false);
     }
 
     /**
@@ -119,7 +134,7 @@ abstract class AbstractDaemonController extends DaemonController
      */
     protected function cancel($job)
     {
-        $job->delivery_info['channel']->basic_cancel($job->delivery_info['consumer_tag']);
+        $this->channel->basic_cancel($job->delivery_info['consumer_tag']);
     }
 
     /**

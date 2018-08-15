@@ -45,14 +45,15 @@ use yii\widgets\Pjax;
             $arr = [];
             $iikoSelectedStores = \api\common\models\iiko\iikoSelectedStore::findAll(['organization_id' => $org]);
             if ($iikoSelectedStores) {
-                foreach ($iikoSelectedStores as $store) {
-                    $arr[] = $store->store_id;
+                foreach ($iikoSelectedStores as $iikoStore) {
+                    $arr[] = $iikoStore->store_id;
                 }
             }
+
             $iikoStores = \api\common\models\iiko\iikoStore::findAll(['org_id' => $org, 'is_active' => 1]);
             if ($iikoStores && is_iterable($iikoStores)) {
                 foreach ($iikoStores as $store) {
-                    echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'name' => 'Stores[' . $store->id . ']', 'checked ' => (is_iterable($arr) && in_array($store->id, $arr)) ? true : false]);
+                    echo $form->field($model, 'value')->checkbox(['label' => $store->denom, 'value' => (is_iterable($arr) && in_array($store->id, $arr)) ? true : false, 'name' => 'Stores[' . $store->id . ']', 'checked ' => (is_iterable($arr) && in_array($store->id, $arr)) ? true : false]);
                 }
             }
             break;
@@ -69,4 +70,20 @@ use yii\widgets\Pjax;
     </div>
     <?php ActiveForm::end(); ?>
 </div>
+<?php
+$customJs = <<< JS
+
+$("document").ready(function(){
+$(".dict-agent-form").on("click", "input[type='checkbox']", function() {
+    var checked = $(this).prop('checked');
+    if (checked) {
+        $(this).val(1);
+    } else {
+        $(this).val(0);
+    }
+});
+});
+
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_READY);
 

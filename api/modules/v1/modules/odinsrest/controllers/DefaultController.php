@@ -117,7 +117,7 @@ class DefaultController extends Controller
             \Yii::$app->get('db_api')
                 ->createCommand()
                 ->update(OneSWaybill::tableName(), [
-                    'status' => 2
+                    'status_id' => 2
                 ], [
                     'org' => $organizationID,
                     'readytoexport' => 1

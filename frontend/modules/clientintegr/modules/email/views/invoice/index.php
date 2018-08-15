@@ -516,3 +516,4 @@ $this->registerJsFile(
     ['depends' => [\yii\web\JqueryAsset::className()]]
 );
 ?>
+<?php \yii\widgets\Pjax::end(); ?>

@@ -56,12 +56,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
-	<p>
-		<span>Контрагент: <?=$agentName?></span> |
-		<span>Номер заказа: <?=$wmodel->order_id?></span> |
-		<span>Номер накладной: <?=$wmodel->num_code?></span> |
-		<span>Склад: <?=$storeName?></span>
-	</p>
+    <p>
+        <span>Контрагент: <?= $agentName ?></span> |
+        <span>Номер заказа: <?= $wmodel->order_id ?></span> |
+        <span>Номер накладной: <?= $wmodel->num_code ?></span> |
+        <span>Склад: <?= $storeName ?></span>
+    </p>
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -225,6 +225,22 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'asPopover' => $isAndroid ? false : true,
                                     'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                     'inputType' => \kartik\editable\Editable::INPUT_TEXT,
+                                    'afterInput' => function ($form) {
+                                        echo '<input type="checkbox" name="forever">' . "&nbsp;" . "Сохранить в сопоставлении";
+                                    },
+                                    'buttonsTemplate' => '{reset}{submit}',
+                                    'resetButton' => [
+                                        'class' => 'btn btn-sm btn-outline-danger',
+                                        'icon' => '<i class="glyphicon glyphicon-ban-circle"></i> ',
+                                        'name' => 'otkaz',
+                                        'label' => 'Отменить'
+                                    ],
+                                    'submitButton' => [
+                                        'class' => 'btn btn-sm btn-success',
+                                        'icon' => '<i class="glyphicon glyphicon-save"></i> ',
+                                        'name' => 'forever',
+                                        'label' => 'Применить сейчас'
+                                    ],
                                     'formOptions' => [
                                         'action' => Url::toRoute('changekoef'),
                                         'enableClientValidation' => false,
@@ -232,7 +248,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 ],
                                 'hAlign' => 'right',
                                 'vAlign' => 'bottom',
-                                // 'width'=>'100px',
                                 'format' => ['decimal', 6],
                                 'pageSummary' => true,
                                 'label' => 'Коэфф.'
@@ -273,9 +288,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 ],
                                 'hAlign' => 'right',
                                 'vAlign' => 'bottom',
-                                // 'width'=>'100px',
                                 'format' => ['decimal', 2],
-                                //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                 'footer' => \api\common\models\RkWaybilldata::getSumByWaybillid($wmodel->id),
                                 'pageSummary' => true,
                                 'label' => 'Сумма б/н'
@@ -358,7 +371,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'format' => ['decimal', 2],
                                 'hAlign' => 'right',
                                 'vAlign' => 'bottom',
-                                'value' =>  function ($model) {
+                                'value' => function ($model) {
                                     $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
                                     return $sumsnds;
                                 }

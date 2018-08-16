@@ -19,12 +19,11 @@ use yii\helpers\ArrayHelper;
  * @module Frontend
  * @version 1.0
  */
-
 class SearchOrdersComponent extends Component
 {
 
     public $affiliated = [];
-  /** @var $searchParams array */
+    /** @var $searchParams array */
     public $searchParams = [];
     /** @var $counts array */
     public $counts = [
@@ -138,7 +137,6 @@ class SearchOrdersComponent extends Component
             asort($this->affiliated);
 
 
-
         }
 
     }
@@ -161,7 +159,9 @@ class SearchOrdersComponent extends Component
         if (isset($selectedFromSession[$this->currentPage])) {
             $this->selected = $selectedFromSession[$this->currentPage];
         }
-        if(!$this->totalPrice) {$this->totalPrice = 0;}
+        if (!$this->totalPrice) {
+            $this->totalPrice = 0;
+        }
     }
 
 }

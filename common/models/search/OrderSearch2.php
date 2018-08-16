@@ -61,7 +61,6 @@ class OrderSearch2 extends Order
     }
 
 
-
     /**
      * swdfsdfsfd
      * @var $params array
@@ -71,7 +70,7 @@ class OrderSearch2 extends Order
      * @var $sort array
      * @return ActiveDataProvider
      */
-    public function search(array $params, string $businessType, array $orderStatuses = [], array $pagination = [], array $sort = []) : ActiveDataProvider
+    public function search(array $params, string $businessType, array $orderStatuses = [], array $pagination = [], array $sort = []): ActiveDataProvider
     {
 
         $selfTypeColumnId = 'vendor_id';
@@ -132,6 +131,3 @@ class OrderSearch2 extends Order
 
 
 }
-// 13318 13317 13294 - поставщик
-
-//mc.vendor.1@bklv.ru - Mix1

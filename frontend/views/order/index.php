@@ -310,153 +310,156 @@ $urlSaveSelected = Url::to(['/order/save-selected-orders']);
 $i = 'Внимание, данные о фактическом приёме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете корректность данных?';
 $titleCompleteEDI = EchoRu::echo ('frontend.views.order.complete_edi', $i, 'app');
 $btnYes = EchoRu::echo ('frontend.views.order.yep', 'Да');
-$btnNo = EchoRu::echo ('frontend.views.order.cancel', 'Да');
+$btnNo = EchoRu::echo ('frontend.views.order.cancel', 'Нет');
 $js = <<< JS
-    $("document").ready(function(){
-        
-        $(".box-body").on("change", "#orderFilter", function() {
-            var target = "http:";
-            var w = window.location.protocol;
-            if (w === "https:") {target = "https:";} 
-            target = target + '//' + window.location.hostname + '/order?OrderSearch[id]=' + $("#orderFilter").val();
-            window.location.href = target;
-        });
+$("document").ready(function () {
 
-        var justSubmitted = false;
-        $(".box-body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#search-form").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-        
-        $(".box-body").on("change", "#ordersearch2-doc_status", function() {
-            $("#search-form").submit();
-        });
-          
-        $(document).on("click", ".export-to-xls", function(e) {
-            if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
-                window.location.href = "$urlExport?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;
-             }
-
-        });
-        $(document).on("click", ".grid-report", function(e) {
-            if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
-                window.location.href = "$urlReport?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;
-            }
-        });
-
-        var current_page = 0;
-         $(document).on("click", ".pagination a", function(e) {
-              e.preventDefault();
-              url = $(this).attr("href");
-    
-               $.ajax({
-                 url: "$urlSaveSelected?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page,
-                 type: "GET",
-                 success: function(){
-                     $.pjax.reload({container: "#order-list", url: url, timeout:30000});
-                 }
-               });
-               
-               current_page = $(this).attr("data-page")
-        });
-
-         
-        $(".box-body").on("click", "td", function (e) {
-            if($(this).find("input").hasClass("checkbox-export")){
-                return true;
-            }
-            if ($(this).find("a").hasClass("reorder") || 
-                $(this).find("a").hasClass("complete")
-            ){
-                return true;
-            }
-            
-            var url = $(this).parent("tr").data("url");
-            if (url !== undefined) {
-                location.href = url;
-            }
-        });
-        
-        
-      $(document).on("click", ".reorder, .complete", function(e) {
-            e.preventDefault();
-            clicked = $(this);
-            if($(this).hasClass("completeEdi")){
-                var title = "$titleCompleteEDI";
-            } else {
-                var title = clicked.data("original-title") + "?";
-            }
-            swal({
-                title: title,
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonText: "$btnYes",
-                cancelButtonText: "$btnNo",
-                showLoaderOnConfirm: true,
-            }).then(function(result) {
-                if (result.dismiss === "cancel") {
-                    swal.close();
-                } else {
-                    document.location = clicked.data("url")
-                }
-            });
-        });
-        
+    $(".box-body").on("change", "#orderFilter", function () {
+        var target = "http:";
+        var w = window.location.protocol;
+        if (w === "https:") {
+            target = "https:";
+        }
+        target = target + '//' + window.location.hostname + '/order?OrderSearch[id]=' + $("#orderFilter").val();
+        window.location.href = target;
     });
+
+    var justSubmitted = false;
+    $(".box-body").on("change", "#dateFrom, #dateTo", function () {
+        if (!justSubmitted) {
+            $("#search-form").submit();
+            justSubmitted = true;
+            setTimeout(function () {
+                justSubmitted = false;
+            }, 500);
+        }
+    });
+
+    $(".box-body").on("change", "#ordersearch2-doc_status", function () {
+        $("#search-form").submit();
+    });
+
+    $(document).on("click", ".export-to-xls", function () {
+        if ($("#orderHistory").yiiGridView("getSelectedRows").length > 0) {
+            window.location.href = "$urlExport?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page;
+        }
+
+    });
+    $(document).on("click", ".grid-report", function () {
+        if ($("#orderHistory").yiiGridView("getSelectedRows").length > 0) {
+            window.location.href = "$urlReport?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page;
+        }
+    });
+
+    var current_page = 0;
+    $(document).on("click", ".pagination a", function (e) {
+        e.preventDefault();
+        var url = $(this).attr("href");
+
+        $.ajax({
+            url: "$urlSaveSelected?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page,
+            type: "GET",
+            success: function () {
+                $.pjax.reload({container: "#order-list", url: url, timeout: 30000});
+            }
+        });
+
+        current_page = $(this).attr("data-page")
+    });
+
+    $(".box-body").on("click", "td", function () {
+        if ($(this).find("input").hasClass("checkbox-export")) {
+            return true;
+        }
+        if ($(this).find("a").hasClass("reorder") ||
+            $(this).find("a").hasClass("complete")
+        ) {
+            return true;
+        }
+
+        var url = $(this).parent("tr").data("url");
+        if (url !== undefined) {
+            location.href = url;
+        }
+    });
+
+    $(document).on("click", ".reorder, .complete", function (e) {
+        e.preventDefault();
+        var title;
+        var clicked = $(this);
+        if ($(this).hasClass("completeEdi")) {
+            title = "$titleCompleteEDI";
+        } else {
+            title = clicked.data("original-title") + "?";
+        }
+        swal({
+            title: title,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "$btnYes",
+            cancelButtonText: "$btnNo",
+            showLoaderOnConfirm: true
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                document.location = clicked.data("url")
+            }
+        });
+    });
+
+});   
 JS;
 $js2 = NULL;
 if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
     $js2 = <<< JS
-    $("document").ready(function(){
-        $(".box-body").on("change", "#ordersearch2-vendor_id", function() {
-            $("#search-form").submit();
-        });
-     });
+$("document").ready(function () {
+    $(".box-body").on("change", "#ordersearch2-vendor_id", function () {
+        $("#search-form").submit();
+    });
+});
   
 JS;
 } elseif ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) {
     $js2 = <<< JS
-    $("document").ready(function(){
-        $(".box-body").on("change", "#ordersearch2-client_id", function() {
-            $("#search-form").submit();
-        });
-     });
+ $("document").ready(function () {
+    $(".box-body").on("change", "#ordersearch2-client_id", function () {
+        $("#search-form").submit();
+    });
+});
 JS;
 }
 $this->registerJs($js . $js2);
 #-----------------------------------------------------------------------------------------------------------------------
 $css = <<< CSS
-    tr:hover {
-        cursor: pointer;
-    }
 
-    #orderHistory a:not(.btn) {
-        color: #333;
-    }
+tr:hover {
+    cursor: pointer;
+}
 
-    .dataTable a {
-        width: 100%;
-        min-height: 17px;
-        display: inline-block;
-    }
+#orderHistory a:not(.btn) {
+    color: #333;
+}
 
-    #select2-ordersearch2-vendor_id-container, #select2-ordersearch2-client_id-container {
-        margin-top: 0;
-    }
+.dataTable a {
+    width: 100%;
+    min-height: 17px;
+    display: inline-block;
+}
 
-    .select2-selection__clear {
-        display: none;
-    }
-    #select2-ordersearch2-vendor_id-container,
-    #select2-ordersearch2-client_id-container,
-    #select2-ordersearch2-doc_status-container {
-        margin-top: 0 !important
-    }
+#select2-ordersearch2-vendor_id-container, #select2-ordersearch2-client_id-container {
+    margin-top: 0;
+}
+
+.select2-selection__clear {
+    display: none;
+}
+
+#select2-ordersearch2-vendor_id-container,
+#select2-ordersearch2-client_id-container,
+#select2-ordersearch2-doc_status-container {
+    margin-top: 0 !important
+}
 
 CSS;
 $this->registerCss($css);

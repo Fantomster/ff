@@ -477,11 +477,11 @@ class OrderController extends DefaultController
 
         $cart = Cart::findOne(['organization_id' => $client->id]);
         $cartItems = empty($cart) ? [] : (new \yii\db\Query)
-                ->select('product_id')
-                ->from(\common\models\CartContent::tableName())
-                ->where(['cart_id' => $cart->id])
-                ->createCommand()
-                ->queryColumn();
+            ->select('product_id')
+            ->from(\common\models\CartContent::tableName())
+            ->where(['cart_id' => $cart->id])
+            ->createCommand()
+            ->queryColumn();
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
@@ -642,7 +642,7 @@ class OrderController extends DefaultController
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
             return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params','client'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params', 'client'));
         }
     }
 
@@ -2516,14 +2516,16 @@ class OrderController extends DefaultController
         }
     }
 
-    public function actionClearAllBlocked() {
+    public function actionClearAllBlocked()
+    {
         $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
 
         CatalogGoodsBlocked::deleteAll(['owner_organization_id' => $client->id]);
         return true;
     }
 
-    public function actionBlockedProducts() {
+    public function actionBlockedProducts()
+    {
         $selected = Yii::$app->request->post('selected');
         $state = Yii::$app->request->post('state');
         $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;

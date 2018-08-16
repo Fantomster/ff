@@ -1,6 +1,7 @@
 <?php
 
 namespace common\components;
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -16,9 +17,14 @@ use yii\helpers\Url;
 class UrlPjax
 {
 
-    public static function make(string $title, string $url, string $value = NULL, string $identifier = 'id') {
-        if (!$title) {$title = '';}
-        if (!$value) {$value = $title;}
+    public static function make(string $title, string $url, string $value = NULL, string $identifier = 'id')
+    {
+        if (!$title) {
+            $title = '';
+        }
+        if (!$value) {
+            $value = $title;
+        }
         return Html::a($title, Url::to([$url, $identifier => $value]), ['class' => 'target-blank', 'data-pjax' => "0"]);
     }
 

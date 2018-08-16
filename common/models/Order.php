@@ -521,9 +521,9 @@ class Order extends \yii\db\ActiveRecord
                 $eComIntegration = new EComIntegration();
                 $login = $vendor->ediOrganization->login;
                 $pass = $vendor->ediOrganization->pass;
-                if($this->status == self::STATUS_DONE){
+                if ($this->status == self::STATUS_DONE) {
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass, true);
-                }else{
+                } else {
                     $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass);
                 }
                 if (!$result) {
@@ -555,9 +555,9 @@ class Order extends \yii\db\ActiveRecord
     {
         if ($user instanceof User) {
 
-            if (Yii::$app instanceof Yii\console\Application){
+            if (Yii::$app instanceof Yii\console\Application) {
                 return Yii::$app->params['url'] . "/order/view" . $this->id;
-            }else{
+            } else {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view/",
                     "id" => $this->id
@@ -620,11 +620,12 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasMany(OrderAttachment::className(), ['order_id' => 'id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAssignment() {
+    public function getAssignment()
+    {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
     }
 }

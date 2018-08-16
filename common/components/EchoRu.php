@@ -28,7 +28,9 @@ class EchoRu
      */
     public static function echo(string $index, string $body, string $category = NULL): string
     {
-        if (!$category) {$category = self::$message_category;}
+        if (!$category) {
+            $category = self::$message_category;
+        }
         return Yii::t($category, $index, [self::$message_localization => $body]);
     }
 

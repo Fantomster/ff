@@ -20,12 +20,15 @@ $this->registerCss("
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 
 $dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org]));
-$arr = [];
+$arrSession = Yii::$app->session->get('SelectedProduct');
 $iikoSelectedGoods = \api\common\models\iiko\iikoSelectedProduct::findAll(['organization_id' => $org]);
 if ($iikoSelectedGoods) {
     foreach ($iikoSelectedGoods as $good) {
         $arr[] = $good->product_id;
     }
+}
+if (is_array($arrSession)) {
+    $arr = array_merge($arr, $arrSession);
 }
 
 Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
@@ -39,25 +42,25 @@ $form = ActiveForm::begin([
     'method' => 'get',
 ]);
 ?>
-<div class="row">
-    <div class="col-md-3">
-        <?php
-        echo $form->field($searchModel, 'product_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getProductType()))->label(Yii::t('app', 'Тип продукта'), ['class' => 'label', 'style' => 'color:#555']);
-        ?>
+    <div class="row">
+        <div class="col-md-3">
+            <?php
+            echo $form->field($searchModel, 'product_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getProductType()))->label(Yii::t('app', 'Тип продукта'), ['class' => 'label', 'style' => 'color:#555']);
+            ?>
+        </div>
+        <div class="col-md-3">
+            <?php
+            echo $form->field($searchModel, 'cooking_place_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getCoockingPlaceType()))
+                ->label(Yii::t('app', 'Тип места приготовления продукта'), ['class' => 'label', 'style' => 'color:#555']);
+            ?>
+        </div>
+        <div class="col-md-3">
+            <?php
+            echo $form->field($searchModel, 'unit')
+                ->dropDownList(array_merge(['all' => 'Все'], $searchModel->getUnit()))->label(Yii::t('app', 'Единица измерения товара в системе IIKO'), ['class' => 'label', 'style' => 'color:#555']);
+            ?>
+        </div>
     </div>
-    <div class="col-md-3">
-        <?php
-        echo $form->field($searchModel, 'cooking_place_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getCoockingPlaceType()))
-            ->label(Yii::t('app', 'Тип места приготовления продукта'), ['class' => 'label', 'style' => 'color:#555']);
-        ?>
-    </div>
-    <div class="col-md-3">
-        <?php
-        echo $form->field($searchModel, 'unit')
-            ->dropDownList(array_merge(['all' => 'Все'], $searchModel->getUnit()))->label(Yii::t('app', 'Единица измерения товара в системе IIKO'), ['class' => 'label', 'style' => 'color:#555']);
-        ?>
-    </div>
-</div>
 <?php echo Html::hiddenInput('selected_goods'); ?>
 <?php
 echo \kartik\grid\GridView::widget([
@@ -106,6 +109,7 @@ echo \kartik\grid\GridView::widget([
 ]);
 ActiveForm::end();
 Pjax::end();
+$sessionUrl = \yii\helpers\Url::to('ajax-add-product-to-session');
 $customJs = <<< JS
 
  $("document").ready(function(){
@@ -180,6 +184,19 @@ $customJs = <<< JS
             $("#search-form").submit();
         }, 700);
     });
+ 
+$("document").ready(function(){
+        $(".dict-agent-form").on("click", ".checkbox-group_operations", function() { 
+            if ($(this).prop('checked')){
+                var productID = $(this).val();
+                $.ajax({
+                    url : '$sessionUrl',
+                    type: 'post',
+                    data : {productID : productID}
+                });
+            }
+        });
+});
 
 JS;
 $this->registerJs($customJs, \yii\web\View::POS_READY);

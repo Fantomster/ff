@@ -22,6 +22,7 @@ $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 $dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org]));
 $arrSession = Yii::$app->session->get('SelectedProduct');
 $iikoSelectedGoods = \api\common\models\iiko\iikoSelectedProduct::findAll(['organization_id' => $org]);
+$arr = [];
 if ($iikoSelectedGoods) {
     foreach ($iikoSelectedGoods as $good) {
         $arr[] = $good->product_id;
@@ -70,6 +71,7 @@ echo \kartik\grid\GridView::widget([
         [
             'class' => 'yii\grid\CheckboxColumn',
             'contentOptions' => ['class' => 'small_cell_checkbox'],
+            'header' => '',
             'headerOptions' => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {
                 if (is_iterable($arr) && in_array($model->id, $arr)) {
@@ -77,6 +79,7 @@ echo \kartik\grid\GridView::widget([
                 } else {
                     $checked = false;
                 }
+                echo Html::hiddenInput('goods[' . $model->id . ']', (int)$checked, ['id' => 'goods_' . $model->id]);
                 return ['value' => $model->id, 'class' => 'checkbox-group_operations', 'checked' => $checked];
             }
         ],
@@ -187,13 +190,17 @@ $customJs = <<< JS
  
 $("document").ready(function(){
         $(".dict-agent-form").on("click", ".checkbox-group_operations", function() { 
+            var productID = $(this).val();
+            var idName = 'goods_' + productID;
             if ($(this).prop('checked')){
-                var productID = $(this).val();
                 $.ajax({
                     url : '$sessionUrl',
                     type: 'post',
                     data : {productID : productID}
                 });
+               $('#' + idName).val(1);
+            } else {
+               $('#' + idName).val(0); 
             }
         });
 });

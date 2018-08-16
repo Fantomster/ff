@@ -92,15 +92,18 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     
     private function handleSelectedProducts($post, $org)
     {
-        if (isset($post['selection'])) {
-            $products = $post['selection'];
+        if (isset($post['goods'])) {
+            $products = $post['goods'];
             $allSelectedProducts = iikoSelectedProduct::findAll(['organization_id' => $org]);
-            foreach ($allSelectedProducts as &$product) {
-                if (!in_array($product->product_id, $products)) {
+            foreach ($allSelectedProducts as $product) {
+                if (isset($products[$product->product_id]) &&  $products[$product->product_id] == 0) {
                     $product->delete();
                 }
             }
-            foreach ($products as $productID) {
+            foreach ($products as $productID => $value) {
+                if ($value == 0) {
+                    continue;
+                }
                 $selectedProduct = iikoSelectedProduct::findOne(['product_id' => $productID, 'organization_id' => $org]);
                 if (!$selectedProduct) {
                     $selectedProduct = new iikoSelectedProduct();

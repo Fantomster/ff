@@ -563,7 +563,11 @@ class OrderController extends DefaultController
         return $this->renderPartial('_vds_list', compact('mercVSDs'));
     }
 
-
+    /**
+     * Редактирование шаблона
+     * @param int $id
+     * @return string
+     */
     public function actionEditGuide(int $id)
     {
         $client = $this->currentUser->organization;
@@ -580,13 +584,16 @@ class OrderController extends DefaultController
             unset($session['guideProductList']);
             unset($session['selectedVendor']);
         }
+
         $session['currentGuide'] = $id;
 
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
 
-        if (!count($session['guideProductList']))
+        if (!count($session['guideProductList'])) {
             $params['show_sorting'] = false;
+        }
+
         if (is_iterable($session['guideProductList'])) {
             foreach ($session['guideProductList'] as $one) {
                 if (gettype($one) == "integer") {
@@ -646,43 +653,67 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Сохранение шаблона
+     * @param $id
+     * @return \yii\web\Response
+     * @throws \Exception
+     */
     public function actionSaveGuide($id)
     {
-        $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        $session = Yii::$app->session;
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $client = $this->currentUser->organization;
+            $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
-        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
-            return $this->redirect(['order/guides']);
-        }
+            $current_id = Yii::$app->session->get('currentGuide', null);
+            if ($id != $current_id) {
+                return $this->redirect(['order/guides']);
+            }
 
-        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            $guideProductList = Yii::$app->session->get('guideProductList');
 
-        foreach ($guide->guideProducts as $guideProduct) {
-            if (!in_array($guideProduct->cbg_id, $guideProductList)) {
-                $guideProduct->delete();
-            } else {
-                $position = array_search($guideProduct->cbg_id, $guideProductList);
-                if ($position !== false) {
-                    unset($guideProductList[$position]);
+            foreach ($guide->guideProducts as $guideProduct) {
+                if (!in_array($guideProduct->cbg_id, $guideProductList)) {
+                    $guideProduct->delete();
+                } else {
+                    $position = array_search($guideProduct->cbg_id, $guideProductList);
+                    if ($position !== false) {
+                        unset($guideProductList[$position]);
+                    }
                 }
             }
-        }
 
-        foreach ($guideProductList as $newProductId) {
-            $newProduct = new GuideProduct();
-            $newProduct->guide_id = $id;
-            $newProduct->cbg_id = $newProductId;
-            $newProduct->save();
-        }
+            $rows = [];
+            foreach ($guideProductList as $newProductId) {
+                $rows[] = [
+                    'guide_id' => $id,
+                    'cbg_id' => $newProductId,
+                ];
+            }
 
-        unset($session['guideProductList']);
-        unset($session['selectedVendor']);
-        unset($session['currentGuide']);
+            if (!empty($rows)) {
+                Yii::$app->db->createCommand()
+                    ->batchInsert(GuideProduct::tableName(), ['guide_id', 'cbg_id'], $rows)
+                    ->execute();
+            }
+
+            Yii::$app->session->remove('guideProductList');
+            Yii::$app->session->remove('selectedVendor');
+            Yii::$app->session->remove('currentGuide');
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
 
         return $this->redirect(['order/guides']);
     }
 
+    /**
+     * Отмена изменений
+     * @return \yii\web\Response
+     */
     public function actionResetGuide()
     {
         $session = Yii::$app->session;
@@ -692,6 +723,10 @@ class OrderController extends DefaultController
         return $this->redirect(['order/guides']);
     }
 
+    /**
+     * @param int $id
+     * @return String
+     */
     public function actionAjaxShowGuide(int $id): String
     {
         $client = $this->currentUser->organization;
@@ -720,45 +755,58 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Установка поставщика в шаблоне при редактировании
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxSelectVendor($id)
     {
-        $session = Yii::$app->session;
-        $session['selectedVendor'] = $id;
+        Yii::$app->session->set('selectedVendor', $id);
         return true;
     }
 
+    /**
+     * Добавляем товар в шаблон
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxAddToGuide($id)
     {
         $client = $this->currentUser->organization;
         $session = Yii::$app->session;
-
         $product = $client->getProductIfAvailable($id);
-
         if ($product) {
-            $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            $guideProductList = $session->get('guideProductList', []);
             if (!in_array($product->id, $guideProductList)) {
                 $guideProductList[] = $product->id;
-                $session['guideProductList'] = $guideProductList;
+                $session->set('guideProductList', $guideProductList);
             }
         }
-
         return isset($product);
     }
 
+    /**
+     * Удаление товара из шаблона
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxRemoveFromGuide($id)
     {
-        $client = $this->currentUser->organization;
         $session = Yii::$app->session;
-        $guideProductList = $session['guideProductList'];
-        $positionInGuide = array_search($id, $guideProductList);
-        if ($positionInGuide !== FALSE) {
-            unset($guideProductList[$positionInGuide]);
-            $session['guideProductList'] = $guideProductList;
+        $guideProductList = $session->get('guideProductList', []);
+        if (in_array($id, $guideProductList)) {
+            $session->set('guideProductList', array_diff($guideProductList, [$id]));
             return true;
         }
         return false;
     }
 
+    /**
+     * Добавить шаблон в корзину
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxAddGuideToCart($id)
     {
         $client = $this->currentUser->organization;
@@ -1134,8 +1182,6 @@ class OrderController extends DefaultController
 
     public function actionIndex()
     {
-
-
         $organization = $this->currentUser->organization;
 
         $searchModel = new OrderSearch2();

@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use kartik\date\DatePicker;
+use kartik\datetime\DateTimePicker;
 use yii\helpers\ArrayHelper;
 use kartik\tree\TreeViewInput;
 use yii\bootstrap\Dropdown;
@@ -49,20 +49,20 @@ use yii\web\JsExpression;
     <?php
 
     if (!$model->doc_date) {
-        $model->doc_date = date('d.m.Y', time());
+        $model->doc_date = date('Y-m-d h:i');
     } else {
-        $rdate = date('d.m.Y', strtotime($model->doc_date));
+        $rdate = date('Y-m-d h:i', strtotime($model->doc_date));
         $model->doc_date = $rdate;
     }
     ?>
     <?= $form->field($model, 'doc_date')->label('Дата Документа')->
-    widget(DatePicker::classname(), [
-        'type' => DatePicker::TYPE_COMPONENT_APPEND,
+    widget(DateTimePicker::classname(), [
+        'type' => DateTimePicker::TYPE_COMPONENT_APPEND,
         'convertFormat' => true,
         'layout' => '{picker}{input}',
         'pluginOptions' => [
             'autoclose' => true,
-            'format' => 'dd.MM.yyyy',
+            'format' => 'yyyy-nn-dd hh:i',
             'todayHighlight' => false,
         ],
     ]);

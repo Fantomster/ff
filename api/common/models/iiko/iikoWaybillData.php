@@ -23,11 +23,11 @@ use Yii;
  * @property double $koef
  * @property string $created_at
  * @property string $updated_at
-  */
+ */
 class iikoWaybillData extends \yii\db\ActiveRecord
 {
     public $pdenom;
-    public $enable_all_map;
+    public $enable_all_map = true;
 
     /**
      * @inheritdoc

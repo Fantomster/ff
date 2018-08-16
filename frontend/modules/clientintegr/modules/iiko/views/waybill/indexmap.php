@@ -188,7 +188,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'asPopover' => $isAndroid ? false : true,
                                         'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
-                                        'afterInput' => function($form, $w) {
+                                        'afterInput' => function ($form, $w) {
                                             /**
                                              * @var $form ActiveForm
                                              * @var $w \kartik\editable\Editable

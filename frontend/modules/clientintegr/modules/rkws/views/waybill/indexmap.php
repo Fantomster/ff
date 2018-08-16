@@ -226,7 +226,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                     'inputType' => \kartik\editable\Editable::INPUT_TEXT,
                                     'afterInput' => function ($form) {
-                                        echo '<input type="checkbox" name="forever">' . "&nbsp;" . "Сохранить в сопоставлении";
+                                        echo "<input type='checkbox' name='forever'>&nbsp;Сохранить в сопоставлении";
                                     },
                                     'buttonsTemplate' => '{reset}{submit}',
                                     'resetButton' => [

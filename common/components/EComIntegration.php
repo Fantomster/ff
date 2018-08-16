@@ -17,9 +17,6 @@ use common\models\User;
 use frontend\controllers\OrderController;
 use mongosoft\soapclient\Client;
 use Yii;
-use yii\base\Component;
-use yii\base\ErrorException;
-use yii\console\Request;
 use yii\db\Exception;
 use yii\db\Expression;
 
@@ -37,112 +34,106 @@ class EComIntegration
     const STATUS_ERROR = 3;
     const STATUS_HANDLED = 4;
 
+    
+    /**
+     * get distinct organization
+     * */
+    private function getOrganizations(){
+        return EdiOrganization::find()->where(['and', ['not', ['gln_code' => null]], ['not', ['gln_code' => '']]])
+            ->andWhere(['and', ['not', ['login' => null]], ['not', ['login' => '']]])
+            ->andWhere(['and', ['not', ['pass' => null]], ['not', ['pass' => '']]])
+            ->groupBy('login')->distinct()->all();
+    }
 
     public function handleFilesList(): void
     {
-        $ediOrganizations = EdiOrganization::find()->where(['not', ['gln_code' => null]])->andWhere(['not', ['login' => null]])->andWhere(['not', ['pass' => null]])->all();
+        $ediOrganizations = $this->getOrganizations();
+        
         if (is_iterable($ediOrganizations)) {
             foreach ($ediOrganizations as $ediOrganization) {
                 $login = $ediOrganization['login'];
                 $pass = $ediOrganization['pass'];
-                $transaction = Yii::$app->db_api->beginTransaction();
+            
+                $client = Yii::$app->siteApi;
                 try {
-                    $client = Yii::$app->siteApi;
-                    try {
-                        $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
-                    } catch (Exception $e) {
-                        Yii::error($e->getMessage());
-                        continue;
-                    }
-                    if ($object->result->errorCode != 0) {
-                        Yii::error('EComIntegration getList Error');
-                        continue;
-                    }
-                    $list = $object->result->list ?? null;
-                    if (!$list) {
-                        echo "No files";
-                        continue;
-                    }
-                    if (is_iterable($list)) {
-                        foreach ($list as $fileName) {
-                            $this->insertFilesInQueue($fileName, $ediOrganization['organization_id']);
-                        }
-                    } else {
-                        $this->insertFilesInQueue($list, $ediOrganization['organization_id']);
-                    }
-                    $transaction->commit();
-                } catch (Exception $e) {
-                    Yii::error($e);
-                    $transaction->rollback();
+                    $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+                } catch (\Throwable $e) {
+                    Yii::error($e->getMessage());
+                    continue;
+                }
+                if ($object->result->errorCode != 0) {
+                    Yii::error('EComIntegration getList Error №' . $object->result->errorCode);
+                    continue;
+                }
+                $list = $object->result->list ?? null;
+                
+                if (!$list) {
+                    Yii::error('No files for ' . $ediOrganization['login']);
+                    continue;
+                }
+                if(!empty($list)){
+                    $this->insertFilesInQueue($list);
                 }
             }
         }
     }
 
-
-    private function insertFilesInQueue(String $fileName, int $organizationID): void
+    /**
+     * @throw \Exception
+     * */
+    private function insertFilesInQueue(array $list): void
     {
-        $file = (new \yii\db\Query())
-            ->select(['id'])
+        $batch = [];
+        $files = (new \yii\db\Query())
+            ->select(['name'])
             ->from('edi_files_queue')
-            ->where(['organization_id' => $organizationID, 'name' => $fileName])
-            ->one();
-        if (!$file) {
-            Yii::$app->db->createCommand()->insert('edi_files_queue', [
-                'name' => $fileName,
-                'organization_id' => $organizationID,
-            ])->execute();
+            ->where(['name' => $list])
+            ->indexBy('name')
+            ->all();
+        
+        foreach ($list as $name) {
+            if(!array_key_exists($name, $files)){
+                $batch[] = [$name];
+            }
+        }
+        
+        if (!empty($batch)) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name'], $batch)->execute();
+                $transaction->commit();
+            } catch (\Throwable $e) {
+                $transaction->rollback();
+                Yii::error($e);
+            }
         }
     }
-
-
+    
     public function handleFilesListQueue(): void
     {
         $rows = (new \yii\db\Query())
-            ->select(['id', 'name', 'organization_id'])
+            ->select(['id', 'name'])
             ->from('edi_files_queue')
             ->where(['status' => [self::STATUS_NEW, self::STATUS_ERROR]])
             ->all();
-        $arr = [];
-        $i = 0;
-        if (is_iterable($rows)) {
-            $client = Yii::$app->siteApi;
-            foreach ($rows as $row) {
-                $organizationID = $row['organization_id'];
-                $arr[$organizationID][$i]['name'] = $row['name'];
-                $arr[$organizationID][$i]['id'] = $row['id'];
-                $i++;
-            }
-        } else {
-            exit();
-        }
-        foreach ($arr as $organizationID => $item) {
-            $ediOrganization = (new \yii\db\Query())
-                ->select(['login', 'pass'])
-                ->from('edi_organization')
-                ->where(['organization_id' => $organizationID])
-                ->one();
-            $login = $ediOrganization['login'];
-            $pass = $ediOrganization['pass'];
-            if($login && $pass){
-                foreach ($item as $value) {
-                    $fileName = $value['name'];
-                    $id = $value['id'];
-                    $this->getDoc($client, $fileName, $login, $pass, $id);
-                }
+        $client = Yii::$app->siteApi;
+        var_dump($rows);
+        $ediOrganizations = $this->getOrganizations();
+
+        foreach ($ediOrganizations as $ediOrganization) {
+            foreach ($rows as $item) {
+                $this->getDoc($client, $item['name'], $ediOrganization['login'], $ediOrganization['pass'], $item['id']);
             }
         }
     }
-
-
+    
     private function getDoc(Client $client, String $fileName, String $login, String $pass, int $ediFilesQueueID): bool
     {
-        $transaction = Yii::$app->db_api->beginTransaction();
         try {
             $this->updateQueue($ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {
                 $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
                 Yii::error($e->getMessage());
                 return false;
@@ -151,10 +142,12 @@ class EComIntegration
                 $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'No such file');
                 return false;
             }
+            
             $content = $doc->result->content;
             $dom = new \DOMDocument();
             $dom->loadXML($content);
             $simpleXMLElement = simplexml_import_dom($dom);
+            $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->HEAD->SUPPLIER);
             $success = false;
             if (strpos($content, 'PRICAT>')) {
                 $success = $this->handlePriceListUpdating($simpleXMLElement);
@@ -165,6 +158,7 @@ class EComIntegration
             if (strpos($content, 'ALCDES>')) {
                 $success = $this->handleOrderResponse($simpleXMLElement, true);
             }
+    
             if ($success) {
                 $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
                 $this->updateQueue($ediFilesQueueID, self::STATUS_HANDLED, '');
@@ -174,12 +168,27 @@ class EComIntegration
         } catch (Exception $e) {
             Yii::error($e);
             $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
-            $transaction->rollback();
             return false;
         }
         return true;
     }
 
+    /**
+     * add org id to file in queue table
+     * */
+    private function addOrgIdToFile($id, $glnCode){
+        $orgId = (new \yii\db\Query())
+            ->select(['organization_id'])
+            ->from('edi_organization')
+            ->where(['gln_code' => $glnCode])
+            ->one();
+        
+        try{
+            $_=Yii::$app->db->createCommand()->update('edi_files_queue', ['organization_id' => $orgId['organization_id']], 'id=' . $id)->execute();
+        } catch (\Throwable $t){
+            Yii::error($t->getMessage() . 'error on pdate id=' . $id . 'gln = ' . $glnCode, __METHOD__);
+        }
+    }
 
     private function updateQueue(int $ediFilesQueueID, int $status, String $errorText): void
     {

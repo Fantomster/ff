@@ -2,9 +2,11 @@
 
 namespace api\common\models;
 
+use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use Yii;
 use common\models\Organization;
 use yii\base\Exception;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "rk_access".
@@ -20,13 +22,14 @@ use yii\base\Exception;
  * @property datetime $td
  * @property integer $ver
  * @property integer $locked
- * @property string $usereq 
+ * @property string $usereq
  * @property string $comment
  * @property string $salespoint
  * @property datetime $linked_at
- * 
+ *
  */
-class RkWaybilldata extends \yii\db\ActiveRecord {
+class RkWaybilldata extends \yii\db\ActiveRecord
+{
 
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
@@ -36,26 +39,28 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'rk_waybill_data';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['waybill_id', 'product_id'], 'required'],
             //  [['koef'], 'number'],
             //  
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            ['vat', 'in', 'allowArray' => true,  'range' => [0, 1000, 1800] ],
+            ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
             //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
-            ['vat', 'in', 'allowArray' => true,  'range' => [0, 1000, 1800] ],
+            ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
             ['koef', 'filter', 'filter' => function ($value) {
-                        $newValue = 0 + str_replace(',', '.', $value);
-                        return $newValue;
-                    }],
+                $newValue = 0 + str_replace(',', '.', $value);
+                return $newValue;
+            }],
             ['sum', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
@@ -73,7 +78,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
             'fid' => 'FID',
@@ -81,18 +87,23 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
             'quant' => 'Количество',
             'product_id' => 'ID в Mixcart',
             'koef' => 'Коэфф.',
-            'fproductnameProduct'=>'Наименование продукции'
+            'fproductnameProduct' => 'Наименование продукции'
         ];
     }
 
-    public static function getStatusArray() {
+    public static function getStatusArray()
+    {
         return [
             RkAccess::STATUS_UNLOCKED => 'Активен',
             RkAccess::STATUS_LOCKED => 'Отключен',
         ];
     }
 
-    public function getWaybill() {
+    /**
+     * @return RkWaybill
+     */
+    public function getWaybill()
+    {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return RkWaybill::findOne(['id' => $this->waybill_id]);
@@ -100,12 +111,14 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
-    public function getVat() {
+    public function getVat()
+    {
 
 
     }
 
-    public function getProduct() {
+    public function getProduct()
+    {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $rprod = RkProduct::find()->andWhere('id = :id', [':id' => $this->product_rid])->one();
@@ -115,9 +128,11 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getFproductname()
     {
-
         return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
     }
 
@@ -126,7 +141,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         return $this->fproductname->product;
     }
 
-    public function beforeSave($insert) {
+    public function beforeSave($insert)
+    {
 
         if (parent::beforeSave($insert)) {
 
@@ -157,7 +173,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
                 $this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
             } else { // Создание
-               // $this->koef = 1;
+                // $this->koef = 1;
             }
 
 
@@ -167,25 +183,28 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         }
     }
 
-/*    public function beforeValidate() {
-        
-        if (parent::beforeValidate()) {
-            $this->koef = 0 + str_replace(',', '.', $this->koef);
-            
-            return true;
+    /*    public function beforeValidate() {
+
+            if (parent::beforeValidate()) {
+                $this->koef = 0 + str_replace(',', '.', $this->koef);
+
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
-*/
-    public function afterSave($insert, $changedAttributes) {
+    */
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
 
-        $wmodel = $this->waybill;
+        $this->saveAllMap();
 
+        $wmodel = $this->waybill;
         $check = $this::find()
-                ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
-                ->andwhere('product_rid is null or munit_rid is null')
-                ->count('*');
+            ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
+            ->andwhere('product_rid is null or munit_rid is null')
+            ->count('*');
+
         if ($check > 0) {
             $wmodel->readytoexport = 0;
         } else {
@@ -199,7 +218,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         }
     }
 
-    public static function getDb() {
+    public static function getDb()
+    {
         return \Yii::$app->db_api;
     }
 
@@ -216,6 +236,41 @@ class RkWaybilldata extends \yii\db\ActiveRecord {
         }
         $sum = number_format($sum, 2, ',', ' ');
         return $sum;
+    }
+
+    /**
+     * @return bool
+     */
+    public function saveAllMap()
+    {
+        $client_id = $this->getWaybill()->org;
+        $vendor_id = $this->getWaybill()->getOrder()->vendor_id;
+
+        $allMapModel = AllMaps::findOne([
+            'service_id' => rkeeperService::getServiceId(),
+            'org_id' => $client_id,
+            'supp_id' => $vendor_id,
+            'product_id' => $this->product_id
+        ]);
+
+        if (empty($allMapModel)) {
+            $allMapModel = new AllMaps([
+                'service_id' => rkeeperService::getServiceId(),
+                'org_id' => $client_id,
+                'supp_id' => $vendor_id,
+                'product_id' => $this->product_id,
+                'created_at' => Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss')
+            ]);
+        }
+
+        $allMapModel->serviceproduct_id = $this->product_rid;
+        $allMapModel->unit_rid = $this->munit_rid;
+        $allMapModel->store_rid = $this->getWaybill()->store_rid;
+        $allMapModel->koef = $this->koef;
+        $allMapModel->vat = $this->vat;
+        $allMapModel->is_active = 1;
+
+        return !empty($allMapModel->dirtyAttributes) ? $allMapModel->save() : false;
     }
 
 }

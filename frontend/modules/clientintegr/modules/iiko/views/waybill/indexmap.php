@@ -39,15 +39,15 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
-	<p>
-		<span>Контрагент: <?=$agentName?></span> |
-		<span>Номер заказа: <?=$wmodel->order_id?></span> |
-		<span>Номер накладной: <?=$wmodel->num_code?></span> |
-		<span>Склад: <?=$storeName?></span>
-	</p>
+    <p>
+        <span>Контрагент: <?= $agentName ?></span> |
+        <span>Номер заказа: <?= $wmodel->order_id ?></span> |
+        <span>Номер накладной: <?= $wmodel->num_code ?></span> |
+        <span>Склад: <?= $storeName ?></span>
+    </p>
 </section>
 <section class="content">
-	<div class="catalog-index">
+    <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
@@ -72,10 +72,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             ]); ?>
                         </div>
                         <?php
-                            $pjax = "$('#search-pjax').on('pjax:end', function(){
+                        $pjax = "$('#search-pjax').on('pjax:end', function(){
                                             $.pjax.reload('#map_grid1',{'timeout':10000});
                                     });";
-                            $this->registerJs($pjax);
+                        $this->registerJs($pjax);
                         ?>
                         <?php Pjax::begin(['enablePushState' => true, 'timeout' => 10000, 'id' => 'search-pjax']); ?>
                         <?php
@@ -188,6 +188,22 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'asPopover' => $isAndroid ? false : true,
                                         'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                         'inputType' => \kartik\editable\Editable::INPUT_TEXT,
+                                        'afterInput' => function ($form) {
+                                            echo "<input type='checkbox' name='forever'>&nbsp;Сохранить в сопоставлении";
+                                        },
+                                        'buttonsTemplate' => '{reset}{submit}',
+                                        'resetButton' => [
+                                            'class' => 'btn btn-sm btn-outline-danger',
+                                            'icon' => '<i class="glyphicon glyphicon-ban-circle"></i> ',
+                                            'name' => 'otkaz',
+                                            'label' => 'Отменить'
+                                        ],
+                                        'submitButton' => [
+                                            'class' => 'btn btn-sm btn-success',
+                                            'icon' => '<i class="glyphicon glyphicon-save"></i> ',
+                                            'name' => 'forever',
+                                            'label' => 'Применить сейчас'
+                                        ],
                                         'formOptions' => [
                                             'action' => Url::toRoute('change-coefficient'),
                                             'enableClientValidation' => false,
@@ -237,7 +253,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'vAlign' => 'bottom',
                                     'format' => ['decimal', 2],
                                     'pageSummary' => true,
-                                    //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                     'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
                                     'label' => 'Сумма б/н'
                                 ],

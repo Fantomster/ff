@@ -192,11 +192,12 @@ $dataColumns = [
         'visible' => $forRestaurant,
         'format' => 'raw',
         'value' => function ($data) {
-            $class = $message = $message_orig = NULL;
+            $class = $message = $message_orig = $url = NULL;
             if (in_array($data->status, [Order::STATUS_DONE, Order::STATUS_REJECTED, Order::STATUS_CANCELLED])) {
                 $message_orig = EchoRu::echo ('frontend.views.order.repeat_order', 'Повторить заказ');
                 $message = EchoRu::echo ('frontend.views.order.repeat', 'Повторить');
                 $class = 'reorder btn btn-outline-processing';
+                $url = 'order/repeat';
             } elseif ($data->isObsolete) {
                 $message_orig = EchoRu::echo ('frontend.views.order.complete_order', 'Завершить заказ');
                 $message = EchoRu::echo ('frontend.views.order.complete', 'Завершить');
@@ -204,12 +205,13 @@ $dataColumns = [
                 if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code > 0) {
                     $class = 'complete btn btn-outline-success completeEdi';
                 }
+                $url = 'complete-obsolete';
             }
             if ($class) {
                 return Html::a($message, '#', [
                     'class' => $class,
                     'data' => ['toggle' => 'tooltip', 'original-title' => $message_orig,
-                        'url' => Url::to(['order/repeat', 'id' => $data->id])],
+                        'url' => Url::to([$url, 'id' => $data->id])],
                 ]);
             }
             return NULL;

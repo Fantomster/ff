@@ -106,6 +106,9 @@ class RkWaybill extends \yii\db\ActiveRecord {
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
+    /**
+     * @return Order
+     */
     public function getOrder() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);

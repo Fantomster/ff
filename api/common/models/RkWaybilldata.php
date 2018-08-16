@@ -257,7 +257,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
                 'org_id' => $client_id,
                 'supp_id' => $vendor_id,
                 'product_id' => $this->product_id,
-                'created_at' => new Expression('NOW()')
+                'created_at' => Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss')
             ]);
         }
 

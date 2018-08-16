@@ -23,10 +23,11 @@ use Yii;
  * @property double $koef
  * @property string $created_at
  * @property string $updated_at
- */
+  */
 class iikoWaybillData extends \yii\db\ActiveRecord
 {
     public $pdenom;
+    public $enable_all_map;
 
     /**
      * @inheritdoc
@@ -93,6 +94,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
+            'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
         ];
     }
 

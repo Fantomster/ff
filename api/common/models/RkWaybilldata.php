@@ -2,9 +2,11 @@
 
 namespace api\common\models;
 
+use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use Yii;
 use common\models\Organization;
 use yii\base\Exception;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "rk_access".
@@ -99,6 +101,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return RkWaybill
+     */
     public function getWaybill()
     {
 
@@ -125,9 +130,11 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getFproductname()
     {
-
         return $this->hasOne(\common\models\CatalogBaseGoods::className(), ['id' => 'product_id']);
     }
 
@@ -192,12 +199,14 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        $wmodel = $this->waybill;
+        $this->saveAllMap();
 
+        $wmodel = $this->waybill;
         $check = $this::find()
             ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
             ->andwhere('product_rid is null or munit_rid is null')
             ->count('*');
+      
         if ($check > 0) {
             $wmodel->readytoexport = 0;
         } else {
@@ -229,6 +238,41 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         }
         $sum = number_format($sum, 2, ',', ' ');
         return $sum;
+    }
+
+    /**
+     * @return bool
+     */
+    public function saveAllMap()
+    {
+        $client_id = $this->getWaybill()->org;
+        $vendor_id = $this->getWaybill()->getOrder()->vendor_id;
+
+        $allMapModel = AllMaps::findOne([
+            'service_id' => rkeeperService::getServiceId(),
+            'org_id' => $client_id,
+            'supp_id' => $vendor_id,
+            'product_id' => $this->product_id
+        ]);
+
+        if (empty($allMapModel)) {
+            $allMapModel = new AllMaps([
+                'service_id' => rkeeperService::getServiceId(),
+                'org_id' => $client_id,
+                'supp_id' => $vendor_id,
+                'product_id' => $this->product_id,
+                'created_at' => Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss')
+            ]);
+        }
+
+        $allMapModel->serviceproduct_id = $this->product_rid;
+        $allMapModel->unit_rid = $this->munit_rid;
+        $allMapModel->store_rid = $this->getWaybill()->store_rid;
+        $allMapModel->koef = $this->koef;
+        $allMapModel->vat = $this->vat;
+        $allMapModel->is_active = 1;
+
+        return !empty($allMapModel->dirtyAttributes) ? $allMapModel->save() : false;
     }
 
 }

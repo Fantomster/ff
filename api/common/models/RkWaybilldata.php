@@ -35,6 +35,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     const STATUS_LOCKED = 1;
 
     public $pdenom;
+    public $enable_all_map = true;
 
     /**
      * @inheritdoc
@@ -87,7 +88,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             'quant' => 'Количество',
             'product_id' => 'ID в Mixcart',
             'koef' => 'Коэфф.',
-            'fproductnameProduct' => 'Наименование продукции'
+            'fproductnameProduct' => 'Наименование продукции',
+            'enable_all_map' => 'Сохранить в сопоставлении'
         ];
     }
 
@@ -204,7 +206,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
             ->andwhere('product_rid is null or munit_rid is null')
             ->count('*');
-
+      
         if ($check > 0) {
             $wmodel->readytoexport = 0;
         } else {

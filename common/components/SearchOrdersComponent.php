@@ -48,6 +48,11 @@ class SearchOrdersComponent extends Component
     /** @var $businessType string self::BUSINESS_TYPE_RESTAURANT || self::BUSINESS_TYPE_VENDOR */
     public $businessType;
 
+    const INTEGRATION_TYPE_RKWS = 'rkws';
+    const INTEGRATION_TYPE_IIKO = 'iiko';
+    const INTEGRATION_TYPE_ONES = '1c';
+
+
     /**
      * Search if $organization->type_id == Organization::TYPE_RESTAURANT
      *
@@ -185,11 +190,8 @@ class SearchOrdersComponent extends Component
         $this->businessType = SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT;
 
         // 3. Update widget parameters
-        if ($type == 'rkws') {
-            $this->dataProvider = $searchModel->searchForIntegrationRKWS($this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
-        } elseif ($type == 'iiko') {
-            $this->dataProvider = $searchModel->searchForIntegrationIIKO($this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
-        }
+        $this->dataProvider = $searchModel->searchForIntegration($type, $this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
+
 
         // 4. Detect vendors
         $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])

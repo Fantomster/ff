@@ -126,8 +126,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             throw new BadRequestHttpException('Access denied');
         }
         $search = new SearchOrdersComponent();
-        $search->getRestaurantIntegration('iiko', $searchModel, $organization->id, $this->currentUser->organization_id,
-            $wbStatuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
+        $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_IIKO, $searchModel,
+            $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
+            ['defaultOrder' => ['id' => SORT_DESC]]);
         $lisences = $organization->getLicenseList();
         // $lisences = iikoService::getLicense();
         if (isset($lisences['iiko']) && $lisences['iiko']) {

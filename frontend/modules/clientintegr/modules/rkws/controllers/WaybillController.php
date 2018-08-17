@@ -133,8 +133,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             throw new BadRequestHttpException('Access denied');
         }
         $search = new SearchOrdersComponent();
-        $search->getRestaurantIntegration('rkws', $searchModel, $organization->id, $this->currentUser->organization_id,
-            $wbStatuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
+        $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_RKWS, $searchModel,
+            $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
+            ['defaultOrder' => ['id' => SORT_DESC]]);
+
         $lisences = $organization->getLicenseList();
 
         $view = ($lisences['rkws'] && $lisences['rkws_ucs']) ? 'index' : '/default/_nolic';

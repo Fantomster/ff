@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
 use api\common\models\iiko\iikoAgent;
+use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
 use api\common\models\iiko\iikoSelectedProduct;
 use api\common\models\VatData;
@@ -230,7 +231,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $out = [];
         if (!is_null($term)) {
             $orgId = User::findOne(Yii::$app->user->id)->organization_id;
-            $parentId = iikoPconst::findOne(['const_id' => 8, 'org' => $orgId]);
+            $constId = iikoDicconst::findOne(['denom' => 'main_org']);
+            $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
             $andWhere = '';
             $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');

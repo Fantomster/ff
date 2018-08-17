@@ -68,6 +68,11 @@ use kartik\grid\GridView;
                                         if ($model->denom == 'auth_login') {
                                             return $res;
                                         }
+                                        
+                                        // В случае отображения логина
+                                        if ($model->denom == 'main_org') {
+                                            return $res;
+                                        }
 
                                         if ($model->type == \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX || $model->type == \api\common\models\iiko\iikoDicconst::TYPE_LIST) {
                                             return $res;

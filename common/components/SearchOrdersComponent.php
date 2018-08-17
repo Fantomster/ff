@@ -30,7 +30,7 @@ class SearchOrdersComponent extends Component
         'new' => 0,
         'processing' => 0,
         'fulfilled' => 0,
-        // 'stopped' => 0, // @todo проверить потребность в счетчике
+        // 'stopped' => 0, //
     ];
     /** @var $totalPrice int */
     public $totalPrice;

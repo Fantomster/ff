@@ -216,7 +216,7 @@ class createStoreEntryForm extends Model
 
     public static function getCountryList()
     {
-        $res = \common\models\vetis\VetisCountry::getCountryList($this->product);
+        $res = \common\models\vetis\VetisCountry::getCountryList();
         if (!empty($res)) {
             return $res;
         }

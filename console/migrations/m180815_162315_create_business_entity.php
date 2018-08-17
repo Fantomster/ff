@@ -19,7 +19,7 @@ class m180815_162315_create_business_entity extends Migration
      */
     public function safeUp()
     {
-        $this->createTable('vetis_business_entity', [
+        $this->createTable('{{%vetis_business_entity}}', [
             'uuid' => $this->string()->notNull(),
             'guid' => $this->string()->notNull(),
             'last' => $this->boolean()->null(),
@@ -33,7 +33,10 @@ class m180815_162315_create_business_entity extends Migration
             'inn' => $this->string()->null(),
             'kpp' => $this->string()->null(),
             'addressView' => $this->string()->null(),
+            'data' => $this->text()->null(),
         ]);
+        $this->createIndex('vetis_business_entity_uuid', '{{%vetis_business_entity}}', 'uuid');
+        $this->createIndex('vetis_business_entity_guid', '{{%vetis_business_entity}}', 'guid');
     }
 
     /**
@@ -41,7 +44,9 @@ class m180815_162315_create_business_entity extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('vetis_business_entity');
+        $this->dropIndex('vetis_business_entity_uuid', '{{%vetis_business_entity}}');
+        $this->dropIndex('vetis_business_entity_guid', '{{%vetis_business_entity}}');
+        $this->dropTable('{{%vetis_business_entity}}');
     }
 
     /*

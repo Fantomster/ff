@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: user
@@ -31,7 +32,8 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocument;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
 
-class createStoreEntryForm extends Model {
+class createStoreEntryForm extends Model
+{
 
     const ADD_PRODUCT = 1;
     const INV_PRODUCT = 2;
@@ -63,11 +65,11 @@ class createStoreEntryForm extends Model {
     public function rules()
     {
         return [
-            [['productType','product','subProduct','product_name','volume', 'unit','perishable','country','producer','vsd_issueNumber'], 'required'],
-            [['productType','perishable'],'integer'],
+            [['productType', 'product', 'subProduct', 'product_name', 'volume', 'unit', 'perishable', 'country', 'producer', 'vsd_issueNumber'], 'required'],
+            [['productType', 'perishable'], 'integer'],
             [['volume'], 'double'],
-            [['product', 'subProduct','product_name', 'unit','country','producer','producer_role','producer_product_name','batchID', 'country','vsd_issueNumber','vsd_issueSeries'], 'string', 'max' => 255],
-            [['vsd'],'string']
+            [['product', 'subProduct', 'product_name', 'unit', 'country', 'producer', 'producer_role', 'producer_product_name', 'batchID', 'country', 'vsd_issueNumber', 'vsd_issueSeries'], 'string', 'max' => 255],
+            [['vsd'], 'string']
         ];
     }
 
@@ -112,86 +114,112 @@ class createStoreEntryForm extends Model {
         $enterprise = $enterprise->enterprise;
         $business = $business->businessEntity;
 
-        return [ $enterprise->name.'('.
-                    $enterprise->address->addressView
-                    .')',
-                $business->name.', ИНН:'.$business->inn,
+        return [$enterprise->name . '(' .
+            $enterprise->address->addressView
+            . ')',
+            $business->name . ', ИНН:' . $business->inn,
         ];
     }
 
     public static function getUnitList()
     {
+        $res = \common\models\vetis\VetisUnit::getUnitList();
+        if (!empty($res)) {
+            return $res;
+        }
+
         $list = dictsApi::getInstance()->getUnitList();
 
         $res = [];
-        foreach ($list->unitList->unit as $item)
-        {
-            if($item->last && $item->active)
+        foreach ($list->unitList->unit as $item) {
+            if ($item->last && $item->active) {
                 $res[$item->uuid] = $item->name;
+            }
         }
         return $res;
     }
 
     public function getProductList()
     {
-        if(empty($this->productType))
+        if (empty($this->productType)) {
             return [];
+        }
+        
+        $res = \common\models\vetis\VetisProductByType::getProductByTypeList($this->productType);
+        if (!empty($res)) {
+            return $res;
+        }
 
-       $list = productApi::getInstance()->getProductByTypeList($this->productType);
+        $list = productApi::getInstance()->getProductByTypeList($this->productType);
 
-        if(!isset($list->productList->product))
+        if (!isset($list->productList->product)) {
             return [];
+        }
 
         $res = [];
-        foreach ($list->productList->product as $item)
-        {
-            if($item->last && $item->active)
+        foreach ($list->productList->product as $item) {
+            if ($item->last && $item->active) {
                 $res[$item->guid] = $item->name;
+            }
         }
         return $res;
     }
 
     public function getSubProductList()
     {
-        if(empty($this->product))
+        if (empty($this->product)) {
             return [];
+        }
+        
+        $res = \common\models\vetis\VetisSubproductByProduct::getSubProductByProductList($this->product);
+        if (!empty($res)) {
+            return $res;
+        }
+        
         $list = productApi::getInstance()->getSubProductByProductList($this->product);
 
-        if(!isset($list->subProductList->subProduct))
+        if (!isset($list->subProductList->subProduct)) {
             return [];
+        }
 
         $res = [];
-        foreach ($list->subProductList->subProduct as $item)
-        {
-            if($item->last && $item->active)
-                $res[$item->guid] = $item->name. " (".$item->code.")";
+        foreach ($list->subProductList->subProduct as $item) {
+            if ($item->last && $item->active) {
+                $res[$item->guid] = $item->name . " (" . $item->code . ")";
+            }
         }
         return $res;
     }
 
     public function getProductName()
     {
-        if(empty($this->productType) || empty($this->product) || empty($this->subProduct))
+        if (empty($this->productType) || empty($this->product) || empty($this->subProduct)) {
             return "";
-        $list = productApi::getInstance()->getProductItemList  ($this->productType, $this->product, $this->subProduct);
+        }
+        $list = productApi::getInstance()->getProductItemList($this->productType, $this->product, $this->subProduct);
 
-        if(!isset($list->productItemList->productItem))
+        if (!isset($list->productItemList->productItem)) {
             return [];
+        }
 
         $res = [];
-        foreach ($list->productItemList->productItem as $item)
-        {
-            if($item->last && $item->active)
+        foreach ($list->productItemList->productItem as $item) {
+            if ($item->last && $item->active) {
                 $res[] = ['value' => $item->name . " | " . $item->uuid,
                     'label' => $item->name,
                     'uuid' => $item->uuid,
-                    ];
+                ];
+            }
         }
         return $res;
     }
 
     public static function getCountryList()
     {
+        $res = \common\models\vetis\VetisCountry::getCountryList($this->product);
+        if (!empty($res)) {
+            return $res;
+        }
 
         $listOptions = new ListOptions();
         $listOptions->count = 100;
@@ -201,20 +229,23 @@ class createStoreEntryForm extends Model {
         do {
             $list = ikarApi::getInstance()->getAllCountryList($listOptions);
             foreach ($list->countryList->country as $item) {
-                if ($item->last && $item->active)
+                if ($item->last && $item->active) {
                     $res[$item->uuid] = $item->name;
+                }
             }
 
-            if($list->countryList->count < $list->countryList->total)
+            if ($list->countryList->count < $list->countryList->total) {
                 $listOptions->offset += $list->countryList->count;
+            }
         } while ($list->countryList->total > ($list->countryList->offset + $list->countryList->count));
         return $res;
     }
 
     public function getStockDiscrepancy($ID)
     {
-        if($this->type == createStoreEntryForm::ADD_PRODUCT)
+        if ($this->type == createStoreEntryForm::ADD_PRODUCT) {
             return $this->getAddStockDiscrepancy($ID);
+        }
 
         return $this->getInvStockDiscrepancy($ID);
     }
@@ -245,7 +276,7 @@ class createStoreEntryForm extends Model {
         $stockEntry->batch->expiryDate = $this->convertDate($this->expiryDate);
 
         $stockEntry->batch->batchID = $this->batchID;
-        $stockEntry->batch->perishable = (bool)$this->perishable;
+        $stockEntry->batch->perishable = (bool) $this->perishable;
 
         $stockEntry->batch->origin = new BatchOrigin();
         $stockEntry->batch->origin->country = new Country();
@@ -289,8 +320,7 @@ class createStoreEntryForm extends Model {
         $res->firstDate->day = date('d', $time);
         $res->firstDate->hour = date('h', $time);
 
-        if(isset($date->secondDate))
-        {
+        if (isset($date->secondDate)) {
             $time = strtotime($date->second_date);
 
             $res->secondDate = new ComplexDate();
@@ -304,22 +334,26 @@ class createStoreEntryForm extends Model {
 
     public function getReason()
     {
-        if ($this->type == createStoreEntryForm::ADD_PRODUCT)
+        if ($this->type == createStoreEntryForm::ADD_PRODUCT) {
             return "Добавление по бумажному ВСД";
+        }
 
-        if ($this->type == createStoreEntryForm::INV_PRODUCT)
+        if ($this->type == createStoreEntryForm::INV_PRODUCT) {
             return $this->reason;
+        }
 
         return "dsdsds";
     }
 
     public function getDescription()
     {
-        if ($this->type == createStoreEntryForm::ADD_PRODUCT)
+        if ($this->type == createStoreEntryForm::ADD_PRODUCT) {
             return "Добавление по бумажному ВСД";
+        }
 
-        if ($this->type == createStoreEntryForm::INV_PRODUCT)
+        if ($this->type == createStoreEntryForm::INV_PRODUCT) {
             return $this->description;
+        }
 
         return "Некачественный товар";
     }

@@ -31,16 +31,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     /** @var string Все заказы без учета привязанных к ним накладных */
     const ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS = 'allstat';
     /** @var string Все заказы, по которым вообще нет накладных */
-    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
-    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
     const ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS = 'nodoc';
     /** @var string Все заказы, по которым есть накладные не подходящие под критерии ready и completed */
+    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
+    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
     const ORDER_STATUS_READY_DEFINEDBY_WB_STATUS = 'ready';
-    /** @var string Все заказы, по которым есть накладные со статусом 2 */
-    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
     /** @var string Все заказы, по которым накладные в процессе обработки !!! настоящее время не используется */
     const ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS = 'outgoing';
-
+    /** @var string Все заказы, по которым есть накладные со статусом 2 */
+    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
 
     /**
      * @return array
@@ -134,7 +133,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             throw new BadRequestHttpException('Access denied');
         }
         $search = new SearchOrdersComponent();
-        $search->getRestaurantIntegration($searchModel, $organization->id, $this->currentUser->organization_id,
+        $search->getRestaurantIntegration('rkws', $searchModel, $organization->id, $this->currentUser->organization_id,
             $wbStatuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
         $lisences = $organization->getLicenseList();
 

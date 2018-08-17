@@ -24,10 +24,26 @@ use api\common\models\iiko\iikoWaybillData;
 use yii\web\Response;
 use yii\helpers\Url;
 use api\common\models\iikoWaybillDataSearch;
-
+use common\models\search\OrderSearch2;
+use yii\web\BadRequestHttpException;
+use common\components\SearchOrdersComponent;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
+
+    /** @var string Все заказы без учета привязанных к ним накладных */
+    const ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS = 'allstat';
+    /** @var string Все заказы, по которым вообще нет накладных */
+    const ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS = 'nodoc';
+    /** @var string Все заказы, по которым есть накладные не подходящие под критерии ready и completed */
+    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
+    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
+    const ORDER_STATUS_READY_DEFINEDBY_WB_STATUS = 'ready';
+    /** @var string Все заказы, по которым накладные в процессе обработки !!! настоящее время не используется */
+    const ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS = 'outgoing';
+    /** @var string Все заказы, по которым есть накладные со статусом 2 */
+    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
+
     /**
      * @return array
      */
@@ -82,30 +98,66 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way', 0);
+
+        $organization = $this->currentUser->organization;
+
         Url::remember();
-        $searchModel = new OrderSearch();
-        $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-        // $dataProvider->pagination->pageSize=3;
+
+        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+        //  $dataProvider->pagination->pageSize=3;
+
+        /** @var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
+         * Статусы накладных в таблице iiko_waybill_status */
+        $wbStatuses = [
+            self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
+            // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
+        ];
 
 
-        $lic = iikoService::getLicense();
-        $view = $lic ? 'index' : '/default/_nolic';
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
-        $params = [
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
+
+        if ($organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Access denied');
+        }
+        $search = new SearchOrdersComponent();
+        $search->getRestaurantIntegration('iiko', $searchModel, $organization->id, $this->currentUser->organization_id,
+            $wbStatuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
+        $lisences = $organization->getLicenseList();
+        // $lisences = iikoService::getLicense();
+        if (isset($lisences['iiko']) && $lisences['iiko']) {
+            $lisences = $lisences['iiko'];
+            $view = 'index';
+        } else {
+            $view = '/default/_nolic';
+            $lisences = NULL;
+        }
+
+
+
+        $renderParams = [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic,
-            'visible' => iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-            'way' => $way,
-            'organization' => $organization,
+            'affiliated' => $search->affiliated,
+            'dataProvider' => $search->dataProvider,
+            'searchParams' => $search->searchParams,
+            'businessType' => $search->businessType,
+            'lic' => $lisences,
+            'visible' => iikoPconst::getSettingsColumn($organization->id),
+            'wbStatuses' => $wbStatuses,
+            'way' => Yii::$app->request->get('way', 0),
         ];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $params);
+            return $this->renderPartial($view, $renderParams);
         } else {
-            return $this->render($view, $params);
+            return $this->render($view, $renderParams);
         }
+
     }
 
     /**

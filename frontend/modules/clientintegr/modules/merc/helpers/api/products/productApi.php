@@ -14,37 +14,33 @@ class productApi extends baseApi
 
     public function getProductByGuid ($GUID)
     {
-        $cache = Yii::$app->cache;
-        $product = $cache->get('Product_'.$GUID);
+        $product = \common\models\vetis\VetisProductByType::findOne(['guid' => $GUID]);
 
-        if(!($product === false))
+        if(!empty($product)) {
             return $product;
+        }
 
         $client = $this->getSoapClient('product');
         $request = new getProductByGuidRequest();
         $request->guid = $GUID;
         $result = $client->GetProductByGuid($request);
 
-        if($result != null)
-            $cache->add('Product_'.$GUID, $result, 60*60*24);
         return $result;
     }
 
     public function getSubProductByGuid ($GUID)
     {
-        $cache = Yii::$app->cache;
-        $subProduct = $cache->get('SubProduct_'.$GUID);
+        $subProduct = \common\models\vetis\VetisSubproductByProduct::findOne(['guid' => $GUID]);
 
-        if(!($subProduct === false))
+        if(!empty($subProduct)) {
             return $subProduct;
+        }
 
         $client = $this->getSoapClient('product');
         $request = new getSubProductByGuidRequest();
         $request->guid = $GUID;
         $result = $client->GetSubProductByGuid($request);
 
-        if($result != null)
-            $cache->add('subProduct_'.$GUID, $result, 60*60*24);
         return $result;
     }
 

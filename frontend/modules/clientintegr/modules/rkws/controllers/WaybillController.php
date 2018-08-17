@@ -20,9 +20,28 @@ use common\models\Organization;
 use common\models\Order;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
+use common\models\search\OrderSearch2;
+use yii\web\BadRequestHttpException;
+use common\components\SearchOrdersComponent;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
+
+
+    /** @var string Все заказы без учета привязанных к ним накладных */
+    const ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS = 'allstat';
+    /** @var string Все заказы, по которым вообще нет накладных */
+    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
+    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
+    const ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS = 'nodoc';
+    /** @var string Все заказы, по которым есть накладные не подходящие под критерии ready и completed */
+    const ORDER_STATUS_READY_DEFINEDBY_WB_STATUS = 'ready';
+    /** @var string Все заказы, по которым есть накладные со статусом 2 */
+    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
+    /** @var string Все заказы, по которым накладные в процессе обработки !!! настоящее время не используется */
+    const ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS = 'outgoing';
+
+
     /**
      * @return array
      */
@@ -85,55 +104,62 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         ]);
     }
 
-    /**
-     * @return string
-     */
+
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way', 0);
-        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
-        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+
+        $organization = $this->currentUser->organization;
 
         Url::remember();
 
-        $searchModel = new \common\models\search\OrderSearch();
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
-
-        $today = new \DateTime();
-        $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
-
-        $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-
+        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
         //  $dataProvider->pagination->pageSize=3;
 
-        $lic0 = Organization::getLicenseList();
-        //$lic = $this->checkLic();
-        $lic = $lic0['rkws'];
-        $licucs = $lic0['rkws_ucs'];
-        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+        /** @var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
+         * Статусы накладных в таблице rk_waybillstatus - используются, но не все */
+        $wbStatuses = [
+            self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
+            // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
+        ];
+
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
+
+        if ($organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Access denied');
+        }
+        $search = new SearchOrdersComponent();
+        $search->getRestaurantIntegration($searchModel, $organization->id, $this->currentUser->organization_id,
+            $wbStatuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
+        $lisences = $organization->getLicenseList();
+
+        $view = ($lisences['rkws'] && $lisences['rkws_ucs']) ? 'index' : '/default/_nolic';
+        $renderParams = [
+            'searchModel' => $searchModel,
+            'affiliated' => $search->affiliated,
+            'dataProvider' => $search->dataProvider,
+            'searchParams' => $search->searchParams,
+            'businessType' => $search->businessType,
+            'lic' => $lisences['rkws'],
+            'licucs' => $lisences['rkws_ucs'],
+            'visible' => RkPconst::getSettingsColumn($organization->id),
+            'wbStatuses' => $wbStatuses,
+            'way' => Yii::$app->request->get('way', 0),
+        ];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
-                'lic' => $lic,
-                'visible' => RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-                'licucs' => $licucs,
-                'way' => $way,
-            ]);
+            return $this->renderPartial($view, $renderParams);
         } else {
-            return $this->render($vi, [
-                'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
-                'lic' => $lic,
-                'visible' => RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-                'licucs' => $licucs,
-                'way' => $way,
-
-            ]);
+            return $this->render($view, $renderParams);
         }
+
     }
+
 
     /**
      * @param $waybill_id

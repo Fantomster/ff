@@ -142,7 +142,7 @@ class SearchOrdersComponent extends Component
     }
 
     /**
-     * Search if $organization->type_id != Organization::TYPE_RESTAURANT
+     * Search finalize search after counters are culculated
      * @var $searchModel OrderSearch2
      * @var $orderStatuses array
      * @var $pagination array
@@ -162,6 +162,39 @@ class SearchOrdersComponent extends Component
         if (!$this->totalPrice) {
             $this->totalPrice = 0;
         }
+    }
+
+    /**
+     * Search orders for intergartion views
+     * @var $searchModel OrderSearch2
+     * @var $orgId int
+     * @var $curIUserOrgId int
+     * @var $wbStatuses array
+     * @var $pagination array
+     * @var $sort array
+     */
+    public function getRestaurantIntegration(OrderSearch2 $searchModel, int $orgId, int $curIUserOrgId, array $wbStatuses = [], array $pagination = [], array $sort = [])
+    {
+
+
+        // 1. Initialize searchParams
+        $this->searchParams = Yii::$app->request->getQueryParams();
+        $this->searchParams['OrderSearch2']['client_id'] = $curIUserOrgId;
+
+        // 2. Setup business type
+        $this->businessType = SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT;
+
+        // 3. Update widget parameters
+        $this->dataProvider = $searchModel->searchForIntegration($this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
+
+        // 4. Detect vendors
+        $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])
+            ->leftJoin('organization', 'organization.id = order.vendor_id')->groupBy('vendor_id');
+        $data = $query->asArray()->all();
+        $data[''] = ['id' => '', 'name' => NULL];
+        $this->affiliated = ArrayHelper::map($data, 'id', 'name');
+        asort($this->affiliated);
+
     }
 
 }

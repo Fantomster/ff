@@ -263,7 +263,7 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id != self::TYPE_SUPPLIER) {
             return null;
         }
-        return abs($this->is_work - 1);
+        return $this->is_work === 1 ? 0 : 1;
     }
 
     /**

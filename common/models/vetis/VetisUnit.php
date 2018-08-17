@@ -20,7 +20,7 @@ use Yii;
  * @property int $factor
  * @property string $createDate
  * @property string $updateDate
- * @property object $item
+ * @property object $unit
  */
 class VetisUnit extends \yii\db\ActiveRecord
 {

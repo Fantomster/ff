@@ -19,7 +19,7 @@ use Yii;
  * @property int $productType
  * @property string $createDate
  * @property string $updateDate
- * @property object product
+ * @property object $product
  */
 class VetisProductByType extends \yii\db\ActiveRecord
 {

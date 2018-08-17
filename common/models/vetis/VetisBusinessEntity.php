@@ -20,7 +20,7 @@ use Yii;
  * @property string $inn
  * @property string $kpp
  * @property string $addressView
- * @property object businessEntity
+ * @property object $businessEntity
  */
 class VetisBusinessEntity extends \yii\db\ActiveRecord
 {

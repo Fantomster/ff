@@ -9,7 +9,6 @@ use api\common\models\iiko\iikoSelectedProduct;
 use api\common\models\VatData;
 use api\common\models\iiko\iikoStore;
 use common\models\Organization;
-use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
 use common\models\User;

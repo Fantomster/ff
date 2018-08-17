@@ -1,7 +1,7 @@
 <?php
 
 /**
- * R-Keeper integration service - order list view [basic]
+ * IIKO integration service - order list view [basic]
  * @createdBy Basil A Konakov
  * @createdAt 2018-08-17
  * @author Mixcart
@@ -19,7 +19,7 @@ use yii\helpers\Html;
 use kartik\date\DatePicker;
 use common\components\EchoRu;
 use kartik\select2\Select2;
-use frontend\modules\clientintegr\modules\rkws\controllers\WaybillController;
+use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
 use yii\grid\CheckboxColumn;
 use api\common\models\iiko\iikoWaybill;
 use kartik\grid\ExpandRowColumn;
@@ -256,7 +256,7 @@ $("document").ready(function(){
         if (w === "https:") {
             target = "https:";
         }
-        target = target + \'//\' + window.location.hostname + \'/clientintegr/rkws/waybill/index?OrderSearch2[id]=\' + $("#orderFilter").val();
+        target = target + \'//\' + window.location.hostname + \'/clientintegr/iiko/waybill/index?OrderSearch2[id]=\' + $("#orderFilter").val();
         window.location.href = target;
     });
     

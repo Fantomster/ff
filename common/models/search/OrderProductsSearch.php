@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\CatalogGoodsBlocked;
 use Yii;
 use yii\data\SqlDataProvider;
 
@@ -38,7 +39,8 @@ class OrderProductsSearch extends \yii\base\Model {
         
         $searchString = "%$this->searchString%";
 
-
+        $blockedList = CatalogGoodsBlocked::getBlockedList($order->client->id);
+        $blockedItems = empty($blockedList) ? '0' : implode(",", $blockedList);
 
         $query = "
             SELECT cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note 
@@ -52,6 +54,7 @@ class OrderProductsSearch extends \yii\base\Model {
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
                 AND (cbg.id not in (select product_id from order_content where order_id = $order->id))
+                AND (cbg.id not in ($blockedItems))
             UNION ALL
             (
             SELECT cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note
@@ -65,7 +68,8 @@ class OrderProductsSearch extends \yii\base\Model {
                 AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0)
-                AND (cbg.id not in (select product_id from order_content where order_id = $order->id)))
+                AND (cbg.id not in (select product_id from order_content where order_id = $order->id))
+                AND (cbg.id not in ($blockedItems)))
                 ";
 
         $sort = [

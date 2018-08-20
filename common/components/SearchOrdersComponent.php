@@ -184,8 +184,33 @@ class SearchOrdersComponent extends Component
 
         // 1. Initialize searchParams
         $this->searchParams = Yii::$app->request->getQueryParams();
-        $this->searchParams['OrderSearch2']['client_id'] = $curIUserOrgId;
 
+        $this->searchParams['OrderSearch2']['client_id'] = $curIUserOrgId;
+        $sp = [];
+        foreach ($this->searchParams as $k => $v) {
+            if (is_array($v) && $v) {
+                foreach ($v as $kk => $vv) {
+                    $sp[str_replace('amp;', NULL, $k)][$kk] = $vv;
+                }
+            }
+        }
+
+        // костыль полный описан в задаче DEV-1425 Фильтры в iiko
+        $sp_temp = [];
+        foreach ($this->searchParams as $k => $v) {
+            if (substr_count($k, 'OrderSearch2') === 1) {
+                $sp_temp[substr_count($k, 'amp;')] = $v;
+            }
+        }
+        krsort($sp_temp);
+        foreach ($sp_temp as $k => $v) {
+            foreach ($v as $kk => $vv) {
+                $sp['OrderSearch2'][$kk] = $vv;
+            }
+
+        }
+
+        $this->searchParams = $sp;
         // 2. Setup business type
         $this->businessType = SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT;
 

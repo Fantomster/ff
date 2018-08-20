@@ -72,6 +72,7 @@ $filterOptions = [
             EchoRu::echo ('frontend.clientintegr.order.waybill.filled', 'Сформирована'),
         array_search(WaybillController::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS, $wbStatuses) =>
             EchoRu::echo ('frontend.clientintegr.order.waybill.ready', 'Готова к выгрузке'),
+        // array_search(WaybillController::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS, $wbStatuses) =>
         // EchoRu::echo (WaybillController::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS, 'Отправляется'),
         array_search(WaybillController::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS, $wbStatuses) =>
             EchoRu::echo ('frontend.clientintegr.order.waybill.completed', 'Выгружена'),
@@ -395,7 +396,7 @@ $this->registerCss($css);
                                 # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
                                 echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
                                     'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
-                                    'pluginOptions' => ['allowClear' => TRUE],
+                                    'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
                                     'id' => 'wbStatus',
                                 ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>

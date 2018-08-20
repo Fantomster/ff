@@ -421,7 +421,7 @@ $this->registerCss($css);
                                 # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
                                 echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
                                     'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
-                                    'pluginOptions' => ['allowClear' => TRUE],
+                                    'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
                                     'id' => 'wbStatus',
                                 ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>

@@ -1,192 +1,337 @@
 <?php
 
 /**
- * @editedBy Basil A Konakov
- * @editedByKonakovAt 2018-08-10(*)
+ * OneS integration service - order list view [basic]
+ * @createdBy Basil A Konakov
+ * @createdAt 2018-08-20
+ * @author Mixcart
+ * @module Frontend
+ * @version 1.0
  */
 
 use yii\widgets\Breadcrumbs;
-use common\models\Order;
 use kartik\grid\GridView;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
-use common\models\Organization;
 use yii\helpers\Html;
 
-/* @var $searchModel common\models\search\OrderSearch **/
-/* @var $organization common\models\Organization **/
-/* @var $dataProvider yii\data\ActiveDataProvider **/
-/* @var $visible bool ??? **/
-/* @var $way int ??? **/
-/* @var $licucs \api\common\models\RkService ??? **/
 
-$visible = false; // for invoice_relation
+/** @var $affiliated array */
+/** @var $wbStatuses array */
+/** @var $searchParams array Search Params */
+/** @var $way mixed */
 
-if (!$searchModel->date_to) {$today = new \DateTime(); $searchModel->date_to = $today->format('d.m.Y');}
-if (!$searchModel->date_from) {$searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");}
+// use yii\grid\CheckboxColumn;
+use common\components\EchoRu;
+use kartik\select2\Select2;
+use frontend\modules\clientintegr\modules\odinsobsh\controllers\WaybillController;
+use api\common\models\one_s\OneSWaybill;
+use kartik\grid\ExpandRowColumn;
 
-$this->title = 'Интеграция с 1С Общепит';
+$msg = [
+    'entries' => EchoRu::echo ('frontend.views.order.waybill.entries', 'Состав Заказа'),
+    'push' => EchoRu::echo ('frontend.clientintegr.order.waybill.push', 'Выгрузить выбранные'),
+];
+
+$headers = [
+    'id' => EchoRu::echo ('frontend.order.id', 'Номер заказа'),
+    'invoice_relation' => EchoRu::echo ('frontend.clientintegr.order.waybill.id', '№ Накладной'),
+    'vendor' => EchoRu::echo ('frontend.views.order.vendor', 'Поставщик'),
+    'updated_at' => EchoRu::echo ('frontend.views.order.updated_at', 'Обновлено'),
+    'finished_at' => EchoRu::echo ('frontend.views.order.final_date', 'Дата финальная'),
+    'positionCount' => EchoRu::echo ('frontend.views.order.position_сount', 'Кол-во позиций'),
+];
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 3. ФИЛЬТРЫ (В виде инпутов или селектов)
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.1. Заголовки фильтров
+$filterLabels = [
+    'orderId' => EchoRu::echo ('frontend.clientintegr.order.id', 'Номер заказа'),
+    'orderAff' => EchoRu::echo ('frontend.clientintegr.vendors', 'Поставщики'),
+    'orderLastUpdated' => EchoRu::echo ('frontend.clientintegr.order.last_updated.range',
+        'Обновлено: начальная дата / Конечная дата'),
+    'wbStatus' => EchoRu::echo ('frontend.clientintegr.order.waybill.status', 'Статус накладной'),
+];
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.2. Виджеты фильтров
+$filterWidgetNames = [
+    'orderAff' => Select2::class,
+    'wbStatus' => Select2::class,
+];
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.3. Опции фильтров
+$filterOptions = [
+    'orderAff' => $affiliated,
+    'wbStatus' => [
+        array_search(WaybillController::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS, $wbStatuses) =>
+            EchoRu::echo ('frontend.clientintegr.order.waybill.allstat', 'Все'),
+        array_search(WaybillController::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS, $wbStatuses) =>
+            EchoRu::echo ('frontend.clientintegr.order.waybill.nodoc', 'Не сформирована'),
+        array_search(WaybillController::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS, $wbStatuses) =>
+            EchoRu::echo ('frontend.clientintegr.order.waybill.filled', 'Сформирована'),
+        array_search(WaybillController::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS, $wbStatuses) =>
+            EchoRu::echo ('frontend.clientintegr.order.waybill.ready', 'Готова к выгрузке'),
+        // EchoRu::echo (WaybillController::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS, 'Отправляется'),
+        array_search(WaybillController::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS, $wbStatuses) =>
+            EchoRu::echo ('frontend.clientintegr.order.waybill.completed', 'Выгружена'),
+    ],
+];
+$filterOptions['orderAff'][0] = EchoRu::echo ('frontend.clientintegr.order.select.aff.all', 'Все');
+ksort($filterOptions['orderAff']);
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.4. Плейсхолдеры / значения фильтров (для селектов типа kartik - те же самые предустановленные значения фильтров)
+$filterValues = [
+    'orderId' => EchoRu::echo ('frontend.clientintegr.order.id', 'Номер заказа'),
+    'orderAff' => $filterOptions['orderAff'][0],
+    'wbStatus' => $filterOptions['wbStatus'][0],
+    'dateFrom' => $searchParams['OrderSearch2']['date_from'] ?? '',
+    'dateTo' => $searchParams['OrderSearch2']['date_to'] ?? '',
+];
+if (isset($searchParams['OrderSearch2']['id']) && (int)$searchParams['OrderSearch2']['id'] > 0) {
+    $filterValues['orderId'] = (int)$searchParams['OrderSearch2']['id'];
+}
+#-----------------------------------------------------------------------------------------------------------------------
+
+$this->title = EchoRu::echo ('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит');
+
+$columns = array(
+// 1. ЧЕКБОКС
+//    [
+//        'class' => CheckboxColumn::class,
+//        'checkboxOptions' => function ($data) {
+//            $res = ['style' => 'width: 10px', 'class' => 'small_cell_id'];
+//            $nacl = OneSWaybill::findOne(['order_id' => $data->id]);
+//            if ($nacl['status_id'] !== 4 || $nacl['readytoexport'] === 0) {
+//                $res = [
+//                    'disabled' => true,
+//                    'style' => 'display: none;',
+//                    'class' => 'small_cell_id'
+//                ];
+//            }
+//            return $res;
+//        },
+//        'headerOptions' => ['style' => 'white-space: nowrap'],
+//        'contentOptions' => ['style' => 'width: 10px', 'class' => 'small_cell_id'],
+//    ],
+
+    // 2. ID заказа
+    [
+        'attribute' => 'id',
+        'label' => $headers['id'],
+        'format' => 'raw',
+        'contentOptions' => function ($data) {
+            return ["id" => "way" . $data->id, 'style' => 'width: 120px; text-align: center; padding-right: 30px'];
+        },
+    ],
+    // 3. № накладной
+    [
+        'attribute' => 'invoice_relation',
+        'label' => $headers['invoice_relation'],
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'text-align: center'],
+        'contentOptions' => ['style' => 'text-align: center'],
+        'value' => function ($data) {
+            return ($data->invoice) ? Html::encode($data->invoice->number) : '';
+        },
+    ],
+    // 4. Контрагент по договору поставки
+    [
+        'attribute' => 'vendor.name',
+        'label' => $headers['vendor'],
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'text-align: center'],
+        'contentOptions' => ['style' => 'text-align: center'],
+        'value' => function ($data) {
+            return ($data->vendor) ? Html::encode($data->vendor->name) : '';
+        },
+    ],
+    // 5. Дата последнего обновления документа
+    [
+        'attribute' => 'updated_at',
+        'label' => $headers['updated_at'],
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'text-align: center'],
+        'contentOptions' => ['style' => 'text-align: right; padding-right: 20px'],
+        'value' => function ($data) {
+            $title = Yii::$app->formatter->asDatetime($data->updated_at, "php:j M Y");
+            return
+                '<i class="fa fa-fw fa-calendar"></i> ' . $title;
+        },
+    ],
+    // 6. Финальная дата
+    [
+        'attribute' => 'finished_at',
+        'label' => $headers['finished_at'],
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'text-align: center'],
+        'contentOptions' => ['style' => 'text-align: right; padding-right: 20px'],
+        'value' => function ($data) {
+            $fdate = ($data->requested_delivery) ? $data->requested_delivery : $data->updated_at;
+            $fdate = $data->actual_delivery ? $data->actual_delivery : $fdate;
+            $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
+            return '<i class="fa fa-fw fa-calendar"></i> ' . $fdate;
+        },
+    ],
+    // 7. Количество позиций
+    [
+        'attribute' => 'positionCount',
+        'label' => $headers['positionCount'],
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'text-align: center; white-space: nowrap'],
+        'contentOptions' => ['style' => 'text-align: right; width: 100px'],
+        'value' => function ($data) use ($msg) {
+            return $data->positionCount .
+                ' <a class="ajax-popover" data-container="body" data-content="Loading..."
+                    data-html="data-html" data-placement="bottom" data-title="' . $msg['entries'] . '"
+                    data-toggle="popover"  data-trigger="focus" data-url="' .
+                Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']) .
+                '/getpopover"
+                    role="button" tabindex="0" data-original-title="" title="" data-model="' .
+                $data->id . '"><i class="fa fa-info-circle"></i></a>';
+        },
+    ],
+    // 8. Сумма заказа
+    [
+        'attribute' => 'total_price',
+        'label' => EchoRu::echo ('frontend.views.order.summ', 'Сумма'),
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_sum', 'style' => 'text-align: right'],
+        'value' => function ($data) {
+            return "<b>$data->total_price</b> " . $data->currency->symbol;
+        },
+    ],
+
+    // 9. Статус накладной
+    [
+        'value' => function ($data) {
+            $nacl = OneSWaybill::findOne(['order_id' => $data->id]);
+            if (isset($nacl->status)) {
+                return $nacl->status->denom;
+            } else {
+                return 'Не сформирована';
+            }
+        },
+        'label' => 'Статус накладной',
+        'headerOptions' => ['style' => 'text-align: center'],
+        'contentOptions' => ['style' => 'text-align: center'],
+    ],
+
+    # 10. Дополнительные действия
+    [
+        'class' => ExpandRowColumn::class,
+        'width' => '50px',
+        'value'=>function ($model) use ($way) {
+            if ($model->id == $way) {
+                return GridView::ROW_EXPANDED;
+            }
+            return GridView::ROW_COLLAPSED;
+        },
+        'detail' => function ($model) use ($lic) {
+            $wmodel = OneSWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
+            if ($wmodel) {
+                $wmodel = OneSWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id]);
+            } else {
+                $wmodel = null;
+            }
+            $order_id = $model->id;
+            return Yii::$app->controller->renderPartial('_expand-row-details',
+                ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
+        },
+        'headerOptions' => ['class' => 'kartik-sheet-style'],
+        'expandOneOnly' => true,
+    ]
+);
 
 $this->registerJs('
-    $("document").ready(function(){
-        var justSubmitted = false;
-        $(".box-body").on("change", "#statusFilter", function() {
-            $("#search-form").submit();
-        });
-        $(".box-body").on("change", "#orgFilter", function() {
-            $("#search-form").submit();
-        });
-        $(".box-body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#search-form").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-         $(".box-body").on("change", "#orderFilter", function() {
-            $("#search-form").submit();
-        });
+$("document").ready(function(){
+       $(".box-body").on("change", "#orderFilter", function () {
+        var target = "http:";
+        var w = window.location.protocol;
+        if (w === "https:") {
+            target = "https:";
+        }
+        target = target + \'//\' + window.location.hostname + \'/clientintegr/odinsobsh/waybill/index?OrderSearch2[id]=\' + $("#orderFilter").val();
+        window.location.href = target;
     });
+    
+    var justSubmitted = false;
+    $(".box-body").on("change", "#dateFrom, #dateTo", function () {
+        if (!justSubmitted) {
+            $("#search-form").submit();
+            justSubmitted = true;
+            setTimeout(function () {
+                justSubmitted = false;
+            }, 500);
+        }
+    });
+    
+    $(".box-body").on("change", "#ordersearch2-vendor_id", function () {
+        $("#search-form").submit();
+    });
+    
+    $(".box-body").on("change", "#ordersearch2-wb_status", function () {
+        $("#search-form").submit();
+    });
+});
 ');
+#-----------------------------------------------------------------------------------------------------------------------
+$css = <<< CSS
+tr:hover {
+    cursor: pointer;
+}
 
-$this->registerCss("
-    #select2-ordersearch-vendor_id-container{margin-top:0;}
-        .select2-selection__clear{display: none;}
-");
+.bg-default {
+    background: #555
+}
 
+p {
+    margin: 0;
+}
+
+#map {
+    width: 100%;
+    height: 200px;
+}
+
+#select2-ordersearch2-vendor_id-container,
+#select2-ordersearch2-wb_status-container {
+    margin-top: 0 !important
+}
+
+.select2-selection__clear {
+    display: none;
+}
+CSS;
+#-----------------------------------------------------------------------------------------------------------------------
+$this->registerCss($css);
+#-----------------------------------------------------------------------------------------------------------------------
 ?>
-
-<style>
-    .bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
-</style>
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> <?= $this->title ?>
+        <i class="fa fa-history"></i> <?=
+        EchoRu::echo ('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит') ?>
     </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
+    <?= Breadcrumbs::widget([
+        'options' => ['class' => 'breadcrumb',],
         'links' => [
             [
-                'label' => 'Интеграция',
-                'url' => ['/clientintegr'],
+                'label' => EchoRu::echo ('frontend.clientintegr.index', 'Интеграция', 'app'),
+                'url' => '/clientintegr/default'
             ],
-            $this->title
+            EchoRu::echo ('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит'),
         ],
-    ])
+    ]);
     ?>
 </section>
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-    <?=
-    $this->render('/default/_license_no_active.php', ['lic' => $lic]);
-    ?>
-    <?php
-    $columns = array(
-        [
-            'attribute' => 'id',
-            'contentOptions' => function($data) {
-                return ["id" => "way".$data->id];
-            },
-            'format' => 'raw',
-            'value' => function($data){
-                return \yii\helpers\Html::a($data->id, Url::to(['/order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0", 'target' => '_blank']);
-            }
-        ],
-//        [
-//            'attribute'=>'invoice_relation',
-//            'format'=>'raw',
-//            'visible'=>$visible,
-//            'header'=>'№ Накладной',
-//            'value'=>function($data){
-//                return ($data->invoice)?\yii\helpers\Html::encode($data->invoice->number):'';
-//            }
-//        ],
-        [
-            'attribute' => 'vendor.name',
-            'value' => 'vendor.name',
-            'label' => 'Поставщик',
-            //'headerOptions' => ['class'=>'sorting',],
-        ],
-        [
-            'format' => 'raw',
-            'attribute' => 'status',
-            'value' => function ($data) {
-                $statusClass = 'done';
-
-                return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';
-            },
-            'label' => 'Статус Заказа',
-        ],
-        [
-            'attribute' => 'updated_at',
-            'label' => 'Обновлено',
-            'format' => 'date',
-        ],
-        [
-            'attribute' => 'positionCount',
-            'label' => 'Кол-во позиций',
-            'format'=>'raw',
-            'value' => function ($data) {
-                return $data->positionCount .
-                    '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
-                    'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
-                    'data-toggle="popover"  data-trigger="focus" data-url="'.
-                    Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/']).
-                    '/getpopover" role="button" tabindex="0" '.
-                    'data-original-title="" title="" data-model="'.$data->id.'"> '.
-                    '<i class="fa fa-info-circle"></i></a>';
-            }
-        ],
-        [
-            'attribute' => 'total_price',
-            'label' => 'Итоговая сумма',
-            'format' => 'raw',
-        ],
-        [
-            'value' => function ($data) {
-                $nacl = \api\common\models\one_s\OneSWaybill::findOne(['order_id' => $data->id]);
-                if (isset($nacl->status)) {
-                    return $nacl->status->denom;
-                } else {
-                    return 'Не сформирована';
-                }
-            },
-            'label' => 'Статус накладной',
-        ],
-        [
-            'class' => 'kartik\grid\ExpandRowColumn',
-            'width' => '50px',
-            'value'=>function ($model, $key, $index, $column) use ($way) {
-                if ($model->id == $way) {
-                    return GridView::ROW_EXPANDED;
-                }
-                return GridView::ROW_COLLAPSED;
-            },
-            'detail' => function ($model, $key, $index, $column) use ($lic) {
-                $wmodel = \api\common\models\one_s\OneSWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
-
-                if ($wmodel) {
-                    $wmodel = \api\common\models\one_s\OneSWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id]);
-                } else {
-                    $wmodel = null;
-                }
-                $order_id = $model->id;
-                return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
-            },
-            'headerOptions' => ['class' => 'kartik-sheet-style'],
-            'expandOneOnly' => true,
-        ]
-    );
-    ?>
+    <?= $this->render('/default/_menu.php') ?>
+    <?= $this->render('/default/_license_no_active.php', ['lic' => $lic]) ?>
     ЗАВЕРШЁННЫЕ ЗАКАЗЫ
 </section>
 
@@ -196,142 +341,102 @@ $this->registerCss("
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding orders-table">
-
-
-
-
-
-
-                <?php
-                Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
-                $form = ActiveForm::begin([
-                    'options' => [
-                        'data-pjax' => true,
-                        'id' => 'search-form',
-                        //'class' => "navbar-form",
-                        'role' => 'search',
-                    ],
-                    'enableClientValidation' => false,
-                    'method' => 'get',
-                ]);
-                ?>
+                        <?php
+                        Pjax::begin(['enablePushState' => false, 'id' => 'order-list']);
+                        $form = ActiveForm::begin([
+                            'options' => [
+                                'data-pjax' => true,
+                                'id' => 'search-form',
+                                'role' => 'search',
+                            ],
+                            'enableClientValidation' => false,
+                            'method' => 'get',
+                        ]);
+                        ?>
                         <div class="row">
-
-                            <div class="col-lg-1 col-md-2 col-sm-6">
+                            <div class="col-lg-1 col-md-2 col-sm-6" style="width: 150px;">
                                 <?php
                                 # 1. INPUT ORDER ID Filter field
-                                $label = Yii::t('message', 'frontend.views.order.id',
-                                    ['ru' => 'Номер заказа']);
-                                echo
-                                $form->field($searchModel, 'id')
-                                    ->textInput(['id' => 'orderFilter', 'class' => 'form-control',
-                                        'style' => 'width: 130px', 'placeholder' => $label])
-                                    ->label($label, ['class' => 'label', 'style' => 'color:#555']);
+                                echo $form->field($searchModel, 'id')
+                                    ->textInput(['id' => 'orderFilter', 'class' => 'form-control', 'value' => '',
+                                        'style' => 'width: 130px; margin-right: 20px', 'placeholder' => $filterValues['orderId']])
+                                    ->label($filterLabels['orderId'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>
                             </div>
-
-                            <div class="col-lg-2 col-md-3 col-sm-6">
+                            <div class="col-lg-2 col-md-2 col-sm-6" style="width: 240px;">
                                 <?php
                                 # 2. SELECT SUPPLIER Filter field
-                                /** earlier - $organization->getSuppliers() */
-                                if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                                    $label = Yii::t('message', 'frontend.views.order.vendors',
-                                        ['ru' => 'Поставщики']);
-                                    $associates = $organization->getRestaurantSupplierAll();
-                                } else {
-                                    $label = Yii::t('message', 'frontend.views.order.rest',
-                                        ['ru' => 'Рестораны']);
-                                    $associates = $organization->getClients();
-                                }
-                                echo $form->field($searchModel, 'vendor_id')
-                                    ->dropDownList($associates, ['id' => 'orgFilter'])
-                                    ->label($label, ['class' => 'label', 'style' => 'color:#555']);
+                                echo $form->field($searchModel, 'vendor_id')->widget($filterWidgetNames['orderAff'], [
+                                    'data' => $filterOptions['orderAff'], 'options' => ['placeholder' => $filterValues['orderAff']],
+                                    'pluginOptions' => ['allowClear' => FALSE],
+                                    'id' => 'orgFilter',
+                                ])->label($filterLabels['orderAff'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>
                             </div>
-
-
-                            <div class="col-lg-3 col-md-3 col-sm-6">
+                            <div class="col-lg-3 col-md-3 col-sm-6" style="width: 440px;">
                                 <?php
                                 # 3. RANGE ORDER LAST_UPDATED Filter field
-                                $label = Yii::t('message', 'frontend.views.order.last_updated.range',
-                                    ['ru' => 'Обновлено: Начальная дата / Конечная дата ']);
-                                echo Html::label($label, null, ['class' => 'label', 'style' => 'color:#555']);
+                                echo Html::label($filterLabels['orderLastUpdated'], null, ['class' => 'label', 'style' => 'color:#555']);
                                 ?>
-                                <div class="form-group" style="width: 300px; height: 44px;">
-                                    <?php
-                                    $label_from = Yii::t('message', 'frontend.views.order.date',
-                                        ['ru' => 'Дата']);
-                                    $label_to = Yii::t('message', 'frontend.views.order.date_to',
-                                        ['ru' => 'Конечная дата']);
-                                    echo DatePicker::widget([
+                                <div class="form-group">
+                                    <?= DatePicker::widget([
                                         'model' => $searchModel,
-                                        'attribute' => 'date_from',
-                                        'attribute2' => 'date_to',
-                                        'options' => ['placeholder' => $label_from, 'id' => 'dateFrom'],
-                                        'options2' => ['placeholder' => $label_to, 'id' => 'dateTo'],
-                                        'separator' => '-',
-                                        'type' => DatePicker::TYPE_RANGE,
-                                        'pluginOptions' => [
-                                            'format' => 'dd.mm.yyyy',
-                                            'autoclose' => true,
-                                            'endDate' => "0d",
-                                        ]
+                                        'attribute' => 'date_from', 'attribute2' => 'date_to',
+                                        'options' => ['placeholder' => $filterValues['dateFrom'], 'id' => 'dateFrom', 'style' => "min-width: 100px"],
+                                        'options2' => ['placeholder' => $filterValues['dateTo'], 'id' => 'dateTo', 'style' => "min-width: 100px"],
+                                        'separator' => '-', 'type' => DatePicker::TYPE_RANGE,
+                                        'pluginOptions' => ['format' => 'dd.mm.yyyy', 'autoclose' => true, 'endDate' => "0d"],
                                     ]);
                                     ?>
                                 </div>
                             </div>
-
-                            <div class="col-lg-2 col-md-3 col-sm-6">
+                            <div class="col-lg-2 col-md-3 col-sm-6" style=" width: 240px;">
                                 <?php
                                 # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
-                                $waybillStatusesLabel = Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.status');
-                                $waybillStatusesValues = [
-                                    '0' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.allstat'),
-                                    '1' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.nodoc'),
-                                    '2' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.ready'),
-                                    '3' => Yii::t('message', 'frontend.clientintegr.odinsobsh.views.waybill.completed'),
-                                    // '4' => Yii::t('message', $pref.'cancelled', ['ru'=>'Отменено'])
-                                ];
-                                echo $form->field($searchModel, 'docStatus')
-                                    ->dropDownList($waybillStatusesValues, ['id' => 'statusFilter'])
-                                    ->label($waybillStatusesLabel, ['class' => 'label', 'style' => 'color:#555'])
+                                echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
+                                    'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
+                                    'pluginOptions' => ['allowClear' => TRUE],
+                                    'id' => 'wbStatus',
+                                ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>
                             </div>
-
-
                             <div class="col-lg-2 col-md-3 col-sm-6">
-                                <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br />
-                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/odinsobsh/waybill/index']) ?>">Сбросить фильтры</a>
+                                <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
+                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/odinsobsh/waybill']) ?>">Сбросить
+                                    фильтры</a>
                             </div>
-
-
-
+                            <div class="col-lg-5 col-md-6 col-sm-6">
+                                <?php $title = EchoRu::echo ($msg['push'], 'Выгрузить выбранные');
+                                echo Html::a($title, false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
+                            </div>
                         </div>
-                        <?=
-                        GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'pjax' => true,
-                            'summary' => '',
-                            'filterPosition' => false,
-                            'columns' => $columns,
-                            'options' => ['class' => 'table-responsive'],
-                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                            'bordered' => false,
-                            'striped' => true,
-                            'condensed' => false,
-                            'responsive' => false,
-                            'hover' => true,
-                            'resizableColumns' => false,
-                            'export' => [
-                                'fontAwesome' => true,
-                            ],
-                        ]);
-                        ?>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <?=
+                                GridView::widget([
+                                    'dataProvider' => $dataProvider,
+                                    'pjax' => true,
+                                    'pjaxSettings' => ['options' => ['id' => 'waybill_grid1'], 'loadingCssClass' => false],
+                                    'filterPosition' => false,
+                                    'columns' => $columns,
+                                    'options' => ['class' => 'table-responsive'],
+                                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                    'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                    'bordered' => true,
+                                    'striped' => true,
+                                    'condensed' => true,
+                                    'responsive' => true,
+                                    'hover' => true,
+                                    'resizableColumns' => true,
+                                    'export' => [
+                                        'fontAwesome' => true,
+                                    ],
+                                ]);
+                                ?>
+                            </div>
+                        </div>
                         <?php ActiveForm::end(); ?>
                         <?php Pjax::end() ?>
-
-
                     </div>
                 </div>
             </div>

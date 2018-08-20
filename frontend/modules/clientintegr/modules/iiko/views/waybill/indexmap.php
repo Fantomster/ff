@@ -133,7 +133,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'vAlign' => 'bottom',
                                     'width' => '210px',
                                     'refreshGrid' => true,
-
+	                                'readonly' => function ($model, $key, $index, $column) use ($parentBusinessId) {
+	                                    if ($parentBusinessId > 0){
+	                                        return true;
+		                                }
+		                                return false;
+	                                },
                                     'editableOptions' => [
                                         'asPopover' => $isAndroid ? false : true,
                                         'formOptions' => ['action' => ['edit']],
@@ -161,7 +166,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             ]
 
                                         ]
-                                    ]],
+                                    ]
+                                ],
                                 [
                                     'attribute' => 'munit',
                                     'value' => function ($model) {

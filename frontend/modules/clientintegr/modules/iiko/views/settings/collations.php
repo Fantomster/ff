@@ -38,10 +38,22 @@ use yii\helpers\Url;
 		                    <?php
 		                    $models = $provider->getModels();
 		                    $model = current($models);
-                            $parentId = !is_null($parentId) ? ['options' => [$parentId->value => ['Selected' => true]]]: [];
+		                    $options = [];
+                            $jsParentId = '';
                             $items = \yii\helpers\ArrayHelper::map($models,'id','name');
+		                    if(!is_null($parentId)){
+		                    	$jsParentId = $parentId->value;
+                                foreach ($items as $key => $value) {
+                                	if($jsParentId != $value){
+                                        $arTmp[$key] = ['disabled' => true];
+	                                }
+                                }
+                                $arTmp[$jsParentId] = ['Selected' => true];
+                                $arTmp['readonly'] = true;
+                                $options = ['options' => $arTmp];
+		                    }
 	                        
-	                        echo $form->field($model, 'name')->dropDownList($items, $parentId)->label('Укажите главный бизнес');
+	                        echo $form->field($model, 'name')->dropDownList($items, $options)->label('Укажите главный бизнес');
 	                        ?>
                             <?= \yii\helpers\Html::a('Применить сопоставление', false, ['class' => 'btn btn-md fk-button', 'id' => 'apply_collation']); ?>
 		                    <?= \yii\helpers\Html::a('Отменить всё', false, ['class' => 'btn btn-danger', 'id' => 'cancel_collation']); ?>
@@ -116,14 +128,14 @@ $js = <<< JS
 		                showCancelButton: true,
 		                confirmButtonColor: '#3085d6',
 		                cancelButtonColor: '#d33',
-		                confirmButtonText: 'Выгрузить',
+		                confirmButtonText: 'Выполнить',
 		                cancelButtonText: 'Отмена',
 		            }).then((result) => {
 		                if(result.value)
 		                {
 		                    swal({
-		                        title: 'Идёт отправка',
-		                        text: 'Подождите, пока закончится выгрузка...',
+		                        title: 'Идёт выполнение',
+		                        text: 'Подождите, пока закончится выполнение...',
 		                        onOpen: () => {
 		                            swal.showLoading();
 		                            $.post(url, {ids:keys, main:$('#organization-name').val()}, function (data) {
@@ -174,21 +186,24 @@ $js = <<< JS
 		                showCancelButton: true,
 		                confirmButtonColor: '#3085d6',
 		                cancelButtonColor: '#d33',
-		                confirmButtonText: 'Выгрузить',
+		                confirmButtonText: 'Удалить',
 		                cancelButtonText: 'Отмена',
 		            }).then((result) => {
 		                if(result.value)
 		                {
 		                    swal({
-		                        title: 'Идёт отправка',
-		                        text: 'Подождите, пока закончится выгрузка...',
+		                        title: 'Идёт удаление',
+		                        text: 'Подождите, пока закончится удаление...',
 		                        onOpen: () => {
 		                            swal.showLoading();
 		                            $.post(url, {ids:ids}, function (data) {
 		                                
 		                                if (data.success === true) {
 		                                    swal.close();
-		                                    swal('Готово', '', 'success')
+		                                    swal('Готово', '', 'success');
+		                                    setInterval(function(){
+		                                    	location.reload();
+		                                    }, 1500);
 		                                } else {
 		                                    console.log(data.error);
 		                                    swal(
@@ -218,12 +233,15 @@ $js = <<< JS
         FF.dropDownChange = {
         	init: function(){
         		var dropId = $('#organization-name').val(),
+        		    mainOrg = "$jsParentId",
         		    firstEl = $('#table-option-' + dropId);
+        		// console.log(mainOrg);
+        		// return false;
         		firstEl.hide();
         		firstEl.prop('disabled', true);
         		firstEl.prop('checked', false);
         		firstEl.parent().parent().removeClass('danger');
-        		$(document).on('change', '#organization-name', function () {
+        		$(document).on('change', '#organization-name', function (e) {
         			let option = '#table-option-';
         			$(option + dropId).show();
         			$(option + dropId).prop('checked', false);
@@ -233,6 +251,19 @@ $js = <<< JS
         		    $(option + dropId).prop('disabled', true);
         		    $(option + dropId).prop('checked', false);
         		    $(option + dropId).parent().parent().removeClass('danger');
+        		});
+        		
+        		$(document).on('click', '#organization-name', function (e) {
+        			if(mainOrg.length > 0){
+        				e.preventDefault();
+        				swal({
+			                title: 'Нельзя сменить главный бизнес без сброса всех дочерних бизнесов!',
+			                type: 'info',
+			                confirmButtonColor: '#3085d6',
+			                confirmButtonText: 'Ok',
+		                });
+        				return false;
+        			}
         		});
             }
         };

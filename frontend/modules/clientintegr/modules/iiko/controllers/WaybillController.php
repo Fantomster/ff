@@ -119,6 +119,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
+        
+        $const_id = iikoDicconst::findOne(['denom' => 'main_org']);
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
         $userAgent = \xj\ua\UserAgent::model();
@@ -147,6 +149,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData,
+            'parentBusinessId' => $const_id->getPconstValue(),
         ];
 
         if (Yii::$app->request->isPjax) {

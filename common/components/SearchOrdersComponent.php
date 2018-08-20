@@ -192,7 +192,6 @@ class SearchOrdersComponent extends Component
         // 3. Update widget parameters
         $this->dataProvider = $searchModel->searchForIntegration($type, $this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
 
-
         // 4. Detect vendors
         $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])
             ->leftJoin('organization', 'organization.id = order.vendor_id')->groupBy('vendor_id');

@@ -53,7 +53,7 @@ class LoadStockEntryList extends Model
                 'perishable' =>  (int)$item->batch->perishable,
                 'producer_name' => isset($producer) ? ($producer->enterprise->name.'('. $producer->enterprise->address->addressView .')') : null,
                 'producer_country' => $country->country->name,
-                'producer_guid' => $item->batch->origin->producer->enterprise->guid,
+                'producer_guid' => isset($item->batch->origin->producer->enterprise->guid) ? $item->batch->origin->producer->enterprise->guid : null,
                 'low_grade_cargo' =>  (int)$item->batch->lowGradeCargo,
                 'vsd_uuid' => isset($item->vetDocument) ? $item->vetDocument->uuid : null,
                 'product_marks' => isset($item->batch->packageList->package->productMarks->_) ? $item->batch->packageList->package->productMarks->_ : "",

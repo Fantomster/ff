@@ -340,7 +340,7 @@ $this->registerCss($css);
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
-                    <div class="box-body table-responsive no-padding orders-table">
+                    <div class="box-body table-responsive2 no-padding orders-table">
                         <?php
                         Pjax::begin(['enablePushState' => false, 'id' => 'order-list']);
                         $form = ActiveForm::begin([
@@ -425,7 +425,7 @@ $this->registerCss($css);
                                     'bordered' => true,
                                     'striped' => true,
                                     'condensed' => true,
-                                    'responsive' => true,
+                                    'responsive' => false,
                                     'hover' => true,
                                     'resizableColumns' => true,
                                     'export' => [

@@ -89,7 +89,7 @@ $dataColumns = [
         },
     ],
 
-    // 3. Контрагент по договору поставки
+    // 4. Контрагент по договору поставки
     [
         'attribute' => 'vendor.name',
         'label' => $headers['vendor'],
@@ -101,7 +101,7 @@ $dataColumns = [
         },
     ],
 
-    // 4. Дата последнего обновления документа
+    // 5. Дата последнего обновления документа
     [
         'attribute' => 'updated_at',
         'label' => $headers['updated_at'],
@@ -115,7 +115,7 @@ $dataColumns = [
         },
     ],
 
-    // 5. Финальная дата
+    // 6. Финальная дата
     [
         'attribute' => 'finished_at',
         'label' => $headers['finished_at'],
@@ -130,7 +130,7 @@ $dataColumns = [
         },
     ],
 
-    // 5. Количество позиций
+    // 7. Количество позиций
     [
         'attribute' => 'positionCount',
         'label' => $headers['positionCount'],
@@ -147,11 +147,9 @@ $dataColumns = [
                     role="button" tabindex="0" data-original-title="" title="" data-model="' .
                 $data->id . '"><i class="fa fa-info-circle"></i></a>';
         },
-
-
     ],
 
-    // 6. Сумма заказа
+    // 8. Сумма заказа
     [
         'attribute' => 'total_price',
         'label' => EchoRu::echo ('frontend.views.order.summ', 'Сумма'),
@@ -162,7 +160,7 @@ $dataColumns = [
         },
     ],
 
-    // 7. Статус накладной
+    // 9. Статус накладной
     [
         'value' => function ($data) {
             $nacl = RkWaybill::findOne(['order_id' => $data->id]);
@@ -177,7 +175,7 @@ $dataColumns = [
         'contentOptions' => ['style' => 'text-align: center'],
     ],
 
-    # 8. Дополнительные действия
+    # 10. Дополнительные действия
     [
         'class' => ExpandRowColumn::class,
         'width' => '50px',
@@ -340,141 +338,136 @@ $this->registerCss($css);
 
 ?>
 
-    <section class="content-header">
-        <h1>
-            <i class="fa fa-history"></i> <?=
-            EchoRu::echo ('frontend.clientintegr.rkws.waybill', 'Интеграция с R-keeper SH (White Server)') ?>
-        </h1>
-        <?= Breadcrumbs::widget([
-            'options' => ['class' => 'breadcrumb',],
-            'links' => [
-                [
-                    'label' => EchoRu::echo ('frontend.clientintegr.index', 'Интеграция', 'app'),
-                    'url' => '/clientintegr/default'
-                ],
-                EchoRu::echo ('frontend.clientintegr.rkws.default', 'Интеграция с R-keeper WS'),
+<section class="content-header">
+    <h1>
+        <i class="fa fa-history"></i> <?=
+        EchoRu::echo ('frontend.clientintegr.rkws.waybill', 'Интеграция с R-keeper SH (White Server)') ?>
+    </h1>
+    <?= Breadcrumbs::widget([
+        'options' => ['class' => 'breadcrumb',],
+        'links' => [
+            [
+                'label' => EchoRu::echo ('frontend.clientintegr.index', 'Интеграция', 'app'),
+                'url' => '/clientintegr/default'
             ],
-        ]);
-        ?>
-    </section>
-    <section class="content-header">
-        <?= $this->render('/default/_menu.php'); ?>
-        <?= $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]); ?>
-        ЗАВЕРШЁННЫЕ ЗАКАЗЫ
-    </section>
-    <section class="content">
-        <div class="catalog-index">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <div class="panel-body">
-                        <div class="box-body table-responsive no-padding orders-table">
-                            <?php
-
-                            Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
-
-                            $form = ActiveForm::begin([
-                                'options' => [
-                                    'data-pjax' => true,
-                                    'id' => 'search-form',
-                                    //'class' => "navbar-form",
-                                    'role' => 'search',
-                                ],
-                                'enableClientValidation' => false,
-                                'method' => 'get',
-                            ]);
-
-                            ?>
-
-                            <div class="row">
-                                <div class="col-lg-1 col-md-2 col-sm-6" style="width: 150px;">
-                                    <?php
-                                    # 1. INPUT ORDER ID Filter field
-                                    echo $form->field($searchModel, 'id')
-                                        ->textInput(['id' => 'orderFilter', 'class' => 'form-control', 'value' => '',
-                                            'style' => 'width: 130px; margin-right: 20px', 'placeholder' => $filterValues['orderId']])
-                                        ->label($filterLabels['orderId'], ['class' => 'label', 'style' => 'color:#555']);
-                                    ?>
-                                </div>
-                                <div class="col-lg-2 col-md-2 col-sm-6" style="width: 240px;">
-                                    <?php
-                                    # 2. SELECT SUPPLIER Filter field
-                                    echo $form->field($searchModel, 'vendor_id')->widget($filterWidgetNames['orderAff'], [
-                                        'data' => $filterOptions['orderAff'], 'options' => ['placeholder' => $filterValues['orderAff']],
-                                        'pluginOptions' => ['allowClear' => FALSE],
-                                        'id' => 'orgFilter',
-                                    ])->label($filterLabels['orderAff'], ['class' => 'label', 'style' => 'color:#555']);
-                                    ?>
-                                </div>
-
-                                <div class="col-lg-3 col-md-3 col-sm-6" style="width: 440px;">
-                                    <?php
-                                    # 3. RANGE ORDER LAST_UPDATED Filter field
-                                    echo Html::label($filterLabels['orderLastUpdated'], null, ['class' => 'label', 'style' => 'color:#555']);
-                                    ?>
-                                    <div class="form-group">
-                                        <?= DatePicker::widget([
-                                            'model' => $searchModel,
-                                            'attribute' => 'date_from', 'attribute2' => 'date_to',
-                                            'options' => ['placeholder' => $filterValues['dateFrom'], 'id' => 'dateFrom', 'style' => "min-width: 100px"],
-                                            'options2' => ['placeholder' => $filterValues['dateTo'], 'id' => 'dateTo', 'style' => "min-width: 100px"],
-                                            'separator' => '-', 'type' => DatePicker::TYPE_RANGE,
-                                            'pluginOptions' => ['format' => 'dd.mm.yyyy', 'autoclose' => true, 'endDate' => "0d"],
-                                        ]);
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-lg-2 col-md-3 col-sm-6" style=" width: 240px;">
-                                    <?php
-                                    # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
-                                    echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
-                                        'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
-                                        'pluginOptions' => ['allowClear' => TRUE],
-                                        'id' => 'wbStatus',
-                                    ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
-                                    ?>
-                                </div>
-                                <div class="col-lg-2 col-md-3 col-sm-6">
-                                    <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
-                                    <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/rkws/default']) ?>">Сбросить
-                                        фильтры</a>
-                                </div>
-                                <div class="col-lg-5 col-md-6 col-sm-6">
-                                    <?php $title = EchoRu::echo ($msg['push'], 'Выгрузить выбранные');
-                                    echo Html::a($title, false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
-                                </div>
+            EchoRu::echo ('frontend.clientintegr.rkws.default', 'Интеграция с R-keeper WS'),
+        ],
+    ]);
+    ?>
+</section>
+<section class="content-header">
+    <?= $this->render('/default/_menu.php'); ?>
+    <?= $this->render('/default/_license_no_active.php', ['lic' => $lic, 'licucs' => $licucs]); ?>
+    ЗАВЕРШЁННЫЕ ЗАКАЗЫ
+</section>
+<section class="content">
+    <div class="catalog-index">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <div class="panel-body">
+                    <div class="box-body table-responsive no-padding orders-table">
+                        <?php
+                        Pjax::begin(['enablePushState' => false, 'id' => 'order-list']);
+                        $form = ActiveForm::begin([
+                            'options' => [
+                                'data-pjax' => true,
+                                'id' => 'search-form',
+                                'role' => 'search',
+                            ],
+                            'enableClientValidation' => false,
+                            'method' => 'get',
+                        ]);
+                        ?>
+                        <div class="row">
+                            <div class="col-lg-1 col-md-2 col-sm-6" style="width: 150px;">
+                                <?php
+                                # 1. INPUT ORDER ID Filter field
+                                echo $form->field($searchModel, 'id')
+                                    ->textInput(['id' => 'orderFilter', 'class' => 'form-control', 'value' => '',
+                                        'style' => 'width: 130px; margin-right: 20px', 'placeholder' => $filterValues['orderId']])
+                                    ->label($filterLabels['orderId'], ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
                             </div>
-                            <?php ActiveForm::end(); ?>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <?php echo GridView::widget([
-                                        'dataProvider' => $dataProvider,
-                                        'pjax' => true,
-                                        'pjaxSettings' => ['options' => ['id' => 'waybill_grid1'], 'loadingCssClass' => false],
-                                        'filterPosition' => false,
-                                        'columns' => $dataColumns,
-                                        'options' => ['class' => 'table-responsive'],
-                                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                                        'bordered' => true,
-                                        'striped' => true,
-                                        'condensed' => true,
-                                        'responsive' => true,
-                                        'hover' => true,
-                                        'resizableColumns' => true,
-                                        'export' => [
-                                            'fontAwesome' => true,
-                                        ],
+                            <div class="col-lg-2 col-md-2 col-sm-6" style="width: 240px;">
+                                <?php
+                                # 2. SELECT SUPPLIER Filter field
+                                echo $form->field($searchModel, 'vendor_id')->widget($filterWidgetNames['orderAff'], [
+                                    'data' => $filterOptions['orderAff'], 'options' => ['placeholder' => $filterValues['orderAff']],
+                                    'pluginOptions' => ['allowClear' => FALSE],
+                                    'id' => 'orgFilter',
+                                ])->label($filterLabels['orderAff'], ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-6" style="width: 440px;">
+                                <?php
+                                # 3. RANGE ORDER LAST_UPDATED Filter field
+                                echo Html::label($filterLabels['orderLastUpdated'], null, ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
+                                <div class="form-group">
+                                    <?= DatePicker::widget([
+                                        'model' => $searchModel,
+                                        'attribute' => 'date_from', 'attribute2' => 'date_to',
+                                        'options' => ['placeholder' => $filterValues['dateFrom'], 'id' => 'dateFrom', 'style' => "min-width: 100px"],
+                                        'options2' => ['placeholder' => $filterValues['dateTo'], 'id' => 'dateTo', 'style' => "min-width: 100px"],
+                                        'separator' => '-', 'type' => DatePicker::TYPE_RANGE,
+                                        'pluginOptions' => ['format' => 'dd.mm.yyyy', 'autoclose' => true, 'endDate' => "0d"],
                                     ]);
                                     ?>
                                 </div>
                             </div>
-                            <?php Pjax::end(); ?>
+                            <div class="col-lg-2 col-md-3 col-sm-6" style=" width: 240px;">
+                                <?php
+                                # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
+                                echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
+                                    'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
+                                    'pluginOptions' => ['allowClear' => TRUE],
+                                    'id' => 'wbStatus',
+                                ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
+                                ?>
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
+                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/rkws/waybill']) ?>">Сбросить
+                                    фильтры</a>
+                            </div>
+                            <div class="col-lg-5 col-md-6 col-sm-6">
+                                <?php $title = EchoRu::echo ($msg['push'], 'Выгрузить выбранные');
+                                echo Html::a($title, false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
+                            </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <?php echo GridView::widget([
+                                    'dataProvider' => $dataProvider,
+                                    'pjax' => true,
+                                    'pjaxSettings' => ['options' => ['id' => 'waybill_grid1'], 'loadingCssClass' => false],
+                                    'filterPosition' => false,
+                                    'columns' => $dataColumns,
+                                    'options' => ['class' => 'table-responsive'],
+                                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                    'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                    'bordered' => true,
+                                    'striped' => true,
+                                    'condensed' => true,
+                                    'responsive' => true,
+                                    'hover' => true,
+                                    'resizableColumns' => true,
+                                    'export' => [
+                                        'fontAwesome' => true,
+                                    ],
+                                ]);
+                                ?>
+                            </div>
+                        </div>
+                        <?php ActiveForm::end(); ?>
+                        <?php Pjax::end() ?>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
 <?php
 $url = Url::toRoute('waybill/sendws');

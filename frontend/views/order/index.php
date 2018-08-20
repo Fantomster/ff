@@ -291,7 +291,7 @@ $filterValues = [
     'dateTo' => $searchParams['OrderSearch2']['date_to'] ?? '',
 ];
 if (isset($searchParams['OrderSearch']['id']) && (int)$searchParams['OrderSearch']['id'] > 0) {
-    $filterValues['orderId'] = (int)$searchParams['OrderSearch']['id'];
+    $filterValues['id'] = (int)$searchParams['OrderSearch2']['id'];
 }
 #-----------------------------------------------------------------------------------------------------------------------
 # 3.5. Динамичные идентификаторы (для ресторанов и для поставщиков типы контрагентов различаются)
@@ -322,7 +322,7 @@ $("document").ready(function () {
         if (w === "https:") {
             target = "https:";
         }
-        target = target + '//' + window.location.hostname + '/order?OrderSearch[id]=' + $("#orderFilter").val();
+        target = target + '//' + window.location.hostname + '/order?OrderSearch2[id]=' + $("#orderFilter").val();
         window.location.href = target;
     });
 
@@ -596,7 +596,6 @@ $this->registerCss($css);
                 <?= Html::submitButton('<i class="fa fa-th"></i> ' . $btn['grid'],
                     ['class' => 'btn btn-success grid-report']) ?>
             <?php } ?>
-            <?php ActiveForm::end(); ?>
             <div class="row">
                 <div class="col-md-12">
                     <?= GridView::widget([
@@ -614,6 +613,7 @@ $this->registerCss($css);
                     ?>
                 </div>
             </div>
+            <?php ActiveForm::end(); ?>
             <?php Pjax::end() ?>
         </div>
     </div>

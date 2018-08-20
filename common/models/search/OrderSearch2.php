@@ -2,6 +2,8 @@
 
 namespace common\models\search;
 
+use api\common\models\iiko\iikoWaybill;
+use api\common\models\one_s\OneSWaybill;
 use common\models\Order;
 use common\models\User;
 use frontend\modules\clientintegr\modules\rkws\controllers\WaybillController;
@@ -66,7 +68,8 @@ class OrderSearch2 extends Order
 
 
     /**
-     * swdfsdfsfd
+     * searchForIntegration R-Keeper
+     * @var $type string
      * @var $params array
      * @var $businessType string
      * @var $wbStatuses array
@@ -74,7 +77,7 @@ class OrderSearch2 extends Order
      * @var $sort array
      * @return ActiveDataProvider
      */
-    public function searchForIntegration(array $params, string $businessType, array $wbStatuses = [], array $pagination = [], array $sort = []): ActiveDataProvider
+    public function searchForIntegration(string $type, array $params, string $businessType, array $wbStatuses = [], array $pagination = [], array $sort = []): ActiveDataProvider
     {
 
         $selfTypeColumnId = 'vendor_id';
@@ -88,6 +91,8 @@ class OrderSearch2 extends Order
             $query = Order::find()->where(['id' => (int)$params['OrderSearch2']['id']])
                 ->andWhere([$selfTypeColumnId => $orgId])
                 ->andFilterWhere(['status' => Order::STATUS_DONE]);
+        } elseif (isset($params['OrderSearch2']['id']) && $params['OrderSearch2']['id']) {
+            $query = Order::find()->where(['id' => 0]);
         } else {
 
             $query = Order::find()->andWhere([$selfTypeColumnId => $orgId]);
@@ -126,52 +131,92 @@ class OrderSearch2 extends Order
 
             $query->andFilterWhere(['status' => Order::STATUS_DONE]);
 
-
-
             if ($this->wb_status && isset($wbStatuses[$this->wb_status]) && $wbStatuses[$this->wb_status]) {
                 /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
                 if ($wbStatuses[$this->wb_status] == WaybillController::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS) {
 
                     # ищем все готовые к выгрузке
-                    $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
-                    $ordersWithReadyWbDoc = RkWaybill::find()->select('order_id') ->where($qparams)->asArray()->all();
+                    $ordersWithReadyWbDoc = [];
+                    if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
+                        $ordersWithReadyWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $ordersWithReadyWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $ordersWithReadyWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }
                     $ordersWithReadyWbDoc = ArrayHelper::map($ordersWithReadyWbDoc, 'order_id', 'order_id');
-
                     $query->andWhere(['IN', 'order.id', $ordersWithReadyWbDoc]);
 
                 } elseif ($wbStatuses[$this->wb_status] == WaybillController::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS) {
 
                     # ищем все выгруженные
+                    $ordersWithFinalWbDoc = [];
                     $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 2];
-                    $ordersWithFinalWbDoc = RkWaybill::find()->select('order_id') ->where($qparams)->asArray()->all();
+                    if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
+                        $ordersWithFinalWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
+                        $ordersWithFinalWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
+                        $ordersWithFinalWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }
                     $ordersWithFinalWbDoc = ArrayHelper::map($ordersWithFinalWbDoc, 'order_id', 'order_id');
-
                     $query->andWhere(['IN', 'order.id', $ordersWithFinalWbDoc]);
 
                 } elseif ($wbStatuses[$this->wb_status] == WaybillController::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS) {
 
-                    # ищем все сформированные
+                    # ищем все
+                    $all = [];
                     $qparams = ['org' => (int)$params['OrderSearch2']['client_id']];
-                    $all = RkWaybill::find()->select('order_id') ->where($qparams)->asArray()->all();
+                    if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
+                        $all = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
+                        $all = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
+                        $all = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }
                     $all = ArrayHelper::map($all, 'order_id', 'order_id');
-
                     # ищем все готовые к выгрузке и выгруженные
-                    $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
-                    $ordersWithReadyWbDoc = RkWaybill::find()->select('order_id') ->where($qparams)->asArray()->all();
+                    $ordersWithReadyWbDoc = [];
+                    if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
+                        $ordersWithReadyWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $ordersWithReadyWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $ordersWithReadyWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }
                     $ordersWithReadyWbDoc = ArrayHelper::map($ordersWithReadyWbDoc, 'order_id', 'order_id');
-
+                    $ordersWithFinalWbDoc = [];
                     $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 2];
-                    $ordersWithFinalWbDoc = RkWaybill::find()->select('order_id') ->where($qparams)->asArray()->all();
+                    if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
+                        $ordersWithFinalWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
+                        $ordersWithFinalWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
+                        $ordersWithFinalWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }
                     $ordersWithFinalWbDoc = ArrayHelper::map($ordersWithFinalWbDoc, 'order_id', 'order_id');
-
+                    # ищем все сформированные
                     $query->andWhere(['IN', 'order.id', array_diff($all, array_merge($ordersWithReadyWbDoc, $ordersWithFinalWbDoc))]);
+
                 } elseif ($wbStatuses[$this->wb_status] == WaybillController::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS) {
 
                     # ищем все сформированные
+                    $all = [];
                     $qparams = ['org' => (int)$params['OrderSearch2']['client_id']];
-                    $all = RkWaybill::find()->select('order_id') ->where($qparams)->asArray()->all();
+                    if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
+                        $all = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
+                        $all = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
+                        $all = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
+                    }
                     $all = ArrayHelper::map($all, 'order_id', 'order_id');
-
                     $query->andWhere(['NOT IN', 'order.id', $all]);
 
                 }
@@ -210,6 +255,8 @@ class OrderSearch2 extends Order
         if (isset($params['OrderSearch2']['id']) && (int)$params['OrderSearch2']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch2']['id']])
                 ->andWhere([$selfTypeColumnId => User::findOne(Yii::$app->user->id)->organization_id]);
+        } elseif (isset($params['OrderSearch2']['id']) && $params['OrderSearch2']['id']) {
+            $query = Order::find()->where(['id' => 0]);
         } else {
 
             $query = Order::find()->andWhere([$selfTypeColumnId => User::findOne(Yii::$app->user->id)->organization_id]);
@@ -236,7 +283,7 @@ class OrderSearch2 extends Order
                 }
             }
 
-            $keys = array_keys(array_merge([''], $orderStatuses));
+            $keys = array_keys(array_merge([0], $orderStatuses));
             if (isset($keys[$this->doc_status]) && $keys[$this->doc_status]) {
                 if (isset($orderStatuses[$keys[$this->doc_status]]) && $orderStatuses[$keys[$this->doc_status]]) {
                     $query->andFilterWhere(['status' => $orderStatuses[$keys[$this->doc_status]]]);

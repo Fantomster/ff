@@ -94,7 +94,7 @@ class OneSWaybillData extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
-            'enable_all_map' => 'Сохранить в сопоставлении'
+            'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
         ];
     }
 

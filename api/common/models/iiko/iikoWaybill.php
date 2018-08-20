@@ -206,14 +206,14 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><document></document>');
 
         $xml->addChild('comment', $model->note);
-        $xml->addChild('documentNumber', $model->num_code);
+        $xml->addChild('documentNumber', $model->order_id);
         $datetime = new \DateTime($model->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
         $xml->addChild('invoice', $model->text_code);
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
-        $xml->addChild('incomingDocumentNumber', $model->order_id);
+        $xml->addChild('incomingDocumentNumber', $model->num_code);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');

@@ -71,7 +71,6 @@ echo \kartik\grid\GridView::widget([
         [
             'class' => 'yii\grid\CheckboxColumn',
             'contentOptions' => ['class' => 'small_cell_checkbox'],
-            'header' => '',
             'headerOptions' => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {
                 if (is_iterable($arr) && in_array($model->id, $arr)) {
@@ -79,7 +78,7 @@ echo \kartik\grid\GridView::widget([
                 } else {
                     $checked = false;
                 }
-                echo Html::hiddenInput('goods[' . $model->id . ']', (int)$checked, ['id' => 'goods_' . $model->id]);
+                echo Html::hiddenInput('goods[' . $model->id . ']', (int)$checked, ['id' => 'goods_' . $model->id, 'class' => 'alHiddenInput']);
                 return ['value' => $model->id, 'class' => 'checkbox-group_operations', 'checked' => $checked];
             }
         ],
@@ -201,6 +200,16 @@ $("document").ready(function(){
                $('#' + idName).val(1);
             } else {
                $('#' + idName).val(0); 
+            }
+        });
+});
+
+$("document").ready(function(){
+        $(".dict-agent-form").on("click", ".select-on-check-all", function() {
+            if ($(this).prop('checked')){
+                $('.alHiddenInput').val(1);
+            } else {
+                $('.alHiddenInput').val(0);
             }
         });
 });

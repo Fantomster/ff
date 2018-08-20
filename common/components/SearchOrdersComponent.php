@@ -48,6 +48,11 @@ class SearchOrdersComponent extends Component
     /** @var $businessType string self::BUSINESS_TYPE_RESTAURANT || self::BUSINESS_TYPE_VENDOR */
     public $businessType;
 
+    const INTEGRATION_TYPE_RKWS = 'rkws';
+    const INTEGRATION_TYPE_IIKO = 'iiko';
+    const INTEGRATION_TYPE_ONES = '1c';
+
+
     /**
      * Search if $organization->type_id == Organization::TYPE_RESTAURANT
      *
@@ -166,6 +171,7 @@ class SearchOrdersComponent extends Component
 
     /**
      * Search orders for intergartion views
+     * @var $type string
      * @var $searchModel OrderSearch2
      * @var $orgId int
      * @var $curIUserOrgId int
@@ -173,9 +179,8 @@ class SearchOrdersComponent extends Component
      * @var $pagination array
      * @var $sort array
      */
-    public function getRestaurantIntegration(OrderSearch2 $searchModel, int $orgId, int $curIUserOrgId, array $wbStatuses = [], array $pagination = [], array $sort = [])
+    public function getRestaurantIntegration($type, OrderSearch2 $searchModel, int $orgId, int $curIUserOrgId, array $wbStatuses = [], array $pagination = [], array $sort = [])
     {
-
 
         // 1. Initialize searchParams
         $this->searchParams = Yii::$app->request->getQueryParams();
@@ -185,7 +190,7 @@ class SearchOrdersComponent extends Component
         $this->businessType = SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT;
 
         // 3. Update widget parameters
-        $this->dataProvider = $searchModel->searchForIntegration($this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
+        $this->dataProvider = $searchModel->searchForIntegration($type, $this->searchParams, $this->businessType, $wbStatuses, $pagination, $sort);
 
         // 4. Detect vendors
         $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])

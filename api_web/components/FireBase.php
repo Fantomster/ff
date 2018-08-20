@@ -8,20 +8,9 @@ use yii\web\HttpException;
 
 class FireBase
 {
-
-    function __wakeup()
-    {
-        // TODO: Implement __wakeup() method.
-    }
-
-    function __clone()
-    {
-        // TODO: Implement __clone() method.
-    }
-
-    function __construct()
-    {
-    }
+    function __wakeup(){}
+    function __clone(){}
+    function __construct(){}
 
     /**
      * @var FireBase
@@ -38,6 +27,9 @@ class FireBase
      */
     private static $path;
 
+    /**
+     * @return FireBase
+     */
     public static function getInstance()
     {
         if (self::$instance == null) {
@@ -46,6 +38,9 @@ class FireBase
         return self::$instance;
     }
 
+    /**
+     * @return FireBase
+     */
     private static function createInstance()
     {
         self::$path = Yii::$app->params['fireBase']['DEFAULT_PATH'] ?? '/';
@@ -55,6 +50,10 @@ class FireBase
         return new self();
     }
 
+    /**
+     * @param $path
+     * @return string
+     */
     private function getPath($path)
     {
         $pathReturn = self::$path;
@@ -69,12 +68,21 @@ class FireBase
         return $pathReturn;
     }
 
+    /**
+     * @param $path
+     * @return array
+     */
     public function get($path)
     {
         $path = $this->getPath($path);
         return self::$fireBase->get($path);
     }
 
+    /**
+     * @param $path
+     * @param $data
+     * @throws HttpException
+     */
     public function set($path, $data)
     {
         $path = $this->getPath($path);
@@ -84,12 +92,21 @@ class FireBase
         }
     }
 
+    /**
+     * @param $path
+     * @param $data
+     * @return array
+     */
     public function update($path, $data)
     {
         $path = $this->getPath($path);
         return self::$fireBase->update($path, $data);
     }
 
+    /**
+     * @param $path
+     * @throws HttpException
+     */
     public function delete($path)
     {
         $path = $this->getPath($path);

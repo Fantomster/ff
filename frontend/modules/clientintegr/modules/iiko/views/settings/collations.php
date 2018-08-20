@@ -116,7 +116,7 @@ $js = <<< JS
 		                showCancelButton: true,
 		                confirmButtonColor: '#3085d6',
 		                cancelButtonColor: '#d33',
-		                confirmButtonText: 'Выгрузить',
+		                confirmButtonText: 'Выполнить',
 		                cancelButtonText: 'Отмена',
 		            }).then((result) => {
 		                if(result.value)
@@ -174,7 +174,7 @@ $js = <<< JS
 		                showCancelButton: true,
 		                confirmButtonColor: '#3085d6',
 		                cancelButtonColor: '#d33',
-		                confirmButtonText: 'Выгрузить',
+		                confirmButtonText: 'Выполнить',
 		                cancelButtonText: 'Отмена',
 		            }).then((result) => {
 		                if(result.value)

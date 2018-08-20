@@ -428,7 +428,7 @@ $this->registerCss($css);
                             </div>
                             <div class="col-lg-2 col-md-3 col-sm-6">
                                 <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
-                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/rkws/default']) ?>">Сбросить
+                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/rkws/waybill']) ?>">Сбросить
                                     фильтры</a>
                             </div>
                             <div class="col-lg-5 col-md-6 col-sm-6">

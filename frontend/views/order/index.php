@@ -580,7 +580,7 @@ $this->registerCss($css);
                     # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
                     echo $form->field($searchModel, 'doc_status')->widget($filterWidgetNames['orderStatus'], [
                         'data' => $filterOptions['orderStatus'], 'options' => ['placeholder' => $filterValues['orderStatus']],
-                        'pluginOptions' => ['allowClear' => TRUE],
+                        'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
                         'id' => 'docStatus',
                     ])->label($filterLabels['orderStatus'], ['class' => 'label', 'style' => 'color:#555']);
                     ?>

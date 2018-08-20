@@ -596,7 +596,6 @@ $this->registerCss($css);
                 <?= Html::submitButton('<i class="fa fa-th"></i> ' . $btn['grid'],
                     ['class' => 'btn btn-success grid-report']) ?>
             <?php } ?>
-            <?php ActiveForm::end(); ?>
             <div class="row">
                 <div class="col-md-12">
                     <?= GridView::widget([
@@ -614,6 +613,7 @@ $this->registerCss($css);
                     ?>
                 </div>
             </div>
+            <?php ActiveForm::end(); ?>
             <?php Pjax::end() ?>
         </div>
     </div>

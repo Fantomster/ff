@@ -73,7 +73,7 @@ use yii\web\JsExpression;
     <div class="form-group">
         <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
         <?= Html::a('Вернуться',
-            ['index'],
+            Url::previous(),
             ['class' => 'btn btn-success btn-export']);
         ?>
     </div>

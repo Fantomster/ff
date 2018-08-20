@@ -365,7 +365,7 @@ $this->registerCss($css);
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
-                    <div class="box-body table-responsive no-padding orders-table">
+                    <div class="box-body table-responsive2 no-padding orders-table">
                         <?php
                         Pjax::begin(['enablePushState' => false, 'id' => 'order-list']);
                         $form = ActiveForm::begin([
@@ -421,7 +421,7 @@ $this->registerCss($css);
                                 # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
                                 echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
                                     'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
-                                    'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
+                                    'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE, // добавил ранее
                                     'id' => 'wbStatus',
                                 ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>
@@ -450,7 +450,7 @@ $this->registerCss($css);
                                     'bordered' => true,
                                     'striped' => true,
                                     'condensed' => true,
-                                    'responsive' => true,
+                                    'responsive' => false,
                                     'hover' => true,
                                     'resizableColumns' => true,
                                     'export' => [

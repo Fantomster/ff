@@ -144,7 +144,7 @@ class OrderSearch2 extends Order
                         $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
-                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 3, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     }
                     $ordersWithReadyWbDoc = ArrayHelper::map($ordersWithReadyWbDoc, 'order_id', 'order_id');
@@ -187,7 +187,7 @@ class OrderSearch2 extends Order
                         $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     }elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
-                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 3, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     }
                     $ordersWithReadyWbDoc = ArrayHelper::map($ordersWithReadyWbDoc, 'order_id', 'order_id');

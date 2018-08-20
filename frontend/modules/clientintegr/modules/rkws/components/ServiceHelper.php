@@ -80,6 +80,8 @@ class ServiceHelper extends AuthHelper {
 
         $nmodel->status_id=0;
 
+        $nmodel->td = new DateTime('2018-12-31');
+
         //var_dump($nmodel);
         
         if (!$nmodel->save()) {
@@ -99,11 +101,13 @@ class ServiceHelper extends AuthHelper {
         //     var_dump($obj['license_agent_expired_date']);
 
         $rcount->is_deleted = 0;
-        $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
+       // $rcount->td = Yii::$app->formatter->asDate($modDate, 'yyyy-MM-dd HH:mm:ss');
         $rcount->last_active = Yii::$app->formatter->asDate($lastDate, 'yyyy-MM-dd HH:mm:ss');
         $rcount->address = isset($res2['resp']['address']) ? $res2['resp']['address'] : 'Не задано';
         $rcount->status_id = $statLic;
         //var_dump($rcount);
+
+        $rcount->td = new DateTime('2018-12-31');
 
         if (!$rcount->save()) {
             echo "Can't save the service model";

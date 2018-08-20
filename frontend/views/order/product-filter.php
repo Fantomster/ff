@@ -23,6 +23,21 @@ $this->registerJs('
         $($(this).data("target-form")).submit();
     });
     
+     $(document).on("change", "#selectedVendor", function(e) {
+                var form = $("#searchForm");
+                form.submit();
+     });
+            
+     $(document).on("change keyup paste cut", "#searchString", function() {
+                $("#hiddenSearchString").val($("#searchString").val());
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    $("#searchForm").submit();
+                }, 700);
+     });
+    
      $(document).on("click", ".clear-all-blocked", function(e) {
           if(($("#productFilterGrid").yiiGridView("getSelectedRows").length + cnt) == 0)
              return false;
@@ -63,6 +78,9 @@ $this->registerJs('
             </li>
         </ul>
         <div class="tab-content">
+            <?php
+           // Pjax::begin(['formSelector' => 'form', 'id' => 'productFilter', 'timeout' => 5000]);
+            ?>
             <div class="row">
                 <div class="col-md-12">
                     <div class="guid-header">
@@ -70,6 +88,7 @@ $this->registerJs('
                         $form = ActiveForm::begin([
                             'options' => [
                                 'id' => 'searchForm',
+                                'data-pjax' => true,
                                 'class' => "navbar-form no-padding no-margin",
                                 'role' => 'search',
                             ],
@@ -105,9 +124,6 @@ $this->registerJs('
                     </div>
                 </div>
             </div>
-            <?php
-            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'productFilter', 'timeout' => 5000]);
-            ?>
             <div class="row">
                 <div class="col-md-12">
                     <hr>
@@ -126,6 +142,7 @@ $this->registerJs('
                             'dataProvider' => $dataProvider,
                             'filterModel' => $searchModel,
                             'filterPosition' => false,
+                            'pjax' => true,
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             'summary' => '',
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
@@ -160,7 +177,7 @@ $this->registerJs('
                                                              type: "POST",
                                                              data: {selected: value, state: state},
                                                              success: function(){
-                                                                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
+                                                                 $.pjax.reload({container: "#productFilterGrid-pjax", url: url, timeout:30000});
                                                              }
                                                            }); }',
                                         'changeCell' => 'function(e) {
@@ -173,7 +190,7 @@ $this->registerJs('
                                                              type: "POST",
                                                              data: {selected: value, state: state},
                                                              success: function(){
-                                                                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
+                                                                 $.pjax.reload({container: "#productFilterGrid-pjax", url: url, timeout:30000});
                                                              }
                                                            });}'
                                                      ],
@@ -226,8 +243,8 @@ $this->registerJs('
                     </div>
                 </div>
             </div>
-            <?php Pjax::end(); ?>
         </div>
+        <?php //Pjax::end(); ?>
         <!-- /.tab-content -->
     </div>
 </section>

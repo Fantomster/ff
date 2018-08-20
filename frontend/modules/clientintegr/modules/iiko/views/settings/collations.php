@@ -134,8 +134,8 @@ $js = <<< JS
 		                if(result.value)
 		                {
 		                    swal({
-		                        title: 'Идёт отправка',
-		                        text: 'Подождите, пока закончится выгрузка...',
+		                        title: 'Идёт выполнение',
+		                        text: 'Подождите, пока закончится выполнение...',
 		                        onOpen: () => {
 		                            swal.showLoading();
 		                            $.post(url, {ids:keys, main:$('#organization-name').val()}, function (data) {
@@ -192,15 +192,18 @@ $js = <<< JS
 		                if(result.value)
 		                {
 		                    swal({
-		                        title: 'Идёт отправка',
-		                        text: 'Подождите, пока закончится выгрузка...',
+		                        title: 'Идёт удаление',
+		                        text: 'Подождите, пока закончится удаление...',
 		                        onOpen: () => {
 		                            swal.showLoading();
 		                            $.post(url, {ids:ids}, function (data) {
 		                                
 		                                if (data.success === true) {
 		                                    swal.close();
-		                                    swal('Готово', '', 'success')
+		                                    swal('Готово', '', 'success');
+		                                    setInterval(function(){
+		                                    	location.reload();
+		                                    }, 1500);
 		                                } else {
 		                                    console.log(data.error);
 		                                    swal(

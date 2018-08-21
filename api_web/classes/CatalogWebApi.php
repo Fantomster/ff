@@ -193,15 +193,19 @@ class CatalogWebApi extends WebApi
                 }
             }
             //Удаляем все
-            CatalogTempContent::deleteAll(['AND',
-                'temp_id' => $temp_id,
-                ['in', 'id', array_values($ids)]
-            ]);
+            if ($temp_id !== null && !empty($ids)) {
+                CatalogTempContent::deleteAll(['AND',
+                    'temp_id' => $temp_id,
+                    ['in', 'id', array_values($ids)]
+                ]);
+            }
             //Все ок!
             $transaction->commit();
             return ['result' => true];
         } catch (\Exception $e) {
-            $transaction->rollBack();
+            if ($transaction->getIsActive()) {
+                $transaction->rollBack();
+            }
             throw $e;
         }
     }

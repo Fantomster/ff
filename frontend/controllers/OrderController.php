@@ -1201,7 +1201,7 @@ class OrderController extends DefaultController
             $search->countForRestaurant($organization->id, $this->currentUser->organization_id, $statuses);
         } else {
             $search->businessType = SearchOrdersComponent::BUSINESS_TYPE_VENDOR;
-            $search->countForOthers($organization->id, $this->currentUser->organization_id, $statuses, $this->currentUser->id);
+            $search->countForVendor($organization->id, $this->currentUser->organization_id, $statuses, $this->currentUser->id);
         }
         $search->finalize($searchModel, $statuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
         $renderParams = [

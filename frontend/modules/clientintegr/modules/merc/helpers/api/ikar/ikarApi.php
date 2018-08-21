@@ -17,7 +17,7 @@ class ikarApi extends baseApi
     public function getCountryByGuid($GUID)
     {
         $country = \common\models\vetis\VetisCountry::findOne(['guid' => $GUID]);
-
+        
         if (!empty($country)) {
             return $country;
         }
@@ -27,10 +27,6 @@ class ikarApi extends baseApi
         $request->guid = $GUID;
 
         $result = $client->GetCountryByGuid($request);
-
-        if ($result != null) {
-            $cache->add('Country_' . $GUID, $result, 60 * 60 * 24 * 7);
-        }
 
         return $result;
     }

@@ -551,6 +551,7 @@ class RequestWebApi extends WebApi
             "name" => $model->product,
             "status" => (int)$model->active_status,
             "created_at" => date('d.m.Y H:i', strtotime($model->created_at)),
+            "end_at" => !empty($model->end) ? date('d.m.Y H:i', strtotime($model->end)) : null,
             "category" => $model->categoryName->name,
             "category_id" => (int)$model->category,
             "amount" => $model->amount,

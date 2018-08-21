@@ -164,8 +164,8 @@ class EmailIntegrationController extends Controller
                     //Получаем только подходящие нам вложения из е-мэйла
                     if ($files = $this->getAttachments($email, $setting)) {
                         foreach ($files as $file) {
+                            $transaction = \Yii::$app->db->beginTransaction();
                             try {
-                                $transaction = \Yii::$app->db->beginTransaction();
                                 $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
                                 $transaction->commit();
                                 $this->log([

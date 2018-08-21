@@ -76,6 +76,34 @@ class CatalogWebApi extends WebApi
     }
 
     /**
+     * Удаление из временного каталога
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function deletePositionTempCatalog($request)
+    {
+        if (empty($request['temp_id'])) {
+            throw new BadRequestHttpException("empty_param|temp_id");
+        }
+
+        if (empty($request['position_id'])) {
+            throw new BadRequestHttpException("empty_param|position_id");
+        }
+
+        $model = CatalogTempContent::findOne(['temp_id' => (int)$request['temp_id'], 'id' => (int)$request['position_id']]);
+        if (empty($model)) {
+            throw new BadRequestHttpException("model_not_found");
+        }
+
+        if (!$model->delete()) {
+            throw new BadRequestHttpException('Model not delete!!!');
+        }
+
+        return ['result' => true];
+    }
+
+    /**
      * Поиск дублей в темповом каталоге
      * @param array $request
      * @return array
@@ -131,17 +159,62 @@ class CatalogWebApi extends WebApi
         }
 
         foreach ($content as $row) {
-            $result[$row[$index]][] = $this->prepareTempPosition($row);
+            $result[$row[$index]][] = $this->prepareTempDuplicatePosition($row);
         }
 
         return $result;
     }
 
     /**
+     * Автоматическое удаление дублей из загружаемого каталога
+     * @param array $request
+     * @return array
+     * @throws \Exception
+     */
+    public function autoClearTempDuplicatePosition(array $request)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            //ID каталога темпового
+            $temp_id = null;
+            //Список id позиций которые будем удалять
+            $ids = [];
+            //Получаем список дублей
+            $doubles = $this->getTempDuplicatePosition($request);
+            foreach ($doubles as &$positions) {
+                while (count($positions) > 1) {
+                    $position = array_pop($positions);
+                    //Один раз запоминаем id темпового каталога
+                    if ($temp_id === null) {
+                        $temp_id = $position['temp_id'];
+                    }
+                    //Собираем id дублей которые удалим
+                    $ids[] = $position['id'];
+                }
+            }
+            //Удаляем все
+            if ($temp_id !== null && !empty($ids)) {
+                CatalogTempContent::deleteAll(['AND',
+                    'temp_id' => $temp_id,
+                    ['in', 'id', array_values($ids)]
+                ]);
+            }
+            //Все ок!
+            $transaction->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            if ($transaction->getIsActive()) {
+                $transaction->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
      * @param array $row
      * @return array
      */
-    private function prepareTempPosition(array $row)
+    private function prepareTempDuplicatePosition(array $row)
     {
         return [
             "id" => (int)$row['id'],
@@ -152,7 +225,7 @@ class CatalogWebApi extends WebApi
             "units" => round($row['units'], 3),
             "note" => $row['note'],
             "ed" => $row['ed'],
-            "CountOf" => (int)$row['CountOf']
+            "CountOf" => (int)$row['CountOf'] ?? 1
         ];
     }
 }

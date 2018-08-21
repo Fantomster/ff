@@ -120,6 +120,7 @@ class CatalogWebApi extends WebApi
             ->from(CatalogTempContent::tableName() . " as T1")
             ->where(["T1.temp_id" => $catalogTemp->id])
             ->innerJoin("({$innerJoin}) as T2", "T1.{$index} = T2.{$index}")
+            ->orderBy("T1.{$index}")
             ->all();
 
         $result = [];
@@ -130,7 +131,7 @@ class CatalogWebApi extends WebApi
         }
 
         foreach ($content as $row) {
-            $result[$row[$catalogTemp->index_column]][] = $this->prepareTempPosition($row);
+            $result[$row[$index]][] = $this->prepareTempPosition($row);
         }
 
         return $result;

@@ -648,27 +648,4 @@ SQL;
         
         return ['success' => true, 'action' => $action];
     }
-    
-    /**
-     * Make unload_status -> 1
-    */
-//    public function actionMapRestoreWaybillData()
-//    {
-//        Yii::$app->response->format = Response::FORMAT_JSON;
-//        $transaction = Yii::$app->db_api->beginTransaction();
-//        $id = Yii::$app->request->post('id');
-//
-//        $model = iikoWaybillData::findOne($id);
-//        try {
-//            $model->unload_status = 1;
-//            $model->save();
-//            $transaction->commit();
-//        } catch (\Throwable $t){
-//            $transaction->rollback();
-//            Yii::debug($t->getMessage());
-//            return false;
-//        }
-//
-//        return ['success' => true, 'action' => 'restore'];
-//    }
 }

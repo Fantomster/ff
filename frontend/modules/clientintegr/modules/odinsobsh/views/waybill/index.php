@@ -24,7 +24,6 @@ use yii\helpers\Html;
 /** @var $searchParams array Search Params */
 /** @var $way mixed */
 
-// use kartik\grid\CheckboxColumn;
 use common\components\EchoRu;
 use kartik\select2\Select2;
 use frontend\modules\clientintegr\modules\odinsobsh\controllers\WaybillController;

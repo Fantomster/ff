@@ -135,7 +135,10 @@ $columns = array(
         'headerOptions' => ['style' => 'text-align: center'],
         'contentOptions' => ['style' => 'text-align: center'],
         'value' => function ($data) {
-            return ($data->invoice) ? Html::encode($data->invoice->number) : '';
+            $res1 = ($data->waybill_number) ? Html::encode($data->waybill_number) : '';
+            return ($data->invoice) ? Html::encode($data->invoice->number) .
+                '&nbsp;&nbsp;<span title="Накладная поставщика" style="color: #ff0; background: #070; '.
+                'border: 1px #ccc solid; padding: 2px 4px; border-radius: 2px; font-size: 62%; margin-right: 6px">НП</span>' : $res1;
         },
     ],
     // 4. Контрагент по договору поставки

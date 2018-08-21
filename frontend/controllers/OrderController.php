@@ -2557,7 +2557,7 @@ class OrderController extends DefaultController
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
-        if (Yii::$app->request->isPjax) {
+       if (Yii::$app->request->isPjax) {
             return $this->renderPartial('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
         } else {
             return $this->render('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));

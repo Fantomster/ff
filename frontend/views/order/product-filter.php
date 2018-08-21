@@ -78,17 +78,15 @@ $this->registerJs('
             </li>
         </ul>
         <div class="tab-content">
-            <?php
-           // Pjax::begin(['formSelector' => 'form', 'id' => 'productFilter', 'timeout' => 5000]);
-            ?>
             <div class="row">
                 <div class="col-md-12">
                     <div class="guid-header">
                         <?php
                         $form = ActiveForm::begin([
+                            'action' => Url::to('product-filter'),
+                            'method' => 'get',
                             'options' => [
                                 'id' => 'searchForm',
-                                'data-pjax' => true,
                                 'class' => "navbar-form no-padding no-margin",
                                 'role' => 'search',
                             ],
@@ -136,13 +134,16 @@ $this->registerJs('
             <div class="row">
                 <div class="col-md-12">
                     <div id="products">
+                        <?php
+                        Pjax::begin(['formSelector' => 'form', 'enablePushState' => true, 'id' => 'productFilter', 'timeout' => 5000]);
+                        ?>
                         <?=
                         GridView::widget([
                                 'id'=>'productFilterGrid',
                             'dataProvider' => $dataProvider,
                             'filterModel' => $searchModel,
                             'filterPosition' => false,
-                            'pjax' => true,
+                            //'pjax' => false,
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             'summary' => '',
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
@@ -177,10 +178,10 @@ $this->registerJs('
                                                              type: "POST",
                                                              data: {selected: value, state: state},
                                                              success: function(){
-                                                                 $.pjax.reload({container: "#productFilterGrid-pjax", url: url, timeout:30000});
+                                                                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
                                                              }
                                                            }); }',
-                                        'changeCell' => 'function(e) {
+                                        'changeCell' => 'function(e) { 
                                                             url = window.location.href;
                                                             var value = $(this).val();
                                                             state = $(this).prop("checked") ? 1 : 0;
@@ -190,7 +191,7 @@ $this->registerJs('
                                                              type: "POST",
                                                              data: {selected: value, state: state},
                                                              success: function(){
-                                                                 $.pjax.reload({container: "#productFilterGrid-pjax", url: url, timeout:30000});
+                                                                 $.pjax.reload({container: "#productFilter", url: url, timeout:30000});
                                                              }
                                                            });}'
                                                      ],
@@ -240,11 +241,11 @@ $this->registerJs('
                             ],
                         ])
                         ?>
+                        <?php Pjax::end(); ?>
                     </div>
                 </div>
             </div>
         </div>
-        <?php //Pjax::end(); ?>
         <!-- /.tab-content -->
     </div>
 </section>

@@ -20,7 +20,7 @@ use kartik\date\DatePicker;
 use common\components\EchoRu;
 use kartik\select2\Select2;
 use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
-use yii\grid\CheckboxColumn;
+use kartik\grid\CheckboxColumn;
 use api\common\models\iiko\iikoWaybill;
 use kartik\grid\ExpandRowColumn;
 

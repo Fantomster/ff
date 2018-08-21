@@ -22,7 +22,7 @@ use common\components\EchoRu;
 use api\common\models\RkService;
 use kartik\select2\Select2;
 use yii\helpers\Html;
-use yii\grid\CheckboxColumn;
+use kartik\grid\CheckboxColumn;
 use kartik\grid\ExpandRowColumn;
 use frontend\modules\clientintegr\modules\rkws\controllers\WaybillController;
 

@@ -463,4 +463,72 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('VendorWebApi')->getTempMainCatalog($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/vendor/get-temp-duplicate-position",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Возвращает список дублей в загруженом каталоге",
+     *     description="Возвращает список дублей в загруженом каталоге",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 3010
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "1_test": {
+     *                              {
+     *                                  "id": 1,
+     *                                  "temp_id": 2,
+     *                                  "article": "1_test",
+     *                                  "product": "Продукт 1",
+     *                                  "price": 100,
+     *                                  "units": 1,
+     *                                  "note": null,
+     *                                  "ed": "кг",
+     *                                  "CountOf": 4
+     *                              },
+     *                              {
+     *                                  "id": 2,
+     *                                  "temp_id": 2,
+     *                                  "article": "1_test",
+     *                                  "product": "Продукт 2",
+     *                                  "price": 110,
+     *                                  "units": 1,
+     *                                  "note": null,
+     *                                  "ed": "кг",
+     *                                  "CountOf": 4
+     *                              }
+     *                          }
+     *                  }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetTempDuplicatePosition()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($this->request);
+    }
 }

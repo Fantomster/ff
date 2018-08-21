@@ -1201,6 +1201,11 @@ class OrderController extends DefaultController
             $search->businessType = SearchOrdersComponent::BUSINESS_TYPE_VENDOR;
             $search->countForVendor($organization->id, $this->currentUser->organization_id, $statuses, $this->currentUser->id);
         }
+
+        if (isset($search->searchParams['OrderSearch2']['reset']) && $search->searchParams['OrderSearch2']['reset']) {
+            Yii::$app->getSession()->set('order', json_encode([]));
+        }
+
         $search->finalize($searchModel, $statuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
         $renderParams = [
             'businessType' => $search->businessType,

@@ -587,7 +587,7 @@ $this->registerCss($css);
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
-                    <a class="btn btn-warning" href="<?= Url::to(['/orders']) ?>">Сбросить фильтры</a>
+                    <a class="btn btn-warning" href="<?= Url::to(['/orders?OrderSearch2[reset]=1']) ?>">Сбросить фильтры</a>
                 </div>
             </div>
             <?php if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) { ?>
@@ -618,5 +618,3 @@ $this->registerCss($css);
         </div>
     </div>
 </section>
-
-

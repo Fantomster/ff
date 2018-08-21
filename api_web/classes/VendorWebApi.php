@@ -624,35 +624,6 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Удаление из временного каталога
-     * @param $request
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    public function deletePositionTempCatalog($request)
-    {
-        if (empty($request['temp_id'])) {
-            throw new BadRequestHttpException("empty_param|temp_id");
-        }
-
-        if (empty($request['position_id'])) {
-            throw new BadRequestHttpException("empty_param|position_id");
-        }
-
-        $model = CatalogTempContent::findOne(['temp_id' => (int)$request['temp_id'], 'id' => (int)$request['position_id']]);
-        if (empty($model)) {
-            throw new BadRequestHttpException("model_not_found");
-        }
-
-        if (!$model->delete()) {
-            throw new BadRequestHttpException('Model not delete!!!');
-        }
-
-        return ['result' => true];
-    }
-
-
-    /**
      * Статус загруженного, но не импортированного каталога
      * @param array $request
      * @return array

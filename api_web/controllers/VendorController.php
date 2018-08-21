@@ -436,7 +436,7 @@ class VendorController extends WebApiController
      */
     public function actionDeletePositionTempCatalog()
     {
-        $this->response = $this->container->get('VendorWebApi')->deletePositionTempCatalog($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->deletePositionTempCatalog($this->request);
     }
 
     public function actionImportCustomCatalog()
@@ -530,5 +530,50 @@ class VendorController extends WebApiController
     public function actionGetTempDuplicatePosition()
     {
         $this->response = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/vendor/auto-clear-temp-duplicate-position",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Автоматическое удаление дублей в каталоге",
+     *     description="Автоматическое удаление дублей в каталоге",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 3010
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "result": true
+     *                  }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAutoClearTempDuplicatePosition()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->autoClearTempDuplicatePosition($this->request);
     }
 }

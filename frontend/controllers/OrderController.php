@@ -1184,8 +1184,6 @@ class OrderController extends DefaultController
     {
         $organization = $this->currentUser->organization;
 
-        Url::remember();
-
         $searchModel = new OrderSearch2();
         $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
         $statuses = [

@@ -64,10 +64,38 @@ $arr = [
     Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте ещё раз']),
 ];
 
+
+$organization = $user->organization;
+$lisences = $organization->getLicenseList();
+$list_integration = '';
+$links = [
+    'rkws' => [
+        'alter' => 'R_keeper',
+        'title' => 'R_keeper',
+        'url' => '/clientintegr/rkws/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+    ],
+    'iiko' => [
+        'title' => 'iiko Office',
+        'url' => '/clientintegr/iiko/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+    ],
+    'odinsobsh' => [
+        'title' => '1C',
+        'url' => '/clientintegr/odinsobsh/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+    ]
+];
+foreach ($links as $key => $val) {
+    if (isset($lisences[$key]) && $lisences[$key]) {
+        $list_integration .= '<br>' . Html::a($val['title'], Yii::$app->urlManager->createUrl($val['url']), [
+                'class' => 'btn btn-primary', 'style' => 'margin-top: 8px'
+            ]);
+    }
+}
+
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            
             var clickedButton = $(this);
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
@@ -89,6 +117,11 @@ $js = <<<JS
                         $('#actionButtons').html(result);
                         clickedButton.button("reset");
                 });
+                 swal(
+                'Накладная успешно привязана!',
+                'Перейти в интеграцию: $list_integration',
+                'success'
+                );
             }
         });
         $('.content').on('change keyup paste cut', '.view-data', function() {

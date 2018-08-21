@@ -35,13 +35,16 @@ class iikoProductSearch extends iikoProduct
                 'product_type' => $params['productSearch']
             ]);
         }
-
+        
         if (isset($params['cookingPlaceSearch']) && $params['cookingPlaceSearch'] != 'all') {
+            if($params['cookingPlaceSearch'] == ''){
+                $params['cookingPlaceSearch'] = null;
+            }
             $query->andWhere([
                 'cooking_place_type' => $params['cookingPlaceSearch']
             ]);
         }
-
+        
         if (isset($params['unitSearch']) && $params['unitSearch'] != 'all') {
             $query->andWhere([
                 'unit' => $params['unitSearch']

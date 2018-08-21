@@ -5,7 +5,6 @@ use yii\bootstrap\ActiveForm;
 use common\models\User;
 use yii\widgets\Pjax;
 
-
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
 /* @var $dicConst \api\common\models\iiko\iikoDicconst */
@@ -69,7 +68,7 @@ echo \kartik\grid\GridView::widget([
     'filterModel' => $searchModel,
     'columns' => [
         [
-            'class' => 'yii\grid\CheckboxColumn',
+            'class' => 'kartik\grid\CheckboxColumn',
             'contentOptions' => ['class' => 'small_cell_checkbox'],
             'headerOptions' => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {

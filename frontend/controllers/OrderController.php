@@ -1204,6 +1204,7 @@ class OrderController extends DefaultController
 
         if (isset($search->searchParams['OrderSearch2']['reset']) && $search->searchParams['OrderSearch2']['reset']) {
             Yii::$app->getSession()->set('order', json_encode([]));
+            return $this->redirect(['']);
         }
 
         $search->finalize($searchModel, $statuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);

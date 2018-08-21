@@ -17,7 +17,7 @@ use yii\helpers\Url;
 class UrlPjax
 {
 
-    public static function make(string $title, string $url, string $value = NULL, string $identifier = 'id')
+    public static function make($title = '', string $url = '', $value = NULL, string $identifier = 'id')
     {
         if (!$title) {
             $title = '';

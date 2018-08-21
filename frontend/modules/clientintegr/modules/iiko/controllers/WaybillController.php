@@ -623,4 +623,29 @@ SQL;
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+    
+    /**
+     * Make unload_status -> 0
+    */
+    public function actionMapTriggerWaybillDataStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $id = Yii::$app->request->post('id');
+        $status = Yii::$app->request->post('status');
+        $action = Yii::$app->request->post('action');
+        
+        $model = iikoWaybillData::findOne($id);
+        try {
+            $model->unload_status = $status;
+            $model->save();
+            $transaction->commit();
+        } catch (\Throwable $t){
+            $transaction->rollback();
+            Yii::debug($t->getMessage());
+            return false;
+        }
+        
+        return ['success' => true, 'action' => $action];
+    }
 }

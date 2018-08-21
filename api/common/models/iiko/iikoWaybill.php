@@ -220,7 +220,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
         /**
          * @var $row iikoWaybillData
          */
-        $records = iikoWaybillData::findAll(['waybill_id' => $model->id]);
+        $records = iikoWaybillData::findAll(['waybill_id' => $model->id, 'unload_status' => 1]);
         $vatPercent = 0;
         $discount = 0;
         //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);

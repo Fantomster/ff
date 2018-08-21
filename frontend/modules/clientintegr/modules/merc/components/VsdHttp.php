@@ -38,8 +38,8 @@ class VsdHttp extends \yii\base\Component {
     }
     
     public function getPdfData($uuid) {
-        $vsdNumber = $this->getVsdNumberByUuid($uuid);
         $this->getCookie();
+        $vsdNumber = $this->getVsdNumberByUuid($uuid);
         $step = $this->getPage($this->pdfLink . $vsdNumber, true, \Yii::$app->session[$this->sessionName]);
         $data = $step['content'];
         return $data;
@@ -47,8 +47,13 @@ class VsdHttp extends \yii\base\Component {
 
     private function getCookie() {
         if (!isset(\Yii::$app->session[$this->sessionName])) {
-            $this->auth();
+            return $this->auth();
         }
+        return ['success' => true];
+    }
+    
+    public function checkAuthData(){
+        return $this->getCookie();
     }
     
     private function auth() {
@@ -75,12 +80,12 @@ class VsdHttp extends \yii\base\Component {
 
         $step3 = $this->postForm($step2['url'], false, $authData, $srv_id . $step2['cookies']);
 
-//        echo $step3['content'];
-//        
-//        return;
+        if($step3['content'] === ''){
+            return ['success' => false, 'error' => 'Неверные данные для авторизации'];
+        }
         
         $data2 = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step3['content']);
-
+    
         $forms2 = $data2->find("form");
 
         $action2 = html_entity_decode($forms2[0]->action);
@@ -98,6 +103,8 @@ class VsdHttp extends \yii\base\Component {
         $step6 = $this->getPage($this->chooseFirmLink . $this->firmGuid, true, $step4['cookies']);
         
         \Yii::$app->session[$this->sessionName] = $step4['cookies'];
+        
+        return ['success' => true];
     }
 
     private function getPage($url, $follow, $cookiesIn = '') {

@@ -264,16 +264,15 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionAjaxCheckVetisPass()
     {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $user = Yii::$app->user->identity;
         $mercPConst = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_password"')->one();
-        if ($mercPConst && $mercPConst->value != '') {
-            return true;
-        }
         $mercPConstLogin = mercPconst::find()->leftJoin('merc_dicconst', 'merc_dicconst.id=merc_pconst.const_id')->where('merc_pconst.org=:org', ['org' => $user->organization_id])->andWhere('merc_dicconst.denom="vetis_login"')->one();
-        if ($mercPConstLogin) {
-            return $mercPConstLogin->value;
+        if ($mercPConst && $mercPConst->value != '') {
+            return ['success' => true, 'login' => $mercPConstLogin->value];
         }
-        return false;
+        
+        return ['success' => false, 'login' => $mercPConstLogin->value];
     }
 
     public function actionAjaxUpdateVetisAccessData()
@@ -294,9 +293,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
-    public function actionGetPdf($uuid)
-    {
-        $vsdHttp = new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
+    private function generateVsdHttp(){
+        return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
             'authLink' => Yii::$app->params['vtsHttp']['authLink'],
             'vsdLink' => Yii::$app->params['vtsHttp']['vsdLink'],
             'pdfLink' => Yii::$app->params['vtsHttp']['pdfLink'],
@@ -305,6 +303,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             'password' => mercDicconst::getSetting("vetis_password"), //'2wsx2WSX', //
             'firmGuid' => mercDicconst::getSetting("issuer_id"),
         ]);
+    }
+    public function actionGetPdf($uuid)
+    {
+        $vsdHttp = $this->generateVsdHttp();
         $data = $vsdHttp->getPdfData($uuid);
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
         header('Content-Disposition: attachment; filename=' . $uuid . 'pdf');
@@ -314,6 +316,14 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         header('Pragma: public');
         flush();
         echo $data;
+    }
+    
+    public function actionCheckAuthData(){
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $vsdHttp = $this->generateVsdHttp();
+        $data = $vsdHttp->checkAuthData();
+    
+        return $data;
     }
 
     private function updateVSDList()

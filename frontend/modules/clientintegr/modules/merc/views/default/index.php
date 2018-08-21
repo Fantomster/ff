@@ -366,6 +366,7 @@ $preparePdfText = Yii::t('message', 'frontend.client.integration.pdf_prepare', [
 $loadUrl = Url::to(['ajax-load-vsd']);
 $checkVetisPassUrl = Url::to(['ajax-check-vetis-pass']);
 $updateAccessDataUrl = Url::to(['ajax-update-vetis-access-data']);
+$checkVsdAuthDataUrl = Url::to(['check-auth-data']);
 
 $customJs = <<< JS
 var justSubmitted = false;
@@ -467,7 +468,6 @@ $(document).on("click", ".hand_loading", function(e) {
                     confirmButtonText: "$confirmButtonText",
                     showLoaderOnConfirm: true,
                     allowOutsideClick: false,
-                    showLoaderOnConfirm: true,
                     inputValue: "",
                     onClose: function() {
                         clicked.blur();
@@ -502,98 +502,108 @@ $(document).on("click", ".hand_loading", function(e) {
                         swal({title: "$error", text: "$error_text", type: "error"});
                     }
                 });
-            }); 
-    $(document).on('click', '.download-pdf', function(e) {
-        e.preventDefault();
+            });
 
-        var url = $(this).data('url');
-        var filename = $(this).data('name');
-
-        $.ajax({
-            url: '$checkVetisPassUrl',
-            method: 'GET',
-            success: function (data) {
-                if(data != 1){
-                    swal({
-                        title: 'Печать ВСД',
-                        showCancelButton: true,
-                        cancelButtonText: "Отмена",
-                        confirmButtonText: "Подтвердить",
-                        html:
-                            '<p style="color: gray;">Для продолжения печати документа, Вам необходимо ввести актуальные данные от Личного Кабинета ИС Меркурий</p>' +
-                            '<div class="row"><div class="col-md-3"><label style="padding-top: 30px;">Логин</label></div><div class="col-md-offset-3" style="padding-right: 20px"><input id="swal-input1" class="swal2-input" placeholder="Логин" value=' + data +' required></div></div>' +
-                            '<div class="row"><div class="col-md-3"><label style="padding-top: 30px;">Пароль</label></div><div class="col-md-offset-3" style="padding-right: 20px"><input id="swal-input2" class="swal2-input" placeholder="Пароль" required></div></div>',
-                        onOpen: function () {
-                            $('#swal-input1').focus()
-                        }
-                    }).then(function (result) {
-                        var login = $('#swal-input1').val();
-                        var pass = $('#swal-input2').val();
-                  
-                        $.ajax({
-                            url: '$updateAccessDataUrl',
-                            data: {login : login, pass : pass}
-                        })
-                        swal("Доступы изменены");
-                        url = $(this).data('url');
-                            filename = $(this).data('name');
-                            swal({
-                                title: '$preparePdfText'
-                            });
-                            swal.showLoading();
-                            $.ajax({
-                                url: url,
-                                method: 'GET',
-                                xhrFields: {
-                                    responseType: 'blob'
-                                },
-                                success: function (data) {
-                                    var a = document.createElement('a');
-                                    var url = window.URL.createObjectURL(data);
-                                    document.body.appendChild(a);
-                                    a.href = url;
-                                    a.download = filename;
-                                    a.class = "pdf-download";
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    swal.close()
-                                }
-                            });
-                    })
-                } else {
-                    swal({
-                        title: '$preparePdfText'
-                    });
-                    swal.showLoading();
-                    $.ajax({
-                        url: url,
-                        method: 'GET',
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success: function (data) {
-                            if (navigator.msSaveBlob) { // IE10+ : (has Blob, but not a[download] or URL)
-                                swal.close();
-                                return navigator.msSaveBlob(data, filename);
-                            } else {
-                                var a = document.createElement('a');
-                                var url = window.URL.createObjectURL(data);
-                                document.body.appendChild(a);
-                                a.href = url;
-                                a.download = filename;
-                                a.class = "pdf-download";
-                                a.click();
-                                window.URL.revokeObjectURL(url);
-                                swal.close();
-                            }
-                        }
-                    });
-
+	FF = {};
+	FF.uploadPDF = {
+		
+		init: function(){
+			$(document).on('click', '.download-pdf', function(e) {
+		        e.preventDefault();
+				FF.uploadPDF.url = $(this).data('url');
+				FF.uploadPDF.filename = $(this).data('name');
+		        $.ajax({
+		            url: '$checkVetisPassUrl',
+		            method: 'GET',
+		            success: function (data) {
+		            	FF.uploadPDF.authData = data;
+		                if(data.success == false){
+		                    FF.uploadPDF.reAuth(data);
+		                } else {
+		                    swal({
+		                        title: '$preparePdfText'
+		                    });
+		                    swal.showLoading();
+		                    FF.uploadPDF.checkAuthData();
+		                }
+		            }
+		        });
+		
+		    });
+		},
+		
+		reAuth: function(data){
+			swal({
+                title: 'Печать ВСД',
+                showCancelButton: true,
+                cancelButtonText: "Отмена",
+                confirmButtonText: "Подтвердить",
+                html:
+                    '<p style="color: gray;">Для продолжения печати документа, Вам необходимо ввести актуальные данные от Личного Кабинета ИС Меркурий</p>' +
+                    '<div class="row"><div class="col-md-3"><label style="padding-top: 30px;">Логин</label></div><div class="col-md-offset-3" style="padding-right: 20px"><input id="swal-input1" class="swal2-input" placeholder="Логин" value=' + data.login +' required></div></div>' +
+                    '<div class="row"><div class="col-md-3"><label style="padding-top: 30px;">Пароль</label></div><div class="col-md-offset-3" style="padding-right: 20px"><input id="swal-input2" class="swal2-input" placeholder="Пароль" required></div></div>',
+                onOpen: function () {
+                    $('#swal-input1').focus()
                 }
-            }
-        });
-
-    });
+            }).then(function (result) {
+                var login = $('#swal-input1').val();
+                var pass = $('#swal-input2').val();
+          
+                $.ajax({
+                    url: '$updateAccessDataUrl',
+                    data: {login : login, pass : pass}
+                })
+                swal("Доступы изменены");
+                
+                swal({
+                    title: '$preparePdfText'
+                });
+                swal.showLoading();
+                setInterval(FF.uploadPDF.checkAuthData(), 2000);
+            })
+		},
+		checkAuthData: function(){
+			$.ajax({
+		            url: '$checkVsdAuthDataUrl',
+		            method: 'GET',
+		            success: function (data) {
+		                if(data.success == false){
+		                    FF.uploadPDF.reAuth(FF.uploadPDF.authData);
+		                } else {
+		                    FF.uploadPDF.uploadDPF();
+		                }
+		            }
+		        });
+		},
+		uploadDPF: function(){
+			$.ajax({
+                url: FF.uploadPDF.url,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data) {
+                    if (navigator.msSaveBlob) { // IE10+ : (has Blob, but not a[download] or URL)
+                        swal.close();
+                        return navigator.msSaveBlob(data, FF.uploadPDF.filename);
+                    } else {
+                        var a = document.createElement('a');
+                        var url = window.URL.createObjectURL(data);
+                        document.body.appendChild(a);
+                        a.href = url;
+                        a.download = FF.uploadPDF.filename;
+                        a.class = "pdf-download";
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        swal.close();
+                    }
+                }
+            });
+		}
+	}
+	
+	FF.uploadPDF.init();
+ 
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

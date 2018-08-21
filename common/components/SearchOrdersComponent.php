@@ -10,6 +10,7 @@ use yii\base\Component;
 use yii\data\ActiveDataProvider;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * Special service component for Customer-type user's `order searching` needs
@@ -63,8 +64,22 @@ class SearchOrdersComponent extends Component
     public function countForRestaurant(int $orgId, int $curIUserOrgId, array $statuses)
     {
 
+        $temp = (array)json_decode(Yii::$app->getSession()->get('order'));
+
+        if (isset($temp['OrderSearch2']) && is_object($temp['OrderSearch2'])) {
+            $temp = (array)$temp['OrderSearch2'];
+            foreach (['vendor_id', 'date_from', 'date_to', 'doc_status'] as $item) {
+                if (isset($temp[$item])) {
+                    $this->searchParams['OrderSearch2'][$item] = $temp[$item];
+                }
+            }
+        }
+
         // 1. Initialize searchParams
-        $this->searchParams = Yii::$app->request->getQueryParams();
+        $i = Yii::$app->request->getQueryParams();
+        if (isset($i['OrderSearch2'])) {
+            $this->searchParams = $i;
+        }
 
         $this->searchParams['OrderSearch2']['client_id'] = $curIUserOrgId;
         $sp = [];
@@ -88,9 +103,11 @@ class SearchOrdersComponent extends Component
             foreach ($v as $kk => $vv) {
                 $sp['OrderSearch2'][$kk] = $vv;
             }
-
         }
         $this->searchParams = $sp;
+
+
+       Yii::$app->getSession()->set('order', json_encode($this->searchParams));
 
         // 2. Update counts
         foreach ($this->counts as $key => $val) {
@@ -120,7 +137,25 @@ class SearchOrdersComponent extends Component
     {
 
         // 1. Initialize searchParams
-        $this->searchParams = Yii::$app->request->getQueryParams();
+
+
+        $temp = (array)json_decode(Yii::$app->getSession()->get('order'));
+
+        if (isset($temp['OrderSearch2']) && is_object($temp['OrderSearch2'])) {
+            $temp = (array)$temp['OrderSearch2'];
+            foreach (['client_id', 'date_from', 'date_to', 'doc_status'] as $item) {
+                if (isset($temp[$item])) {
+                    $this->searchParams['OrderSearch2'][$item] = $temp[$item];
+                }
+            }
+        }
+
+        // 1. Initialize searchParams
+        $i = Yii::$app->request->getQueryParams();
+        if (isset($i['OrderSearch2'])) {
+            $this->searchParams = $i;
+        }
+
         $this->searchParams['OrderSearch2']['vendor_id'] = $curIUserOrgId;
         $sp = [];
         foreach ($this->searchParams as $k => $v) {
@@ -143,9 +178,10 @@ class SearchOrdersComponent extends Component
             foreach ($v as $kk => $vv) {
                 $sp['OrderSearch2'][$kk] = $vv;
             }
-
         }
         $this->searchParams = $sp;
+
+        Yii::$app->getSession()->set('order', json_encode($this->searchParams));
 
         // 2. Update counts and totalprice - can manage
         if (Yii::$app->user->can('manage')) {

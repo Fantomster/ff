@@ -38,9 +38,10 @@ class EmailIntegrationController extends Controller
         return parent::afterAction($action, $result);
     }
 
-    public function actionTest() {
+    public function actionTest()
+    {
 
-        //$temp_file[1] = '/app/console/runtime/testnac.xls';
+        $temp_file[1] = '/app/console/runtime/testnac.xls';
         /*$temp_file[2] = '/app/console/runtime/testnac2.xls';
         $temp_file[3] = '/app/console/runtime/testnac3.xls';
         $temp_file[4] = '/app/console/runtime/testnac4.xls';
@@ -72,13 +73,21 @@ class EmailIntegrationController extends Controller
         $temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
         $temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
         $temp_file[32] = '/app/console/runtime/id7905.xlsx';
-        $temp_file[33] = '/app/console/runtime/testnac30.xlsx';*/
-        //$temp_file[34] = '/app/console/runtime/testnac31.xlsx';
+        $temp_file[33] = '/app/console/runtime/testnac30.xlsx';
+        $temp_file[34] = '/app/console/runtime/testnac31.xlsx';
         $temp_file[35] = '/app/console/runtime/testnac32.xls';
         $temp_file[36] = '/app/console/runtime/testnac33.xlsx';
+        $temp_file[37] = '/app/console/runtime/testnac34.xls';*/
+        //$temp_file[38] = '/app/console/runtime/testnac35.xls'; // файл Excel 5.0/95, не читается из-за кодировки
+        //$temp_file[39] = '/app/console/runtime/testnac36.xls'; // файл Excel 5.0/95, не читается из-за кодировки
+        //$temp_file[40] = '/app/console/runtime/testnac37.xls'; // файл Excel 5.0/95, не читается из-за кодировки
+        //$temp_file[41] = '/app/console/runtime/testnac38.xlsx';
+        //$temp_file[42] = '/app/console/runtime/testnac39.xlsx';
+        //$temp_file[43] = '/app/console/runtime/testnac40.xlsx';
+        //$temp_file[44] = '/app/console/runtime/testnac41.xls'; // файл Excel 5.0/95, не читается из-за кодировки
 
 
-        $i =1;
+        $i = 1;
 
         foreach ($temp_file as $filet) {
 
@@ -89,7 +98,7 @@ class EmailIntegrationController extends Controller
                 exit('ERROR PARSING TORG12 FILE' . $e->getMessage());
             }
 
-            if(empty($parser->invoice->rows)) {
+            if (empty($parser->invoice->rows)) {
                 exit('Error: empty rows ');
             }
 
@@ -98,17 +107,17 @@ class EmailIntegrationController extends Controller
                 'invoice' => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
             ];
 
-            echo $filet.PHP_EOL;
-            print_r("Result date:".$result[$i-1]['invoice']['date'].PHP_EOL);
-            print_r("Result number:".$result[$i-1]['invoice']['number'].PHP_EOL);
-            print_r("Result name:".$result[$i-1]['invoice']['namePostav'].PHP_EOL);
-            print_r("Result inn:".$result[$i-1]['invoice']['innPostav'].PHP_EOL);
-            print_r("Result kpp:".$result[$i-1]['invoice']['kppPostav'].PHP_EOL);
-            print_r("Result consignee:".$result[$i-1]['invoice']['nameConsignee'].PHP_EOL);
-            print_r("Result price_without_tax_sum:".$result[$i-1]['invoice']['price_without_tax_sum'].PHP_EOL);
-            print_r("Result price_with_tax_sum:".$result[$i-1]['invoice']['price_with_tax_sum'].PHP_EOL);
-            print_r("=================================".PHP_EOL);
-            //print_r($result[$i-1]['invoice']['rows']);
+            echo $filet . PHP_EOL;
+            print_r("Result date:" . $result[$i - 1]['invoice']['date'] . PHP_EOL);
+            print_r("Result number:" . $result[$i - 1]['invoice']['number'] . PHP_EOL);
+            print_r("Result name:" . $result[$i - 1]['invoice']['namePostav'] . PHP_EOL);
+            print_r("Result inn:" . $result[$i - 1]['invoice']['innPostav'] . PHP_EOL);
+            print_r("Result kpp:" . $result[$i - 1]['invoice']['kppPostav'] . PHP_EOL);
+            print_r("Result consignee:" . $result[$i - 1]['invoice']['nameConsignee'] . PHP_EOL);
+            print_r("Result price_without_tax_sum:" . $result[$i - 1]['invoice']['price_without_tax_sum'] . PHP_EOL);
+            print_r("Result price_with_tax_sum:" . $result[$i - 1]['invoice']['price_with_tax_sum'] . PHP_EOL);
+            print_r("=================================" . PHP_EOL);
+            //print_r($result[$i - 1]['invoice']['rows']);
 
             //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
             //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
@@ -142,7 +151,6 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
-            $transaction = \Yii::$app->db->beginTransaction();
             try {
                 //Подключаемся
                 $this->connect($setting);
@@ -153,22 +161,28 @@ class EmailIntegrationController extends Controller
                     if (empty($email['attachment'])) {
                         continue;
                     }
-                    //Получаем только подходящие нам вложения из емэйла
+                    //Получаем только подходящие нам вложения из е-мэйла
                     if ($files = $this->getAttachments($email, $setting)) {
                         foreach ($files as $file) {
-                            $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
+                            $transaction = \Yii::$app->db->beginTransaction();
+                            try {
+                                $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
+                                $transaction->commit();
+                                $this->log([
+                                    PHP_EOL . str_pad('', 100, '='),
+                                    str_pad('END ' . $message_console, 99, ' ') . '|',
+                                    str_pad('', 100, '=')
+                                ]);
+                            } catch (\Exception $e) {
+                                $transaction->rollBack();
+                                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
+                                \Yii::error($this->log, 'email-integration-error');
+                            }
                         }
                     }
                 }
                 $this->connect->disconnect();
-                $transaction->commit();
-                $this->log([
-                    PHP_EOL . str_pad('', 100, '='),
-                    str_pad('END ' . $message_console, 99, ' ') . '|',
-                    str_pad('', 100, '=')
-                ]);
             } catch (\Exception $e) {
-                $transaction->rollBack();
                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
                 \Yii::error($this->log, 'email-integration-error');
             }
@@ -297,7 +311,7 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
-            if(empty($parser->invoice->rows)) {
+            if (empty($parser->invoice->rows)) {
                 $this->log([
                     PHP_EOL,
                     'Error: empty rows ' . $name_file
@@ -305,7 +319,7 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
-            //Данные необходимые для сохранения в базу
+            //Данные, необходимые для сохранения в базу
             $result[] = [
                 'integration_setting_from_email_id' => $setting->id,
                 'organization_id' => $setting->organization_id,

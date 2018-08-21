@@ -23,6 +23,7 @@ use Yii;
  * @property double $koef
  * @property string $created_at
  * @property string $updated_at
+ * @property integer unload_status
  */
 class iikoWaybillData extends \yii\db\ActiveRecord
 {
@@ -95,6 +96,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'updated_at' => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
             'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
+            'unload_status' => Yii::t('app', 'Статус для отправления'),
         ];
     }
 

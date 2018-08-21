@@ -65,36 +65,6 @@ class SearchOrdersComponent extends Component
 
         // 1. Initialize searchParams
         $this->searchParams = Yii::$app->request->getQueryParams();
-        $this->searchParams['OrderSearch2']['client_id'] = $curIUserOrgId;
-        // 2. Update counts
-        foreach ($this->counts as $key => $val) {
-            $this->counts[$key] = Order::find()->where(['client_id' => $orgId])->andWhere(['status' => $statuses[$key]])->count();
-        }
-        // 3. Detect vendors
-        $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])
-            ->leftJoin('organization', 'organization.id = order.vendor_id')->groupBy('vendor_id');
-        $data = $query->asArray()->all();
-        $data[''] = ['id' => '', 'name' => NULL];
-        $this->affiliated = ArrayHelper::map($data, 'id', 'name');
-        asort($this->affiliated);
-        // 4. Update Totalprice
-        $this->totalPrice = Order::find()->where(['status' => $statuses['fulfilled'], 'client_id' => $orgId])->sum("total_price");
-
-    }
-
-    /**
-     * Search if $organization->type_id != Organization::TYPE_RESTAURANT
-     *
-     * @var $orgId int
-     * @var $curIUserOrgId int
-     * @var $statuses array
-     * @var $userId int
-     */
-    public function countForOthers(int $orgId, int $curIUserOrgId, array $statuses, int $userId)
-    {
-
-        // 1. Initialize searchParams
-        $this->searchParams = Yii::$app->request->getQueryParams();
 
         $this->searchParams['OrderSearch2']['client_id'] = $curIUserOrgId;
         $sp = [];
@@ -120,28 +90,62 @@ class SearchOrdersComponent extends Component
             }
 
         }
-
         $this->searchParams = $sp;
 
+        // 2. Update counts
+        foreach ($this->counts as $key => $val) {
+            $this->counts[$key] = Order::find()->where(['client_id' => $orgId])->andWhere(['status' => $statuses[$key]])->count();
+        }
+        // 3. Detect vendors
+        $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])
+            ->leftJoin('organization', 'organization.id = order.vendor_id')->groupBy('vendor_id');
+        $data = $query->asArray()->all();
+        $data[''] = ['id' => '', 'name' => NULL];
+        $this->affiliated = ArrayHelper::map($data, 'id', 'name');
+        asort($this->affiliated);
+        // 4. Update Totalprice
+        $this->totalPrice = Order::find()->where(['status' => $statuses['fulfilled'], 'client_id' => $orgId])->sum("total_price");
 
+    }
 
+    /**
+     * Search if $organization->type_id != Organization::TYPE_RESTAURANT
+     *
+     * @var $orgId int
+     * @var $curIUserOrgId int
+     * @var $statuses array
+     * @var $userId int
+     */
+    public function countForVendor(int $orgId, int $curIUserOrgId, array $statuses, int $userId)
+    {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // 1. Initialize searchParams
+        $this->searchParams = Yii::$app->request->getQueryParams();
         $this->searchParams['OrderSearch2']['vendor_id'] = $curIUserOrgId;
+        $sp = [];
+        foreach ($this->searchParams as $k => $v) {
+            if (is_array($v) && $v) {
+                foreach ($v as $kk => $vv) {
+                    $sp[str_replace('amp;', NULL, $k)][$kk] = $vv;
+                }
+            }
+        }
+
+        // костыль полный описан в задачах по фильтрам, например, DEV-1425 "Фильтры в iiko"
+        $sp_temp = [];
+        foreach ($this->searchParams as $k => $v) {
+            if (substr_count($k, 'OrderSearch2') === 1) {
+                $sp_temp[substr_count($k, 'amp;')] = $v;
+            }
+        }
+        krsort($sp_temp);
+        foreach ($sp_temp as $k => $v) {
+            foreach ($v as $kk => $vv) {
+                $sp['OrderSearch2'][$kk] = $vv;
+            }
+
+        }
+        $this->searchParams = $sp;
 
         // 2. Update counts and totalprice - can manage
         if (Yii::$app->user->can('manage')) {

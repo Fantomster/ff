@@ -438,12 +438,50 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Вы уже установлены исполнителем.');
         }
 
+        if (!empty($request->responsible_supp_org_id)) {
+            throw new BadRequestHttpException('На эту заявку уже назначен исполнитель.');
+        }
+
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $request->responsible_supp_org_id = $callback->supp_org_id;
             $request->save();
             $request->refresh();
             Notice::init('Request')->setContractor($request, $callback, $this->user);
+            $transaction->commit();
+            return $this->prepareRequest($request);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function unsetContractor(array $post)
+    {
+        if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
+        }
+
+        if (empty($post['request_id'])) {
+            throw new BadRequestHttpException('empty_param|request_id');
+        }
+
+        $request = Request::findOne((int)$post['request_id']);
+        if (empty($request)) {
+            throw new BadRequestHttpException('Not found request');
+        }
+
+        $this->checkAccess($request);
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $request->responsible_supp_org_id = null;
+            $request->save();
             $transaction->commit();
             return $this->prepareRequest($request);
         } catch (\Exception $e) {

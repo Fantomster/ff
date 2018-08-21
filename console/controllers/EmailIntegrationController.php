@@ -187,6 +187,7 @@ class EmailIntegrationController extends Controller
                 \Yii::error($this->log, 'email-integration-error');
             }
         }
+        print_r($this->log);
     }
 
     /**

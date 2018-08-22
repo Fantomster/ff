@@ -83,16 +83,10 @@ abstract class AbstractDaemonController extends DaemonController
     /**
      * Поддержка соединений
      */
-    protected function renewConnections()
+    public function renewConnections()
     {
-        if (isset(\Yii::$app->db_api)) {
-            \Yii::$app->db_api->close();
-            \Yii::$app->db_api->open();
-        }
-        if (isset(\Yii::$app->db)) {
-            \Yii::$app->db->close();
-            \Yii::$app->db->open();
-        }
+        \Yii::$app->db->open();
+        \Yii::$app->db_api->open();
     }
 
     /**

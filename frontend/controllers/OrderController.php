@@ -12,6 +12,7 @@ use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
 use common\models\Cart;
 use common\models\CatalogGoodsBlocked;
 use common\models\search\OrderProductsSearch;
+use frontend\helpers\GenerationTime;
 use Yii;
 use common\components\SearchOrdersComponent;
 use yii\db\Expression;
@@ -1022,6 +1023,8 @@ class OrderController extends DefaultController
 
     public function actionAjaxMakeOrder()
     {
+        GenerationTime::start();
+
         $cart = (new CartWebApi())->items();
         $cartCount = count($cart);
 
@@ -1074,7 +1077,12 @@ class OrderController extends DefaultController
             $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return ["title" => $title, "description" => $description, "type" => $type];
+
+            $timeTag = Html::tag('p', "Generation time: " . GenerationTime::end(), [
+                'style' => 'position:absolute;right:0px;bottom: -94px;font-size:10px;color:darkgray;'
+            ]);
+
+            return ["title" => $title, "description" => $description . $timeTag, "type" => $type];
         }
         return false;
     }
@@ -2561,7 +2569,7 @@ class OrderController extends DefaultController
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
-       if (Yii::$app->request->isPjax) {
+        if (Yii::$app->request->isPjax) {
             return $this->renderPartial('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
         } else {
             return $this->render('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));

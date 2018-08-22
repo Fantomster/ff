@@ -238,6 +238,9 @@ Modal::widget([
     ?>
 </section>
 <section class="content-header">
+    <?= $this->render('/default/_menu.php'); ?>
+</section>
+<section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru'=>'Журнал входной продукци']) ?>:</h4>
 </section>
 <section class="content-header">

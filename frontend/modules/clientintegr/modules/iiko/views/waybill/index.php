@@ -23,11 +23,13 @@ use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
 use kartik\grid\CheckboxColumn;
 use api\common\models\iiko\iikoWaybill;
 use kartik\grid\ExpandRowColumn;
+use common\components\SearchOrdersComponent;
 
 /** @var $affiliated array */
 /** @var $searchParams array Search Params */
 /** @var $wbStatuses array */
 /** @var $way mixed */
+/** @var $dont_show bool */
 
 $msg = [
     'entries' => EchoRu::echo ('frontend.views.order.waybill.entries', 'Состав Заказа'),
@@ -41,6 +43,14 @@ $headers = [
     'finished_at' => EchoRu::echo ('frontend.views.order.final_date', 'Дата финальная'),
     'positionCount' => EchoRu::echo ('frontend.views.order.position_сount', 'Кол-во позиций'),
 ];
+
+$dont_show = FALSE;
+if ($way) {
+    if (isset($_COOKIE[SearchOrdersComponent::IIKO_WB_DONT_SHOW_VARNAME_PREF.$way]) &&
+        $_COOKIE[SearchOrdersComponent::IIKO_WB_DONT_SHOW_VARNAME_PREF.$way] == $way) {
+        $dont_show = TRUE;
+    }
+}
 
 #-----------------------------------------------------------------------------------------------------------------------
 # 3. ФИЛЬТРЫ (В виде инпутов или селектов)
@@ -226,11 +236,12 @@ $columns = array(
     [
         'class' => ExpandRowColumn::class,
         'width' => '50px',
-        'value' => function ($model) use ($way) {
-            $val = kartik\grid\GridView::ROW_COLLAPSED;
-            if (($model->id == $way) or (Yii::$app->session->get('iiko_waybill') == $model->id)) {
-                Yii::$app->session->set("iiko_waybill", 0);
-                $val = kartik\grid\GridView::ROW_EXPANDED;
+        'value' => function ($model) use ($way, $dont_show) {
+            $val = GridView::ROW_COLLAPSED;
+            if ($dont_show && $dont_show == $model->id) {
+                $val = GridView::ROW_COLLAPSED;
+            } elseif ($model->id == $way) {
+                $val = GridView::ROW_EXPANDED;
             }
             return $val;
         },
@@ -243,7 +254,8 @@ $columns = array(
             }
             $order_id = $model->id;
             $query_string = Yii::$app->getRequest()->getQueryString();
-            Yii::$app->session->set("query_string", $query_string);
+
+                Yii::$app->session->set("query_string", $query_string);
             return Yii::$app->controller->renderPartial('_expand-row-details',
                 ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
         },
@@ -252,7 +264,15 @@ $columns = array(
     ]
 );
 
+
 $this->registerJs('
+function js_cookie_set(c, y) {var d = new Date (); d.setTime (d.getTime()+(60*60*24*365));
+    c += "="+escape(y)+"; expires="+d.toGMTString()+"; path="+escape('."'".'/'."'".')+"; ";
+    c += "domain="+escape(window.location.hostname); document.cookie = c;}
+function js_cookie_remove(c) {var d = new Date (); d.setTime (d.getTime()-1000); var y = "";
+    c += "="+escape(y)+"; expires="+d.toGMTString()+"; path="+escape('."'".'/'."'".')+"; ";
+    c += "domain="+escape(window.location.hostname); document.cookie = c;}
+
 $("document").ready(function(){
        $(".box-body").on("change", "#orderFilter", function () {
         var target = "http:";
@@ -282,8 +302,17 @@ $("document").ready(function(){
     $(".box-body").on("change", "#ordersearch2-wb_status", function () {
         $("#search-form").submit();
     });
-});
-');
+
+    var $grid = $("#waybill_grid1");
+    $grid.on("kvexprow:toggle", function (event, ind, key, extra, state) {
+        if (state === false) {
+            js_cookie_set("'.SearchOrdersComponent::IIKO_WB_DONT_SHOW_VARNAME_PREF.'" + key, key);
+        } else {
+            js_cookie_remove("'.SearchOrdersComponent::IIKO_WB_DONT_SHOW_VARNAME_PREF.'" + key);
+        }
+    });
+
+});');
 #-----------------------------------------------------------------------------------------------------------------------
 $css = <<< CSS
 tr:hover {
@@ -622,6 +651,7 @@ $('.ajax-popover').click(function() {
 });
 SCRIPT;
 $this->registerJs($js, View::POS_END);
+
 ?>
 <?php
 $js = <<< 'SCRIPT'

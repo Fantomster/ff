@@ -53,6 +53,7 @@ class SearchOrdersComponent extends Component
     const INTEGRATION_TYPE_IIKO = 'iiko';
     const INTEGRATION_TYPE_ONES = '1c';
 
+    const IIKO_WB_DONT_SHOW_VARNAME_PREF = 'iiko_wb_hide_';
 
     /**
      * Search if $organization->type_id == Organization::TYPE_RESTAURANT

@@ -291,6 +291,7 @@ Modal::widget([
                                         'separator' => '-',
                                         'type' => DatePicker::TYPE_RANGE,
                                         'pluginOptions' => [
+                                            'orientation' => 'bottom left',
                                             'format' => 'dd.mm.yyyy', //'d M yyyy',//
                                             'autoclose' => true,
                                             'endDate' => "0d",
@@ -424,12 +425,12 @@ $("#ajax-load").on("click", ".save-form", function() {
  
  $(document).on("click", ".clear_filters", function () {
            $('#product_name').val(''); 
-           $('#statusFilter').val(''); 
+           $("#statusFilter option:selected").removeAttr("selected");
            $('#typeFilter').val('1');
            $('#dateFrom').val('');
            $('#dateTo').val('');
-           $('#recipientFilter').val('');
-           $("#search_form").submit();
+           $("#recipientFilter option:selected").removeAttr("selected");
+           $("#search-form").submit();
     });
  
  $(".box-body").on("change", "#dateFrom, #dateTo", function() {

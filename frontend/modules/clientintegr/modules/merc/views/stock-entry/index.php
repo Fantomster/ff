@@ -212,29 +212,9 @@ Modal::widget([
                     ]);
                     return Html::a($icon, ['inventory', 'id' => $model->id], $options);
                 },
-                /*'rejected' => function ($url, $model, $key) use ($searchModel) {
-                    if ($model->status != MercVsd::DOC_STATUS_CONFIRMED || $searchModel->type == 2)
-                        return "";
-                    $options = [
-                        'title' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
-                        'aria-label' => Yii::t('message', 'frontend.client.integration.return_all', ['ru' => 'Возврат']),
-                        'data' => [
-                            //'pjax'=>0,
-                            'target' => '#ajax-load',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-                    ];
-                    $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/back_vsd.png',
-                        'style' => 'width: 18px'
-                    ]);
-                    return Html::a($icon, ['done-partial', 'uuid' => $model->uuid,  'reject' => true], $options);
-                },*/
             ]
         ]
     );
-    if ($lic_merc==0) {unset($columns[7]['buttons']['done-partial']);unset($columns[7]['buttons']['rejected']);}
     ?>
 </section>
 <section class="content-header">
@@ -271,7 +251,6 @@ Modal::widget([
                     ]);
                     ?>
                     <?php
-                    /*$searchModel->status = isset($searchModel->status) ? $searchModel->status : MercVsd::DOC_STATUS_CONFIRMED;
                     $form = ActiveForm::begin([
                         'options' => [
                             'data-pjax' => true,
@@ -282,58 +261,6 @@ Modal::widget([
                         'method' => 'get',
                     ]); ?>
                     <div class="col-md-12">
-                        <div class="col-sm-2">
-                            <div class="form-group field-statusFilter">
-                                <?=
-                                $form->field($searchModel, 'type')
-                                    ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
-                                        [
-                                            1 => ['selected' => true]
-                                        ]
-                                    ])
-                                    ->label(Yii::t('message', 'frontend.views.order.type', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
-                                ?>
-                            </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <div class="form-group field-statusFilter">
-                                <?=
-                                $form->field($searchModel, 'status')
-                                    ->dropDownList(MercVsd::$statuses, ['id' => 'statusFilter'])
-                                    ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
-                                ?>
-                            </div>
-                        </div>
-                        <div class="col-sm-3 col-md-2">
-                            <div class="form-group field-statusFilter">
-                                <?=
-                                $form->field($searchModel, 'sender_name')
-                                    ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
-                                    ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
-                                ?>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-sm-6">
-                            <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                            <div class="form-group" style="height: 44px;">
-                                <?=
-                                DatePicker::widget([
-                                    'model' => $searchModel,
-                                    'attribute' => 'date_from',
-                                    'attribute2' => 'date_to',
-                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
-                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
-                                    'separator' => '-',
-                                    'type' => DatePicker::TYPE_RANGE,
-                                    'pluginOptions' => [
-                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                        'autoclose' => true,
-                                        'endDate' => "0d",
-                                    ]
-                                ])
-                                ?>
-                            </div>
-                        </div>
                         <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
@@ -352,12 +279,74 @@ Modal::widget([
                                 ?>
                             </div>
                         </div>
+                        <div class="col-sm-2">
+                            <div class="form-group field-statusFilter">
+                                <?=
+                                $form->field($searchModel, "producer_name", [
+                                    'addon' => [
+                                        'append' => [
+                                            'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                            'options' => [
+                                                'class' => 'append',
+                                            ],
+                                        ],
+                                    ],
+                                ])
+                                    ->textInput(['prompt' => 'Производитель', 'class' => 'form-control', 'id' => 'producer_name'])
+                                    ->label( 'Производитель', ['class' => 'label search_string', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-6">
+                            <?= Html::label( Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производства']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                            <div class="form-group" style="height: 44px;">
+                                <?=
+                                DatePicker::widget([
+                                    'model' => $searchModel,
+                                    'attribute' => 'date_from_production_date',
+                                    'attribute2' => 'date_to_production_date',
+                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromProductionDate'],
+                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToProductionDate'],
+                                    'separator' => '-',
+                                    'type' => DatePicker::TYPE_RANGE,
+                                    'pluginOptions' => [
+                                        'orientation' => 'bottom left',
+                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                        'autoclose' => true,
+                                        'endDate' => "0d",
+                                    ]
+                                ])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-6">
+                            <?= Html::label(Yii::t('message', 'frontend.client.integration.expiry_date', ['ru' => 'Срок годности']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                            <div class="form-group" style="height: 44px;">
+                                <?=
+                                DatePicker::widget([
+                                    'model' => $searchModel,
+                                    'attribute' => 'date_from_expiry_date',
+                                    'attribute2' => 'date_to_expiry_date',
+                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromExpiryDate'],
+                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToExpiryDate'],
+                                    'separator' => '-',
+                                    'type' => DatePicker::TYPE_RANGE,
+                                    'pluginOptions' => [
+                                        'orientation' => 'bottom left',
+                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                        'autoclose' => true,
+                                        'endDate' => "0d",
+                                    ]
+                                ])
+                                ?>
+                            </div>
+                        </div>
                         <div class="col-sm-3 col-md-2 col-lg-1">
                             <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
                             <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
                     </div>
-                    <?php ActiveForm::end(); */?>
+                    <?php ActiveForm::end();?>
                     <div class="col-md-12">
                         <?php
                         //$checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
@@ -458,18 +447,18 @@ $("#ajax-load").on("click", ".save-form", function() {
             $("#search-form").submit();
         });
      });   
- 
+ */
  $(document).on("click", ".clear_filters", function () {
            $('#product_name').val(''); 
-           $('#statusFilter').val(''); 
-           $('#typeFilter').val('1');
-           $('#dateFrom').val('');
-           $('#dateTo').val('');
-           $('#recipientFilter').val('');
-           $("#search_form").submit();
+           $('#producer_name').val('');
+           $('#dateFromProductionDate').val('');
+           $('#dateToProductionDate').val('');
+           $('#dateFromExpiryDate').val('');
+           $('#dateToExpiryDate').val('');
+           $("#search-form").submit();
     });
  
- $(".box-body").on("change", "#dateFrom, #dateTo", function() {
+ $(".box-body").on("change", "#dateFromProductionDate, #dateToProductionDate", function() {
             if (!justSubmitted) {
                 $("#search-form").submit();
                 justSubmitted = true;
@@ -477,9 +466,19 @@ $("#ajax-load").on("click", ".save-form", function() {
                     justSubmitted = false;
                 }, 500);
             }
-        }); 
- */
-/* $(document).on("change keyup paste cut", "#product_name", function() {
+        });
+ 
+  $(".box-body").on("change", "#dateFromExpiryDate, #dateToExpiryDate", function() {
+            if (!justSubmitted) {
+                $("#search-form").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 500);
+            }
+        });
+ 
+ $(document).on("change keyup paste cut", "#product_name", function() {
      if (justSubmitted) {
             clearTimeout(justSubmitted);
         }
@@ -487,7 +486,16 @@ $("#ajax-load").on("click", ".save-form", function() {
             justSubmitted = false;
             $("#search-form").submit();
         }, 700);
-    });*/
+    });
+  $(document).on("change keyup paste cut", "#producer_name", function() {
+     if (justSubmitted) {
+            clearTimeout(justSubmitted);
+        }
+        justSubmitted = setTimeout(function() {
+            justSubmitted = false;
+            $("#search-form").submit();
+        }, 700);
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

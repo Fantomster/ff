@@ -450,7 +450,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
 
-    public function actionChvat($id, $vat)
+    public function actionChvat($id, $vat, $page, $way)
     {
 
         $model = $this->findDataModel($id);
@@ -458,7 +458,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $rress = Yii::$app->db_api
             ->createCommand('UPDATE one_s_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' => $id])->execute();
 
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
 
     }
 

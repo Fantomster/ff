@@ -542,7 +542,8 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Temp catalog not found");
         }
         $excelUrl = Yii::$app->get('resourceManager')->getUrl(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
-        if (Excel::writeToTempTable($excelUrl, $tempCatalog, $request['mapping'])) {
+        $file = \api_web\helpers\File::getFromUrl($excelUrl);
+        if (Excel::writeToTempTable($file->tempName, $tempCatalog, $request['mapping'])) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
             $tempCatalog->delete();
         }

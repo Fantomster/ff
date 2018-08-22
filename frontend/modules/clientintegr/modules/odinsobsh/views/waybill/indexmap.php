@@ -284,9 +284,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 }
 
                                                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                $product_id = $model->product_id;
+                                                $way = $model->id;
                                                 $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => 0, 'page' => $page, 'product_id' => $product_id]);
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => 0, 'page' => $page, 'way' => $way]);
                                                 return \yii\helpers\Html::a('&nbsp;0', $customurl,
                                                     ['title' => Yii::t('backend', '0%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
@@ -301,8 +301,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 }
 
                                                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                                $way = $model->id;
                                                 $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1000', 'page' => $page]);
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1000', 'page' => $page, 'way' => $way]);
                                                 return \yii\helpers\Html::a('10', $customurl,
                                                     ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
@@ -317,8 +318,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 }
 
                                                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                                $way = $model->id;
                                                 $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1800', 'page' => $page]);
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1800', 'page' => $page, 'way' => $way]);
                                                 return \yii\helpers\Html::a('18', $customurl,
                                                     ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },

@@ -23,6 +23,7 @@ use yii\web\NotFoundHttpException;
 use common\models\search\OrderSearch2;
 use yii\web\BadRequestHttpException;
 use common\components\SearchOrdersComponent;
+use yii\web\Response;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -617,5 +618,30 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
         return isset($eDate) ? $eDate->updated_at : null;
+    }
+    
+    /**
+     * Make unload_status -> 0 or unload_status -> 1
+     */
+    public function actionMapTriggerWaybillDataStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $id = Yii::$app->request->post('id');
+        $status = Yii::$app->request->post('status');
+        $action = Yii::$app->request->post('action');
+        
+        $model = RkWaybilldata::findOne($id);
+        try {
+            $model->unload_status = $status;
+            $model->save();
+            $transaction->commit();
+        } catch (\Throwable $t){
+            $transaction->rollback();
+            Yii::debug($t->getMessage());
+            return false;
+        }
+        
+        return ['success' => true, 'action' => $action];
     }
 }

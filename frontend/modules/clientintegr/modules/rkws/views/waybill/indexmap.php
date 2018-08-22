@@ -385,10 +385,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'contentOptions' => ['style' => 'width: 6%;'],
-                                'template' => '{clear}&nbsp;',
+                                'template' => '{clear}&nbsp;{delete}',
                                 'visibleButtons' => [
                                     'clear' => function ($model, $key, $index) {
                                         // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                        return true;
+                                    },
+                                    'delete' => function ($model, $key, $index) {
                                         return true;
                                     },
                                 ],
@@ -396,10 +399,33 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'clear' => function ($url, $model) {
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                         $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/cleardata', 'id' => $model->id]);
-                                        return \yii\helpers\Html::a('<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
+                                        return \yii\helpers\Html::a('<i class="fa fa-sign-in padding-right-15" aria-hidden="true"></i>', $customurl,
                                             ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax' => "0"]);
                                     },
-                                ]
+                                    'delete' => function ($url, $model) {
+                                        $text = 'Удалить';
+                                        $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
+                                        $action = 'delete';
+                                        if(!$model->unload_status){
+                                            $action = 'restore';
+                                            $text = 'Восстановить';
+                                        }
+                                        return \yii\helpers\Html::a(
+                                            '<i class="fa fa-trash" aria-hidden="true"></i>',
+                                            '#',
+                                            [
+                                                'title' => Yii::t('backend', $text),
+                                                'data-pjax' => "0",
+                                                'id' => 'delete-waybill',
+                                                'data-waybill-id' => $model->id,
+                                                'data-url' => $url,
+                                                'data-product-name' => $model->fproductname->product,
+                                                'data-status' => $model->unload_status,
+                                                'data-action' => $action,
+                                            ]
+                                        );
+                                    },
+                                ],
                             ]);
                         ?>
                         <?=
@@ -422,6 +448,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             'export' => [
                                 'fontAwesome' => true,
                             ],
+                            'rowOptions' => function ($model) {
+                                if(!$model->unload_status) {
+                                    return ['style' => 'opacity: 0.3;'];
+                                }
+                            },
                         ]);
                         ?>
 
@@ -518,6 +549,65 @@ $js = <<< JS
                 }
             })
         });
+        
+        FF = {};
+        FF.deleteBtn = {
+        	init: function(){
+        		$(document).on('click', '#delete-waybill', function () {
+        			var that = $(this),
+        			    url = that.data('url'),
+        			    id = that.data('waybill-id'),
+        			    name = that.data('product-name'),
+        			    action = that.data('action'),
+        			    status = that.data('status'),
+        			    title = that.prop('title');
+        			
+        			    status = status === 1 ? 0 : 1;
+        			    
+        			swal({
+		                title: 'Вы точно хотите '+ title.toLowerCase() + ' ' + name +' ?',
+		                type: 'info',
+		                showCancelButton: true,
+		                confirmButtonColor: '#3085d6',
+		                cancelButtonColor: '#d33',
+		                confirmButtonText: title,
+		                cancelButtonText: 'Отмена',
+		            }).then((result) => {
+		            	if(result.value){
+		            		$.ajax({
+				                url: url,
+				                method: 'POST',
+				                data:{
+				                    id: id,
+				                    action: action,
+				                    status: status
+				                },
+				                success: function (data) {
+				                	let el = $('#delete-waybill');
+				                	if(data.success){
+				                		if(data.action == 'delete'){
+						                    $('tr[data-key='+ id +']').css({opacity: '0.3'});
+						                    el.prop('title', 'Восстановить');
+						                    el.data('status', 0);
+						                    el.data('action', 'restore');
+				                		} else if(data.action == 'restore'){
+				                			$('tr[data-key='+ id +']').css({opacity: '1'});
+						                    el.prop('title', 'Удалить');
+						                    el.data('status', 1);
+						                    el.data('action', 'delete');
+				                		}
+				                		
+				                	}
+				                }
+				            });
+		            	}
+		            });
+        			
+        		});
+        	}
+        };
+        
+        FF.deleteBtn.init();
     });
 JS;
 

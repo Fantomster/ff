@@ -374,12 +374,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'delete' => function ($url, $model) {
                                             $text = 'Удалить';
                                             $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
-                                            $style = '';
                                             $action = 'delete';
 				                            if(!$model->unload_status){
                                                 $action = 'restore';
 				                            	$text = 'Восстановить';
-                                                $style = 'opacity: 0.3;';
                                             }
                                             return \yii\helpers\Html::a(
                                                 '<i class="fa fa-trash" aria-hidden="true"></i>',

@@ -69,8 +69,8 @@ use yii\helpers\Url;
 	                                [
 	                                    'class' => 'kartik\grid\CheckboxColumn',
 	                                    'checkboxOptions' => function ($model, $key, $index, $column) {
-                                            $constId = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'main_org']);
-                                            $pConst = \api\common\models\iiko\iikoPconst::findOne(['const_id' => $constId->id, 'org' => $key]);
+                                            $obConstModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'main_org']);
+                                            $pConst = \api\common\models\iiko\iikoPconst::findOne(['const_id' => $obConstModel->id, 'org' => $key]);
                                             if(!is_null($pConst)){
                                             	return [
                                                     'id' => 'table-option-' . $key,

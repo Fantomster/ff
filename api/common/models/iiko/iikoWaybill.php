@@ -126,8 +126,8 @@ class iikoWaybill extends \yii\db\ActiveRecord
                     $wdmodel->defquant = $record->quantity;
                     $wdmodel->defsum = round($record->price * $record->quantity, 2);
                     $wdmodel->vat = $taxVat;
-                    $constId = iikoDicconst::findOne(['denom' => 'main_org']);
-                    $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $this->org]);
+                    $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+                    $parentId = iikoPconst::findOne(['const_id' => $obConstModel->id, 'org' => $this->org]);
                     $wdmodel->org = !is_null($parentId) ? $parentId->value : $this->org;
                     $wdmodel->koef = 1;
                     // Check previous

@@ -45,18 +45,19 @@ class AllMaps extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['supp_id', 'org_id', 'product_id'], 'required'],
+            //[['supp_id', 'org_id', 'product_id'], 'required'],
+            [['org_id', 'product_id'], 'required'],
             //  [['koef'], 'number'],
             //  
             [['koef'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            [['koef'], 'number', 'min' => 0.000001],
+            //[['koef'], 'number', 'min' => 0.000001],
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
             //  [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
-            [['product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id',
+            [['product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id', 'supp_id',
                 'vat_included', 'linked_at', 'pdenom', 'munit_rid', 'store_rid'], 'safe']
         ];
 
@@ -125,7 +126,6 @@ class AllMaps extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-
         if (parent::beforeSave($insert)) {
 
             if (!$insert) {  // Обновление

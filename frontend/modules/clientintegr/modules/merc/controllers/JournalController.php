@@ -60,7 +60,7 @@ class JournalController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'user' => $user
+            'user' => $user,
         ]);
     }
 

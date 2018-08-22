@@ -201,13 +201,9 @@ Modal::widget([
         }
         ?>
     </section>
-<?php
-$user = Yii::$app->user->identity;
-if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) {
-    echo "<section class=\"content-header\">";
-    echo $this->render('/default/_menu.php');
-    echo "</section>";
-} ?>
+    <section class="content-header">
+        <?= $this->render('/default/_menu.php'); ?>
+    </section>
     <section class="content-header">
         <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru' => 'Список ВСД"']) ?>:</h4>
     </section>

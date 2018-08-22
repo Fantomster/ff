@@ -416,7 +416,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             [
                                                 'title' => Yii::t('backend', $text),
                                                 'data-pjax' => "0",
-                                                'id' => 'delete-waybill',
+                                                'id' => 'delete-waybill_' . $model->id,
+                                                'class' => 'delete-waybill',
                                                 'data-waybill-id' => $model->id,
                                                 'data-url' => $url,
                                                 'data-product-name' => $model->fproductname->product,
@@ -553,7 +554,7 @@ $js = <<< JS
         FF = {};
         FF.deleteBtn = {
         	init: function(){
-        		$(document).on('click', '#delete-waybill', function () {
+        		$(document).on('click', '.delete-waybill', function () {
         			var that = $(this),
         			    url = that.data('url'),
         			    id = that.data('waybill-id'),
@@ -583,7 +584,7 @@ $js = <<< JS
 				                    status: status
 				                },
 				                success: function (data) {
-				                	let el = $('#delete-waybill');
+				                	let el = $('#delete-waybill_' + id);
 				                	if(data.success){
 				                		if(data.action == 'delete'){
 						                    $('tr[data-key='+ id +']').css({opacity: '0.3'});

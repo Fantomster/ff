@@ -537,11 +537,6 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function importMainCatalog(array $request)
     {
-        //сохранение файла с s3 на локальный диск
-        //валидация
-        //удаление локального файла
-        //сохранение
-        //удаление файла на s3
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
             throw new BadRequestHttpException("Temp catalog not found");

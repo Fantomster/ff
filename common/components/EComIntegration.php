@@ -34,11 +34,12 @@ class EComIntegration
     const STATUS_ERROR = 3;
     const STATUS_HANDLED = 4;
 
-    
+
     /**
      * get distinct organization
      * */
-    private function getOrganizations(){
+    private function getOrganizations()
+    {
         return EdiOrganization::find()->where(['and', ['not', ['gln_code' => null]], ['not', ['gln_code' => '']]])
             ->andWhere(['and', ['not', ['login' => null]], ['not', ['login' => '']]])
             ->andWhere(['and', ['not', ['pass' => null]], ['not', ['pass' => '']]])
@@ -48,12 +49,12 @@ class EComIntegration
     public function handleFilesList(): void
     {
         $ediOrganizations = $this->getOrganizations();
-        
+
         if (is_iterable($ediOrganizations)) {
             foreach ($ediOrganizations as $ediOrganization) {
                 $login = $ediOrganization['login'];
                 $pass = $ediOrganization['pass'];
-            
+
                 $client = Yii::$app->siteApi;
                 try {
                     $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
@@ -66,12 +67,12 @@ class EComIntegration
                     continue;
                 }
                 $list = $object->result->list ?? null;
-                
+
                 if (!$list) {
                     Yii::error('No files for ' . $ediOrganization['login']);
                     continue;
                 }
-                if(!empty($list)){
+                if (!empty($list)) {
                     $this->insertFilesInQueue($list);
                 }
             }
@@ -90,13 +91,13 @@ class EComIntegration
             ->where(['name' => $list])
             ->indexBy('name')
             ->all();
-        
+
         foreach ($list as $name) {
-            if(!array_key_exists($name, $files)){
+            if (!array_key_exists($name, $files)) {
                 $batch[] = [$name];
             }
         }
-        
+
         if (!empty($batch)) {
             $transaction = Yii::$app->db->beginTransaction();
             try {
@@ -108,7 +109,7 @@ class EComIntegration
             }
         }
     }
-    
+
     public function handleFilesListQueue(): void
     {
         $rows = (new \yii\db\Query())
@@ -117,7 +118,6 @@ class EComIntegration
             ->where(['status' => [self::STATUS_NEW, self::STATUS_ERROR]])
             ->all();
         $client = Yii::$app->siteApi;
-        var_dump($rows);
         $ediOrganizations = $this->getOrganizations();
 
         foreach ($ediOrganizations as $ediOrganization) {
@@ -126,7 +126,7 @@ class EComIntegration
             }
         }
     }
-    
+
     private function getDoc(Client $client, String $fileName, String $login, String $pass, int $ediFilesQueueID): bool
     {
         try {
@@ -138,34 +138,36 @@ class EComIntegration
                 Yii::error($e->getMessage());
                 return false;
             }
+
             if (!isset($doc->result->content)) {
                 $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'No such file');
                 return false;
             }
-            
+
             $content = $doc->result->content;
             $dom = new \DOMDocument();
             $dom->loadXML($content);
             $simpleXMLElement = simplexml_import_dom($dom);
-            $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->HEAD->SUPPLIER);
+
             $success = false;
             if (strpos($content, 'PRICAT>')) {
+                $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->SUPPLIER);
                 $success = $this->handlePriceListUpdating($simpleXMLElement);
-            }
-            if (strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')) {
+            } elseif (strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')) {
+                $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->HEAD->SUPPLIER);
                 $success = $this->handleOrderResponse($simpleXMLElement);
-            }
-            if (strpos($content, 'ALCDES>')) {
+            } elseif (strpos($content, 'ALCDES>')) {
+                $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->HEAD->SUPPLIER);
                 $success = $this->handleOrderResponse($simpleXMLElement, true);
             }
-    
+
             if ($success) {
                 $client->archiveDoc(['user' => ['login' => Yii::$app->params['e_com']['login'], 'pass' => Yii::$app->params['e_com']['pass']], 'fileName' => $fileName]);
                 $this->updateQueue($ediFilesQueueID, self::STATUS_HANDLED, '');
             } else {
                 $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 1');
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Yii::error($e);
             $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
             return false;
@@ -176,16 +178,17 @@ class EComIntegration
     /**
      * add org id to file in queue table
      * */
-    private function addOrgIdToFile($id, $glnCode){
+    private function addOrgIdToFile($id, $glnCode)
+    {
         $orgId = (new \yii\db\Query())
             ->select(['organization_id'])
             ->from('edi_organization')
             ->where(['gln_code' => $glnCode])
             ->one();
-        
-        try{
-            $_=Yii::$app->db->createCommand()->update('edi_files_queue', ['organization_id' => $orgId['organization_id']], 'id=' . $id)->execute();
-        } catch (\Throwable $t){
+
+        try {
+            Yii::$app->db->createCommand()->update('edi_files_queue', ['organization_id' => $orgId['organization_id']], 'id=' . $id)->execute();
+        } catch (\Throwable $t) {
             Yii::error($t->getMessage() . 'error on pdate id=' . $id . 'gln = ' . $glnCode, __METHOD__);
         }
     }
@@ -202,7 +205,7 @@ class EComIntegration
         $supplier = $simpleXMLElement->HEAD->SUPPLIER;
 
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
-        if(!$ediOrganization){
+        if (!$ediOrganization) {
             return false;
         }
         $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
@@ -227,7 +230,7 @@ class EComIntegration
         $totalPrice = 0;
         foreach ($positions as $position) {
             $contID = (int)$position->PRODUCTIDBUYER;
-            if(!$contID){
+            if (!$contID) {
                 $contID = (int)$position->PRODUCT;
             }
             $positionsArray[] = (int)$contID;
@@ -249,7 +252,7 @@ class EComIntegration
             $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
             $totalPrice += $arr[$contID]['PRICE'];
         }
-        if($totalQuantity == 0.00 || $totalPrice == 0.00){
+        if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
             OrderController::sendOrderCanceled($order->client, $order);
             $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
             OrderController::sendSystemMessage($user, $order->id, $message);
@@ -263,11 +266,11 @@ class EComIntegration
         foreach ($order->orderContent as $orderContent) {
             $index = $orderContent->id;
             $ordContArr[] = $orderContent->id;
-            if (!isset($arr[$index]['BARCODE'])){
-                if(isset($orderContent->ediOrderContent)){
+            if (!isset($arr[$index]['BARCODE'])) {
+                if (isset($orderContent->ediOrderContent)) {
                     $index = $orderContent->ediOrderContent->barcode;
                     $ordContArr[] = $index;
-                }else{
+                } else {
                     continue;
                 }
             }
@@ -286,10 +289,10 @@ class EComIntegration
                 $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
 
                 if ($oldQuantity != $newQuantity) {
-                    if($newQuantity == 0){
+                    if ($newQuantity == 0) {
                         $ordCont->delete();
                         $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    }else{
+                    } else {
                         $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                     }
                 }
@@ -297,10 +300,10 @@ class EComIntegration
                 $oldPrice = (float)$ordCont->price;
                 $newPrice = (float)$arr[$index]['PRICE'];
                 if ($oldPrice != $newPrice) {
-                    if($newPrice == 0){
+                    if ($newPrice == 0) {
                         $ordCont->delete();
                         $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    }else{
+                    } else {
                         $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . $newPrice . " руб";
                     }
                 }
@@ -323,12 +326,12 @@ class EComIntegration
         }
         if (!$isDesadv) {
             foreach ($positions as $position) {
-                if($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00)continue;
+                if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
                 $contID = (int)$position->PRODUCTIDBUYER;
-                if(!$contID){
+                if (!$contID) {
                     $contID = (int)$position->PRODUCT;
                 }
-                if(!$contID)continue;
+                if (!$contID) continue;
                 $barcode = (int)$position->PRODUCT;
                 if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);

@@ -88,18 +88,21 @@ class OneSWaybill extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-
+            
             if ($this->doc_date) {
-                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
+                $datetime = new \DateTime($this->doc_date);
+                $this->doc_date = $datetime->format('Y-m-d H:i:s');
             } else {
-                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
+                $datetime = new \DateTime();
+                $this->doc_date = $datetime->format('Y-m-d H:i:s');
             }
 
             if (empty($this->num_code)) {
                 $this->num_code = $this->order_id;
             }
 
-            return parent::beforeSave($insert);
+            return true;
+//            return parent::beforeSave($insert); // ну жесть же, зачем оно тут?
         }
     }
 
@@ -213,7 +216,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
         /**
          * @var $row OneSWaybillData
          */
-        $records = OneSWaybillData::findAll(['waybill_id' => $model->id]);
+        $records = OneSWaybillData::findAll(['waybill_id' => $model->id, 'unload_status' => 1]);
         $vatPercent = 0;
         $discount = 0;
         //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);

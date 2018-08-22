@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: user
@@ -14,6 +15,7 @@ use yii\base\Model;
 
 class step2Form extends Model
 {
+
     public $purpose;
     public $cargoExpertized;
     public $locationProsperity = 'Благополучна';
@@ -40,6 +42,12 @@ class step2Form extends Model
 
     public function getPurposeList()
     {
+        $res = \common\models\vetis\VetisPurpose::getPurposeList();
+
+        if (!empty($res)) {
+            return $res;
+        }
+
         $api = dictsApi::getInstance();
         $listOptions = new ListOptions();
         $listOptions->count = 100;
@@ -50,13 +58,13 @@ class step2Form extends Model
             $list = $api->getPurposeList($listOptions);
             $list = $list->purposeList;
 
-            if(isset($list->purpose)) {
+            if (isset($list->purpose)) {
                 foreach ($list->purpose as $item) {
                     if ($item->last && $item->active)
                         $res[$item->guid] = $item->name;
                 }
             }
-            if($list->count < $list->total)
+            if ($list->count < $list->total)
                 $listOptions->offset += $list->count;
         } while ($list->total > ($list->count + $list->offset));
 
@@ -65,7 +73,7 @@ class step2Form extends Model
 
     public function getExpertizeList()
     {
-       return [
+        return [
             'UNKNOWN' => 'Результат неизвестен',
             'UNDEFINED' => 'Результат невозможно определить (не нормируется)',
             'POSITIVE' => 'Положительный результат',
@@ -73,6 +81,7 @@ class step2Form extends Model
             'UNFULFILLED' => 'Не проводилось',
             'VSERAW' => 'ВСЭ подвергнуто сырьё, из которого произведена продукция',
             'VSEFULL' => 'Продукция подвергнута ВСЭ в полном объеме'
-       ];
+        ];
     }
+
 }

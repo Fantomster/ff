@@ -2,7 +2,9 @@
 
 namespace common\models\search;
 
+use common\models\CatalogGoodsBlocked;
 use common\models\Order;
+use common\models\Organization;
 use Yii;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
@@ -85,6 +87,13 @@ class FavoriteSearch extends \yii\base\Model
             "cbg.cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)",
             "cg.cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)"
         ]);
+
+        //Добавляем блокировку запрещенных товаров
+        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($clientId));
+        $query->andWhere(["AND",
+            "oc.product_id NOT IN ($blockedItems)"
+            ]);
+
         //Группируем по товару
         $query->groupBy('cbg_id');
         $query->having("cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)", [':cid' => $clientId]);

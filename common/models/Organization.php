@@ -128,8 +128,8 @@ class Organization extends \yii\db\ActiveRecord {
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted'], 'integer'],
-            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn'], 'safe'],
-            [['name', 'inn', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
+            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp'], 'safe'],
+            [['name', 'inn', 'kpp', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -140,6 +140,8 @@ class Organization extends \yii\db\ActiveRecord {
             [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
+            [['inn'], 'integer', 'min' => 1000000000, 'max' => 999999999999, 'message' => Yii::t('app', 'Поле ИНН должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов')],
+            [['kpp'], 'integer', 'min' => 100000000, 'max' => 999999999, 'message' => Yii::t('app', 'Поле КПП должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 9 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 9 символов')],
         ];
     }
 
@@ -261,7 +263,7 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id != self::TYPE_SUPPLIER) {
             return null;
         }
-        return abs($this->is_work - 1);
+        return $this->is_work === 1 ? 0 : 1;
     }
 
     /**
@@ -318,6 +320,35 @@ class Organization extends \yii\db\ActiveRecord {
         }
         ksort($vendors);
         return $vendors;
+    }
+
+
+    /**
+     * Get the list of organization type restaurant suppliers - filtered by categories
+     * @var $addAllOption bool "Don't use filter" indicator
+     * @createdBy Basil A Konakov
+     * @createdAt 2018-08-10
+     * @return array
+     */
+    public function getRestaurantSupplierAll($addAllOption = true): array
+    {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT && !$addAllOption) {
+            return [];
+        }
+        $query = RelationSuppRest::find()
+            ->select(['organization.id', 'organization.name'])
+            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+            ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+        $res = $query
+            ->orderBy(['organization.name' => SORT_ASC])
+            ->asArray()
+            ->all();
+        $res = ArrayHelper::map($res, 'id', 'name');
+        if ($addAllOption) {
+            $res[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+        }
+        ksort($res);
+        return $res;
     }
 
     public function getSuppliersTorg12($category_id = '', $all = true, $notMap=true) {

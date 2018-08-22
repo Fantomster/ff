@@ -14,29 +14,27 @@ class dictsApi extends baseApi
 
     public function getPurposeByGuid ($GUID)
     {
-        $cache = Yii::$app->cache;
-        $purpose = $cache->get('Purpose_'.$GUID);
+        $purpose = \common\models\vetis\VetisPurpose::findOne(['guid' => $GUID]);
 
-        if(!($purpose === false))
+        if(!empty($purpose)) {
             return $purpose;
+        }
 
         $client = $this->getSoapClient('dicts');
         $request = new getPurposeByGuidRequest();
         $request->guid = $GUID;
         $result = $client->GetPurposeByGuid($request);
 
-        if(isset($result))
-            $cache->add('Purpose_'.$GUID, $result, 60*60*24*7);
         return $result;
     }
 
     public function getUnitByGuid ($GUID)
     {
-        $cache = Yii::$app->cache;
-        $unit = $cache->get('Unit_'.$GUID);
+        $unit = \common\models\vetis\VetisUnit::findOne(['guid' => $GUID]);
 
-        if(!($unit === false))
+        if(!empty($unit)) {
             return $unit;
+        }
 
         $client = $this->getSoapClient('dicts');
 
@@ -45,8 +43,6 @@ class dictsApi extends baseApi
         //var_dump($client->soapClient); die();
         $result = $client->GetUnitByGuid($request);
 
-        if(isset($result))
-            $cache->add('Unit_'.$GUID, $result, 60*60*24*7);
         return $result;
     }
 

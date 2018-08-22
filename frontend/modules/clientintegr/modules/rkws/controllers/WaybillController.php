@@ -2,285 +2,318 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
-use api\common\models\iiko\iikoPconst;
-use api\common\models\RkDicconst;
+use api\common\models\RkAgent;
 use api\common\models\RkPconst;
+use api\common\models\RkStore;
 use api\common\models\rkws\RkWaybilldataSearch;
 use api\common\models\VatData;
-use api_web\classes\RkeeperWebApi;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
-use yii\web\Controller;
 use api\common\models\RkWaybill;
-use api\common\models\RkAgentSearch;
-use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use api\common\models\RkWaybilldata;
-use yii\data\ActiveDataProvider;
 use common\models\User;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use common\models\Organization;
 use common\models\Order;
 use yii\helpers\Url;
+use yii\web\NotFoundHttpException;
+use common\models\search\OrderSearch2;
+use yii\web\BadRequestHttpException;
+use common\components\SearchOrdersComponent;
+use yii\web\Response;
+
+class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
+{
 
 
-// use yii\mongosoft\soapserver\Action;
+    /** @var string Все заказы без учета привязанных к ним накладных */
+    const ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS = 'allstat';
+    /** @var string Все заказы, по которым вообще нет накладных */
+    const ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS = 'nodoc';
+    /** @var string Все заказы, по которым есть накладные не подходящие под критерии ready и completed */
+    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
+    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
+    const ORDER_STATUS_READY_DEFINEDBY_WB_STATUS = 'ready';
+    /** @var string Все заказы, по которым накладные в процессе обработки !!! настоящее время не используется */
+    const ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS = 'outgoing';
+    /** @var string Все заказы, по которым есть накладные со статусом 2 */
+    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
 
-/**
- * Description of SiteController
- * F-Keeper SOAP server based on mongosoft\soapserver
- * Author: R.Smirnov
- */
-class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController {
-
-    public function actions() {
+    /**
+     * @return array
+     */
+    public function actions()
+    {
         return ArrayHelper::merge(parent::actions(), [
-                    'edit' => [// identifier for your editable action
-                        'class' => EditableColumnAction::className(), // action class name
-                        'modelClass' => RkWaybilldata::className(), // the update model class
-                        'outputValue' => function ($model, $attribute, $key, $index) {
-                            $value = $model->$attribute;                 // your attribute value
-                            if ($attribute === 'pdenom') {
+            'edit' => [// identifier for your editable action
+                'class' => EditableColumnAction::className(), // action class name
+                'modelClass' => RkWaybilldata::className(), // the update model class
+                'outputValue' => function ($model, $attribute, $key, $index) {
+                    $value = $model->$attribute;                 // your attribute value
+                    if ($attribute === 'pdenom') {
 
-                                if (!is_numeric($model->pdenom))
-                                    return '';
+                        if (!is_numeric($model->pdenom))
+                            return '';
 
-                                $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
-                                $model->product_rid = $rkProd->id;
-                                $model->munit_rid = $rkProd->unit_rid;
-                                $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                        $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
+                        $model->product_rid = $rkProd->id;
+                        $model->munit_rid = $rkProd->unit_rid;
+                        $model->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-                             //   $model->koef = 1.8;
-                                $model->save(false);
-                                return $rkProd->denom;       // return formatted value if desired
-                            }
-                            return '';                                   // empty is same as $value
-                        },
-                        'outputMessage' => function($model, $attribute, $key, $index) {
-                            return '';                                  // any custom error after model save
-                        },
-                    // 'showModelErrors' => true,                     // show model errors after save
-                    // 'errorOptions' => ['header' => '']             // error summary HTML options
-                    // 'postOnly' => true,
-                    // 'ajaxOnly' => true,
-                    // 'findModel' => function($id, $action) {},
-                    // 'checkAccess' => function($action, $model) {}
-                    ],
-                    'changekoef' => [// identifier for your editable column action
-                        'class' => EditableColumnAction::className(), // action class name
-                        'modelClass' => RkWaybilldata::className(), // the model for the record being edited
-                        //   'outputFormat' => ['decimal', 6],    
-                        'outputValue' => function ($model, $attribute, $key, $index) {
-                            if ($attribute === 'vat') {
-                                return $model->$attribute / 100;
-                            } else {
-                                return round($model->$attribute, 6);      // return any custom output value if desired    
-                            }
-                            //       return $model->$attribute;
-                        },
-                        'outputMessage' => function($model, $attribute, $key, $index) {
-                            return '';                                  // any custom error to return after model save
-                        },
-                        'showModelErrors' => true, // show model validation errors after save
-                        'errorOptions' => ['header' => '']                // error summary HTML options
-                    // 'postOnly' => true,
-                    // 'ajaxOnly' => true,
-                    // 'findModel' => function($id, $action) {},
-                    // 'checkAccess' => function($action, $model) {}
-                    ]
+                        //   $model->koef = 1.8;
+                        $model->save(false);
+                        return $rkProd->denom;       // return formatted value if desired
+                    }
+                    return '';                                   // empty is same as $value
+                },
+                'outputMessage' => function ($model, $attribute, $key, $index) {
+                    return '';                                  // any custom error after model save
+                },
+                // 'showModelErrors' => true,                     // show model errors after save
+                // 'errorOptions' => ['header' => '']             // error summary HTML options
+                // 'postOnly' => true,
+                // 'ajaxOnly' => true,
+                // 'findModel' => function($id, $action) {},
+                // 'checkAccess' => function($action, $model) {}
+            ],
+            'changekoef' => [// identifier for your editable column action
+                'class' => EditableColumnAction::className(), // action class name
+                'modelClass' => RkWaybilldata::className(), // the model for the record being edited
+                //   'outputFormat' => ['decimal', 6],
+                'outputValue' => function ($model, $attribute, $key, $index) {
+                    if ($attribute === 'vat') {
+                        return $model->$attribute / 100;
+                    } else {
+                        return round($model->$attribute, 6);      // return any custom output value if desired
+                    }
+                    //       return $model->$attribute;
+                },
+                'outputMessage' => function ($model, $attribute, $key, $index) {
+                    return '';                                  // any custom error to return after model save
+                },
+                'showModelErrors' => true, // show model validation errors after save
+                'errorOptions' => ['header' => '']                // error summary HTML options
+                // 'postOnly' => true,
+                // 'ajaxOnly' => true,
+                // 'findModel' => function($id, $action) {},
+                // 'checkAccess' => function($action, $model) {}
+            ]
         ]);
     }
 
-    public function actionIndex() {
-        $way = Yii::$app->request->get('way',0);
-       //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
-       //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+
+    public function actionIndex()
+    {
+
+        $organization = $this->currentUser->organization;
 
         Url::remember();
 
-        $searchModel = new \common\models\search\OrderSearch();
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
+        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+        //  $dataProvider->pagination->pageSize=3;
 
-        $today = new \DateTime();
-        $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
+        /** @var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
+         * Статусы накладных в таблице rk_waybillstatus - используются, но не все */
+        $wbStatuses = [
+            self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
+            // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
+        ];
 
-        $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
 
-      //  $dataProvider->pagination->pageSize=3;
+        if ($organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Access denied');
+        }
+        $search = new SearchOrdersComponent();
+        $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_RKWS, $searchModel,
+            $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
+            ['defaultOrder' => ['id' => SORT_DESC]]);
 
-        $lic0 = Organization::getLicenseList();
-        //$lic = $this->checkLic();
-        $lic = $lic0['rkws'];
-        $licucs = $lic0['rkws_ucs'];
-        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+        $lisences = $organization->getLicenseList();
+
+        $view = ($lisences['rkws'] && $lisences['rkws_ucs']) ? 'index' : '/default/_nolic';
+        $renderParams = [
+            'searchModel' => $searchModel,
+            'affiliated' => $search->affiliated,
+            'dataProvider' => $search->dataProvider,
+            'searchParams' => $search->searchParams,
+            'businessType' => $search->businessType,
+            'lic' => $lisences['rkws'],
+            'licucs' => $lisences['rkws_ucs'],
+            'visible' => RkPconst::getSettingsColumn($organization->id),
+            'wbStatuses' => $wbStatuses,
+            'way' => Yii::$app->request->get('way', 0),
+        ];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
-                        'lic' => $lic,
-                'visible' =>RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-                        'licucs' => $licucs,
-                        'way' => $way,
-            ]);
+            return $this->renderPartial($view, $renderParams);
         } else {
-            return $this->render($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
-                        'lic' => $lic,
-                    'visible' =>RkPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-                        'licucs' => $licucs,
-                        'way' => $way,
-
-            ]);
+            return $this->render($view, $renderParams);
         }
+
     }
 
 
-    public function actionMap($waybill_id) {
-        
-        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $waybill_id])->one();
+    /**
+     * @param $waybill_id
+     * @return string
+     */
+    public function actionMap($waybill_id)
+    {
+        $wmodel = RkWaybill::find()->andWhere('id= :id', [':id' => $waybill_id])->one();
         $vatData = VatData::getVatList();
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
 
-            $userAgent = \xj\ua\UserAgent::model();
-            /* @var \xj\ua\UserAgent $userAgent */
+        $userAgent = \xj\ua\UserAgent::model();
+        /* @var \xj\ua\UserAgent $userAgent */
 
-                $platform = $userAgent->platform;
-                $browser = $userAgent->browser;
+        $platform = $userAgent->platform;
+        $browser = $userAgent->browser;
 
-                 if (stristr($platform,'android') OR stristr($browser,'android')) {
-                    $isAndroid = true;
-                 } else $isAndroid = false;
-        
-        if(!$wmodel) {
+        if (stristr($platform, 'android') OR stristr($browser, 'android')) {
+            $isAndroid = true;
+        } else $isAndroid = false;
+
+        if (!$wmodel) {
             echo "Cant find wmodel in map controller";
             die();
         }
 
         $searchModel = new RkWaybilldataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        
-        $lic = $this->checkLic();       
+
+        $agentModel = RkAgent::findOne(['rid' => $wmodel->corr_rid, 'acc' => $wmodel->org]);
+        $storeModel = RkStore::findOne(['rid' => $wmodel->store_rid]);
+
+        $lic = $this->checkLic();
         $vi = $lic ? 'indexmap' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                        'dataProvider' => $dataProvider,
-                        'searchModel' => $searchModel,
-                        'wmodel' => $wmodel,
-                        'isAndroid' => $isAndroid,
-                        'vatData' => $vatData
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'wmodel' => $wmodel,
+                'agentName' => $agentModel['denom'],
+                'storeName' => $storeModel['denom'],
+                'isAndroid' => $isAndroid,
+                'vatData' => $vatData
             ]);
         } else {
             return $this->render($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
-                        'wmodel' => $wmodel,
-                        'isAndroid' => $isAndroid,
-                        'vatData' => $vatData
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'wmodel' => $wmodel,
+                'agentName' => $agentModel['denom'],
+                'storeName' => $storeModel['denom'],
+                'isAndroid' => $isAndroid,
+                'vatData' => $vatData
             ]);
         }
     }
 
+    /**
+     * @return string
+     */
     public function actionGetpopover()
     {
-
         $id = Yii::$app->request->post('key');
+        $goodCount = OrderContent::find()->andWhere('order_id = :id', ['id' => $id])->count('*');
+        $listIds = OrderContent::find()->select('product_id')->andWhere('order_id = :id', ['id' => $id])->limit(10)->asArray()->all();
 
-        $goodCount = OrderContent::find()->andWhere('order_id = :id',['id' => $id])->count('*');
-
-        $listIds = OrderContent::find()->select('product_id')->andWhere('order_id = :id',['id' => $id])->limit(10)->asArray()->all();
-
-        foreach ($listIds as $ids ) {
-            foreach($ids as $key => $value) {
-                $fList[]  = $value;
+        foreach ($listIds as $ids) {
+            foreach ($ids as $key => $value) {
+                $fList[] = $value;
             }
         }
 
         $listGoods = CatalogBaseGoods::find()->select('product')->andWhere(['IN', 'id', $fList])->asArray()->all();
-
-        $result ="";
+        $result = "";
         $ind = 1;
 
-        foreach ($listGoods as $ids ) {
-            foreach($ids as $key => $value) {
-              //  $result  .= $ind++.')&nbsp;'.str_replace(' ', '&nbsp;',$value)."<br>";
-                  $result  .= $ind++.')&nbsp;'.$value."<br>";
+        foreach ($listGoods as $ids) {
+            foreach ($ids as $key => $value) {
+                $result .= $ind++ . ')&nbsp;' . $value . "<br>";
             }
         }
 
-        if ($goodCount > 10)
-            $result  .= "и другие...";
+        if ($goodCount > 10) {
+            $result .= "и другие...";
+        }
         return $result;
-
     }
 
-        public function actionChangevat() {
-        
-      $checked = Yii::$app->request->post('key');
-      
-      $arr = explode(",", $checked);
-      $wbill_id = $arr[1];
-      $is_checked = $arr[0]; 
-      
-      $wmodel = RkWaybill::find()->andWhere('id = :acc', [':acc' => $wbill_id])->one();
-      
-      if (!$wmodel) {
-          die('Waybill model is not found');
-      }
-      
-      if ($is_checked) { // Добавляем НДС
-          
-      $rress = Yii::$app->db_api
-              ->createCommand('UPDATE rk_waybill_data SET sum=round(sum/(vat/10000+1),2) WHERE waybill_id = :acc', [':acc' => $wbill_id])->execute();
-      
-      $wmodel->vat_included = 1;
-      if (!$wmodel->save()) {
-          die('Cant save wmodel where vat = 1');
-      }
-                
-      } else { // Убираем НДС
-          
-      $rress = Yii::$app->db_api
-              ->createCommand('UPDATE rk_waybill_data SET sum=defsum WHERE waybill_id = :acc', [':acc' => $wbill_id])->execute();    
-      
-      $wmodel->vat_included = 0;
-      if (!$wmodel->save()) {
-          die('Cant save wmodel where vat = 0');
-      }
-      
-      }
-       if ($rress) {
-           return true;
-       } else {
-           return false;
-       }
-       
+    /**
+     * @return bool
+     */
+    public function actionChangevat()
+    {
+        $checked = Yii::$app->request->post('key');
+        $arr = explode(",", $checked);
+        $wbill_id = $arr[1];
+        $is_checked = $arr[0];
+        $wmodel = RkWaybill::find()->andWhere('id = :acc', [':acc' => $wbill_id])->one();
+
+        if (!$wmodel) {
+            die('Waybill model is not found');
+        }
+
+        if ($is_checked) { // Добавляем НДС
+            $rress = Yii::$app->db_api
+                ->createCommand('UPDATE rk_waybill_data SET sum=round(sum/(vat/10000+1),2) WHERE waybill_id = :acc', [':acc' => $wbill_id])
+                ->execute();
+
+            $wmodel->vat_included = 1;
+            if (!$wmodel->save()) {
+                die('Cant save wmodel where vat = 1');
+            }
+        } else { // Убираем НДС
+            $rress = Yii::$app->db_api
+                ->createCommand('UPDATE rk_waybill_data SET sum=defsum WHERE waybill_id = :acc', [':acc' => $wbill_id])
+                ->execute();
+
+            $wmodel->vat_included = 0;
+            if (!$wmodel->save()) {
+                die('Cant save wmodel where vat = 0');
+            }
+        }
+
+        if ($rress) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public function actionCleardata($id) {
-
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionCleardata($id)
+    {
         $model = $this->findDataModel($id);
-
         $model->quant = $model->defquant;
         $model->koef = 1;
-        
-        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $model->waybill_id])->one();
-        if(!$wmodel) {
+        $wmodel = RkWaybill::find()->andWhere('id= :id', [':id' => $model->waybill_id])->one();
+        if (!$wmodel) {
             echo "Cant find wmodel in map controller cleardata";
             die();
         }
-        
+
         if ($wmodel->vat_included) {
-            $model->sum = round($model->defsum/(1+$model->vat/10000),2);
+            $model->sum = round($model->defsum / (1 + $model->vat / 10000), 2);
         } else {
             $model->sum = $model->defsum;
         }
-        
 
         if (!$model->save()) {
             echo $model->getErrors();
@@ -290,86 +323,70 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
     }
 
-    public function actionMakevat($waybill_id, $vat) {
-
+    /**
+     * @param $waybill_id
+     * @param $vat
+     * @return \yii\web\Response
+     */
+    public function actionMakevat($waybill_id, $vat)
+    {
         $model = $this->findModel($waybill_id);
 
-        $rress = Yii::$app->db_api
-            ->createCommand('UPDATE rk_waybill_data set vat = :vat, linked_at = now() where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
-        /*
-        $model->quant = $model->defquant;
-        $model->koef = 1;
+        Yii::$app->db_api
+            ->createCommand('UPDATE rk_waybill_data SET vat = :vat, linked_at = now() WHERE waybill_id = :id', [':vat' => $vat, ':id' => $waybill_id])
+            ->execute();
 
-        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $model->waybill_id])->one();
-        if(!$wmodel) {
-            echo "Cant find wmodel in map controller cleardata";
-            die();
-        }
-
-        if ($wmodel->vat_included) {
-            $model->sum = round($model->defsum/(1+$model->vat/10000),2);
-        } else {
-            $model->sum = $model->defsum;
-        }
-
-
-        if (!$model->save()) {
-            echo $model->getErrors();
-            die();
-        }
-*/
         return $this->redirect(['map', 'waybill_id' => $model->id]);
     }
 
-
-    public function actionChvat($id, $vat) {
-
+    /**
+     * @param $id
+     * @param $vat
+     * @return \yii\web\Response
+     */
+    public function actionChvat($id, $vat)
+    {
         $model = $this->findDataModel($id);
         $model->vat = $vat;
         $model->save();
-
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
-
     }
 
-
-
-    public function actionAutocomplete($term = null) {
+    /**
+     * @param null $term
+     * @return mixed
+     */
+    public function actionAutocomplete($term = null)
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        // $out = ['results' => ['id' => '0', 'text' => 'Создать контрагента']];
+        $out['results'] = [];
+
         if (!is_null($term)) {
-            $query = new \yii\db\Query;
+            $organization_id = User::findOne(Yii::$app->user->id)->organization_id;
 
-            // $query->select("`id`, CONCAT(`inn`,`denom`) AS `text`")
-            /*
-            $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unitname,")")'])
-                    ->from('rk_product')
-                    ->where('acc = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
-                    ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
-                    ->limit(20);
-            */
+            $sql = "( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where acc = " . $organization_id . " and denom = '" . $term . "' )" .
+                "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = " . $organization_id . " and denom like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = " . $organization_id . " and denom like '%" . $term . "%' limit 10 )" .
+                "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
-            $sql = "( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-            " union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-            "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
-            "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
-
-            $db = Yii::$app->db_api;
-            $data = $db->createCommand($sql)->queryAll();
+            $data = Yii::$app->get('db_api')->createCommand($sql)->queryAll();
             $out['results'] = array_values($data);
         }
-        //  $out['results'][] = ['id' => '0', 'text' => 'Создать контрагента'];
+
         return $out;
     }
 
-    public function actionAutocompleteagent($term = null, $org) {
-
+    /**
+     * @param null $term
+     * @param $org
+     * @return mixed
+     */
+    public function actionAutocompleteagent($term = null, $org)
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
+        $out['results'] = [];
         if (!is_null($term)) {
             $query = new \yii\db\Query;
-
-            // $query->select("`id`, CONCAT(`inn`,`denom`) AS `text`")
             $query->select(['id' => 'rid', 'text' => 'denom'])
                 ->from('rk_agent')
                 ->where('acc = :acc', [':acc' => $org])
@@ -381,68 +398,72 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $data = $command->queryAll();
             $out['results'] = array_values($data);
         }
-        //  $out['results'][] = ['id' => '0', 'text' => 'Создать контрагента'];
         return $out;
     }
 
-    public function actionUpdate($id) {
+    /**
+     * @param $id
+     * @return string|\yii\web\Response
+     */
+    public function actionUpdate($id)
+    {
         $model = $this->findModel($id);
-
         $lic = $this->checkLic();
         $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            //  return $this->redirect(['view', 'id' => $model->id]);
-
             if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
             }
-
-            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render($vi, [
-                        'model' => $model,
+                'model' => $model,
             ]);
         }
     }
 
-    public function actionCreate($order_id) {
-        
+    /**
+     * @param $order_id
+     * @return string|\yii\web\Response
+     */
+    public function actionCreate($order_id)
+    {
         $ord = \common\models\Order::findOne(['id' => $order_id]);
-
         if (!$ord) {
             echo "Can't find order";
             die();
         }
-                
+
         $model = new RkWaybill();
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
             if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
             }
-
-            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render('create', [
-                        'model' => $model,
+                'model' => $model,
             ]);
         }
     }
-    public function getLastUrl() {
 
+    /**
+     * @return bool|mixed|null|string
+     */
+    public function getLastUrl()
+    {
         $lastUrl = Url::previous();
-        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+        $lastUrl = substr($lastUrl, strpos($lastUrl, "/clientintegr"));
+        $lastUrl = $this->deleteGET($lastUrl, 'way');
 
-        $lastUrl = $this->deleteGET($lastUrl,'way');
-
-        if(!strpos($lastUrl,"?")) {
+        if (!strpos($lastUrl, "?")) {
             $lastUrl .= "?";
         } else {
             $lastUrl .= "&";
@@ -450,32 +471,61 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $lastUrl;
     }
 
-    public function deleteGET($url, $name, $amp = true) {
+    /**
+     * @param $url
+     * @param $name
+     * @param bool $amp
+     * @return mixed|string
+     */
+    public function deleteGET($url, $name, $amp = true)
+    {
         $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
         list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
         parse_str($qs_part, $qs_vars); // Разбиваем строку с запросом на массив с параметрами и их значениями
         unset($qs_vars[$name]); // Удаляем необходимый параметр
+
         if (count($qs_vars) > 0) { // Если есть параметры
-            $url = $url_part."?".http_build_query($qs_vars); // Собираем URL обратно
-            if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
+            $url = $url_part . "?" . http_build_query($qs_vars); // Собираем URL обратно
+            if ($amp) {
+                $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
+            }
+        } else {
+            $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
         }
-        else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
         return $url; // Возвращаем итоговый URL
     }
 
-    public function actionSendws() {
-
-
-        $waybill_id = Yii::$app->request->post('id');
-        $model = $this->findModel($waybill_id);
+    /**
+     * @param null $waybill_id
+     * @return string
+     */
+    public function actionSendws($waybill_id = null)
+    {
+        if (is_null($waybill_id)) {
+            $waybill_id = Yii::$app->request->post('id');
+        }
 
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
         $res->sendWaybill($waybill_id);
 
         return 'true';
-       //$this->redirect('/clientintegr/rkws/waybill/index');
     }
 
+    /**
+     *  Отправка нескольких накладных
+     */
+    public function actionMultiSend()
+    {
+        $ids = Yii::$app->request->post('ids');
+        $succesCnt = 0;
+        foreach ($ids as $id) {
+            $res = $this->actionSendws($id);
+            if ($res === 'true') {
+                $succesCnt++;
+            }
+        }
+        return ['success' => true, 'count' => $succesCnt];
+    }
 
     /**
      * Отправляем накладную по нажатию кнопки при соспоставлении товаров
@@ -483,76 +533,115 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionSendwsByButton()
     {
         /**
-        header ("Content-Type:text/xml");
-        $id = Yii::$app->request->get('id');
-        $model = $this->findModel($id);
-        echo $model->getXmlDocument();
-        exit;
+         * header ("Content-Type:text/xml");
+         * $id = Yii::$app->request->get('id');
+         * $model = $this->findModel($id);
+         * echo $model->getXmlDocument();
+         * exit;
          */
 
-            $id = Yii::$app->request->post('id');
+        $id = Yii::$app->request->post('id');
+        $model = $this->findModel($id);
+        $error = '';
+
+        if (!$model) {
+            $error .= 'Не удалось найти накладную. ';
+        }
+
+        if ($model->readytoexport == 0) {
+            $error .= 'Не все товары сопоставлены! ';
+        }
+
+        if ($error == '') {
+            $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
+            $res->sendWaybill($id);
             $model = $this->findModel($id);
-            $error='';
+            if ($model->status_id != 2) $error .= 'Ошибка при отправке. ';
+        }
 
-
-            if (!$model) $error.= 'Не удалось найти накладную. ';
-
-            if ($model->readytoexport==0) $error.= 'Не все товары сопоставлены! ';
-            if ($error=='') {
-                $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
-                $res->sendWaybill($id);
-                $model = $this->findModel($id);
-                if ($model->status_id!=2) $error.= 'Ошибка при отправке. ';
-            }
-
-        if ($error=='') {
-                Yii::$app->session->set("rkws_waybill", $model->order_id);
-                return 'true';}
-                else return $error;
+        if ($error == '') {
+            Yii::$app->session->set("rkws_waybill", $model->order_id);
+            return 'true';
+        } else {
+            return $error;
+        }
     }
 
-    protected function checkLic() {
+    /**
+     * @return \api\common\models\RkServicedata|array|int|null|\yii\db\ActiveRecord
+     */
+    protected function checkLic()
+    {
+        $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])->one();
+        $res = 0;
+        if ($lic) {
+            $res = $lic;
+        }
+        return $res ?? null;
+    }
 
-        $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
-    $t = strtotime(date('Y-m-d H:i:s',time()));
+    /**
+     * @param $id
+     * @return ActiveRecord
+     * @throws NotFoundHttpException
+     */
+    protected function findModel($id)
+    {
+        $model = RkWaybill::findOne($id);
+        if ($model) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    /**
+     * @param $id
+     * @return ActiveRecord
+     * @throws NotFoundHttpException
+     */
+    protected function findDataModel($id)
+    {
+        $model = RkWaybilldata::findOne($id);
+        if ($model) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    /**
+     * @param $org_id
+     * @return mixed|null|string
+     */
+    protected function getEarliestOrder($org_id)
+    {
+        $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
+        return isset($eDate) ? $eDate->updated_at : null;
+    }
     
-    if ($lic) {
-       /*if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) {*/
-       $res = $lic; 
-    /*} else {
-       $res = 0; 
-    }*/
-    } else 
-       $res = 0; 
-    
-    
-    return $res ? $res : null;
+    /**
+     * Make unload_status -> 0 or unload_status -> 1
+     */
+    public function actionMapTriggerWaybillDataStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $id = Yii::$app->request->post('id');
+        $status = Yii::$app->request->post('status');
+        $action = Yii::$app->request->post('action');
         
-    }
-
-    protected function findModel($id) {
-        if (($model = RkWaybill::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+        $model = RkWaybilldata::findOne($id);
+        try {
+            $model->unload_status = $status;
+            $model->save();
+            $transaction->commit();
+        } catch (\Throwable $t){
+            $transaction->rollback();
+            Yii::debug($t->getMessage());
+            return false;
         }
+        
+        return ['success' => true, 'action' => $action];
     }
-
-    protected function findDataModel($id) {
-        if (($model = RkWaybilldata::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
-    }
-
-    protected function getEarliestOrder($org_id) {
-
-    $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
-
-    return isset($eDate) ?  $eDate->updated_at : null;
-
-    }
-
-
 }

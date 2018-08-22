@@ -5,15 +5,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
-use common\components\Torg12Invoice;
 
 
 ?>
@@ -61,6 +56,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
+    <p>
+        <span>Контрагент: <?= $agentName ?></span> |
+        <span>Номер заказа: <?= $wmodel->order_id ?></span> |
+        <span>Номер накладной: <?= $wmodel->num_code ?></span> |
+        <span>Склад: <?= $storeName ?></span>
+    </p>
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -145,10 +146,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             [
                                 'attribute' => 'product_id',
                                 'label' => 'ID в Mixcart',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'fproductnameProduct',
                                 'label' => 'Наименование продукции',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'product_id',
@@ -157,12 +160,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед. изм. Mixcart',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
                                 'attribute' => 'pdenom',
                                 'label' => 'Наименование в Store House',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 'width' => '210px',
                                 'refreshGrid' => true,
 
@@ -205,11 +209,13 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед.изм. StoreHouse',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'attribute' => 'defquant',
                                 'format' => 'raw',
                                 'label' => 'Кол-во в Заказе',
+                                'vAlign' => 'bottom',
                             ],
                             [
                                 'class' => 'kartik\grid\EditableColumn',
@@ -219,14 +225,33 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'asPopover' => $isAndroid ? false : true,
                                     'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                     'inputType' => \kartik\editable\Editable::INPUT_TEXT,
+                                    'afterInput' => function ($form, $w) {
+                                        /**
+                                         * @var $form ActiveForm
+                                         * @var $w \kartik\editable\Editable
+                                         */
+                                        echo $form->field($w->model, 'enable_all_map')->checkbox();
+                                    },
+                                    'buttonsTemplate' => '{reset}{submit}',
+                                    'resetButton' => [
+                                        'class' => 'btn btn-sm btn-outline-danger',
+                                        'icon' => '<i class="glyphicon glyphicon-ban-circle"></i> ',
+                                        'name' => 'otkaz',
+                                        'label' => 'Отменить'
+                                    ],
+                                    'submitButton' => [
+                                        'class' => 'btn btn-sm btn-success',
+                                        'icon' => '<i class="glyphicon glyphicon-save"></i> ',
+                                        'name' => 'forever',
+                                        'label' => 'Применить сейчас'
+                                    ],
                                     'formOptions' => [
                                         'action' => Url::toRoute('changekoef'),
                                         'enableClientValidation' => false,
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
-                                // 'width'=>'100px',
+                                'vAlign' => 'bottom',
                                 'format' => ['decimal', 6],
                                 'pageSummary' => true,
                                 'label' => 'Коэфф.'
@@ -245,7 +270,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
+                                'vAlign' => 'bottom',
                                 // 'width'=>'100px',
                                 'format' => ['decimal'],
                                 'footer' => 'Итого сумма без НДС:',
@@ -266,52 +291,22 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                 ],
                                 'hAlign' => 'right',
-                                'vAlign' => 'middle',
-                                // 'width'=>'100px',
+                                'vAlign' => 'bottom',
                                 'format' => ['decimal', 2],
-                                //'footer' => Torg12Invoice::getSumWithoutNdsById($wmodel->order_id),
                                 'footer' => \api\common\models\RkWaybilldata::getSumByWaybillid($wmodel->id),
                                 'pageSummary' => true,
                                 'label' => 'Сумма б/н'
                             ]);
-
-
-                        array_push($columns,
-                            [
-                                'attribute' => 'vat',
-                                'format' => 'raw',
-                                'label' => 'НДС',
-                                'contentOptions' => ['class' => 'text-right'],
-                                'value' => function ($model) {
-                                    return $model->vat / 100;
-                                }
-                            ]);
-
-                        /*   [
-                            'attribute' => 'vat',
-                            'format' => 'raw',
-                            'label' => 'Ставка НДС',
-                            'contentOptions' => ['class' => 'text-right'],
-                            'value' => function($model) {
-                               $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue()/100;
-                               return $exportVAT;
-                            }
-                           ], */
-
-
-
                         array_push($columns,
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'contentOptions' => ['style' => 'width: 6%;'],
+                                'headerOptions' => ['style' => 'width: 6%; text-align:center'],
+                                'contentOptions' => ['style' => 'width: 6%; text-align:center'],
                                 'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
-                                'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                'header' => '<span align="center">НДС</br>' .
+                                    ' <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
                                     '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
                                     '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
-
-                                //  'sort' => false,
-                                //  '' => false,
 
                                 'visibleButtons' => [
                                     'zero' => function ($model, $key, $index) {
@@ -325,16 +320,23 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         if ($model->vat == 0) {
                                             $tClass = "label label-success";
                                             $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-
                                         } else {
                                             $tClass = "label label-default";
                                             $tStyle = "";
                                         }
 
-                                        //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => 0]);
-                                        return \yii\helpers\Html::a('&nbsp;0', $customurl,
-                                            ['title' => Yii::t('backend', '0%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                        $customurl = Yii::$app->getUrlManager()->createUrl([
+                                            'clientintegr/rkws/waybill/chvat',
+                                            'id' => $model->id,
+                                            'vat' => 0
+                                        ]);
+
+                                        return \yii\helpers\Html::a('&nbsp;0', $customurl, [
+                                            'title' => Yii::t('backend', '0%'),
+                                            'data-pjax' => 0,
+                                            'class' => $tClass,
+                                            'style' => $tStyle
+                                        ]);
                                     },
                                     'ten' => function ($url, $model) {
 
@@ -367,16 +369,29 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
                                 ]
+                            ],
+                            [
+                                'label' => 'Сумма с НДС',
+                                'format' => ['decimal', 2],
+                                'hAlign' => 'right',
+                                'vAlign' => 'bottom',
+                                'value' => function ($model) {
+                                    $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
+                                    return $sumsnds;
+                                }
                             ]);
 
                         array_push($columns,
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'contentOptions' => ['style' => 'width: 6%;'],
-                                'template' => '{clear}&nbsp;',
+                                'template' => '{clear}&nbsp;{delete}',
                                 'visibleButtons' => [
                                     'clear' => function ($model, $key, $index) {
                                         // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                        return true;
+                                    },
+                                    'delete' => function ($model, $key, $index) {
                                         return true;
                                     },
                                 ],
@@ -384,10 +399,34 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'clear' => function ($url, $model) {
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                         $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/cleardata', 'id' => $model->id]);
-                                        return \yii\helpers\Html::a('<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
+                                        return \yii\helpers\Html::a('<i class="fa fa-sign-in padding-right-15" aria-hidden="true"></i>', $customurl,
                                             ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax' => "0"]);
                                     },
-                                ]
+                                    'delete' => function ($url, $model) {
+                                        $text = 'Удалить';
+                                        $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
+                                        $action = 'delete';
+                                        if(!$model->unload_status){
+                                            $action = 'restore';
+                                            $text = 'Восстановить';
+                                        }
+                                        return \yii\helpers\Html::a(
+                                            '<i class="fa fa-trash" aria-hidden="true"></i>',
+                                            '#',
+                                            [
+                                                'title' => Yii::t('backend', $text),
+                                                'data-pjax' => "0",
+                                                'id' => 'delete-waybill_' . $model->id,
+                                                'class' => 'delete-waybill',
+                                                'data-waybill-id' => $model->id,
+                                                'data-url' => $url,
+                                                'data-product-name' => $model->fproductname->product,
+                                                'data-status' => $model->unload_status,
+                                                'data-action' => $action,
+                                            ]
+                                        );
+                                    },
+                                ],
                             ]);
                         ?>
                         <?=
@@ -410,6 +449,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             'export' => [
                                 'fontAwesome' => true,
                             ],
+                            'rowOptions' => function ($model) {
+                                if(!$model->unload_status) {
+                                    return ['style' => 'opacity: 0.3;'];
+                                }
+                            },
                         ]);
                         ?>
 
@@ -506,6 +550,65 @@ $js = <<< JS
                 }
             })
         });
+        
+        FF = {};
+        FF.deleteBtn = {
+        	init: function(){
+        		$(document).on('click', '.delete-waybill', function () {
+        			var that = $(this),
+        			    url = that.data('url'),
+        			    id = that.data('waybill-id'),
+        			    name = that.data('product-name'),
+        			    action = that.data('action'),
+        			    status = that.data('status'),
+        			    title = that.prop('title');
+        			
+        			    status = status === 1 ? 0 : 1;
+        			    
+        			swal({
+		                title: 'Вы точно хотите '+ title.toLowerCase() + ' ' + name +' ?',
+		                type: 'info',
+		                showCancelButton: true,
+		                confirmButtonColor: '#3085d6',
+		                cancelButtonColor: '#d33',
+		                confirmButtonText: title,
+		                cancelButtonText: 'Отмена',
+		            }).then((result) => {
+		            	if(result.value){
+		            		$.ajax({
+				                url: url,
+				                method: 'POST',
+				                data:{
+				                    id: id,
+				                    action: action,
+				                    status: status
+				                },
+				                success: function (data) {
+				                	let el = $('#delete-waybill_' + id);
+				                	if(data.success){
+				                		if(data.action == 'delete'){
+						                    $('tr[data-key='+ id +']').css({opacity: '0.3'});
+						                    el.prop('title', 'Восстановить');
+						                    el.data('status', 0);
+						                    el.data('action', 'restore');
+				                		} else if(data.action == 'restore'){
+				                			$('tr[data-key='+ id +']').css({opacity: '1'});
+						                    el.prop('title', 'Удалить');
+						                    el.data('status', 1);
+						                    el.data('action', 'delete');
+				                		}
+				                		
+				                	}
+				                }
+				            });
+		            	}
+		            });
+        			
+        		});
+        	}
+        };
+        
+        FF.deleteBtn.init();
     });
 JS;
 

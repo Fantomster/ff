@@ -63,6 +63,10 @@ class mercLogger extends Component
         $journal->getErrors();
 
         $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml);
+
+        if ($journal->type == mercLog::REJECTED) {
+            throw new \Exception($journal->id, 600);
+        }
     }
 
     public function addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml)
@@ -83,9 +87,9 @@ class mercLogger extends Component
         $log->save();
         //var_dump($log->getErrors());
 
-        if ($log->status == mercLog::REJECTED) {
+        /*if ($log->status == mercLog::REJECTED) {
             throw new \Exception($log->id, 600);
-        }
+        }*/
     }
 
 

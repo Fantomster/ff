@@ -6,12 +6,15 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+
 $this->title = Yii::t('message', 'frontend.views.order.order', ['ru' => 'Заказ №']) . $order->id;
 
 if (!empty($order->invoice)) {
     $title = $this->title . ' ' . Yii::t('message', 'frontend.views.order.order_invoice_create', ['ru' => 'создан на основании накладной 1С']);
 
-    if(!empty($order->invoice->orderRelation)){
+    $title .= ' №' . $order->invoice->number . ' ';
+
+    if (!empty($order->invoice->orderRelation)) {
         $link = \yii\helpers\Html::a($order->invoice->orderRelation->id, '/order/' . $order->invoice->orderRelation->id);
         $lang = Yii::t('message', 'frontend.views.order.order_invoice', ['ru' => 'первичный заказ']);
         $title .= " ($lang №$link)";
@@ -61,10 +64,38 @@ $arr = [
     Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте ещё раз']),
 ];
 
+
+$organization = $user->organization;
+$lisences = $organization->getLicenseList();
+$list_integration = '';
+$links = [
+    'rkws' => [
+        'alter' => 'R_keeper',
+        'title' => 'R_keeper',
+        'url' => '/clientintegr/rkws/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+    ],
+    'iiko' => [
+        'title' => 'iiko Office',
+        'url' => '/clientintegr/iiko/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+    ],
+    'odinsobsh' => [
+        'title' => '1C',
+        'url' => '/clientintegr/odinsobsh/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+    ]
+];
+foreach ($links as $key => $val) {
+    if (isset($lisences[$key]) && $lisences[$key]) {
+        $list_integration .= '<br>' . Html::a($val['title'], Yii::$app->urlManager->createUrl($val['url']), [
+                'class' => 'btn btn-primary', 'style' => 'margin-top: 8px'
+            ]);
+    }
+}
+
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            
             var clickedButton = $(this);
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
@@ -86,6 +117,11 @@ $js = <<<JS
                         $('#actionButtons').html(result);
                         clickedButton.button("reset");
                 });
+                 swal(
+                'Накладная успешно привязана!',
+                'Перейти в интеграцию: $list_integration',
+                'success'
+                );
             }
         });
         $('.content').on('change keyup paste cut', '.view-data', function() {
@@ -238,7 +274,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     <h1>
         <i class="fa fa-history"></i> <?= $title ?>
         <?php
-        if (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code>0) {
+        if (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) {
             $alt = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
             echo ' ' . Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt]);
         }

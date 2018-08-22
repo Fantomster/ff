@@ -3,6 +3,8 @@
 namespace common\models\search;
 
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoodsBlocked;
+use common\models\Organization;
 use Yii;
 use common\models\guides\Guide;
 use yii\data\ActiveDataProvider;
@@ -109,6 +111,12 @@ class GuideSearch extends Guide
 
         if (isset($this->vendors)) {
             $query->andWhere(['IN', CatalogBaseGoods::tableName() . '.supp_org_id', $this->vendors]);
+        }
+
+        //Добавляем блокировку запрещенных товаров
+        $blockedItems = CatalogGoodsBlocked::getBlockedList($client_id);
+        if (!empty($blockedItems) && array_pop($blockedItems) != 0) {
+            $query->andWhere(["NOT IN", "cbg_id", $blockedItems]);
         }
 
         return $dataProvider;

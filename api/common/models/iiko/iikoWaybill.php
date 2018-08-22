@@ -126,7 +126,9 @@ class iikoWaybill extends \yii\db\ActiveRecord
                     $wdmodel->defquant = $record->quantity;
                     $wdmodel->defsum = round($record->price * $record->quantity, 2);
                     $wdmodel->vat = $taxVat;
-                    $wdmodel->org = $this->org;
+                    $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+                    $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $this->org]);
+                    $wdmodel->org = !is_null($obConstModel) ? $obConstModel->value : $this->org;
                     $wdmodel->koef = 1;
                     // Check previous
                     $ch = iikoWaybillData::find()
@@ -204,21 +206,21 @@ class iikoWaybill extends \yii\db\ActiveRecord
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><document></document>');
 
         $xml->addChild('comment', $model->note);
-        $xml->addChild('documentNumber', $model->num_code);
+        $xml->addChild('documentNumber', $model->order_id);
         $datetime = new \DateTime($model->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
         $xml->addChild('invoice', $model->text_code);
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
-        $xml->addChild('incomingDocumentNumber', $model->order_id);
+        $xml->addChild('incomingDocumentNumber', $model->num_code);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');
         /**
          * @var $row iikoWaybillData
          */
-        $records = iikoWaybillData::findAll(['waybill_id' => $model->id]);
+        $records = iikoWaybillData::findAll(['waybill_id' => $model->id, 'unload_status' => 1]);
         $vatPercent = 0;
         $discount = 0;
         //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);

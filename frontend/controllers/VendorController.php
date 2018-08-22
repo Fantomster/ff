@@ -93,6 +93,7 @@ class VendorController extends DefaultController {
                             'events',
                             'get-sub-cat',
                             'import-base-catalog-from-xls',
+                            'import-base-catalog',
                             'import',
                             'import-restaurant',
                             'list-catalog',
@@ -390,10 +391,15 @@ class VendorController extends DefaultController {
                                     where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
                                     andFilterWhere(['LIKE', 'name', $searchString])->all();
                 }
-                return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type'));
+            } else {
+                $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
+                                where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
+                                andFilterWhere(['LIKE', 'name', $searchString])->all();
             }
-            return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog'));
+            return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type'));
         }
+        return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog'));
+        //}
     }
 
     public function actionSupplierStartCatalogCreate() {
@@ -568,8 +574,7 @@ class VendorController extends DefaultController {
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         $cat_id = $baseCatalog->id;
-
-        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id'));
+        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id', 'currentUser'));
     }
 
     public function actionImport($id) {
@@ -2044,7 +2049,7 @@ class VendorController extends DefaultController {
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                             date('Y-m-d', strtotime($filter_to_date)) . "')" .
                             $where .
-                            ") AS `total_price`  
+                            ") AS `total_price`
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `$orderTable` where 
                 vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
@@ -2060,7 +2065,7 @@ class VendorController extends DefaultController {
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                             date('Y-m-d', strtotime($filter_to_date)) . "')" .
                             $where .
-                            ") AS `total_price`  
+                            ") AS `total_price`
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `$orderTable` LEFT JOIN `$maTable` ON `$orderTable`.client_id = `$maTable`.organization_id WHERE 
                 vendor_id = $currentUser->organization_id AND `$maTable`.manager_id = $currentUser->id and status<>" . Order::STATUS_FORMING . " and("
@@ -2178,18 +2183,26 @@ class VendorController extends DefaultController {
 
         $managerCondition = Yii::$app->user->can('manage') ? '' : "AND `manager_associate`.manager_id = $currentUser->id";
         $managerJoin = Yii::$app->user->can('manage') ? '' : "LEFT JOIN `manager_associate` ON `order`.client_id = `manager_associate`.organization_id ";
-
+    
+        $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date, 'vendor_id');
+        $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
+        empty($filter_currency) ? $where = " and currency_id='1'" : $where = " and currency_id='" . $filter_currency . "'";
+        
+        uksort($currencyList, function ($a, $b) use ($filter_currency){
+            return $a == $filter_currency ? -1 : 1;
+        });
+        
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
             (select sum(total_price) FROM `order` $managerJoin
             where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
             vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and ("
                         . "DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                        date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                        ") AS `total_price`  
+                        date('Y-m-d', strtotime($filter_to_date)) . "')" . $where .
+                        ") AS `total_price`
             FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
             FROM `order` $managerJoin where 
-            vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and("
+            vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . $where . " and("
                         . "DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
@@ -2208,18 +2221,18 @@ class VendorController extends DefaultController {
         //------>Статистика
         $stats = Yii::$app->db->createCommand("SELECT
             (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . $where . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
             (SELECT sum(total_price) FROM `order` $managerJoin 
-             WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
+             WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . $where . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW())))
             as 'curMonth',
             (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . $where . " and YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
              as 'curWeek',
             (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . $where . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
             as 'lastMonth',
             (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . $where . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
             as 'TwoLastMonth'")->queryOne();
         // <-------Статистика
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
@@ -2238,8 +2251,9 @@ class VendorController extends DefaultController {
 
         $organization = $currentUser->organization;
         $profile = $currentUser->profile;
+    
         return $this->render('index', compact(
-                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats', 'organization', 'profile'
+                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats', 'organization', 'profile', 'currencyList'
         ));
     }
 

@@ -303,7 +303,7 @@ Modal::end();
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
-                            'href' => Url::to(['/vendor/import', 'id' => $cat_id]),
+                            'href' => Url::to(['/vendor/import-base-catalog', 'id' => $cat_id]),
                             'style' => 'margin-right:10px;',
                         ],
                     ])
@@ -709,20 +709,20 @@ $(document).on("click", ".del-product", function(e){
             className: "danger-fk",
             callback: function(result) {
 		if(result){
-		$.ajax({
-	        url: "$deleteProductUrl",
-	        type: "POST",
-	        dataType: "json",
-	        data: {'id' : id},
-	        cache: false,
-	        success: function(response) {
-		        if(response.success){
-			        $.pjax.reload({container: "#kv-unique-id-1"}); 
-			        }else{
-				    console.log('$var5');    
-			        }
-		        }	
-		    });
+                    $.ajax({
+                    url: "$deleteProductUrl",
+                    type: "POST",
+                    dataType: "json",
+                    data: {'id' : id},
+                    cache: false,
+                    success: function(response) {
+                            if(response.success) {
+                                $.pjax.reload({container: "#kv-unique-id-1"}); 
+                            } else {
+                                console.log('$var5');    
+                            }
+                        }	
+                    });
 		}else{
 		console.log('cancel');	
 		}
@@ -736,6 +736,9 @@ $("#instruction").on('show.bs.modal', function(){
 $("#video").attr('src', url);
 });
 $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
+    $(this).data("bs.modal", null);
+})
+$(document).on("hidden.bs.modal", "#importToXls", function() {
     $(this).data("bs.modal", null);
 })
 $("body").on("show.bs.modal", "#add-product-market-place", function() {
@@ -778,6 +781,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             cancelButtonText: '$var4',
             showLoaderOnConfirm: true,
             confirmButtonText: '$var13',
+            cancelButtonText: '$cancelText',
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
@@ -809,10 +813,11 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                         '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency],
                     showCancelButton: true,
                     showLoaderOnConfirm: true,
+                    cancelButtonText: '$cancelText',
                     allowOutsideClick: false,
                     preConfirm: function () {
                         return new Promise(function (resolve) {
-                             $.post(
+                            $.post(
                                 "{$changeCurrencyUrl}",
                                 {newCurrencyId: newCurrency}
                             ).done(function (response) {

@@ -23,10 +23,12 @@ use Yii;
  * @property double $koef
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $unload_status
  */
 class iikoWaybillData extends \yii\db\ActiveRecord
 {
     public $pdenom;
+    public $enable_all_map = true;
 
     /**
      * @inheritdoc
@@ -93,6 +95,8 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
+            'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
+            'unload_status' => Yii::t('app', 'Статус для отправления'),
         ];
     }
 
@@ -127,12 +131,15 @@ class iikoWaybillData extends \yii\db\ActiveRecord
         $check = $this::find()
             ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
             ->andwhere('product_rid is null or munit is null')
+            ->andWhere('unload_status=1')
             ->count('*');
 
         if ($check > 0) {
             $wmodel->readytoexport = 0;
+            $wmodel->status_id = 1;
         } else {
             $wmodel->readytoexport = 1;
+            $wmodel->status_id = 4;
         }
 
         if (!$wmodel->save(false)) {
@@ -170,11 +177,12 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     public function getSumByWaybillid($number)
     {
         Yii::$app->get('db_api');
-        $sum=0;
+        $sum = 0;
         $summes = iikoWaybillData::find()->where(['waybill_id' => $number])->all();
         foreach ($summes as $summa) {
-            $sum+=$summa->sum;
+            $sum += $summa->sum;
         }
+        $sum = number_format($sum, 2, ',', ' ');
         return $sum;
     }
 }

@@ -1,179 +1,526 @@
+...
+
 <?php
 
+use yii\widgets\ActiveForm;
+use yii\widgets\Breadcrumbs;
+use yii\widgets\Pjax;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
-use common\models\Order;
-use common\models\Organization;
-use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
-use yii\widgets\Breadcrumbs;
-use common\models\Role;
+use common\components\SearchOrdersComponent;
+use common\components\EchoRu;
+use common\models\search\OrderSearch;
+use common\models\Order;
+use yii\grid\CheckboxColumn;
+use common\components\UrlPjax;
+use kartik\select2\Select2;
 
-$this->title = Yii::t('message', 'frontend.views.order.order_four', ['ru' => 'Заказы']);
+/**
+ * Order list view [basic]
+ * @createdBy Basil A Konakov
+ * @createdAt 2018-08-14
+ * @author Mixcart
+ * @module Frontend
+ * @version 1.0
+ */
+
+/** @var $totalPrice int sum of total_price for orders */
+/** @var $counts array Counts */
+/** @var $searchParams array Search Params */
+/** @var $searchModel OrderSearch */
+/** @var $affiliated array */
+/** @var $businessType string */
+/** @var $selected array */
+
+$forVendor = FALSE;
+$forRestaurant = FALSE;
+if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) {
+    $forVendor = TRUE;
+}
+if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
+    $forRestaurant = TRUE;
+}
+
+$headers = [
+    'vendor' => EchoRu::echo ('frontend.views.order.vendor', 'Поставщик'),
+    'client' => EchoRu::echo ('frontend.views.order.rest_two', 'Ресторан'),
+];
+
+
+$dataColumns = [
+
+    // 1. ЧЕКБОКС (ТОЛЬКО ПОСТАВЩИКИ)
+    [
+        'visible' => $forVendor,
+        'class' => CheckboxColumn::class,
+        'contentOptions' => ['class' => 'small_cell_checkbox'],
+        'headerOptions' => ['style' => 'text-align:center'],
+        'checkboxOptions' => function ($model) use ($selected) {
+            return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => in_array($model['id'], $selected)];
+        }
+    ],
+
+    // 2. ID заказа
+    [
+        'attribute' => 'id',
+        'label' => '№',
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_id'],
+        'value' => function ($data) {
+            return UrlPjax::make($data->id, 'order/view');
+        },
+    ],
+
+    // 3. Контрагент по договору поставки
+    ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) ? [
+        'attribute' => 'vendor.name',
+        'label' => $headers['vendor'],
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_supp'],
+        'value' => function ($data) {
+            $text = NULL;
+            if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code > 0) {
+                $alt = EchoRu::echo ('frontend.views.client.suppliers.edi_alt_text',
+                    'Поставщик работает через систему электронного документооборота', 'app');
+                $text = Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt, 'width' => 35]);
+            }
+            $url = UrlPjax::make($data->vendor->name ?? '', 'order/view', $data->id);
+            return "<div class='col-md-10'>" . $url . " </div><div class='col-md-2'>" . $text . "</div>";
+        },
+    ] : [
+        'attribute' => 'client.name',
+        'label' => $headers['client'],
+        'format' => 'raw',
+        'value' => function ($data) {
+            return UrlPjax::make($data->client->name ?? '', 'order/view', $data->id);
+        },
+    ],
+
+    // 4. Кто создал заказ
+    [
+        'attribute' => 'createdByProfile.full_name',
+        'label' => EchoRu::echo ('frontend.views.order.order_created_by', 'Заказ создал'),
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_sozdal'],
+        'value' => function ($data) {
+            return UrlPjax::make($data->createdByProfile->full_name ?? '', 'order/view', $data->id);
+        },
+    ],
+
+    // 5. Кто принял заказ
+    [
+        'attribute' => 'acceptedByProfile.full_name',
+        'label' => EchoRu::echo ('frontend.views.order.accepted_by', 'Заказ принял'),
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_prinyal', 'style' => 'min-width: 120px;'],
+        'value' => function ($data) {
+            return UrlPjax::make($data->acceptedByProfile->full_name ?? '', 'order/view', $data->id);
+        },
+    ],
+
+    // 6. Сумма
+    [
+        'attribute' => 'total_price',
+        'label' => EchoRu::echo ('frontend.views.order.summ', 'Сумма'),
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_sum', 'style' => 'min-width: 120px; text-align: right'],
+        'value' => function ($data) {
+            $title = $data->currency->symbol ?? '';
+            return UrlPjax::make("<b>$data->total_price</b> " . $title, 'order/view', $data->id);
+        },
+    ],
+
+    // 7. Дата создания
+    [
+        'attribute' => 'created_at',
+        'label' => EchoRu::echo ('frontend.views.order.creating_date', 'Дата создания'),
+        'format' => 'raw',
+        'contentOptions' => ['style' => 'min-width: 120px; text-align: center'],
+        'value' => function ($data) {
+            $title = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
+            return UrlPjax::make('<i class="fa fa-fw fa-calendar""></i> ' . $title, 'order/view', $data->id);
+        },
+    ],
+
+    // 8. Дата завершения
+    [
+        'attribute' => 'finished_at',
+        'label' => EchoRu::echo ('frontend.views.order.final_date', 'Дата финальная'),
+        'format' => 'raw',
+        'contentOptions' => ['style' => 'min-width: 120px; text-align: center'],
+        'value' => function ($data) {
+            $fdate = ($data->requested_delivery) ? $data->requested_delivery : $data->updated_at;
+            $fdate = $data->actual_delivery ? $data->actual_delivery : $fdate;
+            $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
+            $title = '<i class="fa fa-fw fa-calendar""></i> ' . $fdate ?? '';
+            return UrlPjax::make($title, 'order/view', $data->id);
+        },
+    ],
+
+    // 9. Статус
+    [
+        'attribute' => 'status',
+        'label' => EchoRu::echo ('frontend.views.order.status_two', 'Статус'),
+        'format' => 'raw',
+        'contentOptions' => ['class' => 'small_cell_status'],
+        'value' => function ($data) {
+            $statusClass = '';
+            switch ($data->status) {
+                case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                    $statusClass = 'new';
+                    break;
+                case Order::STATUS_PROCESSING:
+                    $statusClass = 'processing';
+                    break;
+                case Order::STATUS_DONE:
+                    $statusClass = 'done';
+                    break;
+                case Order::STATUS_REJECTED:
+                case Order::STATUS_CANCELLED:
+                    $statusClass = 'cancelled';
+                    break;
+            }
+            $title = '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '';
+            return UrlPjax::make($title, 'order/view', $data->id);
+
+        },
+    ],
+    [
+        'visible' => $forRestaurant,
+        'format' => 'raw',
+        'value' => function ($data) {
+            $class = $message = $message_orig = $url = NULL;
+            if (in_array($data->status, [Order::STATUS_DONE, Order::STATUS_REJECTED, Order::STATUS_CANCELLED])) {
+                $message_orig = EchoRu::echo ('frontend.views.order.repeat_order', 'Повторить заказ');
+                $message = EchoRu::echo ('frontend.views.order.repeat', 'Повторить');
+                $class = 'reorder btn btn-outline-processing';
+                $url = 'order/repeat';
+            } elseif ($data->isObsolete) {
+                $message_orig = EchoRu::echo ('frontend.views.order.complete_order', 'Завершить заказ');
+                $message = EchoRu::echo ('frontend.views.order.complete', 'Завершить');
+                $class = 'complete btn btn-outline-success';
+                if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code > 0) {
+                    $class = 'complete btn btn-outline-success completeEdi';
+                }
+                $url = 'complete-obsolete';
+            }
+            if ($class) {
+                return Html::a($message, '#', [
+                    'class' => $class,
+                    'data' => ['toggle' => 'tooltip', 'original-title' => $message_orig,
+                        'url' => Url::to([$url, 'id' => $data->id])],
+                ]);
+            }
+            return NULL;
+        },
+        'contentOptions' => ['class' => 'text-center'],
+        'headerOptions' => ['style' => 'width: 20px;']
+    ],
+];
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 1. ПАРАМЕТРЫ СТРАНИЦЫ (СЕРВИСНАЯ ИНФОРМАЦИЯ)
+$this->title = EchoRu::echo ('frontend.views.order.order_four', 'Заказы');
+#-----------------------------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 2. ЛОКАЛИЗАЦИЯ, НАДПИСИ И ТЕКСТЫ
+#-----------------------------------------------------------------------------------------------------------------------
+# 2.1. СТАТА
+$msg = [
+    'new' => EchoRu::echo ('frontend.views.order.new', 'Новые'),
+    'processing' => EchoRu::echo ('frontend.views.order.in_process', 'Выполняются'),
+    'fulfilled' => EchoRu::echo ('frontend.views.order.ended', 'Завершено'),
+    'totalPrice' => EchoRu::echo ('frontend.views.order.summ_completed', 'Всего выполнено на сумму'),
+];
+$stata = [
+    'totalPrice' => Yii::$app->formatter->asDecimal($totalPrice, 2),
+];
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 2.2. КНОПКИ
+$btn = [
+    'excel' => EchoRu::echo ('frontend.views.order.index.report', 'отчет xls', 'app'),
+    'grid' => EchoRu::echo ('frontend.views.order.index.grid-report', 'Сеточный отчет', 'app'),
+];
+#-----------------------------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 3. ФИЛЬТРЫ (В виде инпутов или селектов)
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.1. Заголовки фильтров
+$filterLabels = [
+    'orderId' => EchoRu::echo ('frontend.views.order.id', 'Номер заказа'),
+    'orderAff' => EchoRu::echo ('frontend.views.order.clients', 'Рестораны'),
+    'orderLastUpdated' => EchoRu::echo ('frontend.views.order.last_updated.range',
+        'Начальная дата / Конечная дата'),
+    'orderStatus' => EchoRu::echo ('frontend.views.order.status', 'Статус'),
+];
+if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
+    $filterLabels['orderAff'] = EchoRu::echo ('frontend.views.order.vendors', 'Поставщики');
+}
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.2. Виджеты фильтров
+$filterWidgetNames = [
+    'orderAff' => Select2::class,
+    'orderStatus' => Select2::class,
+];
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.3. Опции фильтров
+$filterOptions = [
+    'orderAff' => $affiliated,
+    'orderStatus' => [
+        EchoRu::echo ('frontend.views.order.all', 'Все'),
+        EchoRu::echo ('frontend.views.order.new', 'Новый'),
+        EchoRu::echo ('frontend.views.order.canceled', 'Отменен'),
+        EchoRu::echo ('frontend.views.order.in_process_two', 'Выполняется'),
+        EchoRu::echo ('frontend.views.order.completed', 'Завершен'),
+    ],
+];
+$filterOptions['orderAff'][''] = EchoRu::echo ('frontend.views.order.select.aff.all', 'Все');
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.4. Плейсхолдеры / значения фильтров (для селектов типа kartik - те же самые предустановленные значения фильтров)
+$filterValues = [
+    'orderId' => EchoRu::echo ('frontend.views.order.id', 'Номер заказа'),
+    'orderAff' => $filterOptions['orderAff'][''],
+    'orderStatus' => $filterOptions['orderStatus'][0],
+    'dateFrom' => $searchParams['OrderSearch2']['date_from'] ?? '',
+    'dateTo' => $searchParams['OrderSearch2']['date_to'] ?? '',
+];
+if (isset($searchParams['OrderSearch']['id']) && (int)$searchParams['OrderSearch']['id'] > 0) {
+    $filterValues['id'] = (int)$searchParams['OrderSearch2']['id'];
+}
+#-----------------------------------------------------------------------------------------------------------------------
+# 3.5. Динамичные идентификаторы (для ресторанов и для поставщиков типы контрагентов различаются)
+$filterSwitcher = [
+    'orderAff' => 'client_id',
+];
+if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
+    $filterSwitcher['orderAff'] = 'vendor_id';
+}
+#-----------------------------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 4. ДОПОЛНЕНИЕ ДАННЫХ JS и CSS
+#-----------------------------------------------------------------------------------------------------------------------
 $urlExport = Url::to(['/order/export-to-xls']);
 $urlReport = Url::to(['/order/grid-report']);
 $urlSaveSelected = Url::to(['/order/save-selected-orders']);
-$urlGetVSDList = Url::to(['/order/ajax-get-vsd-list']);
-$this->registerJs('
-    $("document").ready(function(){
-        var justSubmitted = false;
-        $(".box-body").on("change", "#statusFilter", function() {
-            $("#search-form").submit();
-        });
-        $(".box-body").on("change", "#ordersearch-vendor_id", function() {
-            $("#search-form").submit();
-        });
-        $(".box-body").on("change", "#ordersearch-client_id", function() {
-            $("#search-form").submit();
-        });
-        $(".box-body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#search-form").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-        $(".box-body").on("click", "td", function (e) {
-            if($(this).find("input").hasClass("checkbox-export")){
-                return true;
-            }
-            if ($(this).find("a").hasClass("reorder") || 
-                $(this).find("a").hasClass("complete")
-            ){
-                return true;
-            }
-            
-            var url = $(this).parent("tr").data("url");
-            if (url !== undefined) {
-                location.href = url;
-            }
-        });
+$i = 'Внимание, данные о фактическом приёме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете корректность данных?';
+$titleCompleteEDI = EchoRu::echo ('frontend.views.order.complete_edi', $i, 'app');
+$btnYes = EchoRu::echo ('frontend.views.order.yep', 'Да');
+$btnNo = EchoRu::echo ('frontend.views.order.cancel', 'Нет');
+$js = <<< JS
+$("document").ready(function () {
 
-        $(document).on("click", ".reorder, .complete", function(e) {
-            e.preventDefault();
-            clicked = $(this);
-            if($(this).hasClass("completeEdi")){
-                var title = "' . Yii::t('app', 'frontend.views.order.complete_edi', ['ru' => 'Внимание, данные о фактическом приёме товара будут направлены ПОСТАВЩИКУ! Вы подтверждаете корректность данных?']) . ' ";
-            }else{
-                var title = clicked.data("original-title") + "?";
-            }
-            swal({
-                title: title,
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep', ['ru' => 'Да']) . ' ",
-                cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel', ['ru' => 'Отмена']) . ' ",
-                showLoaderOnConfirm: true,
-            }).then(function(result) {
-                if (result.dismiss === "cancel") {
-                    swal.close();
-                } else {
-                    document.location = clicked.data("url")
-                }
-            });
-        });
-
+    $(".box-body").on("change", "#orderFilter", function () {
+        var target = "http:";
+        var w = window.location.protocol;
+        if (w === "https:") {
+            target = "https:";
+        }
+        target = target + '//' + window.location.hostname + '/order?OrderSearch2[id]=' + $("#orderFilter").val();
+        window.location.href = target;
     });
-    $(document).on("click", ".export-to-xls", function(e) {
-        if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
-            window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;  
+
+    var justSubmitted = false;
+    $(".box-body").on("change", "#dateFrom, #dateTo", function () {
+        if (!justSubmitted) {
+            $("#search-form").submit();
+            justSubmitted = true;
+            setTimeout(function () {
+                justSubmitted = false;
+            }, 500);
         }
     });
-    
-    $(document).on("click", ".grid-report", function(e) {
-        if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
-            window.location.href = "' . $urlReport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page;  
+
+    $(".box-body").on("change", "#ordersearch2-doc_status", function () {
+        $("#search-form").submit();
+    });
+
+    $(document).on("click", ".export-to-xls", function () {
+        if ($("#orderHistory").yiiGridView("getSelectedRows").length > 0) {
+            window.location.href = "$urlExport?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page;
+        }
+
+    });
+    $(document).on("click", ".grid-report", function () {
+        if ($("#orderHistory").yiiGridView("getSelectedRows").length > 0) {
+            window.location.href = "$urlReport?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page;
         }
     });
-    
+
     var current_page = 0;
-     $(document).on("click", ".pagination a", function(e) {
-          e.preventDefault();
-          url = $(this).attr("href");
+    $(document).on("click", ".pagination a", function (e) {
+        e.preventDefault();
+        var url = $(this).attr("href");
 
-           $.ajax({
-             url: "'.$urlSaveSelected.'?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows")+"&page="+current_page,
-             type: "GET",
-             success: function(){
-                 $.pjax.reload({container: "#order-list", url: url, timeout:30000});
-             }
-           });
-           
-           current_page = $(this).attr("data-page")
+        $.ajax({
+            url: "$urlSaveSelected?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page,
+            type: "GET",
+            success: function () {
+                $.pjax.reload({container: "#order-list", url: url, timeout: 30000});
+            }
+        });
+
+        current_page = $(this).attr("data-page")
     });
-');
 
+    $(".box-body").on("click", "td", function () {
+        if ($(this).find("input").hasClass("checkbox-export")) {
+            return true;
+        }
+        if ($(this).find("a").hasClass("reorder") ||
+            $(this).find("a").hasClass("complete")
+        ) {
+            return true;
+        }
 
-$this->registerCss("
-    tr:hover{cursor: pointer;}
-    #orderHistory a:not(.btn){color: #333;}
-    .dataTable a{width: 100%; min-height: 17px; display: inline-block;}
-    #select2-ordersearch-vendor_id-container, #select2-ordersearch-client_id-container{margin-top:0;}
-    .select2-selection__clear{display: none;}
-        ");
+        var url = $(this).parent("tr").data("url");
+        if (url !== undefined) {
+            location.href = url;
+        }
+    });
+
+    $(document).on("click", ".reorder, .complete", function (e) {
+        e.preventDefault();
+        var title;
+        var clicked = $(this);
+        if ($(this).hasClass("completeEdi")) {
+            title = "$titleCompleteEDI";
+        } else {
+            title = clicked.data("original-title") + "?";
+        }
+        swal({
+            title: title,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "$btnYes",
+            cancelButtonText: "$btnNo",
+            showLoaderOnConfirm: true
+        }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                document.location = clicked.data("url")
+            }
+        });
+    });
+
+});   
+JS;
+$js2 = NULL;
+if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
+    $js2 = <<< JS
+$("document").ready(function () {
+    $(".box-body").on("change", "#ordersearch2-vendor_id", function () {
+        $("#search-form").submit();
+    });
+});
+  
+JS;
+} elseif ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) {
+    $js2 = <<< JS
+ $("document").ready(function () {
+    $(".box-body").on("change", "#ordersearch2-client_id", function () {
+        $("#search-form").submit();
+    });
+});
+JS;
+}
+$this->registerJs($js . $js2);
+#-----------------------------------------------------------------------------------------------------------------------
+$css = <<< CSS
+
+tr:hover {
+    cursor: pointer;
+}
+
+#orderHistory a:not(.btn) {
+    color: #333;
+}
+
+.dataTable a {
+    width: 100%;
+    min-height: 17px;
+    display: inline-block;
+}
+
+#select2-ordersearch2-vendor_id-container, #select2-ordersearch2-client_id-container {
+    margin-top: 0;
+}
+
+.select2-selection__clear {
+    display: none;
+}
+
+#select2-ordersearch2-vendor_id-container,
+#select2-ordersearch2-client_id-container,
+#select2-ordersearch2-doc_status-container {
+    margin-top: 0 !important
+}
+
+CSS;
+$this->registerCss($css);
+#-----------------------------------------------------------------------------------------------------------------------
 ?>
+
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.views.order.orders', ['ru' => 'Заказы']) ?>
-        <small><?= Yii::t('message', 'frontend.views.order.orders_list', ['ru' => 'Список всех созданных заказов']) ?></small>
+        <i class="fa fa-history"></i> <?= EchoRu::echo ('frontend.views.order.orders', 'Заказы') ?>
+        <small>
+            <?= EchoRu::echo ('frontend.views.order.orders_list', 'Список всех созданных заказов') ?>
+        </small>
     </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
-        'links' => [
-            Yii::t('message', 'frontend.views.order.orders_history', ['ru' => 'История заказов']),
-        ],
+    <?= Breadcrumbs::widget([
+        'options' => ['class' => 'breadcrumb',],
+        'homeLink' => ['label' => EchoRu::echo ('frontend.views.to_main', 'Главная', 'app'),
+            'url' => '/'],
+        'links' => [EchoRu::echo ('frontend.views.order.orders_history', 'История заказов')],
     ])
     ?>
 </section>
 <section class="content">
     <div class="box box-info order-history">
         <div class="box-body">
-
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box">
                     <div class="info-box-content">
-                        <span class="info-box-number status new"><?= $newCount ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новые']) ?></span>
+                        <span class="info-box-number status new"><?= $counts['new'] ?></span>
+                        <span class="info-box-text"><?= $msg['new'] ?></span>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box">
                     <div class="info-box-content">
-                        <span class="info-box-number status processing"><?= $processingCount ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.in_process', ['ru' => 'Выполняются']) ?></span>
+                        <span class="info-box-number status processing"><?= $counts['processing'] ?></span>
+                        <span class="info-box-text"><?= $msg['processing'] ?></span>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box">
                     <div class="info-box-content">
-                        <span class="info-box-number status done"><?= $fulfilledCount ?></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.ended', ['ru' => 'Завершено']) ?></span>
+                        <span class="info-box-number status done"><?= $counts['fulfilled'] ?></span>
+                        <span class="info-box-text"><?= $msg['fulfilled'] ?></span>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box bg-total-price">
                     <div class="info-box-content">
-                        <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> <i
-                                    class="fa fa-fw fa-rub"></i></span>
-                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.summ_completed', ['ru' => 'Всего выполнено на сумму']) ?></span>
+                        <span class="info-box-number"><?= $stata['totalPrice'] ?> <i class="fa fa-fw fa-rub"></i></span>
+                        <span class="info-box-text"><?= $msg['totalPrice'] ?></span>
                     </div>
                 </div>
             </div>
             <div style="clear: both;">
             </div>
         </div>
-        <!-- /.box-body -->
     </div>
     <div class="box box-info order-history">
         <div class="box-body">
@@ -183,7 +530,6 @@ $this->registerCss("
                 'options' => [
                     'data-pjax' => true,
                     'id' => 'search-form',
-                    //'class' => "navbar-form",
                     'role' => 'search',
                 ],
                 'enableClientValidation' => false,
@@ -191,66 +537,68 @@ $this->registerCss("
             ]);
             ?>
             <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6">
-                    <?=
-                    $form->field($searchModel, 'status')
-                        ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru' => 'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru' => 'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru' => 'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru' => 'Завершён'])], ['id' => 'statusFilter'])
-                        ->label(Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']), ['class' => 'label', 'style' => 'color:#555'])
-                    ?>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6">
+                <div class="col-lg-1 col-md-2 col-sm-6" style="width: 150px;">
+
                     <?php
-                    if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                        echo $form->field($searchModel, 'vendor_id')->widget(\kartik\select2\Select2::classname(), [
-                            'data' => $organization->getSuppliers(),
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                            'id' => 'orgFilter'
-                        ])->label(Yii::t('message', 'frontend.views.order.vendors', ['ru' => 'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
-                    } else {
-                        echo $form->field($searchModel, 'client_id')->widget(\kartik\select2\Select2::classname(), [
-                            'data' => $organization->getClients(),
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ])->label(Yii::t('message', 'frontend.views.order.rest', ['ru' => 'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
-                    }
+                    # 1. INPUT ORDER ID Filter field
+                    echo $form->field($searchModel, 'id')
+                        ->textInput(['id' => 'orderFilter', 'class' => 'form-control', 'value' => '',
+                            'style' => 'width: 130px; margin-right: 20px', 'placeholder' => $filterValues['orderId']])
+                        ->label($filterLabels['orderId'], ['class' => 'label', 'style' => 'color:#555']);
                     ?>
                 </div>
-                <div class="col-lg-5 col-md-6 col-sm-6">
-                    <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                    <div class="form-group" style="width: 300px; height: 44px;">
-                        <?=
-                        DatePicker::widget([
+                <div class="col-lg-2 col-md-2 col-sm-6" style="width: 240px;">
+                    <?php
+                    # 2. SELECT SUPPLIER Filter field
+                    echo $form->field($searchModel, $filterSwitcher['orderAff'])->widget($filterWidgetNames['orderAff'], [
+                        'data' => $filterOptions['orderAff'],
+                        'pluginOptions' => ['allowClear' => TRUE],
+                        'id' => 'orgFilter',
+                    ])->label($filterLabels['orderAff'], ['class' => 'label', 'style' => 'color:#555']);
+                    ?>
+                </div>
+
+                <div class="col-lg-3 col-md-3 col-sm-6" style="width: 440px;">
+                    <?php
+                    # 3. RANGE ORDER LAST_UPDATED Filter field
+                    echo Html::label($filterLabels['orderLastUpdated'], null, ['class' => 'label', 'style' => 'color:#555']);
+                    ?>
+                    <div class="form-group">
+                        <?= DatePicker::widget([
                             'model' => $searchModel,
-                            'attribute' => 'date_from',
-                            'attribute2' => 'date_to',
-                            'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
-                            'separator' => '-',
-                            'type' => DatePicker::TYPE_RANGE,
-                            'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                'autoclose' => true,
-                                'endDate' => "0d",
-                            ]
-                        ])
+                            'attribute' => 'date_from', 'attribute2' => 'date_to',
+                            'options' => ['placeholder' => $filterValues['dateFrom'], 'id' => 'dateFrom', 'style' => "min-width: 100px"],
+                            'options2' => ['placeholder' => $filterValues['dateTo'], 'id' => 'dateTo', 'style' => "min-width: 100px"],
+                            'separator' => '-', 'type' => DatePicker::TYPE_RANGE,
+                            'pluginOptions' => ['format' => 'dd.mm.yyyy', 'autoclose' => true, 'endDate' => "0d"],
+                        ]);
                         ?>
                     </div>
                 </div>
-                <div class="col-lg-5 col-md-6 col-sm-6">
-
+                <div class="col-lg-2 col-md-3 col-sm-6" style=" width: 240px;">
+                    <?php
+                    # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
+                    echo $form->field($searchModel, 'doc_status')->widget($filterWidgetNames['orderStatus'], [
+                        'data' => $filterOptions['orderStatus'], 'options' => ['placeholder' => $filterValues['orderStatus']],
+                        'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
+                        'id' => 'docStatus',
+                    ])->label($filterLabels['orderStatus'], ['class' => 'label', 'style' => 'color:#555']);
+                    ?>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
+                    <a class="btn btn-warning" href="<?= Url::to(['/orders?OrderSearch2[reset]=1']) ?>">Сбросить фильтры</a>
                 </div>
             </div>
-            <?php ActiveForm::end(); ?>
-            <?php if ($organization->type_id == Organization::TYPE_SUPPLIER) { ?>
-                <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> ' . Yii::t('app', 'frontend.views.order.index.report', ['ru' => 'отчет xls']), ['class' => 'btn btn-success export-to-xls']) ?>
-                <?= Html::submitButton('<i class="fa fa-th"></i> ' . Yii::t('app', 'frontend.views.order.index.grid-report', ['ru' => 'Сеточный отчет']), ['class' => 'btn btn-success grid-report']) ?>
+            <?php if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) { ?>
+                <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> ' . $btn['excel'],
+                    ['class' => 'btn btn-success export-to-xls']) ?>
+                <?= Html::submitButton('<i class="fa fa-th"></i> ' . $btn['grid'],
+                    ['class' => 'btn btn-success grid-report']) ?>
             <?php } ?>
             <div class="row">
                 <div class="col-md-12">
-                <?= GridView::widget([
+                    <?= GridView::widget([
                         'id' => 'orderHistory',
                         'dataProvider' => $dataProvider,
                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
@@ -258,175 +606,15 @@ $this->registerCss("
                         'filterPosition' => false,
                         'summary' => '',
                         'options' => ['class' => 'table-responsive'],
-                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
-                        'columns' => [
-                            [
-                                'visible' => ($organization->type_id == Organization::TYPE_SUPPLIER) ? true : false,
-                                'class' => 'yii\grid\CheckboxColumn',
-                                'contentOptions' => ['class' => 'small_cell_checkbox'],
-                                'headerOptions' => ['style' => 'text-align:center;'],
-                                'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
-                                    return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => in_array($model['id'], $selected)];
-                                }
-                            ],
-                            [
-                                'attribute' => 'id',
-                                'label' => '№',
-                                'contentOptions' => ['class' => 'small_cell_id'],
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return Html::a($data->id, Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                            ],
-                            $organization->type_id == Organization::TYPE_RESTAURANT ? [
-                                'attribute' => 'vendor.name',
-                                'value' => 'vendor.name',
-                                'contentOptions' => ['class' => 'small_cell_supp'],
-                                'label' => Yii::t('message', 'frontend.views.order.vendor', ['ru' => 'Поставщик']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    $text = "<div class='col-md-10'>";
-                                    $text .= Html::a($data->vendor->name, Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                    $text .= "</div><div class='col-md-2'>";
-                                    if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0) {
-                                        $alt = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
-                                        $text .= Html::img(Url::to('/img/edi-logo.png'), ['alt' => $alt, 'title' => $alt, 'width' => 35]);
-                                    }
-                                    $text .= "</div>";
-                                    return $text;
-                                },
-                            ] : [
-                                'attribute' => 'client.name',
-                                'value' => 'client.name',
-                                'label' => Yii::t('message', 'frontend.views.order.rest_two', ['ru' => 'Ресторан']),
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return Html::a($data->client->name, Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                            ],
-                            [
-                                'attribute' => 'createdByProfile.full_name',
-                                'value' => 'createdByProfile.full_name',
-                                'label' => Yii::t('message', 'frontend.views.order.order_created_by', ['ru' => 'Заказ создал']),
-                                'contentOptions' => ['class' => 'small_cell_sozdal'],
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return Html::a($data->createdByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                            ],
-                            [
-                                'attribute' => 'acceptedByProfile.full_name',
-                                'value' => 'acceptedByProfile.full_name',
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    return Html::a($data->acceptedByProfile->full_name ?? '', Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                                'label' => Yii::t('message', 'frontend.views.order.accepted_by', ['ru' => 'Заказ принял']),
-                                'contentOptions' => ['class' => 'small_cell_prinyal'],
-                            ],
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'total_price',
-                                'value' => function ($data) {
-                                    return Html::a("<b>$data->total_price</b> " . $data->currency->symbol ?? '', Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                                'label' => Yii::t('message', 'frontend.views.order.summ', ['ru' => 'Сумма']),
-                                'contentOptions' => ['class' => 'small_cell_sum'],
-                            ],
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'created_at',
-                                'value' => function ($data) {
-                                    $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> ' . $date ?? '', Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                                'label' => Yii::t('message', 'frontend.views.order.creating_date', ['ru' => 'Дата создания']),
-                                'contentOptions' => ['style' => 'min-width:120px;'],
-
-                            ],
-                            [
-                                'format' => 'raw',
-                                'value' => function ($data) {
-
-                                    $fdate = $data->actual_delivery ? $data->actual_delivery :
-                                        ($data->requested_delivery ? $data->requested_delivery :
-                                            $data->updated_at);
-
-                                    $fdate = Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
-                                    return Html::a('<i class="fa fa-fw fa-calendar""></i> ' . $fdate ?? '', Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                                'label' => Yii::t('message', 'frontend.views.order.final_date', ['ru' => 'Дата финальная']),
-                            ],
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'status',
-                                'value' => function ($data) {
-                                    switch ($data->status) {
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                            $statusClass = 'new';
-                                            break;
-                                        case Order::STATUS_PROCESSING:
-                                            $statusClass = 'processing';
-                                            break;
-                                        case Order::STATUS_DONE:
-                                            $statusClass = 'done';
-                                            break;
-                                        case Order::STATUS_REJECTED:
-                                        case Order::STATUS_CANCELLED:
-                                            $statusClass = 'cancelled';
-                                            break;
-                                    }
-                                    return Html::a('<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '', Url::to(['order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                },
-                                'label' => Yii::t('message', 'frontend.views.order.status_two', ['ru' => 'Статус']),
-                                'contentOptions' => ['class' => 'small_cell_status'],
-                            ],
-                            [
-                                'format' => 'raw',
-                                'visible' => ($organization->type_id == Organization::TYPE_RESTAURANT),
-                                'value' => function ($data) {
-                                    switch ($data->status) {
-                                        case Order::STATUS_DONE:
-                                        case Order::STATUS_REJECTED:
-                                        case Order::STATUS_CANCELLED:
-                                            return Html::a(Yii::t('message', 'frontend.views.order.repeat', ['ru' => 'Повторить']), '#', [
-                                                'class' => 'reorder btn btn-outline-processing',
-                                                'data' => [
-                                                    'toggle' => 'tooltip',
-                                                    'original-title' => Yii::t('message', 'frontend.views.order.repeat_order', ['ru' => 'Повторить заказ']),
-                                                    'url' => Url::to(['order/repeat', 'id' => $data->id])
-                                                ],
-                                            ]);
-                                            break;
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                        case Order::STATUS_PROCESSING:
-                                            if ($data->isObsolete) {
-                                                return Html::a(Yii::t('message', 'frontend.views.order.complete', ['ru' => 'Завершить']), '#', [
-                                                    'class' => (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0) ? 'complete btn btn-outline-success completeEdi' : 'complete btn btn-outline-success',
-                                                    'data' => [
-                                                        'toggle' => 'tooltip',
-                                                        'original-title' => Yii::t('message', 'frontend.views.order.complete_order', ['ru' => 'Завершить заказ']),
-                                                        'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
-                                                    ],
-                                                ]);
-                                            }
-                                            break;
-                                    }
-                                    return '';
-                                },
-                                'contentOptions' => ['class' => 'text-center'],
-                                'headerOptions' => ['style' => 'width: 20px;']
-                            ],
-                        ],
+                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable',
+                            'role' => 'grid'],
+                        'columns' => $dataColumns
                     ]);
                     ?>
                 </div>
             </div>
+            <?php ActiveForm::end(); ?>
             <?php Pjax::end() ?>
-            <!-- /.table-responsive -->
         </div>
-        <!-- /.box-body -->
     </div>
 </section>

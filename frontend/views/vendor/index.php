@@ -45,6 +45,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
 </section>
 <section class="content">
     <div class="row">
+        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'order-analytic-list',]); ?>
         <div class="col-md-8  hidden-xs">
             <!-- AREA CHART -->
             <div class="box box-info" style="min-height: 286px;">
@@ -91,12 +92,20 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                 </div>
                 <div class="box-body" style="display: block;">
                     <!--img style="width: 100%;" src="http://www.imageup.ru/img171/2601902/snimok-ehkrana-2016-11-16-v-154356-2.png"-->
-
+	                <div class="col-lg-1 col-md-1 col-sm-6" id="alCurrencies" style="display: contents;">
+                        <?php if (count($currencyList) > 0): ?>
+                            <?= Html::label(Yii::t('message', 'frontend.views.client.anal.currency', ['ru' => 'Валюта']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                            <?=
+                            Html::dropDownList('filter_currency', null, $currencyList, ['class' => 'form-control', 'id' => 'filter_currency'])
+                            ?>
+                        <?php endif; ?>
+	                </div>
                     <div class="panel-body" style="min-height: 307px;height:100%;">
                         <div>
+	                        
                             <small class="stat-label text-bold"><?= Yii::t('message', 'frontend.views.vendor.curr_month', ['ru'=>'Текущий месяц']) ?></small>
                             <h2 class="m-xs text-success font-bold  text-bold">
-                                <?= $stats['curMonth'] ? (float) $stats['curMonth'] . '<i class="fa fa-fw fa-rub"></i>' : 0 . '<i class="fa fa-fw fa-rub"></i>'; ?>
+                                <?= $stats['curMonth'] ? (float) $stats['curMonth'] : 0; ?>
                             </h2>
                         </div>
                         <?php
@@ -108,13 +117,13 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             <div class="col-xs-6">
                                 <small class="stat-label text-bold"><?= Yii::t('message', 'frontend.views.vendor.today', ['ru'=>'Сегодня']) ?></small>
                                 <h4 class="text-success">
-                                    <?= $stats['curDay'] ? (float) $stats['curDay'] . '<i class="fa fa-fw fa-rub"></i>' : 0 . '<i class="fa fa-fw fa-rub"></i>'; ?>
+                                    <?= $stats['curDay'] ? (float) $stats['curDay'] : 0; ?>
                                 </h4> 
                             </div>
                             <div class="col-xs-6">
                                 <small class="stat-label text-bold"><?= Yii::t('message', 'frontend.views.vendor.curr_week', ['ru'=>'Текущая неделя']) ?></small>
                                 <h4 class="text-success">
-                                    <?= $stats['curWeek'] ? (float) $stats['curWeek'] . '<i class="fa fa-fw fa-rub"></i>' : 0 . '<i class="fa fa-fw fa-rub"></i>'; ?>
+                                    <?= $stats['curWeek'] ? (float) $stats['curWeek'] : 0; ?>
                                 </h4>
                             </div>
                         </div>
@@ -122,13 +131,13 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             <div class="col-xs-6">
                                 <small class="stat-label text-bold"><?= $months[date('n', strtotime(" -1 months"))]; ?></small>
                                 <h4 class="text-success">
-                                    <?= $stats['lastMonth'] ? (float) $stats['lastMonth'] . '<i class="fa fa-fw fa-rub"></i>' : 0 . '<i class="fa fa-fw fa-rub"></i>'; ?>
+                                    <?= $stats['lastMonth'] ? (float) $stats['lastMonth'] : 0; ?>
                                 </h4>
                             </div>
                             <div class="col-xs-6">
                                 <small class="stat-label text-bold"><?= $months[date('n', strtotime(" -2 months"))]; ?></small>
                                 <h4 class="text-success">
-                                    <?= $stats['TwoLastMonth'] ? (float) $stats['TwoLastMonth'] . '<i class="fa fa-fw fa-rub"></i>' : 0 . '<i class="fa fa-fw fa-rub"></i>'; ?>
+                                    <?= $stats['TwoLastMonth'] ? (float) $stats['TwoLastMonth'] : 0; ?>
                                 </h4>
                             </div>
                         </div>   
@@ -260,7 +269,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             ],
                         ];
                         ?>
-                        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'order-analytic-list',]); ?>
+                        
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,
@@ -287,3 +296,39 @@ if ($organization->step == Organization::STEP_SET_INFO) {
         </div>
     </div>
 </section>
+<?php
+$filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
+$filter_clear_to_date = date("d-m-Y");
+
+$analyticsUrl = Url::to(['vendor/index']);
+
+$customJs = <<< JS
+$(document).on("change", "#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency", function () {
+$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client,#filter_currency").attr('disabled','disabled')
+var filter_status = $("#filter_status").val();
+var filter_from_date =  $("#filter-date").val();
+var filter_to_date =  $("#filter-date-2").val();
+var filter_client =  $("#filter_client").val();
+var filter_employee =  $("#filter_employee").val();
+var filter_currency =  $("#filter_currency").val();
+
+    $.pjax({
+     type: 'GET',
+     push: false,
+     timeout: 10000,
+     url: "$analyticsUrl",
+     container: "#order-analytic-list",
+     data: {
+         // filter_status: filter_status,
+         // filter_from_date: filter_from_date,
+         // filter_to_date: filter_to_date,
+         // filter_client: filter_client,
+         // filter_employee: filter_employee,
+         filter_currency: filter_currency,
+           }
+   }).done(function() {
+   	// $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee,#filter_currency").removeAttr('disabled')
+   });
+});
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_READY);

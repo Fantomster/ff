@@ -7,8 +7,6 @@ use dosamigos\resourcemanager\ResourceManagerInterface;
 use yii\web\UploadedFile;
 use yii\base\InvalidParamException;
 use yii\db\BaseActiveRecord;
-use yii\helpers\FileHelper;
-use Imagine\Image\ManipulatorInterface;
 use yii\imagine\Image;
 
 /**
@@ -16,12 +14,14 @@ use yii\imagine\Image;
  *
  * @author sharaf
  */
-class UploadBehavior extends \mongosoft\file\UploadBehavior {
+class UploadBehavior extends \mohorev\file\UploadBehavior
+{
 
     /**
      * @event Event an event that is triggered before a file is uploaded.
      */
     const EVENT_BEFORE_UPLOAD = 'beforeUpload';
+
     /**
      * @event Event an event that is triggered after a file is uploaded.
      */
@@ -31,44 +31,54 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * @var string the attribute which holds the attachment.
      */
     public $attribute;
+
     /**
      * @var array the scenarios in which the behavior will be triggered
      */
     public $scenarios = [];
+
     /**
      * @var string the base path or path alias to the directory in which to save files.
      */
     public $path;
+
     /**
      * @var string the base URL or path alias for this file
      */
     public $url;
+
     /**
      * @var ResourceManagerInterface handles resource to upload/uploaded.
      */
     public $resourceManager;
+
     /**
      * @var array options to resourceManager->save() function
      */
     public $saveOptions = [];
+
     /**
      * @var bool Getting file instance by name
      */
     public $instanceByName = false;
+
     /**
      * @var boolean|callable generate a new unique name for the file
      * set true or anonymous function takes the old filename and returns a new name.
      * @see self::generateFileName()
      */
     public $generateNewName = true;
+
     /**
      * @var boolean If `true` current attribute file will be deleted
      */
     public $unlinkOnSave = true;
+
     /**
      * @var boolean If `true` current attribute file will be deleted after model deletion.
      */
     public $unlinkOnDelete = true;
+
     /**
      * @var boolean $deleteTempFile whether to delete the temporary file after saving.
      */
@@ -78,11 +88,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * @var UploadedFile the uploaded file instance.
      */
     protected $_file;
-
     protected $_oldValue;
-
     protected $_deleting = false;
-
 
     /**
      * @inheritdoc
@@ -127,7 +134,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
     /**
      * This method is invoked before validation starts.
      */
-    public function beforeValidate() {
+    public function beforeValidate()
+    {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         if (in_array($model->scenario, $this->scenarios)) {
@@ -153,7 +161,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
     /**
      * This method is called at the beginning of inserting or updating a record.
      */
-    public function beforeSave() {
+    public function beforeSave()
+    {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         if (in_array($model->scenario, $this->scenarios)) {
@@ -185,7 +194,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * This method is called at the end of inserting or updating a record.
      * @throws \yii\base\InvalidParamException
      */
-    public function afterSave() {
+    public function afterSave()
+    {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         $value = $model->getAttribute($this->attribute);
@@ -228,13 +238,14 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
     {
         $this->owner->trigger(self::EVENT_AFTER_UPLOAD);
     }
-    
+
     /**
      * Returns file url for the attribute.
      * @param string $attribute
      * @return string|null
      */
-    public function getUploadUrl($attribute) {
+    public function getUploadUrl($attribute)
+    {
         $url = $this->getUploadPath($attribute);
         $resourceName = $this->getResourceName($url);
         $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
@@ -247,21 +258,23 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * @param string $attribute
      * @return string|null
      */
-    public function getRawUploadUrl($attribute) {
+    public function getRawUploadUrl($attribute)
+    {
         $url = $this->getUploadPath($attribute);
         $resourceName = $this->getResourceName($url);
         $resultUrl = $url ? $this->resourceManager->getUrl($resourceName) : null;
         return $resultUrl;
     }
 
-    private $_resourceNames = [];    
-    
+    private $_resourceNames = [];
+
     /**
      * Return resource file name (for dosamigos\resourcemanager)
      * @param $path
      * @return string
      */
-    public function getResourceName($path) {
+    public function getResourceName($path)
+    {
         if (!isset($this->_resourceNames[$path])) {
             $path_parts = pathinfo($path);
             $basename = $path_parts['filename']; //(isset($path_parts['dirname']) ? $path_parts['dirname'] . DIRECTORY_SEPARATOR : '') . $path_parts['filename'];
@@ -277,11 +290,13 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * Return resource category
      * @return string|null
      */
-    public function getResourceCategory() {
+    public function getResourceCategory()
+    {
         return property_exists($this->owner, 'resourceCategory') ? $this->owner->resourceCategory : null;
     }
 
-    public function getFromBase64() {
+    public function getFromBase64()
+    {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
 
@@ -313,7 +328,7 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         $upload->name = $temp_filename_jpg;
         $upload->tempName = $temp_path_jpg;
         $upload->type = $mime_type;
-        $upload->size = filesize($temp_path_jpg);//$uploadArr['size'];
+        $upload->size = filesize($temp_path_jpg); //$uploadArr['size'];
         $upload->error = UPLOAD_ERR_OK;
 
         return $upload;
@@ -325,7 +340,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * @param string $path the file path used to save the uploaded file
      * @return boolean true whether the file is saved successfully
      */
-    protected function save($file, $path) {
+    protected function save($file, $path)
+    {
         return $this->resourceManager->save($file, $this->getResourceName($path), $this->saveOptions);
     }
 
@@ -334,15 +350,18 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * @param string $attribute
      * @param boolean $old
      */
-    protected function delete($attribute, $old = false) {
+    protected function delete($attribute, $old = false)
+    {
         $path = $this->getUploadPath($attribute, $old);
         $this->resourceManager->delete($this->getResourceName($path));
     }
-    
-    public function beforeDelete() {
+
+    public function beforeDelete()
+    {
         $attribute = $this->attribute;
         if ($this->unlinkOnDelete && $attribute) {
             $this->delete($attribute);
         }
     }
+
 }

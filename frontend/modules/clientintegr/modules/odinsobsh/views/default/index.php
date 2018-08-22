@@ -42,7 +42,7 @@ use kartik\grid\GridView;
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
                     <?php Pjax::begin(['id' => 'dics_pjax']);
-                    $columns = array (
+                    $columns = array(
                         [
                             'attribute' => 'dictype_id',
                             'value' => function ($model) {
@@ -71,8 +71,10 @@ use kartik\grid\GridView;
                             ]
                         ]
                     );
-                    $timestamp_now=time();
-                    if (!(($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))))) {unset($columns[4]['buttons']['get']);}?>
+                    $timestamp_now = time();
+                    if (!(($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))))) {
+                        unset($columns[4]['buttons']['get']);
+                    } ?>
                     <?=
                     GridView::widget([
                         'dataProvider' => $dataProvider,

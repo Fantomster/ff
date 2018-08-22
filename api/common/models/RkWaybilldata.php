@@ -26,6 +26,7 @@ use yii\db\Expression;
  * @property string $comment
  * @property string $salespoint
  * @property datetime $linked_at
+ * @property integer $unload_status
  *
  */
 class RkWaybilldata extends \yii\db\ActiveRecord
@@ -35,6 +36,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     const STATUS_LOCKED = 1;
 
     public $pdenom;
+    public $enable_all_map = true;
 
     /**
      * @inheritdoc
@@ -87,7 +89,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             'quant' => 'Количество',
             'product_id' => 'ID в Mixcart',
             'koef' => 'Коэфф.',
-            'fproductnameProduct' => 'Наименование продукции'
+            'fproductnameProduct' => 'Наименование продукции',
+            'enable_all_map' => 'Сохранить в сопоставлении',
+            'unload_status' => Yii::t('app', 'Статус для отправления'),
         ];
     }
 
@@ -203,12 +207,15 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         $check = $this::find()
             ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
             ->andwhere('product_rid is null or munit_rid is null')
+            ->andWhere('unload_status=1')
             ->count('*');
-
+      
         if ($check > 0) {
             $wmodel->readytoexport = 0;
+            $wmodel->status_id = 1;
         } else {
             $wmodel->readytoexport = 1;
+            $wmodel->status_id = 5;
         }
 
         if (!$wmodel->save(false)) {
@@ -233,6 +240,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         foreach ($summes as $summa) {
             $sum += $summa->sum;
         }
+        $sum = number_format($sum, 2, ',', ' ');
         return $sum;
     }
 

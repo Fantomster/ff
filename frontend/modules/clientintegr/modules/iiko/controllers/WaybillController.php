@@ -2,16 +2,17 @@
 
 namespace frontend\modules\clientintegr\modules\iiko\controllers;
 
+use api\common\models\iiko\iikoAgent;
+use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
+use api\common\models\iiko\iikoSelectedProduct;
 use api\common\models\VatData;
-use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
+use api\common\models\iiko\iikoStore;
 use common\models\Organization;
-use common\models\search\OrderSearch;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
 use common\models\User;
 use yii\db\Connection;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use yii\web\NotFoundHttpException;
@@ -22,10 +23,26 @@ use api\common\models\iiko\iikoWaybillData;
 use yii\web\Response;
 use yii\helpers\Url;
 use api\common\models\iikoWaybillDataSearch;
-
+use common\models\search\OrderSearch2;
+use yii\web\BadRequestHttpException;
+use common\components\SearchOrdersComponent;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
+
+    /** @var string Все заказы без учета привязанных к ним накладных */
+    const ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS = 'allstat';
+    /** @var string Все заказы, по которым вообще нет накладных */
+    const ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS = 'nodoc';
+    /** @var string Все заказы, по которым есть накладные не подходящие под критерии ready и completed */
+    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
+    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
+    const ORDER_STATUS_READY_DEFINEDBY_WB_STATUS = 'ready';
+    /** @var string Все заказы, по которым накладные в процессе обработки !!! настоящее время не используется */
+    const ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS = 'outgoing';
+    /** @var string Все заказы, по которым есть накладные со статусом 2 */
+    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
+
     /**
      * @return array
      */
@@ -80,30 +97,67 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionIndex()
     {
-        $way = Yii::$app->request->get('way', 0);
+
+        $organization = $this->currentUser->organization;
+
         Url::remember();
-        $searchModel = new OrderSearch();
-        $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-        // $dataProvider->pagination->pageSize=3;
+
+        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+        //  $dataProvider->pagination->pageSize=3;
+
+        /** @var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
+         * Статусы накладных в таблице iiko_waybill_status */
+        $wbStatuses = [
+            self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
+            // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
+        ];
 
 
-        $lic = iikoService::getLicense();
-        $view = $lic ? 'index' : '/default/_nolic';
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
-        $params = [
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
+
+        if ($organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Access denied');
+        }
+        $search = new SearchOrdersComponent();
+        $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_IIKO, $searchModel,
+            $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
+            ['defaultOrder' => ['id' => SORT_DESC]]);
+        $lisences = $organization->getLicenseList();
+        // $lisences = iikoService::getLicense();
+        if (isset($lisences['iiko']) && $lisences['iiko']) {
+            $lisences = $lisences['iiko'];
+            $view = 'index';
+        } else {
+            $view = '/default/_nolic';
+            $lisences = NULL;
+        }
+
+
+
+        $renderParams = [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic,
-            'visible' => iikoPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-            'way' => $way,
-            'organization' => $organization,
+            'affiliated' => $search->affiliated,
+            'dataProvider' => $search->dataProvider,
+            'searchParams' => $search->searchParams,
+            'businessType' => $search->businessType,
+            'lic' => $lisences,
+            'visible' => iikoPconst::getSettingsColumn($organization->id),
+            'wbStatuses' => $wbStatuses,
+            'way' => Yii::$app->request->get('way', 0),
         ];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $params);
+            return $this->renderPartial($view, $renderParams);
         } else {
-            return $this->render($view, $params);
+            return $this->render($view, $renderParams);
         }
+
     }
 
     /**
@@ -117,6 +171,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
+        
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
         $userAgent = \xj\ua\UserAgent::model();
@@ -132,15 +188,20 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new iikoWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $agentModel = iikoAgent::findOne(['uuid' => $model->agent_uuid, 'org_id' => $model->org]);
+        $storeModel = iikoStore::findOne(['id' => $model->store_id]);
 
         $lic = iikoService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
+            'agentName' => $agentModel->denom,
+            'storeName' => $storeModel->denom,
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData,
+            'parentBusinessId' => $obConstModel->getPconstValue(),
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -224,53 +285,29 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = [];
         if (!is_null($term)) {
-            $organizationID = User::findOne(Yii::$app->user->id)->organization_id;
-            $iikoPconst = \api\common\models\iiko\iikoPconst::find()->leftJoin('iiko_dicconst', 'iiko_dicconst.id=iiko_pconst.const_id')->where('iiko_dicconst.denom="available_goods_list"')->andWhere('iiko_pconst.org=:org', [':org' => $organizationID])->one();
-
-            if ($iikoPconst) {
-                $arr = unserialize($iikoPconst->value);
+            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+            $constId = iikoDicconst::findOne(['denom' => 'main_org']);
+            $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+            $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+            $andWhere = '';
+            $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+            if (count($arr)) {
+                $andWhere = 'AND id in (' . implode(',', $arr) . ')';
             }
 
-            if (isset($arr) && is_iterable($arr)) {
-                $arrayString = '(';
-                $i = 1;
-                foreach ($arr as $one) {
-                    $arrayString .= $one;
-                    if ($i != count($arr)) {
-                        $arrayString .= ',';
-                    }
-                    $i++;
-                }
-                $arrayString .= ')';
-                $sql = <<<SQL
+            $sql = <<<SQL
             SELECT id, denom as text FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term AND id in $arrayString )
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ AND id in $arrayString LIMIT 10)
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 10)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ AND id in $arrayString LIMIT 5)
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 5)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
                   END
             ) as t
 SQL;
-            } else {
-                $sql = <<<SQL
-            SELECT id, denom as text FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term )
-                    UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ LIMIT 10)
-                    UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ LIMIT 5)
-                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
-                     THEN 1
-                     ELSE 2
-                  END
-            ) as t
-SQL;
-            }
-
 
             /**
              * @var $db Connection
@@ -366,8 +403,10 @@ SQL;
 
     /**
      * Отправляем накладную
+     * @var $id int|null
+     * @return array
      */
-    public function actionSend()
+    public function actionSend($id = null)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db_api->beginTransaction();
@@ -386,7 +425,9 @@ SQL;
                 throw new \Exception('Only ajax method');
             }
 
-            $id = Yii::$app->request->post('id');
+            if (is_null($id)) {
+                $id = Yii::$app->request->post('id');
+            }
             $model = $this->findModel($id);
 
             if (!$model) {
@@ -411,6 +452,39 @@ SQL;
             $api->logout();
             return ['success' => false, 'error' => $e->getMessage()];
         }
+    }
+
+    /**
+     *  Отправка нескольких накладных
+     */
+    public function actionMultiSend()
+    {
+        $ids = Yii::$app->request->post('ids');
+        $scsCount = 0;
+        foreach ($ids as $id) {
+            $transaction = Yii::$app->db_api->beginTransaction();
+            try {
+                $model = $this->findModel($id);
+                //Выставляем статус отправляется
+                $model->status_id = 3;
+                $model->save();
+                $res = $this->actionSend($id);
+                if ($res['success'] === true) {
+                    $scsCount++;
+                } else {
+                    throw new \Exception($res['error']);
+                }
+                $transaction->commit();
+            } catch (\Throwable $e) {
+                //Выставляем статус обратно
+                $transaction->rollBack();
+                return ['success' => false, 'error' => $e->getMessage()];
+            }
+        }
+        if (count($ids) == $scsCount) {
+            return ['success' => true, 'count' => $scsCount];
+        }
+        return ['success' => false, 'error' => 'Выгруженно только ' . $scsCount . ' накладных'];
     }
 
     /**
@@ -522,7 +596,7 @@ SQL;
 
 
     /**
-     * @param $id
+     * @param $id ИД накладной
      * @return iikoWaybill
      * @throws NotFoundHttpException
      */
@@ -548,5 +622,30 @@ SQL;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    /**
+     * Make unload_status -> 0 or unload_status -> 1
+     */
+    public function actionMapTriggerWaybillDataStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $id = Yii::$app->request->post('id');
+        $status = Yii::$app->request->post('status');
+        $action = Yii::$app->request->post('action');
+        
+        $model = iikoWaybillData::findOne($id);
+        try {
+            $model->unload_status = $status;
+            $model->save();
+            $transaction->commit();
+        } catch (\Throwable $t){
+            $transaction->rollback();
+            Yii::debug($t->getMessage());
+            return false;
+        }
+        
+        return ['success' => true, 'action' => $action];
     }
 }

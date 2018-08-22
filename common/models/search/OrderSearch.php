@@ -38,7 +38,7 @@ class OrderSearch extends Order
     public function rules(): array
     {
         return [
-            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id'], 'integer'],
+            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id'], 'integer'],
             [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus'], 'safe'],
         ];
     }
@@ -76,6 +76,20 @@ class OrderSearch extends Order
      */
     public function search($params)
     {
+
+
+        /**
+         * @editedBy Basil A Konakov
+         * @editedByKonakovAt 2018-08-13
+         */
+        if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
+            $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
+                ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);
+            return new ActiveDataProvider([
+                'query' => $query
+            ]);
+        }
+
         $query = Order::find();
         $this->load($params);
 
@@ -200,7 +214,7 @@ class OrderSearch extends Order
             $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         }
         $query->andFilterWhere(['client_id' => $this->client_id]);
-        if((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')){
+        if ((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')) {
             $query->rightJoin('integration_invoice', 'integration_invoice.number=order.waybill_number');
         }
 
@@ -222,6 +236,20 @@ class OrderSearch extends Order
      */
     public function searchWaybill($params)
     {
+
+        /**
+         * @editedBy Basil A Konakov
+         * @editedByKonakovAt 2018-08-10
+         */
+        if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
+            $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
+                ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);
+            return new ActiveDataProvider([
+                'query' => $query
+            ]);
+        }
+
+
         //$query = Order::find();
 
         $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
@@ -393,86 +421,85 @@ class OrderSearch extends Order
      *
      * @return array
      */
-   public function searchWaybillWebApi(array $post, String $modelName = 'api\common\models\iiko\iikoWaybill'): array
-   {
-       $arr = [];
-       $userID = $post['search']['user_id'];
-       $orderID = $post['search']['order_id'] ?? null;
-       $numCode = $post['search']['num_code'] ?? null;
-       $storeID = $post['search']['store_id'] ?? null;
-       $vendorID = $post['search']['vendor_id'] ?? null;
-       $actualDelivery = $post['search']['actual_delivery'] ?? null;
+    public function searchWaybillWebApi(array $post, String $modelName = 'api\common\models\iiko\iikoWaybill'): array
+    {
+        $arr = [];
+        $userID = $post['search']['user_id'];
+        $orderID = $post['search']['order_id'] ?? null;
+        $numCode = $post['search']['num_code'] ?? null;
+        $storeID = $post['search']['store_id'] ?? null;
+        $vendorID = $post['search']['vendor_id'] ?? null;
+        $actualDelivery = $post['search']['actual_delivery'] ?? null;
 
-       $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
-       $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-       $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
-               ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
+        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+            ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
 
-       if($orderID){
-           $query->andWhere(['order.id'=>$orderID]);
-       }
+        if ($orderID) {
+            $query->andWhere(['order.id' => $orderID]);
+        }
 
-       if($vendorID){
-           $query->andWhere(['order.vendor_id'=>$vendorID]);
-       }
+        if ($vendorID) {
+            $query->andWhere(['order.vendor_id' => $vendorID]);
+        }
 
-       if($actualDelivery){
-           $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
-       }
+        if ($actualDelivery) {
+            $query->andWhere(['order.actual_delivery' => $actualDelivery]);
+        }
 
-       if($numCode || $storeID)
-       {
-           $orders = ArrayHelper::getColumn($query->all(),'id');
-           if(count($orders)){
-               $waybills = $modelName::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
-               if($numCode){
-                   $waybills->andWhere("num_code = $numCode");
-               }
+        if ($numCode || $storeID) {
+            $orders = ArrayHelper::getColumn($query->all(), 'id');
+            if (count($orders)) {
+                $waybills = $modelName::find()->select(['order_id'])->where('order_id IN (' . implode(',', $orders) . ')');
+                if ($numCode) {
+                    $waybills->andWhere("num_code = $numCode");
+                }
 
-               if($storeID){
-                   $waybills->andWhere("store_id = $storeID");
-               }
-               $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
-               if(empty($waybills))
-                   $waybills[] = 0;
-               $query->andWhere('id IN ('.implode(',', $waybills) . ')');
-           }
-       }
-      
-       $count = $query->count();
-       $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
-       $i=0;
-       foreach ($ordersArray as $order){
-           $nacl = $modelName::findOne(['order_id' => $order->id]);
-           
-           if (isset($nacl->status)) {
-               $status = $nacl->status->id;
-               $statusText = $nacl->status->denom;
-           } else {
-               $status = 1;
-               $statusText = 'Не сформирована';
-           }
-           
-           $arr['orders'][$i]['order_id'] = $order->id;
-           $arr['orders'][$i]['vendor'] = $order->vendor->name;
-           $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
-           $arr['orders'][$i]['position_count'] = $order->positionCount;
-           $arr['orders'][$i]['total_price'] = $order->total_price;
-           $arr['orders'][$i]['currency_id'] = $order->currency_id;
-           $arr['orders'][$i]['currency'] = $order->currency->iso_code;
-           $arr['orders'][$i]['status'] = $status;
-           $arr['orders'][$i]['status_text'] = $statusText;
-           $i++;
-       }
+                if ($storeID) {
+                    $waybills->andWhere("store_id = $storeID");
+                }
+                $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
+                if (empty($waybills))
+                    $waybills[] = 0;
+                $query->andWhere('id IN (' . implode(',', $waybills) . ')');
+            }
+        }
 
-       $arr['pagination'] = [
-           'page' => $page,
-           'total_page' => ceil($count / $pageSize),
-           'page_size' => $pageSize
+        $count = $query->count();
+        $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
+        $i = 0;
+        foreach ($ordersArray as $order) {
+            $nacl = $modelName::findOne(['order_id' => $order->id]);
+
+            if (isset($nacl->status)) {
+                $status = $nacl->status->id;
+                $statusText = $nacl->status->denom;
+            } else {
+                $status = 1;
+                $statusText = 'Не сформирована';
+            }
+
+            $arr['orders'][$i]['order_id'] = $order->id;
+            $arr['orders'][$i]['vendor'] = $order->vendor->name;
+            $arr['orders'][$i]['delivery_date'] = strip_tags(Yii::$app->formatter->format($order->actual_delivery, 'date'));
+            $arr['orders'][$i]['position_count'] = $order->positionCount;
+            $arr['orders'][$i]['total_price'] = $order->total_price;
+            $arr['orders'][$i]['currency_id'] = $order->currency_id;
+            $arr['orders'][$i]['currency'] = $order->currency->iso_code;
+            $arr['orders'][$i]['status'] = $status;
+            $arr['orders'][$i]['status_text'] = $statusText;
+            $i++;
+        }
+
+        $arr['pagination'] = [
+            'page' => $page,
+            'total_page' => ceil($count / $pageSize),
+            'page_size' => $pageSize
         ];
-       return $arr;
-   }
+        return $arr;
+    }
 
     /**
      * Creates data provider instance with search query applied for waybill controller (Integration)
@@ -497,39 +524,38 @@ class OrderSearch extends Order
         $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
             ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
 
-        if($orderID){
-            $query->andWhere(['order.id'=>$orderID]);
+        if ($orderID) {
+            $query->andWhere(['order.id' => $orderID]);
         }
 
-        if($vendorID){
-            $query->andWhere(['order.vendor_id'=>$vendorID]);
+        if ($vendorID) {
+            $query->andWhere(['order.vendor_id' => $vendorID]);
         }
 
 
-        if($actualDelivery){
-            $query->andWhere(['order.actual_delivery'=>$actualDelivery]);
+        if ($actualDelivery) {
+            $query->andWhere(['order.actual_delivery' => $actualDelivery]);
         }
 
-        if($numCode || $storeRID)
-        {
-            $orders = ArrayHelper::getColumn($query->all(),'id');
-            $waybills = RkWaybill::find()->select(['order_id'])->where('order_id IN ('.implode(',', $orders) . ')');
-            if($numCode){
+        if ($numCode || $storeRID) {
+            $orders = ArrayHelper::getColumn($query->all(), 'id');
+            $waybills = RkWaybill::find()->select(['order_id'])->where('order_id IN (' . implode(',', $orders) . ')');
+            if ($numCode) {
                 $waybills->andWhere("num_code = $numCode");
             }
 
-            if($storeRID){
+            if ($storeRID) {
                 $waybills->andWhere("store_rid = $storeRID");
             }
             $waybills = ArrayHelper::getColumn($waybills->asArray()->all(), 'order_id', $waybills);
-            if(empty($waybills))
+            if (empty($waybills))
                 $waybills[] = 0;
-            $query->andWhere('id IN ('.implode(',', $waybills) . ')');
+            $query->andWhere('id IN (' . implode(',', $waybills) . ')');
         }
         $count = $query->count();
         $ordersArray = $query->limit($pageSize)->offset($pageSize * ($page - 1))->all();
-        $i=0;
-        foreach ($ordersArray as $order){
+        $i = 0;
+        foreach ($ordersArray as $order) {
             $nacl = RkWaybill::findOne(['order_id' => $order->id]);
 
             if (isset($nacl->status)) {

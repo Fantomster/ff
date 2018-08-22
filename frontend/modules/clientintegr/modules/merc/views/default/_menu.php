@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 ?>
 
@@ -17,8 +18,15 @@ use yii\helpers\Html;
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-8 text-left">
-                            <?= Html::a('Главная', ['/clientintegr/merc/default'], ['class'=>'btn btn-md fk-button']); ?>
-                            <?= Html::a(Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']), ['/clientintegr/merc/stock-entry'], ['class'=>'btn btn-md fk-button']); ?>
+                            <?php $currentUrl = Yii::$app->request->url ?>
+                            <?= ($currentUrl != Url::to(['/clientintegr/merc/default'])) ? Html::a('Список ВСД', ['/clientintegr/merc/default'], ['class'=>'btn btn-md fk-button']) : ''; ?>
+                            <?php
+                            $user = Yii::$app->user->identity;
+                            if (($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) && ($currentUrl != Url::to(['/clientintegr/merc/stock-entry']))) {
+                                echo Html::a(Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']), ['/clientintegr/merc/stock-entry'], ['class'=>'btn btn-md fk-button']);
+                            }
+                            ?>
+                            <?= ($currentUrl != Url::to(['/clientintegr/merc/journal'])) ? Html::a('Журнал', ['/clientintegr/merc/journal'], ['class' => 'btn btn-md fk-button']) : ''; ?>
                         </div>
                     </div>
                 </div>

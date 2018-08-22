@@ -31,6 +31,8 @@ class WebApiErrorHandler extends ErrorHandler
 
         if (isset($exception->statusCode)) {
             $response->setStatusCode($exception->statusCode);
+        } elseif ($response->data['code'] == 42000) {
+            $response->setStatusCode(500);
         }
 
         $response->send();
@@ -56,8 +58,8 @@ class WebApiErrorHandler extends ErrorHandler
         if ($exception instanceof ValidationException) {
             $validation = $exception->validation;
             foreach ($validation as $key => &$value) {
-                if(is_string($value)) {
-                    $value = (string) $this->prepareMessage($value);
+                if (is_string($value)) {
+                    $value = (string)$this->prepareMessage($value);
                 }
             }
             $error['errors'] = $validation;

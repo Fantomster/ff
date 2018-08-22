@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\helpers\Url;
-
+use common\components\UrlPjax;
 function renderButton($id)
 {
     return \yii\helpers\Html::tag('a', 'Задать', [
@@ -252,10 +252,12 @@ $this->registerJs('
                                     },
                                 ],
                                 [
+                                    'format' => 'raw',
                                     'attribute' => 'order_id',
                                     'value' => function ($data) {
-                                        return $data->order_id ? $data->order_id : 'Нет';
-                                    }
+                                        return UrlPjax::make($data->order_id, '/order/view', $data->order_id);
+
+                                    },
                                 ],
                                 [
                                     'attribute' => 'total_sum_withtax',

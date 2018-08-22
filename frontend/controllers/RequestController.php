@@ -174,28 +174,28 @@ class RequestController extends DefaultController
                 //Массив в достывками
                 $deliveryRegions = $organization->deliveryRegionAsArray;
                 //Доступные для доставки регионы
-                if(!empty($deliveryRegions['allow'])) {
+                if (!empty($deliveryRegions['allow'])) {
                     foreach ($deliveryRegions['allow'] as $row) {
-                        if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
-                            $p = $row['administrative_area_level_1'].$row['locality'];
-                            $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p',[':p' => $p]);
-                        } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
+                        if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                            $p = $row['administrative_area_level_1'] . $row['locality'];
+                            $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p', [':p' => $p]);
+                        } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
                             $query->orWhere(['=', 'locality', $row['locality']]);
-                        } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
+                        } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
                             $query->orWhere(['=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
                         }
                     }
                 }
                 //Условия для исключения доставки с регионов
-                if(!empty($deliveryRegions['exclude'])) {
-                    if(!empty($deliveryRegions['exclude'])) {
+                if (!empty($deliveryRegions['exclude'])) {
+                    if (!empty($deliveryRegions['exclude'])) {
                         foreach ($deliveryRegions['exclude'] as $row) {
-                            if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
-                                $p = $row['administrative_area_level_1'].$row['locality'];
-                                $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s',[':s' => $p]);
-                            } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
+                            if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                                $p = $row['administrative_area_level_1'] . $row['locality'];
+                                $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s', [':s' => $p]);
+                            } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
                                 $query->andWhere(['!=', 'locality', $row['locality']]);
-                            } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
+                            } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
                                 $query->andWhere(['!=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
                             }
                         }
@@ -335,7 +335,7 @@ class RequestController extends DefaultController
                 //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
                 $sms_text = 'sms.request_set_responsible';
-                $subject = Yii::t('app', 'frontend.controllers.request.mix', ['ru'=>"mixcart.ru - заявка №%s"]);
+                $subject = Yii::t('app', 'frontend.controllers.request.mix', ['ru' => "mixcart.ru - заявка №%s"]);
                 $email_template = 'requestSetResponsibleMailToSupp';
                 $client_email_template = 'requestSetResponsible';
                 //Если $reject значит сняли с заявки
@@ -451,10 +451,10 @@ class RequestController extends DefaultController
                 $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
 
                 if ($relationSuppRest->save()) {
-                    $rows = User::find()->where(['organization_id' => $vendor->id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
+                    $rows = User::find()->where(['organization_id' => $vendor->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER])->all();
                     foreach ($rows as $row) {
-                        $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$client->organization_id]);
-                        if(!$managerAssociate){
+                        $managerAssociate = ManagerAssociate::findOne(['manager_id' => $row->id, 'organization_id' => $client->organization_id]);
+                        if (!$managerAssociate) {
                             $managerAssociate = new ManagerAssociate();
                             $managerAssociate->manager_id = $row->id;
                             $managerAssociate->organization_id = $client->organization_id;
@@ -465,7 +465,7 @@ class RequestController extends DefaultController
                     $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
                     if ($client->email) {
                         $mailer = Yii::$app->mailer;
-                        $subject = Yii::t('message', 'frontend.controllers.request.request_two', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
+                        $subject = Yii::t('message', 'frontend.controllers.request.request_two', ['ru' => "mixcart.ru - заявка №"]) . $request->id;
                         $mailer->htmlLayout = 'layouts/request';
                         $mailer->compose('requestInviteSupplierMailToRest', compact("request", "client"))
                             ->setTo($client->email)
@@ -547,7 +547,7 @@ class RequestController extends DefaultController
                     $request = Request::findOne($id);
                     #Готовим сообщения
                     //Тема Email
-                    $text = Yii::t('app', 'frontend.controllers.request.mix_two', ['ru'=>'mixcart.ru - заявка №%s']);
+                    $text = Yii::t('app', 'frontend.controllers.request.mix_two', ['ru' => 'mixcart.ru - заявка №%s']);
                     $subject = sprintf($text, $request->id);
                     //Сообщение SMS
                     $sms_text = Yii::$app->sms->prepareText('sms.request_new_callback', [
@@ -556,10 +556,10 @@ class RequestController extends DefaultController
                     ]);
                     //Найдем всех сотрудников ресторана, кому должны отправить уведомления
                     $clients = User::find()->where([
-                            'organization_id' => $request->rest_org_id,
-                            'status' => User::STATUS_ACTIVE,
-                            'role_id' => Role::ROLE_RESTAURANT_MANAGER
-                        ])->orWhere(['id' => $request->rest_user_id])->all();
+                        'organization_id' => $request->rest_org_id,
+                        'status' => User::STATUS_ACTIVE,
+                        'role_id' => Role::ROLE_RESTAURANT_MANAGER
+                    ])->orWhere(['id' => $request->rest_user_id])->all();
                     //Если есть клиенты, а они должн быть :)
                     if (!empty($clients)) {
                         foreach ($clients as $client) {

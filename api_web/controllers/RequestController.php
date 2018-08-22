@@ -101,6 +101,7 @@ class RequestController extends WebApiController
      *                  default={
      *                               "search":{
      *                                   "status": 1,
+     *                                   "name": "продукт"
      *                               },
      *                               "pagination":{
      *                                   "page":1,
@@ -638,7 +639,84 @@ class RequestController extends WebApiController
      *     )
      * )
      */
-    public function actionSetContractor() {
+    public function actionSetContractor()
+    {
         $this->response = $this->container->get('RequestWebApi')->setContractor($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/request/unset-contractor",
+     *     tags={"Request"},
+     *     summary="Снять исполнителя с заявки",
+     *     description="Снять исполнителя с заявки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                               "request_id": 279
+     *                           }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                       "id": 74,
+     *                       "name": "цукен",
+     *                       "status": 1,
+     *                       "created_at": "30.06.2017 14:17",
+     *                       "category": "Мебель",
+     *                       "category_id": 231,
+     *                       "client": {
+     *                       "id": 1,
+     *                           "name": "Космическая пятница",
+     *                           "phone": "",
+     *                           "email": "investor@f-keeper.ru",
+     *                           "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                           "type_id": 1,
+     *                           "type": "Ресторан",
+     *                           "rating": 0,
+     *                           "city": "Казань",
+     *                           "administrative_area_level_1": "Республика Татарстан",
+     *                           "country": "Россия",
+     *                           "about": ""
+     *                       },
+     *                       "vendor": {
+     *                           "id": 4,
+     *                           "name": "ООО Рога и Копыта",
+     *                           "phone": "",
+     *                           "email": "",
+     *                           "address": "ул. Госпитальный Вал, Москва, Россия",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
+     *                           "type_id": 2,
+     *                           "type": "Поставщик",
+     *                           "rating": 3.7,
+     *                          "city": "Москва",
+     *                           "administrative_area_level_1": null,
+     *                           "country": "Россия",
+     *                           "about": ""
+     *                       },
+     *                       "hits": 0,
+     *                       "count_callback": 2,
+     *                       "urgent": 1
+     *     })),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     */
+    public function actionUnsetContractor()
+    {
+        $this->response = $this->container->get('RequestWebApi')->unsetContractor($this->request);
     }
 }

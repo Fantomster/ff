@@ -10,8 +10,11 @@ use api_web\classes\RkeeperWebApi;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
 use common\models\Cart;
+use common\models\CatalogGoodsBlocked;
 use common\models\search\OrderProductsSearch;
+use frontend\helpers\GenerationTime;
 use Yii;
+use common\components\SearchOrdersComponent;
 use yii\db\Expression;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -23,6 +26,7 @@ use common\models\Role;
 use common\models\OrderContent;
 use common\models\Organization;
 use common\models\search\OrderSearch;
+use common\models\search\OrderSearch2;
 use common\models\search\OrderContentSearch;
 use common\models\ManagerAssociate;
 use common\models\OrderChat;
@@ -93,6 +97,9 @@ class OrderController extends DefaultController
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
                             Role::getFranchiseeEditorRoles(),
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ACCOUNTANT,
+                            Role::ROLE_RESTAURANT_BUYER,
                         ],
                     ],
                     [
@@ -100,6 +107,7 @@ class OrderController extends DefaultController
                             'create',
                             'guides',
                             'favorites',
+                            'product-filter',
                             'edit-guide',
                             'reset-guide',
                             'save-guide',
@@ -127,6 +135,8 @@ class OrderController extends DefaultController
                             'ajax-order-update-waybill',
                             'complete-obsolete',
                             'pjax-cart',
+                            'blocked-products',
+                            'clear-all-blocked',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -137,6 +147,9 @@ class OrderController extends DefaultController
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
                             Role::getFranchiseeEditorRoles(),
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ACCOUNTANT,
+                            Role::ROLE_RESTAURANT_BUYER,
                         ],
                     ],
                 ],
@@ -455,6 +468,7 @@ class OrderController extends DefaultController
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
+        $searchModel->product_block = true;
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
@@ -464,11 +478,11 @@ class OrderController extends DefaultController
 
         $cart = Cart::findOne(['organization_id' => $client->id]);
         $cartItems = empty($cart) ? [] : (new \yii\db\Query)
-                ->select('product_id')
-                ->from(\common\models\CartContent::tableName())
-                ->where(['cart_id' => $cart->id])
-                ->createCommand()
-                ->queryColumn();
+            ->select('product_id')
+            ->from(\common\models\CartContent::tableName())
+            ->where(['cart_id' => $cart->id])
+            ->createCommand()
+            ->queryColumn();
         //Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
@@ -489,9 +503,9 @@ class OrderController extends DefaultController
         $dataProvider = $searchModel->search($params, $client->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('guides', compact('dataProvider', 'searchModel'));
+            return $this->renderPartial('guides', compact('dataProvider', 'searchModel', 'client'));
         } else {
-            return $this->render('guides', compact('dataProvider', 'searchModel'));
+            return $this->render('guides', compact('dataProvider', 'searchModel', 'client'));
         }
     }
 
@@ -550,7 +564,11 @@ class OrderController extends DefaultController
         return $this->renderPartial('_vds_list', compact('mercVSDs'));
     }
 
-
+    /**
+     * Редактирование шаблона
+     * @param int $id
+     * @return string
+     */
     public function actionEditGuide(int $id)
     {
         $client = $this->currentUser->organization;
@@ -567,13 +585,16 @@ class OrderController extends DefaultController
             unset($session['guideProductList']);
             unset($session['selectedVendor']);
         }
+
         $session['currentGuide'] = $id;
 
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
 
-        if (!count($session['guideProductList']))
+        if (!count($session['guideProductList'])) {
             $params['show_sorting'] = false;
+        }
+
         if (is_iterable($session['guideProductList'])) {
             foreach ($session['guideProductList'] as $one) {
                 if (gettype($one) == "integer") {
@@ -605,6 +626,7 @@ class OrderController extends DefaultController
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
+        $productSearchModel->product_block = true;
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
         }
@@ -628,47 +650,71 @@ class OrderController extends DefaultController
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
             return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params', 'client'));
         }
     }
 
+    /**
+     * Сохранение шаблона
+     * @param $id
+     * @return \yii\web\Response
+     * @throws \Exception
+     */
     public function actionSaveGuide($id)
     {
-        $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        $session = Yii::$app->session;
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $client = $this->currentUser->organization;
+            $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
-        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
-            return $this->redirect(['order/guides']);
-        }
+            $current_id = Yii::$app->session->get('currentGuide', null);
+            if ($id != $current_id) {
+                return $this->redirect(['order/guides']);
+            }
 
-        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            $guideProductList = Yii::$app->session->get('guideProductList');
 
-        foreach ($guide->guideProducts as $guideProduct) {
-            if (!in_array($guideProduct->cbg_id, $guideProductList)) {
-                $guideProduct->delete();
-            } else {
-                $position = array_search($guideProduct->cbg_id, $guideProductList);
-                if ($position !== false) {
-                    unset($guideProductList[$position]);
+            foreach ($guide->guideProducts as $guideProduct) {
+                if (!in_array($guideProduct->cbg_id, $guideProductList)) {
+                    $guideProduct->delete();
+                } else {
+                    $position = array_search($guideProduct->cbg_id, $guideProductList);
+                    if ($position !== false) {
+                        unset($guideProductList[$position]);
+                    }
                 }
             }
-        }
 
-        foreach ($guideProductList as $newProductId) {
-            $newProduct = new GuideProduct();
-            $newProduct->guide_id = $id;
-            $newProduct->cbg_id = $newProductId;
-            $newProduct->save();
-        }
+            $rows = [];
+            foreach ($guideProductList as $newProductId) {
+                $rows[] = [
+                    'guide_id' => $id,
+                    'cbg_id' => $newProductId,
+                ];
+            }
 
-        unset($session['guideProductList']);
-        unset($session['selectedVendor']);
-        unset($session['currentGuide']);
+            if (!empty($rows)) {
+                Yii::$app->db->createCommand()
+                    ->batchInsert(GuideProduct::tableName(), ['guide_id', 'cbg_id'], $rows)
+                    ->execute();
+            }
+
+            Yii::$app->session->remove('guideProductList');
+            Yii::$app->session->remove('selectedVendor');
+            Yii::$app->session->remove('currentGuide');
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
 
         return $this->redirect(['order/guides']);
     }
 
+    /**
+     * Отмена изменений
+     * @return \yii\web\Response
+     */
     public function actionResetGuide()
     {
         $session = Yii::$app->session;
@@ -678,6 +724,10 @@ class OrderController extends DefaultController
         return $this->redirect(['order/guides']);
     }
 
+    /**
+     * @param int $id
+     * @return String
+     */
     public function actionAjaxShowGuide(int $id): String
     {
         $client = $this->currentUser->organization;
@@ -706,45 +756,58 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Установка поставщика в шаблоне при редактировании
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxSelectVendor($id)
     {
-        $session = Yii::$app->session;
-        $session['selectedVendor'] = $id;
+        Yii::$app->session->set('selectedVendor', $id);
         return true;
     }
 
+    /**
+     * Добавляем товар в шаблон
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxAddToGuide($id)
     {
         $client = $this->currentUser->organization;
         $session = Yii::$app->session;
-
         $product = $client->getProductIfAvailable($id);
-
         if ($product) {
-            $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            $guideProductList = $session->get('guideProductList', []);
             if (!in_array($product->id, $guideProductList)) {
                 $guideProductList[] = $product->id;
-                $session['guideProductList'] = $guideProductList;
+                $session->set('guideProductList', $guideProductList);
             }
         }
-
         return isset($product);
     }
 
+    /**
+     * Удаление товара из шаблона
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxRemoveFromGuide($id)
     {
-        $client = $this->currentUser->organization;
         $session = Yii::$app->session;
-        $guideProductList = $session['guideProductList'];
-        $positionInGuide = array_search($id, $guideProductList);
-        if ($positionInGuide !== FALSE) {
-            unset($guideProductList[$positionInGuide]);
-            $session['guideProductList'] = $guideProductList;
+        $guideProductList = $session->get('guideProductList', []);
+        if (in_array($id, $guideProductList)) {
+            $session->set('guideProductList', array_diff($guideProductList, [$id]));
             return true;
         }
         return false;
     }
 
+    /**
+     * Добавить шаблон в корзину
+     * @param $id
+     * @return bool
+     */
     public function actionAjaxAddGuideToCart($id)
     {
         $client = $this->currentUser->organization;
@@ -960,6 +1023,8 @@ class OrderController extends DefaultController
 
     public function actionAjaxMakeOrder()
     {
+        GenerationTime::start();
+
         $cart = (new CartWebApi())->items();
         $cartCount = count($cart);
 
@@ -1012,7 +1077,12 @@ class OrderController extends DefaultController
             $type = ($res['error'] == 0) ? $type = "success" : $type = "error";
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return ["title" => $title, "description" => $description, "type" => $type];
+
+            $timeTag = Html::tag('p', "Generation time: " . GenerationTime::end(), [
+                'style' => 'position:absolute;right:0px;bottom: -94px;font-size:10px;color:darkgray;'
+            ]);
+
+            return ["title" => $title, "description" => $description . $timeTag, "type" => $type];
         }
         return false;
     }
@@ -1121,73 +1191,48 @@ class OrderController extends DefaultController
     public function actionIndex()
     {
         $organization = $this->currentUser->organization;
-        $searchModel = new OrderSearch();
-        $today = new \DateTime();
-        $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");
 
-        $params = Yii::$app->request->getQueryParams();
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
+        $statuses = [
+            'new' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR],
+            'stopped' => [Order::STATUS_CANCELLED, Order::STATUS_REJECTED],
+            'processing' => Order::STATUS_PROCESSING,
+            'fulfilled' => Order::STATUS_DONE,
+        ];
+
+        $search = new SearchOrdersComponent();
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
-            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
-            $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
-            $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
-            $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and client_id=' . $organization->id)->queryOne();
-            $totalPrice = $query['total'];
+            $search->businessType = SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT;
+            $search->countForRestaurant($organization->id, $this->currentUser->organization_id, $statuses);
         } else {
-            $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
-            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
-            $canManage = Yii::$app->user->can('manage');
-            if ($canManage) {
-                $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
-                $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
-                $fulfilledCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-                $totalPrice = Order::find()->where(['status' => Order::STATUS_DONE, 'vendor_id' => $organization->id])->sum("total_price");
-            } else {
-                $params['OrderSearch']['manager_id'] = $this->currentUser->id;
-                $orderTable = Order::tableName();
-                $maTable = ManagerAssociate::tableName();
-                $newCount = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'vendor_id' => $organization->id,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
-                    ->count();
-                $processingCount = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'vendor_id' => $organization->id,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'status' => Order::STATUS_PROCESSING])
-                    ->count();
-                $fulfilledCount = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'vendor_id' => $organization->id,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'status' => Order::STATUS_DONE])
-                    ->count();
-                $totalPrice = Order::find()
-                    ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                    ->where([
-                        'status' => Order::STATUS_DONE,
-                        "$maTable.manager_id" => $this->currentUser->id,
-                        'vendor_id' => $organization->id])
-                    ->sum("total_price");
-            }
+            $search->businessType = SearchOrdersComponent::BUSINESS_TYPE_VENDOR;
+            $search->countForVendor($organization->id, $this->currentUser->organization_id, $statuses, $this->currentUser->id);
         }
-        $dataProvider = $searchModel->search($params);
-        $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
-        $selected = $session = Yii::$app->session->get('selected', []);
-        $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
 
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
-        } else {
-            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice', 'selected'));
+        if (isset($search->searchParams['OrderSearch2']['reset']) && $search->searchParams['OrderSearch2']['reset']) {
+            Yii::$app->getSession()->set('order', json_encode([]));
+            return $this->redirect(['']);
         }
+
+        $search->finalize($searchModel, $statuses, ['pageSize' => 20], ['defaultOrder' => ['id' => SORT_DESC]]);
+        $renderParams = [
+            'businessType' => $search->businessType,
+            'affiliated' => $search->affiliated,
+            'searchParams' => $search->searchParams,
+            'organization' => $organization,
+            'searchModel' => $searchModel,
+            'dataProvider' => $search->dataProvider,
+            'counts' => $search->counts,
+            'totalPrice' => $search->totalPrice,
+            'selected' => $search->selected,
+        ];
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('index', $renderParams);
+        } else {
+            return $this->render('index', $renderParams);
+        }
+
     }
 
     public function actionView($id)
@@ -1742,9 +1787,10 @@ class OrderController extends DefaultController
     public function actionRepeat($id)
     {
         $order = Order::findOne(['id' => $id]);
-
         $newContent = [];
-        foreach ($order->orderContent as $position) {
+        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($order->client_id));
+        $orderContent = OrderContent::find()->where(['order_id' => $id])->andWhere(["AND", "product_id NOT IN ($blockedItems)"])->all();
+        foreach ($orderContent as $position) {
             $attributes = $position->copyIfPossible();
             if ($attributes) {
                 $newContent[] = ['product_id' => $position->product_id, 'quantity' => $position->quantity];
@@ -2490,6 +2536,78 @@ class OrderController extends DefaultController
                 unset($_SESSION[$key]);
             }
         }
+    }
+
+    public function actionProductFilter()
+    {
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+        $searchModel = new OrderCatalogSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+
+        $selectedCategory = null;
+        $selectedVendor = null;
+
+        if (isset($params['OrderCatalogSearch'])) {
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
+        }
+        $vendors = $client->getSuppliers($selectedCategory);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+
+        $searchModel->client = $client;
+        $searchModel->catalogs = $catalogs;
+
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
+
+        $blockedItems = CatalogGoodsBlocked::getBlockedList($client->id);
+        //Вывод по 10
+        $dataProvider->pagination->pageSize = 10;
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
+        } else {
+            return $this->render('product-filter', compact('dataProvider', 'searchModel', 'blockedItems', 'client', 'vendors', 'selectedVendor'));
+        }
+    }
+
+    public function actionClearAllBlocked()
+    {
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+
+        CatalogGoodsBlocked::deleteAll(['owner_organization_id' => $client->id]);
+        return true;
+    }
+
+    public function actionBlockedProducts()
+    {
+        $selected = Yii::$app->request->post('selected');
+        $state = Yii::$app->request->post('state');
+        $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
+        $current = !empty($selected) ? explode(",", $selected) : [];
+
+        foreach ($current as $item) {
+            $model = CatalogGoodsBlocked::find()->where("cbg_id = $item and owner_organization_id = $client->id")->one();
+            if ($state) {
+                if (!isset($model)) {
+                    $model = new CatalogGoodsBlocked();
+                }
+                $model->cbg_id = $item;
+                $model->owner_organization_id = $client->id;
+                $model->save();
+            } else {
+                if (isset($model)) {
+                    $model->delete();
+                }
+            }
+        }
+
+        return true;
     }
 
 }

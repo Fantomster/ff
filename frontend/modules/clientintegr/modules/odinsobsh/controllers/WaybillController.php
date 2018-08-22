@@ -2,29 +2,47 @@
 
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
+use api\common\models\one_s\OneSContragent;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSPconst;
+use api\common\models\one_s\OneSStore;
 use api\common\models\OneSWaybillDataSearch;
 use api\common\models\VatData;
 use common\models\Organization;
 use common\models\search\OrderSearch;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
 use yii\web\NotFoundHttpException;
-use api\common\models\one_s\OneSProduct;
 use api\common\models\one_s\OneSService;
 use api\common\models\one_s\OneSWaybill;
 use api\common\models\one_s\OneSWaybillData;
 use yii\web\Response;
 use yii\helpers\Url;
-use api\common\models\iikoWaybillDataSearch;
+use common\models\search\OrderSearch2;
+use yii\web\BadRequestHttpException;
+use common\components\SearchOrdersComponent;
 
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
+
+
+    /** @var string Все заказы без учета привязанных к ним накладных */
+    const ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS = 'allstat';
+    /** @var string Все заказы, по которым вообще нет накладных */
+    const ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS = 'nodoc';
+    /** @var string Все заказы, по которым есть накладные не подходящие под критерии ready и completed */
+    const ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS = 'filled';
+    /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */
+    const ORDER_STATUS_READY_DEFINEDBY_WB_STATUS = 'ready';
+    /** @var string Все заказы, по которым накладные в процессе обработки !!! настоящее время не используется */
+    const ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS = 'outgoing';
+    /** @var string Все заказы, по которым есть накладные со статусом 2 */
+    const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
+
+
     /**
      * @return array
      */
@@ -75,34 +93,71 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     /**
+     * Default web-site url `.../clientintegr/odinsobsh/waybill` action
+     * @throws BadRequestHttpException
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
-        $way = Yii::$app->request->get('way',0);
+
+        $organization = $this->currentUser->organization;
+
         Url::remember();
-        $searchModel = new OrderSearch();
-        $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
-       // $dataProvider->pagination->pageSize=3;
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
+
+        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+        //  $dataProvider->pagination->pageSize=3;
+
+        /** @var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
+         * Статусы накладных в таблице one_s_waybill_status */
+        $wbStatuses = [
+            self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
+            // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
+            self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
+        ];
 
 
-        $lic = OneSService::getLicense();
-        $view = $lic ? 'index' : '/default/_nolic';
-        $params = [
+        $searchModel = new OrderSearch2();
+        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
+
+        if ($organization->type_id != Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Access denied');
+        }
+        $search = new SearchOrdersComponent();
+        $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_ONES, $searchModel,
+            $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
+            ['defaultOrder' => ['id' => SORT_DESC]]);
+        $lisences = $organization->getLicenseList();
+        // $lisences = OneSService::getLicense();
+        if (isset($lisences['odinsobsh']) && $lisences['odinsobsh']) {
+            $lisences = $lisences['odinsobsh'];
+            $view = 'index';
+        } else {
+            $view = '/default/_nolic';
+            $lisences = NULL;
+        }
+        $renderParams = [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic,
+            'affiliated' => $search->affiliated,
+            'dataProvider' => $search->dataProvider,
+            'searchParams' => $search->searchParams,
+            'businessType' => $search->businessType,
+            'lic' => $lisences,
+            'visible' => false,
             //'visible' =>OneSPconst::getSettingsColumn(Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id),
-            'way' => $way,
-            'organization' => $organization
+            'wbStatuses' => $wbStatuses,
+            'way' => Yii::$app->request->get('way', 0),
         ];
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $params);
+            return $this->renderPartial($view, $renderParams);
         } else {
-            return $this->render($view, $params);
+            return $this->render($view, $renderParams);
         }
+
     }
 
     /**
@@ -130,13 +185,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new OneSWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-
+    
+        $agentModel = OneSContragent::findOne(['id' => $model->agent_uuid]);
+        $storeModel = OneSStore::findOne(['id' => $model->store_id]);
+        
         $lic = OneSService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
+            'agentName' => $agentModel->name,
+            'storeName' => $storeModel->name,
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData
@@ -457,5 +516,30 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    /**
+     * Make unload_status -> 0 or unload_status -> 1
+     */
+    public function actionMapTriggerWaybillDataStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $id = Yii::$app->request->post('id');
+        $status = Yii::$app->request->post('status');
+        $action = Yii::$app->request->post('action');
+        
+        $model = OneSWaybillData::findOne($id);
+        try {
+            $model->unload_status = $status;
+            $model->save();
+            $transaction->commit();
+        } catch (\Throwable $t){
+            $transaction->rollback();
+            Yii::debug($t->getMessage());
+            return false;
+        }
+        
+        return ['success' => true, 'action' => $action];
     }
 }

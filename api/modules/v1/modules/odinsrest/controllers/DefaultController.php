@@ -3,6 +3,7 @@
 namespace api\modules\v1\modules\odinsrest\controllers;
 
 use api\common\models\one_s\OneSContragent;
+use api\common\models\one_s\OneSDic;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSStore;
 use api\common\models\one_s\OneSWaybill;
@@ -108,16 +109,19 @@ class DefaultController extends Controller
                 ->leftJoin('one_s_contragent', 'one_s_contragent.id = ' . 'one_s_waybill.agent_uuid')
                 ->leftJoin('one_s_store', 'one_s_store.id = ' . 'one_s_waybill.store_id')
                 ->all($db);
-            foreach ($rows as &$row){
+            foreach ($rows as $row) {
                 $productID = $row['product_id'];
                 $catalogBaseGood = CatalogBaseGoods::findOne(['id' => $productID]);
                 $row['mixcart_product_name'] = $catalogBaseGood->product ?? '';
             }
-            $wayBills = OneSWaybill::find()->where(['org' => $organizationID, 'readytoexport' => 1])->all();
-            foreach ($wayBills as &$one){
-                $one->status_id = 2;
-                $one->save();
-            }
+            \Yii::$app->get('db_api')
+                ->createCommand()
+                ->update(OneSWaybill::tableName(), [
+                    'status_id' => 2
+                ], [
+                    'org' => $organizationID,
+                    'readytoexport' => 1
+                ])->execute();
             return json_encode($rows, JSON_UNESCAPED_UNICODE);
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);
@@ -171,78 +175,95 @@ class DefaultController extends Controller
         if ($res) {
             $content = json_decode($body);
             $positions = $content->data ?? null;
-            if(is_iterable($positions)){
-                switch ($type){
+            if (is_iterable($positions)) {
+                switch ($type) {
                     case 1:
                         $modelName = OneSGood::className();
+                        $dictypeID = 3;
                         break;
                     case 2:
                         $modelName = OneSStore::className();
+                        $dictypeID = 2;
                         break;
                     case 3:
                         $modelName = OneSContragent::class;
+                        $dictypeID = 1;
                         break;
                     default:
                         $modelName = OneSGood::className();
+                        $dictypeID = 1;
                 }
-                $i = 0;
-                $returnArray = [];
-                foreach ($positions as $position){
-                    if(!$position->is_changed)continue;
-                    $oneSPosition = $modelName::findOne(['org_id'=>$res, 'cid'=>$position->cid]);
-                    if(!$oneSPosition){
-                        $oneSPosition = new $modelName();
-                    }
-                    $oneSPosition->name = $position->name;
-                    $oneSPosition->cid = $position->cid;
-                    $oneSPosition->org_id = $res;
-                    switch ($type){
-                        case 1:
-                            $oneSPosition->parent_id = $position->parent_id;
-                            $oneSPosition->measure = $position->measure;
-                            $oneSPosition->is_category = $position->is_category ?? 0;
-                            break;
-                        case 2:
-                            $oneSPosition->address = $position->address;
-                            break;
-                        case 3:
-                            $oneSPosition->inn_kpp = $position->inn_kpp;
-                            break;
-                        default:
-                            $oneSPosition->parent_id = $position->parent_id;
-                            $oneSPosition->measure = $position->measure;
-                    }
-                    $oneSPosition->updated_at = new Expression('NOW()');
-                    if ($oneSPosition->validate()) {
-                        $oneSPosition->save();
-                    } else {
-                        // validation failed: $errors is an array containing error messages
-                        $errors = $oneSPosition->errors;
-                        $errorsString = "<pre>" . print_r($errors, 1) . "</pre>";
-                        Yii::error($errorsString);
-                        return 'Saving failture';
-                    }
-                    $i++;
-                    $returnArray[$i]['cid'] = $oneSPosition->cid;
-                    $returnArray[$i]['updated_at'] = date('Y-m-d h:i:s');
+                $arr = $this->handlePositions($positions, $modelName, $res, $type);
+                $count = $modelName::find()->where(['org_id' => $res])->count();
+                $oneSDic = OneSDic::findOne(['org_id' => $res, 'dictype_id' => $dictypeID]);
+                if ($oneSDic) {
+                    $oneSDic->dicstatus_id = 1;
+                    $oneSDic->obj_count = $count ?? 0;
+                    $oneSDic->save();
                 }
-                $arr = [
-                    'updated_count' => $i,
-                    'data' => $returnArray
-                ];
                 $decodedResponse = \GuzzleHttp\json_encode($arr);
                 $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
                 return $decodedResponse;
-            }else{
+            } else {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'No new goods', $this->ip);
                 return 'No positions has been uploaded.';
             }
-
-
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);
             return 'Session error. Active session is not found.';
         }
+    }
+
+
+
+    private function handlePositions($positions, $modelName, $res, $type)
+    {
+        $i = 0;
+        $returnArray = [];
+        foreach ($positions as $position) {
+            if (!$position->is_changed) continue;
+            $oneSPosition = $modelName::findOne(['org_id' => $res, 'cid' => $position->cid]);
+            if (!$oneSPosition) {
+                $oneSPosition = new $modelName();
+            }
+            $oneSPosition->name = $position->name;
+            $oneSPosition->cid = $position->cid;
+            $oneSPosition->org_id = $res;
+            switch ($type) {
+                case 1:
+                    $oneSPosition->parent_id = $position->parent_id;
+                    $oneSPosition->measure = $position->measure;
+                    $oneSPosition->is_category = $position->is_category ?? 0;
+                    break;
+                case 2:
+                    $oneSPosition->address = $position->address;
+                    break;
+                case 3:
+                    $oneSPosition->inn_kpp = $position->inn_kpp;
+                    break;
+                default:
+                    $oneSPosition->parent_id = $position->parent_id;
+                    $oneSPosition->measure = $position->measure;
+            }
+            $oneSPosition->updated_at = new Expression('NOW()');
+            if ($oneSPosition->validate()) {
+                $oneSPosition->save();
+            } else {
+                // validation failed: $errors is an array containing error messages
+                $errors = $oneSPosition->errors;
+                $errorsString = "<pre>" . print_r($errors, 1) . "</pre>";
+                Yii::error($errorsString);
+                return 'Saving failture';
+            }
+            $i++;
+            $returnArray[$i]['cid'] = $oneSPosition->cid;
+            $returnArray[$i]['updated_at'] = date('Y-m-d h:i:s');
+        }
+        $arr = [
+            'updated_count' => $i,
+            'data' => $returnArray
+        ];
+        return $arr;
     }
 
 

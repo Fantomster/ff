@@ -44,6 +44,10 @@ class RequestWebApi extends WebApi
             if (isset($post['search']['status'])) {
                 $query->andWhere(['active_status' => (int)$post['search']['status']]);
             }
+
+            if (isset($post['search']['name'])) {
+                $query->andWhere(['LIKE', 'product', $post['search']['name']]);
+            }
         }
 
         $dataProvider = new ArrayDataProvider([
@@ -434,12 +438,50 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Вы уже установлены исполнителем.');
         }
 
+        if (!empty($request->responsible_supp_org_id)) {
+            throw new BadRequestHttpException('На эту заявку уже назначен исполнитель.');
+        }
+
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $request->responsible_supp_org_id = $callback->supp_org_id;
             $request->save();
             $request->refresh();
             Notice::init('Request')->setContractor($request, $callback, $this->user);
+            $transaction->commit();
+            return $this->prepareRequest($request);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function unsetContractor(array $post)
+    {
+        if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
+            throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
+        }
+
+        if (empty($post['request_id'])) {
+            throw new BadRequestHttpException('empty_param|request_id');
+        }
+
+        $request = Request::findOne((int)$post['request_id']);
+        if (empty($request)) {
+            throw new BadRequestHttpException('Not found request');
+        }
+
+        $this->checkAccess($request);
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $request->responsible_supp_org_id = null;
+            $request->save();
             $transaction->commit();
             return $this->prepareRequest($request);
         } catch (\Exception $e) {
@@ -547,6 +589,7 @@ class RequestWebApi extends WebApi
             "name" => $model->product,
             "status" => (int)$model->active_status,
             "created_at" => date('d.m.Y H:i', strtotime($model->created_at)),
+            "end_at" => !empty($model->end) ? date('d.m.Y H:i', strtotime($model->end)) : null,
             "category" => $model->categoryName->name,
             "category_id" => (int)$model->category,
             "amount" => $model->amount,

@@ -552,7 +552,7 @@ SQL;
     }
 
 
-    public function actionChvat($id, $vat)
+    public function actionChvat($id, $vat, $page, $way)
     {
 
         $model = $this->findDataModel($id);
@@ -560,7 +560,7 @@ SQL;
         $rress = Yii::$app->db_api
             ->createCommand('UPDATE iiko_waybill_data SET vat = :vat, linked_at = now() WHERE id = :id', [':vat' => $vat, ':id' => $id])->execute();
 
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
 
     }
 

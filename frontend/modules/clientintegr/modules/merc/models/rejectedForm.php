@@ -23,7 +23,11 @@ class rejectedForm extends Model {
     {
         return [
             [['volume', 'reason'], 'required'],
-            [['volume'], 'double'],
+            [['volume'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
+            ['volume', 'filter', 'filter' => function ($value) {
+                $newValue = 0 + str_replace(',', '.', $value);
+                return $newValue;
+            }],
             [['reason', 'description'], 'string', 'max' => 255],
             [['uuid'], 'safe']
         ];

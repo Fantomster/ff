@@ -85,8 +85,15 @@ abstract class AbstractDaemonController extends DaemonController
      */
     public function renewConnections()
     {
-        \Yii::$app->db->open();
-        \Yii::$app->db_api->open();
+        //if (\Yii::$app->db->isActive) {
+            \Yii::$app->db->close();
+            \Yii::$app->db->open();
+        //}
+
+        //if (\Yii::$app->db_api->isActive) {
+            \Yii::$app->db_api->close();
+            \Yii::$app->db_api->open();
+        //}
     }
 
     /**

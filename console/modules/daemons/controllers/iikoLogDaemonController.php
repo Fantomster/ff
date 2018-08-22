@@ -35,7 +35,14 @@ class iikoLogDaemonController extends AbstractDaemonController
                 throw new \Exception('Message is not array! ' . PHP_EOL . print_r($row, true));
             }
 
-            \Yii::$app->get('db_api')->createCommand()->insert(iikoLogger::$tableName, $row)->execute();
+            try{
+                \Yii::$app->get('db_api')->createCommand()->insert(iikoLogger::$tableName, $row)->execute();
+            } catch (\Exception $e) {
+                $this->log(PHP_EOL . " DIE: HALT " . $e->getMessage());
+                @unlink(\Yii::$app->basePath . "/runtime/daemons/pids/" . self::shortClassName());
+                die('die mysql connection');
+            }
+
             /**
              * Вносим информацию об операции в общий журнал
              */

@@ -172,7 +172,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             die("Cant find wmodel in map controller");
         }
         
-        $const_id = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
         $userAgent = \xj\ua\UserAgent::model();
@@ -201,7 +201,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData,
-            'parentBusinessId' => $const_id->getPconstValue(),
+            'parentBusinessId' => $obConstModel->getPconstValue(),
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -625,8 +625,8 @@ SQL;
     }
     
     /**
-     * Make unload_status -> 0
-    */
+     * Make unload_status -> 0 or unload_status -> 1
+     */
     public function actionMapTriggerWaybillDataStatus()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;

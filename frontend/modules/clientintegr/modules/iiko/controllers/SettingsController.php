@@ -161,7 +161,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
      */
     public function actionCollations()
     {
-        $const_id = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
         /** @var $currentUser User */
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUserRole = User::findOne(Yii::$app->user->id);
@@ -180,7 +180,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 $arIdsOrgs[] = $org->id;
             }
             
-            $pConst = iikoPconst::findOne(['const_id' => $const_id->id, 'org' => $arIdsOrgs]);
+            $pConst = iikoPconst::findOne(['const_id' => $obConstModel->id, 'org' => $arIdsOrgs]);
             
             return $this->render('collations', [
                     'provider' => $provider,
@@ -199,19 +199,19 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
      */
     public function actionApplyCollation()
     {
-        $const_id = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
         Yii::$app->response->format = Response::FORMAT_JSON;
         $ids = Yii::$app->request->post('ids');
         $mainId = Yii::$app->request->post('main');
         $arModels = [];
         
-        $arPconstModels = iikoPconst::find()->select('org')->where(['const_id' => $const_id->id, 'org' => $ids])->indexBy('org')->all();
+        $arPconstModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'org' => $ids])->indexBy('org')->all();
         $arDeletedIds = array_keys($arPconstModels);
         
         foreach ($ids as $id) {
                 $pConst = new iikoPconst();
                 $pConst->org = $id;
-                $pConst->const_id = $const_id->id;
+                $pConst->const_id = $obConstModel->id;
                 $pConst->value = $mainId;
                 $arModels[] = $pConst;
         }
@@ -240,13 +240,13 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
      */
     public function actionCancelCollation($ids = null)
     {
-        $const_id = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
         Yii::$app->response->format = Response::FORMAT_JSON;
         if (is_null($ids)) {
             $ids = Yii::$app->request->post('ids');
         }
         try {
-            $pConst = iikoPconst::deleteAll(['const_id' => $const_id->id, 'org' => $ids]);
+            $pConst = iikoPconst::deleteAll(['const_id' => $obConstModel->id, 'org' => $ids]);
         } catch (\Throwable $throwable) {
             return ['success' => false, 'error' => $throwable->getMessage()];
         }

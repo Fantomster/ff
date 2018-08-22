@@ -26,6 +26,7 @@ use yii\db\Expression;
  * @property string $comment
  * @property string $salespoint
  * @property datetime $linked_at
+ * @property integer $unload_status
  *
  */
 class RkWaybilldata extends \yii\db\ActiveRecord
@@ -89,7 +90,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             'product_id' => 'ID в Mixcart',
             'koef' => 'Коэфф.',
             'fproductnameProduct' => 'Наименование продукции',
-            'enable_all_map' => 'Сохранить в сопоставлении'
+            'enable_all_map' => 'Сохранить в сопоставлении',
+            'unload_status' => Yii::t('app', 'Статус для отправления'),
         ];
     }
 

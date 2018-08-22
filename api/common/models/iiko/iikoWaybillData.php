@@ -23,7 +23,7 @@ use Yii;
  * @property double $koef
  * @property string $created_at
  * @property string $updated_at
- * @property integer unload_status
+ * @property integer $unload_status
  */
 class iikoWaybillData extends \yii\db\ActiveRecord
 {

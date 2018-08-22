@@ -139,7 +139,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
 
-
         $renderParams = [
             'searchModel' => $searchModel,
             'affiliated' => $search->affiliated,
@@ -171,7 +170,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
-        
+
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
@@ -299,9 +298,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             SELECT id, denom as text FROM (
                   (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 10)
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 5)
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -623,7 +622,7 @@ SQL;
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
-    
+
     /**
      * Make unload_status -> 0 or unload_status -> 1
      */
@@ -634,18 +633,18 @@ SQL;
         $id = Yii::$app->request->post('id');
         $status = Yii::$app->request->post('status');
         $action = Yii::$app->request->post('action');
-        
+
         $model = iikoWaybillData::findOne($id);
         try {
             $model->unload_status = $status;
             $model->save();
             $transaction->commit();
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $transaction->rollback();
             Yii::debug($t->getMessage());
             return false;
         }
-        
+
         return ['success' => true, 'action' => $action];
     }
 }

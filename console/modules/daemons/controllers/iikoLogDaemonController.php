@@ -27,6 +27,8 @@ class iikoLogDaemonController extends AbstractDaemonController
      */
     public function doJob($job)
     {
+        $this->renewConnections();
+
         $row = \json_decode($job->body, true);
         try {
             if (!is_array($row)) {

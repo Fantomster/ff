@@ -129,10 +129,12 @@ class OneSWaybillData extends \yii\db\ActiveRecord
         $check = $this::find()
             ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
             ->andwhere('product_rid is null or munit is null')
+            ->andWhere('unload_status=1')
             ->count('*');
 
         if ($check > 0) {
             $wmodel->readytoexport = 0;
+            $wmodel->status_id = 1;
         } else {
             $wmodel->readytoexport = 1;
             $wmodel->status_id = 3;

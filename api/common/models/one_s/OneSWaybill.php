@@ -216,7 +216,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
         /**
          * @var $row OneSWaybillData
          */
-        $records = OneSWaybillData::findAll(['waybill_id' => $model->id]);
+        $records = OneSWaybillData::findAll(['waybill_id' => $model->id, 'unload_status' => 1]);
         $vatPercent = 0;
         $discount = 0;
         //  $vatModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'taxVat']);

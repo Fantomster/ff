@@ -608,6 +608,10 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function deleteMainCatalog(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -623,6 +627,10 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function changeMainIndex(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -634,12 +642,18 @@ class VendorWebApi extends \api_web\components\WebApi
      * Удаление загруженного необработанного каталога
      * @param array $request
      * @return array
+     * @throws BadRequestHttpException
      */
     public function deleteTempMainCatalog(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+            CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
             $tempCatalog->delete();
         }
         return ['result' => true];

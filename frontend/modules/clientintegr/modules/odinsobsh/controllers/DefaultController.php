@@ -16,6 +16,8 @@ use yii\httpclient\Response;
 use yii\data\ActiveDataProvider;
 use api\common\models\one_s\OneSContragent;
 use common\models\User;
+use yii\helpers\ArrayHelper;
+use kartik\grid\EditableColumnAction;
 
 class DefaultController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -33,6 +35,28 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
         return parent::beforeAction($action);
     }
+
+    public function actions()
+    {
+        return ArrayHelper::merge(parent::actions(), [
+            'agent-mapping' => [                                       // identifier for your editable column action
+                'class' => EditableColumnAction::className(),     // action class name
+                'modelClass' => OneSContragent::className(),                // the model for the record being edited
+                'outputValue' => function ($model, $attribute, $key, $index) {
+                    $vendor = $model->vendor;
+                    return isset($vendor) ? $vendor->name : null;      // return any custom output value if desired
+                },
+                'outputMessage' => function($model, $attribute, $key, $index) {
+                    return '';                                  // any custom error to return after model save
+                },
+                'showModelErrors' => true,                        // show model validation errors after save
+                'errorOptions' => ['header' => '']  ,              // error summary HTML options
+                'postOnly' => true,
+                'ajaxOnly' => true,
+            ]
+        ]);
+    }
+
 
     public function actionIndex()
     {
@@ -113,5 +137,26 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $model = oneSWaybill::findOne(7);
         header('Content-type: text/xml');
         echo $model->getXmlDocument();
+    }
+
+    /**
+     * Формирование списка поставщиков по введенным символам
+     * @param null $term
+     * @return mixed
+     * @throws \yii\db\Exception
+     */
+    public function actionAgentAutocomplete($term = null)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (!is_null($term)) {
+
+            $sql = "SELECT id, `name` as text FROM organization where `name` LIKE '%$term%' and type_id = 2 and id in (SELECT supp_org_id FROM fkeeper.relation_supp_rest where rest_org_id = $this->organisation_id)";
+            $db = \Yii::$app->db;
+            $data = $db->createCommand($sql)->queryAll();
+            $out['results'] = array_values($data);
+        }
+
+        return $out;
     }
 }

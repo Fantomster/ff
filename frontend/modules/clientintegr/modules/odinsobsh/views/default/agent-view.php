@@ -10,6 +10,7 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
+use \yii\web\JsExpression;
 
 $this->title = 'Интеграция с 1С Общепит';
 
@@ -51,6 +52,38 @@ $this->title = 'Интеграция с 1С Общепит';
                                 'id',
                                 'cid',
                                 'name',
+                                [
+                                    'class' => 'kartik\grid\EditableColumn',
+                                    'attribute' => 'vendor_id',
+                                    'value' => function ($model) {
+                                        $vendor = $model->vendor;
+                                        return isset($vendor) ? $vendor->name : null;
+                                    },
+                                    'label' => 'Поставщик MixCart',
+                                    'vAlign' => 'middle',
+                                    'width' => '210px',
+                                    'refreshGrid' => true,
+                                    'editableOptions' => [
+                                        'asPopover' => true,
+                                        'name' => 'vendor_id',
+                                        'formOptions' => ['action' => ['agent-mapping']],
+                                        'header' => 'Поставщик MixCart',
+                                        'size' => 'md',
+                                        'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
+                                        'options' => [
+                                            'options' => ['placeholder' => 'Выберите поставщика из списка',
+                                            ],
+                                            'pluginOptions' => [
+                                                'minimumInputLength' => 2,
+                                                'ajax' => [
+                                                    'url' => Url::toRoute(['agent-autocomplete']),
+                                                    'dataType' => 'json',
+                                                    'data' => new JsExpression('function(params) { return {term:params.term}; }')
+                                                ],
+                                                'allowClear' => true
+                                            ],
+                                        ]
+                                    ]],
                                 'inn_kpp',
                                 'updated_at',
                             ],

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use api\common\models\iiko\iikoAgent;
 use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
@@ -26,6 +27,7 @@ use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
@@ -37,6 +39,11 @@ use yii\db\Query;
 class ClientController extends DefaultController
 {
 
+    const AJAX_STATUS_SUCCESS = 'Y';
+    const AJAX_STATUS_FAIL = 'N';
+
+    const MAX_DELAY_PAYMENT = 365;
+
     public $layout = "main-client";
 
     /**
@@ -44,6 +51,7 @@ class ClientController extends DefaultController
      */
     public function behaviors()
     {
+
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -53,6 +61,16 @@ class ClientController extends DefaultController
                 ],
 //                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial', 'employees'],
                 'rules' => [
+                    [
+                        'actions' => [
+                            'ajax-set-agent-attr-payment-delay',
+                        ],
+                        'allow' => true,
+                        // Only restaurant owners which are in system "managers"
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                        ],
+                    ],
                     [
                         'actions' => [
                             'settings',
@@ -237,6 +255,37 @@ class ClientController extends DefaultController
     /*
      *  User create
      */
+
+    public function actionAjaxSetAgentAttrPaymentDelay()
+    {
+
+        $result = ['status' => self::AJAX_STATUS_FAIL, 'error' => 'Вы указали неверный формат данных!'];
+
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if (isset($post['agent_id']) && $post['agent_id'] && (int)$post['agent_id'] > 0) {
+                if (isset($post['delay_days']) && (int)$post['delay_days'] < (self::MAX_DELAY_PAYMENT + 1)) {
+                    $agent = iikoAgent::findOne([
+                        'id' => $post['agent_id'],
+                        'org_id' => $this->currentUser->organization->id,
+                    ]);
+                    if ($agent instanceof iikoAgent) {
+                        $result['status'] = self::AJAX_STATUS_SUCCESS;
+                        $agent->payment_delay = (int)$post['delay_days'];
+                        $agent->save();
+                    } else {
+                        $result['status'] = self::AJAX_STATUS_FAIL;
+                        $result['error'] = 'Нет прав на редактирование параметров агента';
+                    }
+                } else {
+                    $result['status'] = self::AJAX_STATUS_FAIL;
+                    $result['error'] = 'Продолжительность периода - не более 365 дней!';
+                }
+            }
+        }
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return $result;
+    }
 
     public function actionAjaxCreateUser()
     {

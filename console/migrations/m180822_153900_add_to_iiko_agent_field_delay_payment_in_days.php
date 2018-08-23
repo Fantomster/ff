@@ -30,7 +30,6 @@ class m180822_153900_add_to_iiko_agent_field_delay_payment_in_days extends Migra
     public function safeDown()
     {
         $this->dropColumn('{{%iiko_agent}}', 'payment_delay');
-        $this->dropCommentFromColumn('{{%iiko_agent}}', 'payment_delay');
     }
 
 }

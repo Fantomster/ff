@@ -144,6 +144,10 @@ class EComIntegration
                 return false;
             }
 
+            if(!$this->checkOrgIdAndOrderId($doc->result->content, $ediFilesQueueID, $fileName)){
+                return false;
+            }
+
             $content = $doc->result->content;
             $dom = new \DOMDocument();
             $dom->loadXML($content);
@@ -151,13 +155,10 @@ class EComIntegration
 
             $success = false;
             if (strpos($content, 'PRICAT>')) {
-                $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->SUPPLIER);
                 $success = $this->handlePriceListUpdating($simpleXMLElement);
             } elseif (strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')) {
-                $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->HEAD->SUPPLIER);
                 $success = $this->handleOrderResponse($simpleXMLElement);
             } elseif (strpos($content, 'ALCDES>')) {
-                $this->addOrgIdToFile($ediFilesQueueID, $simpleXMLElement->HEAD->SUPPLIER);
                 $success = $this->handleOrderResponse($simpleXMLElement, true);
             }
 
@@ -177,6 +178,9 @@ class EComIntegration
 
     /**
      * add org id to file in queue table
+     * @var integer $id
+     * @var string $glnCode
+     * @return boolean
      * */
     private function addOrgIdToFile($id, $glnCode)
     {
@@ -186,11 +190,16 @@ class EComIntegration
             ->where(['gln_code' => $glnCode])
             ->one();
 
+        if (!$orgId) {
+            return false;
+        }
+
         try {
             Yii::$app->db->createCommand()->update('edi_files_queue', ['organization_id' => $orgId['organization_id']], 'id=' . $id)->execute();
         } catch (\Throwable $t) {
             Yii::error($t->getMessage() . 'error on pdate id=' . $id . 'gln = ' . $glnCode, __METHOD__);
         }
+        return true;
     }
 
     private function updateQueue(int $ediFilesQueueID, int $status, String $errorText): void
@@ -342,16 +351,16 @@ class EComIntegration
                         $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                     }
                     Yii::$app->db->createCommand()->insert('order_content', [
-                        'order_id' => $order->id,
-                        'product_id' => $good->id,
-                        'quantity' => $quan,
-                        'price' => (float)$position->PRICE,
+                        'order_id'         => $order->id,
+                        'product_id'       => $good->id,
+                        'quantity'         => $quan,
+                        'price'            => (float)$position->PRICE,
                         'initial_quantity' => $quan,
-                        'product_name' => $good->product,
-                        'plan_quantity' => $quan,
-                        'plan_price' => (float)$position->PRICE,
-                        'units' => $good->units,
-                        'updated_at' => new Expression('NOW()'),
+                        'product_name'     => $good->product,
+                        'plan_quantity'    => $quan,
+                        'plan_price'       => (float)$position->PRICE,
+                        'units'            => $good->units,
+                        'updated_at'       => new Expression('NOW()'),
                     ])->execute();
                     $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
                     $summ += $quan * $position->PRICE;
@@ -452,18 +461,18 @@ class EComIntegration
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = Yii::$app->db->createCommand()->insert('catalog_base_goods', [
-                    'cat_id' => $baseCatalog->id,
-                    'article' => $good['article'],
-                    'product' => $good['name'],
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'supp_org_id' => $organization->id,
-                    'price' => $good['price'],
-                    'units' => $good['units'],
-                    'ed' => $good['ed'],
-                    'created_at' => new Expression('NOW()'),
-                    'category_id' => null,
-                    'deleted' => 0,
-                    'barcode' => $barcode,
+                    'cat_id'               => $baseCatalog->id,
+                    'article'              => $good['article'],
+                    'product'              => $good['name'],
+                    'status'               => CatalogBaseGoods::STATUS_ON,
+                    'supp_org_id'          => $organization->id,
+                    'price'                => $good['price'],
+                    'units'                => $good['units'],
+                    'ed'                   => $good['ed'],
+                    'created_at'           => new Expression('NOW()'),
+                    'category_id'          => null,
+                    'deleted'              => 0,
+                    'barcode'              => $barcode,
                     'edi_supplier_article' => $good['edi_supplier_article']
                 ])->execute();
                 if (!$res) continue;
@@ -515,11 +524,11 @@ class EComIntegration
     private function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
     {
         $res = Yii::$app->db->createCommand()->insert('catalog_goods', [
-            'cat_id' => $catID,
+            'cat_id'        => $catID,
             'base_goods_id' => $catalogBaseGoodID,
-            'created_at' => new Expression('NOW()'),
-            'updated_at' => new Expression('NOW()'),
-            'price' => $price,
+            'created_at'    => new Expression('NOW()'),
+            'updated_at'    => new Expression('NOW()'),
+            'price'         => $price,
         ])->execute();
         if ($res) {
             return true;
@@ -538,7 +547,7 @@ class EComIntegration
             if (!$ediOrder) {
                 Yii::$app->db->createCommand()->insert('edi_order', [
                     'order_id' => $order->id,
-                    'lang' => Yii::$app->language ?? 'ru'
+                    'lang'     => Yii::$app->language ?? 'ru'
                 ])->execute();
             }
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
@@ -548,9 +557,9 @@ class EComIntegration
                     $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $one->id]);
                     if (!$ediOrderContent) {
                         Yii::$app->db->createCommand()->insert('edi_order_content', [
-                            'order_content_id' => $one->id,
+                            'order_content_id'     => $one->id,
                             'edi_supplier_article' => $catGood->edi_supplier_article ?? null,
-                            'barcode' => $catGood->barcode ?? null
+                            'barcode'              => $catGood->barcode ?? null
                         ])->execute();
                     }
                 }
@@ -620,4 +629,51 @@ class EComIntegration
         Yii::$app->db->createCommand()->delete('edi_files_queue', 'updated_at <= DATE_SUB(CURDATE(),INTERVAL 30 DAY) AND updated_at IS NOT NULL')->execute();
     }
 
+    /**
+     * check gln code for organization and check orderId if file dont have pricat prefix
+     * @var string $content
+     * @var integer $fileId
+     * @var string $fileName
+     * @return boolean
+     */
+    private function checkOrgIdAndOrderId($content, $fileId, $fileName)
+    {
+        $supplier = $this->getStringBetweenTags($content, '<SUPPLIER>', '</SUPPLIER>');
+        $updateResult = $this->addOrgIdToFile($fileId, $supplier);
+        if (!$updateResult) {
+            $this->updateQueue($fileId, self::STATUS_ERROR, 'Dont find organization with gln = ' . $supplier);
+            return false;
+        }
+        if(strpos($fileName, 'pricat') !== 0){
+            $orderNumber = $this->getStringBetweenTags($content, '<ORDERNUMBER>', '</ORDERNUMBER>');
+            if (is_numeric($orderNumber)) {
+                $order = Order::findOne(['id' => $orderNumber]);
+                if (is_null($order) || !$order) {
+                    $this->updateQueue($fileId, self::STATUS_ERROR, 'Dont find order with id = ' . $orderNumber);
+                    return false;
+                }
+            } else {
+                $this->updateQueue($fileId, self::STATUS_ERROR, 'Number dont numeric with id = ' . $orderNumber);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Return string between $startTag and $endTag
+     * @var string $startTag
+     * @var string $endTag
+     * @return string
+     */
+    private function getStringBetweenTags($string, $startTag, $endTag)
+    {
+        $start = strpos($string, $startTag) + strlen($startTag);
+        $end = strpos($string, $endTag);
+        if (!$start || !$end) {
+            return false;
+        }
+        return substr($string, $start, $end - $start);
+    }
 }

@@ -129,6 +129,7 @@ class Role extends \amnah\yii2\user\models\Role
 
     /**
      * Get list of roles for creating dropdowns
+     * @param int $orgType
      * @return array
      */
     public static function dropdown($orgType = null)
@@ -136,7 +137,7 @@ class Role extends \amnah\yii2\user\models\Role
         // get all records from database and generate
         static $dropdown;
         if ($dropdown === null) {
-            if (isset($orgType)) {
+            if (isset($orgType) && $orgType) {
                 $models = static::findAll(['organization_type' => $orgType]);
             } else {
                 $models = static::find()->all();

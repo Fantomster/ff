@@ -29,7 +29,7 @@ class CatalogWebApi extends WebApi
     {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
-            $catalog->index_column = $index;
+            $catalog->main_index = $index;
             $catalog->save();
             return [
                 'result' => true
@@ -60,7 +60,6 @@ class CatalogWebApi extends WebApi
             }
         }
     }
-
 
     /**
      * Список ключей

@@ -78,7 +78,7 @@ if (empty($model)) {
                         ['title' => Yii::t('backend', 'Изменить шапку'), 'data-pjax' => "0"]);
                 },
                 'map' => function ($url, $model) {
-                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/map', 'waybill_id' => $model->id]);
+                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/map', 'waybill_id' => $model->id, 'way' => 0]);
                     return \yii\helpers\Html::a('<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax' => "0"]);
                 },

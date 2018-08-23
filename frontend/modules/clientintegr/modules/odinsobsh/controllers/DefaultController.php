@@ -150,7 +150,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if (!is_null($term)) {
-
             $sql = "SELECT id, `name` as text FROM organization where `name` LIKE '%$term%' and type_id = 2 and id in (SELECT supp_org_id FROM fkeeper.relation_supp_rest where rest_org_id = $this->organisation_id)";
             $db = \Yii::$app->db;
             $data = $db->createCommand($sql)->queryAll();

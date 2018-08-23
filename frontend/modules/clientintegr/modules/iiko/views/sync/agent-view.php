@@ -47,6 +47,8 @@ $max = ClientController::MAX_DELAY_PAYMENT;
 
 $js = <<< JS
 
+
+
 $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function () {
     var title = "Отсрочка платежа<br />(не более $max дней)";
     var agentId = $(this).attr('data-id');
@@ -55,7 +57,8 @@ $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function 
     swal({
         title: title,
         showCancelButton: true,
-        html: "<input type=text id=swal-input value=" + delayPaymentDays + " class=swal2-input>",
+        html: "<input type=text id=swal-input value=" + delayPaymentDays + " class=swal2-input onkeyup='  var check = (parseInt($(this).val(), 10) == $(this).val()); if (check == false) { $(\"#swal-input-memo\").html(\"Необходимо ввести целое число\");  } else { $(\"#swal-input-memo\").html(\"&nbsp;\"); }      '>" + 
+        "<br /><span id=swal-input-memo ыендц>&nbsp;</span>",
         confirmButtonText: "Сохранить",
         cancelButtonText: "Отмена",
     }).then(function (result) {

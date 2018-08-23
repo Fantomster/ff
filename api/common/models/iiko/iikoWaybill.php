@@ -5,6 +5,7 @@ namespace api\common\models\iiko;
 use common\models\Order;
 use common\models\OrderContent;
 use Yii;
+use frontend\controllers\ClientController;
 
 /**
  * This is the model class for table "iiko_waybill".
@@ -26,6 +27,7 @@ use Yii;
  * @property string $created_at
  * @property string $exported_at
  * @property string $updated_at
+ * @property integer $payment_delay
  * @property Order $order;
  */
 class iikoWaybill extends \yii\db\ActiveRecord
@@ -52,12 +54,14 @@ class iikoWaybill extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
+            [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included', 'payment_delay'], 'integer'],
             [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code'], 'safe'],
             [['org', 'store_id', 'agent_uuid'], 'required'],
             [['agent_uuid'], 'string', 'max' => 36],
             [['text_code', 'num_code'], 'string', 'max' => 128],
             [['note'], 'string', 'max' => 255],
+            [['note'], 'string', 'max' => 255],
+            [['payment_delay'], 'integer', 'max' => 365],
         ];
     }
 
@@ -84,6 +88,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'exported_at' => Yii::t('app', 'Exported At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'payment_delay' => Yii::t('app', 'Payment delay'),
         ];
     }
 
@@ -97,7 +102,10 @@ class iikoWaybill extends \yii\db\ActiveRecord
 //                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
 //            }
 
-            if (empty($this->text_code)) {
+        if ((int)$this->payment_delay > ClientController::MAX_DELAY_PAYMENT) {
+            return false;
+        }
+        if (empty($this->text_code)) {
                 $this->text_code = 'mixcart';
             }
 

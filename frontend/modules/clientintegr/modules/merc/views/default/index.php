@@ -543,9 +543,12 @@ $(document).on("click", ".hand_loading", function(e) {
                     $('#swal-input1').focus()
                 }
             }).then(function (result) {
-                var login = $('#swal-input1').val();
+                if (result.value.dismiss === "cancel") {
+                    swal.close();
+                }
+            	var login = $('#swal-input1').val();
                 var pass = $('#swal-input2').val();
-          
+                
                 $.ajax({
                     url: '$updateAccessDataUrl',
                     data: {login : login, pass : pass}

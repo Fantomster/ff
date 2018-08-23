@@ -52,7 +52,7 @@ class iikoLogger
     public function request($request)
     {
         self::update([
-            'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
+            'request' => mb_substr(\json_encode($request, JSON_UNESCAPED_UNICODE), 0, 1000),
             'request_at' => date('Y-m-d H:i:s', time())
         ]);
     }
@@ -64,7 +64,7 @@ class iikoLogger
     public function response($response)
     {
         self::update([
-            'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
+            'response' => mb_substr(\json_encode($response, JSON_UNESCAPED_UNICODE), 0, 1000),
             'response_at' => date('Y-m-d H:i:s', time())
         ]);
 

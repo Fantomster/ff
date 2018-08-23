@@ -280,11 +280,10 @@ class User extends \amnah\yii2\user\models\User
         return $this->hasOne(RelationUserOrganization::className(), ['user_id' => 'id', 'organization_id' => 'organization_id']);
     }
 
-    public function getRelationUserOrganizationRoleID(int $userID): int
+    public function getRelationUserOrganizationRoleID($organizationId)
     {
-        $user = self::findIdentity($userID);
-        $rel = RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $user->organization_id]);
-        return $rel->role_id;
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $organizationId]);
+        return isset($rel->role_id) ? $rel->role_id : null;
     }
 
     /**

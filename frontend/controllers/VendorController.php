@@ -174,13 +174,14 @@ class VendorController extends DefaultController {
         $searchModel = new UserSearch();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
-        $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
+        $organizationId = $this->currentUser->organization_id;
+        $params['UserSearch']['organization_id'] = $organizationId;
         $dataProvider = $searchModel->search($params);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('employees', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('employees', compact('searchModel', 'dataProvider', 'organizationId'));
         } else {
-            return $this->render('employees', compact('searchModel', 'dataProvider'));
+            return $this->render('employees', compact('searchModel', 'dataProvider', 'organizationId'));
         }
     }
 
@@ -309,7 +310,7 @@ class VendorController extends DefaultController {
         $profile = $user->profile;
         $currentUserOrganizationID = $this->currentUser->organization_id;
         $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
-        $selected = $user->getRelationUserOrganizationRoleID($id);
+        $selected = $user->getRelationUserOrganizationRoleID($currentUserOrganizationID);
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();

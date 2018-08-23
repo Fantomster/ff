@@ -176,7 +176,7 @@ $this->registerJs(
             });
         
           
-       
+       /*
             $(document).on("change", ".select-on-check-all", function(e) {
    
           //  e.preventDefault();
@@ -205,8 +205,9 @@ $this->registerJs(
            });
            
     });
+    */
     
-     $(document).on("change", ".checkbox-export", function(e) {
+    /* $(document).on("change", ".checkbox-export", function(e) {
    
            // e.preventDefault();
            // url = $(this).attr("href");
@@ -228,7 +229,7 @@ $this->registerJs(
              }
            });
            
-    });
+    });*/
         
         
         '
@@ -335,7 +336,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
               </div>
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <div  >
 
                     <div id="products">
                         <?=
@@ -345,10 +346,11 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                             'filterModel' => $searchModel,
                             'filterPosition' => false,
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                          //  'responsive' => false,
                             'summary' => '',
                             'pjax' => true,
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
-                            'options' => ['class' => 'table-responsive'],
+                            // 'options' => ['class' => 'table-responsive'],
                             /* 'rowOptions'=>function($model) use ($cart){
                                 foreach ($cart as $vendor) {
                                     foreach ($vendor['items'] as $item) {
@@ -362,7 +364,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                 'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed
                             ],
                             'columns' => [
-                                [
+                            /*    [
                                    // 'visible' => ($organization->type_id == Organization::TYPE_SUPPLIER) ? true : false,
                                     'class' => 'yii\grid\CheckboxColumn',
                                     'contentOptions' => ['class' => 'small_cell_checkbox'],
@@ -370,7 +372,50 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                     'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
                                         return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
                                     }
+                                ], */
+                                [
+                                    'class' => 'common\components\multiCheck\CheckboxColumn',
+                                    'contentOptions' => ['class' => 'small_cell_checkbox width150'],
+                                    'headerOptions' => ['style' => 'text-align:center; width150'],
+                                    'onChangeEvents' => [
+                                        'changeAll' => 'function(e) {
+                                                            url      = window.location.href;
+                                                            var value = [];
+                                                            state = $(this).prop("checked") ? 1 : 0;
+                                                            
+                                                           $(".checkbox-export").each(function() {
+                                                                value.push($(this).val());
+                                                            });    
+                                                
+                                                           value = value.toString();  
+                                                           
+                                                           $.ajax({
+                                                             url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
+                                                             success: function(){
+                                                                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                                                             }
+                                                           }); }',
+                                        'changeCell' => 'function(e) { 
+                                                            url = window.location.href;
+                                                            var value = $(this).val();
+                                                            state = $(this).prop("checked") ? 1 : 0;
+                                                          
+                                                           $.ajax({
+                                                             url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
+                                                             success: function(){
+                                                                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                                                             }
+                                                           });}'
+                                    ],
+                                    'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+                                        return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
+                                    },
                                 ],
+
                                 'service_denom',
                                 'id',
                                 [

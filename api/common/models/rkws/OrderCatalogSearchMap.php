@@ -131,10 +131,13 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $where_all .= ' AND (service_id = :service_id OR service_id is NULL )';
         }
         else {
+            $this->service_id = 0;
             $where_all .= ' AND service_id = 0';
         }
 
         $sql = "
+      SELECT * FROM (
+      SELECT * FROM (
         SELECT DISTINCT * FROM (
            SELECT 
               " . implode(',', $fieldsCBG) . "
@@ -142,7 +145,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id."
+             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
              LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
              LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc  AND fstore.type = 2 
              LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id       
@@ -158,7 +161,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
            LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id."
+           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
            LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
            LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid  AND fmap.org_id = fstore.acc  AND fstore.type = 2
            LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id 
@@ -166,13 +169,16 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
           cg.cat_id IN (" . $this->catalogs . ")
           ".$where."
           AND (cbg.status = 1 AND cbg.deleted = 0)     
-        ) as c WHERE id != 0 ".$where_all;
+        ) as c WHERE id != 0 ".$where_all.
+            " ORDER BY service_id desc ) as d
+             GROUP BY id) as e ";
 
         $query = \Yii::$app->db->createCommand($sql);
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->sql,
             'params' => $params_sql,
+
             'pagination' => [
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
                 'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
@@ -183,12 +189,13 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             'key' => 'id',
             'sort' => [
                 'attributes' => [
-                    'product' => [
-                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
-                        'desc' => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
-                        'default' => SORT_ASC
-                    ],
-                    'price',
+                    'product',
+                    /* => [
+                        'asc' => ['product' => SORT_ASC],
+                        'desc' => ['product' => SORT_DESC],
+                      //  'default' => SORT_ASC
+                    ],*/
+              /*      'price',
                     'units',
                     'article',
                     'name',
@@ -200,12 +207,12 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                     'store',
                     'unitname',
                     'koef'
-
+*/
                 ],
                 'defaultOrder' => [
                     'product' => SORT_ASC,
-                    'c_article_1' => SORT_ASC,
-                    'c_article' => SORT_ASC
+                    // 'c_article_1' => SORT_ASC,
+                    // 'c_article' => SORT_ASC
                 ]
             ],
         ]);

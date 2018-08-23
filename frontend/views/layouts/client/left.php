@@ -74,6 +74,7 @@ $licenses = $user->organization->getLicenseList();
                         ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl'][Yii::$app->language]['market'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.requests', ['ru'=>'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket'], 'visible' => !in_array($user->role_id, $disabled_roles)],
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.anal', ['ru'=>'Аналитика']), 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs'], 'visible' => !in_array($user->role_id, $disabled_roles)],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.fullmap', ['ru'=>'Сопоставление']), 'icon' => 'signal', 'url' => ['/clientintegr/fullmap'], 'options' => ['class' => 'hidden-xs'], 'visible' => !in_array($user->role_id, $disabled_roles)],
 //                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                      //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],

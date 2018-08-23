@@ -18,7 +18,8 @@ use yii\web\BadRequestHttpException;
  * @property string $updated_at
  * @property integer $currency_id
  * @property string $main_index
- * 
+ * @property string $mapping
+ *
  * @property Vendor $vendor
  * @property Currency $currency
  * @property integer $positionsCount

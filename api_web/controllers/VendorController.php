@@ -353,17 +353,9 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 4,
-     *                      "uploaded_name": "dfg5fhbdhb",
-     *                      "index_field": "ssid",
-     *                      "mapping": {
-     *                          "ssid": 1,
-     *                          "article": 3,
-     *                          "product_name": 2,
-     *                          "unit": 4,
-     *                          "price": 6,
-     *                          "multiplicity": 7
-     *                      }
+     *                      "cat_id": 3010,
+     *                      "index_field": "article",
+     *                      "mapping": {"article", "product", "units", "price", "ed", "other"}
      *                  }
      *              )
      *         )

@@ -4,26 +4,30 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use kartik\date\DatePicker;
 use yii\helpers\ArrayHelper;
-use kartik\tree\TreeViewInput;
-use yii\bootstrap\Dropdown;
 use common\models\User;
-use kartik\widgets\Select2;
 use yii\helpers\Url;
-use yii\web\JsExpression;
+use api\common\models\iiko\iikoAgent;
+use api\common\models\iiko\iikoSelectedStore;
+use api\common\models\iiko\iikoStore;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoWaybill */
 /* @var $form yii\bootstrap\ActiveForm */
-$org = User::findOne(Yii::$app->user->id)->organization_id;
-$selectedStore = ArrayHelper::map(\api\common\models\iiko\iikoSelectedStore::find()->with('iikoStore')->where(['organization_id' => $org])->all(), 'iikoStore.id', 'iikoStore.denom');
+
+$orgId = User::findOne(Yii::$app->user->id)->organization_id;
+
+$selectedStoreInit = iikoSelectedStore::find()->with('iikoStore')->where(['organization_id' => $orgId])->all();
+$selectedStore = ArrayHelper::map($selectedStoreInit, 'iikoStore.id', 'iikoStore.denom');
+
 if (!$selectedStore || count($selectedStore) == 0) {
-    $selectedStore = ArrayHelper::map(\api\common\models\iiko\iikoStore::find()->where(['org_id' => $org, 'is_active' => 1])->all(), 'id', 'denom');
+    $selectedStore = ArrayHelper::map(iikoStore::find()->where(['org_id' => $orgId, 'is_active' => 1])->all(), 'id', 'denom');
 }
 ?>
 
 <div class="dict-agent-form">
 
-    <?php $agentModel = \api\common\models\iiko\iikoAgent::findOne(['org_id' => $org, 'uuid' => $model->agent_uuid]); ?>
+    <?php $agentModel = iikoAgent::findOne(['org_id' => $orgId, 'uuid' => $model->agent_uuid]); ?>
     <?php $data = ($agentModel) ? [$agentModel->uuid => $agentModel->denom] : []; ?>
 
     <?php $form = ActiveForm::begin(); ?>
@@ -36,8 +40,26 @@ if (!$selectedStore || count($selectedStore) == 0) {
 
     <?php echo $form->field($model, 'num_code')->textInput(['maxlength' => true]) ?>
 
-    <?php echo $form->field($model, 'agent_uuid')->widget(\kartik\select2\Select2::classname(), [
-        'data' => \api\common\models\iiko\iikoAgent::getAgents($org),
+    <?php
+
+    $delays = iikoAgent::find()->select(['uuid', 'payment_delay'])->where(['org_id' => $orgId])->asArray()->all();
+    $agentPaymentDelays = [];
+    foreach ($delays as $k => $v) {
+        $agentPaymentDelays[$v['uuid']] = ['data-payment-delay' => $v['payment_delay']];
+    }
+
+    ?>
+
+    <?php echo $form->field($model, 'agent_uuid')->widget(Select2::class, [
+        'data' => iikoAgent::getAgents($orgId),
+        'options' => [
+            'options' => $agentPaymentDelays,
+        ],
+        'pluginEvents' => [
+            "change" => "function() {
+                $('#iikowaybill-payment_delay').val($('option[value='+ $(this).val() +']').attr('data-payment-delay'));
+            }",
+        ],
         'pluginOptions' => [
             'allowClear' => true],
         'id' => 'orgFilter'
@@ -54,8 +76,13 @@ if (!$selectedStore || count($selectedStore) == 0) {
         $model->doc_date = $rdate;
     }
     ?>
+
+    <?php echo $form->field($model, 'payment_delay')->textInput(['maxlength' => true, 'value' =>
+        ($model->payment_delay) ? $model->payment_delay : 0
+    ]) ?>
+
     <?= $form->field($model, 'doc_date')->label('Дата документа')->
-    widget(DatePicker::classname(), [
+    widget(DatePicker::class, [
         'type' => DatePicker::TYPE_COMPONENT_APPEND,
         'convertFormat' => true,
         'layout' => '{picker}{input}',
@@ -81,4 +108,3 @@ if (!$selectedStore || count($selectedStore) == 0) {
     <?php ActiveForm::end(); ?>
 
 </div>
-

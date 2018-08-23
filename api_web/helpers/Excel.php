@@ -80,12 +80,12 @@ class Excel
             $write = true;
             foreach ($cellIterator as $cell) {
                 $value = $cell->getValue();
-                if($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
+                if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
                     $write = false;
                     break;
                 }
 
-                if($mapping[$cellsCount] == $index && empty($value)) {
+                if ($mapping[$cellsCount] == $index && empty($value)) {
                     $write = false;
                     break;
                 }
@@ -94,7 +94,7 @@ class Excel
                 $cellsCount++;
             }
 
-            if($write === true) {
+            if ($write === true) {
                 $rows[] = $attributes;
             }
         }
@@ -103,9 +103,17 @@ class Excel
             return false;
         }
 
-        $attributes = array_keys($rows[0]);
-        \Yii::$app->db->createCommand()->batchInsert(CatalogTempContent::tableName(), $attributes, $rows)->execute();
-        return true;
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            CatalogTempContent::deleteAll(['temp_id' => $tmpCatId]);
+            $attributes = array_keys($rows[0]);
+            \Yii::$app->db->createCommand()->batchInsert(CatalogTempContent::tableName(), $attributes, $rows)->execute();
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return false;
+        }
     }
 
 }

@@ -45,12 +45,14 @@ use yii\web\BadRequestHttpException;
  * @property SmsNotification $smsNotification
  * @property Job $job
  */
-class User extends \amnah\yii2\user\models\User {
+class User extends \amnah\yii2\user\models\User
+{
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         $rules = [
             // general email and username rules
             [['email', 'username', 'language'], 'string', 'max' => 255],
@@ -66,11 +68,11 @@ class User extends \amnah\yii2\user\models\User {
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('app', 'Passwords do not match')],
             // email rules invite client
-            [['email'], 'required', 'message' => Yii::t('message', 'frontend.views.vendor.enter_email', ['ru'=>'Введите E-mail'])],
-            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru'=>'Введите эл.почту партнера'])],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor2'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
-            [['email'],'validateClient', 'on'=>'sendInviteFromActiveVendor'],      // account page
-            [['email'],'validateInviteClient', 'on'=>'sendInviteFromActiveVendor2'],      // account page
+            [['email'], 'required', 'message' => Yii::t('message', 'frontend.views.vendor.enter_email', ['ru' => 'Введите E-mail'])],
+            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru' => 'Введите эл.почту партнера'])],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor2'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
+            [['email'], 'validateClient', 'on' => 'sendInviteFromActiveVendor'], // account page
+            [['email'], 'validateInviteClient', 'on' => 'sendInviteFromActiveVendor2'], // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
             // admin crud rules
             [['role_id', 'status'], 'required', 'on' => ['admin']],
@@ -80,7 +82,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
             [['organization_id', 'type', 'subscribe', 'sms_subscribe', 'send_manager_message', 'send_week_message', 'send_demo_message'], 'integer'],
-            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru'=>'Организация не найдена'])],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'allowArray' => false, 'message' => Yii::t('app', 'common.models.org_not_found', ['ru' => 'Организация не найдена'])],
         ];
 
         // add required for currentPassword on account page
@@ -100,9 +102,10 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
 
-    public function beforeSave($insert) {
+    public function beforeSave($insert)
+    {
         $result = parent::beforeSave($insert);
-        if (!$insert && isset($this->oldAttributes['status'])  && ($this->oldAttributes['status'] != $this->status) && ($this->status == self::STATUS_ACTIVE) && empty($this->first_logged_in_at)) {
+        if (!$insert && isset($this->oldAttributes['status']) && ($this->oldAttributes['status'] != $this->status) && ($this->status == self::STATUS_ACTIVE) && empty($this->first_logged_in_at)) {
             $this->first_logged_in_at = new Expression('NOW()');
         }
         $this->language = Yii::$app->language;
@@ -164,7 +167,7 @@ class User extends \amnah\yii2\user\models\User {
              * Уведомления по СМС
              */
             $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id]);
-            if(empty($smsNotification)) {
+            if (empty($smsNotification)) {
                 $smsNotification = new notifications\SmsNotification();
             }
             $smsNotification->user_id = $this->id;
@@ -175,12 +178,12 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->invites = true;
 
             $smsNotification->save();
-            if($this->role_id == Role::ROLE_SUPPLIER_MANAGER){
+            if ($this->role_id == Role::ROLE_SUPPLIER_MANAGER) {
                 $userId = $this->id;
                 $organizationId = $this->organization_id;
                 $clients = \common\models\RelationSuppRest::findAll(['supp_org_id' => $organizationId]);
-                if ($clients){
-                    foreach ($clients as $client){
+                if ($clients) {
+                    foreach ($clients as $client) {
                         $clientId = $client->rest_org_id;
                         $managerAssociate = new ManagerAssociate();
                         $managerAssociate->manager_id = $userId;
@@ -188,12 +191,11 @@ class User extends \amnah\yii2\user\models\User {
                         $managerAssociate->save();
                     }
                 }
-
             }
         }
-        if(!$insert && $this->role_id == Role::ROLE_ONE_S_INTEGRATION){
+        if (!$insert && $this->role_id == Role::ROLE_ONE_S_INTEGRATION) {
             $organizationId = $this->organization_id;
-            if($organizationId){
+            if ($organizationId) {
                 $this->createOneSIntegrationAccount($this->email, $this->password, $this->organization_id);
             }
         }
@@ -238,14 +240,15 @@ class User extends \amnah\yii2\user\models\User {
         return $this;
     }
 
-
-    public function setRole(int $roleId){
+    public function setRole(int $roleId)
+    {
         $this->role_id = $roleId;
         $this->save();
         return $this;
     }
 
-    public function setFranchisee(int $fr_id) {
+    public function setFranchisee(int $fr_id)
+    {
         $franchisee = Franchisee::findOne(['id' => $fr_id]);
         if ($franchisee) {
             $franchiseeUser = new FranchiseeUser();
@@ -259,49 +262,52 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrganization() {
+    public function getOrganization()
+    {
         $organization = $this->module->model("Organization");
         return $this->hasOne($organization::className(), ['id' => 'organization_id']);
     }
 
-    public function getOrganizations() {
+    public function getOrganizations()
+    {
         $organization = $this->module->model("Organization");
         return $this->hasMany($organization::className(), ['id' => 'organization_id'])
-            ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
+                        ->viaTable('{{%relation_user_organization}}', ['user_id' => 'id']);
     }
 
-
-    public function getRelationUserOrganization(){
-        return $this->hasOne(RelationUserOrganization::className(), ['user_id'=>'id', 'organization_id'=>'organization_id']);
+    public function getRelationUserOrganization()
+    {
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id' => 'id', 'organization_id' => 'organization_id']);
     }
-
 
     public function getRelationUserOrganizationRoleID(int $userID): int
     {
-        $user = self::findIdentity(Yii::$app->user->id);
-        $rel = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$user->organization_id]);
+        $user = self::findIdentity($userID);
+        $rel = RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $user->organization_id]);
         return $rel->role_id;
     }
-
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFranchiseeUser() {
+    public function getFranchiseeUser()
+    {
         return $this->hasOne(FranchiseeUser::className(), ['user_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getManagersLeader() {
+    public function getManagersLeader()
+    {
         return $this->hasOne(User::className(), ['leader_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAssociated() {
+    public function getAssociated()
+    {
         return $this->hasMany(ManagerAssociate::className(), ['manager_id' => 'id']);
     }
 
@@ -324,15 +330,15 @@ class User extends \amnah\yii2\user\models\User {
         return $this->getNotifications('common\models\notifications\SmsNotification', $org_id, $isFranchisee);
     }
 
-
     private function getNotifications(String $className, $org_id = null, bool $isFranchisee = false)
     {
         $org_id = ($org_id == null) ? $this->organization_id : $org_id;
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);;
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
+        ;
         if ($rel === null && !$isFranchisee) {
             return $className::emptyInstance();
         }
-        if($rel === null && $isFranchisee){
+        if ($rel === null && $isFranchisee) {
             $rel = new RelationUserOrganization();
             $rel->user_id = $this->id;
             $rel->organization_id = $org_id;
@@ -348,7 +354,8 @@ class User extends \amnah\yii2\user\models\User {
      *
      * @return bool
      */
-    public function isActive() {
+    public function isActive()
+    {
         return ($this->status == static::STATUS_ACTIVE);
     }
 
@@ -357,7 +364,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param User $vendor
      * @return int
      */
-    public function sendInviteToVendor($vendor) {
+    public function sendInviteToVendor($vendor)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -371,9 +379,9 @@ class User extends \amnah\yii2\user\models\User {
         $email = $vendor->email;
         $subject = "Приглашение на MixCart";
         $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -385,7 +393,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param User $client
      * @return int
      */
-    public function sendInviteToClient($client) {
+    public function sendInviteToClient($client)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -395,11 +404,11 @@ class User extends \amnah\yii2\user\models\User {
         // send email
         $vendor = $this->organization->name;
         $email = $client->email;
-        $subject = Yii::t('app', 'common.models.invitation', ['ru'=>"Приглашение на MixCart"]);
+        $subject = Yii::t('app', 'common.models.invitation', ['ru' => "Приглашение на MixCart"]);
         $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -411,7 +420,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param User $client
      * @return int
      */
-    public function sendInviteToActiveClient($client) {
+    public function sendInviteToActiveClient($client)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -421,11 +431,11 @@ class User extends \amnah\yii2\user\models\User {
         // send email
         $vendor = $this->organization->name;
         $email = $client->email;
-        $subject = Yii::t('app', 'common.models.invitation', ['ru'=>"Приглашение на MixCart"]);
+        $subject = Yii::t('app', 'common.models.invitation', ['ru' => "Приглашение на MixCart"]);
         $result = $mailer->compose('acceptActiveVendorInvite', compact("subject", "client", "vendor"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -437,7 +447,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param string $email
      * @return int
      */
-    public function sendInviteToFriend($email) {
+    public function sendInviteToFriend($email)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -446,11 +457,11 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
         // send email
         $we = $this->organization->name;
-        $subject = Yii::t('app', 'common.models.invitation_two', ['ru'=>"Приглашение на MixCart"]);
+        $subject = Yii::t('app', 'common.models.invitation_two', ['ru' => "Приглашение на MixCart"]);
         $result = $mailer->compose('friendInvite', compact("subject", "we"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -462,7 +473,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param User $client
      * @return int
      */
-    public function sendWelcome() {
+    public function sendWelcome()
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -474,11 +486,11 @@ class User extends \amnah\yii2\user\models\User {
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
         $user = $this;
-        $subject = Yii::t('app', 'common.models.welcome', ['ru'=>"Добро пожаловать на  MixCart"]);
+        $subject = Yii::t('app', 'common.models.welcome', ['ru' => "Добро пожаловать на  MixCart"]);
         $result = $mailer->compose('welcome', compact("subject", "type", "name", "user"))
-            ->setTo($this->email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($this->email)
+                ->setSubject($subject)
+                ->send();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
 //            \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this);
@@ -494,7 +506,8 @@ class User extends \amnah\yii2\user\models\User {
      *  @param User $user
      *  @return int
      */
-    public function sendEmployeeConfirmation($user) {
+    public function sendEmployeeConfirmation($user)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $profile = $user->profile;
@@ -506,18 +519,19 @@ class User extends \amnah\yii2\user\models\User {
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
-        $subject = Yii::t('app', 'common.models.confirm', ['ru'=>"Подтвердите аккаунт на MixCart"]);
+        $subject = Yii::t('app', 'common.models.confirm', ['ru' => "Подтвердите аккаунт на MixCart"]);
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
 
-    public static function getOrganizationUser($user_ids) {
+    public static function getOrganizationUser($user_ids)
+    {
         $user_orgganization = User::find()->select('organization_id')->where(['id' => $user_ids])->one();
         return $user_orgganization['organization_id'];
     }
@@ -527,7 +541,8 @@ class User extends \amnah\yii2\user\models\User {
      * @param UserToken $userToken
      * @return int
      */
-    public function sendEmailConfirmation($userToken) {
+    public function sendEmailConfirmation($userToken)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -539,12 +554,12 @@ class User extends \amnah\yii2\user\models\User {
         $user = $this;
         $profile = $user->profile;
         $email = $userToken->data ?: $user->email;
-        $subject = Yii::$app->id . " - " . Yii::t("app", 'common.models.user.confirm.', ['ru'=>"Подтверждение Email"]);
+        $subject = Yii::$app->id . " - " . Yii::t("app", 'common.models.user.confirm.', ['ru' => "Подтверждение Email"]);
 
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -583,7 +598,7 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getEmailInBlackList()
     {
-        return (bool)EmailBlacklist::find()->where("email = :e", [':e' => $this->email])->one();
+        return (bool) EmailBlacklist::find()->where("email = :e", [':e' => $this->email])->one();
     }
 
     /**
@@ -598,55 +613,53 @@ class User extends \amnah\yii2\user\models\User {
     public function validateClient($attribute, $params)
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        if(RelationSuppRest::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
-            $this->addError($attribute, Yii::t('message', 'common.models.rel_already_exists', ['ru'=>'Ресторан с таким email уже сотрудничает с вами. Проверьте список ваших клиентов!']));
+        if (RelationSuppRest::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
+            $this->addError($attribute, Yii::t('message', 'common.models.rel_already_exists', ['ru' => 'Ресторан с таким email уже сотрудничает с вами. Проверьте список ваших клиентов!']));
     }
 
     public function validateInviteClient($attribute, $params)
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        if(RelationSuppRestPotential::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
-            $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
+        if (RelationSuppRestPotential::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
+            $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
     }
-
 
     /**
      * Creating user-organization relations
      */
     public function setRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
     {
-        if(RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID])){
+        if (RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $organizationID])) {
             return false;
         }
-        if(Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)){
+        if (Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)) {
             $currentUser = User::findIdentity(Yii::$app->user->id);
-            $organization = Organization::findOne(['id'=>$currentUser->organization_id]);
+            $organization = Organization::findOne(['id' => $currentUser->organization_id]);
 
             self::createRelationUserOrganization($userID, $organizationID, $roleID);
-            if($organization->parent_id){
-                $children = Organization::findAll(['parent_id'=>$organization->parent_id]);
-                $children = array_merge($children, Organization::findAll(['id'=>$organization->parent_id]));
-            }else{
-                $children = Organization::findAll(['parent_id'=>$organization->id]);
+            if ($organization->parent_id) {
+                $children = Organization::findAll(['parent_id' => $organization->parent_id]);
+                $children = array_merge($children, Organization::findAll(['id' => $organization->parent_id]));
+            } else {
+                $children = Organization::findAll(['parent_id' => $organization->id]);
             }
-            foreach ($children as $child){
+            foreach ($children as $child) {
                 self::createRelationUserOrganization($userID, $child->id, $roleID);
             }
             return true;
-        }else{
+        } else {
             return self::createRelationUserOrganization($userID, $organizationID, $roleID);
         }
     }
-
 
     /**
      * Creating 1C integration account
      */
     public function createOneSIntegrationAccount(String $email, String $pass, int $organizationID): bool
     {
-        try{
+        try {
             $apiAccess = OneSRestAccess::findOne(['login' => $email, 'org' => $organizationID]);
-            if(!$apiAccess){
+            if (!$apiAccess) {
                 $apiAccess = new OneSRestAccess();
                 $apiAccess->login = $email;
                 $apiAccess->fid = $this->id;
@@ -664,26 +677,24 @@ class User extends \amnah\yii2\user\models\User {
                     $errors = $apiAccess->errors;
                     Yii::error("<pre>" . print_r($errors, 1) . "</pre>");
                 }
-
-            }else{
+            } else {
                 $apiAccess->password = $pass;
                 $apiAccess->save();
             }
-        }catch (Exception $e){
+        } catch (Exception $e) {
             Yii::error($e->getMessage());
             return false;
         }
         return true;
     }
 
-
     /**
      * Creating single user-organization relation
      */
     public function createRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
     {
-        $check = RelationUserOrganization::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
-        if($check){
+        $check = RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $organizationID]);
+        if ($check) {
             return false;
         }
         $rel = new RelationUserOrganization();
@@ -695,19 +706,17 @@ class User extends \amnah\yii2\user\models\User {
         return true;
     }
 
-
     /**
      * Deleting single user-organization relation
      */
     public function deleteRelationUserOrganization(int $userId, int $organizationId): bool
     {
-        $check = RelationUserOrganization::findOne(['user_id'=>$userId, 'organization_id'=>$organizationId]);
-        if($check){
+        $check = RelationUserOrganization::findOne(['user_id' => $userId, 'organization_id' => $organizationId]);
+        if ($check) {
             $check->delete();
         }
         return true;
     }
-
 
     /**
      * Deleting all user-organization relations
@@ -716,45 +725,44 @@ class User extends \amnah\yii2\user\models\User {
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $relationsOrg = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>Yii::$app->user->id])->all();
+            $relationsOrg = RelationUserOrganization::find()->select('organization_id')->where(['user_id' => Yii::$app->user->id])->all();
             $deleteAll = false;
-            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id'=>$userID])->all();
+            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id' => $userID])->all();
 
             $orgArray = [];
-            foreach ($relationsOrg as $item){
+            foreach ($relationsOrg as $item) {
                 $orgArray[] = $item->organization_id;
             }
-            foreach ($relationsTwo as $one){
-                if(!in_array($one->organization_id, $orgArray)){
+            foreach ($relationsTwo as $one) {
+                if (!in_array($one->organization_id, $orgArray)) {
                     $deleteAll = true;
                 }
             }
 
-            if($deleteAll){
-                $relations = RelationUserOrganization::find()->where(['user_id'=>Yii::$app->user->id])->all();
+            if ($deleteAll) {
+                $relations = RelationUserOrganization::find()->where(['user_id' => Yii::$app->user->id])->all();
                 foreach ($relations as $relation) {
                     self::deleteRelationUserOrganization($userID, $organizationID);
                 }
-
-            }else{
+            } else {
                 $user = User::findIdentity(Yii::$app->user->id);
                 self::deleteRelationUserOrganization($userID, $organizationID);
             }
 
-            $check = RelationUserOrganization::findOne(['user_id'=>$userID]);
+            $check = RelationUserOrganization::findOne(['user_id' => $userID]);
 
-            if($check!=null){
+            if ($check != null) {
                 $existingUser = User::findOne(['id' => $userID]);
                 $existingUser->organization_id = $check->organization_id;
                 $existingUser->role_id = $check->role_id;
                 $existingUser->save();
                 $transaction->commit();
                 return true;
-            }else{
+            } else {
                 $result = self::deleteAllUserData($userID);
-                if($result){
+                if ($result) {
                     $transaction->commit();
-                }else{
+                } else {
                     $transaction->rollBack();
                 }
                 return $result;
@@ -767,32 +775,30 @@ class User extends \amnah\yii2\user\models\User {
         return false;
     }
 
-
     /**
      * Getting user role for relation
      */
     private function getRelationRole(int $roleID, int $organizationID): int
     {
-        $children = (new \yii\db\Query())->select(['type_id'])->from('organization')->where(['id'=>$organizationID])->one();
-        if($children['type_id'] == Organization::TYPE_RESTAURANT){
-            if($roleID == Role::ROLE_SUPPLIER_MANAGER){
+        $children = (new \yii\db\Query())->select(['type_id'])->from('organization')->where(['id' => $organizationID])->one();
+        if ($children['type_id'] == Organization::TYPE_RESTAURANT) {
+            if ($roleID == Role::ROLE_SUPPLIER_MANAGER) {
                 $roleID = Role::ROLE_RESTAURANT_MANAGER;
             }
-            if($roleID == Role::ROLE_SUPPLIER_EMPLOYEE){
+            if ($roleID == Role::ROLE_SUPPLIER_EMPLOYEE) {
                 $roleID = Role::ROLE_RESTAURANT_EMPLOYEE;
             }
         }
-        if($children['type_id'] == Organization::TYPE_SUPPLIER){
-            if($roleID == Role::ROLE_RESTAURANT_MANAGER){
+        if ($children['type_id'] == Organization::TYPE_SUPPLIER) {
+            if ($roleID == Role::ROLE_RESTAURANT_MANAGER) {
                 $roleID = Role::ROLE_SUPPLIER_MANAGER;
             }
-            if($roleID == Role::ROLE_RESTAURANT_EMPLOYEE){
+            if ($roleID == Role::ROLE_RESTAURANT_EMPLOYEE) {
                 $roleID = Role::ROLE_SUPPLIER_EMPLOYEE;
             }
         }
         return $roleID;
     }
-
 
     /**
      * Deleting user completely
@@ -830,7 +836,6 @@ class User extends \amnah\yii2\user\models\User {
         return false;
     }
 
-
     /**
      * Updating user-organization relations
      */
@@ -838,21 +843,21 @@ class User extends \amnah\yii2\user\models\User {
     {
         $user = User::findIdentity($userID);
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $relation = RelationUserOrganization::find()->where(['user_id'=>$userID, 'organization_id'=>$organizationID])->one();
+        $relation = RelationUserOrganization::find()->where(['user_id' => $userID, 'organization_id' => $organizationID])->one();
         $relation->role_id = $roleID;
         $relation->save();
-        $organization = Organization::findOne(['id'=>$currentUser->organization_id]);
-        if($organization->parent_id){
-            $children = Organization::findAll(['parent_id'=>$organization->parent_id]);
-            $children = array_merge($children, Organization::findAll(['id'=>$organization->parent_id]));
-        }else{
-            $children = Organization::findAll(['parent_id'=>$organization->id]);
+        $organization = Organization::findOne(['id' => $currentUser->organization_id]);
+        if ($organization->parent_id) {
+            $children = Organization::findAll(['parent_id' => $organization->parent_id]);
+            $children = array_merge($children, Organization::findAll(['id' => $organization->parent_id]));
+        } else {
+            $children = Organization::findAll(['parent_id' => $organization->id]);
         }
-        if(Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)){
-            foreach ($children as $child){
+        if (Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)) {
+            foreach ($children as $child) {
                 self::createRelationUserOrganization($userID, $child->id, $roleID);
             }
-        }else{
+        } else {
             foreach ($children as $child) {
                 self::deleteRelationUserOrganization($userID, $child->id);
             }
@@ -871,40 +876,38 @@ class User extends \amnah\yii2\user\models\User {
     public function getAllOrganization($searchString = null, $type = null): array
     {
         $userID = $this->id;
-        if($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR){
-            $org = Organization::findOne(['id'=>$this->organization_id]);
-            $orgArray = Organization::find()->distinct()->leftJoin(['org2'=>'organization'], 'org2.parent_id=organization.id')->where(['organization.id'=>$this->organization_id]);
-            if($searchString){
+        if ($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR) {
+            $org = Organization::findOne(['id' => $this->organization_id]);
+            $orgArray = Organization::find()->distinct()->leftJoin(['org2' => 'organization'], 'org2.parent_id=organization.id')->where(['organization.id' => $this->organization_id]);
+            if ($searchString) {
                 $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
             }
-            $orgArray = $orgArray->orWhere(['organization.parent_id'=>$this->organization_id]);
-            if($org && $org->parent_id != null){
-                $orgArray = $orgArray->orWhere(['organization.id'=>$org->parent_id])->orWhere(['organization.parent_id'=>$org->parent_id]);
+            $orgArray = $orgArray->orWhere(['organization.parent_id' => $this->organization_id]);
+            if ($org && $org->parent_id != null) {
+                $orgArray = $orgArray->orWhere(['organization.id' => $org->parent_id])->orWhere(['organization.parent_id' => $org->parent_id]);
             }
-            if($searchString){
+            if ($searchString) {
                 $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
             }
 
-            if($type) {
+            if ($type) {
                 $orgArray->andWhere(['organization.type_id' => $type]);
             }
 
             $orgArray = $orgArray->orderBy('organization.name')->all();
             return $orgArray;
-        }else{
-            $orgArray = Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id'=>$userID]);
-            if($searchString){
+        } else {
+            $orgArray = Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id' => $userID]);
+            if ($searchString) {
                 $orgArray = $orgArray->andWhere(['like', 'organization.name', $searchString]);
             }
-            if($type) {
+            if ($type) {
                 $orgArray->andWhere(['organization.type_id' => $type]);
             }
             $orgArray = $orgArray->orderBy('organization.name')->all();
             return $orgArray;
         }
-
     }
-
 
     public function getAllOrganizationsDataProvider($searchString = null, $showEmpty = false): ArrayDataProvider
     {
@@ -917,7 +920,6 @@ class User extends \amnah\yii2\user\models\User {
         return $dataProvider;
     }
 
-
     /**
      * Проверка, можно ли переключиться на организацию
      * @param $organization_id
@@ -927,13 +929,12 @@ class User extends \amnah\yii2\user\models\User {
     {
         $all = $this->getAllOrganization();
         foreach ($all as $item) {
-            if($item['id'] == $organization_id){
+            if ($item['id'] == $organization_id) {
                 return true;
             }
         }
         return false;
     }
-
 
     /**
      * Checking if email exists in DB
@@ -961,7 +962,8 @@ class User extends \amnah\yii2\user\models\User {
         return $result;
     }
 
-    public function wipeNotifications() {
+    public function wipeNotifications()
+    {
         $toBeWiped = [
             'order_created' => 0,
             'order_canceled' => 0,
@@ -984,7 +986,8 @@ class User extends \amnah\yii2\user\models\User {
         }
     }
 
-    public function setNotifications() {
+    public function setNotifications()
+    {
         $toBeSet = [
             'order_created' => 1,
             'order_canceled' => 1,
@@ -1006,8 +1009,9 @@ class User extends \amnah\yii2\user\models\User {
             $smsNotification->save();
         }
     }
-    
-    public static function getMixManagersList($empty = false) {
+
+    public static function getMixManagersList($empty = false)
+    {
         $managers = self::find()
                 ->select(['user.id', 'profile.full_name'])
                 ->joinWith('profile')
@@ -1016,4 +1020,5 @@ class User extends \amnah\yii2\user\models\User {
                 ->all();
         return \yii\helpers\ArrayHelper::map($managers, 'id', 'full_name');
     }
+
 }

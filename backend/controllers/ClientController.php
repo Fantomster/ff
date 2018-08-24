@@ -190,12 +190,12 @@ class ClientController extends Controller
                 $user->save();
                 //$profile->email = $user->getEmail();
                 $profile->save();
-                if (($currentUser->role_id == ROLE::ROLE_ADMIN) && ($user->role_id != Role::ROLE_FKEEPER_MANAGER)) {
-                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
+                if ($user->role_id != Role::ROLE_FKEEPER_MANAGER) {
+                    $user->updateRelationUserOrganization($user->organization_id, $user->role_id);
                 }
                 return $this->redirect(['client/view', 'id' => $user->id]);
             } else {
-                if (isset($user->organization_id) && $user->getRelationUserOrganizationRoleID($user->organization_id)) {
+                if (isset($user->organization_id) && $user->getRelationUserOrganizationRoleID($user->organization_id) && ($user->role_id != Role::ROLE_FKEEPER_MANAGER)) {
                     $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $user->organization_id));
                     $selected = $user->getRelationUserOrganizationRoleID($id);
                 } else {

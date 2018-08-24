@@ -31,12 +31,14 @@ use yii\web\UploadedFile;
 /**
  * Controller for supplier
  */
-class VendorController extends DefaultController {
+class VendorController extends DefaultController
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -143,7 +145,8 @@ class VendorController extends DefaultController {
      *  Main settings page
      */
 
-    public function actionSettings() {
+    public function actionSettings()
+    {
         $organization = $this->currentUser->organization;
         $organization->scenario = "settings";
         $post = Yii::$app->request->post();
@@ -169,7 +172,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionEmployees(): String {
+    public function actionEmployees(): String
+    {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
@@ -185,7 +189,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionDelivery() {
+    public function actionDelivery()
+    {
         $organization = $this->currentUser->organization;
         $supplier = $organization->id;
         $regionsList = DeliveryRegions::find()->where(['supplier_id' => $supplier])->all();
@@ -216,7 +221,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionRemoveDeliveryRegion(int $id): void {
+    public function actionRemoveDeliveryRegion(int $id): void
+    {
         $organization = $this->currentUser->organization;
         $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
         if ($deliveryRegions) {
@@ -228,7 +234,8 @@ class VendorController extends DefaultController {
      *  User validate
      */
 
-    public function actionAjaxValidateUser() {
+    public function actionAjaxValidateUser()
+    {
         $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
 
@@ -249,7 +256,8 @@ class VendorController extends DefaultController {
      *  User create
      */
 
-    public function actionAjaxCreateUser() {
+    public function actionAjaxCreateUser()
+    {
         $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
         $this->loadCurrentUser();
@@ -273,14 +281,14 @@ class VendorController extends DefaultController {
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $user->wipeNotifications();
                     $this->currentUser->sendEmployeeConfirmation($user);
-                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
+                    $user->setRelationUserOrganization($user->organization->id, $user->role_id);
 
                     $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 } else {
                     if (array_key_exists('email', $user->errors)) {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
-                        $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                        $success = $existingUser->setRelationUserOrganization($this->currentUser->organization->id, $post['User']['role_id']);
                         if ($success) {
 
                             $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
@@ -303,7 +311,8 @@ class VendorController extends DefaultController {
      *  User update
      */
 
-    public function actionAjaxUpdateUser(int $id): String {
+    public function actionAjaxUpdateUser(int $id): String
+    {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
         $oldRole = $user->role_id;
@@ -329,7 +338,7 @@ class VendorController extends DefaultController {
                     $user->save();
                     //$profile->email = $user->getEmail();
                     $profile->save();
-                    User::updateRelationUserOrganization($user->id, $currentUserOrganizationID, $post['User']['role_id']);
+                    $user->updateRelationUserOrganization($currentUserOrganizationID, $post['User']['role_id']);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -342,7 +351,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
     }
 
-    public function actionCatalogs() {
+    public function actionCatalogs()
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
         if (!Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
@@ -403,7 +413,8 @@ class VendorController extends DefaultController {
         //}
     }
 
-    public function actionSupplierStartCatalogCreate() {
+    public function actionSupplierStartCatalogCreate()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -425,7 +436,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                if(in_array($product, $productArray)){
+                if (in_array($product, $productArray)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!')]];
                     return $result;
                 }
@@ -535,7 +546,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionClients() {
+    public function actionClients()
+    {
         $currentOrganization = User::findIdentity(Yii::$app->user->id)->organization;
         $searchModel = new \common\models\search\ClientSearch();
 
@@ -550,7 +562,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionRemoveClient() {
+    public function actionRemoveClient()
+    {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -559,7 +572,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionBasecatalog() {
+    public function actionBasecatalog()
+    {
         $sort = \Yii::$app->request->get('sort') ?? '';
 
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -578,7 +592,8 @@ class VendorController extends DefaultController {
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id', 'currentUser'));
     }
 
-    public function actionImport($id) {
+    public function actionImport($id)
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         $vendor = \common\models\Catalog::find()->where([
@@ -787,7 +802,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }
 
-    public function actionImportRestaurant($id) {
+    public function actionImportRestaurant($id)
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->id, 'type' => Catalog::BASE_CATALOG]);
@@ -941,12 +957,13 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_importFormRestaurant', compact('importModel'));
     }
 
-    public function actionImportBaseCatalogFromXls() {
+    public function actionImportBaseCatalogFromXls()
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
             $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization->id]);
-            if(!$catalog){
+            if (!$catalog) {
                 $catalog = new Catalog();
             }
             $catalog->makeSnapshot();
@@ -1054,7 +1071,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
     }
 
-    public function actionChangestatus() {
+    public function actionChangestatus()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $id = \Yii::$app->request->post('id');
@@ -1070,7 +1088,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionAjaxInviteRestOrgId() {
+    public function actionAjaxInviteRestOrgId()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1100,7 +1119,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionMycatalogdelcatalog() {
+    public function actionMycatalogdelcatalog()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -1118,7 +1138,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionAjaxDeleteProduct() {
+    public function actionAjaxDeleteProduct()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -1130,7 +1151,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionAjaxCreateProductMarketPlace() {
+    public function actionAjaxCreateProductMarketPlace()
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
@@ -1173,7 +1195,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods', 'countrys'));
     }
 
-    public function actionAjaxUpdateProductMarketPlace($id) {
+    public function actionAjaxUpdateProductMarketPlace($id)
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         $catalogBaseGoods->scenario = 'marketPlace';
@@ -1188,7 +1211,7 @@ class VendorController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if(isset($post['CatalogBaseGoods']['units']) && strpos($post['CatalogBaseGoods']['units'], ',')){
+            if (isset($post['CatalogBaseGoods']['units']) && strpos($post['CatalogBaseGoods']['units'], ',')) {
                 $post['CatalogBaseGoods']['units'] = str_replace(',', '.', $post['CatalogBaseGoods']['units']);
             }
             if ($catalogBaseGoods->load($post)) {
@@ -1224,7 +1247,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods', 'countrys'));
     }
 
-    public function actionMpCountryList($q) {
+    public function actionMpCountryList($q)
+    {
         if (Yii::$app->request->isAjax) {
             $model = new \common\models\MpCountry();
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1234,7 +1258,8 @@ class VendorController extends DefaultController {
         return false;
     }
 
-    public function actionGetSubCat() {
+    public function actionGetSubCat()
+    {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
             $id = end($_POST['depdrop_parents']);
@@ -1271,7 +1296,8 @@ class VendorController extends DefaultController {
         return Json::encode(['output' => '', 'selected' => '']);
     }
 
-    public function actionChangecatalogprop() {
+    public function actionChangecatalogprop()
+    {
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1309,7 +1335,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionChangesetcatalog() {
+    public function actionChangesetcatalog()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1344,7 +1371,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionChangecatalogstatus() {
+    public function actionChangecatalogstatus()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $id = \Yii::$app->request->post('id');
@@ -1358,7 +1386,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionCreateCatalog() {
+    public function actionCreateCatalog()
+    {
         $relation_supp_rest = new RelationSuppRest;
         if (Yii::$app->request->isAjax) {
             
@@ -1370,7 +1399,8 @@ class VendorController extends DefaultController {
      *  User delete (not actual delete, just remove organization relation)
      */
 
-    public function actionAjaxDeleteUser() {
+    public function actionAjaxDeleteUser()
+    {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($post && isset($post['id'])) {
@@ -1427,7 +1457,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('settings/_success', ['message' => $message]);
     }
 
-    public function actionStep1() {
+    public function actionStep1()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $catalog = new Catalog();
@@ -1452,7 +1483,8 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-1', compact('catalog'));
     }
 
-    public function actionStep1Update($id) {
+    public function actionStep1Update($id)
+    {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if (!Catalog::find()->where(['id' => $id, 'supp_org_id' => $currentUser->organization_id])->exists()) {
@@ -1475,7 +1507,8 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-1', compact('catalog', 'cat_id', 'searchModel', 'dataProvider'));
     }
 
-    public function actionStep1Clone($id) {
+    public function actionStep1Clone($id)
+    {
         $cat_id_old = $id; //id исходного каталога
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
@@ -1508,7 +1541,8 @@ class VendorController extends DefaultController {
         return $this->redirect(['vendor/step-1-update', 'id' => $cat_id]);
     }
 
-    public function actionStep2AddProduct() {
+    public function actionStep2AddProduct()
+    {
         if (Yii::$app->request->isAjax) {
             $product_id = Yii::$app->request->post('baseProductId');
             $cat_id = Yii::$app->request->post('cat_id');
@@ -1528,7 +1562,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionStep2($id) {
+    public function actionStep2($id)
+    {
         $sort = \Yii::$app->request->get('sort');
 
         $cat_id = $id;
@@ -1613,7 +1648,8 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-2', compact('dataProvider', 'cat_id', 'baseCurrencySymbol'));
     }
 
-    public function actionStep3Copy($id) {
+    public function actionStep3Copy($id)
+    {
         ini_set('memory_limit', '256M');
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1728,7 +1764,8 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'dataProvider'));
     }
 
-    public function actionStep3UpdateProduct($id) {
+    public function actionStep3UpdateProduct($id)
+    {
         $catalogGoods = CatalogGoods::find()->where(['id' => $id])->one();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -1745,7 +1782,8 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_productForm', compact('catalogGoods'));
     }
 
-    public function actionStep4($id) {
+    public function actionStep4($id)
+    {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
@@ -1785,7 +1823,8 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-4', compact('searchModel', 'dataProvider', 'currentCatalog', 'cat_id'));
     }
 
-    public function actionAjaxAddClient() {
+    public function actionAjaxAddClient()
+    {
         $user = new User(['scenario' => 'sendInviteFromVendor']);
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -1829,7 +1868,8 @@ class VendorController extends DefaultController {
     }
 
     public
-            function actionAjaxSetPercent($id) {
+            function actionAjaxSetPercent($id)
+    {
         $cat_id = $id;
         $catalogGoods = new CatalogGoods(['scenario' => 'update']);
         if (Yii::$app->request->isAjax) {
@@ -1848,7 +1888,8 @@ class VendorController extends DefaultController {
     }
 
     public
-            function actionViewClient($id) {
+            function actionViewClient($id)
+    {
         $client_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $canManage = Yii::$app->user->can('manage');
@@ -1910,7 +1951,8 @@ class VendorController extends DefaultController {
     }
 
     public
-            function actionViewCatalog($id) {
+            function actionViewCatalog($id)
+    {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalog = Catalog::find()->where(['id' => $cat_id])->one();
@@ -1931,7 +1973,8 @@ class VendorController extends DefaultController {
     }
 
     public
-            function actionListCatalog() {
+            function actionListCatalog()
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $search = Yii::$app->request->post('search');
         $restaurant = Yii::$app->request->post('restaurant');
@@ -1940,17 +1983,20 @@ class VendorController extends DefaultController {
     }
 
     public
-            function actionMessages() {
+            function actionMessages()
+    {
         return $this->render('/site/underConstruction');
     }
 
     public
-            function actionEvents() {
+            function actionEvents()
+    {
         return $this->render('/site/underConstruction');
     }
 
     public
-            function actionAnalytics() {
+            function actionAnalytics()
+    {
 
         $currentUser = $this->currentUser;
         $vendor = $currentUser->organization;
@@ -2006,7 +2052,8 @@ class VendorController extends DefaultController {
         $where = "";
 
         //pieChart
-        function hex() {
+        function hex()
+        {
             $hex = '#';
             foreach (array('r', 'g', 'b') as $color) {
                 //случайное число в диапазоне 0 и 255.
@@ -2160,7 +2207,8 @@ class VendorController extends DefaultController {
         ));
     }
 
-    public function actionAjaxUpdateCurrency() {
+    public function actionAjaxUpdateCurrency()
+    {
         $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
         $currencyId = \Yii::$app->request->get('filter_currency') ?? 1;
@@ -2176,7 +2224,8 @@ class VendorController extends DefaultController {
      */
 
     public
-            function actionIndex() {
+            function actionIndex()
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         //ГРАФИК ПРОДАЖ ----->
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
@@ -2184,15 +2233,15 @@ class VendorController extends DefaultController {
 
         $managerCondition = Yii::$app->user->can('manage') ? '' : "AND `manager_associate`.manager_id = $currentUser->id";
         $managerJoin = Yii::$app->user->can('manage') ? '' : "LEFT JOIN `manager_associate` ON `order`.client_id = `manager_associate`.organization_id ";
-    
+
         $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date, 'vendor_id');
         $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
         empty($filter_currency) ? $where = " and currency_id='1'" : $where = " and currency_id='" . $filter_currency . "'";
-        
-        uksort($currencyList, function ($a, $b) use ($filter_currency){
+
+        uksort($currencyList, function ($a, $b) use ($filter_currency) {
             return $a == $filter_currency ? -1 : 1;
         });
-        
+
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
             (select sum(total_price) FROM `order` $managerJoin
             where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
@@ -2252,24 +2301,27 @@ class VendorController extends DefaultController {
 
         $organization = $currentUser->organization;
         $profile = $currentUser->profile;
-    
+
         return $this->render('index', compact(
                                 'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats', 'organization', 'profile', 'currencyList'
         ));
     }
 
     public
-            function actionTutorial() {
+            function actionTutorial()
+    {
         return $this->render('tutorial');
     }
 
     public
-            function actionSupport() {
+            function actionSupport()
+    {
         return $this->render('/site/underConstruction');
     }
 
     public
-            function actionSidebar() {
+            function actionSidebar()
+    {
         Yii::$app->session->get('sidebar-collapse') ?
                         Yii::$app->session->set('sidebar-collapse', false) :
                         Yii::$app->session->set('sidebar-collapse', true);
@@ -2279,7 +2331,8 @@ class VendorController extends DefaultController {
      * changes currency in given catalog
      */
     public
-            function actionAjaxChangeCurrency($id) {
+            function actionAjaxChangeCurrency($id)
+    {
         $newCurrencyId = Yii::$app->request->post('newCurrencyId');
         $catalog = Catalog::find()->where(['id' => $id, 'supp_org_id' => $this->currentUser->organization_id])->one();
 
@@ -2303,7 +2356,8 @@ class VendorController extends DefaultController {
      * calculate prices with new currency
      */
     public
-            function actionAjaxCalculatePrices($id) {
+            function actionAjaxCalculatePrices($id)
+    {
         $catalog = Catalog::find()->where(['id' => $id, 'supp_org_id' => $this->currentUser->organization_id])->one();
 
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -2379,7 +2433,8 @@ class VendorController extends DefaultController {
     }
 
     public
-            function actionPayments() {
+            function actionPayments()
+    {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchModel = new PaymentSearch();
 
@@ -2390,7 +2445,8 @@ class VendorController extends DefaultController {
         return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
     }
 
-    public function actionChkmail() {
+    public function actionChkmail()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $result = User::checkInvitingUser(\Yii::$app->request->post('email'));
@@ -2398,7 +2454,8 @@ class VendorController extends DefaultController {
         }
     }
 
-    public function actionAjaxChangeMainIndex() {
+    public function actionAjaxChangeMainIndex()
+    {
         $post = Yii::$app->request->post();
         if (isset($post['cat_id']) && isset($post['main_index'])) {
             $cat_id = $post['cat_id'];
@@ -2418,7 +2475,8 @@ class VendorController extends DefaultController {
         return $catalog->save();
     }
 
-    public function actionAjaxDeleteMainCatalog() {
+    public function actionAjaxDeleteMainCatalog()
+    {
         $currentUser = $this->currentUser;
         $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (!empty($catalog)) {
@@ -2427,7 +2485,8 @@ class VendorController extends DefaultController {
         return false;
     }
 
-    public function actionAjaxRestoreMainCatalogLatestSnapshot() {
+    public function actionAjaxRestoreMainCatalogLatestSnapshot()
+    {
         $currentUser = $this->currentUser;
         $catalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (!empty($catalog)) {

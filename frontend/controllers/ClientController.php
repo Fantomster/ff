@@ -262,7 +262,7 @@ class ClientController extends DefaultController
                     $userid = $user->id;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
-                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
+                    $user->setRelationUserOrganization($user->organization->id, $user->role_id);
                     $user->wipeNotifications();
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     //Yii::$app->db->createCommand($query)->queryScalar();
@@ -275,7 +275,7 @@ class ClientController extends DefaultController
                                 $message = Yii::t('app', 'common.models.already_exists');
                                 return $this->renderAjax('settings/_success', ['message' => $message]);
                             }
-                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                            $success = $existingUser->setRelationUserOrganization($this->currentUser->organization->id, $post['User']['role_id']);
                             if ($success) {
                                 $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                                 $existingUser->setRole($post['User']['role_id'])->save();
@@ -321,7 +321,7 @@ class ClientController extends DefaultController
                     $user->role_id = $post['User']['role_id'];
                     $user->save();
                     $profile->save();
-                    User::updateRelationUserOrganization($user->id, $this->currentUser->organization_id, $post['User']['role_id']);
+                    $user->updateRelationUserOrganization($currentUserOrganizationID, $post['User']['role_id']);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -530,7 +530,7 @@ class ClientController extends DefaultController
                                 $currentOrganization->step = Organization::STEP_OK;
                                 $currentOrganization->save();
                             }
-                            User::createRelationUserOrganization($user->id, $organization->id, Role::getManagerRole($organization->type_id));
+                            $user->createRelationUserOrganization($organization->id, Role::getManagerRole($organization->type_id));
                         } else {
                             //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                             $get_supp_org_id = $check['org_id'];

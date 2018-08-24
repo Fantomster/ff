@@ -626,28 +626,26 @@ class User extends \amnah\yii2\user\models\User
     /**
      * Creating user-organization relations
      */
-    public function setRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
+    public function setRelationUserOrganization(int $organizationID, int $roleID): bool
     {
         if (RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $organizationID])) {
             return false;
         }
-        if (Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)) {
-            $currentUser = User::findIdentity(Yii::$app->user->id);
-            $organization = Organization::findOne(['id' => $currentUser->organization_id]);
-
-            self::createRelationUserOrganization($userID, $organizationID, $roleID);
-            if ($organization->parent_id) {
+        if ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER) {
+            $this->createRelationUserOrganization($organizationID, $roleID);
+            $organization = $this->organization;
+            if (isset($organization) && $organization->parent_id) {
                 $children = Organization::findAll(['parent_id' => $organization->parent_id]);
                 $children = array_merge($children, Organization::findAll(['id' => $organization->parent_id]));
             } else {
                 $children = Organization::findAll(['parent_id' => $organization->id]);
             }
             foreach ($children as $child) {
-                self::createRelationUserOrganization($userID, $child->id, $roleID);
+                $this->createRelationUserOrganization($child->id, $roleID);
             }
             return true;
         } else {
-            return self::createRelationUserOrganization($userID, $organizationID, $roleID);
+            $this->createRelationUserOrganization($organizationID, $roleID);
         }
     }
 
@@ -690,14 +688,14 @@ class User extends \amnah\yii2\user\models\User
     /**
      * Creating single user-organization relation
      */
-    public function createRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
+    public function createRelationUserOrganization(int $organizationID, int $roleID): bool
     {
-        $check = RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $organizationID]);
+        $check = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $organizationID]);
         if ($check) {
             return false;
         }
         $rel = new RelationUserOrganization();
-        $rel->user_id = $userID;
+        $rel->user_id = $this->id;
         $rel->organization_id = $organizationID;
         $roleID = self::getRelationRole($roleID, $organizationID);
         $rel->role_id = $roleID;
@@ -720,37 +718,16 @@ class User extends \amnah\yii2\user\models\User
     /**
      * Deleting all user-organization relations
      */
-    public function deleteUserFromOrganization(int $userID, int $organizationID): bool
+    public static function deleteUserFromOrganization(int $userID, int $organizationID): bool
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $relationsOrg = RelationUserOrganization::find()->select('organization_id')->where(['user_id' => Yii::$app->user->id])->all();
-            $deleteAll = false;
-            $relationsTwo = RelationUserOrganization::find()->select('organization_id')->where(['user_id' => $userID])->all();
 
-            $orgArray = [];
-            foreach ($relationsOrg as $item) {
-                $orgArray[] = $item->organization_id;
-            }
-            foreach ($relationsTwo as $one) {
-                if (!in_array($one->organization_id, $orgArray)) {
-                    $deleteAll = true;
-                }
-            }
-
-            if ($deleteAll) {
-                $relations = RelationUserOrganization::find()->where(['user_id' => Yii::$app->user->id])->all();
-                foreach ($relations as $relation) {
-                    self::deleteRelationUserOrganization($userID, $organizationID);
-                }
-            } else {
-                $user = User::findIdentity(Yii::$app->user->id);
-                self::deleteRelationUserOrganization($userID, $organizationID);
-            }
+            self::deleteRelationUserOrganization($userID, $organizationID);
 
             $check = RelationUserOrganization::findOne(['user_id' => $userID]);
 
-            if ($check != null) {
+            if (isset($check)) {
                 $existingUser = User::findOne(['id' => $userID]);
                 $existingUser->organization_id = $check->organization_id;
                 $existingUser->role_id = $check->role_id;
@@ -807,9 +784,6 @@ class User extends \amnah\yii2\user\models\User
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = User::findOne(['id' => $userID]);
-            if ($user->id == Yii::$app->user->id) {
-                return false;
-            }
             if ($user) {
                 EmailNotification::deleteAll(['user_id' => $userID]);
                 SmsNotification::deleteAll(['user_id' => $userID]);
@@ -838,33 +812,34 @@ class User extends \amnah\yii2\user\models\User
     /**
      * Updating user-organization relations
      */
-    public function updateRelationUserOrganization(int $userID, int $organizationID, int $roleID): bool
+    public function updateRelationUserOrganization(int $organizationID, int $roleID): bool
     {
-        $user = User::findIdentity($userID);
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $relation = RelationUserOrganization::find()->where(['user_id' => $userID, 'organization_id' => $organizationID])->one();
+        $relation = RelationUserOrganization::find()->where(['user_id' => $this->id, 'organization_id' => $organizationID])->one();
+        if (empty($relation)) {
+            return false;
+        }
         $relation->role_id = $roleID;
         $relation->save();
-        $organization = Organization::findOne(['id' => $currentUser->organization_id]);
+        $organization = Organization::findOne(['id' => $organizationID]);
         if ($organization->parent_id) {
             $children = Organization::findAll(['parent_id' => $organization->parent_id]);
             $children = array_merge($children, Organization::findAll(['id' => $organization->parent_id]));
         } else {
             $children = Organization::findAll(['parent_id' => $organization->id]);
         }
-        if (Yii::$app->user->id && ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)) {
+        if (($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER)) {
             foreach ($children as $child) {
-                self::createRelationUserOrganization($userID, $child->id, $roleID);
+                $this->createRelationUserOrganization($child->id, $roleID);
             }
         } else {
             foreach ($children as $child) {
-                self::deleteRelationUserOrganization($userID, $child->id);
+                self::deleteRelationUserOrganization($this->id, $child->id);
             }
-            $user->organization_id = $currentUser->organization->id;
-            $user->role_id = $roleID;
-            $user->save();
+            $this->organization_id = $organizationID;
+            $this->role_id = $roleID;
+            $this->save();
         }
-        self::createRelationUserOrganization($userID, $organizationID, $roleID);
+        $this->createRelationUserOrganization($organizationID, $roleID);
         return true;
     }
 

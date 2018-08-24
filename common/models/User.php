@@ -72,7 +72,7 @@ class User extends \amnah\yii2\user\models\User
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'common.models.partners_email', ['ru' => 'Введите эл.почту партнера'])],
             [['email'], 'unique', 'on' => ['sendInviteFromVendor2'], 'message' => Yii::t('app', 'common.models.already_exists', ['ru' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'])],
             [['email'], 'validateClient', 'on' => 'sendInviteFromActiveVendor'], // account page
-            [['email'], 'validateInviteClient', 'on' => 'sendInviteFromActiveVendor2'], // account page
+            [['email'], 'validateInviteClient', 'on' => 'sendInviteFromActiveVendor2'], // account page 
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
             // admin crud rules
             [['role_id', 'status'], 'required', 'on' => ['admin']],
@@ -609,6 +609,7 @@ class User extends \amnah\yii2\user\models\User
         return EmailFails::find()->where("email = :e", [':e' => $this->email])->orderBy('type DESC, id DESC')->one();
     }
 
+    //-- wtf begin
     public function validateClient($attribute, $params)
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -622,13 +623,14 @@ class User extends \amnah\yii2\user\models\User
         if (RelationSuppRestPotential::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
             $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
     }
-
+    //-- wtf end                         что это?!! 
+    
     /**
      * Creating user-organization relations
      */
     public function setRelationUserOrganization(int $organizationID, int $roleID): bool
     {
-        if (RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $organizationID])) {
+        if (RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $organizationID])) {
             return false;
         }
         if ($roleID == Role::ROLE_SUPPLIER_MANAGER || $roleID == Role::ROLE_RESTAURANT_MANAGER) {

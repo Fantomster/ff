@@ -42,6 +42,10 @@ class CartWebApi extends \api_web\components\WebApi
             $this->addItem($post);
         }
 
+        //Сообщение в очередь, Изменение количества товара в корзине
+        Notice::init('Order')->sendOrderToTurnClient($this->user->organization);
+        Notice::init('Order')->sendLastUserCartAdd($this->user);
+
         return $this->items();
     }
 
@@ -59,25 +63,17 @@ class CartWebApi extends \api_web\components\WebApi
         if (empty($post['product_id'])) {
             throw new BadRequestHttpException("empty_param|product_id");
         }
-        /**
-         * @var Organization $client
-         */
-        $client = $this->user->organization;
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $cart = $this->getCart();
             $product = (new Product())->findFromCatalogs($post['product_id']);
-            $catalogs = explode(',', $client->getCatalogs());
+            $catalogs = explode(',',  $this->user->organization->getCatalogs());
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $catalogs) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
                 throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
             }
             $this->setPosition($cart, $product, $post['quantity']);
-            //Сообщение в очередь, Изменение количества товара в корзине
-            Notice::init('Order')->sendOrderToTurnClient($client);
-            Notice::init('Order')->sendLastUserCartAdd($this->user);
-
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -308,10 +304,10 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         $result = (new Query())->from('cart as c')
-                ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
-                ->andWhere(['c.organization_id' => $this->user->organization->id])
-                ->andWhere(['cc.product_id' => $id])
-                ->one();
+            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+            ->andWhere(['c.organization_id' => $this->user->organization->id])
+            ->andWhere(['cc.product_id' => $id])
+            ->one();
 
         if (!empty($result['quantity'])) {
             $return = round($result['quantity'], 3);
@@ -361,8 +357,9 @@ class CartWebApi extends \api_web\components\WebApi
     private function getCart()
     {
         $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
-        if (isset($individual_cart_enable))
+        if (isset($individual_cart_enable)) {
             $cart = Cart::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+        }
 
         if (empty($cart)) {
             $cart = new Cart([
@@ -457,10 +454,10 @@ class CartWebApi extends \api_web\components\WebApi
     {
         $model = $row->product;
 
-        $item['id'] = (int) $model['id'];
+        $item['id'] = (int)$model['id'];
         $item['product'] = $model['product'];
-        $item['catalog_id'] = (int) $model['cat_id'];
-        $item['category_id'] = isset($model['model']->category) ? (int) $model['model']->category->id : 0;
+        $item['catalog_id'] = (int)$model['cat_id'];
+        $item['category_id'] = isset($model['model']->category) ? (int)$model['model']->category->id : 0;
         $item['price'] = round($model['price'], 2);
         $item['rating'] = round($model['model']->ratingStars, 1);
         $item['supplier'] = $row->vendor->name;

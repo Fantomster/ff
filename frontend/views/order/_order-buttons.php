@@ -35,7 +35,7 @@ $this->registerJs('
             swal({
                 title: title,
                 showCancelButton: true,
-                html:"<input type=text id=swal-input1 value=" + waybillNumber + " class=swal2-input>",
+                html:"<input type=text id=swal-input1 value=\"" + waybillNumber + "\" class=swal2-input>",
                 confirmButtonText: "' . Yii::t('app', 'Сохранить') . ' ",
                 cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel', ['ru' => 'Отмена']) . ' ",
             }).then(function(result) {

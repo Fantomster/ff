@@ -41,43 +41,43 @@ class EmailIntegrationController extends Controller
     public function actionTest()
     {
 
-        $temp_file[1] = '/app/console/runtime/testnac.xls';
-        /*$temp_file[2] = '/app/console/runtime/testnac2.xls';
-        $temp_file[3] = '/app/console/runtime/testnac3.xls';
-        $temp_file[4] = '/app/console/runtime/testnac4.xls';
-        $temp_file[5] = '/app/console/runtime/testnac10.xlsx';
-        $temp_file[6] = '/app/console/runtime/testnac11.xlsx';
-        $temp_file[7] = '/app/console/runtime/testnac12.xls';
-        $temp_file[8] = '/app/console/runtime/testnac13.xlsx';
-        $temp_file[9] = '/app/console/runtime/testnac22.xlsx';
-        $temp_file[10] = '/app/console/runtime/testnac23.xls';
-        $temp_file[11] = '/app/console/runtime/testnac24.xls';
-        $temp_file[12] = '/app/console/runtime/testnac25.xlsx';
-        $temp_file[13] = '/app/console/runtime/testnac26.xlsx';
-        $temp_file[14] = '/app/console/runtime/testnac27.xlsx';
-        $temp_file[15] = '/app/console/runtime/testnac28.xlsx';
-        $temp_file[16] = '/app/console/runtime/ЕКТД 22007.xls';
-        $temp_file[17] = '/app/console/runtime/ЕКТД 22010.xls';
-        $temp_file[18] = '/app/console/runtime/ЕКТД 22015.xls';
-        $temp_file[19] = '/app/console/runtime/ЕКТД 22016.xls';
-        $temp_file[20] = '/app/console/runtime/ЕКТД 22017.xls';
-        $temp_file[21] = '/app/console/runtime/ЕКТД 22018.xls';
-        $temp_file[22] = '/app/console/runtime/ЕКТД 22028.xls';
-        $temp_file[23] = '/app/console/runtime/ЕКТД 22029.xls';
-        $temp_file[24] = '/app/console/runtime/ЕКТД 22030.xls';
-        $temp_file[25] = '/app/console/runtime/ЕКТД 22031.xls';
-        $temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
-        $temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
-        $temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
-        $temp_file[29] = '/app/console/runtime/testnac29.xls';
-        $temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
-        $temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
-        $temp_file[32] = '/app/console/runtime/id7905.xlsx';
-        $temp_file[33] = '/app/console/runtime/testnac30.xlsx';
-        $temp_file[34] = '/app/console/runtime/testnac31.xlsx';
-        $temp_file[35] = '/app/console/runtime/testnac32.xls';
-        $temp_file[36] = '/app/console/runtime/testnac33.xlsx';
-        $temp_file[37] = '/app/console/runtime/testnac34.xls';*/
+        //$temp_file[1] = '/app/console/runtime/testnac.xls';
+        //$temp_file[2] = '/app/console/runtime/testnac2.xls';
+        //$temp_file[3] = '/app/console/runtime/testnac3.xls';
+        //$temp_file[4] = '/app/console/runtime/testnac4.xls';
+        //$temp_file[5] = '/app/console/runtime/testnac10.xlsx';
+        //$temp_file[6] = '/app/console/runtime/testnac11.xlsx';
+        //$temp_file[7] = '/app/console/runtime/testnac12.xls';
+        //$temp_file[8] = '/app/console/runtime/testnac13.xlsx';
+        //$temp_file[9] = '/app/console/runtime/testnac22.xlsx';
+        //$temp_file[10] = '/app/console/runtime/testnac23.xls';
+        //$temp_file[11] = '/app/console/runtime/testnac24.xls';
+        //$temp_file[12] = '/app/console/runtime/testnac25.xlsx';
+        //$temp_file[13] = '/app/console/runtime/testnac26.xlsx';
+        //$temp_file[14] = '/app/console/runtime/testnac27.xlsx';
+        //$temp_file[15] = '/app/console/runtime/testnac28.xlsx';
+        //$temp_file[16] = '/app/console/runtime/ЕКТД 22007.xls';
+        //$temp_file[17] = '/app/console/runtime/ЕКТД 22010.xls';
+        //$temp_file[18] = '/app/console/runtime/ЕКТД 22015.xls';
+        //$temp_file[19] = '/app/console/runtime/ЕКТД 22016.xls';
+        //$temp_file[20] = '/app/console/runtime/ЕКТД 22017.xls';
+        //$temp_file[21] = '/app/console/runtime/ЕКТД 22018.xls';
+        //$temp_file[22] = '/app/console/runtime/ЕКТД 22028.xls';
+        //$temp_file[23] = '/app/console/runtime/ЕКТД 22029.xls';
+        //$temp_file[24] = '/app/console/runtime/ЕКТД 22030.xls';
+        //$temp_file[25] = '/app/console/runtime/ЕКТД 22031.xls';
+        //$temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
+        //$temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
+        //$temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
+        //$temp_file[29] = '/app/console/runtime/testnac29.xls'; // накладная, где сумма итоговая не совпадает с суммой по строкам
+        //$temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
+        //$temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
+        //$temp_file[32] = '/app/console/runtime/id7905.xlsx';
+        //$temp_file[33] = '/app/console/runtime/testnac30.xlsx';
+        //$temp_file[34] = '/app/console/runtime/testnac31.xlsx';
+        //$temp_file[35] = '/app/console/runtime/testnac32.xls';
+        //$temp_file[36] = '/app/console/runtime/testnac33.xlsx';
+        //$temp_file[37] = '/app/console/runtime/testnac34.xls';
         //$temp_file[38] = '/app/console/runtime/testnac35.xls'; // файл Excel 5.0/95, не читается из-за кодировки
         //$temp_file[39] = '/app/console/runtime/testnac36.xls'; // файл Excel 5.0/95, не читается из-за кодировки
         //$temp_file[40] = '/app/console/runtime/testnac37.xls'; // файл Excel 5.0/95, не читается из-за кодировки
@@ -85,6 +85,18 @@ class EmailIntegrationController extends Controller
         //$temp_file[42] = '/app/console/runtime/testnac39.xlsx';
         //$temp_file[43] = '/app/console/runtime/testnac40.xlsx';
         //$temp_file[44] = '/app/console/runtime/testnac41.xls'; // файл Excel 5.0/95, не читается из-за кодировки
+        //$temp_file[45] = '/app/console/runtime/testnac42.xlsx';
+        //$temp_file[46] = '/app/console/runtime/testnac43.xlsx';
+        //$temp_file[47] = '/app/console/runtime/testnac44.xlsx';
+        ////$temp_file[48] = '/app/console/runtime/testnac45.xlsx'; //Не парсится в принципе!!! Вся накладная в одной ячейке
+        //$temp_file[49] = '/app/console/runtime/testnac46.xls';
+        //$temp_file[50] = '/app/console/runtime/testnac47.xls';
+        //$temp_file[51] = '/app/console/runtime/testnac48.xls';
+        //$temp_file[52] = '/app/console/runtime/testnac49.xls';
+        $temp_file[53] = '/app/console/runtime/testnac50.xls';
+        $temp_file[54] = '/app/console/runtime/testnac51.xls';
+        $temp_file[55] = '/app/console/runtime/testnac52.xls';
+        $temp_file[56] = '/app/console/runtime/testnac53.xls';
 
 
         $i = 1;
@@ -168,17 +180,17 @@ class EmailIntegrationController extends Controller
                             try {
                                 $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
                                 $transaction->commit();
-                                $this->log([
-                                    PHP_EOL . str_pad('', 100, '='),
-                                    str_pad('END ' . $message_console, 99, ' ') . '|',
-                                    str_pad('', 100, '=')
-                                ]);
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
                                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
                                 \Yii::error($this->log, 'email-integration-error');
                             }
                         }
+                        $this->log([
+                            PHP_EOL . str_pad('', 100, '='),
+                            str_pad('END ' . $message_console, 99, ' ') . '|',
+                            str_pad('', 100, '=')
+                        ]);
                     }
                 }
                 $this->connect->disconnect();
@@ -206,7 +218,7 @@ class EmailIntegrationController extends Controller
                 $connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
                 break;
             default:
-                throw new Exception('Не определен тип сервера.');
+                throw new Exception('Не определён тип сервера.');
         }
         $this->connect = $connect;
     }

@@ -878,10 +878,6 @@ class OrderController extends DefaultController
             return false;
         }
 
-        $client = $this->currentUser->organization;
-        $cartCount = $client->getCartCount();
-        $this->sendCartChange($client, $cartCount);
-
         return $post['id'];
     }
 

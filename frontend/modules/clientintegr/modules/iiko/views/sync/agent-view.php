@@ -23,22 +23,20 @@ $dataColumns = [
     [
          'class' => 'kartik\grid\EditableColumn',
          'attribute' => 'vendor_id',
-         'value' => function ($model) {
-                $vendor = $model->vendor;
-                return isset($vendor) ? $vendor->name : null;
-         },
          'label' => 'Поставщик MixCart',
          'vAlign' => 'middle',
          'width' => '210px',
          'refreshGrid' => true,
-         'editableOptions' => [
+         'editableOptions' => function($model) {return [
              'asPopover' => true,
              'name' => 'vendor_id',
              'formOptions' => ['action' => ['agent-mapping']],
              'header' => 'Поставщик MixCart',
              'size' => 'md',
              'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
+             'displayValue' => isset($model->vendor) ? $model->vendor->name : null,
              'options' => [
+                 'data' => [$model->vendor_id => isset($model->vendor) ? $model->vendor->name : ''],
                  'options' => ['placeholder' => 'Выберите поставщика из списка',
                  ],
                  'pluginOptions' => [
@@ -51,7 +49,7 @@ $dataColumns = [
                      'allowClear' => true
                  ],
              ]
-         ]],
+         ];}],
     'comment',
     'is_active',
     'created_at',

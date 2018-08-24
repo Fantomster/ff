@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use api\common\models\iiko\iikoAgent;
+use common\components\SimpleChecker;
 use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
@@ -32,6 +33,7 @@ use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
 use yii\db\Query;
+use Exception;
 
 /**
  *  Controller for restaurant
@@ -252,39 +254,92 @@ class ClientController extends DefaultController
         }
     }
 
-    /*
-     *  User create
-     */
 
-    public function actionAjaxSetAgentAttrPaymentDelay()
+    /**
+     * Throw new Exception of not Ajax
+     * @throws Exception
+     */
+    public function checkAjax()
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new Exception('Use ajax-method only!');
+        }
+    }
+
+    /**
+     * Format result as JSON
+     */
+    public function formatJson()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+    }
+
+    /**
+     * Display ajax fail result
+     * @var $message string
+     * @throws Exception
+     * @return array
+     */
+    public function fail($message = NULL): array
+    {
+        $this->formatJson();
+        $result = ['status' => self::AJAX_STATUS_FAIL];
+        $result['error'] = $message;
+        return $result;
+    }
+
+    /**
+     * Display ajax success result
+     * @var $message string
+     * @throws Exception
+     * @return array
+     */
+    public function success($message = NULL): array
+    {
+        $this->formatJson();
+        $result = ['status' => self::AJAX_STATUS_SUCCESS];
+        $result['error'] = $message;
+        return $result;
+    }
+
+    /**
+     * Display ajax request result
+     * @var $message string
+     * @throws Exception
+     * @return array
+     */
+    public function actionAjaxSetAgentAttrPaymentDelay(): array
     {
 
-        $result = ['status' => self::AJAX_STATUS_FAIL, 'error' => 'Вы указали неверный формат данных!'];
 
-        if (Yii::$app->request->isAjax) {
-            $post = Yii::$app->request->post();
-            if (isset($post['agent_id']) && $post['agent_id'] && (int)$post['agent_id'] > 0) {
-                if (isset($post['delay_days']) && (int)$post['delay_days'] < (self::MAX_DELAY_PAYMENT + 1)) {
-                    $agent = iikoAgent::findOne([
-                        'id' => $post['agent_id'],
-                        'org_id' => $this->currentUser->organization->id,
-                    ]);
-                    if ($agent instanceof iikoAgent) {
-                        $result['status'] = self::AJAX_STATUS_SUCCESS;
-                        $agent->payment_delay = (int)$post['delay_days'];
-                        $agent->save();
-                    } else {
-                        $result['status'] = self::AJAX_STATUS_FAIL;
-                        $result['error'] = 'Нет прав на редактирование параметров агента';
-                    }
-                } else {
-                    $result['status'] = self::AJAX_STATUS_FAIL;
-                    $result['error'] = 'Продолжительность периода - не более 365 дней!';
-                }
-            }
+        $this->checkAjax();
+        $post = Yii::$app->request->post();
+        if (isset($post['delay_days'])) {
+            $post['delay_days'] = trim($post['delay_days']);
         }
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        return $result;
+
+        if (!isset($post['agent_id']) || !$post['agent_id']) {
+            return $this->fail('Agent ID is required!');
+        } elseif (!isset($post['delay_days'])) {
+            return $this->fail('Payment delay value is required!');
+        } elseif (!SimpleChecker::validateWholeNumerExactly($post['delay_days'])) {
+            return $this->fail('Payment delay value must be whole number!');
+        } elseif ($post['delay_days'] > self::MAX_DELAY_PAYMENT) {
+            return $this->fail('Payment delay value must be not more than ' . self::MAX_DELAY_PAYMENT . '!');
+        }
+
+        $agent = iikoAgent::findOne([
+            'id' => $post['agent_id'],
+            'org_id' => $this->currentUser->organization->id,
+        ]);
+        if (!$agent || !$agent instanceof iikoAgent) {
+            return $this->fail('Agent ID record not found!');
+        }
+
+        $result['status'] = self::AJAX_STATUS_SUCCESS;
+        $agent->payment_delay = (int)$post['delay_days'];
+        $agent->save();
+        return $this->success();
     }
 
     public function actionAjaxCreateUser()
@@ -348,7 +403,8 @@ class ClientController extends DefaultController
      *  User update
      */
 
-    public function actionAjaxUpdateUser($id)
+    public
+    function actionAjaxUpdateUser($id)
     {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
@@ -384,7 +440,8 @@ class ClientController extends DefaultController
      *  User delete (not actual delete, just remove organization relation)
      */
 
-    public function actionAjaxDeleteUser()
+    public
+    function actionAjaxDeleteUser()
     {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -446,7 +503,8 @@ class ClientController extends DefaultController
      * 6 Поставщик авторизован, предлагаем invite
      *
      */
-    public function actionChkmail()
+    public
+    function actionChkmail()
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -455,7 +513,8 @@ class ClientController extends DefaultController
         }
     }
 
-    public function actionCreate()
+    public
+    function actionCreate()
     {
         set_time_limit(180);
         if (Yii::$app->request->isAjax) {
@@ -978,7 +1037,8 @@ class ClientController extends DefaultController
         }
     }
 
-    public function actionInvite()
+    public
+    function actionInvite()
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1082,7 +1142,8 @@ class ClientController extends DefaultController
         }
     }
 
-    public function actionViewSupplier($id)
+    public
+    function actionViewSupplier($id)
     {
         $supplier_org_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1140,7 +1201,8 @@ class ClientController extends DefaultController
         return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user', 'userStatus'));
     }
 
-    public function actionReSendEmailInvite($id)
+    public
+    function actionReSendEmailInvite($id)
     {
         if (Yii::$app->request->isAjax) {
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1157,7 +1219,8 @@ class ClientController extends DefaultController
         }
     }
 
-    public function actionViewCatalog($id)
+    public
+    function actionViewCatalog($id)
     {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1214,7 +1277,8 @@ class ClientController extends DefaultController
         return $this->renderAjax('suppliers/_viewCatalog', compact('searchModel', 'dataProvider', 'cat_id'));
     }
 
-    public function actionEditCatalog($id)
+    public
+    function actionEditCatalog($id)
     {
         $catalog_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1488,7 +1552,8 @@ class ClientController extends DefaultController
         return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array', 'catalogCurrency'));
     }
 
-    public function actionRemoveSupplier()
+    public
+    function actionRemoveSupplier()
     {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
@@ -1502,12 +1567,14 @@ class ClientController extends DefaultController
         }
     }
 
-    public function actionMessages()
+    public
+    function actionMessages()
     {
         return $this->render('/site/underConstruction');
     }
 
-    public function actionAnalytics()
+    public
+    function actionAnalytics()
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
@@ -1711,7 +1778,8 @@ class ClientController extends DefaultController
         }
     }
 
-    public function actionAjaxUpdateCurrency()
+    public
+    function actionAjaxUpdateCurrency()
     {
         $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
@@ -1723,17 +1791,20 @@ class ClientController extends DefaultController
         return $this->renderPartial('analytics/currency', compact('currencyList', 'count', 'currencyId'));
     }
 
-    public function actionTutorial()
+    public
+    function actionTutorial()
     {
         return $this->render('tutorial');
     }
 
-    public function actionSupport()
+    public
+    function actionSupport()
     {
         return $this->render('/site/underConstruction');
     }
 
-    public function actionEvents()
+    public
+    function actionEvents()
     {
         return $this->render('/site/underConstruction');
     }
@@ -1742,7 +1813,8 @@ class ClientController extends DefaultController
      *  index DASHBOARD
      */
 
-    public function actionIndex()
+    public
+    function actionIndex()
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $suppliers_where = "";
@@ -1820,7 +1892,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 //        }
     }
 
-    public function actionSuppliers()
+    public
+    function actionSuppliers()
     {
         $user = new User();
         $profile = new Profile();
@@ -1842,7 +1915,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         }
     }
 
-    public function actionApplySupplier()
+    public
+    function actionApplySupplier()
     {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
@@ -1871,7 +1945,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         }
     }
 
-    public function actionAddFirstVendor()
+    public
+    function actionAddFirstVendor()
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
@@ -1897,7 +1972,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         }
     }
 
-    public function actionAjaxValidateVendor()
+    public
+    function actionAjaxValidateVendor()
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
@@ -1953,14 +2029,16 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         }
     }
 
-    public function actionSidebar()
+    public
+    function actionSidebar()
     {
         Yii::$app->session->get('sidebar-collapse') ?
             Yii::$app->session->set('sidebar-collapse', false) :
             Yii::$app->session->set('sidebar-collapse', true);
     }
 
-    public function actionPayments()
+    public
+    function actionPayments()
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchModel = new PaymentSearch();
@@ -1972,7 +2050,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
     }
 
-    public function actionCheckEmail(): array
+    public
+    function actionCheckEmail(): array
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1985,7 +2064,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
      * Сформировать, и скачать отчет
      * @throws \Exception
      */
-    public function actionPriceStat()
+    public
+    function actionPriceStat()
     {
         $post = Yii::$app->request->post();
         $supplierID = $post['supplier'];

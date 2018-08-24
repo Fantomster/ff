@@ -125,19 +125,12 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
 
-        if(!empty($this->service_id)) {
-            $params_sql[':service_id'] = $this->service_id;
-            // $where_all .= ' AND (service_id = :service_id OR service_id is NULL and product_id in (..))';
-            $where_all .= ' AND (service_id = :service_id OR service_id is NULL )';
-        }
-        else {
+        if(empty($this->service_id)) {
             $this->service_id = 0;
             $where_all .= ' AND service_id = 0';
         }
 
         $sql = "
-      SELECT * FROM (
-      SELECT * FROM (
         SELECT DISTINCT * FROM (
            SELECT 
               " . implode(',', $fieldsCBG) . "
@@ -169,9 +162,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
           cg.cat_id IN (" . $this->catalogs . ")
           ".$where."
           AND (cbg.status = 1 AND cbg.deleted = 0)     
-        ) as c WHERE id != 0 ".$where_all.
-            " ORDER BY service_id desc ) as d
-             GROUP BY id) as e ";
+        ) as c WHERE id != 0 ".$where_all;
 
         $query = \Yii::$app->db->createCommand($sql);
 

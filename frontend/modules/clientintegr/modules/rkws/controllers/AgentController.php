@@ -108,7 +108,7 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         if (!is_null($term)) {
             $user = User::findOne(\Yii::$app->user->id);
             $organisation_id = $user->organization_id;
-            $sql = "SELECT id, `name` as text FROM organization where `name` LIKE '%$term%' and type_id = 2 and id in (SELECT supp_org_id FROM fkeeper.relation_supp_rest where rest_org_id = $organisation_id and deleted = 0)";
+            $sql = "SELECT id, `name` as text FROM organization where `name` LIKE '%$term%' and type_id = 2 and id in (SELECT supp_org_id FROM relation_supp_rest where rest_org_id = $organisation_id and deleted = 0)";
             $db = \Yii::$app->db;
             $data = $db->createCommand($sql)->queryAll();
             $out['results'] = array_values($data);

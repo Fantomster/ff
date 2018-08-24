@@ -82,7 +82,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
             $user->setOrganization($organization, true);
-            $user->setRelationUserOrganization($user->id, $organization->id, $user->role_id);
+            $user->setRelationUserOrganization($organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
 
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);

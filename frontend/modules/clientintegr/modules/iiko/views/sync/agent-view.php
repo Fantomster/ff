@@ -93,8 +93,7 @@ $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function 
     swal({
         title: title,
         showCancelButton: true,
-        html: "<input type=text id=swal-input value=" + delayPaymentDays + " class=swal2-input>" + 
-        "<p id=swal-input-memo style=\"font-size: 15px; font-weight: 400; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; color: red\">&nbsp;</p>",
+        html: "<input type=text id=swal-input value=" + delayPaymentDays + " class=swal2-input>",
         confirmButtonText: "Сохранить",
         cancelButtonText: "Отмена",
         preConfirm: function() {

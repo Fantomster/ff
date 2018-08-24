@@ -4,7 +4,7 @@ namespace console\modules\daemons\components;
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use vyants\daemon\DaemonController;
+//use vyants\daemon\DaemonController;
 use PhpAmqpLib\Channel\AMQPChannel;
 
 abstract class AbstractDaemonController extends DaemonController
@@ -66,7 +66,7 @@ abstract class AbstractDaemonController extends DaemonController
         }
         return false;
     }
-
+    
     /**
      * @param $message array|string
      */

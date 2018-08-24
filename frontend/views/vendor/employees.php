@@ -1,5 +1,4 @@
 <?php
-
 /* @var $this \yii\web\View */
 
 use yii\helpers\Html;
@@ -120,7 +119,7 @@ $this->registerJs(
                     ])
                     ?>
                 </div>
-<?php ActiveForm::end(); ?>
+                <?php ActiveForm::end(); ?>
             </div>
             <div class="box-body no-padding">
                 <!--?= Html::button('Добавить пользователя', ['id' => 'add-user', 'class' => 'btn btn-primary']) ?-->
@@ -166,8 +165,8 @@ $this->registerJs(
                         [
                             'attribute' => 'role.name',
                             'label' => \Yii::t('app', 'frontend.views.vendor.empl.role', ['ru' => 'Роль']),
-                            'value' => function($model) {
-                                return Yii::t('app', Role::getRoleName($model->getRelationUserOrganizationRoleID($model->id)));
+                            'value' => function($model) use ($organizationId) {
+                                return Yii::t('app', Role::getRoleName($model->getRelationUserOrganizationRoleID($organizationId)));
                             }
                         ],
                         [
@@ -182,7 +181,7 @@ $this->registerJs(
                     ],
                 ]);
                 ?>
-<?php Pjax::end(); ?>
+                <?php Pjax::end(); ?>
             </div>
         </div>
         <?php
@@ -190,5 +189,5 @@ $this->registerJs(
             'id' => 'user-edit',
         ]);
         ?>
-<?php Modal::end(); ?>
+        <?php Modal::end(); ?>
 </section>

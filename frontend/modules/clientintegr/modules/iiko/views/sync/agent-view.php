@@ -98,8 +98,16 @@ $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function 
         confirmButtonText: "Сохранить",
         cancelButtonText: "Отмена",
         preConfirm: function() {
-            var value = $('#swal-input').val()
-            if ((parseInt(value, 10) == value) == false) {
+            var s = '1234567890';
+            var err = false;
+            var value = $('#swal-input').val();
+            for (var j = 0; j < value.length; j++) {
+                var char = value.substring(j, j+1);
+                if (s.indexOf(char) == -1) {
+                    err = true;
+                }
+            }
+            if (err == true) {
                swal.showValidationError('Необходимо ввести целое число!')
             } else if (value > $max) {
                swal.showValidationError('Отсрочка платежа не может превышать $max дней!')

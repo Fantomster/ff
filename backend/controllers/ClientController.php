@@ -190,7 +190,7 @@ class ClientController extends Controller
                 $user->save();
                 //$profile->email = $user->getEmail();
                 $profile->save();
-                if ($user->role_id != Role::ROLE_FKEEPER_MANAGER) {
+                if ($user->role_id != Role::ROLE_FKEEPER_MANAGER && isset($user->organization_id)) {
                     $user->updateRelationUserOrganization($user->organization_id, $user->role_id);
                 }
                 return $this->redirect(['client/view', 'id' => $user->id]);

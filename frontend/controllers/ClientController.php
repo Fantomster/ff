@@ -254,9 +254,9 @@ class ClientController extends DefaultController
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-//                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
-//                        $user->role_id = $this->currentUser->role_id;
-//                    }
+                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
+                        $user->role_id = array_keys($dropDown)[0];
+                    }
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
@@ -311,7 +311,7 @@ class ClientController extends DefaultController
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             $email = $user->email;
-            if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
+            if ($user->load($post) && !in_array($user->role_id, Role::getAdminRoles())) {
                 $profile->load($post);
 
 

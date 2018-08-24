@@ -588,6 +588,9 @@ class User extends \amnah\yii2\user\models\User
             Role::ROLE_FRANCHISEE_OPERATOR,
             Role::ROLE_FRANCHISEE_ACCOUNTANT,
             Role::ROLE_ONE_S_INTEGRATION,
+            Role::ROLE_RESTAURANT_ACCOUNTANT,
+            Role::ROLE_RESTAURANT_BUYER,
+            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
         ];
     }
 

@@ -38,7 +38,13 @@ $this->registerJs('
                 html:"<input type=text id=swal-input1 value=\"" + waybillNumber + "\" class=swal2-input>",
                 confirmButtonText: "' . Yii::t('app', 'Сохранить') . ' ",
                 cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel', ['ru' => 'Отмена']) . ' ",
-            }).then(function(result) {
+                preConfirm: function() {
+                    var len = $(\'#swal-input1\').val().length;
+                    if (len > 32) {
+                       swal.showValidationError(\'Номер накладной не может превышать 32 символов!\')
+                    }
+                }
+        }).then(function(result) {
                 if (result.dismiss === "cancel") {
                     swal.close();
                 } else {

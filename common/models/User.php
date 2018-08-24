@@ -567,7 +567,13 @@ class User extends \amnah\yii2\user\models\User
 
     public static function getAllowedRoles(int $role_id): array
     {
-        $clientRoles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE];
+        $clientRoles = [
+            Role::ROLE_RESTAURANT_MANAGER,
+            Role::ROLE_RESTAURANT_EMPLOYEE,
+            Role::ROLE_RESTAURANT_ACCOUNTANT,
+            Role::ROLE_RESTAURANT_BUYER,
+            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+        ];
         $vendorRoles = [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE];
         $franchiseeRoles = [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
         if (in_array($role_id, $clientRoles)) {
@@ -626,8 +632,9 @@ class User extends \amnah\yii2\user\models\User
         if (RelationSuppRestPotential::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $currentUser->organization_id]))
             $this->addError($attribute, Yii::t('app', 'common.models.already_exists', ['ru' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!']));
     }
+
     //-- wtf end                         что это?!! 
-    
+
     /**
      * Creating user-organization relations
      */

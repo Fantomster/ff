@@ -2,6 +2,8 @@
 
 namespace api\common\models;
 
+use api\common\models\iiko\iikoProduct;
+use api\common\models\one_s\OneSGood;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use common\models\Catalog;
 use Yii;
@@ -110,9 +112,25 @@ class AllMaps extends \yii\db\ActiveRecord
         return CatalogBaseGoods::find()->andWhere('id = :id', [':id' => $this->product_id])->one();
     }
 
-    public function getProductrk()
+    public function getProductNameService()
     {
-        return RkProduct::find()->andWhere('id = :id', [':id' => $this->serviceproduct_id])->one();
+        $attr = 'denom';
+
+        switch ($this->service_id) {
+            case 1 : // R-keeper
+                $modelName = RkProduct::class;
+                break;
+            case 2 : // iiko
+                $modelName = iikoProduct::class;
+                break;
+            case 8 : // 1C
+                $modelName = OneSGood::class;
+                $attr = 'name';
+                break;
+        }
+
+       $res =  $modelName::find()->andWhere('id = :id', [':id' => $this->serviceproduct_id])->one();
+       return isset($res) ? $res->{$attr} : null;
     }
 
     public function getStore()

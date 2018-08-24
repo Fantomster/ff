@@ -56,8 +56,9 @@ class FullmapController extends DefaultController {
         $vendors = $client->getSuppliers($selectedCategory);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
-        $services[] = 'Выберите сервис';
-        $services = array_merge($services, ArrayHelper::map(AllService::find()->andWhere('type_id = 1')->all(),'id', 'denom' )); // Add check license
+
+        $services = ArrayHelper::map(AllService::find()->andWhere('type_id = 1')->all(),'id', 'denom' ); // Add check license
+        $services = ['0' => 'Выберите сервис'] + $services;
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
@@ -123,7 +124,7 @@ class FullmapController extends DefaultController {
                throw new \RuntimeException('Cant update allmaps table.');
            }
 
-           $res = $hasProduct->productrk->denom;
+           $res = $hasProduct->getProductNameService();
 
        } else { // New link for mapping creation
 
@@ -142,7 +143,7 @@ class FullmapController extends DefaultController {
                throw new \RuntimeException('Cant save new allmaps model.');
            }
 
-           $res = $newProduct->productrk->denom;
+           $res = $newProduct->getProductNameService();
 
        }
 
@@ -250,15 +251,32 @@ class FullmapController extends DefaultController {
           return true;
     }
 
-    public function actionChvat($id, $vat, $service_id) {
+    public function actionChvat($id, $vat, $service_id = null) {
 
         // $model = $this->findModel($id);
 
-        $rress = Yii::$app->db_api
-            ->createCommand('UPDATE all_map set vat = :vat, linked_at = now() where product_id = :id and service_id = :service_id', [':vat' => $vat, ':id' =>$id,
-                ':service_id' => $service_id])->execute();
+        if ($service_id === null) {
+            $rress = Yii::$app->db_api
+                ->createCommand('UPDATE all_map set vat = :vat, linked_at = now() where product_id = :id and service_id is null', [':vat' => $vat, ':id' => $id])->execute();
+            var_dump($rress);
+            if ($rress == 0) {
+                $res = Yii::$app->db_api
+                    ->createCommand('INSERT INTO all_map (product_id, org_id, vat) 
+                                     VALUES (:id,:org,:vat)', [':vat' => $vat, ':id' => $id, ':org' => $this->currentUser->organization->id])->execute();
+                var_dump($res);
+            }
+        }
+        else {
+            var_dump("33");
+            $rress = Yii::$app->db_api
+                ->createCommand('UPDATE all_map set vat = :vat, linked_at = now() where product_id = :id and service_id = :service_id', [':vat' => $vat, ':id' =>$id,
+                    ':service_id' => $service_id])->execute();
+        }
 
-        return $this->redirect(['index']);
+       /* var_dump($rress);
+        die();*/
+
+        return  true;  //$this->redirect(['index']);
 
     }
 
@@ -293,11 +311,41 @@ class FullmapController extends DefaultController {
     public function actionAutocomplete($service_id, $term = null) {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
+        $sourceTable = '';
+        $denomField = '';
+        $unitField = '';
+        $where = '';
+        $orgField = '';
+
         if (!is_null($term)) {
 
-            $sql = "( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-                " union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
+            switch ($service_id) {
+                case 1: // R-keeper
+                    $sourceTable = 'rk_product';
+                    $denomField = 'denom';
+                    $unitField = 'unitname';
+                    $orgField = 'acc';
+                    break;
+
+                case 2: // iiko
+                    $sourceTable = 'iiko_product';
+                    $denomField = 'denom';
+                    $unitField = 'unit';
+                    $orgField = 'org_id';
+                    break;
+
+                case 8: // 1C
+                    $sourceTable = 'one_s_good';
+                    $denomField = 'name';
+                    $unitField = 'measure';
+                    $orgField = 'org_id';
+                    $where = ' and is_category = 0 ';
+                    break;
+            }
+
+            $sql = "( select id, CONCAT(`".$denomField."`, ' (' ,".$unitField.", ')') as `text` from ".$sourceTable." where ".$orgField." = ".User::findOne(Yii::$app->user->id)->organization_id." and ".$denomField." = '".$term."' ".$where." )".
+                " union ( select id, CONCAT(`".$denomField."`, ' (' ,".$unitField.", ')') as `text` from ".$sourceTable."  where ".$orgField." = ".User::findOne(Yii::$app->user->id)->organization_id." and  ".$denomField." like '".$term."%'  ".$where." limit 10 )".
+                "union ( select id, CONCAT(`".$denomField."`, ' (' ,".$unitField.", ')') as `text` from ".$sourceTable." where  ".$orgField." = ".User::findOne(Yii::$app->user->id)->organization_id." and ".$denomField." like '%".$term."%'  ".$where." limit 5 )".
                 "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;

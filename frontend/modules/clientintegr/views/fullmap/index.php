@@ -76,7 +76,16 @@ $this->registerJs(
     
     $(document).ready(function(){
     
-     
+     $(document).on("click", ".vatchange", function(e) {
+                 $.ajax({
+             url: $(this).attr("url"),
+             type: "POST",
+             dataType: "json",
+             success: function(){
+                 $.pjax.reload({container: "#fullmapGrid-pjax", timeout:30000});
+             }
+           });
+            });
      
             $(document).on("change", "#selectedCategory", function(e) {
                 var form = $("#searchForm");
@@ -620,49 +629,49 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                         'zero' =>  function ($model,$data,$index) use ($searchModel) {
 
                                             if ($data['vat'] == 0) {
-                                                $tClass = "label label-success";
+                                                $tClass = "btn label label-success";
                                                 $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-
                                             } else {
-                                                $tClass = "label label-default";
+                                                $tClass = "vatchange btn label label-default";
                                                 $tStyle = "";
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['chvat', 'id'=>$data['id'], 'vat' =>0, 'service_id' => $data['service_id']]);
-                                            return \yii\helpers\Html::a( '&nbsp;0', $customurl,
-                                                ['title' => Yii::t('backend', '0%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                            $customurl=Url::toRoute(['chvat', 'id'=>$data['id'], 'vat' =>0, 'service_id' => $data['service_id']]);
+                                            return \yii\helpers\Html::button( '0',
+                                                ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
+
 
                                         },
                                        'ten' =>  function ($model, $data, $index)use ($searchModel) {
 
                                             if ($data['vat'] == 1000) {
-                                                $tClass = "label label-success";
+                                                $tClass = "btn label label-success";
                                                 $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
                                             } else {
-                                                $tClass = "label label-default";
+                                                $tClass = "vatchange btn label label-default";
                                                 $tStyle = "";
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['chvat', 'id'=>$data['id'], 'vat' => '1000', 'service_id' => $data['service_id']]);
-                                            return \yii\helpers\Html::a( '10', $customurl,
-                                                ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                            $customurl=Url::toRoute(['chvat', 'id'=>$data['id'], 'vat' => '1000', 'service_id' => $data['service_id']]);
+                                            return \yii\helpers\Html::button( '10',
+                                                ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
                                         },
                                         'eighteen' =>  function ($model, $data, $index) {
 
                                             if ($data['vat'] == 1800) {
-                                                $tClass = "label label-success";
+                                                $tClass = "btn label label-success";
                                                 $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
                                             } else {
-                                                $tClass = "label label-default";
+                                                $tClass = "vatchange btn label label-default";
                                                 $tStyle = "";
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id'=>$data['id'], 'vat' => '1800', 'service_id' => $data['service_id']]);
-                                            return \yii\helpers\Html::a( '18', $customurl,
-                                                ['title' => Yii::t('backend', '18%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle]);
+                                            $customurl=Url::toRoute(['chvat', 'id'=>$data['id'], 'vat' => '1800', 'service_id' => $data['service_id']]);
+                                            return \yii\helpers\Html::button( '18',
+                                                ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
                                         },
 
                                     ]

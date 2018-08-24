@@ -55,27 +55,48 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         $db_api = \Yii::$app->db_api;
         $dbName = $this->getDsnAttribute('dbname', $db_api->dsn);
+        if(empty($this->service_id)) {
+            $this->service_id = 0;
+        }
+        $fields = [
+            0 => [],
+            1 => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
+            2 => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
+            8 => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
+        ];
 
-        $fieldsCBG = [
+        $joins = [
+            0 => '',
+            1 => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
+
+            2 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
+
+            8 => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`one_s_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id ",
+
+        ];
+
+        $fieldsCBG = array_merge([
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
-            "curr.id as currency_id", "fmap.id as fmap_id", "fprod.denom as pdenom", "fmap.vat as vat",
-            "fstore.name as store", "fprod.unitname as unitname", "fmap.koef as koef", "fmap.service_id as service_id",
+            "curr.id as currency_id", "fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
             "allservice.denom as service_denom"
-        ];
-        $fieldsCG = [
+        ], $fields[$this->service_id]);
+
+        $fieldsCG = array_merge([
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
-            "curr.id as currency_id", "fmap.id as fmap_id", "fprod.denom as pdenom", "fmap.vat as vat",
-            "fstore.name as store", "fprod.unitname as unitname", "fmap.koef as koef", "fmap.service_id as service_id",
+            "curr.id as currency_id", "fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
             "allservice.denom as service_denom"
-        ];
+        ], $fields[$this->service_id]);
 
         $where = '';
         $where_all = '';
@@ -125,8 +146,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
 
-        if(empty($this->service_id)) {
-            $this->service_id = 0;
+        if(!$this->service_id) {
             $where_all .= ' AND service_id = 0';
         }
 
@@ -138,9 +158,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
-             LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-             LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc  AND fstore.type = 2 
+             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND (fmap.service_id = ".$this->service_id." OR fmap.service_id is null)
+             ".$joins[$this->service_id]."
              LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id       
            WHERE          
            cbg.cat_id IN (" . $this->catalogs . ")
@@ -154,9 +173,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
            LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
-           LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-           LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid  AND fmap.org_id = fstore.acc  AND fstore.type = 2
+           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND (fmap.service_id = ".$this->service_id." OR fmap.service_id is null)
+           ".$joins[$this->service_id]."
            LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id 
           WHERE         
           cg.cat_id IN (" . $this->catalogs . ")

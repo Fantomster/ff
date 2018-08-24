@@ -271,9 +271,9 @@ class VendorController extends DefaultController
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER) {
-                        $user->role_id = $this->currentUser->role_id;
-                    }
+//                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER) {
+//                        $user->role_id = $this->currentUser->role_id;
+//                    }
 
                     $user->setRegisterAttributes($user->role_id)->save();
                     //$profile->email = $user->getEmail();

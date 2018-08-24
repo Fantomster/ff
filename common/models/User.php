@@ -645,10 +645,10 @@ class User extends \amnah\yii2\user\models\User
             foreach ($children as $child) {
                 $this->createRelationUserOrganization($child->id, $roleID);
             }
-            return true;
         } else {
             $this->createRelationUserOrganization($organizationID, $roleID);
         }
+        return true;
     }
 
     /**

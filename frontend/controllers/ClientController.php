@@ -254,12 +254,11 @@ class ClientController extends DefaultController
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
-                        $user->role_id = $this->currentUser->role_id;
-                    }
+//                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
+//                        $user->role_id = $this->currentUser->role_id;
+//                    }
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $userid = $user->id;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
                     $user->setRelationUserOrganization($user->organization->id, $user->role_id);

@@ -61,6 +61,86 @@ class CatalogWebApi extends WebApi
         }
     }
 
+
+    /**
+     * Обновление главного каталога
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function updateMainCatalog($request)
+    {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException("empty_param|cat_id");
+        }
+
+        $catalogTemp = CatalogTemp::findOne(['cat_id' => (int)$request['cat_id'], 'user_id' => $this->user->id]);
+        if (empty($catalogTemp)) {
+            throw new BadRequestHttpException("catalog_temp_not_found");
+        }
+
+        $catalogTempContent = CatalogTempContent::find()->where(['temp_id' => $catalogTemp->id])->all();
+        if (empty($catalogTempContent)) {
+            throw new BadRequestHttpException("catalog_temp_content_not_found");
+        }
+
+        $catalog = Catalog::findOne(['id' => $catalogTemp->cat_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException("base_catalog_not_found");
+        }
+
+        if (!empty($this->getTempDuplicatePosition(['cat_id' => $catalog->id]))) {
+            throw new BadRequestHttpException("catalog_temp_exists_duplicate");
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            CatalogBaseGoods::updateAll([
+                'status' => CatalogBaseGoods::STATUS_OFF
+            ], [
+                'supp_org_id' => $catalog->supp_org_id,
+                'cat_id' => $catalog->id
+            ]);
+            /**
+             * @var $tempRow CatalogTempContent
+             */
+            foreach ($catalogTempContent as $tempRow) {
+                //Поиск товара в главном каталоге
+                $model = CatalogBaseGoods::findOne([
+                    'cat_id' => $catalog->id,
+                    'article' => $tempRow->article,
+                    'product' => $tempRow->product
+                ]);
+                //Если не нашли, создаем его
+                if (empty($model)) {
+                    $model = new CatalogBaseGoods([
+                        'cat_id' => $catalog->id,
+                        'article' => $tempRow->article,
+                        'product' => $tempRow->product,
+                        'supp_org_id' => $catalog->supp_org_id
+                    ]);
+                }
+                //Заполняем аттрибуты
+                $model->ed = $tempRow->ed;
+                $model->units = $tempRow->units;
+                $model->price = $tempRow->price;
+                $model->note = $tempRow->note;
+                $model->status = CatalogBaseGoods::STATUS_ON;
+                //Если атрибуты изменились или новая запись, сохраняем модель
+                $model->save();
+            }
+            //Убиваем временный каталог
+            CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
+            $catalogTemp->delete();
+            $transaction->commit();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
     /**
      * Список ключей
      * @return array

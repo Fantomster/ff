@@ -92,11 +92,12 @@ foreach ($links as $key => $val) {
         $numLicences++;
     }
 }
-
+$title = 'Накладная успешно привязана!';
 if ($numLicences) {
     $textIntegration = 'Перейти в интеграцию: '.$listIntegration;
 } else {
-    $textIntegration = 'Для полноценной работы в системе и загрузки накладной Вам необходимо активировать лицензию!';
+    $title = 'Заказ завершен';
+    $textIntegration = 'Просьба активировать лицензию';
 }
 
 $js = <<<JS
@@ -125,7 +126,7 @@ $js = <<<JS
                 clickedButton.button("reset");
             });
             swal(
-                'Накладная успешно привязана!',
+                '$title',
                 '$textIntegration',
                 'success'
             );

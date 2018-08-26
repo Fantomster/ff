@@ -37,6 +37,16 @@ abstract class DaemonController extends Controller
      * @default false
      */
     public $isMultiInstance = false;
+
+	/**
+	 * @var null
+	 */
+	public $consumerClass = null;
+
+	/**
+	 * @var null
+	 */
+	public $orgId = null;
     
     /**
      * @var $parentPID int main procces pid
@@ -73,8 +83,9 @@ abstract class DaemonController extends Controller
     
     protected $pidDir = "@runtime/daemons/pids";
     protected $logDir = "@runtime/daemons/logs";
-    
+
     private $shortName = '';
+
     
     /**
      * Init function
@@ -84,10 +95,10 @@ abstract class DaemonController extends Controller
         parent::init();
         
         //set PCNTL signal handlers
-        pcntl_signal(SIGTERM, ['vyants\daemon\DaemonController', 'signalHandler']);
-        pcntl_signal(SIGHUP, ['vyants\daemon\DaemonController', 'signalHandler']);
-        pcntl_signal(SIGUSR1, ['vyants\daemon\DaemonController', 'signalHandler']);
-        pcntl_signal(SIGCHLD, ['vyants\daemon\DaemonController', 'signalHandler']);
+        pcntl_signal(SIGTERM, ['console\modules\daemons\components\DaemonController', 'signalHandler']);
+        pcntl_signal(SIGHUP, ['console\modules\daemons\components\DaemonController', 'signalHandler']);
+        pcntl_signal(SIGUSR1, ['console\modules\daemons\components\DaemonController', 'signalHandler']);
+        pcntl_signal(SIGCHLD, ['console\modules\daemons\components\DaemonController', 'signalHandler']);
         
         $this->shortName = $this->shortClassName();
     }
@@ -208,7 +219,9 @@ abstract class DaemonController extends Controller
             'demonize',
             'taskLimit',
             'isMultiInstance',
-            'maxChildProcesses'
+            'maxChildProcesses',
+            'orgId',
+            'consumerClass',
         ];
     }
     
@@ -260,14 +273,9 @@ abstract class DaemonController extends Controller
                                 ' worker(s). Delegate tasks.'
                             );
                         }
-                        
-                        
+
                         pcntl_signal_dispatch();
-//                        if($class1::timeout < 0){
-                            $this->runDaemon($job);
-//                        } else {
-//                            $this->ask();
-//                        }
+                        $this->runDaemon($job);
                     }
                 } else {
                     sleep($this->sleep);
@@ -345,7 +353,6 @@ abstract class DaemonController extends Controller
      */
     final public function runDaemon($job)
     {
-        
         if ($this->isMultiInstance) {
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -439,14 +446,17 @@ abstract class DaemonController extends Controller
         
         return $classname;
     }
-    
+    /**
+     * Get pid file
+     * @return string file path
+     * */
     public function getPidPath()
     {
         $dir = \Yii::getAlias($this->pidDir);
         if (!file_exists($dir)) {
             mkdir($dir, 0744, true);
         }
-        return $dir . DIRECTORY_SEPARATOR . $this->shortName;
+        return $dir . DIRECTORY_SEPARATOR . $this->shortName . $this->consumerClass . $this->orgId;
     }
     
 }

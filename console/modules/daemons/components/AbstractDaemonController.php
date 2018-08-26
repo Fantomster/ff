@@ -4,12 +4,17 @@ namespace console\modules\daemons\components;
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-//use vyants\daemon\DaemonController;
 use PhpAmqpLib\Channel\AMQPChannel;
 
 abstract class AbstractDaemonController extends DaemonController
 {
-    /**
+
+	/**
+	 * @var \console\modules\daemons\components\ConsumerInterface
+	 */
+	public $consumer;
+
+	/**
      * Description
      * @var RabbitService
      */
@@ -29,6 +34,34 @@ abstract class AbstractDaemonController extends DaemonController
      * @var int
      */
     public $maxChildProcesses = 5;
+
+	/**
+	 * Check consumer implements interfaces methods
+	 * @param \console\modules\daemons\components\ConsumerInterface $consumer
+	 */
+	private function getConsumer(ConsumerInterface $consumer){
+		$this->consumer = $consumer;
+	}
+
+	/**
+	 * Generate class string
+	 * @return string
+	 */
+	public function getConsumerClassName(){
+		return "console\modules\daemons\classes\\".$this->consumerClass;
+	}
+
+	/**
+	 * Create consumer with different parameters
+	 * maybe refactoring to argument unpacking new class(...$arrayOfConstructorParameters)
+	 */
+	public function createConsumer(){
+		if(!is_null($this->orgId)){
+			$this->getConsumer(new $this->consumerClassName($this->orgId));
+		} else {
+			$this->getConsumer(new $this->consumerClassName);
+		}
+	}
 
     /**
      * @return array|bool

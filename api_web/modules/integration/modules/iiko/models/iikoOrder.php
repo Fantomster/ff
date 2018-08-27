@@ -125,6 +125,7 @@ class iikoOrder extends WebApi
             'agent_denom' => $item->agent->denom ?? 'Не указано',
             'store_denom' => $item->store->denom ?? 'Не указано',
             'doc_date' => \Yii::$app->formatter->format($item->doc_date, 'date'),
+            'payment_delay_date' => \Yii::$app->formatter->format($item->payment_delay_date, 'date'),
             'status_denom' => $item->status->denom
         ];
 

@@ -303,7 +303,7 @@ Modal::end();
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
-                            'href' => Url::to(['/vendor/import-base-catalog', 'id' => $cat_id]),
+                            'href' => Url::to(['/vendor/import', 'id' => $cat_id]),
                             'style' => 'margin-right:10px;',
                         ],
                     ])

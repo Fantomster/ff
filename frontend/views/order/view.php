@@ -157,7 +157,7 @@ $js = <<<JS
                         clickedButton.button("reset");
                         swal(
                             'Накладная успешно привязана!',
-                            'Перейти в интеграцию: $list_integration',
+                            'Перейти в интеграцию: $listIntegration',
                             'success'
                         );
                 });

@@ -158,7 +158,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND (fmap.service_id = ".$this->service_id." OR fmap.service_id is null)
+             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
              ".$joins[$this->service_id]."
              LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id       
            WHERE          
@@ -173,7 +173,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
            LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND (fmap.service_id = ".$this->service_id." OR fmap.service_id is null)
+           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
            ".$joins[$this->service_id]."
            LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id 
           WHERE         

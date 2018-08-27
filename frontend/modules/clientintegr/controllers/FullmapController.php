@@ -86,9 +86,8 @@ class FullmapController extends DefaultController {
 
         $selected = $session->get('selectedmap', []);
 
-        $stores = [-1 => 'Нет'];
-        $stores +=  ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $client->id])->
-        andWhere('type = 2')->all(), 'rid', 'name');
+
+        $stores = AllMaps::getStoreListService($searchModel->service_id, $client->id);
 
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax ) {
@@ -120,7 +119,7 @@ class FullmapController extends DefaultController {
            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
            $hasProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-           if (!$hasProduct->save(false)){
+           if (!$hasProduct->save()){
                throw new \RuntimeException('Cant update allmaps table.');
            }
 
@@ -139,7 +138,7 @@ class FullmapController extends DefaultController {
            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
            $newProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-           if (!$newProduct->save(false)){
+           if (!$newProduct->save()){
                throw new \RuntimeException('Cant save new allmaps model.');
            }
 
@@ -167,6 +166,7 @@ class FullmapController extends DefaultController {
             $hasProduct->koef = $koef;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
+            $hasProduct->setScenario('koef');
             if (!$hasProduct->save()){
                 throw new \RuntimeException('Cant update allmaps table.');
             }
@@ -185,6 +185,7 @@ class FullmapController extends DefaultController {
             $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
+            $newProduct->setScenario('koef');
             if (!$newProduct->save()){
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
@@ -210,11 +211,11 @@ class FullmapController extends DefaultController {
             $hasProduct->store_rid = $store;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$hasProduct->save(false)){
+            if (!$hasProduct->save()){
                 throw new \RuntimeException('Cant update allmaps table.');
             }
 
-            $res = $hasProduct->store->name;
+            $res = $hasProduct->store;
 
         } else { // New link for mapping creation
 
@@ -228,68 +229,70 @@ class FullmapController extends DefaultController {
             $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$newProduct->save(false)){
+            if (!$newProduct->save()){
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
 
-            $res = $newProduct->store->name;
+            $res = $newProduct->store;
 
         }
 
+        switch ($service_id) {
+            case 1 :
+                $res = $res->name;
+                break;
+            case 2 :
+                $res = $res->denom;
+                break;
+            case 8 :
+                $res = $res->name;
+                break;
+        }
 
         return Json::encode(['output' => $res, 'message' => '']);
 
     }
 
-    public function actionRenewcats() {
-        return true; //for great justice!
-        $helper = new FullmapHelper();
 
-        $helper->getcats();
+    public function actionChvat($prod_id, $vat, $service_id) {
 
-       // return $this->redirect(['index']);
-          return true;
-    }
+        $hasProduct = AllMaps::find()->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
+            ->andWhere('service_id = '.$service_id.' and is_active =1')
+            ->andWhere('product_id = :prod',[':prod' => $prod_id])->one();
 
-    public function actionChvat($id, $vat, $service_id = null) {
+        if (!empty($hasProduct)) { // Product link already mapped in table
 
-        // $model = $this->findModel($id);
+            $hasProduct->vat = $vat;
+            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-        if ($service_id === null) {
-            $rress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set vat = :vat, linked_at = now() where product_id = :id and service_id is null', [':vat' => $vat, ':id' => $id])->execute();
-            var_dump($rress);
-            if ($rress == 0) {
-                $res = Yii::$app->db_api
-                    ->createCommand('INSERT INTO all_map (product_id, org_id, vat) 
-                                     VALUES (:id,:org,:vat)', [':vat' => $vat, ':id' => $id, ':org' => $this->currentUser->organization->id])->execute();
-                var_dump($res);
+            if (!$hasProduct->save()){
+                throw new \RuntimeException('Cant update allmaps table.');
             }
-        }
-        else {
-            var_dump("33");
-            $rress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set vat = :vat, linked_at = now() where product_id = :id and service_id = :service_id', [':vat' => $vat, ':id' =>$id,
-                    ':service_id' => $service_id])->execute();
-        }
 
-       /* var_dump($rress);
-        die();*/
+            $res = $hasProduct->vat;
 
-        return  true;  //$this->redirect(['index']);
+        } else { // New link for mapping creation
+
+            $newProduct = new AllMaps();
+
+            $newProduct->service_id = $service_id;
+            $newProduct->org_id =  $this->currentUser->organization->id;
+            $newProduct->product_id = $prod_id;
+            $newProduct->is_active = 1;
+            $newProduct->vat = $vat;
+            $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
+            if (!$newProduct->save()){
+                throw new \RuntimeException('Cant save new allmaps model.');
+            }
+
+            $res = $newProduct->vat;
+        }
+        return Json::encode(['output' => $res, 'message' => '']);
 
     }
 
-    public function actionMakevat($vat, $service_id) {
-
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
-
-        $rress = Yii::$app->db_api
-            ->createCommand('UPDATE all_map set vat = :vat, linked_at = now() where service_id = '.$service_id.' and org_id = :org',
-                [':vat' => $vat, ':org' => $organization])->execute();
-
-        return $this->redirect(['index']);
-    }
 
     public function getLastUrl() {
 
@@ -364,6 +367,8 @@ class FullmapController extends DefaultController {
         $koef = Yii::$app->request->post('koef_set');
         $store = Yii::$app->request->post('store_set');
         $vat = Yii::$app->request->post('vat_set');
+
+        $koef=str_replace(",",".",$koef);
 
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
 

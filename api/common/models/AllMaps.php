@@ -3,12 +3,15 @@
 namespace api\common\models;
 
 use api\common\models\iiko\iikoProduct;
+use api\common\models\iiko\iikoStore;
 use api\common\models\one_s\OneSGood;
+use api\common\models\one_s\OneSStore;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use common\models\Catalog;
 use Yii;
 use common\models\Organization;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "rk_access".
@@ -56,7 +59,7 @@ class AllMaps extends \yii\db\ActiveRecord
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
-            }],
+            }, 'on' => 'koef'],
             //  [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [['product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id', 'supp_id',
@@ -133,12 +136,48 @@ class AllMaps extends \yii\db\ActiveRecord
        return isset($res) ? $res->{$attr} : null;
     }
 
+    public static function getStoreListService($service_id, $org_id)
+    {
+        $stores = [-1 => 'Нет'];
+        switch ($service_id) {
+            case 1 : // R-keeper
+                $stores += ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $org_id])->
+                andWhere('type = 2')->all(), 'rid', 'name');
+                break;
+
+            case 2 : // iiko
+                $stores += ArrayHelper::map(iikoStore::find()->andWhere('org_id=:acc',[':acc' => $org_id])->
+                andWhere('is_active = 1')->all(), 'id', 'denom');
+                break;
+            case 8 : // 1C
+                $stores += ArrayHelper::map(OneSStore::find()->andWhere('org_id=:acc',[':acc' => $org_id])->
+                all(), 'id', 'name');
+                break;
+        }
+
+        return $stores;
+    }
+
     public function getStore()
     {
         $acc = ($this->org_id === null) ? Yii::$app->user->identity->organization_id : $this->org_id;
 
-        return RkStoretree::find()->andWhere('rid = :rid', [':rid' => $this->store_rid])->
-        andWhere('acc = :acc', [':acc' => $acc])->one();
+        switch ($this->service_id) {
+
+            case 1:  // R-keeper
+                return RkStoretree::find()->andWhere('rid = :rid', [':rid' => $this->store_rid])->
+                andWhere('acc = :acc', [':acc' => $acc])->one();
+            case 2:  // iiko
+                return iikoStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->
+                andWhere('org_id = :acc', [':acc' => $acc])->one();
+            case 8:  // 1C
+                return OneSStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->
+                andWhere('org_id = :acc', [':acc' => $acc])->one();
+            default:
+                return null;
+
+        }
+
     }
 
 

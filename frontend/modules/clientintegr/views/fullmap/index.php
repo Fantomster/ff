@@ -244,11 +244,7 @@ $this->registerJs(
         '
 );
 ?>
-<?php
-$sLinkzero = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' =>0]);
-$sLinkten = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' =>1000]);
-$sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' =>1800]);
-?>
+
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <style>
     .bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
@@ -334,6 +330,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                         <?php echo Html::label('НДС:','vat_set');?>
                         <?php echo Html::dropDownList('vat_set', null,[-1 => 'Нет', 0 => '0%', 1000 =>'10%', 1800 => '18%'],
                             ['class' => 'form-control', 'style'=>'width:15%', 'id' => 'vat_set']); ?>
+                        <?php echo Html::hiddenInput('service_id', '1'); ?>
                     </div>
                 </div>
 
@@ -558,13 +555,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                         'header' => 'Склад SH',
                                         'size' => 'md',
                                         'inputType' => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
-                                        //'widgetClass'=> 'kartik\datecontrol\DateControl',
                                         'options' => [
-                                            //   'initValueText' => $productDesc,
-
-                                            //'data' => $pdenom,
-                                            //'data' => [1 =>1, 2=>2],
-
                                             'options' => ['placeholder' => 'Выберите склад из списка',
 
                                             ],
@@ -637,7 +628,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Url::toRoute(['chvat', 'id'=>$data['id'], 'vat' =>0, 'service_id' => $data['service_id']]);
+                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' =>0, 'service_id' => $data['service_id']]);
                                             return \yii\helpers\Html::button( '0',
                                                 ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
 
@@ -654,7 +645,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Url::toRoute(['chvat', 'id'=>$data['id'], 'vat' => '1000', 'service_id' => $data['service_id']]);
+                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' => '1000', 'service_id' => $data['service_id']]);
                                             return \yii\helpers\Html::button( '10',
                                                 ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
                                         },
@@ -669,7 +660,7 @@ $sLinkeight = Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientinte
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Url::toRoute(['chvat', 'id'=>$data['id'], 'vat' => '1800', 'service_id' => $data['service_id']]);
+                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' => '1800', 'service_id' => $data['service_id']]);
                                             return \yii\helpers\Html::button( '18',
                                                 ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
                                         },

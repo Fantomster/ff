@@ -660,7 +660,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'category_id' => (int)$model['category_id'],
                 'price' => round($model['price'], 2),
                 'ed' => $model['ed'],
-                'units' => (int)$model['units'] ?? 1,
+                'units' => round(($model['units'] ?? 0), 3),
                 'currency' => $model['symbol'],
                 'currency_id' => (int)$model['currency_id'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),

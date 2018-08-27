@@ -78,8 +78,11 @@ $max = ClientController::MAX_DELAY_PAYMENT;
 
 $js = <<< JS
 
+function check(id) {
 
-
+    return isNum;
+}
+   
 $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function () {
     var title = "Отсрочка платежа<br />(не более $max дней)";
     var agentId = $(this).attr('data-id');
@@ -88,10 +91,25 @@ $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function 
     swal({
         title: title,
         showCancelButton: true,
-        html: "<input type=text id=swal-input value=" + delayPaymentDays + " class=swal2-input onkeyup='  var check = (parseInt($(this).val(), 10) == $(this).val()); if (check == false) { $(\"#swal-input-memo\").html(\"Необходимо ввести целое число\");  } else { $(\"#swal-input-memo\").html(\"&nbsp;\"); }      '>" + 
-        "<br /><span id=swal-input-memo ыендц>&nbsp;</span>",
+        html: "<input type=text id=swal-input value=" + delayPaymentDays + " class=swal2-input>",
         confirmButtonText: "Сохранить",
         cancelButtonText: "Отмена",
+        preConfirm: function() {
+            var s = '1234567890';
+            var err = false;
+            var value = $('#swal-input').val();
+            for (var j = 0; j < value.length; j++) {
+                var char = value.substring(j, j+1);
+                if (s.indexOf(char) == -1) {
+                    err = true;
+                }
+            }
+            if (err == true) {
+               swal.showValidationError('Необходимо ввести целое число!')
+            } else if (value > $max) {
+               swal.showValidationError('Отсрочка платежа не может превышать $max дней!')
+            }
+        }
     }).then(function (result) {
         if (result.dismiss === "cancel") {
             swal.close();

@@ -116,12 +116,13 @@ $js = <<<JS
                 ).done(function(result) {
                         $('#actionButtons').html(result);
                         clickedButton.button("reset");
+                        swal(
+                            'Накладная успешно привязана!',
+                            'Перейти в интеграцию: $list_integration',
+                            'success'
+                        );
                 });
-                 swal(
-                'Накладная успешно привязана!',
-                'Перейти в интеграцию: $list_integration',
-                'success'
-                );
+                 
             }
         });
         $('.content').on('change keyup paste cut', '.view-data', function() {

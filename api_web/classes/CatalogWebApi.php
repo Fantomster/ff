@@ -2,11 +2,14 @@
 
 namespace api_web\classes;
 
+use common\models\CatalogGoods;
 use common\models\CatalogTemp;
 use common\models\CatalogTempContent;
 use Yii;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
+use yii\data\ArrayDataProvider;
+use yii\data\Pagination;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\components\WebApi;
@@ -287,6 +290,78 @@ class CatalogWebApi extends WebApi
             }
             throw $e;
         }
+    }
+
+    /**
+     * Список товаров в каталоге
+     */
+    public function getGoodsInCatalog($request)
+    {
+        $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
+        $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
+
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
+        $catalog = Catalog::findOne($request['cat_id']);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('catalog_not_found');
+        }
+
+        $catalogs = explode(',', $this->user->organization->getCatalogs());
+        if (!in_array($catalog->id, $catalogs)) {
+            throw new BadRequestHttpException('this_is_not_your_catalog');
+        }
+
+        $selectFields = [
+            'cbg.id as product_id',
+            'cbg.article as article',
+            'cbg.product as name',
+            'cbg.ed as ed',
+            "{$catalog->currency_id} as `currency_id`",
+            "'{$catalog->currency->symbol}' as `currency`"
+        ];
+
+        $query = (new Query())->select($selectFields);
+        if ($catalog->type == Catalog::BASE_CATALOG) {
+            $query->addSelect(['cbg.price as price']);
+            $query->from(CatalogBaseGoods::tableName() . ' as cbg');
+            $query->where(['cbg.cat_id' => $catalog->id]);
+        } else {
+            $query->addSelect(['cg.price as price']);
+            $query->from(CatalogGoods::tableName() . ' as cg');
+            $query->innerJoin(CatalogBaseGoods::tableName() . ' as cbg', 'cg.base_goods_id = cbg.id');
+            $query->where(['cg.cat_id' => $catalog->id]);
+        }
+        $query->andWhere(['cbg.deleted' => CatalogBaseGoods::DELETED_OFF]);
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $query->all()
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
+        $result = $dataProvider->models;
+        if (!empty($result)) {
+            foreach ($result as &$item) {
+                $item['product_id'] = (int)$item['product_id'];
+                $item['price'] = round($item['price'], 2);
+                $item['currency_id'] = (int)$item['currency_id'];
+            }
+        }
+
+        return [
+            'result' => $result,
+            'pagination' => [
+                'page' => ($dataProvider->pagination->page + 1),
+                'page_size' => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
     }
 
     /**

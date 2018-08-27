@@ -225,6 +225,50 @@ class VendorController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/vendor/get-goods-in-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Список товаров в каталоге",
+     *     description="Список товаров в каталоге",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 3010,
+     *                      "pagination":{
+     *                          "page":1,
+     *                          "page_size":12
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(ref="#/definitions/VendorCatalogGoods"),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetGoodsInCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->getGoodsInCatalog($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/vendor/upload-main-catalog",
      *     tags={"Vendor/Catalog"},
      *     summary="Загрузка основного каталога",

@@ -674,7 +674,7 @@ class ParserTorg12
                         $temp1[1] = trim($temp1[1]); //убираем пробелы
                         $temp2 = explode('/', $temp1[1]); //разбиваем значения текущей ячейки по слэшу, отделяя цифры ИНН от КПП
                         $this->invoice->innPostav = $temp2[0];
-                        if (count($temp2)>1) $this->invoice->kppPostav = $temp2[1];
+                        if (count($temp2) > 1) $this->invoice->kppPostav = $temp2[1];
                     }
                 }
             }
@@ -1042,7 +1042,11 @@ class ParserTorg12
         $row = [];
         $key = 1;
 
-        if (isset($this->columnList['num'])) {$begin = $this->columnList['num']['col'];} else {$begin = $this->columnList['name']['col'];}
+        if (isset($this->columnList['num'])) {
+            $begin = $this->columnList['num']['col'];
+        } else {
+            $begin = $this->columnList['name']['col'];
+        }
         for ($col = $begin; $col <= $this->highestColumn; $col++) {//
             $currentCell = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $rowNumber)->getValue());
             // запишем непустые значения в массив для текущей строки
@@ -1220,8 +1224,8 @@ class ParserTorg12
                 $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
             }
         }
-        if ($this->invoice->price_without_tax_sum!=$this->sumWithoutTaxExcel) $this->sumNotEqual = true;
-        if ($this->invoice->price_with_tax_sum!=$this->sumWithTaxExcel) $this->sumNotEqual = true;
+        if ($this->invoice->price_without_tax_sum != $this->sumWithoutTaxExcel) $this->sumNotEqual = true;
+        if ($this->invoice->price_with_tax_sum != $this->sumWithTaxExcel) $this->sumNotEqual = true;
     }
 
     /**
@@ -1505,19 +1509,20 @@ class ParserTorg12
         return $has;
     }
 
-    public function sendMailNotEqualSum($email, $name_file) {
+    public function sendMailNotEqualSum($email, $name_file)
+    {
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */
         $mailer = Yii::$app->mailer;
         $subject = Yii::t('app', 'common.mail.error.subject', ['ru' => 'В вашей накладной ошибка!']);
 
-        if(!empty($email)) {
-            $viev['text'] = 'У Вас в накладной закралась ошибка';
-            $viev['text'] = 'В вашем письме, отправленном  '.$this->invoice->nameConsignee.' во вложенном файле накладной ';
-            $viev['text'].= $name_file.' есть ошибки. Суммы, указанные в итоге накладной, не совпадают с подсчитанной суммой всех строк накладной. ';
-            $viev['text'].='Сумма накладной без НДС - '.$this->sumWithoutTaxExcel.' а сумма без НДС всех строк накладной равна '.$this->invoice->price_without_tax_sum;
-            $viev['text'].=' Сумма накладной c НДС - '.$this->sumWithTaxExcel.' а сумма c НДС всех строк накладной равна '.$this->invoice->price_with_tax_sum;
-            $viev['text'].=' Обратите внимание и разберитесь, пожалуйста!';
+        if (!empty($email)) {
+            $viev = 'Возможно, в Вашей накладной ошибка. Просим проверить. ';
+            $viev .= 'В вашем письме, отправленном  ' . $this->invoice->nameConsignee . ' во вложенном файле накладной ';
+            $viev .= $name_file . ' есть ошибки. Суммы, указанные в итоге накладной, не совпадают с подсчитанной суммой всех строк накладной. ';
+            $viev .= 'Сумма накладной без НДС - ' . $this->sumWithoutTaxExcel . ' а сумма без НДС всех строк накладной равна ' . $this->invoice->price_without_tax_sum;
+            $viev .= ' Сумма накладной c НДС - ' . $this->sumWithTaxExcel . ' а сумма c НДС всех строк накладной равна ' . $this->invoice->price_with_tax_sum;
+            $viev .= ' Просим обратить внимание на ошибку и подтвердить достоверность передаваемых данных.';
             $mailer->compose()
                 ->setTo($email)
                 ->setFrom('noreply@mixcart.ru')

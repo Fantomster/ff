@@ -190,7 +190,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
                     
                     // Check previous
 
-                    /*
+
                     $ch = RkWaybilldata::find()
                             ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
                             ->andWhere('org = :org',['org' => $wdmodel->org]) 
@@ -207,10 +207,10 @@ class RkWaybill extends \yii\db\ActiveRecord {
                         $wdmodel->vat = $ch->vat;
 
                     }
-*/
+
                     // New check with mass mapping...
 
-                    $ch = AllMaps::find()
+ /*                   $ch = AllMaps::find()
                         ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ])
                         ->andWhere('org_id = :org',['org' => $wdmodel->org])
                         ->limit(1)
@@ -229,7 +229,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
                         if (isset($ch->vat))
                             $wdmodel->vat = $ch->vat;
                     }
-
+*/
                     if (!$wdmodel->save()) {
 
                         //AD: made those changes locally for debug

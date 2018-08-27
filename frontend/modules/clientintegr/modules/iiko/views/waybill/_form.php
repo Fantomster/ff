@@ -57,7 +57,15 @@ if (!$selectedStore || count($selectedStore) == 0) {
         ],
         'pluginEvents' => [
             "change" => "function() {
-                $('#iikowaybill-payment_delay').val($('option[value='+ $(this).val() +']').attr('data-payment-delay'));
+                var dateObj = Math.round(new Date().getTime() / 1000);
+                var newDate = new Date((dateObj + $('option[value='+ $(this).val() +']').attr('data-payment-delay') * 24 * 60 * 60) * 1000);
+                var y = newDate.getFullYear();
+                var m = newDate.getMonth() + 1;
+                if (m < 10) {m = '0' + m;}
+                var d = newDate.getDate();
+                if (d < 10) {d = '0' + d;}
+                var res = d + '.' + m + '.' + y;
+                $('#iikowaybill-payment_delay_date').val(res);
             }",
         ],
         'pluginOptions' => [
@@ -72,14 +80,14 @@ if (!$selectedStore || count($selectedStore) == 0) {
     if (!$model->doc_date) {
         $model->doc_date = date('d.m.Y', time());
     } else {
-        $rdate = date('d.m.Y', strtotime($model->doc_date));
-        $model->doc_date = $rdate;
+        $model->doc_date = date('d.m.Y', strtotime($model->doc_date));
+    }
+    if(!$model->payment_delay_date) {
+        $model->payment_delay_date = date('d.m.Y', time());
+    } else {
+        $model->payment_delay_date = date('d.m.Y', strtotime($model->payment_delay_date));
     }
     ?>
-
-    <?php echo $form->field($model, 'payment_delay')->textInput(['maxlength' => true, 'value' =>
-        ($model->payment_delay) ? $model->payment_delay : 0
-    ]) ?>
 
     <?= $form->field($model, 'doc_date')->label('Дата документа')->
     widget(DatePicker::class, [
@@ -92,7 +100,20 @@ if (!$selectedStore || count($selectedStore) == 0) {
             'todayHighlight' => false,
         ],
     ]);
+    ?>
 
+    <?php
+    echo $form->field($model, 'payment_delay_date')->label('Дата отсрочки платежа')->
+    widget(DatePicker::class, [
+        'type' => DatePicker::TYPE_COMPONENT_APPEND,
+        'convertFormat' => true,
+        'layout' => '{picker}{input}',
+        'pluginOptions' => [
+            'autoclose' => true,
+            'format' => 'dd.MM.yyyy',
+            'todayHighlight' => false,
+        ],
+    ]);
     ?>
 
     <?php echo $form->field($model, 'note')->textInput(['maxlength' => true]) ?>

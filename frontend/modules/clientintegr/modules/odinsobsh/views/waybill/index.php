@@ -17,12 +17,15 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\helpers\Html;
+use common\components\SearchOrdersComponent;
 
 
 /** @var $affiliated array */
 /** @var $wbStatuses array */
 /** @var $searchParams array Search Params */
 /** @var $way mixed */
+
+/** @var $dont_show bool */
 
 use common\components\EchoRu;
 use kartik\select2\Select2;
@@ -31,29 +34,37 @@ use api\common\models\one_s\OneSWaybill;
 use kartik\grid\ExpandRowColumn;
 
 $msg = [
-    'entries' => EchoRu::echo ('frontend.views.order.waybill.entries', 'Состав Заказа'),
-    'push' => EchoRu::echo ('frontend.clientintegr.order.waybill.push', 'Выгрузить выбранные'),
+    'entries' => EchoRu::echo('frontend.views.order.waybill.entries', 'Состав Заказа'),
+    'push' => EchoRu::echo('frontend.clientintegr.order.waybill.push', 'Выгрузить выбранные'),
 ];
 
 $headers = [
-    'id' => EchoRu::echo ('frontend.order.id', 'Номер заказа'),
-    'invoice_relation' => EchoRu::echo ('frontend.clientintegr.order.waybill.id', '№ Накладной'),
-    'vendor' => EchoRu::echo ('frontend.views.order.vendor', 'Поставщик'),
-    'updated_at' => EchoRu::echo ('frontend.views.order.updated_at', 'Обновлено'),
-    'finished_at' => EchoRu::echo ('frontend.views.order.final_date', 'Дата финальная'),
-    'positionCount' => EchoRu::echo ('frontend.views.order.position_сount', 'Кол-во позиций'),
+    'id' => EchoRu::echo('frontend.order.id', 'Номер заказа'),
+    'invoice_relation' => EchoRu::echo('frontend.clientintegr.order.waybill.id', '№ Накладной'),
+    'vendor' => EchoRu::echo('frontend.views.order.vendor', 'Поставщик'),
+    'updated_at' => EchoRu::echo('frontend.views.order.updated_at', 'Обновлено'),
+    'finished_at' => EchoRu::echo('frontend.views.order.final_date', 'Дата финальная'),
+    'positionCount' => EchoRu::echo('frontend.views.order.position_сount', 'Кол-во позиций'),
 ];
+
+$dont_show = FALSE;
+if ($way) {
+    if (isset($_COOKIE[SearchOrdersComponent::ODIN_C_WB_DONT_SHOW_VARNAME_PREF . $way]) &&
+        $_COOKIE[SearchOrdersComponent::ODIN_C_WB_DONT_SHOW_VARNAME_PREF . $way] == $way) {
+        $dont_show = TRUE;
+    }
+}
 
 #-----------------------------------------------------------------------------------------------------------------------
 # 3. ФИЛЬТРЫ (В виде инпутов или селектов)
 #-----------------------------------------------------------------------------------------------------------------------
 # 3.1. Заголовки фильтров
 $filterLabels = [
-    'orderId' => EchoRu::echo ('frontend.clientintegr.order.id', 'Номер заказа'),
-    'orderAff' => EchoRu::echo ('frontend.clientintegr.vendors', 'Поставщики'),
-    'orderLastUpdated' => EchoRu::echo ('frontend.clientintegr.order.last_updated.range',
+    'orderId' => EchoRu::echo('frontend.clientintegr.order.id', 'Номер заказа'),
+    'orderAff' => EchoRu::echo('frontend.clientintegr.vendors', 'Поставщики'),
+    'orderLastUpdated' => EchoRu::echo('frontend.clientintegr.order.last_updated.range',
         'Обновлено: начальная дата / Конечная дата'),
-    'wbStatus' => EchoRu::echo ('frontend.clientintegr.order.waybill.status', 'Статус накладной'),
+    'wbStatus' => EchoRu::echo('frontend.clientintegr.order.waybill.status', 'Статус накладной'),
 ];
 #-----------------------------------------------------------------------------------------------------------------------
 # 3.2. Виджеты фильтров
@@ -67,25 +78,25 @@ $filterOptions = [
     'orderAff' => $affiliated,
     'wbStatus' => [
         array_search(WaybillController::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS, $wbStatuses) =>
-            EchoRu::echo ('frontend.clientintegr.order.waybill.allstat', 'Все'),
+            EchoRu::echo('frontend.clientintegr.order.waybill.allstat', 'Все'),
         array_search(WaybillController::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS, $wbStatuses) =>
-            EchoRu::echo ('frontend.clientintegr.order.waybill.nodoc', 'Не сформирована'),
+            EchoRu::echo('frontend.clientintegr.order.waybill.nodoc', 'Не сформирована'),
         array_search(WaybillController::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS, $wbStatuses) =>
-            EchoRu::echo ('frontend.clientintegr.order.waybill.filled', 'Сформирована'),
+            EchoRu::echo('frontend.clientintegr.order.waybill.filled', 'Сформирована'),
         array_search(WaybillController::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS, $wbStatuses) =>
-            EchoRu::echo ('frontend.clientintegr.order.waybill.ready', 'Готова к выгрузке'),
+            EchoRu::echo('frontend.clientintegr.order.waybill.ready', 'Готова к выгрузке'),
         // EchoRu::echo (WaybillController::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS, 'Отправляется'),
         array_search(WaybillController::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS, $wbStatuses) =>
-            EchoRu::echo ('frontend.clientintegr.order.waybill.completed', 'Выгружена'),
+            EchoRu::echo('frontend.clientintegr.order.waybill.completed', 'Выгружена'),
     ],
 ];
-$filterOptions['orderAff'][0] = EchoRu::echo ('frontend.clientintegr.order.select.aff.all', 'Все');
+$filterOptions['orderAff'][0] = EchoRu::echo('frontend.clientintegr.order.select.aff.all', 'Все');
 ksort($filterOptions['orderAff']);
 
 #-----------------------------------------------------------------------------------------------------------------------
 # 3.4. Плейсхолдеры / значения фильтров (для селектов типа kartik - те же самые предустановленные значения фильтров)
 $filterValues = [
-    'orderId' => EchoRu::echo ('frontend.clientintegr.order.id', 'Номер заказа'),
+    'orderId' => EchoRu::echo('frontend.clientintegr.order.id', 'Номер заказа'),
     'orderAff' => $filterOptions['orderAff'][0],
     'wbStatus' => $filterOptions['wbStatus'][0],
     'dateFrom' => $searchParams['OrderSearch2']['date_from'] ?? '',
@@ -96,7 +107,7 @@ if (isset($searchParams['OrderSearch2']['id']) && (int)$searchParams['OrderSearc
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
-$this->title = EchoRu::echo ('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит');
+$this->title = EchoRu::echo('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит');
 
 $columns = array(
 // 1. ЧЕКБОКС
@@ -137,7 +148,7 @@ $columns = array(
         'value' => function ($data) {
             $res1 = ($data->waybill_number) ? Html::encode($data->waybill_number) : '';
             return ($data->invoice) ? Html::encode($data->invoice->number) .
-                '&nbsp;&nbsp;<span title="Накладная поставщика" style="color: #ff0; background: #070; '.
+                '&nbsp;&nbsp;<span title="Накладная поставщика" style="color: #ff0; background: #070; ' .
                 'border: 1px #ccc solid; padding: 2px 4px; border-radius: 2px; font-size: 62%; margin-right: 6px">НП</span>' : $res1;
         },
     ],
@@ -200,7 +211,7 @@ $columns = array(
     // 8. Сумма заказа
     [
         'attribute' => 'total_price',
-        'label' => EchoRu::echo ('frontend.views.order.summ', 'Сумма'),
+        'label' => EchoRu::echo('frontend.views.order.summ', 'Сумма'),
         'format' => 'raw',
         'contentOptions' => ['class' => 'small_cell_sum', 'style' => 'text-align: right'],
         'value' => function ($data) {
@@ -227,11 +238,14 @@ $columns = array(
     [
         'class' => ExpandRowColumn::class,
         'width' => '50px',
-        'value'=>function ($model) use ($way) {
-            if ($model->id == $way) {
-                return GridView::ROW_EXPANDED;
+        'value' => function ($model) use ($way, $dont_show) {
+            $val = GridView::ROW_COLLAPSED;
+            if ($dont_show && $dont_show == $model->id) {
+                $val = GridView::ROW_COLLAPSED;
+            } elseif ($model->id == $way) {
+                $val = GridView::ROW_EXPANDED;
             }
-            return GridView::ROW_COLLAPSED;
+            return $val;
         },
         'detail' => function ($model) use ($lic) {
             $wmodel = OneSWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
@@ -250,6 +264,13 @@ $columns = array(
 );
 
 $this->registerJs('
+function js_cookie_set(c, y) {var d = new Date (); d.setTime (d.getTime()+(60*60*24*365));
+    c += "="+escape(y)+"; expires="+d.toGMTString()+"; path="+escape(' . "'" . '/' . "'" . ')+"; ";
+    c += "domain="+escape(window.location.hostname); document.cookie = c;}
+function js_cookie_remove(c) {var d = new Date (); d.setTime (d.getTime()-1000); var y = "";
+    c += "="+escape(y)+"; expires="+d.toGMTString()+"; path="+escape(' . "'" . '/' . "'" . ')+"; ";
+    c += "domain="+escape(window.location.hostname); document.cookie = c;}
+
 $("document").ready(function(){
        $(".box-body").on("change", "#orderFilter", function () {
         var target = "http:";
@@ -279,8 +300,17 @@ $("document").ready(function(){
     $(".box-body").on("change", "#ordersearch2-wb_status", function () {
         $("#search-form").submit();
     });
-});
-');
+    
+var $grid = $("#waybill_grid1");
+    $grid.on("kvexprow:toggle", function (event, ind, key, extra, state) {
+        if (state === false) {
+            js_cookie_set("' . SearchOrdersComponent::ODIN_C_WB_DONT_SHOW_VARNAME_PREF . '" + key, key);
+        } else {
+            js_cookie_remove("' . SearchOrdersComponent::ODIN_C_WB_DONT_SHOW_VARNAME_PREF . '" + key);
+        }
+    });
+
+});');
 #-----------------------------------------------------------------------------------------------------------------------
 $css = <<< CSS
 tr:hover {
@@ -317,16 +347,16 @@ $this->registerCss($css);
 <section class="content-header">
     <h1>
         <i class="fa fa-history"></i> <?=
-        EchoRu::echo ('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит') ?>
+        EchoRu::echo('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит') ?>
     </h1>
     <?= Breadcrumbs::widget([
         'options' => ['class' => 'breadcrumb',],
         'links' => [
             [
-                'label' => EchoRu::echo ('frontend.clientintegr.index', 'Интеграция', 'app'),
+                'label' => EchoRu::echo('frontend.clientintegr.index', 'Интеграция', 'app'),
                 'url' => '/clientintegr/default'
             ],
-            EchoRu::echo ('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит'),
+            EchoRu::echo('frontend.clientintegr.ones.waybill', 'Интеграция с 1С Общепит'),
         ],
     ]);
     ?>
@@ -408,7 +438,7 @@ $this->registerCss($css);
                                     фильтры</a>
                             </div>
                             <div class="col-lg-5 col-md-6 col-sm-6">
-                                <?php $title = EchoRu::echo ($msg['push'], 'Выгрузить выбранные');
+                                <?php $title = EchoRu::echo($msg['push'], 'Выгрузить выбранные');
                                 echo Html::a($title, false, ['class' => 'btn btn-md fk-button', 'id' => 'mk-all-nakl']); ?>
                             </div>
                         </div>
@@ -530,7 +560,7 @@ $("[data-toggle='popover']").popover({
 // });
 SCRIPT;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 
 <?php
@@ -560,7 +590,7 @@ $('.ajax-popover').click(function() {
   }
 });
 SCRIPT;
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 <?php
 $js = <<< 'SCRIPT'
@@ -603,7 +633,7 @@ $('.ajax-popover').click(function() {
 })
 SCRIPT;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 
 <?php
@@ -622,5 +652,5 @@ $(document).ready(function () {
 });    
 JS;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>

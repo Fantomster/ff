@@ -25,6 +25,7 @@ use yii\helpers\Html;
 use kartik\grid\CheckboxColumn;
 use kartik\grid\ExpandRowColumn;
 use frontend\modules\clientintegr\modules\rkws\controllers\WaybillController;
+use common\components\SearchOrdersComponent;
 
 /** @var $licucs RkService */
 /** @var $affiliated array */
@@ -32,6 +33,7 @@ use frontend\modules\clientintegr\modules\rkws\controllers\WaybillController;
 /** @var $searchParams array Search Params */
 /* @var $way int ??? * */
 /* @var $businessType string * */
+/** @var $dont_show bool */
 
 
 $msg = [
@@ -46,6 +48,15 @@ $headers = [
     'finished_at' => EchoRu::echo ('frontend.views.order.final_date', 'Дата финальная'),
     'positionCount' => EchoRu::echo ('frontend.views.order.position_сount', 'Кол-во позиций'),
 ];
+
+$dont_show = FALSE;
+if ($way) {
+    if (isset($_COOKIE[SearchOrdersComponent::RKWS_WB_DONT_SHOW_VARNAME_PREF.$way]) &&
+        $_COOKIE[SearchOrdersComponent::RKWS_WB_DONT_SHOW_VARNAME_PREF.$way] == $way) {
+        $dont_show = TRUE;
+    }
+}
+
 $dataColumns = [
 
     // 1. ЧЕКБОКС
@@ -182,11 +193,12 @@ $dataColumns = [
     [
         'class' => ExpandRowColumn::class,
         'width' => '50px',
-        'value' => function ($model) use ($way) {
-            $val = kartik\grid\GridView::ROW_COLLAPSED;
-            if (($model->id == $way) or (Yii::$app->session->get('rkws_waybill') == $model->id)) {
-                Yii::$app->session->set("rkws_waybill", 0);
-                $val = kartik\grid\GridView::ROW_EXPANDED;
+        'value' => function ($model) use ($way, $dont_show) {
+            $val = GridView::ROW_COLLAPSED;
+            if ($dont_show && $dont_show == $model->id) {
+                $val = GridView::ROW_COLLAPSED;
+            } elseif ($model->id == $way) {
+                $val = GridView::ROW_EXPANDED;
             }
             return $val;
         },
@@ -271,7 +283,14 @@ if (isset($searchParams['OrderSearch2']['id']) && (int)$searchParams['OrderSearc
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-$js = <<< JS
+$this->registerJs('
+
+function js_cookie_set(c, y) {var d = new Date (); d.setTime (d.getTime()+(60*60*24*365));
+    c += "="+escape(y)+"; expires="+d.toGMTString()+"; path="+escape('."'".'/'."'".')+"; ";
+    c += "domain="+escape(window.location.hostname); document.cookie = c;}
+function js_cookie_remove(c) {var d = new Date (); d.setTime (d.getTime()-1000); var y = "";
+    c += "="+escape(y)+"; expires="+d.toGMTString()+"; path="+escape('."'".'/'."'".')+"; ";
+    c += "domain="+escape(window.location.hostname); document.cookie = c;}
 
 $("document").ready(function(){
        $(".box-body").on("change", "#orderFilter", function () {
@@ -280,7 +299,7 @@ $("document").ready(function(){
         if (w === "https:") {
             target = "https:";
         }
-        target = target + '//' + window.location.hostname + '/clientintegr/rkws/waybill/index?OrderSearch2[id]=' + $("#orderFilter").val();
+        target = target + window.location.hostname + "/clientintegr/rkws/waybill/index?OrderSearch2[id]=" + $("#orderFilter").val();
         window.location.href = target;
     });
     
@@ -302,10 +321,19 @@ $("document").ready(function(){
     $(".box-body").on("change", "#ordersearch2-wb_status", function () {
         $("#search-form").submit();
     });
+    
+var $grid = $("#waybill_grid1");
+    $grid.on("kvexprow:toggle", function (event, ind, key, extra, state) {
+        if (state === false) {
+            js_cookie_set("'.SearchOrdersComponent::RKWS_WB_DONT_SHOW_VARNAME_PREF.'" + key, key);
+        } else {
+            js_cookie_remove("'.SearchOrdersComponent::RKWS_WB_DONT_SHOW_VARNAME_PREF.'" + key);
+        }
+    });
+
 });
-JS;
-#-----------------------------------------------------------------------------------------------------------------------
-$this->registerJs($js);
+');
+
 #-----------------------------------------------------------------------------------------------------------------------
 $css = <<< CSS
 tr:hover {

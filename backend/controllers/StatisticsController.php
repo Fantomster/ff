@@ -445,7 +445,35 @@ class StatisticsController extends Controller {
                 ->andWhere('category_id is not null')
                 ->andWhere(['between', "$cbgTable.created_at", $dt->format('Y-m-d'), $end->format('Y-m-d')])
                 ->count();
-        
+
+        //Среднее количество заказов ресторанами в день за период
+        $query = "select avg(cnt)
+                        from (
+                        select a.client_id, count(a.id) cnt, DATE_FORMAT(a.created_at,'%Y-%m-%d') d
+                        from `order` a,
+                             organization b
+                        where a.client_id = b.id
+                          and b.blacklisted = 0
+                          and a.status in (3,4,2,1)
+                          and a.created_at between :dateFrom and :dateTo
+                        group by client_id, d) a";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $dayOrderCount = $command->queryScalar();
+
+        //Среднее количество заказов ресторанами в месяц за период
+        $query = "select avg(cnt)
+                        from (
+                        select a.client_id, count(a.id) cnt, DATE_FORMAT(a.created_at,'%Y-%m') d
+                        from `order` a,
+                             organization b
+                        where a.client_id = b.id
+                          and b.blacklisted = 0
+                          and a.status in (3,4,2,1)
+                          and a.created_at between :dateFrom and :dateTo
+                        group by client_id, d) a";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $monthOrderCount = $command->queryScalar();
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('misc', compact(
                     'totalClients',
@@ -453,6 +481,8 @@ class StatisticsController extends Controller {
                     'vendorsWithGoodsCount',
                     'productsCount',
                     'productsOnMarketCount',
+                    'dayOrderCount',
+                    'monthOrderCount',
                     'dateFilterFrom', 
                     'dateFilterTo'
                     ));
@@ -463,6 +493,8 @@ class StatisticsController extends Controller {
                     'vendorsWithGoodsCount',
                     'productsCount',
                     'productsOnMarketCount',
+                    'dayOrderCount',
+                    'monthOrderCount',
                     'dateFilterFrom', 
                     'dateFilterTo'
                     ));

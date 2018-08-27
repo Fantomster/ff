@@ -67,6 +67,9 @@ $form = ActiveForm::begin([
 <div>Ресторанов с 5 заказами: <?= $clientsStats["c5"] ?></div>
 <div>Ресторанов с большим количеством заказов: <?= $clientsStats["cn"] ?></div>
 <br>
+<div>Среднее количество заказов ресторанами в день за период: <?= $dayOrderCount ?></div>
+<div>Среднее количество заказов ресторанами в месяц за период: <?= $monthOrderCount ?></div>
+<br>
 <div>Поставщиков с каталогами: <?= $vendorsWithGoodsCount ?></div>
 <div>Всего размещено товаров: <?= $productsCount ?></div>
 <div>Из них на маркете: <?= $productsOnMarketCount ?></div>

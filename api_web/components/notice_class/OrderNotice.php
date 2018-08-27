@@ -18,6 +18,7 @@ use yii\swiftmailer\Mailer;
 
 class OrderNotice
 {
+
     /**
      * @param $vendor Organization
      * @return bool
@@ -52,8 +53,8 @@ class OrderNotice
             FireBase::getInstance()->update([
                 'user' => $user->id,
                 'organization' => $client->id
-            ], [
-                'cart_count' => (int)$client->getCartCount()
+                    ], [
+                'cart_count' => (int) $client->getCartCount()
             ]);
         }
         return true;
@@ -63,14 +64,15 @@ class OrderNotice
      * @param User $userSend
      * @return bool
      */
-    public function sendLastUserCartAdd(User $userSend) {
+    public function sendLastUserCartAdd(User $userSend)
+    {
         $client = $userSend->organization;
         $clientUsers = $client->users;
         foreach ($clientUsers as $user) {
             FireBase::getInstance()->update([
                 'user' => $user->id,
                 'organization' => $client->id
-            ], [
+                    ], [
                 'last_add_cart_user_name' => $userSend->profile->full_name
             ]);
         }
@@ -97,22 +99,28 @@ class OrderNotice
             $email = $recipient->email;
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
-                if ($notification)
-                    if ($notification->order_created) {
+                if ($notification && $notification->order_created) {
+                    try {
                         $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                            ->setTo($email)
-                            ->setSubject($subject)
-                            ->send();
+                                ->setTo($email)
+                                ->setSubject($subject)
+                                ->send();
+                    } catch (\Exception $e) {
+                        \Yii::error($e->getMessage());
                     }
+                }
                 $notification = $recipient->getSmsNotification($org);
-                if ($notification)
-                    if (!empty($recipient->profile->phone) && $notification->order_created) {
+                if ($notification && !empty($recipient->profile->phone) && $notification->order_created) {
+                    try {
                         $text = Yii::$app->sms->prepareText('sms.order_new', [
                             'name' => $senderOrg->name,
                             'url' => $order->getUrlForUser($recipient)
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
+                    } catch (\Exception $e) {
+                        \Yii::error($e->getMessage());
                     }
+                }
             }
         }
     }
@@ -151,9 +159,9 @@ class OrderNotice
                 if ($notification) {
                     if ($notification->order_canceled) {
                         $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                            ->setTo($email)
-                            ->setSubject($subject)
-                            ->send();
+                                ->setTo($email)
+                                ->setSubject($subject)
+                                ->send();
                     }
                 }
                 //Отправляем СМС
@@ -202,9 +210,9 @@ class OrderNotice
                 if ($notification) {
                     if ($notification->order_done) {
                         $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                            ->setTo($email)
-                            ->setSubject($subject)
-                            ->send();
+                                ->setTo($email)
+                                ->setSubject($subject)
+                                ->send();
                     }
                 }
 
@@ -281,7 +289,7 @@ class OrderNotice
                 'user' => $clientUser->id,
                 'organization' => $newMessage->recipient_id,
                 'notifications' => uniqid(),
-            ], ['body' => $newMessage->message]);
+                    ], ['body' => $newMessage->message]);
         }
         foreach ($vendorUsers as $vendorUser) {
             $channel = 'user' . $vendorUser->id;
@@ -299,7 +307,7 @@ class OrderNotice
                 'user' => $vendorUser->id,
                 'organization' => $newMessage->recipient_id,
                 'notifications' => uniqid(),
-            ], ['body' => $newMessage->message]);
+                    ], ['body' => $newMessage->message]);
         }
 
         return true;
@@ -311,6 +319,7 @@ class OrderNotice
      */
     private function getNotificationCount(Organization $organizaion)
     {
-        return (int)OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
+        return (int) OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
     }
+
 }

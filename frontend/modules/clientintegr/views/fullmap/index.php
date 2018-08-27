@@ -138,6 +138,7 @@ $this->registerJs(
             store_set = $("#store_set").val();
             koef_set =  $("#koef_set").val();
             vat_set  =  $("#vat_set").val();
+            service_set  =  $("#service_id option:selected").val();
             
             if (typeof(koef_set) == "undefined" || koef_set == null || koef_set.length == 0 )
             koef_set = -1;
@@ -147,6 +148,11 @@ $this->registerJs(
             // console.log(vat_set);
             
             // Check selection at least one
+            
+            if (typeof(service_set) == "undefined" || service_set == null || service_set.length == 0 ) {
+            alert ("Не выбран сервис интеграции");
+            return false;
+            }
             
             if (store_set == -1 && koef_set == -1 && vat_set == -1) {
             alert ("Не установлен ни один модификатор для массового применения");
@@ -159,7 +165,7 @@ $this->registerJs(
              url: "'.$urlApply.'",
              type: "POST",
              dataType: "json",
-             data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set},
+             data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set, service_set : service_set},
              success: function(){
                  cnt = 0;
                  $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
@@ -330,7 +336,6 @@ $this->registerJs(
                         <?php echo Html::label('НДС:','vat_set');?>
                         <?php echo Html::dropDownList('vat_set', null,[-1 => 'Нет', 0 => '0%', 1000 =>'10%', 1800 => '18%'],
                             ['class' => 'form-control', 'style'=>'width:15%', 'id' => 'vat_set']); ?>
-                        <?php echo Html::hiddenInput('service_id', '1'); ?>
                     </div>
                 </div>
 

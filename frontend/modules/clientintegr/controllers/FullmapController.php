@@ -47,6 +47,17 @@ class FullmapController extends DefaultController {
             $session['orderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
         }
 
+        $params['OrderCatalogSearchMap'] = $session['orderCatalogSearchMap'];
+
+        $currServiceId = isset($params['OrderCatalogSearchMap'])? $params['OrderCatalogSearchMap']['service_id'] : 0;
+        if(isset($currServiceId))
+        {
+            if($session['service_id'] != $currServiceId)
+                $this->actionClearFullmap();
+        }
+
+        $session['service_id'] = $currServiceId;
+
         $selectedCategory = null;
         $selectedVendor = null;
 
@@ -63,7 +74,6 @@ class FullmapController extends DefaultController {
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
 
-        $params['OrderCatalogSearchMap'] = $session['orderCatalogSearchMap'];
         $dataProvider = $searchModel->search($params);
 
         $dataProvider->pagination->params['OrderCatalogSearchMap[searchString]'] = isset($params['OrderCatalogSearchMap']['searchString']) ? $params['OrderCatalogSearchMap']['searchString'] : null;
@@ -369,30 +379,33 @@ class FullmapController extends DefaultController {
         $vat = Yii::$app->request->post('vat_set');
         $service_id = Yii::$app->request->post('service_set');
 
-        $koef=str_replace(",",".",$koef);
+        $valModel = new AllMaps();
+
+        $valModel->org_id = 1;
+        $valModel->product_id = 1;
+        $valModel->service_id = $service_id;
+        $valModel->store_rid = $store;
+        $valModel->vat = $vat;
+        $valModel->koef = $koef;
+
+        if(!$valModel->validate()) {
+            throw new \RuntimeException('Cant validate new allmaps model.');
+        }
 
         $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
 
         $session = Yii::$app->session;
-        $hasProductsFinal = [];
-
         $selected = $session->get('selectedmap', []);
+
         if (empty($selected))
             return true;
 
         $hasProducts = AllMaps::find()->select('product_id')->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = 1 and is_active =1')
-            ->andWhere(['IN','product_id',$selected])->asArray()->all();
-
-        // Find Ids which are not in the all_map table but should be created as presents in $selected
+            ->andWhere('service_id = :s_id and is_active =1',[':s_id' => $service_id])
+            ->andWhere(['IN','product_id',$selected])->column();
 
         if (!empty($hasProducts)) {   // Case we have intersection of arrays
-            foreach ($hasProducts as $p => $k) {
-                foreach($k as $t => $v) {
-                    array_push($hasProductsFinal,$v);
-                }
-            }
-            $noProducts = array_diff($selected,$hasProductsFinal);
+            $noProducts = array_diff($selected,$hasProducts);
         } else {
             $noProducts = $selected; // Case all are new
         }
@@ -409,7 +422,7 @@ class FullmapController extends DefaultController {
             $model->is_active = 1;
             $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$model->save(false)){
+            if (!$model->save()){
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
 
@@ -440,6 +453,8 @@ class FullmapController extends DefaultController {
         return true;
 
     }
+
+
 
     public function actionClearFullmap() {
 

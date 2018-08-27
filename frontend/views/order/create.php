@@ -167,7 +167,7 @@ $this->registerJs(
             </li>
             <?php if ($client->parent_id == null) : ?>
             <li>
-                <a href="<?= Url::to(['order/product-filter']) ?>">
+                <a href="<?= Url::to(['order/product-filter', 'OrderCatalogSearch[selectedVendor]' =>$selectedVendor]) ?>">
                     <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>
                     <small class="label bg-yellow">new</small>
                 </a>

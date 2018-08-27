@@ -64,7 +64,6 @@ $arr = [
     Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте ещё раз']),
 ];
 
-
 $organization = $user->organization;
 $lisences = $organization->getLicenseList();
 $listIntegration = '';
@@ -92,11 +91,11 @@ foreach ($links as $key => $val) {
         $numLicences++;
     }
 }
-$title = 'Накладная успешно привязана!';
+$titleIntegration = 'Накладная успешно привязана!';
 if ($numLicences) {
     $textIntegration = 'Перейти в интеграцию: '.$listIntegration;
 } else {
-    $title = 'Заказ завершен';
+    $titleIntegration = 'Заказ завершен';
     $textIntegration = 'Просьба активировать лицензию';
 }
 
@@ -126,7 +125,7 @@ $js = <<<JS
                 clickedButton.button("reset");
             });
             swal(
-                '$title',
+                '$titleIntegration',
                 '$textIntegration',
                 'success'
             );

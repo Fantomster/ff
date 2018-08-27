@@ -573,7 +573,7 @@ $js = <<< JS
         			    action = that.data('action'),
         			    status = that.data('status'),
         			    title = that.prop('title');
-        			
+        			    
         			    status = status === 1 ? 0 : 1;
         			    
         			swal({
@@ -620,17 +620,13 @@ $js = <<< JS
         };
         
         FF.deleteBtn.init();
+        
+        if ($way > 0) {
+	        $('html, body').animate({
+	            scrollTop: $("#way$way").offset().top
+	        }, 1000);
+        }
     });
-JS;
-
-$js = <<< JS
-$(document).ready(function () {
-    if ($way > 0) {
-        $('html, body').animate({
-            scrollTop: $("#way$way").offset().top
-        }, 1000);
-    }
-});    
 JS;
 
 $this->registerJs($js);

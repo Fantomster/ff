@@ -78,6 +78,7 @@ $gridColumns = [
                         'format' => 'dd.mm.yyyy', //'d M yyyy',//
                         'autoclose' => true,
                         'endDate' => "0d",
+                        'orientation' => "bottom auto"
                     ]
                 ])
                 ?>

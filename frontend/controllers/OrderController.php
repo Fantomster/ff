@@ -457,6 +457,11 @@ class OrderController extends DefaultController
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
 
+        if (Yii::$app->request->get("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        }
+
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
 
         $selectedCategory = null;
@@ -2545,6 +2550,11 @@ class OrderController extends DefaultController
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+
+        if (Yii::$app->request->get("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
         }
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];

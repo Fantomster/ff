@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\DynamicUsageSearch;
+use backend\models\MercuryReportSearch;
 use Yii;
 use common\models\User;
 use common\models\Role;
@@ -481,5 +482,16 @@ class StatisticsController extends Controller {
 
         return $this->render('dynamics', compact('SearchModel', 'DataProvider', 'start_date'));
 
+    }
+
+    /**
+     * Lists all mercuryStatistic.
+     * @return mixed
+     */
+    public function actionMercury()
+    {
+        $searchModel = new MercuryReportSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        return $this->render('mercury', compact('searchModel', 'dataProvider'));
     }
 }

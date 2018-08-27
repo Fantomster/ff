@@ -38,11 +38,13 @@ $gridColumns = [
         'format' => 'raw',
         'attribute' => 'succCount',
         'label' => 'Кол-во погашенных ВСД',
+        'filter' => false,
     ],
     [
         'format' => 'raw',
         'attribute' => 'errorCount',
         'label' => 'Кол-во ошибок',
+        'filter' => false,
     ],
 ];
 ?>

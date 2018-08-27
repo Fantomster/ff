@@ -60,12 +60,26 @@ class iikoWaybill extends \yii\db\ActiveRecord
             [['agent_uuid'], 'string', 'max' => 36],
             [['text_code', 'num_code'], 'string', 'max' => 128],
             [['note'], 'string', 'max' => 255],
+            [['payment_delay_date'], 'isPayDelayOneYearDiff'],
         ];
     }
 
     /**
      * @inheritdoc
      */
+    public function isPayDelayOneYearDiff($attribute, $params) {
+        $start_date = getdate(strtotime($this->doc_date));
+        $start_date = mktime(0, 0, 0, $start_date['mon'], $start_date['mday'], $start_date['year']);
+        $end_date = getdate(strtotime($this->$attribute));
+        $end_date = mktime(0, 0, 0, $end_date['mon'], $end_date['mday'], $end_date['year']);
+        if (($end_date - $start_date) > (ClientController::MAX_DELAY_PAYMENT * 60 * 60 * 24)) {
+            $this->addError($attribute,
+                'Дата отсрочки платежа не может превышать дату документа на срок более' .
+                ClientController::MAX_DELAY_PAYMENT . ' дней!');
+        }
+    }
+
+
     public function attributeLabels()
     {
         return [
@@ -101,19 +115,7 @@ class iikoWaybill extends \yii\db\ActiveRecord
 //            }
 
 
-        $start_date = getdate(strtotime($this->doc_date));
-        $start_date = mktime(0, 0, 0, $start_date['mon'], $start_date['mday'], $start_date['year']);
-        $end_date = getdate(strtotime($this->payment_delay_date));
-        $end_date = mktime(0, 0, 0, $end_date['mon'], $end_date['mday'], $end_date['year']);
 
-
-        if (($end_date - $start_date) > (ClientController::MAX_DELAY_PAYMENT * 60 * 60 * 24)) {
-            $this->addError('payment_delay_date',
-                'Payment delay date cannot be later the date of invoice more than ' .
-                ClientController::MAX_DELAY_PAYMENT . ' days!');
-            return false;
-
-        }
 
         if (empty($this->text_code)) {
                 $this->text_code = 'mixcart';

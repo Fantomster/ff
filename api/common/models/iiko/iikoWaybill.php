@@ -67,7 +67,8 @@ class iikoWaybill extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function isPayDelayOneYearDiff($attribute, $params) {
+    public function isPayDelayOneYearDiff($attribute, $params)
+    {
         $start_date = getdate(strtotime($this->doc_date));
         $start_date = mktime(0, 0, 0, $start_date['mon'], $start_date['mday'], $start_date['year']);
         $end_date = getdate(strtotime($this->$attribute));
@@ -106,28 +107,14 @@ class iikoWaybill extends \yii\db\ActiveRecord
 
     public function beforeSave($insert)
     {
-        //if (parent::beforeSave($insert)) {
-
-//            if ($this->doc_date) {
-//                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
-//            } else {
-//                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
-//            }
-
-
-
 
         if (empty($this->text_code)) {
-                $this->text_code = 'mixcart';
-            }
-
-            if (empty($this->num_code)) {
-                $this->num_code = $this->order_id;
-            }
-
-            return parent::beforeSave($insert);
-        //}
-
+            $this->text_code = 'mixcart';
+        }
+        if (empty($this->num_code)) {
+            $this->num_code = $this->order_id;
+        }
+        return parent::beforeSave($insert);
 
     }
 

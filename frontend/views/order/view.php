@@ -133,7 +133,38 @@ $js = <<<JS
     });
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
-       
+        $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            
+            var clickedButton = $(this);
+            if ($(this).data("action") == "confirm" && dataEdited) {
+                var form = $("#editOrder");
+                extData = "&orderAction=confirm"; 
+                clickedButton.button("loading");
+                $.post(
+                    form.attr("action"),
+                    form.serialize() + extData
+                ).done(function(result) {
+                    dataEdited = 0;
+                    clickedButton.button("reset");
+                });
+            } else if ($(this).data("action") != "cancel") {
+                clickedButton.button("loading");
+                $.post(
+                    "$urlOrderAction",
+                        {"action": $(this).data("action"), "order_id": $order->id}
+                ).done(function(result) {
+                        $('#actionButtons').html(result);
+                        clickedButton.button("reset");
+                        swal(
+                            'Накладная успешно привязана!',
+                            'Перейти в интеграцию: $list_integration',
+                            'success'
+                        );
+                });
+                 
+            }
+        });
+
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
         });

@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-
 /**
  * This is the model class for table "relation_user_organization".
  *
@@ -12,28 +11,32 @@ namespace common\models;
  * @property integer $organization_id
  * @property integer $role_id
  * @property User $user
+ * @property Organization $organization
  */
-class RelationUserOrganization extends \yii\db\ActiveRecord {
-
+class RelationUserOrganization extends \yii\db\ActiveRecord
+{
 
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'relation_user_organization';
     }
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [];
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['user_id', 'organization_id', 'role_id'], 'integer'],
             [['user_id', 'organization_id'], 'unique', 'targetAttribute' => ['user_id', 'organization_id']],
@@ -43,7 +46,8 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
             'user_id' => 'User ID',
@@ -52,32 +56,30 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
         ];
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrganization(){
-        return $this->hasOne(Organization::className(), ['id'=>'organization_id']);
-    }
-
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUser(){
-        return $this->hasOne(User::className(), ['id'=>'user_id']);
-    }
-
-
-    public function checkRelationExisting(User $user):bool
+    public function getOrganization()
     {
-        $rel = self::findAll(['user_id'=>$user->id]);
-        if(count($rel)>1){
+        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    public function checkRelationExisting(User $user): bool
+    {
+        $rel = self::findAll(['user_id' => $user->id]);
+        if (count($rel) > 1) {
             return true;
         }
         return false;
     }
-
 
     /**
      * @param int $organizationID
@@ -87,14 +89,13 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
     public static function getRelationRole(int $organizationID, int $userID)
     {
         $user = User::findIdentity($userID);
-        if(in_array($user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR])) {
+        if (in_array($user->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR])) {
             return $user->role_id;
         }
 
-        $rel = self::findOne(['user_id'=>$userID, 'organization_id'=>$organizationID]);
+        $rel = self::findOne(['user_id' => $userID, 'organization_id' => $organizationID]);
         return $rel->role_id ?? null;
     }
-
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -118,7 +119,7 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
              * Уведомления по СМС
              */
             $smsNotification = notifications\SmsNotification::findOne(['user_id' => $this->id]);
-            if(empty($smsNotification)) {
+            if (empty($smsNotification)) {
                 $smsNotification = new notifications\SmsNotification();
             }
             $smsNotification->user_id = $this->user_id;
@@ -129,12 +130,12 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
             $smsNotification->invites = true;
 
             $smsNotification->save();
-            if($this->role_id == Role::ROLE_SUPPLIER_MANAGER){
+            if ($this->role_id == Role::ROLE_SUPPLIER_MANAGER) {
                 $userId = $this->id;
                 $organizationId = $this->organization_id;
                 $clients = \common\models\RelationSuppRest::findAll(['supp_org_id' => $organizationId]);
-                if ($clients){
-                    foreach ($clients as $client){
+                if ($clients) {
+                    foreach ($clients as $client) {
                         $clientId = $client->rest_org_id;
                         $managerAssociate = new ManagerAssociate();
                         $managerAssociate->manager_id = $userId;
@@ -142,10 +143,10 @@ class RelationUserOrganization extends \yii\db\ActiveRecord {
                         $managerAssociate->save();
                     }
                 }
-
             }
         }
 
         parent::afterSave($insert, $changedAttributes); // TODO: Change the autogenerated stub
     }
+
 }

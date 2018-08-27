@@ -59,24 +59,22 @@ use \yii\web\JsExpression;
                                             'rid',
                                             'denom',
                                             [
-                                                'class' => 'kartik\grid\EditableColumn',
-                                                'attribute' => 'vendor_id',
-                                                'value' => function ($model) {
-                                                    $vendor = $model->vendor;
-                                                    return isset($vendor) ? $vendor->name : null;
-                                                },
+                                                    'class' => 'kartik\grid\EditableColumn',
+                                               'attribute' => 'vendor_id',
                                                 'label' => 'Поставщик MixCart',
                                                 'vAlign' => 'middle',
                                                 'width' => '210px',
                                                 'refreshGrid' => true,
-                                                'editableOptions' => [
+                                                'editableOptions' => function($model) {return [
                                                     'asPopover' => true,
                                                     'name' => 'vendor_id',
                                                     'formOptions' => ['action' => ['agent-mapping']],
                                                     'header' => 'Поставщик MixCart',
                                                     'size' => 'md',
+                                                    'displayValue' => isset($model->vendor) ? $model->vendor->name : null,
                                                     'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
                                                     'options' => [
+                                                        'data' => [$model->vendor_id => isset($model->vendor) ? $model->vendor->name : ''],
                                                         'options' => ['placeholder' => 'Выберите поставщика из списка',
                                                         ],
                                                         'pluginOptions' => [
@@ -89,7 +87,7 @@ use \yii\web\JsExpression;
                                                             'allowClear' => true
                                                         ],
                                                     ]
-                                                ]],
+                                                ];}],
                                             'updated_at',
                                                                                     ],
                                         /* 'rowOptions' => function ($data, $key, $index, $grid) {

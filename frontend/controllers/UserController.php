@@ -27,14 +27,16 @@ use yii\filters\AccessControl;
  * 
  * @inheritdoc
  */
-class UserController extends \amnah\yii2\user\controllers\DefaultController {
+class UserController extends \amnah\yii2\user\controllers\DefaultController
+{
 
     public $layout = "@frontend/views/layouts/main-auth";
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -69,7 +71,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         ];
     }
 
-    public function actionAjaxRegister() {
+    public function actionAjaxRegister()
+    {
         if (!Yii::$app->request->isAjax) {
             throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.user.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
@@ -122,7 +125,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Display registration page
      */
-    public function actionRegister() {
+    public function actionRegister()
+    {
         /** @var \common\models\User $user */
         /** @var \common\models\Profile $profile */
         /** @var \amnah\yii2\user\models\Role $role */
@@ -160,7 +164,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization, true)->save();
-                    $user->setRelationUserOrganization($user->id, $organization->id, $role::getManagerRole($organization->type_id));
+                    $user->setRelationUserOrganization($organization->id, $role::getManagerRole($organization->type_id));
                     $transaction->commit();
                 } catch (Exception $ex) {
                     $transaction->rollBack();
@@ -191,7 +195,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Confirm email
      */
-    public function actionConfirm($token) {
+    public function actionConfirm($token)
+    {
         /** @var \amnah\yii2\user\models\UserToken $userToken */
         /** @var common\models\User $user */
         // search for userToken
@@ -226,7 +231,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->render("reset", compact("invalidToken"));
     }
 
-    public function actionConfirmAdditionalEmail($token) {
+    public function actionConfirmAdditionalEmail($token)
+    {
         $additionalEmail = \common\models\AdditionalEmail::findOne(['token' => $token]);
         if (empty($additionalEmail)) {
             $success = false;
@@ -247,7 +253,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Accept restaurant's invite
      */
-    public function actionAcceptRestaurantsInvite($token) {
+    public function actionAcceptRestaurantsInvite($token)
+    {
         /** @var \amnah\yii2\user\models\User $user */
         /** @var \amnah\yii2\user\models\UserToken $userToken */
         // get user token
@@ -286,7 +293,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Display login page
      */
-    public function actionLogin() {
+    public function actionLogin()
+    {
         //$this->layout = '@app/views/layouts/main-login';
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
@@ -330,7 +338,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Forgot password
      */
-    public function actionForgot() {
+    public function actionForgot()
+    {
         /** @var \amnah\yii2\user\models\forms\ForgotForm $model */
         // load post data and send email
         $model = $this->module->model("ForgotForm");
@@ -354,7 +363,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Reset password
      */
-    public function actionReset($token) {
+    public function actionReset($token)
+    {
         /** @var \amnah\yii2\user\models\User $user */
         /** @var \amnah\yii2\user\models\UserToken $userToken */
         // get user token and check expiration
@@ -396,7 +406,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->render('reset', compact("user", "success"));
     }
 
-    public function actionAjaxInviteFriend() {
+    public function actionAjaxInviteFriend()
+    {
         $currentUser = Yii::$app->user->identity;
         if (Yii::$app->request->isAjax) {
             $email = Yii::$app->request->post('email');
@@ -411,7 +422,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return ['success' => false];
     }
 
-    public function actionChangeForm(): String {
+    public function actionChangeForm(): String
+    {
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = new Organization();
         $searchModel = new BusinessSearch();
@@ -422,7 +434,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->renderAjax('_changeForm', compact('user', 'dataProvider', 'organization', 'searchModel'));
     }
 
-    public function actionBusiness(): String {
+    public function actionBusiness(): String
+    {
         $user = User::findIdentity(Yii::$app->user->id);
         $searchModel = new BusinessSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -434,7 +447,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->render('business', compact('user', 'dataProvider', 'returnUrl', 'searchModel'));
     }
 
-    public function actionDeleteBusiness($id) {
+    public function actionDeleteBusiness($id)
+    {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization;
         $organizationToDelete = Organization::findOne(['id' => $id]);
@@ -456,11 +470,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         }
     }
 
-    public function actionChange(int $id) {
+    public function actionChange(int $id)
+    {
         return (new UserWebApi())->setOrganization(['organization_id' => $id]);
     }
 
-    public function actionCreate() {
+    public function actionCreate()
+    {
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization;
 
@@ -528,11 +544,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     $userID = $user->id;
                 }
 
-                User::createRelationUserOrganization($userID, $organization->id, $roleID);
+                $user->createRelationUserOrganization($organization->id, $roleID);
                 $currentOrganizationID = $currentOrganization->id;
                 $relations = RelationUserOrganization::findAll(['organization_id' => $currentOrganizationID, 'role_id' => [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER]]);
                 foreach ($relations as $relation) {
-                    User::createRelationUserOrganization($relation->user_id, $organization->id, $roleID);
+                    $relation->user->createRelationUserOrganization($organization->id, $roleID);
                 }
             }
         }
@@ -550,7 +566,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      * @return bool
      */
 
-    private function initDemoData($user, $profile, $organization) {
+    private function initDemoData($user, $profile, $organization)
+    {
         $transaction = Yii::$app->dbDemo->beginTransaction();
         try {
             Yii::$app->dbDemo->createCommand()->insert('organization', [

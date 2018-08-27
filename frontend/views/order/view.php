@@ -67,7 +67,7 @@ $arr = [
 
 $organization = $user->organization;
 $lisences = $organization->getLicenseList();
-$list_integration = '';
+$listIntegration = '';
 $links = [
     'rkws' => [
         'alter' => 'R_keeper',
@@ -83,15 +83,55 @@ $links = [
         'url' => '/clientintegr/odinsobsh/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
     ]
 ];
+$numLicences = 0;
 foreach ($links as $key => $val) {
     if (isset($lisences[$key]) && $lisences[$key]) {
-        $list_integration .= '<br>' . Html::a($val['title'], Yii::$app->urlManager->createUrl($val['url']), [
+        $listIntegration .= '<br>' . Html::a($val['title'], Yii::$app->urlManager->createUrl($val['url']), [
                 'class' => 'btn btn-primary', 'style' => 'margin-top: 8px'
             ]);
+        $numLicences++;
     }
+}
+$title = 'Накладная успешно привязана!';
+if ($numLicences) {
+    $textIntegration = 'Перейти в интеграцию: '.$listIntegration;
+} else {
+    $title = 'Заказ завершен';
+    $textIntegration = 'Просьба активировать лицензию';
 }
 
 $js = <<<JS
+
+    $('#actionButtons').on('click', '.btnOrderAction', function () {
+    
+        var clickedButton = $(this);
+        if ($(this).data("action") == "confirm" && dataEdited) {
+            var form = $("#editOrder");
+            extData = "&orderAction=confirm";
+            clickedButton.button("loading");
+            $.post(
+                form.attr("action"),
+                form.serialize() + extData
+            ).done(function (result) {
+                dataEdited = 0;
+                clickedButton.button("reset");
+            });
+        } else if ($(this).data("action") != "cancel") {
+            clickedButton.button("loading");
+            $.post(
+                "$urlOrderAction",
+                {"action": $(this).data("action"), "order_id": $order->id}
+            ).done(function (result) {
+                $('#actionButtons').html(result);
+                clickedButton.button("reset");
+            });
+            swal(
+                '$title',
+                '$textIntegration',
+                'success'
+            );
+        }
+    });
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
@@ -125,6 +165,7 @@ $js = <<<JS
                  
             }
         });
+
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
         });

@@ -220,13 +220,14 @@ class ClientController extends DefaultController
         $searchModel = new UserSearch();
         $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
-        $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
+        $organizationId = $this->currentUser->organization_id;
+        $params['UserSearch']['organization_id'] = $organizationId;
         $dataProvider = $searchModel->search($params);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('employees', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('employees', compact('searchModel', 'dataProvider', 'organizationId'));
         } else {
-            return $this->render('employees', compact('searchModel', 'dataProvider'));
+            return $this->render('employees', compact('searchModel', 'dataProvider', 'organizationId'));
         }
     }
 
@@ -303,14 +304,13 @@ class ClientController extends DefaultController
 
                 if ($user->validate() && $profile->validate()) {
                     if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
-                        $user->role_id = $this->currentUser->role_id;
+                        $user->role_id = array_keys($dropDown)[0];
                     }
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $userid = $user->id;
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
-                    User::setRelationUserOrganization($user->id, $user->organization->id, $user->role_id);
+                    $user->setRelationUserOrganization($user->organization->id, $user->role_id);
                     $user->wipeNotifications();
                     $message = Yii::t('message', 'frontend.controllers.client.user_added', ['ru' => 'Пользователь добавлен!']);
                     //Yii::$app->db->createCommand($query)->queryScalar();
@@ -323,7 +323,7 @@ class ClientController extends DefaultController
                                 $message = Yii::t('app', 'common.models.already_exists');
                                 return $this->renderAjax('settings/_success', ['message' => $message]);
                             }
-                            $success = User::setRelationUserOrganization($existingUser->id, $this->currentUser->organization->id, $post['User']['role_id']);
+                            $success = $existingUser->setRelationUserOrganization($this->currentUser->organization->id, $post['User']['role_id']);
                             if ($success) {
                                 $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
                                 $existingUser->setRole($post['User']['role_id'])->save();
@@ -355,12 +355,12 @@ class ClientController extends DefaultController
         $profile = $user->profile;
         $currentUserOrganizationID = $this->currentUser->organization_id;
         $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
-        $selected = $user->getRelationUserOrganizationRoleID($id);
+        $selected = $user->getRelationUserOrganizationRoleID($currentUserOrganizationID);
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             $email = $user->email;
-            if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
+            if ($user->load($post) && !in_array($user->role_id, Role::getAdminRoles())) {
                 $profile->load($post);
 
 
@@ -369,7 +369,7 @@ class ClientController extends DefaultController
                     $user->role_id = $post['User']['role_id'];
                     $user->save();
                     $profile->save();
-                    User::updateRelationUserOrganization($user->id, $this->currentUser->organization_id, $post['User']['role_id']);
+                    $user->updateRelationUserOrganization($currentUserOrganizationID, $post['User']['role_id']);
 
                     $message = Yii::t('app', 'Пользователь обновлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
@@ -578,7 +578,7 @@ class ClientController extends DefaultController
                                 $currentOrganization->step = Organization::STEP_OK;
                                 $currentOrganization->save();
                             }
-                            User::createRelationUserOrganization($user->id, $organization->id, Role::getManagerRole($organization->type_id));
+                            $user->createRelationUserOrganization($organization->id, Role::getManagerRole($organization->type_id));
                         } else {
                             //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                             $get_supp_org_id = $check['org_id'];

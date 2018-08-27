@@ -190,17 +190,18 @@ class ClientController extends Controller
                 $user->save();
                 //$profile->email = $user->getEmail();
                 $profile->save();
-                if (($currentUser->role_id == ROLE::ROLE_ADMIN) && ($user->role_id != Role::ROLE_FKEEPER_MANAGER)) {
-                    User::updateRelationUserOrganization($user->id, $user->organization_id, $user->role_id);
+                if ($user->role_id != Role::ROLE_FKEEPER_MANAGER && isset($user->organization_id)) {
+                    $user->updateRelationUserOrganization($user->organization_id, $user->role_id);
                 }
                 return $this->redirect(['client/view', 'id' => $user->id]);
-            } elseif ($user->role_id !== Role::ROLE_FKEEPER_MANAGER) {
-                $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $user->organization_id));
-                $selected = $user->getRelationUserOrganizationRoleID($id);
-                return $this->render('update', compact('user', 'profile', 'dropDown', 'selected', 'currentUser'));
             } else {
-                $dropDown[Role::ROLE_FKEEPER_MANAGER] = 'Менеджер MixCart';
-                $selected = Role::ROLE_FKEEPER_MANAGER;
+                if (isset($user->organization_id) && $user->getRelationUserOrganizationRoleID($user->organization_id) && ($user->role_id != Role::ROLE_FKEEPER_MANAGER)) {
+                    $dropDown = Role::dropdown(Role::getRelationOrganizationType($id, $user->organization_id));
+                    $selected = $user->getRelationUserOrganizationRoleID($id);
+                } else {
+                    $dropDown[$user->role_id] = Role::getRoleName($user->role_id);
+                    $selected = $user->role_id;
+                }
                 return $this->render('update', compact('user', 'profile', 'dropDown', 'selected', 'currentUser'));
             }
         } catch (Exception $e) {

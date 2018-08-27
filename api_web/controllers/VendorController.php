@@ -386,6 +386,51 @@ class VendorController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/vendor/update-main-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Обновление главного каталога",
+     *     description="Обновление главного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 3010
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdateMainCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->updateMainCatalog($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/vendor/delete-position-temp-catalog",
      *     tags={"Vendor/Catalog"},
      *     summary="Удаление позиции из временного каталога при загрузке",

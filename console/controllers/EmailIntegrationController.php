@@ -252,8 +252,6 @@ class EmailIntegrationController extends Controller
      */
     private function getAttachments(array $email, IntegrationSettingFromEmail $setting)
     {
-        print $email['from']['email'] . PHP_EOL;
-        die();
         //Разрешенные типы вложений
         $allow_mime_types = [
             'application/vnd.ms-excel',

@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $org_id
  * @property integer $parent_id
  * @property string $address
+ * @property integer $vendor_id
  *
  *
  */
@@ -38,7 +39,7 @@ class OneSContragent extends \yii\db\ActiveRecord
     {
         return [
             [['name','cid','org_id'], 'required'],
-            [['org_id'], 'integer'],
+            [['org_id','vendor_id'], 'integer'],
             [['name', 'inn_kpp'], 'string', 'max' => 255],
         ];
     }
@@ -54,6 +55,7 @@ class OneSContragent extends \yii\db\ActiveRecord
             'name' => 'Наименование',
             'inn_kpp' => 'ИНН/КПП',
             'updated_at' => 'Обновлено',
+            'vendor_id' => 'Поставщик MixCart'
         ];
     }
 
@@ -61,6 +63,11 @@ class OneSContragent extends \yii\db\ActiveRecord
 
     public function getOrganization() {
         return $this->hasOne(Organization::className(), ['id' => 'org_id']);
+    }
+
+    public function getVendor()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
     public function getOrganizationName()

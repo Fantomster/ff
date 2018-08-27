@@ -5,6 +5,7 @@ namespace api\common\models\iiko;
 use common\models\Order;
 use common\models\OrderContent;
 use Yii;
+use frontend\controllers\ClientController;
 
 /**
  * This is the model class for table "iiko_waybill".
@@ -26,6 +27,7 @@ use Yii;
  * @property string $created_at
  * @property string $exported_at
  * @property string $updated_at
+ * @property integer $payment_delay_date
  * @property Order $order;
  */
 class iikoWaybill extends \yii\db\ActiveRecord
@@ -53,17 +55,32 @@ class iikoWaybill extends \yii\db\ActiveRecord
     {
         return [
             [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
-            [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code'], 'safe'],
+            [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code', 'payment_delay_date'], 'safe'],
             [['org', 'store_id', 'agent_uuid'], 'required'],
             [['agent_uuid'], 'string', 'max' => 36],
             [['text_code', 'num_code'], 'string', 'max' => 128],
             [['note'], 'string', 'max' => 255],
+            [['payment_delay_date'], 'isPayDelayOneYearDiff'],
         ];
     }
 
     /**
      * @inheritdoc
      */
+    public function isPayDelayOneYearDiff($attribute, $params)
+    {
+        $start_date = getdate(strtotime($this->doc_date));
+        $start_date = mktime(0, 0, 0, $start_date['mon'], $start_date['mday'], $start_date['year']);
+        $end_date = getdate(strtotime($this->$attribute));
+        $end_date = mktime(0, 0, 0, $end_date['mon'], $end_date['mday'], $end_date['year']);
+        if (($end_date - $start_date) > (ClientController::MAX_DELAY_PAYMENT * 60 * 60 * 24)) {
+            $this->addError($attribute,
+                'Дата отсрочки платежа не может превышать дату документа на срок более' .
+                ClientController::MAX_DELAY_PAYMENT . ' дней!');
+        }
+    }
+
+
     public function attributeLabels()
     {
         return [
@@ -84,29 +101,21 @@ class iikoWaybill extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'exported_at' => Yii::t('app', 'Exported At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'payment_delay_date' => Yii::t('app', 'Дата отсрочки платежа'),
         ];
     }
 
     public function beforeSave($insert)
     {
-        //if (parent::beforeSave($insert)) {
 
-//            if ($this->doc_date) {
-//                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd H:i:s');
-//            } else {
-//                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
-//            }
+        if (empty($this->text_code)) {
+            $this->text_code = 'mixcart';
+        }
+        if (empty($this->num_code)) {
+            $this->num_code = $this->order_id;
+        }
+        return parent::beforeSave($insert);
 
-            if (empty($this->text_code)) {
-                $this->text_code = 'mixcart';
-            }
-
-            if (empty($this->num_code)) {
-                $this->num_code = $this->order_id;
-            }
-
-            return parent::beforeSave($insert);
-        //}
     }
 
     public function afterSave($insert, $changedAttributes)

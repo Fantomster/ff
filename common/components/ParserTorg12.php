@@ -8,6 +8,10 @@ use yii\db\Query;
 use PHPExcel_Shared_Date;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use yii\swiftmailer\Mailer;
+use yii\swiftmailer\Message;
+use yii\web\Application;
+use Yii;
 
 //use PHPExcel;
 
@@ -112,6 +116,9 @@ class ParserTorg12
     private $tip_ooo_short = []; //массив кратких названий типов организаций
     private $tip_ooo_long = []; //массив полных названий типов организаций
     private $kodirov = true; // необходимость ручной раскодировки
+    private $sumWithoutTaxExcel = 0; //Сумма без НДС, указанная в накладной
+    private $sumWithTaxExcel = 0; //Сумма c НДС, указанная в накладной
+    public $sumNotEqual = false; //совпадения общих сумм в накладной с суммами всех строк
 
     /**
      * @param string $filePath Путь к файлу
@@ -206,6 +213,9 @@ class ParserTorg12
 
                 break;
             }
+
+            // если в накладной несовпадения общей суммы с суммами всех строк, то отправляем письмо
+            $this->processRows();
         }
     }
 
@@ -253,7 +263,7 @@ class ParserTorg12
         $cellValue = str_replace("-\n", "", $cellValue);
         $cellValue = str_replace("  ", " ", $cellValue);
 
-        if ($this->kodirov === true) {
+        if ($this->kodirov === true) { //если кодировка не читается, содержимое ячейки раскодируем вручную
             $cellValue = $this->conver($cellValue);
         }
 
@@ -324,7 +334,7 @@ class ParserTorg12
                     $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP/*Date::excelToTimestamp*/
                     ($check));
                 } else {
-                    // года для распознования даты документа
+                    // года для распознавания даты документа
                     $years = [date('Y', strtotime('-1 year')), date('Y'), date('Y', strtotime('+1 year'))];
 
                     foreach ($years as $year) {
@@ -383,15 +393,17 @@ class ParserTorg12
                             PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
                     }
                 } else {
-                    $attributeValue = str_replace(",", ".", $attributeValue);
-                    $attributeValue = str_replace("-", ".", $attributeValue);
-                    $attributeValue = str_replace(" ", ".", $attributeValue);
-                    if (strlen($attributeValue) < 10) {
-                        $temp = explode('.', $attributeValue);
-                        $temp[2] = '20' . $temp[2];
-                        $attributeValue = $temp[0] . '.' . $temp[1] . '.' . $temp[2];
+                    if ($cellValue == 'дата составления') {
+                        $attributeValue = str_replace(",", ".", $attributeValue);
+                        $attributeValue = str_replace("-", ".", $attributeValue);
+                        $attributeValue = str_replace(" ", ".", $attributeValue);
+                        if (strlen($attributeValue) < 10) {
+                            $temp = explode('.', $attributeValue);
+                            $temp[2] = '20' . $temp[2];
+                            $attributeValue = $temp[0] . '.' . $temp[1] . '.' . $temp[2];
+                        }
+                        $attributeValue = date('Y-m-d', strtotime($attributeValue));
                     }
-                    $attributeValue = date('Y-m-d', strtotime($attributeValue));
                 }
                 $this->firstRow = $row;
                 return $attributeValue;
@@ -550,7 +562,9 @@ class ParserTorg12
         // запоминаем координаты ячеек
         for ($row = 0; $row <= $this->highestRow; $row++) {
             for ($col = 0; $col <= $this->highestColumn; $col++) {
+                $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
                 // Закоммеченное НЕ УДАЛЯТЬ!!! Понадобится для будущих багов!
+                //print $cellValue.PHP_EOL;
                 //$qw = 'ò';
                 //$qw=$checkSellRekvizTest($col,$row);
                 //$qw2=mb_convert_encoding($qw, 'UTF-8', 'ISO-8859-1');
@@ -660,7 +674,7 @@ class ParserTorg12
                         $temp1[1] = trim($temp1[1]); //убираем пробелы
                         $temp2 = explode('/', $temp1[1]); //разбиваем значения текущей ячейки по слэшу, отделяя цифры ИНН от КПП
                         $this->invoice->innPostav = $temp2[0];
-                        $this->invoice->kppPostav = $temp2[1];
+                        if (count($temp2) > 1) $this->invoice->kppPostav = $temp2[1];
                     }
                 }
             }
@@ -911,7 +925,6 @@ class ParserTorg12
                     $this->columnList['ed']['row'] = $row;
 
                 }
-                //  if($row == 17) { var_dump($cellValue); }
             }
         }
 
@@ -940,7 +953,7 @@ class ParserTorg12
         } elseif (!isset($this->columnList['num'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий порядковый номер строки ("%s")';
-            $headErrors[] = sprintf($msg, $this->settingsRow['num']);
+            $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['num']));
 
         } elseif (!isset($this->columnList['code'])) {
 
@@ -999,11 +1012,14 @@ class ParserTorg12
             // прекращаем обработку, если попали в подвал накладной
             for ($col = 0; $col <= $this->highestColumn; $col++) {
                 if (in_array($this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($col, $row)->getValue()), $this->settingsRow['total'])) {
+                    $col_sum = $this->columnList['sum_without_tax']['col'];
+                    $this->sumWithoutTaxExcel = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($col_sum, $row)->getValue());
+                    $col_sum = $this->columnList['sum_with_tax']['col'];
+                    $this->sumWithTaxExcel = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($col_sum, $row)->getValue());
                     $this->highestRow = $row - 1;
                     return;
                 }
             }
-
             $currentRow = [];
             //$currentRow['num'] = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
             $currentRow['code'] = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($this->columnList['code']['col'], $row)->getValue());
@@ -1012,7 +1028,6 @@ class ParserTorg12
                 $this->rowsToProcess[] = $row;
             }
         }
-
     }
 
     /**
@@ -1027,7 +1042,12 @@ class ParserTorg12
         $row = [];
         $key = 1;
 
-        for ($col = $this->columnList['num']['col']; $col <= $this->highestColumn; $col++) {//
+        if (isset($this->columnList['num'])) {
+            $begin = $this->columnList['num']['col'];
+        } else {
+            $begin = $this->columnList['name']['col'];
+        }
+        for ($col = $begin; $col <= $this->highestColumn; $col++) {//
             $currentCell = $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($col, $rowNumber)->getValue());
             // запишем непустые значения в массив для текущей строки
             if ($currentCell) {
@@ -1042,15 +1062,7 @@ class ParserTorg12
         ) {
             return false;
         }
-        // Hotfix 1.5.10 corrected (#DEV - 874) Непонятно, что здесь проверялось, толи столбцы надо было проверять,
-        // толи все строчки а не только значимые. Но в итоге все накладные где меньше 12 значимых строк не выгружались.
-        // Закомментировано
 
-        /*
-        if(count($row) < 12) {
-            return false;
-        }
-        */
         if (empty($row[1])) {
             return false;
         }
@@ -1063,12 +1075,16 @@ class ParserTorg12
             return false;
         }
 
-        // пропускаем строку без порядкового номера
-        if (!intval($row[1])) {
+        if ($row[1] == '1' and $row[2] == '1а') {
             return false;
         }
 
-        // пропускаем повторные заголовки (достаточно, если в двух столбцах будет заголовок)
+        // пропускаем строку без порядкового номера
+        /*if (!intval($row[1])) {
+            return false;
+        }*/
+
+        // пропускаем повторные заголовки (достаточно, если в одном столбце будет заголовок кода товара)
         if (in_array($currentRow['code'], $this->settingsRow['code'])) {
             return false;
         }
@@ -1085,6 +1101,7 @@ class ParserTorg12
     private function processRows()
     {
         $ws = $this->worksheet;
+        $numberRow = 0;
         for ($row = $this->startRow; $row <= $this->highestRow; ++$row) {
 
             // пропускаем строки, которые не надо обрабатывать
@@ -1095,7 +1112,12 @@ class ParserTorg12
             $invoiceRow = new InvoiceRow();
 
             // порядковый номер
-            $invoiceRow->num = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
+            if (isset($this->columnList['num'])) {
+                $invoiceRow->num = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
+            } else {
+                $numberRow++;
+                $invoiceRow->num = $numberRow;
+            }
 
 
             // код товара
@@ -1121,22 +1143,23 @@ class ParserTorg12
             }
 
 
-            // сумма без НДС
-            if (isset($this->columnList['sum_without_tax']))
-                $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
-            if ($invoiceRow->sum_without_tax) {
-                $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
-                $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum, 2);
-            }
+            if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
+                // сумма без НДС
+                if (isset($this->columnList['sum_without_tax']))
+                    $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
+                if ($invoiceRow->sum_without_tax) {
+                    $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
+                    $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum, 2);
+                }
 
-            // сумма  c НДС
-            if (isset($this->columnList['sum_with_tax']))
-                $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
-            if ($invoiceRow->sum_with_tax) {
-                $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
-                $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum, 2);
+                // сумма  c НДС
+                if (isset($this->columnList['sum_with_tax']))
+                    $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
+                if ($invoiceRow->sum_with_tax) {
+                    $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
+                    $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum, 2);
+                }
             }
-
             /*
             if (isset($this->columnList['price_with_tax'])) {
 
@@ -1173,8 +1196,8 @@ class ParserTorg12
                 $invoiceRow->tax_rate = $this->defaultTaxRate;
                 $invoiceRow->errors['tax_rate'] = sprintf('Установлено значение НДС по умолчанию: %d', $this->defaultTaxRate);
             } else {
-                $invoiceRow->errors['tax_rate'] = sprintf('Значение НДС "%s" отсутсвует в списке доступных', $taxRate);
-                $this->invoice->errors['tax_rate'] = 'В накладной присутсвует товар с некорректной ставкой НДС';
+                $invoiceRow->errors['tax_rate'] = sprintf('Значение НДС "%s" отсутствует в списке доступных', $taxRate);
+                $this->invoice->errors['tax_rate'] = 'В накладной присутствует товар с некорректной ставкой НДС';
             }
             /*
                         // проверка корректности указанной ставки НДС
@@ -1193,13 +1216,16 @@ class ParserTorg12
                      $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
                  }
      */
-            if ($invoiceRow->cnt > 0)
-                $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax / $invoiceRow->cnt, 2);
+            if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
+                if ($invoiceRow->cnt > 0)
+                    $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax / $invoiceRow->cnt, 2);
 
-            // добавляем обработанную строку в накладную
-            if ($invoiceRow->cnt > 0)
+                // добавляем обработанную строку в накладную
                 $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
+            }
         }
+        if ($this->invoice->price_without_tax_sum != $this->sumWithoutTaxExcel) $this->sumNotEqual = true;
+        if ($this->invoice->price_with_tax_sum != $this->sumWithTaxExcel) $this->sumNotEqual = true;
     }
 
     /**
@@ -1481,6 +1507,29 @@ class ParserTorg12
             }
         }
         return $has;
+    }
+
+    public function sendMailNotEqualSum($email, $name_file)
+    {
+        /** @var \yii\swiftmailer\Mailer $mailer */
+        /** @var \yii\swiftmailer\Message $message */
+        $mailer = Yii::$app->mailer;
+        $subject = Yii::t('app', 'common.mail.error.subject', ['ru' => 'В вашей накладной ошибка!']);
+
+        if (!empty($email)) {
+            $viev = 'Возможно, в Вашей накладной ошибка. Просим проверить. ';
+            $viev .= 'В вашем письме, отправленном  ' . $this->invoice->nameConsignee . ' во вложенном файле накладной ';
+            $viev .= $name_file . ' есть ошибки. Суммы, указанные в итоге накладной, не совпадают с подсчитанной суммой всех строк накладной. ';
+            $viev .= 'Сумма накладной без НДС - ' . $this->sumWithoutTaxExcel . ' а сумма без НДС всех строк накладной равна ' . $this->invoice->price_without_tax_sum;
+            $viev .= ' Сумма накладной c НДС - ' . $this->sumWithTaxExcel . ' а сумма c НДС всех строк накладной равна ' . $this->invoice->price_with_tax_sum;
+            $viev .= ' Просим обратить внимание на ошибку и подтвердить достоверность передаваемых данных.';
+            $mailer->compose()
+                ->setTo($email)
+                ->setFrom('noreply@mixcart.ru')
+                ->setSubject($subject)
+                ->setTextBody($viev)
+                ->send();
+        }
     }
 
 }

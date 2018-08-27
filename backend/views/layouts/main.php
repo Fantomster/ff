@@ -74,6 +74,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             'url' => ['/statistics/dynamics'],
                         ],
                         [
+                            'label' => 'Аналитика по Меркурию',
+                            'url' => ['/statistics/mercury'],
+                        ],
+                        [
                             'label' => 'Разное',
                             'url' => ['/statistics/misc'],
                         ],

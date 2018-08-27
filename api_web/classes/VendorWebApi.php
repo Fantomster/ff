@@ -501,6 +501,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+            CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
             $tempCatalog->delete();
         }
         //сохранение и загрузка на s3
@@ -537,11 +538,41 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function importMainCatalog(array $request)
     {
-        //сохранение файла с s3 на локальный диск
-        //валидация
-        //удаление локального файла
-        //сохранение
-        //удаление файла на s3
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        if (empty($tempCatalog)) {
+            throw new BadRequestHttpException("Temp catalog not found");
+        }
+
+        if (empty($request['index_field']) && empty($tempCatalog->cat->main_index)) {
+            throw new BadRequestHttpException('empty_param|index_field');
+        }
+        $index = $request['index_field'] ?? $tempCatalog->cat->main_index;
+
+        if (empty($request['mapping']) && empty($tempCatalog->cat->mapping)) {
+            throw new BadRequestHttpException('empty_param|mapping');
+        }
+        $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
+        if (is_string($mapping)) {
+            $mapping = \json_decode($mapping);
+        }
+
+        $excelUrl = Yii::$app->get('resourceManager')->getUrl(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+        $file = \api_web\helpers\File::getFromUrl($excelUrl);
+
+        if (Excel::writeToTempTable($file->tempName, $tempCatalog->id, $mapping, $index)) {
+            $tempCatalog->index_column = $index;
+            $tempCatalog->cat->main_index = $tempCatalog->index_column;
+            $tempCatalog->mapping = \json_encode($mapping);
+            $tempCatalog->cat->mapping = $tempCatalog->mapping;
+            $tempCatalog->cat->save();
+            $tempCatalog->save();
+        }
+
+        return ['result' => true];
     }
 
     /**
@@ -577,6 +608,10 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function deleteMainCatalog(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -592,6 +627,10 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function changeMainIndex(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
@@ -603,12 +642,18 @@ class VendorWebApi extends \api_web\components\WebApi
      * Удаление загруженного необработанного каталога
      * @param array $request
      * @return array
+     * @throws BadRequestHttpException
      */
     public function deleteTempMainCatalog(array $request)
     {
+        if (empty($request['cat_id'])) {
+            throw new BadRequestHttpException('empty_param|cat_id');
+        }
+
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+            CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
             $tempCatalog->delete();
         }
         return ['result' => true];

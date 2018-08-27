@@ -607,7 +607,7 @@ class ClientWebApi extends WebApi
                 $user->refresh();
             }
             //Создаем связь нового сотрудника с рестораном
-            $user->createRelationUserOrganization($user->id, $this->user->organization->id, $role_id);
+            $user->createRelationUserOrganization($this->user->organization->id, $role_id);
             //Все хорошо, применяем изменения в базе
             $transaction->commit();
             //Тут нужно отправить письмо для смены пароля пользователю

@@ -362,6 +362,7 @@ SQL;
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
@@ -391,6 +392,7 @@ SQL;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
@@ -552,7 +554,7 @@ SQL;
     }
 
 
-    public function actionChvat($id, $vat)
+    public function actionChvat($id, $vat, $page, $way)
     {
 
         $model = $this->findDataModel($id);
@@ -560,7 +562,7 @@ SQL;
         $rress = Yii::$app->db_api
             ->createCommand('UPDATE iiko_waybill_data SET vat = :vat, linked_at = now() WHERE id = :id', [':vat' => $vat, ':id' => $id])->execute();
 
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
 
     }
 

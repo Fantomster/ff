@@ -451,11 +451,17 @@ class OrderController extends DefaultController
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
-
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
+
+        if (Yii::$app->request->get("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        }
+
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
 
         $selectedCategory = null;
         $selectedVendor = null;
@@ -463,6 +469,7 @@ class OrderController extends DefaultController
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
         }
+
         $vendors = $client->getSuppliers($selectedCategory);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
@@ -470,7 +477,6 @@ class OrderController extends DefaultController
         $searchModel->catalogs = $catalogs;
         $searchModel->product_block = true;
 
-        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
@@ -2540,13 +2546,22 @@ class OrderController extends DefaultController
 
     public function actionProductFilter()
     {
+        $session = Yii::$app->session;
         $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
 
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
+
+        if (Yii::$app->request->get("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        }
+
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
 
         $selectedCategory = null;
         $selectedVendor = null;
@@ -2588,6 +2603,7 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->post('selected');
         $state = Yii::$app->request->post('state');
+
         $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
         $current = !empty($selected) ? explode(",", $selected) : [];
 

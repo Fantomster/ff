@@ -456,6 +456,13 @@ class OrderController extends DefaultController
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
 
+        if (Yii::$app->request->get("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        }
+
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
+
         $selectedCategory = null;
         $selectedVendor = null;
 
@@ -470,7 +477,6 @@ class OrderController extends DefaultController
         $searchModel->catalogs = $catalogs;
         $searchModel->product_block = true;
 
-        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
@@ -2550,6 +2556,13 @@ class OrderController extends DefaultController
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
 
+        if (Yii::$app->request->get("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        }
+
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
+
         $selectedCategory = null;
         $selectedVendor = null;
 
@@ -2562,7 +2575,6 @@ class OrderController extends DefaultController
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
 
-        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;

@@ -69,7 +69,7 @@ class EmailIntegrationController extends Controller
         //$temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
         //$temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
         //$temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
-        //$temp_file[29] = '/app/console/runtime/testnac29.xls'; // накладная, где сумма итоговая не совпадает с суммой по строкам
+        $temp_file[29] = '/app/console/runtime/testnac29.xls'; // накладная, где сумма итоговая не совпадает с суммой по строкам
         //$temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
         //$temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
         //$temp_file[32] = '/app/console/runtime/id7905.xlsx';
@@ -93,10 +93,10 @@ class EmailIntegrationController extends Controller
         //$temp_file[50] = '/app/console/runtime/testnac47.xls';
         //$temp_file[51] = '/app/console/runtime/testnac48.xls';
         //$temp_file[52] = '/app/console/runtime/testnac49.xls';
-        $temp_file[53] = '/app/console/runtime/testnac50.xls';
-        $temp_file[54] = '/app/console/runtime/testnac51.xls';
+        //$temp_file[53] = '/app/console/runtime/testnac50.xls';
+        //$temp_file[54] = '/app/console/runtime/testnac51.xls';
         $temp_file[55] = '/app/console/runtime/testnac52.xls';
-        $temp_file[56] = '/app/console/runtime/testnac53.xls';
+        //$temp_file[56] = '/app/console/runtime/testnac53.xls';
 
 
         $i = 1;
@@ -314,6 +314,7 @@ class EmailIntegrationController extends Controller
             try {
                 // запускаем обработку накладной
                 $parser->parse();
+                if ($parser->sumNotEqual === true) $parser->sendMailNotEqualSum($email['from']['email'], $name_file);
             } catch (ParseTorg12Exception $e) {
                 $this->log([
                     PHP_EOL,

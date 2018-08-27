@@ -485,17 +485,13 @@ $(function () {
     };
     
     FF.deleteBtn.init();
-});
-JS;
-
-$js = <<< JS
-$(document).ready(function () {
+    
     if ($way > 0) {
         $('html, body').animate({
             scrollTop: $("#way$way").offset().top
         }, 1000);
     }
-});    
+});
 JS;
 
 $this->registerJs($js);

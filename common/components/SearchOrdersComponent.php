@@ -54,6 +54,8 @@ class SearchOrdersComponent extends Component
     const INTEGRATION_TYPE_ONES = '1c';
 
     const IIKO_WB_DONT_SHOW_VARNAME_PREF = 'iiko_wb_hide_';
+    const RKWS_WB_DONT_SHOW_VARNAME_PREF = 'rkws_wb_hide_';
+    const ODIN_C_WB_DONT_SHOW_VARNAME_PREF = 'odin_c_wb_hide_';
 
     /**
      * Search if $organization->type_id == Organization::TYPE_RESTAURANT
@@ -108,7 +110,7 @@ class SearchOrdersComponent extends Component
         $this->searchParams = $sp;
 
 
-       Yii::$app->getSession()->set('order', json_encode($this->searchParams));
+        Yii::$app->getSession()->set('order', json_encode($this->searchParams));
 
         // 2. Update counts
         foreach ($this->counts as $key => $val) {

@@ -324,7 +324,7 @@ class CatalogWebApi extends WebApi
         ];
 
         $query = (new Query())->select($selectFields);
-        if ($catalog->type = Catalog::BASE_CATALOG) {
+        if ($catalog->type == Catalog::BASE_CATALOG) {
             $query->addSelect(['cbg.price as price']);
             $query->from(CatalogBaseGoods::tableName() . ' as cbg');
             $query->where(['cbg.cat_id' => $catalog->id]);

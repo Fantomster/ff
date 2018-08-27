@@ -6,15 +6,18 @@ use console\modules\daemons\components\AbstractDaemonController;
 
 class ConsumerDaemonController extends AbstractDaemonController
 {
-	/**
+    /**
      * Имя очереди
      * @return string
      */
     public function getQueueName()
     {
+        if (!is_null($this->orgId)) {
+            return $this->consumerClass . '_' . $this->orgId;
+        }
         return $this->consumerClass;
     }
-
+    
     /**
      * Обработка полученных сообщений
      * @param $job
@@ -23,11 +26,11 @@ class ConsumerDaemonController extends AbstractDaemonController
     public function doJob($job)
     {
         $this->renewConnections();
-	    $this->createConsumer();
+        $this->createConsumer();
 //        $row = \json_decode($job->body, true);
         try {
-	        $this->consumer->getData();
-	        $success = $this->consumer->saveData();
+            $this->consumer->getData();
+            $success = $this->consumer->saveData();
 //            if (!is_array($row)) {
 //                throw new \Exception('Message is not array! ' . PHP_EOL . print_r($row, true));
 //            }
@@ -39,12 +42,12 @@ class ConsumerDaemonController extends AbstractDaemonController
 //                @unlink(\Yii::$app->basePath . "/runtime/daemons/pids/" . self::shortClassName());
 //                die('die mysql connection');
 //            }
-
-			if($success){
-				$this->ask($job);
-			} else {
-				throw new \Exception('$success false');
-			}
+            
+            if ($success) {
+                $this->ask($job);
+            } else {
+                throw new \Exception('$success false');
+            }
         } catch (\Exception $e) {
             $this->log(PHP_EOL . " ERROR: " . $e->getMessage());
             $this->nask($job);

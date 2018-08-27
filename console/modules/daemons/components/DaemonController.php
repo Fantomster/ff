@@ -37,16 +37,16 @@ abstract class DaemonController extends Controller
      * @default false
      */
     public $isMultiInstance = false;
-
-	/**
-	 * @var null
-	 */
-	public $consumerClass = null;
-
-	/**
-	 * @var null
-	 */
-	public $orgId = null;
+    
+    /**
+     * @var null
+     */
+    public $consumerClass = null;
+    
+    /**
+     * @var null
+     */
+    public $orgId = null;
     
     /**
      * @var $parentPID int main procces pid
@@ -83,9 +83,9 @@ abstract class DaemonController extends Controller
     
     protected $pidDir = "@runtime/daemons/pids";
     protected $logDir = "@runtime/daemons/logs";
-
+    
     private $shortName = '';
-
+    
     
     /**
      * Init function
@@ -113,10 +113,10 @@ abstract class DaemonController extends Controller
             $target->enabled = false;
         }
         $config = [
-            'levels' => ['error', 'warning', 'trace', 'info'],
+            'levels'  => ['error', 'warning', 'trace', 'info'],
             'logFile' => \Yii::getAlias($this->logDir) . DIRECTORY_SEPARATOR . $this->shortName . '.log',
-            'logVars'=>[],
-            'except' => [
+            'logVars' => [],
+            'except'  => [
                 'yii\db\*', // Don't include messages from db
             ],
         ];
@@ -273,7 +273,7 @@ abstract class DaemonController extends Controller
                                 ' worker(s). Delegate tasks.'
                             );
                         }
-
+                        
                         pcntl_signal_dispatch();
                         $this->runDaemon($job);
                     }
@@ -313,7 +313,7 @@ abstract class DaemonController extends Controller
     /**
      * PCNTL signals handler
      *
-     * @param $signo
+     * @param      $signo
      * @param null $pid
      * @param null $status
      */
@@ -413,8 +413,9 @@ abstract class DaemonController extends Controller
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\Exception
      */
-    protected function renewConnections() {
-        if(isset(\Yii::$app->db)) {
+    protected function renewConnections()
+    {
+        if (isset(\Yii::$app->db)) {
             \Yii::$app->db->close();
             \Yii::$app->db->open();
         }
@@ -446,6 +447,7 @@ abstract class DaemonController extends Controller
         
         return $classname;
     }
+    
     /**
      * Get pid file
      * @return string file path

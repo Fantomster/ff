@@ -53,13 +53,26 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
         return $className;
     }
     
-    
+    /**
+     * get queue name from array of db row
+     * @param array $row
+     * @return string
+     */
     public function getQueueName($row)
     {
-        if (!is_null($row['organization'])) {
-            return $row['consumer_class_name'] . '_' . $row['organization'];
+        if (!is_null($row['organization_id'])) {
+            return $row['consumer_class_name'] . '_' . $row['organization_id'];
         }
         return $row['consumer_class_name'];
+    }
+    /**
+     * get full class name with namespace
+     * @param string $className shortClassName
+     * @return string
+     */
+    public function getConsumerClassName($className)
+    {
+        return "console\modules\daemons\classes\\" . $className;
     }
     
     /**
@@ -73,17 +86,35 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
         
         foreach ($res as $row) {
 //				Testing string
-//				\Yii::$app->get('rabbit')->setQueue($row['consumer_class_name'])->addRabbitQueue('');
+//            if(!is_null($row['organization_id'])){
+//                \Yii::$app->get('rabbit')->setQueue($row['consumer_class_name'] . '_' . $row['organization_id'])->addRabbitQueue('');
+//            } else {
+//                \Yii::$app->get('rabbit')->setQueue($row['consumer_class_name'])->addRabbitQueue('');
+//            }
             
             $count = \Yii::$app->get('rabbit')->setQueue($this->getQueueName($row))->checkQueueCount();
+            $consumerClass = $this->getConsumerClassName($row['consumer_class_name']);
             
-            $this->daemons[$row['consumer_class_name']] = [
+            if(!is_null($row['last_executed'])){
+                $lastExec = new \DateTime($row['last_executed']);
+                $timeOut = $lastExec->getTimestamp() + $consumerClass::$timeout;
+            }
+            
+            if (!is_null($row['last_executed']) && date('Y-m-d H:i:s', $timeOut) > date('Y-m-d H:i:s')) {
+                $kill = false;
+            } elseif ($count > 0) {
+                $kill = false;
+            } else {
+                $kill = true;
+            }
+            
+            $this->daemons[$row['consumer_class_name'] . $row['organization_id']] = [
                 'className'     => 'ConsumerDaemonController',
-                'enabled'       => $count > 0 ? true : false,
+                'enabled'       => !$kill,
                 'consumerClass' => $row['consumer_class_name'],
                 'orgId'         => $row['organization_id'] ?? '',
                 'demonize'      => 0,
-                'hardKill'      => $count > 0 ? false : true,
+                'hardKill'      => $kill,
             ];
         }
 

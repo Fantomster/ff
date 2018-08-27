@@ -25,12 +25,25 @@ class ConsumerDaemonController extends AbstractDaemonController
      */
     public function doJob($job)
     {
+        if(!is_null($this->lastExec)){
+            $lastExec = new \DateTime($this->lastExec);
+            $timeOut = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
+        }
+        
         $this->renewConnections();
-        $this->createConsumer();
 //        $row = \json_decode($job->body, true);
+        
         try {
-            $this->consumer->getData();
-            $success = $this->consumer->saveData();
+            if (!is_null($this->lastExec) && date('Y-m-d H:i:s', $timeOut) > date('Y-m-d H:i:s')) {
+                $this->log(PHP_EOL . " ERROR: " . 'timeout > date');
+                $success = true;
+            } else {
+                $this->createConsumer();
+                $this->consumer->getData();
+                $success = $this->consumer->saveData();
+                $this->log(PHP_EOL . " ERROR: " . 'timeout < date');
+                $this->loggingExecutedTime();
+            }
 //            if (!is_array($row)) {
 //                throw new \Exception('Message is not array! ' . PHP_EOL . print_r($row, true));
 //            }
@@ -42,7 +55,6 @@ class ConsumerDaemonController extends AbstractDaemonController
 //                @unlink(\Yii::$app->basePath . "/runtime/daemons/pids/" . self::shortClassName());
 //                die('die mysql connection');
 //            }
-            
             if ($success) {
                 $this->ask($job);
             } else {

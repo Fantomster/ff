@@ -14,6 +14,6 @@ namespace console\modules\daemons\components;
 abstract class AbstractConsumer
 {
     /**@var integer $timeout */
-    public static $timeout;
+    public static $timeout = 300;
     
 }

@@ -27,6 +27,8 @@ class m180825_120545_add_table_for_rabit_queues extends Migration
 			'id' => Schema::TYPE_PK,
 			'consumer_class_name' => Schema::TYPE_STRING . ' not null',
 			'organization_id' => Schema::TYPE_INTEGER . ' default null',
+			'last_executed' => Schema::TYPE_DATETIME . ' default null',
+			'start_executing' => Schema::TYPE_DATETIME . ' default null',
 		], $tableOptions);
 	}
 

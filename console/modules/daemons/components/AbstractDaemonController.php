@@ -36,6 +36,12 @@ abstract class AbstractDaemonController extends DaemonController
     public $maxChildProcesses = 5;
     
     /**
+     * rabbit queues table name
+     * @var \DateTime
+     * */
+    public $lastExec= null;
+    
+    /**
      * Check consumer implements interfaces methods
      * @param \console\modules\daemons\components\ConsumerInterface $consumer
      */
@@ -64,6 +70,24 @@ abstract class AbstractDaemonController extends DaemonController
         } else {
             $this->getConsumer(new $this->consumerClassName);
         }
+        $dateTime = new \DateTime();
+        \Yii::$app->db_api->createCommand('UPDATE rabbit_queues SET start_executing=:datetime WHERE consumer_class_name=:consumerCN AND organization_id=:orgId',
+            [ ':consumerCN' => $this->consumerClass,
+              ':orgId' => $this->orgId,
+              ':datetime' => $dateTime->format('Y-m-d H:i:s')
+            ]
+        )->execute();
+    }
+    
+    public function loggingExecutedTime(){
+        $dateTime = new \DateTime();
+        $this->lastExec = $dateTime->format('Y-m-d H:i:s');
+        \Yii::$app->db_api->createCommand('UPDATE rabbit_queues SET start_executing=NULL, last_executed=:datetime WHERE consumer_class_name=:consumerCN AND organization_id=:orgId',
+            [ ':consumerCN' => $this->consumerClass,
+              ':orgId' => $this->orgId,
+              ':datetime' => $this->lastExec,
+            ]
+        )->execute();
     }
     
     /**

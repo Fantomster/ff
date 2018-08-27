@@ -33,7 +33,7 @@ class StatisticsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics','mercury'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -490,7 +490,19 @@ class StatisticsController extends Controller {
      */
     public function actionMercury()
     {
+        $today = new \DateTime();
+        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
+        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
+
         $searchModel = new MercuryReportSearch();
+
+        $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+        $end = $dtEnd->add(new \DateInterval('P1D'));
+
+        $searchModel->dateFrom = $dt->format('Y-m-d');
+        $searchModel->dateTo = $end->format('Y-m-d');
+
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         return $this->render('mercury', compact('searchModel', 'dataProvider'));
     }

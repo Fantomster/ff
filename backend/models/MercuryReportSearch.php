@@ -23,14 +23,14 @@ class MercuryReportSearch extends mercLog {
     public $dateFrom;
     public $succCount;
     public $errorCount;
-    public $org_name;
+    public $orgName;
 
     /**
      * @inheritdoc
      */
     public function rules() {
         return array_merge(parent::rules(),[
-            [['succCount', 'errorCount', 'org_name','dateTo','dateFrom'], 'safe'],
+            [['succCount', 'errorCount', 'orgName','dateTo','dateFrom'], 'safe'],
         ]);
     }
 
@@ -48,7 +48,7 @@ class MercuryReportSearch extends mercLog {
         $db = \Yii::$app->db;
         $dbName = $this->getDsnAttribute('dbname', $db->dsn);
 
-        $query->select('org.`name` as org_name, log.organization_id, SUM(case when log.`status` = \'COMPLETED\' then 1 else 0 end) as succCount, SUM(case when log.`status` <> \'COMPLETED\' then 1 else 0 end) as errorCount');
+        $query->select('org.`name` as orgName, log.organization_id, SUM(case when log.`status` = \'COMPLETED\' then 1 else 0 end) as succCount, SUM(case when log.`status` <> \'COMPLETED\' then 1 else 0 end) as errorCount');
         $query->from('merc_log as log');
         $query->leftJoin("$dbName.$organizationTable as org", 'org.id = log.organization_id');
         $query->where('log.`action` = \'getVetDocumentDone\'');
@@ -56,7 +56,9 @@ class MercuryReportSearch extends mercLog {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['organization_id' => SORT_DESC]],
+            'sort' => [
+                'attributes' => ['orgName','succCount','errorCount'],
+                'defaultOrder' => ['orgName' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 20
             ]
@@ -77,54 +79,19 @@ class MercuryReportSearch extends mercLog {
         }
         $query->andWhere('log.created_at between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
 
-        if(isset($this->organization_id))
-            $query->andWhere('log.organization_id = :org_id', [':org_id' => $this->organization_id]);
+        if(isset($this->orgName))
+            $query->andWhere('org.name like :org_name', [':org_name' => '%'.$this->orgName.'%']);
 
         return $dataProvider;
     }
 
-    /**
-     * Возвращает пользователей по их статусу
-     *
-     * @return array
-     */
-    public static function getListToStatus() {
-
-        $models[]=['id'=>'0','name_allow'=>'Не активен'];
-        $models[]=['id'=>'1','name_allow'=>'Активен'];
-        $models[]=['id'=>'2','name_allow'=>'Ожидается подтверждение E-mail'];
-
-        return
-            ArrayHelper::map($models, 'id', 'name_allow');
-        // );
+    private function getDsnAttribute($name, $dsn)
+    {
+        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
+            return $match[1];
+        } else {
+            return null;
+        }
     }
-
-    /**
-     * Возвращает пользователей по их языку
-     *
-     * @return array
-     */
-    public static function getListToLanguage() {
-
-        $sql = 'SELECT DISTINCT `language` FROM `user` ORDER BY `language`';
-        $models0 = \Yii::$app->db->createCommand($sql)->queryAll();
-        $models = array();
-        foreach($models0 as $m) {
-            $models[]=['id'=>$m['language'],'name_allow'=>$m['language']];
-        }
-
-        /*print "<pre>";
-        print_r($models);
-        print "</pre>";
-        die();*/
-            /*$models = User::find()
-            ->select(['language'])
-            ->asArray()
-            ->all();
-            $models = ActiveQuery::removeDuplicateModels($models);*/
-
-            return
-                ArrayHelper::map($models, 'id','name_allow');
-        }
 
 }

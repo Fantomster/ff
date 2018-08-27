@@ -367,6 +367,7 @@ class FullmapController extends DefaultController {
         $koef = Yii::$app->request->post('koef_set');
         $store = Yii::$app->request->post('store_set');
         $vat = Yii::$app->request->post('vat_set');
+        $service_id = Yii::$app->request->post('service_set');
 
         $koef=str_replace(",",".",$koef);
 

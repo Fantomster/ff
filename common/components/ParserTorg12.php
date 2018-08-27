@@ -1527,7 +1527,7 @@ class ParserTorg12
                 ->setTo($email)
                 ->setFrom('noreply@mixcart.ru')
                 ->setSubject($subject)
-                ->setTextBody($viev['text'])
+                ->setTextBody($viev)
                 ->send();
         }
     }

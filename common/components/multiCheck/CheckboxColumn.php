@@ -5,7 +5,8 @@ namespace common\components\multiCheck;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 
-class CheckboxColumn extends \yii\grid\CheckboxColumn
+class CheckboxColumn extends \kartik\grid\CheckboxColumn
+
 {
     /**
      * @var array
@@ -38,6 +39,7 @@ class CheckboxColumn extends \yii\grid\CheckboxColumn
             }
             $js = implode("\n", $js);
             $view->registerJs($js);
+
         }
     }
 
@@ -58,21 +60,20 @@ class CheckboxColumn extends \yii\grid\CheckboxColumn
         jQuery('#$id').yiiGridView('setSelectionColumn', $options);
         ");
         } else {
-            $this->grid->getView()->registerJs(" function initSelectedAll(){
+            $js = " //function initSelectedAll(){
             jQuery('#$id').yiiGridView('setSelectionColumn', $options);
             countSelected = $('#$id').yiiGridView('getSelectedRows');
             checked = (countSelected.length == $pageCount);
             console.log(countSelected.length);
             console.log($pageCount);
+            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').attr(\"disabled\", true);
             $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').prop(\"checked\", checked);
-            }
-            initSelectedAll();
-            
-             jQuery(document).on(\"pjax:complete\",  function(event){
-            initSelectedAll();
-          }
-        );
-            ");
+            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').removeAttr(\"disabled\");
+           // }
+           // initSelectedAll();
+            ";
+            $this->grid->getView()->registerJs($js);
+            $this->_clientScript .= "\n".$js;
         }
 
         $this->registerOnChangeEvents($this->grid->getView());

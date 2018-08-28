@@ -469,7 +469,7 @@ class FullmapController extends DefaultController {
         $selected = Yii::$app->request->get('selected');
         $state = Yii::$app->request->get('state');
 
-        var_dump ($state);
+        // var_dump ($state);
 
         $session = Yii::$app->session;
 
@@ -488,6 +488,10 @@ class FullmapController extends DefaultController {
                 unset($list[$key]);
             }
 
+        }
+
+        if (count($list) > 12 && $state) {
+            return -1;
         }
 
         $session->set('selectedmap', $list);

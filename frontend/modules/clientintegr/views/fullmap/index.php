@@ -72,7 +72,7 @@ JS;
 $this->registerJs(
 
     '
-    var cnt = '.$selectedCount.';
+    var selectedCount = '.$selectedCount.';
     
     $(document).ready(function(){
     
@@ -130,7 +130,7 @@ $this->registerJs(
         
             $(document).on("click", ".apply-fullmap", function(e) {
                        
-             if(($("#fullmapGrid").yiiGridView("getSelectedRows").length + cnt) == 0){  
+             if(($("#fullmapGrid").yiiGridView("getSelectedRows").length + selectedCount) == 0){  
              alert("Ничего не выбрано!");
              return false;
              }
@@ -167,7 +167,7 @@ $this->registerJs(
              dataType: "json",
              data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set, service_set : service_set},
              success: function(){
-                 cnt = 0;
+                 selectedCount = 0;
                  $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
              }
            });
@@ -183,7 +183,7 @@ $this->registerJs(
              url: "'.$urlClear.'",
              type: "GET",
              success: function(){
-                 cnt = 0;
+                 selectedCount = 0;
                  $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
              }
            });
@@ -207,9 +207,9 @@ $this->registerJs(
 
            value = value.toString();  
            
-           console.log(value);
-           console.log(state);
-           console.log(url);
+           // console.log(value);
+           // console.log(state);
+           // console.log(url);
           
            $.ajax({
              url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
@@ -241,6 +241,8 @@ $this->registerJs(
              type: "GET",
              success: function(){
                  //$.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                // $(#selected_info).val = selectedCount;
+                // alert("Good");
              }
            });
            
@@ -277,7 +279,8 @@ $this->registerJs(
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
-                    <?php // Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]); ?>
+                    <?php // Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]);
+                    // ?>
             <div class="row">
                 <div class="col-md-4" align="left">
                     <div class="guid-header">
@@ -360,6 +363,15 @@ $this->registerJs(
                           //  'responsive' => false,
                             'summary' => '',
                             'pjax' => true,
+                            'panel' => [
+                                'type' => GridView::TYPE_DEFAULT,
+                                'heading' => false,
+                                'before' => "<i class=\"fa fa-check-circle-o\"></i>&nbsp; Выбрано :<span id = 'selected_info'>".$selectedCount."</span>",
+                                'beforeOptions' => ['style' => 'text-align:center;'],
+                            //    'footer' => false,
+                            ],
+
+                            'toolbar' => false,
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             // 'options' => ['class' => 'table-responsive'],
                             /* 'rowOptions'=>function($model) use ($cart){
@@ -394,6 +406,15 @@ $this->registerJs(
                                                             var value = [];
                                                             state = $(this).prop("checked") ? 1 : 0;
                                                             
+                                                         //  selectedCount = parseInt($("#selected_info").text());
+                                                         //   mode = 1;
+                                                                                                                       
+                                                        /*    if ((selectedCount+1) > 12 && state == 1) {
+                                                            alert("Превышен лимит для выбора продуктов в 300 позиций");
+                                                            // mode = 0;
+                                                            return false;        
+                                                            }
+                                                        */    
                                                            $(".checkbox-export").each(function() {
                                                                 value.push($(this).val());
                                                             });    
@@ -404,21 +425,46 @@ $this->registerJs(
                                                              url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
                                                              type: "POST",
                                                              data: {selected: value, state: state},
-                                                             success: function(){
-                                                                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                                                             success: function(data){
+                                                             if (data == -1) {
+                                                             // alert ("Превышен лимит для выбора продуктов в 300 позиций");
+                                                              swal({title: "Болтяра", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
+                                                             }
+                                                             $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
                                                              }
                                                            }); }',
                                         'changeCell' => 'function(e) { 
+                                        
+                                                             // alert(mode);   
+                                                         
+                                                          //   if ((typeof(mode) != "undefined") && mode == 1) {
+                                                          //   return false;
+                                                          //   }
+                                                        
+                                                            // console.log(selectedCount);
+                                                             state = $(this).prop("checked") ? 1 : 0;
+                                                            selectedCount = parseInt($("#selected_info").text());
+                                                           // alert(selectedCount);
+                                                            
+                                                          /*  if ((selectedCount+1) > 12 && state == 1) {
+                                                            alert("Превышен лимит для выбора продуктов в 300 позиций");
+                                                            return false;        
+                                                            } */
+                                                                                                                      
                                                             url = window.location.href;
                                                             var value = $(this).val();
-                                                            state = $(this).prop("checked") ? 1 : 0;
                                                           
                                                            $.ajax({
                                                              url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
                                                              type: "POST",
                                                              data: {selected: value, state: state},
-                                                             success: function(){
-                                                                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                                                             success: function(data){
+                                                             if (data == -1) {
+                                                             // alert ("Превышен лимит для выбора продуктов в 300 позиций");
+                                                              swal({title: "Болтяра", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
+                                                             }
+                                                             $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});                                                             
+                                                                
                                                              }
                                                            });}'
                                     ],

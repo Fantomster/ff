@@ -2,12 +2,11 @@
 
 namespace api_web\classes;
 
+use Yii;
 use api_web\components\WebApi;
 use common\components\SimpleChecker;
 use common\models\Order;
 use yii\web\BadRequestHttpException;
-use Yii;
-
 
 /**
  * Class AnalyticsWebApi
@@ -21,36 +20,41 @@ use Yii;
 class AnalyticsWebApi extends WebApi
 {
 
+    const TYPE_DATE_DMYY = 'dateDMYY';
+    const TYPE_INTEGER_WHOLE = 'wholeInt';
+
+    const RULEINDEX_CHECK_TYPE = 'type';
+    const RULEINDEX_IS_REQUIRED = 'required';
+
     var $rules = [
         'client-goods' => [
-            'type' => [
-                'wholeInt' => [
+            self::RULEINDEX_CHECK_TYPE => [
+                self::TYPE_INTEGER_WHOLE => [
                     'search' => ['vendor_id', 'employee_id', 'order_status_id', 'currency_id'],
                     'pagination' => ['page', 'page_size'],
                 ],
-                'dateDMYY' => [
+                self::TYPE_DATE_DMYY => [
                     'search' => [
                         'date' => ['from', 'to'],
                     ],
                 ],
             ],
-            'required' => [
+            self::RULEINDEX_IS_REQUIRED => [
                 'pagination' => ['page', 'page_size'],
             ],
         ],
     ];
 
     /**
-     * Валидация параметров
+     * Валидация обязательных параметров
      * @param $post array
      * @param $rules array
      * @throws BadRequestHttpException
      */
-    private function validateRules(array $post = [], array $rules = [])
+    private function checkRequired(array $post = [], array $rules = [])
     {
-
         // валидация обязательных параметров
-        foreach ($rules['required'] as $key1 => $v) {
+        foreach ($rules as $key1 => $v) {
             foreach ($v as $key2 => $keys3) {
                 if (is_array($keys3)) {
                     foreach ($keys3 as $key3) {
@@ -63,10 +67,19 @@ class AnalyticsWebApi extends WebApi
                 }
             }
         }
+    }
 
+    /**
+     * Валидация типов данных
+     * @param $post array
+     * @param $rules array
+     * @throws BadRequestHttpException
+     */
+    private function checkTypes(array $post = [], array $rules = [])
+    {
         // валидация типов данных ()
-        foreach ($rules['type'] as $k => $v) {
-            if ($k == 'dateDMYY') {
+        foreach ($rules as $k => $v) {
+            if ($k == self::TYPE_DATE_DMYY) {
                 foreach ($v as $key1 => $vv) {
                     foreach ($vv as $key2 => $keys3) {
                         foreach ($keys3 as $key3) {
@@ -86,7 +99,7 @@ class AnalyticsWebApi extends WebApi
                         }
                     }
                 }
-            } elseif ($k == 'wholeInt') {
+            } elseif ($k == self::TYPE_INTEGER_WHOLE) {
                 foreach ($v as $key1 => $vv) {
                     foreach ($vv as $key2) {
                         if (isset($post[$key1][$key2]) && !SimpleChecker::validateWholeNumerExactly($post[$key1][$key2])) {
@@ -110,8 +123,9 @@ class AnalyticsWebApi extends WebApi
         // загрузка правил валидации
         $rules = $this->rules['client-goods'];
 
-        $this->validateRules($post, $rules);
         // проверка правил валидации
+        $this->checkRequired($post, $rules[self::RULEINDEX_IS_REQUIRED]);
+        $this->checkTypes($post, $rules[self::RULEINDEX_CHECK_TYPE]);
 
         // использование параметров пагинации
         $limit = ($post['pagination']['page'] - 1) * $post['pagination']['page_size'] . ', ' . $post['pagination']['page_size'];

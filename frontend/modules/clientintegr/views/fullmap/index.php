@@ -341,8 +341,8 @@ $this->registerJs(
 
                 <div class="col-md-3"  align="right">
                     <div class="guid-header">
-                        <?= Html::submitButton('<i class="fa fa-th"></i> Применить', ['class' => 'btn btn-success apply-fullmap']) ?>
-                        <?= Html::submitButton('<i class="fa fa-th"></i> Очистить буфер', ['class' => 'btn btn-success clear-fullmap']) ?>
+                        <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Применить', ['class' => 'btn btn-success apply-fullmap']) ?>
+                        <?= Html::submitButton('<i class="fa fa-square-o"></i> Очистить весь выбор', ['class' => 'btn btn-success clear-fullmap']) ?>
                     </div>
               </div>
             </div>

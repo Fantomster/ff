@@ -13,6 +13,9 @@ use yii\base\Component;
 
 class baseApi extends Component
 {
+   const GET_USERDATA = 1;
+   const GET_UPDATES_DICTS = 2;
+
     protected $login;
     protected $pass;
     protected $apiKey;
@@ -23,6 +26,7 @@ class baseApi extends Component
     protected $enterpriseGuid;
     protected $wsdls;
     protected $query_timeout;
+    protected $mode = self::GET_USERDATA;
 
     protected static $_instance = [];
 

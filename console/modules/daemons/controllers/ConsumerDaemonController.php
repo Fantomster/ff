@@ -39,6 +39,7 @@ class ConsumerDaemonController extends AbstractDaemonController
                 $success = true;
             } else {
                 $this->createConsumer();
+                $this->consumer->data = $job->body;
                 $this->consumer->getData();
                 $success = $this->consumer->saveData();
                 $this->log(PHP_EOL . " ERROR: " . 'timeout < date');

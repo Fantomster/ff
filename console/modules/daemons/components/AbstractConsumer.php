@@ -15,5 +15,6 @@ abstract class AbstractConsumer
 {
     /**@var integer $timeout */
     public static $timeout = 300;
-    
+    /**@var string $data data from queue message*/
+    public $data;
 }

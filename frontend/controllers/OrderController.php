@@ -455,10 +455,10 @@ class OrderController extends DefaultController
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
-
-        if (Yii::$app->request->get("OrderCatalogSearch")) {
-            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
-            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        else {
+            if(Yii::$app->request->get("OrderCatalogSearch")) {
+                $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            }
         }
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
@@ -2551,14 +2551,15 @@ class OrderController extends DefaultController
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
 
-        if (Yii::$app->request->post("OrderCatalogSearch")) {
-            $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
-            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        if (Yii::$app->request->isPost) {
+            if(Yii::$app->request->post("OrderCatalogSearch")) {
+                $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            }
         }
-
-        if (Yii::$app->request->get("OrderCatalogSearch")) {
-            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
-            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        else {
+            if(Yii::$app->request->get("OrderCatalogSearch")) {
+                $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            }
         }
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];

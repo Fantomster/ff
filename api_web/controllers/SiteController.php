@@ -20,6 +20,7 @@ class SiteController extends Controller
         $scanDir = [
             Yii::getAlias('@api_web/components/definitions/'),
             Yii::getAlias('@api_web/components/WebApiController.php'),
+            Yii::getAlias('@api_web/controllers/AnalyticsApiController.php'),
             Yii::getAlias('@api_web/controllers/UserController.php'),
             Yii::getAlias('@api_web/controllers/MarketController.php'),
             Yii::getAlias('@api_web/controllers/PaymentController.php'),
@@ -31,9 +32,8 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/ChatController.php'),
             Yii::getAlias('@api_web/controllers/RequestController.php'),
             Yii::getAlias('@api_web/controllers/NotificationController.php'),
-            Yii::getAlias('@api_web/modules/integration/controllers/DefaultController.php')
+            Yii::getAlias('@api_web/modules/integration/controllers/DefaultController.php'),
         ];
-
 
         /**
          * Добавление интеграционных контроллеров происходит автоматически

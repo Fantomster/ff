@@ -299,7 +299,7 @@ $("document").ready(function(){
         if (w === "https:") {
             target = "https:";
         }
-        target = target + window.location.hostname + "/clientintegr/rkws/waybill/index?OrderSearch2[id]=" + $("#orderFilter").val();
+        target = target + \'//\' + window.location.hostname + "/clientintegr/rkws/waybill/index?OrderSearch2[id]=" + $("#orderFilter").val();
         window.location.href = target;
     });
     

@@ -264,6 +264,7 @@ $columns = array(
     ]
 );
 
+$url = Url::to('clientintegr/iiko/waybill/index');
 
 $this->registerJs('
 function js_cookie_set(c, y) {var d = new Date (); d.setTime (d.getTime()+(60*60*24*365));
@@ -280,7 +281,7 @@ $("document").ready(function(){
         if (w === "https:") {
             target = "https:";
         }
-        target = target + \'//\' + window.location.hostname + \'/clientintegr/iiko/waybill/index?OrderSearch2[id]=\' + $("#orderFilter").val();
+        target = target + \'//\' + window.location.hostname + \'/'.$url.'?OrderSearch2[id]=\' + $("#orderFilter").val();
         window.location.href = target;
     });
     

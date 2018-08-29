@@ -128,7 +128,7 @@ $js = <<<JS
                         clickedButton.button("reset");
                         swal(
                             '$titleIntegration',
-                            '$titleIntegration',
+                            '$textIntegration',
                             'success'
                         );
                 });

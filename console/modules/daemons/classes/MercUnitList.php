@@ -17,25 +17,6 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
  */
 class MercUnitList extends MercDictConsumer
 {
-    /*protected function saveList($list) {
-        $list = is_array($list) ? $list : [$list];
-        foreach ($list as $item)
-        {
-            $model = VetisUnit::findOne(['guid' => $item->guid]);
-
-            if($model == null) {
-                $model = new VetisUnit();
-            }
-            $attributes =  json_decode(json_encode($item), true);
-            $model->setAttributes($attributes);
-            $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
-            $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
-            if (!$model->save()) {
-                $this->result = false;
-            }
-        }
-    }*/
-
     protected function init()
     {
         $this->instance = dictsApi::getInstance($this->org_id);

@@ -18,25 +18,6 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
  */
 class MercPurposeList extends MercDictConsumer
 {
-    /*protected function saveList($list) {
-        $list = is_array($list) ? $list : [$list];
-        foreach ($list as $item)
-        {
-            $model = VetisPurpose::findOne(['guid' => $item->guid]);
-
-            if($model == null) {
-                $model = new VetisPurpose();
-            }
-            $attributes =  json_decode(json_encode($item), true);
-            $model->setAttributes($attributes);
-            $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
-            $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
-            if (!$model->save()) {
-                $this->result = false;
-            }
-        }
-    }*/
-
     protected function init()
     {
         $this->instance = dictsApi::getInstance($this->org_id);

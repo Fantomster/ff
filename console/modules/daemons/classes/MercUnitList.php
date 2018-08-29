@@ -17,7 +17,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
  */
 class MercUnitList extends MercDictConsumer
 {
-    protected function saveList($list) {
+    /*protected function saveList($list) {
         $list = is_array($list) ? $list : [$list];
         foreach ($list as $item)
         {
@@ -34,7 +34,7 @@ class MercUnitList extends MercDictConsumer
                 $this->result = false;
             }
         }
-    }
+    }*/
 
     protected function init()
     {
@@ -44,5 +44,6 @@ class MercUnitList extends MercDictConsumer
         $this->request = $data['request'];
         $this->listName = $data['struct']['listName'];
         $this->listItemName = $data['struct']['listItemName'];
+        $this->modelClassName = VetisUnit::class;
     }
 }

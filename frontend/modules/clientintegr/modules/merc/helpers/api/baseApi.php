@@ -21,7 +21,6 @@ class baseApi extends Component
     protected $enterpriseGuid;
     protected $wsdls;
     protected $query_timeout;
-    protected $mode = self::GET_USERDATA;
     protected $system;
     protected $wsdlClassName;
 

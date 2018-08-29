@@ -172,5 +172,64 @@ class AnalyticsWebApi extends WebApi
         ];
 
     }
+    /**
+     * Ресторан: Объем закупок за период
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function clientPurchases($post)
+    {
+
+        // ограничение на собственные заказы
+        $whereParams = ['order.client_id' => $this->user->organization->id];
+
+        // фильтр - поставщик
+        if (isset($post['search']['vendor_id'])) {
+            $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
+        }
+        // фильтр - статус заказа
+        $whereParams['order.status'] = self::ORDER_STATUSES_WELL;
+        if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
+            $whereParams['order.status'] = $post['search']['order_status_id'];
+        }
+        // фильтр - валюта
+        if (isset($post['search']['currency_id'])) {
+            $whereParams['currency.id'] = $post['search']['currency_id'];
+        }
+
+        // ТЕЛО ЗАПРОСА
+        $query = new Query;
+        $query->select(
+            [
+                'FORMAT(SUM(order_content.quantity * order_content.price), 2) AS total_sum',
+                'DATE_FORMAT(order.created_at, "%d.%m.%Y") AS date',
+            ]
+        )->from('order_content')
+            ->leftJoin('order', 'order.id = order_content.order_id')
+            ->leftJoin('currency', 'currency.id = order.currency_id')
+            ->andWhere($whereParams)
+            ->groupBy('date')->orderBy(['total_sum' => SORT_ASC]);
+
+        // фильтр - время создания заказа
+        if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime($post['search']['date']['from'] . ' 00:00:00'))]);
+        }
+        if (isset($post['search']['date']['to']) && $post['search']['date']['to']) {
+            $query->andWhere('order.created_at <= :date_to',
+                [':date_to' => date('Y-m-d H:i:s', strtotime($post['search']['date']['to'] . ' 23:59:59'))]);
+        }
+        // фильтр - менеджер
+        if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
+            $query->leftJoin('order_assignment', 'order.id = order_assignment.order_id');
+            $query->andWhere(['order_assignment.assigned_to' => $post['search']['employee_id']]);
+        }
+
+        return [
+            'result' => $query->all(),
+        ];
+
+    }
 
 }

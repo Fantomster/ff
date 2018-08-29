@@ -127,8 +127,8 @@ $js = <<<JS
                         $('#actionButtons').html(result);
                         clickedButton.button("reset");
                         swal(
-                            'Накладная успешно привязана!',
-                            'Перейти в интеграцию: $listIntegration',
+                            '$titleIntegration',
+                            '$titleIntegration',
                             'success'
                         );
                 });

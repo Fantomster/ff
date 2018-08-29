@@ -17,22 +17,22 @@ class RabbitService extends Component
     public $exchange = 'amq.direct';
     public $queue_prefix = '';
     public $vhost = '/';
-
+    
     public function addRabbitQueue($message)
     {
         //Должна быть указана очередь
         if ($this->queue == null) {
             throw new ErrorException('Необходимо установить имя очереди (new RabbitService())->setQueue($name_queue);');
         }
-
+        
         //Если массив, превратим его в JSON
         if (is_array($message)) {
             $message = json_encode($message);
         }
-
+        
         $connection = $this->connect();
         $channel = $connection->channel();
-
+        
         $channel->queue_declare(
             $this->queue,       #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
             false,              #passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
@@ -40,21 +40,43 @@ class RabbitService extends Component
             false,              #exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
             false               #autodelete - очередь удаляется, когда отписывается последний подписчик
         );
-
+        
         $channel->queue_bind($this->queue, $this->exchange, $this->queue);
-
+        
         //Публикуем сообщение
         $channel->basic_publish(
             new AMQPMessage($message),  #message
             $this->exchange,            #exchange
             $this->queue                #routing key
         );
-
+        
         //Разрыв соединения
         $channel->close();
         $connection->close();
     }
-
+    
+    /**
+     * Check number of jobs in queue
+     * @return integer count of jobs
+     * */
+    public function checkQueueCount()
+    {
+        //Должна быть указана очередь
+        if ($this->queue == null) {
+            throw new ErrorException('Необходимо установить имя очереди (new RabbitService())->setQueue($name_queue);');
+        }
+        
+        $connection = $this->connect();
+        $channel = $connection->channel();
+        list($queue, $messageCount, $consumerCount) = $channel->queue_declare($this->queue, true);
+        
+        //Разрыв соединения
+        $channel->close();
+        $connection->close();
+        
+        return $messageCount;
+    }
+    
     /**
      * Название очереди
      * @param $queue
@@ -69,7 +91,7 @@ class RabbitService extends Component
         $this->queue = ($this->queue_prefix ?? '') . $queue;
         return $this;
     }
-
+    
     /**
      * @param $exchange
      * @return $this
@@ -82,7 +104,7 @@ class RabbitService extends Component
         $this->exchange = $exchange;
         return $this;
     }
-
+    
     /**
      * @return AMQPStreamConnection
      */

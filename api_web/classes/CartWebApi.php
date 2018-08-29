@@ -31,7 +31,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function add(array $post)
+    public function add(array $post, $ajax_published = false)
     {
         //Если прилетел массив товаров
         if (isset($post[0])) {
@@ -42,9 +42,10 @@ class CartWebApi extends \api_web\components\WebApi
             $this->addItem($post);
         }
 
-        //Сообщение в очередь, Изменение количества товара в корзине
-        Notice::init('Order')->sendOrderToTurnClient($this->user->organization);
-        Notice::init('Order')->sendLastUserCartAdd($this->user);
+        if (!$ajax_published) {
+            //Сообщение в очередь, Изменение количества товара в корзине
+            $this->noticeWhenProductAddToCart();
+        }
 
         return $this->items();
     }
@@ -471,6 +472,11 @@ class CartWebApi extends \api_web\components\WebApi
         $item['in_basket'] = $this->countProductInCart($model['id']);
         $item['comment'] = $row->comment;
         return $item;
+    }
+    
+    public function noticeWhenProductAddToCart(){
+        Notice::init('Order')->sendOrderToTurnClient($this->user->organization);
+        Notice::init('Order')->sendLastUserCartAdd($this->user);
     }
 
 }

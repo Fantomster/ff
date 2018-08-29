@@ -122,6 +122,8 @@ $this->registerJs(
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
                    $(\'a[data-id="\'+result+\'"]\').parent().parent().addClass("success");
+                   
+                   $.post("' . Url::to(['/order/ajax-add-to-cart-notice']) . '",{}).done(function(result) {});
                 });
             });
             

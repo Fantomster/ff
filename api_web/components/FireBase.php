@@ -8,9 +8,17 @@ use yii\web\HttpException;
 
 class FireBase
 {
-    function __wakeup(){}
-    function __clone(){}
-    function __construct(){}
+    function __wakeup()
+    {
+    }
+
+    function __clone()
+    {
+    }
+
+    function __construct()
+    {
+    }
 
     /**
      * @var FireBase

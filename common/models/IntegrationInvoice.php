@@ -28,6 +28,7 @@ use yii\db\Exception;
  */
 class IntegrationInvoice extends \yii\db\ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -58,7 +59,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return [
             [['organization_id', 'integration_setting_from_email_id'], 'required'],
             [['organization_id', 'integration_setting_from_email_id', 'order_id'], 'integer'],
-            [['date', 'created_at', 'updated_at', 'total_sum_withtax','price_without_tax_sum'], 'safe'],
+            [['date', 'created_at', 'updated_at', 'total_sum_withtax', 'price_without_tax_sum'], 'safe'],
             [['file_content'], 'string'],
             [['number', 'email_id', 'file_mime_type', 'file_hash_summ', 'name_postav', 'inn_postav', 'kpp_postav', 'consignee'], 'string', 'max' => 255],
             [['id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoiceContent::className(), 'targetAttribute' => ['id' => 'invoice_id']],
@@ -104,10 +105,11 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return $this->hasMany(IntegrationInvoiceContent::className(), ['invoice_id' => 'id']);
     }
 
-    public function getTotalSumm() {
+    public function getTotalSumm()
+    {
         $total = 0;
-        if($this->content){
-            foreach($this->content as $row) {
+        if ($this->content) {
+            foreach ($this->content as $row) {
                 $total += $row->price_nds;
             }
         }
@@ -168,7 +170,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $this->kpp_postav = $invoice['invoice']['kppPostav'];
         $this->consignee = $invoice['invoice']['nameConsignee'];
 
-        if($this->date == '1970-01-01') {
+        if ($this->date == '1970-01-01') {
             $this->date = null;
         }
 
@@ -189,8 +191,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'price_without_nds' => round($row['price_without_tax'], 2),
                     'quantity' => $row['cnt'],
                     'sum_without_nds' => $row['sum_without_tax'],
-
-                    // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
+                        // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -210,8 +211,6 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
      */
     public function getBaseGoods(Organization $vendor)
     {
-        $rel = RelationSuppRest::findOne(['rest_org_id' => $this->organization_id, 'supp_org_id' => $vendor->id]);
-        $catalogID = $rel->cat_id ?? null;
         $models = [];
         /**
          * @var $row IntegrationInvoiceContent
@@ -220,40 +219,27 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         //Если не нашли, создаем
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                ->andWhere('product LIKE :product', [':product' => $row->title])
-                ->one();
+                    ->andWhere('product LIKE :product', [':product' => $row->title])
+                    ->one();
 
             if (empty($model)) {
                 $model = new CatalogBaseGoods();
-                $model->cat_id = $catalogID ?? $vendor->baseCatalog->id;
+                $model->cat_id = $vendor->baseCatalog->id;
                 $model->article = $row->article;
                 $model->product = $row->title;
                 $model->supp_org_id = $vendor->id;
                 $model->ed = $row->ed;
-                $model->status = 1;
+                $model->status = 0;
                 $model->units = 1;
-              //  $model->price = $row->price_nds;  // Hotfix 1.5.14
-                $model->price = round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2);
-                if ($model->validate()) {
-                    $model->save();
-                    $catalogGood = new CatalogGoods();
-                    $catalogGood->cat_id = $catalogID ?? $vendor->baseCatalog->id;
-                    $catalogGood->base_goods_id = $model->id;
-                    $catalogGood->price = $model->price;
-                    if ($catalogGood->validate()) {
-                        $catalogGood->save();
-                    }else {
-                        throw new \yii\db\Exception(print_r($catalogGood->getFirstErrors(), 1));
-                    }
-                } else {
+                $model->price = round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds / 100), 2);
+                if (!$model->save()) {
                     throw new \yii\db\Exception(print_r($model->getFirstErrors(), 1));
                 }
             }
             $models[] = [
                 'id' => $model->id,
                 'quantity' => $row->quantity,
-                // 'price' => $row->price_nds, // Hotfix 1.5.14
-                'price' => round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds/100),2),
+                'price' => round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds / 100), 2),
                 'units' => 1,
                 'product_name' => $model->product,
                 'article' => $model->article
@@ -262,4 +248,5 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
 
         return $models;
     }
+
 }

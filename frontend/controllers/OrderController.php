@@ -116,6 +116,7 @@ class OrderController extends DefaultController
                             'repeat',
                             'refresh-cart',
                             'ajax-add-to-cart',
+                            'ajax-add-to-cart-notice',
                             'ajax-add-guide-to-cart',
                             'ajax-delete-order',
                             'ajax-make-order',
@@ -456,10 +457,10 @@ class OrderController extends DefaultController
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
             $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
-
-        if (Yii::$app->request->get("OrderCatalogSearch")) {
-            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
-            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        else {
+            if(Yii::$app->request->get("OrderCatalogSearch")) {
+                $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            }
         }
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
@@ -880,16 +881,24 @@ class OrderController extends DefaultController
         $product = ['product_id' => $post['id'], 'quantity' => $quantity];
 
         try {
-            (new CartWebApi())->add($product);
+            (new CartWebApi())->add($product, true);
         } catch (\Exception $e) {
             return false;
         }
 
-        $client = $this->currentUser->organization;
-        $cartCount = $client->getCartCount();
-        $this->sendCartChange($client, $cartCount);
-
         return $post['id'];
+    }
+    
+    
+    public function actionAjaxAddToCartNotice()
+    {
+        try {
+            (new CartWebApi())->noticeWhenProductAddToCart();
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     public function actionAjaxShowDetails()
@@ -2558,14 +2567,15 @@ class OrderController extends DefaultController
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
 
-        if (Yii::$app->request->post("OrderCatalogSearch")) {
-            $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
-            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        if (Yii::$app->request->isPost) {
+            if(Yii::$app->request->post("OrderCatalogSearch")) {
+                $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            }
         }
-
-        if (Yii::$app->request->get("OrderCatalogSearch")) {
-            $params['OrderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
-            $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+        else {
+            if(Yii::$app->request->get("OrderCatalogSearch")) {
+                $session['orderCatalogSearch'] = Yii::$app->request->get("OrderCatalogSearch");
+            }
         }
 
         $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];

@@ -101,36 +101,7 @@ if ($numLicences) {
 
 $js = <<<JS
 
-    $('#actionButtons').on('click', '.btnOrderAction', function () {
-    
-        var clickedButton = $(this);
-        if ($(this).data("action") == "confirm" && dataEdited) {
-            var form = $("#editOrder");
-            extData = "&orderAction=confirm";
-            clickedButton.button("loading");
-            $.post(
-                form.attr("action"),
-                form.serialize() + extData
-            ).done(function (result) {
-                dataEdited = 0;
-                clickedButton.button("reset");
-            });
-        } else if ($(this).data("action") != "cancel") {
-            clickedButton.button("loading");
-            $.post(
-                "$urlOrderAction",
-                {"action": $(this).data("action"), "order_id": $order->id}
-            ).done(function (result) {
-                $('#actionButtons').html(result);
-                clickedButton.button("reset");
-            });
-            swal(
-                '$titleIntegration',
-                '$textIntegration',
-                'success'
-            );
-        }
-    });
+   
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
@@ -156,8 +127,8 @@ $js = <<<JS
                         $('#actionButtons').html(result);
                         clickedButton.button("reset");
                         swal(
-                            'Накладная успешно привязана!',
-                            'Перейти в интеграцию: $listIntegration',
+                            '$titleIntegration',
+                            '$textIntegration',
                             'success'
                         );
                 });

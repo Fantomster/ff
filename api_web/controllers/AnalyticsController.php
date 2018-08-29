@@ -29,12 +29,30 @@ class AnalyticsController extends WebApiController
      *         @SWG\Schema (
      *             @SWG\Property(property="user", ref="#/definitions/User"),
      *             @SWG\Property(
-     *                 property="request",
-     *                 type="object",
-     *                 default={
-     *                     "id": 1,
-     *                     "email": "neo@neo.com"
-     *                 }
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                     "search": {
+     *                         "vendor_id": {
+     *                             124,
+     *                             143
+     *                         },
+     *                         "employee_id": 21,
+     *                         "order_status_id": {
+     *                             4,
+     *                             5
+     *                         },
+     *                         "currency_id": 1,
+     *                         "date": {
+     *                             "from": "23.08.2018",
+     *                             "to": "24.08.2018"
+     *                         }
+     *                     },
+     *                     "pagination": {
+     *                         "page": 1,
+     *                         "page_size": 12
+     *                     }
+     *                  }
      *              )
      *         )
      *     ),
@@ -42,16 +60,36 @@ class AnalyticsController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *             default={
-     *                 "vendor_id": 1,
-     *                 "employee_id": 21,
-     *                 "order_status_id": 4,
-     *                 "curency_id": 1,
-     *                 "date": {
-     *                     "from": "23.08.2018",
-     *                     "to": "24.08.2018"
-     *                 }
-     *             }
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Товар 11",
+     *                          "count": 21.00,
+     *                          "total": 10200.01,
+     *                          "currency_id": 1,
+     *                          "currency": "RUB"
+     *                      },
+     *                      {
+     *                          "name": "Товар 12",
+     *                          "count": 32.01,
+     *                          "total": 102,
+     *                          "currency_id": 1,
+     *                          "currency": "RUB"
+     *                      },
+     *                      {
+     *                          "name": "Товар 32",
+     *                          "count": 132.12,
+     *                          "total": 102,
+     *                          "currency_id": 1,
+     *                          "currency": "RUB"
+     *                      }
+     *                  },
+     *                  "pagination": {
+     *                      "page": 1,
+     *                      "total_page": 17,
+     *                      "page_size": 12
+     *                  }
+     *              }
      *         )
      *     ),
      *     @SWG\Response(

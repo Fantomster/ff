@@ -42,6 +42,7 @@ use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\helpers\Url;
+use AutoWaybillHelper;
 
 class OrderController extends DefaultController
 {
@@ -1686,6 +1687,12 @@ class OrderController extends DefaultController
             }
             if ($order->save()) {
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
+
+                if ($order->status = Order::STATUS_DONE) { // AutoWaybil
+                    $waybil = new AutoWaybillHelper();
+                    $waybil->processRkws();
+                }
+
                 return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
             }
         }

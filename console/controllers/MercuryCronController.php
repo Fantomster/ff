@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use api\common\models\RabbitQueues;
+use common\models\vetis\VetisCountry;
 use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisUnit;
 use console\modules\daemons\classes\MercUnitList;
@@ -68,6 +69,8 @@ class MercuryCronController extends Controller
         VetisUnit::getUpdateData();
         echo "GET PURPOSE" . PHP_EOL;
         VetisPurpose::getUpdateData();
+        echo "GET PURPOSE" . PHP_EOL;
+        VetisCountry::getUpdateData();
         echo "FINISH" . PHP_EOL;
     }
 }

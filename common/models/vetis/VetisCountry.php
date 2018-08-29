@@ -48,6 +48,7 @@ class VetisCountry extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullName', 'englishName'], 'string', 'max' => 255],

@@ -57,6 +57,7 @@ class VetisProductItem extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'status', 'productType', 'correspondsToGost'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'globalID', 'product_uuid', 'product_guid', 'subproduct_uuid', 'subproduct_guid', 'gost', 'producer_uuid', 'producer_guid', 'tmOwner_uuid', 'tmOwner_guid'], 'string', 'max' => 255],

@@ -2,6 +2,7 @@
 
 namespace console\modules\daemons\components;
 
+use api_web\components\FireBase;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
@@ -39,7 +40,7 @@ abstract class AbstractDaemonController extends DaemonController
      * rabbit queues table name
      * @var \DateTime
      * */
-    public $lastExec= null;
+    public $lastExec = null;
     
     /**
      * Check consumer implements interfaces methods
@@ -72,20 +73,21 @@ abstract class AbstractDaemonController extends DaemonController
         }
         $dateTime = new \DateTime();
         \Yii::$app->db_api->createCommand('UPDATE rabbit_queues SET start_executing=:datetime WHERE consumer_class_name=:consumerCN AND organization_id=:orgId',
-            [ ':consumerCN' => $this->consumerClass,
-              ':orgId' => $this->orgId,
-              ':datetime' => $dateTime->format('Y-m-d H:i:s')
+            [':consumerCN' => $this->consumerClass,
+             ':orgId'      => $this->orgId,
+             ':datetime'   => $dateTime->format('Y-m-d H:i:s')
             ]
         )->execute();
     }
     
-    public function loggingExecutedTime(){
+    public function loggingExecutedTime()
+    {
         $dateTime = new \DateTime();
         $this->lastExec = $dateTime->format('Y-m-d H:i:s');
         \Yii::$app->db_api->createCommand('UPDATE rabbit_queues SET start_executing=NULL, last_executed=:datetime WHERE consumer_class_name=:consumerCN AND organization_id=:orgId',
-            [ ':consumerCN' => $this->consumerClass,
-              ':orgId' => $this->orgId,
-              ':datetime' => $this->lastExec,
+            [':consumerCN' => $this->consumerClass,
+             ':orgId'      => $this->orgId,
+             ':datetime'   => $this->lastExec,
             ]
         )->execute();
     }
@@ -154,6 +156,41 @@ abstract class AbstractDaemonController extends DaemonController
         \Yii::$app->db_api->close();
         \Yii::$app->db_api->open();
         //}
+    }
+    
+    /**
+     * send to FCM when consumer complete work
+     * */
+    public function noticeToFCM(): void
+    {
+        $arFB = [
+            'dictionaries',
+            'queue' => $this->queueName,
+        ];
+        if (!is_null($this->orgId)) {
+            $arFB['organization'] = $this->orgId;
+        }
+        $count = \Yii::$app->get('rabbit')->setQueue($this->queueName)->checkQueueCount();
+        
+        FireBase::getInstance()->update($arFB, [
+            'last_executed'  => $this->lastExec,
+            'plain_executed' => $this->lastTimeout,
+            'count'          => $count,
+        ]);
+    }
+    
+    /**
+     * Get last timeout from last exec time
+     * @return string|null
+     */
+    public function getLastTimeout()
+    {
+        if (!is_null($this->lastExec)) {
+            $lastExec = new \DateTime($this->lastExec);
+            $timeOut = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
+            return date('Y-m-d H:i:s', $timeOut);
+        }
+        return null;
     }
     
     /**

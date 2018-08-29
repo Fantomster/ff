@@ -25,25 +25,18 @@ class ConsumerDaemonController extends AbstractDaemonController
      */
     public function doJob($job)
     {
-        if(!is_null($this->lastExec)){
-            $lastExec = new \DateTime($this->lastExec);
-            $timeOut = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
-        }
-        
         $this->renewConnections();
-//        $row = \json_decode($job->body, true);
         
         try {
-            if (!is_null($this->lastExec) && date('Y-m-d H:i:s', $timeOut) > date('Y-m-d H:i:s')) {
-                $this->log(PHP_EOL . " ERROR: " . 'timeout > date');
+            if (!is_null($this->lastExec) && $this->lastTimeout > date('Y-m-d H:i:s')) {
                 $success = true;
             } else {
                 $this->createConsumer();
                 $this->consumer->data = $job->body;
                 $this->consumer->getData();
                 $success = $this->consumer->saveData();
-                $this->log(PHP_EOL . " ERROR: " . 'timeout < date');
                 $this->loggingExecutedTime();
+                $this->noticeToFCM();
             }
 //            if (!is_array($row)) {
 //                throw new \Exception('Message is not array! ' . PHP_EOL . print_r($row, true));

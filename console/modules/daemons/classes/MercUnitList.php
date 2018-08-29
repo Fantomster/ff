@@ -23,14 +23,16 @@ class MercUnitList extends MercDictConsumer
         {
             $model = VetisUnit::findOne(['guid' => $item->guid]);
 
-            if($model == null)
+            if($model == null) {
                 $model = new VetisUnit();
+            }
             $attributes =  json_decode(json_encode($item), true);
             $model->setAttributes($attributes);
             $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
             $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
-            if (!$model->save())
+            if (!$model->save()) {
                 $this->result = false;
+            }
         }
     }
 

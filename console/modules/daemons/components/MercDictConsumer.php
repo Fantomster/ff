@@ -52,11 +52,13 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         do {
             $response = $this->instance->sendRequest($this->method, $this->request);
             $list = $response->{$this->listName};
-            if ($list->count > 0)
+            if ($list->count > 0) {
                 $this->saveList($list->{$this->listItemName});
+            }
 
-            if ($list->count < $list->total)
+            if ($list->count < $list->total) {
                 $this->request->listOptions->offset += $list->count;
+            }
 
         } while ($list->total > ($list->count + $list->offset));
     }

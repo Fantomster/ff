@@ -66,7 +66,7 @@ abstract class AbstractDaemonController extends DaemonController
      */
     public function createConsumer()
     {
-        if (!is_null($this->orgId)) {
+        if (!empty($this->orgId)) {
             $this->getConsumer(new $this->consumerClassName($this->orgId));
         } else {
             $this->getConsumer(new $this->consumerClassName);

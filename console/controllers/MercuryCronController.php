@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use api\common\models\merc\mercPconst;
 use api\common\models\RabbitQueues;
 use common\models\vetis\VetisCountry;
 use common\models\vetis\VetisPurpose;
@@ -64,13 +65,14 @@ class MercuryCronController extends Controller
 
     public function actionTest()
     {
+        $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
         echo "GET UNITS" . PHP_EOL;
-        VetisUnit::getUpdateData();
+        VetisUnit::getUpdateData($org_id);
         echo "GET PURPOSE" . PHP_EOL;
-        VetisPurpose::getUpdateData();
-        echo "GET PURPOSE" . PHP_EOL;
-        VetisCountry::getUpdateData();
+        VetisPurpose::getUpdateData($org_id);
+        echo "GET COUNTRY" . PHP_EOL;
+        VetisCountry::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 }

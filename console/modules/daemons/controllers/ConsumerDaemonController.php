@@ -12,7 +12,7 @@ class ConsumerDaemonController extends AbstractDaemonController
      */
     public function getQueueName()
     {
-        if (!is_null($this->orgId)) {
+        if (!empty($this->orgId)) {
             return $this->consumerClass . '_' . $this->orgId;
         }
         return $this->consumerClass;

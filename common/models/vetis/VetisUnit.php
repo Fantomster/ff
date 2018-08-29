@@ -4,6 +4,7 @@ namespace common\models\vetis;
 
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\UpdateDictInterface;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use Yii;
@@ -116,9 +117,10 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData()
+    public static function getUpdateData($org_id)
     {
         try {
+            $load = new Dicts();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercUnitList'])->orderBy(['last_executed' => SORT_DESC])->one();
             if($queue == null) {
@@ -138,10 +140,10 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
-            $instance = dictsApi::getInstance();
+            $instance = dictsApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-            if (!is_null($queue->organization_id)) {
+            if (!empty($queue->organization_id)) {
                 $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
             }
             else {
@@ -155,6 +157,7 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
+            var_dump($e->getMessage());
         }
     }
 }

@@ -32,9 +32,8 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             $this->org_id = $org_id;
         }
         else {
-           $this->org_id = (mercPconst::findOne())->org;
+           $this->org_id = (mercPconst::findOne('1'))->org;
         }
-
     }
 
     /**

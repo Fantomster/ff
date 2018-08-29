@@ -119,7 +119,7 @@ class dictsApi extends baseApi
      * @return getPurposeListRequest
      * @throws Exception
      */
-    public function getPurposeChangeList($options)
+    public function getPurposeChangesList($options)
     {
         $client = $this->getSoapClient('dicts');
 

@@ -13,6 +13,6 @@ namespace console\modules\daemons\components;
  * */
 interface UpdateDictInterface
 {
-    public static function getUpdateData();
+    public static function getUpdateData($org_id);
 
 }

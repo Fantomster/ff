@@ -2,6 +2,7 @@
 
 namespace common\components;
 
+use backend\models\UserSearch;
 use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
@@ -1509,11 +1510,12 @@ class ParserTorg12
         return $has;
     }
 
-    public function sendMailNotEqualSum($email, $name_file)
+    public function sendMailNotEqualSum($email, $name_file, $language)
     {
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */
         $mailer = Yii::$app->mailer;
+        Yii::$app->language = $language;
         $subject = Yii::t('app', 'common.mail.error.subject', ['ru' => 'В вашей накладной ошибка!']);
 
         if (!empty($email)) {
@@ -1525,7 +1527,7 @@ class ParserTorg12
             $viev .= ' Просим обратить внимание на ошибку и подтвердить достоверность передаваемых данных.';
             $mailer->compose()
                 ->setTo($email)
-                ->setFrom('noreply@mixcart.ru')
+                ->setFrom(['noreply@mixcart.ru' => 'noreply@mixcart.ru'])
                 ->setSubject($subject)
                 ->setTextBody($viev)
                 ->send();

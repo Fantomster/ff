@@ -18,6 +18,7 @@ use Yii;
  * @property int $is_active
  * @property string $created_at
  * @property string $updated_at
+ * @property string $language
  *
  * @property Organization $organization
  */
@@ -55,6 +56,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
             [['organization_id', 'server_port', 'server_ssl', 'is_active'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['server_type', 'server_host', 'user', 'password'], 'string', 'max' => 255],
+            [['language'], 'string', 'max' => 3],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
         ];
     }
@@ -75,7 +77,8 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
             'password' => 'Пароль',
             'is_active' => 'Активен',
             'created_at' => 'Дата создания',
-            'updated_at' => 'Updated At',
+            'updated_at' => 'Дата изменения',
+            'language' => 'Язык',
         ];
     }
 

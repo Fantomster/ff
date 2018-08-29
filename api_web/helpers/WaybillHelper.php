@@ -16,7 +16,7 @@ use common\models\WaybillContent;
  * */
 class WaybillHelper
 {
-    /**@var int const for mercuriy service id in all_service table*/
+    /**@var int const for mercuriy service id in all_service table */
     const MERC_SERVICE_ID = 4;
     
     /**
@@ -24,7 +24,8 @@ class WaybillHelper
      * @param string $uuid VSD uuid
      * @return boolean
      * */
-    public function createWaybill($uuid){
+    public function createWaybill($uuid)
+    {
         $transaction = \Yii::$app->db->beginTransaction();
         $orgId = (\Yii::$app->user->identity)->organization_id;
         $modelWaybill = new Waybill();
@@ -33,12 +34,12 @@ class WaybillHelper
         
         $modelWaybillContent = new WaybillContent();
         $modelWaybillContent->merc_uuid = $uuid;
-        try{
+        try {
             $modelWaybill->save();
             $modelWaybillContent->waybill_id = $modelWaybill->id;
             $modelWaybillContent->save();
             $transaction->commit();
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $transaction->rollBack();
             \Yii::error($t->getMessage(), __METHOD__);
             return false;

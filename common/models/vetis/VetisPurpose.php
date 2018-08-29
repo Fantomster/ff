@@ -44,6 +44,7 @@ class VetisPurpose extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name'], 'string', 'max' => 255],

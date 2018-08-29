@@ -47,6 +47,7 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'addressView'], 'string', 'max' => 255],

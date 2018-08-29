@@ -47,6 +47,7 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'country_guid', 'addressView'], 'string', 'max' => 255],

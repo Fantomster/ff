@@ -48,6 +48,7 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'type'], 'integer'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullname', 'fio', 'inn', 'kpp', 'addressView'], 'string', 'max' => 255],
         ];

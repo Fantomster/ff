@@ -16,7 +16,8 @@ use yii\helpers\ArrayHelper;
 /**
  * UserSearch represents the model behind the search form about `common\models\User`.
  */
-class UserSearch extends User {
+class UserSearch extends User
+{
 
     public $role;
     public $full_name;
@@ -35,14 +36,16 @@ class UserSearch extends User {
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return "{{%user}}";
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['id', 'status', 'organization_id', 'sms_allow', 'gender', 'email_allow', 'job', 'subscribe', 'sms_subscribe'], 'integer'],
             [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id', 'job_name', 'language'], 'safe'],
@@ -52,7 +55,8 @@ class UserSearch extends User {
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -64,7 +68,8 @@ class UserSearch extends User {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $role_id = null) {
+    public function search($params, $role_id = null)
+    {
         $query = User::find();
 
         $userTable = User::tableName();
@@ -133,7 +138,7 @@ class UserSearch extends User {
 
         // grid filtering conditions
         $query->andFilterWhere([
-            $userTable.'.id' => $this->id,
+            $userTable . '.id' => $this->id,
             'status' => $this->status,
             'logged_in_at' => $this->logged_in_at,
             'created_at' => $this->created_at,
@@ -144,18 +149,18 @@ class UserSearch extends User {
         ]);
 
         $query->andFilterWhere(['like', 'user.email', $this->email])
-                ->andFilterWhere(['like', 'logged_in_ip', $this->logged_in_ip])
-                ->andFilterWhere(['like', 'created_ip', $this->created_ip])
-                ->andFilterWhere(['like', "$roleTable.name", $this->role])
-                ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
-                ->andFilterWhere(['like', "$organizationTable.type_id", $this->org_type_id])
-                ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
-                ->andFilterWhere(['like', "$userTable.subscribe", $this->subscribe])
-                ->andFilterWhere(['like', "$userTable.sms_subscribe", $this->sms_subscribe])
-                ->andFilterWhere(['like', "$profileTable.phone", $this->phone])
-                ->andFilterWhere(['like', "$profileTable.gender", $this->gender])
-                ->andFilterWhere(['like', "$profileTable.job_id", $this->job])
-                ->andFilterWhere(['like', "$jobTable.name_job", $this->job_name]);
+            ->andFilterWhere(['like', 'logged_in_ip', $this->logged_in_ip])
+            ->andFilterWhere(['like', 'created_ip', $this->created_ip])
+            ->andFilterWhere(['like', "$roleTable.name", $this->role])
+            ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
+            ->andFilterWhere(['like', "$organizationTable.type_id", $this->org_type_id])
+            ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
+            ->andFilterWhere(['like', "$userTable.subscribe", $this->subscribe])
+            ->andFilterWhere(['like', "$userTable.sms_subscribe", $this->sms_subscribe])
+            ->andFilterWhere(['like', "$profileTable.phone", $this->phone])
+            ->andFilterWhere(['like', "$profileTable.gender", $this->gender])
+            ->andFilterWhere(['like', "$profileTable.job_id", $this->job])
+            ->andFilterWhere(['like', "$jobTable.name_job", $this->job_name]);
 
         return $dataProvider;
     }
@@ -165,11 +170,12 @@ class UserSearch extends User {
      *
      * @return array
      */
-    public static function getListToStatus() {
+    public static function getListToStatus()
+    {
 
-        $models[]=['id'=>'0','name_allow'=>'Не активен'];
-        $models[]=['id'=>'1','name_allow'=>'Активен'];
-        $models[]=['id'=>'2','name_allow'=>'Ожидается подтверждение E-mail'];
+        $models[] = ['id' => '0', 'name_allow' => 'Не активен'];
+        $models[] = ['id' => '1', 'name_allow' => 'Активен'];
+        $models[] = ['id' => '2', 'name_allow' => 'Ожидается подтверждение E-mail'];
 
         return
             ArrayHelper::map($models, 'id', 'name_allow');
@@ -181,27 +187,24 @@ class UserSearch extends User {
      *
      * @return array
      */
-    public static function getListToLanguage() {
+    public static function getListToLanguage()
+    {
 
         $sql = 'SELECT DISTINCT `language` FROM `user` ORDER BY `language`';
         $models0 = \Yii::$app->db->createCommand($sql)->queryAll();
         $models = array();
-        foreach($models0 as $m) {
-            $models[]=['id'=>$m['language'],'name_allow'=>$m['language']];
+        foreach ($models0 as $m) {
+            $models[] = ['id' => $m['language'], 'name_allow' => $m['language']];
         }
 
-        /*print "<pre>";
-        print_r($models);
-        print "</pre>";
-        die();*/
-            /*$models = User::find()
-            ->select(['language'])
-            ->asArray()
-            ->all();
-            $models = ActiveQuery::removeDuplicateModels($models);*/
+        /*$models = User::find()
+        ->select(['language'])
+        ->asArray()
+        ->all();
+        $models = ActiveQuery::removeDuplicateModels($models);*/
 
-            return
-                ArrayHelper::map($models, 'id','name_allow');
-        }
+        return
+            ArrayHelper::map($models, 'id', 'name_allow');
+    }
 
 }

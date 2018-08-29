@@ -270,6 +270,7 @@ class EmailIntegrationController extends Controller
         ];
 
         foreach ($email['attachment'] as $name_file => $file) {
+            //print $setting->language.PHP_EOL;
             //Узнаём тип вложения
             $mime_type = array_keys($file)[0];
             //Собираем только разрешённые вложения
@@ -278,12 +279,12 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
-            $this->log([
+            /*$this->log([
                 str_pad('', 100, '_'),
                 'EMAIL ID: ' . $email['id'],
                 'FROM: ' . $email['from']['email'],
                 'SUBJECT: ' . $email['subject'] . PHP_EOL
-            ]);
+            ]);*/
 
             //Получаем тело файла
             $content = array_values($file)[0];
@@ -304,7 +305,7 @@ class EmailIntegrationController extends Controller
                 'file_hash_summ' => md5($file_content),
             ]);
             if (!empty($model)) {
-                $this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
+                //$this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
                 continue;
             }
             //Сохраняем темп файл
@@ -314,7 +315,7 @@ class EmailIntegrationController extends Controller
             try {
                 // запускаем обработку накладной
                 $parser->parse();
-                if ($parser->sumNotEqual === true) $parser->sendMailNotEqualSum($email['from']['email'], $name_file);
+                if ($parser->sumNotEqual === true) $parser->sendMailNotEqualSum($email['from']['email'], $name_file, $setting->language);
             } catch (ParseTorg12Exception $e) {
                 $this->log([
                     PHP_EOL,

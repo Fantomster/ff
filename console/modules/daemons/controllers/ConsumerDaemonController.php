@@ -62,7 +62,7 @@ class ConsumerDaemonController extends AbstractDaemonController
                 throw new \Exception('$success false');
             }
         } catch (\Exception $e) {
-            $this->log(PHP_EOL . " ERROR: " . $e->getMessage());
+            $this->log(PHP_EOL . " ERROR: " . $e->getMessage().PHP_EOL.$e->getTraceAsString());
             $this->nask($job);
         }
         return true;

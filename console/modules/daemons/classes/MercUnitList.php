@@ -7,8 +7,6 @@
  */
 
 namespace console\modules\daemons\classes;
-
-use api\common\models\RabbitQueues;
 use common\models\vetis\VetisUnit;
 use console\modules\daemons\components\MercDictConsumer;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
@@ -38,10 +36,11 @@ class MercUnitList extends MercDictConsumer
 
     protected function init()
     {
-        $this->instance = dictsApi::getInstance(5144);
-        $this->instance->setMode(dictsApi::GET_UPDATES_DICTS);
-        $this->method = (RabbitQueues::findOne(['consumer_class_name' => get_class($this)]) === null) ? 'getUnitList' : 'getUnitChangesList';
-        $this->listName = 'unitList';
-        $this->listItemName = 'unit';
+        $this->instance = dictsApi::getInstance($this->org_id);
+        $data = json_decode($this->data, true);
+        $this->method = $data['method'];
+        $this->request = $data['request'];
+        $this->listName = $data['struct']['listName'];
+        $this->listItemName = $data['struct']['listItemName'];
     }
 }

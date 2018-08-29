@@ -2,11 +2,6 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api;
 
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\Ikar;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
 use api\common\models\merc\mercDicconst;
 use yii\base\Component;
@@ -27,6 +22,8 @@ class baseApi extends Component
     protected $wsdls;
     protected $query_timeout;
     protected $mode = self::GET_USERDATA;
+    protected $system;
+    protected $wsdlClassName;
 
     protected static $_instance = [];
 
@@ -48,45 +45,16 @@ class baseApi extends Component
         return self::$_instance[$key];
     }
 
-    protected function getSoapClient($system)
+    protected function getSoapClient()
     {
-        if ($this->_client === null)
-            switch ($system) {
-            case 'mercury': $this->_client = (new Mercury(
-                    ['url' => $this->wsdls[$system]['wsdl'],
+        $className = $this->wsdlClassName;
+        if ($this->_client === null) {
+            $this->_client = (new $className(
+                    ['url' => $this->wsdls[$this->system]['wsdl'],
                     'login' => $this->login,
                     'password' => $this->pass,
                     'exceptions' => 1,
                     'trace' => 1]))->soapClient;
-                break;
-            case 'cerber': $this->_client = (new Cerber(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
-            case 'dicts': $this->_client = (new Dicts(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
-            case 'ikar': $this->_client = (new Ikar(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
-            case 'product': $this->_client = (new Products(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
         }
 
         return $this->_client;
@@ -95,5 +63,12 @@ class baseApi extends Component
     protected function getLocalTransactionId($method)
     {
         return base64_encode($method.time());
+    }
+
+    public function sendRequest($method, $request)
+    {
+        $client = $this->getSoapClient();
+        $request = json_decode($request, true);
+        return $client->$method($request);
     }
 }

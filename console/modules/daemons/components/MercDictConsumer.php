@@ -8,8 +8,6 @@
 
 namespace console\modules\daemons\components;
 
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
-
 /**
  * Class consumer with realization ConsumerInterface
  * and containing AbstractConsumer methods
@@ -17,23 +15,32 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 {
     protected $result = true;
-    protected $count = 100;
     protected $instance;
     protected $method;
+    protected $startDate;
     protected $listName;
     protected $listItemName;
+    protected $request;
+    protected $org_id;
+
+    public function __construct($org_id = null)
+    {
+        $this->org_id = $org_id;
+    }
 
     /**
      * Обработка и сохранение результата
      * @param $list
      */
-    protected function saveList($list) {
+    protected function saveList($list)
+    {
     }
 
     /**
      * инициализация свойств класса
      */
-    protected function init(){
+    protected function init()
+    {
     }
 
     /**
@@ -43,23 +50,18 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     {
         // TODO: Implement getData() method.
         $this->init();
-        $listOptions = new ListOptions();
-        $listOptions->count = $this->count;
-        $listOptions->offset = 0;
-
         do {
-           $response = $this->instance->{$this->method}($listOptions);
-           $list = $response->{$this->listName};
+            $response = $this->instance->sendRequest($this->method, $this->request);
+            $list = $response->{$this->listName};
+            if ($list->count > 0)
+                $this->saveList($list->{$this->listItemName});
 
-            if($list->count > 0)
-               $this->saveList($list->{$this->listItemName});
-
-            if($list->count < $list->total)
-                $listOptions->offset += $list->count;
+            if ($list->count < $list->total)
+                $this->request->listOptions->offset += $list->count;
 
         } while ($list->total > ($list->count + $list->offset));
     }
-    
+
     /**
      * @return mixed
      */

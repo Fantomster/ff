@@ -48,7 +48,6 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function getData()
     {
-        // TODO: Implement getData() method.
         $this->init();
         do {
             $response = $this->instance->sendRequest($this->method, $this->request);
@@ -67,7 +66,6 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function saveData()
     {
-        // TODO: Implement saveData() method.
         return $this->result;
     }
 }

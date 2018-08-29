@@ -26,7 +26,7 @@ class WaybillHelper
      * */
     public function createWaybill($uuid)
     {
-        $transaction = \Yii::$app->db->beginTransaction();
+        $transaction = \Yii::$app->db_api->beginTransaction();
         $orgId = (\Yii::$app->user->identity)->organization_id;
         $modelWaybill = new Waybill();
         $modelWaybill->acquirer_id = $orgId;

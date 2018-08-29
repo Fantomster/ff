@@ -24,7 +24,7 @@ class WaybillHelper
      * @param string $uuid VSD uuid
      * @return boolean
      * */
-    public function createWaybill($uuid)
+    public function createWaybillFromVsd($uuid)
     {
         $transaction = \Yii::$app->db_api->beginTransaction();
         $orgId = (\Yii::$app->user->identity)->organization_id;
@@ -46,5 +46,15 @@ class WaybillHelper
         }
         
         return true;
+    }
+    
+    /**
+     * Check if exist row with $uuid
+     * @param string $uuid
+     * @return boolean
+     * */
+    public function checkWaybillForVsdUuid($uuid)
+    {
+        return WaybillContent::find()->where(['merc_uuid' => $uuid])->exists();
     }
 }

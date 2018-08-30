@@ -112,7 +112,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
                 'className'     => 'ConsumerDaemonController',
                 'enabled'       => !$kill,
                 'consumerClass' => $row['consumer_class_name'],
-                'orgId'         => $row['organization_id'] ?? '',
+                'orgId'         => $row['organization_id'],
                 'demonize'      => 0,
                 'hardKill'      => $kill,
             ];

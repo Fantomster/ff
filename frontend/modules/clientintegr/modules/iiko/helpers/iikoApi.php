@@ -89,15 +89,18 @@ class iikoApi
         if (!empty($result) && isset($result['productDto'])) {
             foreach ($result['productDto'] as $item) {
                 $id = $item['id'];
-                unset($item['id']);
                 if (isset($item['productGroupType'])) {
                     $categories[$id] = $item;
                 } else {
-                    $products[$id] = $item;
-                    $units[] = $item['mainUnit'];
+                    if ($item['productType'] == 'GOODS') {
+                        $products[$id] = $item;
+                        $units[] = $item['mainUnit'];
+                    }
                 }
             }
         }
+
+        $result = null;
 
         return [
             'categories' => $categories,

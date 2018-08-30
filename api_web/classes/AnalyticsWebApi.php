@@ -60,7 +60,7 @@ class AnalyticsWebApi extends WebApi
         $query->select(
             [
                 'organization.name as name',
-                'FORMAT(SUM(order_content.quantity * order_content.price), 2) AS total_sum',
+                'SUM(order_content.quantity * order_content.price) AS total_sum',
                 'COUNT(order_content.order_id) AS total_count_order',
             ]
         )->from('order_content')
@@ -89,7 +89,12 @@ class AnalyticsWebApi extends WebApi
             $query->limit($limit);
         }
 
-        return $query->all();
+        $result = [];
+        foreach ($query->all() as $data) {
+            $data['total_sum'] = round($data['total_sum'], 2);
+            $result[] = $data;
+        }
+        return $result;
 
     }
 
@@ -107,8 +112,6 @@ class AnalyticsWebApi extends WebApi
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
         // ограничение на собственные заказы
         $whereParams = ['order.client_id' => $this->user->organization->id];
-
-
 
         // фильтр - поставщик
         if (isset($post['search']['vendor_id'])) {
@@ -130,7 +133,7 @@ class AnalyticsWebApi extends WebApi
             [
                 'catalog_base_goods.product as name',
                 'FORMAT(SUM(order_content.quantity), 2) AS count',
-                'FORMAT(SUM(order_content.quantity * order_content.price), 2) AS total',
+                'SUM(order_content.quantity * order_content.price) AS total_sum',
                 'order.currency_id AS currency_id',
                 'currency.symbol AS currency',
             ]
@@ -139,7 +142,7 @@ class AnalyticsWebApi extends WebApi
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency', 'currency.id = order.currency_id')
             ->andWhere($whereParams)
-            ->groupBy('order_content.product_id')->orderBy(['total' => SORT_ASC]);
+            ->groupBy('order_content.product_id')->orderBy(['total_sum' => SORT_ASC]);
 
         // фильтр - время создания заказа
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
@@ -162,8 +165,14 @@ class AnalyticsWebApi extends WebApi
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
+
+        $result = [];
+        foreach ((array)$dataProvider->models as $data) {
+            $data['total_sum'] = round($data['total_sum'], 2);
+            $result[] = $data;
+        }
         return [
-            'result' => $dataProvider->models,
+            'result' => $result,
             'pagination' => [
                 'page' => ($dataProvider->pagination->page + 1),
                 'page_size' => $dataProvider->pagination->pageSize,
@@ -203,7 +212,7 @@ class AnalyticsWebApi extends WebApi
         $query = new Query;
         $query->select(
             [
-                'FORMAT(SUM(order_content.quantity * order_content.price), 2) AS total_sum',
+                'SUM(order_content.quantity * order_content.price) AS total_sum',
                 'DATE_FORMAT(order.created_at, "%d.%m.%Y") AS date',
             ]
         )->from('order_content')
@@ -229,8 +238,13 @@ class AnalyticsWebApi extends WebApi
             $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
 
+        $result = [];
+        foreach ($query->all() as $data) {
+            $data['total_sum'] = round($data['total_sum'], 2);
+            $result[] = $data;
+        }
         return [
-            'result' => $query->all(),
+            'result' => $result,
         ];
 
     }
@@ -256,8 +270,16 @@ class AnalyticsWebApi extends WebApi
      */
     public function clientVendors($post)
     {
+        $total = 0;
+        $result = $this->vendorTurnover($post, 15);
+        foreach ($result as $row) {
+            $total += $row['total_sum'];
+        }
+        foreach ($result as $k => $v) {
+            $result[$k]['percent_sum'] = round(($v['total_sum'] / $total) * 100, 2);
+        }
         return [
-            'result' => $this->vendorTurnover($post, 15),
+            'result' => $result,
         ];
     }
 

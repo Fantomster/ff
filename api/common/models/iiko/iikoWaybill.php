@@ -251,7 +251,9 @@ class iikoWaybill extends \yii\db\ActiveRecord
             $item->addChild('ndsPercent', $row->vat / 100);
 
             $item->addChild('sum', round($row->sum + ($row->sum * $row->vat / 10000), 2));
-            $item->addChild('price', round($row->sum / $row->quant, 2));
+          //  $item->addChild('price', round($row->sum / $row->quant, 2));
+            $item->addChild('price', round(($row->sum  + round($row->sum/100*$row->vat/100)) / $row->quant, 2));
+
             $item->addChild('isAdditionalExpense', false);
             $item->addChild('store', $model->store->uuid);
 

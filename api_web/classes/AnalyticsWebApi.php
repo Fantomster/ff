@@ -81,8 +81,7 @@ class AnalyticsWebApi extends WebApi
         }
         // фильтр - менеджер
         if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
-            $query->leftJoin('order_assignment', 'order.id = order_assignment.order_id');
-            $query->andWhere(['order_assignment.assigned_to' => $post['search']['employee_id']]);
+            $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
 
         // лимит выборки
@@ -108,6 +107,8 @@ class AnalyticsWebApi extends WebApi
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
         // ограничение на собственные заказы
         $whereParams = ['order.client_id' => $this->user->organization->id];
+
+
 
         // фильтр - поставщик
         if (isset($post['search']['vendor_id'])) {
@@ -151,8 +152,7 @@ class AnalyticsWebApi extends WebApi
         }
         // фильтр - менеджер
         if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
-            $query->leftJoin('order_assignment', 'order.id = order_assignment.order_id');
-            $query->andWhere(['order_assignment.assigned_to' => $post['search']['employee_id']]);
+            $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
 
         $dataProvider = new ArrayDataProvider([
@@ -226,8 +226,7 @@ class AnalyticsWebApi extends WebApi
         }
         // фильтр - менеджер
         if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
-            $query->leftJoin('order_assignment', 'order.id = order_assignment.order_id');
-            $query->andWhere(['order_assignment.assigned_to' => $post['search']['employee_id']]);
+            $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
 
         return [

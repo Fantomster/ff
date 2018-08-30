@@ -43,6 +43,24 @@ class VetisPurpose extends \yii\db\ActiveRecord implements UpdateDictInterface
     }
 
     /**
+     * Returns the primary key name(s) for this AR class.
+     * The default implementation will return the primary key(s) as declared
+     * in the DB table that is associated with this AR class.
+     *
+     * If the DB table does not declare any primary key, you should override
+     * this method to return the attributes that you want to use as primary keys
+     * for this AR class.
+     *
+     * Note that an array should be returned even for a table with single primary key.
+     *
+     * @return string[] the primary keys of the associated database table.
+     */
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()

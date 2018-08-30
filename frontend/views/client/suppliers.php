@@ -155,10 +155,10 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'contentOptions' => ['class' => 'text-bold', 'style' => 'vertical-align:middle;width:5%;font-size:14px'],
         'value' => function ($data) {
-            if(isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code>0){
+            if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code > 0) {
                 $text = Yii::t('app', 'frontend.views.client.suppliers.edi_alt_text', ['ru' => 'Поставщик работает через систему электронного документооборота']);
                 return Html::img(Url::to('/img/edi-logo.png'), ['alt' => $text, 'title' => $text, 'width' => 40]);
-            }else{
+            } else {
                 return '';
             }
         }
@@ -261,7 +261,7 @@ $gridColumnsCatalog = [
                         ]
                     );
                 } else {
-                    //Редактирование каталога запрещенно
+                    //Редактирование каталога запрещено
                     $result .= Html::a(
                         '<i class="fa fa-pencil"></i>', '#',
                         [
@@ -319,26 +319,26 @@ $gridColumnsCatalog = [
             }
 
             //Кнопка сопоставления номенклатуры
-           /* $result .= Html::button('<i class="fa fa-paperclip m-r-xs"></i>', [
-                'class' => 'btn btn-default btn-sm',
-                'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
-            ]);
-*/
-           /* Временно отключена кнопка глобального сопоставления - до внедрения Rabbit и нового интерфейса сопоставления
-           /*
-            $result .= Html::beginTag('span', ['class'=>'text-right dropdown']);
-            $result .= Html::button(' <i class="fa fa-paperclip m-r-xs"></i></button>',
-                ['type'=>'button', 'class'=>'btn btn-default btn-sm', 'data-toggle'=>'dropdown']);
-            $result .= DropdownX::widget([
-                'options'=>['class'=>'pull-right'], // for a right aligned dropdown menu
-                'items' => [
-                    // ['label' => 'R-keeper', 'url' => '/clientintegr/rkws/fullmap/index'],
-                    '<li><a href="/clientintegr/rkws/fullmap/index" data-pjax=0>R-keeper</a> </li>'
-                ],
-            ]);
-            $result .= Html::endTag('span');
+            /* $result .= Html::button('<i class="fa fa-paperclip m-r-xs"></i>', [
+                 'class' => 'btn btn-default btn-sm',
+                 'data' => ['id' => $data["supp_org_id"], 'type' => (($data->status == RelationSuppRestPotential::RELATION_STATUS_POTENTIAL) ? 1 : 0)]
+             ]);
+ */
+            /* Временно отключена кнопка глобального сопоставления - до внедрения Rabbit и нового интерфейса сопоставления
+            /*
+             $result .= Html::beginTag('span', ['class'=>'text-right dropdown']);
+             $result .= Html::button(' <i class="fa fa-paperclip m-r-xs"></i></button>',
+                 ['type'=>'button', 'class'=>'btn btn-default btn-sm', 'data-toggle'=>'dropdown']);
+             $result .= DropdownX::widget([
+                 'options'=>['class'=>'pull-right'], // for a right aligned dropdown menu
+                 'items' => [
+                     // ['label' => 'R-keeper', 'url' => '/clientintegr/rkws/fullmap/index'],
+                     '<li><a href="/clientintegr/rkws/fullmap/index" data-pjax=0>R-keeper</a> </li>'
+                 ],
+             ]);
+             $result .= Html::endTag('span');
 
-*/
+ */
             //Кнопка удаления
             $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                 'class' => 'btn btn-danger btn-sm del',
@@ -436,6 +436,9 @@ $gridColumnsCatalog = [
                         ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label(Yii::t('message', 'frontend.views.client.suppliers.org', ['ru' => 'Организация'])) ?>
+                    <?= $form->field($organization, 'inn')->textInput(['id' => 'organization-view-supplirs-inn']); ?>
+                    <?= $form->field($organization, 'kpp')->textInput(['id' => 'organization-view-supplirs-kpp']); ?>
+                    <?= $form->field($organization, 'action')->hiddenInput(['value' => 'new'])->label(false); ?>
                 </div>
                 <div class="box-footer">
                     <div class="form-group">

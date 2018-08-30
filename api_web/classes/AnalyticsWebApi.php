@@ -68,7 +68,7 @@ class AnalyticsWebApi extends WebApi
             ->leftJoin('organization', 'organization.id = order.vendor_id')
             ->leftJoin('currency', 'currency.id = order.currency_id')
             ->andWhere($whereParams)
-            ->groupBy('order.vendor_id')->orderBy(['total_sum' => SORT_ASC]);
+            ->groupBy('order.vendor_id')->orderBy(['total_sum' => SORT_DESC]);
 
         // фильтр - время создания заказа
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
@@ -88,6 +88,9 @@ class AnalyticsWebApi extends WebApi
         if ($limit) {
             $query->limit($limit);
         }
+
+
+        print_r($query->all()); exit;
 
         $result = [];
         foreach ($query->all() as $data) {
@@ -142,7 +145,7 @@ class AnalyticsWebApi extends WebApi
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency', 'currency.id = order.currency_id')
             ->andWhere($whereParams)
-            ->groupBy('order_content.product_id')->orderBy(['total_sum' => SORT_ASC]);
+            ->groupBy('order_content.product_id')->orderBy(['total_sum' => SORT_DESC]);
 
         // фильтр - время создания заказа
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
@@ -219,7 +222,7 @@ class AnalyticsWebApi extends WebApi
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency', 'currency.id = order.currency_id')
             ->andWhere($whereParams)
-            ->groupBy('date')->orderBy(['total_sum' => SORT_ASC]);
+            ->groupBy('date')->orderBy(['total_sum' => SORT_DESC]);
 
         // фильтр - время создания заказа
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {

@@ -218,9 +218,7 @@ class WaybillController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={
-     *                  "search": {"product_name":"часть имени"}
-     *                  }
+     *                  default={}
      *              )
      *         )
      *     ),
@@ -229,7 +227,11 @@ class WaybillController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                      "result": {}
+     *                  "result": {
+     *                      "INCOMING": "Входящий ВСД",
+     *                      "OUTGOING": "Исходящий ВСД",
+     *                      "": "Все ВСД"
+     *                  }
      *              }
      *          )
      *     ),

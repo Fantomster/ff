@@ -238,9 +238,6 @@ class AnalyticsWebApi extends WebApi
             $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
 
-
-        print_r($query->all()); exit;
-
         $result = [];
         foreach ($query->all() as $data) {
             $data['total_sum'] = round($data['total_sum'], 2);

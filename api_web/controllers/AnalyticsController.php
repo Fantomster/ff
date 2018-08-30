@@ -72,7 +72,7 @@ class AnalyticsController extends WebApiController
      *                      {
      *                          "name": "Товар 12",
      *                          "count": 32.01,
-     *                          "total": 102,
+     *                          "total": 1021,
      *                          "currency_id": 1,
      *                          "currency": "RUB"
      *                      },
@@ -105,82 +105,6 @@ class AnalyticsController extends WebApiController
     public function actionClientGoods()
     {
         $this->response = $this->container->get('AnalyticsWebApi')->clientGoods($this->request);
-    }
-
-    /**
-     * @SWG\Post(path="/analytics/client-orders",
-     *     tags={"Analytics"},
-     *     summary="Ресторан: Статистика по поставщикам",
-     *     description="Ресторан: Статистика по поставщикам",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *             @SWG\Property(property="user", ref="#/definitions/User"),
-     *             @SWG\Property(
-     *                  property="request",
-     *                  type="object",
-     *                  default={
-     *                     "search": {
-     *                         "vendor_id": {
-     *                             124,
-     *                             143
-     *                         },
-     *                         "employee_id": 21,
-     *                         "order_status_id": {
-     *                             4,
-     *                             5
-     *                         },
-     *                         "currency_id": 1,
-     *                         "date": {
-     *                             "from": "23.08.2018",
-     *                             "to": "24.08.2018"
-     *                         }
-     *                     }
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                  "result": {
-     *                      {
-     *                          "name": "Поставщик 1",
-     *                          "total_sum": 523801,
-     *                          "total_count_order": 400,
-     *                      },
-     *                      {
-     *                          "name": "Поставщик 231",
-     *                          "total_sum": 3801,
-     *                          "total_count_order": 23,
-     *                      },
-     *                      {
-     *                          "name": "Поставщик 3",
-     *                          "total_sum": 523803,
-     *                          "total_count_order": 12,
-     *                      }
-     *                  }
-     *              }
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "UnauthorizedHttpException"
-     *     )
-     * )
-     */
-    public function actionClientOrders()
-    {
-        $this->response = $this->container->get('AnalyticsWebApi')->clientOrders($this->request);
     }
 
     /**
@@ -226,16 +150,16 @@ class AnalyticsController extends WebApiController
      *              default={
      *                  "result": {
      *                      {
-     *                          "name": "Поставщик 1",
-     *                          "total_sum": 523801,
+     *                          "total_sum": 69521.02,
+     *                          "date": "23.04.2018"
      *                      },
      *                      {
-     *                          "name": "Поставщик 231",
-     *                          "total_sum": 3801,
+     *                          "total_sum": 6952321,
+     *                          "date": "25.04.2018"
      *                      },
      *                      {
-     *                          "name": "Поставщик 3",
-     *                          "total_sum": 523803,
+     *                          "total_sum": 6952321.1,
+     *                          "date": "28.05.2018"
      *                      }
      *                  }
      *              }
@@ -254,6 +178,82 @@ class AnalyticsController extends WebApiController
     public function actionClientPurchases()
     {
         $this->response = $this->container->get('AnalyticsWebApi')->clientPurchases($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/analytics/client-orders",
+     *     tags={"Analytics"},
+     *     summary="Ресторан: Статистика по поставщикам",
+     *     description="Ресторан: Статистика по поставщикам",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *             @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                     "search": {
+     *                         "vendor_id": {
+     *                             124,
+     *                             143
+     *                         },
+     *                         "employee_id": 21,
+     *                         "order_status_id": {
+     *                             4,
+     *                             5
+     *                         },
+     *                         "currency_id": 1,
+     *                         "date": {
+     *                             "from": "23.08.2018",
+     *                             "to": "24.08.2018"
+     *                         }
+     *                     }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Поставщик 12",
+     *                          "total_sum": 695025,
+     *                          "total_count_order": 2323
+     *                      },
+     *                      {
+     *                          "name": "Поставщик 355",
+     *                          "total_sum": 292123,
+     *                          "total_count_order": 21
+     *                      },
+     *                      {
+     *                          "name": "Поставщик 231",
+     *                          "total_sum": 13001,
+     *                          "total_count_order": 1
+     *                      }
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     */
+    public function actionClientOrders()
+    {
+        $this->response = $this->container->get('AnalyticsWebApi')->clientOrders($this->request);
     }
 
     /**
@@ -299,16 +299,22 @@ class AnalyticsController extends WebApiController
      *              default={
      *                  "result": {
      *                      {
-     *                          "name": "Поставщик 1",
-     *                          "total_sum": 523801,
+     *                          "name": "Поставщик 12",
+     *                          "total_sum": 695025,
+     *                          "total_count_order": 12,
+     *                          "percent_sum": 69.5
+     *                      },
+     *                      {
+     *                          "name": "Поставщик 355",
+     *                          "total_sum": 292123,
+     *                          "total_count_order": 21,
+     *                          "percent_sum": 29.2
      *                      },
      *                      {
      *                          "name": "Поставщик 231",
-     *                          "total_sum": 3801,
-     *                      },
-     *                      {
-     *                          "name": "Поставщик 3",
-     *                          "total_sum": 523803,
+     *                          "total_sum": 13001,
+     *                          "total_count_order": 1,
+     *                          "percent_sum": 1.3
      *                      }
      *                  }
      *              }

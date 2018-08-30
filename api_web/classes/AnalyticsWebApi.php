@@ -216,6 +216,9 @@ class AnalyticsWebApi extends WebApi
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
             $query->andWhere('order.created_at >= :date_from',
                 [':date_from' => date('Y-m-d H:i:s', strtotime($post['search']['date']['from'] . ' 00:00:00'))]);
+        } else {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
         }
         if (isset($post['search']['date']['to']) && $post['search']['date']['to']) {
             $query->andWhere('order.created_at <= :date_to',

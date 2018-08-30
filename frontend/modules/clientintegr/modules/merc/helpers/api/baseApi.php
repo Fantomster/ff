@@ -64,10 +64,14 @@ class baseApi extends Component
         return base64_encode($method.time());
     }
 
+    /**
+     * @param string $method
+     * @param array $request
+     * @return mixed
+     */
     public function sendRequest($method, $request)
     {
         $client = $this->getSoapClient();
-        $request = json_decode($request, true);
         return $client->$method($request);
     }
 }

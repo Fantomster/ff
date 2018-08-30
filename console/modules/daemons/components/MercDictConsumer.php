@@ -81,7 +81,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             }
 
             if ($list->count < $list->total) {
-                $this->request->listOptions->offset += $list->count;
+                $this->request['listOptions']['offset'] += $list->count;
             }
 
         } while ($list->total > ($list->count + $list->offset));

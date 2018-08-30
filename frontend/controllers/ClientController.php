@@ -1152,20 +1152,25 @@ class ClientController extends DefaultController
             if (!empty($user)) {
                 $post = Yii::$app->request->post();
                 if ($user->status == 0 && $post) {
+                    $organization->zip_code = '090';
                     $organization->load($post);
                     if ($organization->validate()) {
                         $organization->save();
                         if ($user->email != $organization->email) {
                             $user->email = $organization->email;
                             $user->save();
-                            $currentUser->sendInviteToVendor($user);
-                        }/* else {
-                          if (Yii::$app->request->post('resend_email') == 1) {
-                          $currentUser->sendInviteToVendor($user);
-                          }
-                          } */
+                            if ($organization->action == 'new') $currentUser->sendInviteToVendor($user);
+                            $message = Yii::t('app', 'Сохранено');
+                            return $this->renderAjax('suppliers/_success', ['message' => $message]);
+                        } else {
+                            if ($organization->action == 'new') {
+                                if (Yii::$app->request->post('resend_email') == 1) {
+                                    $currentUser->sendInviteToVendor($user);
+                                }
+                            }
+                        }
                     } else {
-                        $message = 'Не верно заполнена форма!';
+                        $message = 'Неверно заполнена форма!';
                         return $this->renderAjax('suppliers/_success', ['message' => $message]);
                     }
                 }
@@ -2037,7 +2042,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
     }
 
     /**
-     * Сформировать, и скачать отчет
+     * Сформировать и скачать отчёт
      * @throws \Exception
      */
     public function actionPriceStat()

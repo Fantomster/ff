@@ -2,7 +2,11 @@
 
 namespace console\controllers;
 
+use api\common\models\merc\mercPconst;
 use api\common\models\RabbitQueues;
+use common\models\vetis\VetisCountry;
+use common\models\vetis\VetisPurpose;
+use common\models\vetis\VetisUnit;
 use console\modules\daemons\classes\MercUnitList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
@@ -61,37 +65,14 @@ class MercuryCronController extends Controller
 
     public function actionTest()
     {
+        $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
-        try {
-            $instance = dictsApi::getInstance(5144);
-            $instance->setMode(dictsApi::GET_UPDATES_DICTS);
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercUnitList'])->orderBy(['last_executed' => SORT_DESC])->one();
-            $data['method'] = ($queue === null) ? 'getUnitList' : 'getUnitChangesList';
-            $data['struct'] = ['listName' => 'unitList',
-                'listItemName' => 'unit'
-            ];
-
-            $listOptions = new ListOptions();
-            $listOptions->count = 100;
-            $listOptions->offset = 0;
-
-            $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => ($queue === null) ? null : $queue->last_executed]));
-
-            \Yii::$app->get('rabbit')
-                ->setQueue('MercUnitList_5144')
-                ->addRabbitQueue(json_encode($data));
-
-           /*$t = new MercUnitList(5144);
-            $t->data = json_encode($data);
-            json_decode(json_encode($data), true);
-            $t->getData();
-            echo ($t->saveData()).PHP_EOL;*/
-
-        } catch (\Exception $e) {
-            Yii::error($e->getMessage());
-            echo $e->getMessage().PHP_EOL;
-        }
-
+        echo "GET UNITS" . PHP_EOL;
+        VetisUnit::getUpdateData($org_id);
+        echo "GET PURPOSE" . PHP_EOL;
+        VetisPurpose::getUpdateData($org_id);
+        echo "GET COUNTRY" . PHP_EOL;
+        VetisCountry::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 }

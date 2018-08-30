@@ -8,6 +8,8 @@
 
 namespace console\modules\daemons\components;
 
+use api\common\models\merc\mercPconst;
+
 /**
  * Class consumer with realization ConsumerInterface
  * and containing AbstractConsumer methods
@@ -22,10 +24,16 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     protected $listItemName;
     protected $request;
     protected $org_id;
+    protected $modelClassName;
 
     public function __construct($org_id = null)
     {
-        $this->org_id = $org_id;
+        if($org_id != null) {
+            $this->org_id = $org_id;
+        }
+        else {
+           $this->org_id = (mercPconst::findOne('1'))->org;
+        }
     }
 
     /**
@@ -34,6 +42,22 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     protected function saveList($list)
     {
+        $list = is_array($list) ? $list : [$list];
+        foreach ($list as $item)
+        {
+            $model = $this->modelClassName::findOne(['guid' => $item->guid]);
+
+            if($model == null) {
+                $model = new $this->modelClassName();
+            }
+            $attributes =  json_decode(json_encode($item), true);
+            $model->setAttributes($attributes);
+            $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
+            $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
+            if (!$model->save()) {
+                $this->result = false;
+            }
+        }
     }
 
     /**

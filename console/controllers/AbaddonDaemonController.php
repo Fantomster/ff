@@ -60,7 +60,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
      */
     public function getQueueName($row)
     {
-        if (!is_null($row['organization_id'])) {
+        if (!empty($row['organization_id'])) {
             return $row['consumer_class_name'] . '_' . $row['organization_id'];
         }
         return $row['consumer_class_name'];
@@ -83,7 +83,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
     {
         sleep($this->sleep);
         $res = \Yii::$app->db_api->createCommand('SELECT * FROM rabbit_queues')->queryAll();
-        
+
         foreach ($res as $row) {
 //				Testing string
 //            if(!is_null($row['organization_id'])){

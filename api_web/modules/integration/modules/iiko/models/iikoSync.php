@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\iiko\models;
 use api\common\models\iiko\iikoWaybillData;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\Journal;
+use yii\db\Expression;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use api\common\models\iiko\iikoAgent;
@@ -16,9 +17,13 @@ use api\common\models\iiko\iikoStore;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use yii\web\Response;
 
 class iikoSync extends WebApi
 {
+
+    public $updates_uuid = [];
+
     /**
      * Запуск синфронизации определенного типа
      * @param $type
@@ -42,7 +47,6 @@ class iikoSync extends WebApi
         }
 
         if (method_exists($this, $model->method) === true) {
-            $transaction = \Yii::$app->get('db_api')->beginTransaction();
             try {
                 //Пробуем пролезть в iko
                 if (!iikoApi::getInstance()->auth()) {
@@ -59,10 +63,8 @@ class iikoSync extends WebApi
                     throw new BadRequestHttpException($dicModel->getFirstErrors());
                 }
                 //Сохраняем данные
-                $transaction->commit();
                 return ['success' => true];
             } catch (\Exception $e) {
-                $transaction->rollBack();
                 iikoApi::getInstance()->logout();
                 iikoDic::errorSync($model->id);
                 throw $e;
@@ -218,48 +220,89 @@ class iikoSync extends WebApi
         $items = iikoApi::getInstance()->getProducts();
         //Если пришли продукты, обновляем их
         if (!empty($items['products'])) {
+            $org_id = $this->user->organization->id;
             //поскольку мы не можем отследить изменения на стороне провайдера
-            iikoProduct::updateAll(['is_active' => 0], ['org_id' => $this->user->organization->id]);
-            foreach ($items['products'] as $uuid => $item) {
-                $model = iikoProduct::findOne(['uuid' => $uuid, 'org_id' => $this->user->organization->id]);
-                //Если нет категории у нас, создаем
-                if (empty($model)) {
-                    $model = new iikoProduct(['uuid' => $uuid]);
-                    $model->org_id = $this->user->organization->id;
+            iikoProduct::updateAll(['is_active' => 0], ['org_id' => $org_id]);
+
+            $generator = function ($items) {
+                foreach ($items as &$item) {
+                    yield $item;
                 }
-                //Родительская категория если есть
-                if (isset($item['parentId'])) {
-                    $model->parent_uuid = $item['parentId'];
-                }
-                $model->is_active = 1;
-                if (!empty($item['name'])) {
-                    $model->denom = $item['name'];
-                }
-                if (!empty($item['productType'])) {
-                    $model->product_type = $item['productType'];
-                }
-                if (!empty($item['mainUnit'])) {
-                    $model->unit = $item['mainUnit'];
-                }
-                if (!empty($item['num'])) {
-                    $model->num = $item['num'];
-                }
-                if (!empty($item['cookingPlaceType'])) {
-                    $model->cooking_place_type = $item['cookingPlaceType'];
-                }
-                if (isset($item['containers'])) {
-                    $model->containers = \GuzzleHttp\json_encode($item['containers']);
-                }
-                //Валидируем сохраняем
-                if (!$model->validate() || !$model->save()) {
-                    throw new ValidationException($model->getErrors());
-                }
+            };
+
+            foreach ($generator($items['products']) as $item) {
+                $this->updateProduct($item['id'], $item);
+            }
+
+            if (!empty($this->updates_uuid)) {
+                \Yii::$app->db_api->createCommand()
+                    ->update(iikoProduct::tableName(), [
+                        'is_active' => 1,
+                        'updated_at' => new Expression('NOW()')
+                    ], ['uuid' => $this->updates_uuid])
+                    ->execute();
             }
         }
         //Обновляем колличество полученных объектов
         return iikoProduct::find()->where(['is_active' => 1, 'org_id' => $this->user->organization->id])->count();
     }
 
+    /**
+     * Обновление продукта
+     * @param $uuid
+     * @param $item
+     * @return bool
+     * @throws \Exception
+     */
+    private function updateProduct($uuid, $item)
+    {
+        $transaction = \Yii::$app->get('db_api')->beginTransaction();
+        try {
+            $org_id = $this->user->organization->id;
+            $model = iikoProduct::findOne(['uuid' => $uuid, 'org_id' => $org_id]);
+            //Если нет товара у нас, создаем
+            if (empty($model)) {
+                $model = new iikoProduct(['uuid' => $uuid]);
+                $model->org_id = $org_id;
+            }
+            //Родительская категория если есть
+            if (isset($item['parentId']) && !empty($item['parentId'])) {
+                $model->parent_uuid = $item['parentId'];
+            }
+            if (!empty($item['name'])) {
+                $model->denom = $item['name'];
+            }
+            if (!empty($item['productType'])) {
+                $model->product_type = $item['productType'];
+            }
+            if (!empty($item['mainUnit'])) {
+                $model->unit = $item['mainUnit'];
+            }
+            if (!empty($item['num'])) {
+                $model->num = $item['num'];
+            }
+            if (!empty($item['cookingPlaceType'])) {
+                $model->cooking_place_type = $item['cookingPlaceType'];
+            }
+            if (isset($item['containers']) && !empty($item['containers'])) {
+                $model->containers = \json_encode($item['containers']);
+            }
+
+            //Валидируем сохраняем
+            if ($model->attributes !== $model->oldAttributes) {
+                $model->is_active = 1;
+                $model->save(false);
+            } else {
+                $this->updates_uuid[] = $uuid;
+            }
+
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->roolBack();
+            throw $e;
+        }
+    }
 
     /**
      * iiko: Создание сопоставлений номенклатуры накладной с продуктами MixCart
@@ -291,8 +334,8 @@ class iikoSync extends WebApi
         }
 
         return [
-                 "success" => true,
-                 "waybill_data_id" => $waybillData->id
+            "success" => true,
+            "waybill_data_id" => $waybillData->id
         ];
     }
 }

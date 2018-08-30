@@ -89,9 +89,6 @@ class AnalyticsWebApi extends WebApi
             $query->limit($limit);
         }
 
-
-        print_r($query->all()); exit;
-
         $result = [];
         foreach ($query->all() as $data) {
             $data['total_sum'] = round($data['total_sum'], 2);
@@ -222,7 +219,7 @@ class AnalyticsWebApi extends WebApi
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency', 'currency.id = order.currency_id')
             ->andWhere($whereParams)
-            ->groupBy('date')->orderBy(['total_sum' => SORT_DESC]);
+            ->groupBy('date')->orderBy(['date' => SORT_ASC]);
 
         // фильтр - время создания заказа
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
@@ -240,6 +237,9 @@ class AnalyticsWebApi extends WebApi
         if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
             $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
+
+
+        print_r($query->all()); exit;
 
         $result = [];
         foreach ($query->all() as $data) {

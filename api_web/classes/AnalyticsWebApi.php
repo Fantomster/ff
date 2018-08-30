@@ -61,7 +61,7 @@ class AnalyticsWebApi extends WebApi
             [
                 'organization.name as name',
                 'FORMAT(SUM(order_content.quantity * order_content.price), 2) AS total_sum',
-                // 'COUNT(order_content.order_id) AS total_count_order',
+                'COUNT(order_content.order_id) AS total_count_order',
             ]
         )->from('order_content')
             ->leftJoin('order', 'order.id = order_content.order_id')

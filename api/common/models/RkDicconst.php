@@ -58,23 +58,22 @@ class RkDicconst extends \yii\db\ActiveRecord
 
     public function getPconstValue() {
 
-        $pConst = \api\common\models\RkPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
+    $pConst = \api\common\models\RkPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
 
-        $res =  (!isset($pConst->value)) ? $this->def_value : $pConst->value;
+    $res =  (!isset($pConst->value)) ? $this->def_value : $pConst->value;
 
-      //  echo $this->denom.PHP_EOL;
-      //  echo "PCONST:"; var_dump($pConst->value);
-      //  echo "DEF:"; var_dump($this->def_value);
+    //  echo $this->denom.PHP_EOL;
+    //  echo "PCONST:"; var_dump($pConst->value);
+    //  echo "DEF:"; var_dump($this->def_value);
 
 
-        if ($this->denom == 'taxVat')
-            $res = $res/100;
+    if ($this->denom == 'taxVat')
+        $res = $res/100;
 
-      //  echo "RES:"; var_dump($res);
+    //  echo "RES:"; var_dump($res);
 
-        return $res;
-    }
-
+    return $res;
+}
 
     public static function getDb()
     {

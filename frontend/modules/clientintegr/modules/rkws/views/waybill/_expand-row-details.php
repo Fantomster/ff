@@ -4,18 +4,23 @@
  use yii\data\ActiveDataProvider;
  use common\models\User;
  use yii\helpers\Html;
+ use api\common\models\RkDicconst;
 
  ?>
 Приходная Накладная:<br><br>
 
 <?php 
-    
-    // var_dump($model);   
+
+    $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
     if(empty($model)) {
-        echo "<div style=\"text-align:right;\">";
-         echo Html::a('Создать накладную', ['create','order_id'=>$order_id], ['class'=>'btn btn-md fk-button']);
-         echo "</div>";
+        echo "<div  style=\"text-align:right;\">";
+        if ($waybillMode === "0") {
+            echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
+        } else {
+            echo "Включен автоматический режим создания накладных.";
+        }
+        echo "</div>";
     } else {
         $columns = array (
             'id',

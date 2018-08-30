@@ -226,7 +226,7 @@ class AnalyticsController extends WebApiController
      *              default={
      *                  "result": {
      *                      {
-     *                          "date": "Поставщик 1",
+     *                          "name": "Поставщик 1",
      *                          "total_sum": 523801,
      *                      },
      *                      {
@@ -254,6 +254,79 @@ class AnalyticsController extends WebApiController
     public function actionClientPurchases()
     {
         $this->response = $this->container->get('AnalyticsWebApi')->clientPurchases($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/analytics/client-vendors",
+     *     tags={"Analytics"},
+     *     summary="Ресторан: Объем по поставщикам",
+     *     description="Ресторан: Объем по поставщикам",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *             @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                     "search": {
+     *                         "vendor_id": {
+     *                             124,
+     *                             143
+     *                         },
+     *                         "employee_id": 21,
+     *                         "order_status_id": {
+     *                             4,
+     *                             5
+     *                         },
+     *                         "currency_id": 1,
+     *                         "date": {
+     *                             "from": "23.08.2018",
+     *                             "to": "24.08.2018"
+     *                         }
+     *                     }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Поставщик 1",
+     *                          "total_sum": 523801,
+     *                      },
+     *                      {
+     *                          "name": "Поставщик 231",
+     *                          "total_sum": 3801,
+     *                      },
+     *                      {
+     *                          "name": "Поставщик 3",
+     *                          "total_sum": 523803,
+     *                      }
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     */
+    public function actionClientVendors()
+    {
+        $this->response = $this->container->get('AnalyticsWebApi')->clientVendors($this->request);
     }
 
 }

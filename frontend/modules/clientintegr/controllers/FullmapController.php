@@ -490,7 +490,7 @@ class FullmapController extends DefaultController {
 
         }
 
-        if (count($list) > 12 && $state) {
+        if (count($list) > 300 && $state) {
             return -1;
         }
 

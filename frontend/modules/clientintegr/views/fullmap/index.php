@@ -428,7 +428,7 @@ $this->registerJs(
                                                              success: function(data){
                                                              if (data == -1) {
                                                              // alert ("Превышен лимит для выбора продуктов в 300 позиций");
-                                                              swal({title: "Болтяра", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
+                                                              swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
                                                              }
                                                              $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
                                                              }
@@ -461,7 +461,7 @@ $this->registerJs(
                                                              success: function(data){
                                                              if (data == -1) {
                                                              // alert ("Превышен лимит для выбора продуктов в 300 позиций");
-                                                              swal({title: "Болтяра", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
+                                                              swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
                                                              }
                                                              $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});                                                             
                                                                 

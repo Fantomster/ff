@@ -679,13 +679,13 @@ $this->registerJs(
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' =>0, 'service_id' => $data['service_id']]);
+                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' =>0, 'service_id' => $searchModel->service_id]);
                                             return \yii\helpers\Html::button( '0',
                                                 ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
 
 
                                         },
-                                       'ten' =>  function ($model, $data, $index)use ($searchModel) {
+                                       'ten' =>  function ($model, $data, $index) use ($searchModel) {
 
                                             if ($data['vat'] == 1000) {
                                                 $tClass = "btn label label-success";
@@ -696,11 +696,11 @@ $this->registerJs(
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' => '1000', 'service_id' => $data['service_id']]);
+                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' => '1000', 'service_id' => $searchModel->service_id]);
                                             return \yii\helpers\Html::button( '10',
                                                 ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
                                         },
-                                        'eighteen' =>  function ($model, $data, $index) {
+                                        'eighteen' =>  function ($model, $data, $index) use ($searchModel) {
 
                                             if ($data['vat'] == 1800) {
                                                 $tClass = "btn label label-success";
@@ -711,7 +711,7 @@ $this->registerJs(
                                             }
 
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' => '1800', 'service_id' => $data['service_id']]);
+                                            $customurl=Url::toRoute(['chvat', 'prod_id'=>$data['id'], 'vat' => '1800', 'service_id' => $searchModel->service_id]);
                                             return \yii\helpers\Html::button( '18',
                                                 ['title' => Yii::t('backend', '10%'), 'data-pjax'=>"0", 'class'=> $tClass, 'style'=>$tStyle, 'url' => $customurl]);
                                         },

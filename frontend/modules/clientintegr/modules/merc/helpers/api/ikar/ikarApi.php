@@ -18,11 +18,11 @@ class ikarApi extends baseApi
     //Получние страны по GUID
     public function getCountryByGuid($GUID)
     {
-        $country = \common\models\vetis\VetisCountry::findOne(['guid' => $GUID]);
+       /*$country = \common\models\vetis\VetisCountry::findOne(['guid' => $GUID]);
         
         if (!empty($country)) {
             return $country;
-        }
+        }*/
 
         $client = $this->getSoapClient('ikar');
         $request = new getCountryByGuidRequest();

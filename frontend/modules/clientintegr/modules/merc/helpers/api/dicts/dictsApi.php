@@ -24,11 +24,11 @@ class dictsApi extends baseApi
      */
     public function getPurposeByGuid($GUID)
     {
-        $purpose = \common\models\vetis\VetisPurpose::findOne(['guid' => $GUID]);
+        /*$purpose = \common\models\vetis\VetisPurpose::findOne(['guid' => $GUID]);
 
         if (!empty($purpose)) {
             return $purpose;
-        }
+        }*/
 
         $client = $this->getSoapClient('dicts');
         $request = new getPurposeByGuidRequest();
@@ -44,11 +44,11 @@ class dictsApi extends baseApi
      */
     public function getUnitByGuid($GUID)
     {
-        $unit = \common\models\vetis\VetisUnit::findOne(['guid' => $GUID]);
+        /*$unit = \common\models\vetis\VetisUnit::findOne(['guid' => $GUID]);
 
         if (!empty($unit)) {
             return $unit;
-        }
+        }*/
 
         $client = $this->getSoapClient('dicts');
 

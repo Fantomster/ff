@@ -1623,16 +1623,19 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         $lic = iikoService::getLicense();
-        if ($lic != null)
-        {$result['iiko'] = $lic;}
+        if ($lic != null) {
+            $result['iiko'] = $lic;
+        }
 
         $lic = mercService::getLicense();
-        if ($lic != null)
-        {$result['mercury'] = $lic;}
+        if ($lic != null) {
+            $result['mercury'] = $lic;
+        }
 
         $lic = OneSService::getLicense();
-        if ($lic != null)
-        {$result['odinsobsh'] = $lic;}
+        if ($lic != null) {
+            $result['odinsobsh'] = $lic;
+        }
 
         return $result;
     }
@@ -1643,8 +1646,9 @@ class Organization extends \yii\db\ActiveRecord
     public function getVsdCount()
     {
         $lic = mercService::getLicense();
-        if ($lic == null)
-        {return 0;}
+        if ($lic == null) {
+            return 0;
+        }
 
         try {
             $guid = mercDicconst::getSetting('enterprise_guid');

@@ -53,6 +53,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             }
             $attributes =  json_decode(json_encode($item), true);
             $model->setAttributes($attributes);
+            $model->data = serialize($item);
             $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
             $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
             if (!$model->save()) {

@@ -125,12 +125,12 @@ class dictsApi extends baseApi
     /**
      * Составление запроса на загрузку справочника целей
      * @param $options
-     * @return getPurposeListRequest
+     * @return getPurposeChangesListRequest
      * @throws Exception
      */
     public function getPurposeChangesList($options)
     {
-        $request = new getPurposeListRequest();
+        $request = new getPurposeChangesListRequest();
         $request->listOptions = $options['listOptions'];
 
         if (!array_key_exists('listOptions', $options)) {

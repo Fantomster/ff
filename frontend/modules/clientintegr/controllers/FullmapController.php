@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\controllers;
 
 use api\common\models\AllMaps;
+use api\common\models\iiko\iikoProduct;
 use api\common\models\RkStoretree;
 use api\common\models\rkws\OrderCatalogSearchMap;
 use api\modules\v1\modules\mobile\resources\OrderCatalogSearch;

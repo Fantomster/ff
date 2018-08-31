@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EComIntegration;
+use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -534,6 +535,10 @@ class Order extends \yii\db\ActiveRecord
                 throw new BadRequestHttpException($errorText);
             }
         }
+        if ($this->status == self::STATUS_DONE) {
+            AutoWaybillHelper::processWaybill($this->id);
+        }
+
     }
 
 

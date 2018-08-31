@@ -2,8 +2,11 @@
 
 namespace api\common\models\iiko;
 
+use api\common\models\AllMaps;
+use common\helpers\DBNameHelper;
 use common\models\Order;
 use common\models\OrderContent;
+use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use Yii;
 use frontend\controllers\ClientController;
 
@@ -30,7 +33,7 @@ use frontend\controllers\ClientController;
  * @property integer $payment_delay_date
  * @property Order $order;
  */
-class iikoWaybill extends \yii\db\ActiveRecord
+class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
     /**
      * @inheritdoc
@@ -56,7 +59,8 @@ class iikoWaybill extends \yii\db\ActiveRecord
         return [
             [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
             [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code', 'payment_delay_date'], 'safe'],
-            [['org', 'store_id', 'agent_uuid'], 'required'],
+            [['org', 'agent_uuid'], 'required'],
+            [['org', 'agent_uuid', 'store_id'], 'required', 'on' => 'handMade'],
             [['agent_uuid'], 'string', 'max' => 36],
             [['text_code', 'num_code'], 'string', 'max' => 128],
             [['note'], 'string', 'max' => 255],
@@ -121,49 +125,10 @@ class iikoWaybill extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-        if ($insert) {
-            $records = OrderContent::findAll(['order_id' => $this->order_id]);
-            $transaction = \Yii::$app->db_api->beginTransaction();
-            try {
-                $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
-                foreach ($records as $record) {
-                    $wdmodel = new iikoWaybillData();
-                    $wdmodel->waybill_id = $this->id;
-                    $wdmodel->product_id = $record->product_id;
-                    $wdmodel->quant = $record->quantity;
-                    $wdmodel->sum = round($record->price * $record->quantity, 2);
-                    $wdmodel->defquant = $record->quantity;
-                    $wdmodel->defsum = round($record->price * $record->quantity, 2);
-                    $wdmodel->vat = $taxVat;
-                    $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
-                    $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $this->org]);
-                    $wdmodel->org = !is_null($obConstModel) ? $obConstModel->value : $this->org;
-                    $wdmodel->koef = 1;
-                    // Check previous
-                    $ch = iikoWaybillData::find()
-                        ->andWhere('product_id = :prod', ['prod' => $wdmodel->product_id])
-                        ->andWhere('org = :org', ['org' => $wdmodel->org])
-                        ->andWhere('product_rid is not null')
-                        ->orderBy(['linked_at' => SORT_DESC])
-                        ->one();
-                    if ($ch) {
-                        $wdmodel->product_rid = $ch->product_rid;
-                        $wdmodel->munit = $ch->munit;
-                        $wdmodel->koef = $ch->koef;
-                        $wdmodel->vat = $ch->vat;
-                        $wdmodel->quant = $wdmodel->quant * $ch->koef;
-                    }
-                    if (!$wdmodel->save()) {
-                        var_dump($wdmodel->getErrors());
-                        throw new \Exception();
-                    }
-                }
-                $transaction->commit();
-            } catch (\Exception $ex) {
-                var_dump($ex);
-                $transaction->rollback();
-            }
+        if ($insert ) {
+            $this->createWaybillData();
         }
+
     }
 
     /**
@@ -274,5 +239,132 @@ class iikoWaybill extends \yii\db\ActiveRecord
             '1000' => 10,
             '1800' => 18
         ];
+    }
+
+
+    public static function createWaybill($order_id): bool
+    {
+
+        $res = true;
+
+        $order = \common\models\Order::findOne(['id' => $order_id]);
+
+        if (!$order) {
+            echo "Can't find order";
+            return false;
+        }
+
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+
+        $stories = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = 2 and product_id in (
+        SELECT product_id from '.$dbName.'.order_content where order_id = :order  
+        ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column();
+
+        $contra = iikoAgent::findOne(['vendor_id' => $order->vendor_id]);
+
+        $num = (count($stories) > 1) ? 1 : '';
+
+        foreach ($stories as $store) {
+            $model = new iikoWaybill();
+            $model->order_id = $order_id;
+            $model->status_id = 1;
+            $model->org = $order->client_id;
+            $model->text_code = 'mixcart'.$order_id.'-'.$num;
+               // $model->num_code
+            $model->store_id = $store;
+            $model->agent_uuid = isset($contra) ? $contra->uuid : null;
+
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+
+            if (!$model->save()) {
+                $num++;
+                $res = false;
+                continue;
+            }
+
+            $num++;
+
+        }
+        return $res;
+
+    }
+
+    public static function exportWaybill($waybill_id): bool
+    {
+        // TODO: Implement exportWaybill() method.
+    }
+
+    protected function createWaybillData()
+    {
+        if ($this->store_id === null) {
+            $records = OrderContent::findAll(['order_id' => $this->order_id]);
+        }
+        else
+        {
+            $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+
+            \Yii::error($dbName);
+
+            $records =  OrderContent::find()
+                ->where(['order_id' => $this->order_id])
+                ->andWhere('product_id in ( select product_id from '.$dbName.'.all_map where service_id = 2 and store_rid = :store)',
+                    [':store' => $this->store_id])
+                ->all();
+        }
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+            foreach ($records as $record) {
+                $wdmodel = new iikoWaybillData();
+                ///$wdmodel->setScenario('autoWaybill');
+                $wdmodel->waybill_id = $this->id;
+                $wdmodel->product_id = $record->product_id;
+                $wdmodel->quant = $record->quantity;
+                $wdmodel->sum = round($record->price * $record->quantity, 2);
+                $wdmodel->defquant = $record->quantity;
+                $wdmodel->defsum = round($record->price * $record->quantity, 2);
+                $wdmodel->vat = $taxVat;
+                $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+                $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $this->org]);
+                $wdmodel->org = !is_null($obConstModel) ? $obConstModel->value : $this->org;
+                $wdmodel->koef = 1;
+                // New check mapping
+                $ch = AllMaps::find()
+                    ->andWhere('product_id = :prod',['prod' => $record->product_id ])
+                    ->andWhere('org_id = :org',['org' => $this->org])
+                    ->andWhere('service_id = 2')
+                    ->one();
+
+                if ($ch) {
+                    if (isset($ch->serviceproduct_id)) {
+                        $wdmodel->product_rid = $ch->serviceproduct_id;
+                    }
+
+                    if (isset($ch->koef)) {
+                        $wdmodel->koef = $ch->koef;
+                    }
+
+                    if (isset($ch->unit_rid)) {
+                        $wdmodel->munit = $ch->unit_rid;
+                    }
+
+                    if (isset($ch->vat)) {
+                        $wdmodel->vat = $ch->vat;
+                    }
+                }
+
+                $wdmodel->quant = $wdmodel->quant * $ch->koef;
+
+                if (!$wdmodel->save()) {
+                    var_dump($wdmodel->getErrors());
+                    throw new \Exception();
+                }
+            }
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            var_dump($ex);
+            $transaction->rollback();
+        }
     }
 }

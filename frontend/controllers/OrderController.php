@@ -1369,10 +1369,10 @@ class OrderController extends DefaultController
                     $this->sendOrderDone($order->acceptedBy, $order);
                 }
             }
+            $order->calculateTotalPrice();
+            $order->save();
         }
 
-        $order->calculateTotalPrice();
-        $order->save();
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1718,6 +1718,7 @@ class OrderController extends DefaultController
         $order->status = Order::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
         $this->sendOrderDone($order->createdBy, $order);
+
         if ($order->save()) {
             $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);
             $this->redirect(['order/view', 'id' => $id]);

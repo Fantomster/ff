@@ -367,7 +367,6 @@ $js = <<<JS
                                         var arr = JSON.parse(data);
                                         if (arr.length>0) {
                                             var sel100 = 'Показаны первые 100 позиций';
-                                        }
                                             if (arr.length>=100) {
                                             $('#bukv-postav3').html(sel100);
                                         }
@@ -409,8 +408,8 @@ $js = <<<JS
                             //} else {
                               //  $('#bukv-postav2').text('');
                             //}
-                        });
-                    });
+                        })
+                    })
                 })
             }
         ).then(function (result) {

@@ -2,19 +2,22 @@
 
 namespace console\modules\daemons\components;
 
+use api\common\models\RabbitQueues;
 use api_web\components\FireBase;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
+use yii\db\Expression;
+use yii\db\Query;
 
 abstract class AbstractDaemonController extends DaemonController
 {
-    
+
     /**
      * @var \console\modules\daemons\components\ConsumerInterface
      */
     public $consumer;
-    
+
     /**
      * Description
      * @var RabbitService
@@ -30,18 +33,18 @@ abstract class AbstractDaemonController extends DaemonController
      * @var AMQPChannel
      */
     private $channel = null;
-    
+
     /**
      * @var int
      */
     public $maxChildProcesses = 5;
-    
+
     /**
      * rabbit queues table name
      * @var \DateTime
      * */
     public $lastExec = null;
-    
+
     /**
      * Check consumer implements interfaces methods
      * @param \console\modules\daemons\components\ConsumerInterface $consumer
@@ -50,7 +53,7 @@ abstract class AbstractDaemonController extends DaemonController
     {
         $this->consumer = $consumer;
     }
-    
+
     /**
      * Generate class string
      * @return string
@@ -59,7 +62,7 @@ abstract class AbstractDaemonController extends DaemonController
     {
         return "console\modules\daemons\classes\\" . $this->consumerClass;
     }
-    
+
     /**
      * Create consumer with different parameters
      * maybe refactoring to argument unpacking new class(...$arrayOfConstructorParameters)
@@ -71,27 +74,27 @@ abstract class AbstractDaemonController extends DaemonController
         } else {
             $this->getConsumer(new $this->consumerClassName);
         }
+
         $dateTime = new \DateTime();
-        \Yii::$app->db_api->createCommand('UPDATE rabbit_queues SET start_executing=:datetime WHERE consumer_class_name=:consumerCN AND organization_id=:orgId',
-            [':consumerCN' => $this->consumerClass,
-             ':orgId'      => $this->orgId,
-             ':datetime'   => $dateTime->format('Y-m-d H:i:s')
-            ]
-        )->execute();
+        (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+            'start_executing' => $dateTime->format('Y-m-d H:i:s')
+        ], [
+            'consumer_class_name' => $this->consumerClass
+        ])->execute();
     }
-    
+
     public function loggingExecutedTime()
     {
         $dateTime = new \DateTime();
         $this->lastExec = $dateTime->format('Y-m-d H:i:s');
-        \Yii::$app->db_api->createCommand('UPDATE rabbit_queues SET start_executing=NULL, last_executed=:datetime WHERE consumer_class_name=:consumerCN AND organization_id=:orgId',
-            [':consumerCN' => $this->consumerClass,
-             ':orgId'      => $this->orgId,
-             ':datetime'   => $this->lastExec,
-            ]
-        )->execute();
+        (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+            'start_executing' => new Expression('NULL'),
+            'last_executed' => $this->lastExec
+        ], [
+            'consumer_class_name' => $this->consumerClass
+        ])->execute();
     }
-    
+
     /**
      * @return array|bool
      */
@@ -99,25 +102,25 @@ abstract class AbstractDaemonController extends DaemonController
     {
         $this->rabbit = \Yii::$app->get('rabbit');
         $consumerTag = get_class($this);
-        
+
         //Получаем канал, если нет, создаем
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
         //Цепляем канал к очереди
         $channel->queue_bind($this->getQueueName(), $this->getExchangeName(), $this->getQueueName());
         //Цепляем консьюмера
         $channel->basic_consume($this->getQueueName(), $consumerTag, false, false, false, false, [$this, 'doJob']);
-        
+
         /**
          * Инофрмация о подключении
          */
         $this->log([
-            "HOST"     => $this->rabbit->host,
-            "V_HOST"   => $this->rabbit->vhost,
+            "HOST" => $this->rabbit->host,
+            "V_HOST" => $this->rabbit->vhost,
             "Exchange" => $this->getExchangeName(),
-            "Queue"    => $this->getQueueName(),
+            "Queue" => $this->getQueueName(),
             "Consumer" => $consumerTag
         ]);
-        
+
         while (count($channel->callbacks)) {
             try {
                 $channel->wait(null, true, 5);
@@ -128,7 +131,7 @@ abstract class AbstractDaemonController extends DaemonController
         }
         return false;
     }
-    
+
     /**
      * @param $message array|string
      */
@@ -141,7 +144,7 @@ abstract class AbstractDaemonController extends DaemonController
         $message .= str_pad('', 80, '=') . PHP_EOL;
         file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . self::shortClassName() . '.log', $message, FILE_APPEND);
     }
-    
+
     /**
      * Поддержка соединений
      */
@@ -151,13 +154,13 @@ abstract class AbstractDaemonController extends DaemonController
         \Yii::$app->db->close();
         \Yii::$app->db->open();
         //}
-        
+
         //if (\Yii::$app->db_api->isActive) {
         \Yii::$app->db_api->close();
         \Yii::$app->db_api->open();
         //}
     }
-    
+
     /**
      * send to FCM when consumer complete work
      * */
@@ -171,14 +174,14 @@ abstract class AbstractDaemonController extends DaemonController
             $arFB['organization'] = $this->orgId;
         }
         $count = \Yii::$app->get('rabbit')->setQueue($this->queueName)->checkQueueCount();
-        
+
         FireBase::getInstance()->update($arFB, [
-            'last_executed'  => $this->lastExec,
+            'last_executed' => $this->lastExec,
             'plain_executed' => $this->lastTimeout,
-            'count'          => $count,
+            'count' => $count,
         ]);
     }
-    
+
     /**
      * Get last timeout from last exec time
      * @return string|null
@@ -192,7 +195,7 @@ abstract class AbstractDaemonController extends DaemonController
         }
         return null;
     }
-    
+
     /**
      * @param        $queue
      * @param string $exchange
@@ -210,7 +213,7 @@ abstract class AbstractDaemonController extends DaemonController
         }
         return $this->channel;
     }
-    
+
     /**
      * @param $job AMQPMessage
      */
@@ -218,7 +221,7 @@ abstract class AbstractDaemonController extends DaemonController
     {
         $this->channel->basic_ack($job->delivery_info['delivery_tag']);
     }
-    
+
     /**
      * @param $job AMQPMessage
      */
@@ -226,7 +229,7 @@ abstract class AbstractDaemonController extends DaemonController
     {
         $this->channel->basic_nack($job->delivery_info['delivery_tag'], false, false);
     }
-    
+
     /**
      * @param $job AMQPMessage
      */
@@ -234,7 +237,7 @@ abstract class AbstractDaemonController extends DaemonController
     {
         $this->channel->basic_cancel($job->delivery_info['consumer_tag']);
     }
-    
+
     /**
      * Exchange name
      * @return string
@@ -243,11 +246,11 @@ abstract class AbstractDaemonController extends DaemonController
     {
         return 'amq.direct';
     }
-    
+
     /**
      * Queue name
      * @return string
      */
     abstract protected function getQueueName();
-    
+
 }

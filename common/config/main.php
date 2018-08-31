@@ -214,7 +214,7 @@ return [
         ],
         'siteApi' => [
             'class' => 'mongosoft\soapclient\Client',
-            'url' => 'https://ru-soap.edi.su/soap/?wsdl',
+            'url' => 'https://soap-api.e-vo.ru/soap/exite.wsdl',
             'options' => [
                 'cache_wsdl' => WSDL_CACHE_NONE,
             ],

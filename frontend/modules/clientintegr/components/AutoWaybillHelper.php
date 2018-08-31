@@ -12,6 +12,7 @@ use api\common\models\iiko\iikoWaybill;
 use api\common\models\one_s\OneSWaybill;
 use api\common\models\RkWaybill;
 use common\models\User;
+use api\common\models\iiko\iikoDicconst;
 
 class AutoWaybillHelper extends \yii\base\Component
 {
@@ -31,7 +32,6 @@ class AutoWaybillHelper extends \yii\base\Component
     public static function processWaybill($order_id)
     {
 
-        var_dump(2222);
         $licenses = (User::findOne(\Yii::$app->user->id))->organization->getLicenseList();
 
             if(isset($licenses['rkws']) && ($licenses['rkws_ucs']) && array_key_exists('rkws', self::licensesMap)) {
@@ -40,12 +40,18 @@ class AutoWaybillHelper extends \yii\base\Component
 
             if(isset($licenses['iiko']) && array_key_exists('iiko', self::licensesMap)) {
                 $className = self::supportServices[self::licensesMap['iiko']];
+                $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+
+                if ($waybillModeIiko !== '0') {
+                    return $className::createWaybill($order_id);
+                }
             }
+
             if(isset($licenses['odinsobsh']) &&  array_key_exists('odinsobsh', self::licensesMap)) {
                 $className = self::supportServices[self::licensesMap['odinsobsh']];
             }
 
-            return $className::createWaybill($order_id);
+
 
     }
 }

@@ -385,7 +385,8 @@ SQL;
             die();
         }
 
-        $model = new iikoWaybill('handMade');
+        $model = new iikoWaybill();
+        $model->setScenario('handMade');
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;

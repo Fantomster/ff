@@ -297,21 +297,30 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
     protected function createWaybillData()
     {
-        if ($this->store_id === null) {
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+
+        $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+
+        if ($waybillMode !== '0') {
+
+            if ($this->store_id === null) {
+                $records =  OrderContent::find()
+                    ->where(['order_id' => $this->order_id])
+                    ->andWhere('product_id in ( select product_id from '.$dbName.'.all_map where service_id = 2 and store_rid is null)')
+                    ->all();
+            } else {
+                $records =  OrderContent::find()
+                    ->where(['order_id' => $this->order_id])
+                    ->andWhere('product_id in ( select product_id from '.$dbName.'.all_map where service_id = 2 and store_rid = :store)',
+                        [':store' => $this->store_id])
+                    ->all();
+            }
+        } else {
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
         }
-        else
-        {
-            $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
-            \Yii::error($dbName);
 
-            $records =  OrderContent::find()
-                ->where(['order_id' => $this->order_id])
-                ->andWhere('product_id in ( select product_id from '.$dbName.'.all_map where service_id = 2 and store_rid = :store)',
-                    [':store' => $this->store_id])
-                ->all();
-        }
+
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
             $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;

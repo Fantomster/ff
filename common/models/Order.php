@@ -7,6 +7,7 @@ use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use api\common\models\iiko\iikoDicconst;
 
 /**
  * This is the model class for table "order".
@@ -536,7 +537,7 @@ class Order extends \yii\db\ActiveRecord
             }
         }
         if ($this->status == self::STATUS_DONE) {
-            AutoWaybillHelper::processWaybill($this->id);
+                AutoWaybillHelper::processWaybill($this->id);
         }
 
     }

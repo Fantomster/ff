@@ -1,38 +1,22 @@
 <?php
 
-namespace backend\models;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
-use Yii;
-use yii\base\Model;
+namespace common\models\search;
+
 use yii\data\ActiveDataProvider;
-use common\models\User;
-use common\models\Role;
-use common\models\Profile;
-use common\models\Organization;
-use common\models\Job;
-use yii\db\ActiveQuery;
-use yii\helpers\ArrayHelper;
 
 /**
- * UserSearch represents the model behind the search form about `common\models\User`.
+ *  Model for user search form
  */
-class UserSearch extends User
-{
-
-    public $role;
-    public $full_name;
-    public $phone;
-    public $org_name;
-    public $org_type_id;
-    public $sms_allow;
-    public $gender;
-    public $email_allow;
-    public $email;
-    public $job;
-    public $job_name;
-    public $subscribe;
-    public $sms_subscribe;
-
+class UserSearch extends \common\models\User {
+    
+    public $searchString;
+    
     /**
      * @inheritdoc
      */
@@ -47,164 +31,78 @@ class UserSearch extends User
     public function rules()
     {
         return [
-            [['id', 'status', 'organization_id', 'sms_allow', 'gender', 'email_allow', 'job', 'subscribe', 'sms_subscribe'], 'integer'],
-            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id', 'job_name', 'language'], 'safe'],
+            [['id', 'role_id', 'status'], 'integer'],
+            [['email', 'profile.full_name', 'profile.phone', 'role.name', 'organization_id', 'searchString'], 'safe'],
         ];
     }
-
+    
     /**
      * @inheritdoc
      */
-    public function scenarios()
+    public function attributes()
     {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
+        return array_merge(parent::attributes(), ['relationUserOrganization.organization_id', 'profile.full_name', 'role.name']);
     }
-
+    
     /**
-     * Creates data provider instance with search query applied
-     *
+     * Search
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params, $role_id = null)
+    public function search(array $params): ActiveDataProvider
     {
-        $query = User::find();
+        /** @var \common\models\User $user */
+        /** @var \common\models\Profile $profile */
+        /** @var \common\models\Role $role */
 
-        $userTable = User::tableName();
-        $profileTable = Profile::tableName();
-        $roleTable = Role::tableName();
-        $organizationTable = Organization::tableName();
-        $jobTable = Job::tableName();
+        // get models
+        $user = $this->module->model("User");
+        $profile = $this->module->model("Profile");
+        $role = $this->module->model("Role");
+        $organization = $this->module->model("Organization");
+        $profileTable = $profile::tableName();
+        $roleTable = $role::tableName();
+        $organizationTable = $organization::tableName();
 
-        $query = User::find();
-        $query->joinWith(['role', 'profile', 'organization']);
+        $query = $user::find();
+        $query->joinWith(['profile' => function ($query) use ($profileTable) {
+            $query->from(['profile' => $profileTable]);
+        }]);
+        $query->joinWith(['role' => function ($query) use ($roleTable) {
+            $query->from(['role' => $roleTable]);
+        }]);
+        $query->joinWith(['organization' => function ($query) use ($organizationTable) {
+            $query->from(['organization' => $organizationTable]);
+        }]);
+        $query->leftJoin('relation_user_organization', 'relation_user_organization.user_id=user.id');
 
+        // create data provider
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
-            'pagination' => [
-                'pageSize' => 20
-            ]
+            'pagination' => false
         ]);
 
-        $this->load($params);
+        // enable sorting for the related columns
+        $addSortAttributes = ["profile.full_name", "role.name", "profile.phone"];
+        foreach ($addSortAttributes as $addSortAttribute) {
+            $dataProvider->sort->attributes[$addSortAttribute] = [
+                'asc' => [$addSortAttribute => SORT_ASC],
+                'desc' => [$addSortAttribute => SORT_DESC],
+            ];
+        }
 
-        if (!$this->validate()) {
+        if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
         }
 
-        $dataProvider->sort->attributes['role'] = [
-            'asc' => ["$roleTable.name" => SORT_ASC],
-            'desc' => ["$roleTable.name" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['full_name'] = [
-            'asc' => ["$profileTable.full_name" => SORT_ASC],
-            'desc' => ["$profileTable.full_name" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['phone'] = [
-            'asc' => ["$profileTable.phone" => SORT_ASC],
-            'desc' => ["$profileTable.phone" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['org_name'] = [
-            'asc' => ["$organizationTable.name" => SORT_ASC],
-            'desc' => ["$organizationTable.name" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['org_type_id'] = [
-            'asc' => ["$organizationTable.type_id" => SORT_ASC],
-            'desc' => ["$organizationTable.type_id" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['gender'] = [
-            'asc' => ["$profileTable.gender" => SORT_ASC],
-            'desc' => ["$profileTable.gender" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['job'] = [
-            'asc' => ["$jobTable.name_job" => SORT_ASC],
-            'desc' => ["$jobTable.name_job" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['sms_subscribe'] = [
-            'asc' => ["$userTable.sms_subscribe" => SORT_ASC],
-            'desc' => ["$userTable.sms_subscribe" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['subscribe'] = [
-            'asc' => ["$userTable.subscribe" => SORT_ASC],
-            'desc' => ["$userTable.subscribe" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['language'] = [
-            'asc' => ["$userTable.language" => SORT_ASC],
-            'desc' => ["$userTable.language" => SORT_DESC],
-        ];
-
-        // grid filtering conditions
+        $query->orFilterWhere(['like', 'user.email', $this->searchString])
+            ->orFilterWhere(['like', "profile.full_name", $this->searchString])
+            ->orFilterWhere(['like', "profile.phone", $this->searchString])
+            ->orFilterWhere(['like', "role.name", $this->searchString]);
         $query->andFilterWhere([
-            $userTable . '.id' => $this->id,
-            'status' => $this->status,
-            'logged_in_at' => $this->logged_in_at,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'organization_id' => $this->organization_id,
-            'role_id' => $role_id,
-            'language' => $this->language
+            'relation_user_organization.organization_id' => $this->organization_id,
         ]);
-
-        $query->andFilterWhere(['like', 'user.email', $this->email])
-            ->andFilterWhere(['like', 'logged_in_ip', $this->logged_in_ip])
-            ->andFilterWhere(['like', 'created_ip', $this->created_ip])
-            ->andFilterWhere(['like', "$roleTable.name", $this->role])
-            ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
-            ->andFilterWhere(['like', "$organizationTable.type_id", $this->org_type_id])
-            ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
-            ->andFilterWhere(['like', "$userTable.subscribe", $this->subscribe])
-            ->andFilterWhere(['like', "$userTable.sms_subscribe", $this->sms_subscribe])
-            ->andFilterWhere(['like', "$profileTable.phone", $this->phone])
-            ->andFilterWhere(['like', "$profileTable.gender", $this->gender])
-            ->andFilterWhere(['like', "$profileTable.job_id", $this->job])
-            ->andFilterWhere(['like', "$jobTable.name_job", $this->job_name]);
 
         return $dataProvider;
     }
-
-    /**
-     * Возвращает пользователей по их статусу
-     *
-     * @return array
-     */
-    public static function getListToStatus()
-    {
-
-        $models[] = ['id' => '0', 'name_allow' => 'Не активен'];
-        $models[] = ['id' => '1', 'name_allow' => 'Активен'];
-        $models[] = ['id' => '2', 'name_allow' => 'Ожидается подтверждение E-mail'];
-
-        return
-            ArrayHelper::map($models, 'id', 'name_allow');
-        // );
-    }
-
-    /**
-     * Возвращает пользователей по их языку
-     *
-     * @return array
-     */
-    public static function getListToLanguage()
-    {
-
-        $sql = 'SELECT DISTINCT `language` FROM `user` ORDER BY `language`';
-        $models0 = \Yii::$app->db->createCommand($sql)->queryAll();
-        $models = array();
-        foreach ($models0 as $m) {
-            $models[] = ['id' => $m['language'], 'name_allow' => $m['language']];
-        }
-
-        /*$models = User::find()
-        ->select(['language'])
-        ->asArray()
-        ->all();
-        $models = ActiveQuery::removeDuplicateModels($models);*/
-
-        return
-            ArrayHelper::map($models, 'id', 'name_allow');
-    }
-
 }

@@ -69,8 +69,13 @@ abstract class AbstractDaemonController extends DaemonController
      */
     public function createConsumer()
     {
+        $arWhere = [
+            'consumer_class_name' => $this->consumerClass
+        ];
+
         if (!empty($this->orgId)) {
             $this->getConsumer(new $this->consumerClassName($this->orgId));
+            $arWhere['organization_id'] = $this->orgId;
         } else {
             $this->getConsumer(new $this->consumerClassName);
         }
@@ -78,21 +83,25 @@ abstract class AbstractDaemonController extends DaemonController
         $dateTime = new \DateTime();
         (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
             'start_executing' => $dateTime->format('Y-m-d H:i:s')
-        ], [
-            'consumer_class_name' => $this->consumerClass
-        ])->execute();
+        ], $arWhere)->execute();
     }
 
     public function loggingExecutedTime()
     {
+        $arWhere = [
+            'consumer_class_name' => $this->consumerClass
+        ];
+
+        if (!empty($this->orgId)) {
+            $arWhere['organization_id'] = $this->orgId;
+        }
+
         $dateTime = new \DateTime();
         $this->lastExec = $dateTime->format('Y-m-d H:i:s');
         (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
             'start_executing' => new Expression('NULL'),
-            'last_executed' => $this->lastExec
-        ], [
-            'consumer_class_name' => $this->consumerClass
-        ])->execute();
+            'last_executed'   => $this->lastExec
+        ], $arWhere)->execute();
     }
 
     /**
@@ -114,10 +123,10 @@ abstract class AbstractDaemonController extends DaemonController
          * Инофрмация о подключении
          */
         $this->log([
-            "HOST" => $this->rabbit->host,
-            "V_HOST" => $this->rabbit->vhost,
+            "HOST"     => $this->rabbit->host,
+            "V_HOST"   => $this->rabbit->vhost,
             "Exchange" => $this->getExchangeName(),
-            "Queue" => $this->getQueueName(),
+            "Queue"    => $this->getQueueName(),
             "Consumer" => $consumerTag
         ]);
 
@@ -176,9 +185,9 @@ abstract class AbstractDaemonController extends DaemonController
         $count = \Yii::$app->get('rabbit')->setQueue($this->queueName)->checkQueueCount();
 
         FireBase::getInstance()->update($arFB, [
-            'last_executed' => $this->lastExec,
+            'last_executed'  => $this->lastExec,
             'plain_executed' => $this->lastTimeout,
-            'count' => $count,
+            'count'          => $count,
         ]);
     }
 

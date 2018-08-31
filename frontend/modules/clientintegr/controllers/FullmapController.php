@@ -416,7 +416,7 @@ class FullmapController extends DefaultController {
 
             $model = new AllMaps();
 
-            $model->service_id =1;
+            $model->service_id = $service_id;
             $model->org_id =  $organization;
             $model->product_id = $prod;
             $model->is_active = 1;
@@ -431,21 +431,21 @@ class FullmapController extends DefaultController {
         if($koef != -1) {
 
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set koef = :koef, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
+                ->createCommand('UPDATE all_map set koef = :koef, updated_at = now() where service_id = '.$service_id.' and org_id = :org and product_id in ('.$selected.')',
                     [':koef' => $koef, ':org' => $organization])->execute();
 
         }
 
         if($store != -1) {
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set store_rid = :store, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
+                ->createCommand('UPDATE all_map set store_rid = :store, updated_at = now() where service_id = '.$service_id.' and org_id = :org and product_id in ('.$selected.')',
                     [':store' => $store, ':org' => $organization])->execute();
         }
 
 
         if($vat != -1) {
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set vat = :vat, updated_at = now() where service_id = 1 and org_id = :org and product_id in ('.$selected.')',
+                ->createCommand('UPDATE all_map set vat = :vat, updated_at = now() where service_id = '.$service_id.' and org_id = :org and product_id in ('.$selected.')',
                     [':vat' => $vat, ':org' => $organization])->execute();
         }
 

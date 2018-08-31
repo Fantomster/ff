@@ -131,7 +131,6 @@ class cerberApi extends baseApi
     public function getForeignEnterpriseList($name, $country_guid)
     {
         VetisForeignEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
-        VetisRussianEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
 
         $result = VetisForeignEnterprise::find()->where(['country_guid' => $country_guid])->andWhere(['like', 'name', $name])->one();
 
@@ -155,7 +154,6 @@ class cerberApi extends baseApi
      */
     public function getRussianEnterpriseList($name)
     {
-        VetisForeignEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
         VetisRussianEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
 
         $result = VetisRussianEnterprise::find()->where(['like', 'name', $name])->one();

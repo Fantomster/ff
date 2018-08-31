@@ -7,8 +7,11 @@ use api\common\models\RabbitQueues;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisCountry;
 use common\models\vetis\VetisForeignEnterprise;
+use common\models\vetis\VetisProductByType;
+use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
+use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
 use console\modules\daemons\classes\MercUnitList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
@@ -73,8 +76,10 @@ class MercuryCronController extends Controller
         echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
         echo "GET Purpose" . PHP_EOL;
+
         VetisPurpose::getUpdateData($org_id);
         echo "GET Country" . PHP_EOL;
+
         VetisCountry::getUpdateData($org_id);
         echo "GET RussianEnterprise" . PHP_EOL;
         VetisRussianEnterprise::getUpdateData($org_id);
@@ -82,6 +87,13 @@ class MercuryCronController extends Controller
         VetisForeignEnterprise::getUpdateData($org_id);
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);
+
+        echo "GET ProductByType" . PHP_EOL;
+        VetisProductByType::getUpdateData($org_id);
+        echo "GET ProductItem" . PHP_EOL;
+        VetisProductItem::getUpdateData($org_id);
+        echo "GET SubproductByProduct" . PHP_EOL;
+        VetisSubproductByProduct::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 }

@@ -1623,16 +1623,19 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         $lic = iikoService::getLicense();
-        if ($lic != null)
+        if ($lic != null) {
             $result['iiko'] = $lic;
+        }
 
         $lic = mercService::getLicense();
-        if ($lic != null)
+        if ($lic != null) {
             $result['mercury'] = $lic;
+        }
 
         $lic = OneSService::getLicense();
-        if ($lic != null)
+        if ($lic != null) {
             $result['odinsobsh'] = $lic;
+        }
 
         return $result;
     }
@@ -1643,8 +1646,9 @@ class Organization extends \yii\db\ActiveRecord
     public function getVsdCount()
     {
         $lic = mercService::getLicense();
-        if ($lic == null)
+        if ($lic == null) {
             return 0;
+        }
 
         try {
             $guid = mercDicconst::getSetting('enterprise_guid');
@@ -1749,9 +1753,20 @@ class Organization extends \yii\db\ActiveRecord
         $res = $command->queryAll();
         ksort($res);
         $res2 = array();
-        foreach ($res as $postav) {
-            $podstav = mb_strtolower($postav['name']);
-            if (strpos($podstav, $stroka) !== false) $res2[] = $postav;
+        if ($stroka != '') {
+            foreach ($res as $postav) {
+                $podstav = mb_strtolower($postav['name']);
+                if (strpos($podstav, $stroka) !== false) {
+                    $res2[] = $postav;
+                }
+            }
+        } else {
+            foreach ($res as $postav) {
+                $podstav = mb_strtolower($postav['name']);
+                if (count($res2) < 100) {
+                    $res2[] = $postav;
+                } //ограничение на количество поставщиков для выпадающего списка
+            }
         }
         return $res2;
     }

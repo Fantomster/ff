@@ -4,8 +4,11 @@ namespace console\controllers;
 
 use api\common\models\merc\mercPconst;
 use api\common\models\RabbitQueues;
+use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisCountry;
+use common\models\vetis\VetisForeignEnterprise;
 use common\models\vetis\VetisPurpose;
+use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisUnit;
 use console\modules\daemons\classes\MercUnitList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
@@ -67,12 +70,18 @@ class MercuryCronController extends Controller
     {
         $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
-        echo "GET UNITS" . PHP_EOL;
+        echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
-        echo "GET PURPOSE" . PHP_EOL;
+        echo "GET Purpose" . PHP_EOL;
         VetisPurpose::getUpdateData($org_id);
-        echo "GET COUNTRY" . PHP_EOL;
+        echo "GET Country" . PHP_EOL;
         VetisCountry::getUpdateData($org_id);
+        echo "GET RussianEnterprise" . PHP_EOL;
+        VetisRussianEnterprise::getUpdateData($org_id);
+        echo "GET ForeignEnterprise" . PHP_EOL;
+        VetisForeignEnterprise::getUpdateData($org_id);
+        echo "GET BusinessEntity" . PHP_EOL;
+        VetisBusinessEntity::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 }

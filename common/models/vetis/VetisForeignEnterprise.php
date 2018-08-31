@@ -106,7 +106,7 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             ];
 
             $listOptions = new ListOptions();
-            $listOptions->count = 100;
+            $listOptions->count = 1000;
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;

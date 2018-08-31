@@ -23,6 +23,7 @@ class baseApi extends Component
     protected $query_timeout;
     protected $system;
     protected $wsdlClassName;
+    protected $org_id;
 
     protected static $_instance = [];
 

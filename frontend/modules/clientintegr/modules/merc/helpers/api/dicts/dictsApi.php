@@ -2,6 +2,8 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\dicts;
 
+use common\models\vetis\VetisPurpose;
+use common\models\vetis\VetisUnit;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use Yii;
 use yii\db\Exception;
@@ -24,18 +26,15 @@ class dictsApi extends baseApi
      */
     public function getPurposeByGuid($GUID)
     {
-        /*$purpose = \common\models\vetis\VetisPurpose::findOne(['guid' => $GUID]);
+        VetisPurpose::getUpdateData(Yii::$app->user->identity->organization_id);
+
+        $purpose = VetisPurpose::findOne(['guid' => $GUID]);
 
         if (!empty($purpose)) {
-            return $purpose;
-        }*/
+            return unserialize($purpose->data);
+        }
 
-        $client = $this->getSoapClient('dicts');
-        $request = new getPurposeByGuidRequest();
-        $request->guid = $GUID;
-        $result = $client->GetPurposeByGuid($request);
-
-        return $result;
+        return null;
     }
     /**
      * Получение еденицы измерения по Guid
@@ -44,19 +43,15 @@ class dictsApi extends baseApi
      */
     public function getUnitByGuid($GUID)
     {
-        /*$unit = \common\models\vetis\VetisUnit::findOne(['guid' => $GUID]);
+        VetisUnit::getUpdateData(Yii::$app->user->identity->organization_id);
+
+        $unit = VetisUnit::findOne(['guid' => $GUID]);
 
         if (!empty($unit)) {
-            return $unit;
-        }*/
+            return unserialize($unit->data);
+        }
 
-        $client = $this->getSoapClient('dicts');
-
-        $request = new getUnitByGuidRequest();
-        $request->guid = $GUID;
-        $result = $client->GetUnitByGuid($request);
-
-        return $result;
+        return null;
     }
 
     /**
@@ -65,13 +60,20 @@ class dictsApi extends baseApi
      */
     public function getUnitList()
     {
-        $units = \common\models\vetis\VetisUnit::findAll(['active' => 1, 'last' => 1]);
+        VetisUnit::getUpdateData(Yii::$app->user->identity->organization_id);
+
+        $units = VetisUnit::findAll(['active' => 1, 'last' => 1]);
 
         if (!empty($units)) {
-            return $units;
+            $list = [];
+            foreach ($units as $item)
+            {
+                $list[] = unserialize($item->data);
+            }
+            return $list;
         }
 
-        return null;
+        return [];
     }
 
     /**
@@ -80,13 +82,20 @@ class dictsApi extends baseApi
      */
     public function getPurposeList()
     {
-        $units = \common\models\vetis\VetisUnit::findAll(['active' => 1, 'last' => 1]);
+        VetisPurpose::getUpdateData(Yii::$app->user->identity->organization_id);
 
-        if (!empty($units)) {
-            return $units;
+        $purposes = VetisPurpose::findAll(['active' => 1, 'last' => 1]);
+
+        if (!empty($purposes)) {
+            $list = [];
+            foreach ($purposes as $item)
+            {
+               $list[] = unserialize($item->data);
+            }
+            return $list;
         }
 
-        return null;
+        return [];
     }
 
     /**
@@ -121,11 +130,8 @@ class dictsApi extends baseApi
      */
     public function getPurposeChangesList($options)
     {
-        $client = $this->getSoapClient('dicts');
-
         $request = new getPurposeListRequest();
         $request->listOptions = $options['listOptions'];
-
 
         if (!array_key_exists('listOptions', $options)) {
             throw new Exception('startDate field is not specified');

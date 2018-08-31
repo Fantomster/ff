@@ -9,6 +9,7 @@
 namespace console\modules\daemons\components;
 
 use api\common\models\merc\mercPconst;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 
 /**
  * Class consumer with realization ConsumerInterface
@@ -16,7 +17,6 @@ use api\common\models\merc\mercPconst;
  */
 class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 {
-    protected $result = true;
     protected $instance;
     protected $method;
     protected $startDate;
@@ -43,6 +43,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     protected function saveList($list)
     {
         $list = is_array($list) ? $list : [$list];
+        $result = [];
         foreach ($list as $item)
         {
             $model = $this->modelClassName::findOne(['guid' => $item->guid]);
@@ -55,8 +56,15 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
             $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
             if (!$model->save()) {
-                $this->result = false;
+                $result[] = $model->getErrors();
             }
+        }
+
+        if(empty($result)) {
+            mercLogger::getInstance()->addMercLogDict('COMPLETE', self::class, null);
+        }
+        else{
+            mercLogger::getInstance()->addMercLogDict('ERROR', self::class, serialize($result));
         }
     }
 
@@ -92,6 +100,6 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function saveData()
     {
-        return $this->result;
+        return true;
     }
 }

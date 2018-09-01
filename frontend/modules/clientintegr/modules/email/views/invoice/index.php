@@ -8,6 +8,7 @@ use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\helpers\Url;
 use common\components\UrlPjax;
+
 function renderButton($id)
 {
     return \yii\helpers\Html::tag('a', 'Задать', [
@@ -350,8 +351,9 @@ $js = <<<JS
         var organization_id = $organization->id;
 
         swal({
-                html: '<input type="text" id="bukv-postav" class="swal2-input" placeholder="Введите хотя бы две буквы названия поставщика" autofocus>'+'<div id="bukv-postav2"></div>',
-                inputPlaceholder: 'Введите хотя бы две буквы',
+                html: '<input type="text" id="bukv-postav" class="swal2-input" placeholder="Введите или выберите поставщика" autofocus>'+'<div id="bukv-postav2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-postav3" style="margin-top:0px;padding-top:0px;"></div>',
+                //inputPlaceholder: 'Введите хотя бы две буквы',Введите хотя бы две буквы названия поставщика
+                inputPlaceholder: 'Введите или выберите поставщика',
                 confirmButtonText: 'Выбрать',
                 cancelButtonText: 'Отмена',
                 showCancelButton: true,
@@ -359,29 +361,55 @@ $js = <<<JS
                 inputOptions: new Promise(function (resolve) {
                     $(document).ready ( function(){
                         $("#bukv-postav").focus();
-                        $("#bukv-postav").keyup(function() {
-                            var a = $("#bukv-postav").val();
-                                if (a.length>=2) {
-                                    $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
+                        var a = $("#bukv-postav").val();
+                        $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
                                     function(data){
                                         var arr = JSON.parse(data);
                                         if (arr.length>0) {
-                                            var sel = '<select id="selpos" name="list_postav" class="swal2-input">';
+                                            var sel100 = 'Показаны первые 100 позиций';
+                                            if (arr.length>=100) {
+                                            $('#bukv-postav3').html(sel100);
+                                        }
+                                            var sel = '<div id="spisok">';
+                                            sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < arr.length; ++index) {
                                                 sel = sel+'<option value="'+arr[index]['id']+'">'+arr[index]['name']+'</option>';
                                             }
-                                            sel = sel+'</select>';
+                                            sel = sel+'</select></div>';
                                         } else {
                                             sel = 'Нет данных.';
                                         }
                                         $('#bukv-postav2').html(sel);
+                                        $('#bukv-postav').css("margin-bottom", "0px");
+                                        $('#selpos').css("margin-top", "0px");
                                 });
-                            } else {
-                                $('#bukv-postav2').text('');
-                            }
-                        });
-                    });
+                        $("#bukv-postav").keyup(function() {
+                            var a = $("#bukv-postav").val();
+                                //if (a.length>=0) {
+                                    $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
+                                    function(data){
+                                        var arr = JSON.parse(data);
+                                        if (arr.length>0) {
+                                            var sel = '<div id="spisok">';
+                                            sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
+                                            var index;
+                                            for (index = 0; index < arr.length; ++index) {
+                                                sel = sel+'<option value="'+arr[index]['id']+'">'+arr[index]['name']+'</option>';
+                                            }
+                                            sel = sel+'</select></div>';
+                                        } else {
+                                            sel = 'Нет данных.';
+                                        }
+                                        $('#bukv-postav2').html(sel);
+                                        $('#bukv-postav').css("margin-bottom", "0px");
+                                        $('#selpos').css("margin-top", "0px");
+                                });
+                            //} else {
+                              //  $('#bukv-postav2').text('');
+                            //}
+                        })
+                    })
                 })
             }
         ).then(function (result) {

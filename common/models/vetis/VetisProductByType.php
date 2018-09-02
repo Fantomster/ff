@@ -52,6 +52,10 @@ class VetisProductByType extends \yii\db\ActiveRecord implements UpdateDictInter
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
+            [['active','last'], 'filter', 'filter' => function ($value) {
+                $value = ($value === 'true') ? 1 : 0;
+                return $value;
+            }],
             [['last', 'active', 'status', 'productType'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code'], 'string', 'max' => 255],

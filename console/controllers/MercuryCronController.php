@@ -76,12 +76,12 @@ class MercuryCronController extends Controller
         echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
         echo "GET Purpose" . PHP_EOL;
-
         VetisPurpose::getUpdateData($org_id);
-        echo "GET Country" . PHP_EOL;
 
+        echo "GET Country" . PHP_EOL;
         VetisCountry::getUpdateData($org_id);
-        echo "GET RussianEnterprise" . PHP_EOL;
+
+        /*echo "GET RussianEnterprise" . PHP_EOL;
         VetisRussianEnterprise::getUpdateData($org_id);
         echo "GET ForeignEnterprise" . PHP_EOL;
         VetisForeignEnterprise::getUpdateData($org_id);
@@ -93,7 +93,7 @@ class MercuryCronController extends Controller
         echo "GET ProductItem" . PHP_EOL;
         VetisProductItem::getUpdateData($org_id);
         echo "GET SubproductByProduct" . PHP_EOL;
-        VetisSubproductByProduct::getUpdateData($org_id);
+        VetisSubproductByProduct::getUpdateData($org_id);*/
         echo "FINISH" . PHP_EOL;
     }
 }

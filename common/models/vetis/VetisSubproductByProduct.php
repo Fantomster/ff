@@ -52,6 +52,10 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
+            [['active','last'], 'filter', 'filter' => function ($value) {
+                $value = ($value === 'true') ? 1 : 0;
+                return $value;
+            }],
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'productGuid'], 'string', 'max' => 255],

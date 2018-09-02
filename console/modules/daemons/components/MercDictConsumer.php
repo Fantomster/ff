@@ -46,7 +46,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         $result = [];
         foreach ($list as $item)
         {
-            $model = $this->modelClassName::findOne(['guid' => $item->guid]);
+            $model = $this->modelClassName::findOne(['uuid' => $item->uuid]);
 
             if($model == null) {
                 $model = new $this->modelClassName();
@@ -57,15 +57,16 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
             $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
             if (!$model->save()) {
-                $result[] = $model->getErrors();
+                $result[]['error'] = $model->getErrors();
+                $result[]['model-data'] = $model->attributes;
             }
         }
 
         if(empty($result)) {
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', self::class, null);
+            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
         }
         else{
-            mercLogger::getInstance()->addMercLogDict('ERROR', self::class, serialize($result));
+            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
         }
     }
 
@@ -82,9 +83,12 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     public function getData()
     {
         $this->init();
+        $count = 0;
         do {
             $response = $this->instance->sendRequest($this->method, $this->request);
             $list = $response->{$this->listName};
+            $count += $list->count;
+            $this->log('Load '.$count.' / '. $list->total.PHP_EOL);
             if ($list->count > 0) {
                 $this->saveList($list->{$this->listItemName});
             }

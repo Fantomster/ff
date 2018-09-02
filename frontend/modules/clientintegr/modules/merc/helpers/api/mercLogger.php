@@ -118,7 +118,7 @@ class mercLogger extends Component
         $journal->operation_code = '1';//$operation->code."";
         $journal->log_guide = $localTransactionId;
         $journal->type = $result;
-        $journal->response = ($journal->type == 'success') ? 'COMPLETE' :  serialize($response);
+        $journal->response = ($journal->type == 'COMPLETE') ? 'COMPLETE' :  $response;
         $journal->created_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
         $journal->save();

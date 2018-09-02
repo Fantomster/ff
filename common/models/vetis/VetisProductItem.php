@@ -64,6 +64,10 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
+            [['active','last'], 'filter', 'filter' => function ($value) {
+                $value = ($value === 'true') ? 1 : 0;
+                return $value;
+            }],
             [['last', 'active', 'status', 'productType', 'correspondsToGost'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'globalID', 'product_uuid', 'product_guid', 'subproduct_uuid', 'subproduct_guid', 'gost', 'producer_uuid', 'producer_guid', 'tmOwner_uuid', 'tmOwner_guid'], 'string', 'max' => 255],

@@ -51,8 +51,8 @@ class mercLogger extends Component
         $journal = new Journal();
         $journal->service_id = self::service_id;
         $journal->operation_code = $operation->code."";
-        $journal->user_id = \Yii::$app->user->id;
-        $journal->organization_id = (\Yii::$app->user->identity)->organization_id;
+        //$journal->user_id = \Yii::$app->user->id;
+        //$journal->organization_id = (\Yii::$app->user->identity)->organization_id;
         $journal->log_guide = $localTransactionId;
         $journal->type = ($response->application->status == 'COMPLETED') ? 'success' : 'error';
         $journal->response = ($journal->type == 'success') ? 'COMPLETE' :  serialize($response);
@@ -72,7 +72,7 @@ class mercLogger extends Component
     public function addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml)
     {
         //Пишем лог
-        $log = new mercLog();
+      /*  $log = new mercLog();
         $log->applicationId = $response->application->applicationId;
         $log->status = $response->application->status;
         $log->action = $method;

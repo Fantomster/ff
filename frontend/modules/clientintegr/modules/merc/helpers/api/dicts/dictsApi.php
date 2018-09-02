@@ -26,7 +26,7 @@ class dictsApi extends baseApi
      */
     public function getPurposeByGuid($GUID)
     {
-        VetisPurpose::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisPurpose::getUpdateData($this->org_id);
 
         $purpose = VetisPurpose::findOne(['guid' => $GUID]);
 
@@ -43,7 +43,7 @@ class dictsApi extends baseApi
      */
     public function getUnitByGuid($GUID)
     {
-        VetisUnit::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisUnit::getUpdateData($this->org_id);
 
         $unit = VetisUnit::findOne(['guid' => $GUID]);
 
@@ -60,7 +60,7 @@ class dictsApi extends baseApi
      */
     public function getUnitList()
     {
-        VetisUnit::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisUnit::getUpdateData($this->org_id);
 
         $units = VetisUnit::findAll(['active' => 1, 'last' => 1]);
 
@@ -82,7 +82,7 @@ class dictsApi extends baseApi
      */
     public function getPurposeList()
     {
-        VetisPurpose::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisPurpose::getUpdateData($this->org_id);
 
         $purposes = VetisPurpose::findAll(['active' => 1, 'last' => 1]);
 

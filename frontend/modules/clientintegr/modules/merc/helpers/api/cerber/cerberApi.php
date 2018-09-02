@@ -39,8 +39,8 @@ class cerberApi extends baseApi
      */
     public function getEnterpriseByUuid($UUID)
     {
-        VetisForeignEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
-        VetisRussianEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisForeignEnterprise::getUpdateData($this->org_id);
+        VetisRussianEnterprise::getUpdateData($this->org_id);
 
         if ($UUID == null) {
             return null;
@@ -66,7 +66,7 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityByUuid($UUID)
     {
-        VetisBusinessEntity::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisBusinessEntity::getUpdateData($this->org_id);
 
         $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => 'true']);
 
@@ -84,8 +84,8 @@ class cerberApi extends baseApi
      */
     public function getEnterpriseByGuid($GUID)
     {
-        VetisForeignEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
-        VetisRussianEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisForeignEnterprise::getUpdateData($this->org_id);
+        VetisRussianEnterprise::getUpdateData($this->org_id);
 
         if ($GUID == null) {
             return null;
@@ -111,7 +111,7 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityByGuid($GUID)
     {
-        VetisBusinessEntity::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisBusinessEntity::getUpdateData($this->org_id);
 
         $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => 'true']);
 
@@ -130,7 +130,7 @@ class cerberApi extends baseApi
      */
     public function getForeignEnterpriseList($name, $country_guid)
     {
-        VetisForeignEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisForeignEnterprise::getUpdateData($this->org_id);
 
         $result = VetisForeignEnterprise::find()->where(['country_guid' => $country_guid])->andWhere(['like', 'name', $name])->one();
 
@@ -154,7 +154,7 @@ class cerberApi extends baseApi
      */
     public function getRussianEnterpriseList($name)
     {
-        VetisRussianEnterprise::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisRussianEnterprise::getUpdateData($this->org_id);
 
         $result = VetisRussianEnterprise::find()->where(['like', 'name', $name])->one();
 

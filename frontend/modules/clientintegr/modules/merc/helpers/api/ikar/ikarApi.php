@@ -19,7 +19,7 @@ class ikarApi extends baseApi
     //Получние страны по GUID
     public function getCountryByGuid($GUID)
     {
-       VetisCountry::getUpdateData(Yii::$app->user->identity->organization_id);
+       VetisCountry::getUpdateData($this->org_id);
        $country = VetisCountry::findOne(['guid' => $GUID]);
         
         if (!empty($country)) {
@@ -35,7 +35,7 @@ class ikarApi extends baseApi
      */
     public function getAllCountryList()
     {
-        VetisCountry::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisCountry::getUpdateData($this->org_id);
         $countries = VetisCountry::findAll(['active' => 1, 'last' => 1]);
 
         if (!empty($countries)) {

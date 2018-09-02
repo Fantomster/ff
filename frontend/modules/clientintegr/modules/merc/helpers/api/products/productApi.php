@@ -24,7 +24,7 @@ class productApi extends baseApi
      */
     public function getProductByGuid ($GUID)
     {
-        VetisProductByType::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisProductByType::getUpdateData($this->org_id);
         $product = VetisProductByType::findOne(['guid' => $GUID]);
 
         if(!empty($product)) {
@@ -41,7 +41,7 @@ class productApi extends baseApi
      */
     public function getSubProductByGuid ($GUID)
     {
-        VetisSubproductByProduct::getUpdateData(Yii::$app->user->identity->organization_id);
+        VetisSubproductByProduct::getUpdateData($this->org_id);
         $subProduct = VetisSubproductByProduct::findOne(['guid' => $GUID]);
 
         if(!empty($subProduct)) {

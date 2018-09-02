@@ -21,6 +21,7 @@ use console\modules\daemons\classes\MercRussianEnterpriseList;
 use console\modules\daemons\classes\MercSubProductList;
 use console\modules\daemons\classes\MercSubProductListList;
 use console\modules\daemons\classes\MercUnitList;
+use console\modules\daemons\classes\MercVSDList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\ListOptions;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
@@ -96,38 +97,19 @@ class MercuryCronController extends Controller
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);*/
 
-        /*echo "GET ProductByType" . PHP_EOL;
+        echo "GET ProductByType" . PHP_EOL;
         VetisProductByType::getUpdateData($org_id);
         echo "GET ProductItem" . PHP_EOL;
         VetisProductItem::getUpdateData($org_id);
         echo "GET SubproductByProduct" . PHP_EOL;
-        VetisSubproductByProduct::getUpdateData($org_id);*/
+        VetisSubproductByProduct::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 
     public function actionTest2()
     {
-        $load = new Cerber();
-
-        $org_id = (mercPconst::findOne('1'))->org;
-        $queue = null;
         echo "START" . PHP_EOL;
-        //Формируем данные для запроса
-        $data['method'] = 'getSubProductChangesList';
-        $data['struct'] = ['listName' => 'subProductList',
-            'listItemName' => 'subProduct'
-        ];
-
-        $listOptions = new ListOptions();
-        $listOptions->count = 100;
-        $listOptions->offset = 0;
-
-        $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
-        $instance = productApi::getInstance($org_id);
-        $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
-
-        $w = new MercSubProductList($org_id);
-        $w->data = json_encode($data);
+        $w = new MercVSDList(5144);
         $w->getData();
 
         echo "FINISH" . PHP_EOL;

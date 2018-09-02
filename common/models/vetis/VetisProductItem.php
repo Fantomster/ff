@@ -5,9 +5,9 @@ namespace common\models\vetis;
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\Producer;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Product;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
 
 /**
@@ -114,7 +114,7 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
     public static function getUpdateData($org_id)
     {
         try {
-            $load = new Product();
+            $load = new Products();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercProductItemList'])->orderBy(['last_executed' => SORT_DESC])->one();
             if($queue == null) {

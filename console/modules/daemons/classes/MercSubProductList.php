@@ -15,7 +15,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
  * Class consumer with realization ConsumerInterface
  * and containing AbstractConsumer methods
  */
-class MercUnitList extends MercDictConsumer
+class MercSubProductList extends MercDictConsumer
 {
     protected function init()
     {

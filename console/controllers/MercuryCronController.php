@@ -18,6 +18,8 @@ use console\modules\daemons\classes\MercForeignEnterpriseList;
 use console\modules\daemons\classes\MercProductItemList;
 use console\modules\daemons\classes\MercProductList;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
+use console\modules\daemons\classes\MercSubProductList;
+use console\modules\daemons\classes\MercSubProductListList;
 use console\modules\daemons\classes\MercUnitList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\ListOptions;
@@ -94,9 +96,9 @@ class MercuryCronController extends Controller
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);*/
 
-        echo "GET ProductByType" . PHP_EOL;
+        /*echo "GET ProductByType" . PHP_EOL;
         VetisProductByType::getUpdateData($org_id);
-        /*echo "GET ProductItem" . PHP_EOL;
+        echo "GET ProductItem" . PHP_EOL;
         VetisProductItem::getUpdateData($org_id);
         echo "GET SubproductByProduct" . PHP_EOL;
         VetisSubproductByProduct::getUpdateData($org_id);*/
@@ -111,10 +113,9 @@ class MercuryCronController extends Controller
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
-        //Формируем данные для запроса
-        $data['method'] = 'getProductItemChangesList';
-        $data['struct'] = ['listName' => 'productItemList',
-            'listItemName' => 'productItem'
+        $data['method'] = 'getSubProductChangesList';
+        $data['struct'] = ['listName' => 'subProductList',
+            'listItemName' => 'subProduct'
         ];
 
         $listOptions = new ListOptions();
@@ -125,7 +126,7 @@ class MercuryCronController extends Controller
         $instance = productApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-        $w = new MercProductItemList($org_id);
+        $w = new MercSubProductList($org_id);
         $w->data = json_encode($data);
         $w->getData();
 

@@ -265,14 +265,11 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
-        var_dump($dbName);
-        die();
-
         $db = Yii::$app->db_api;
-        $sql = 'SELECT m.store_rid from '.$dbName.'.order_content o 
-                LEFT JOIN all_map m on o.product_id = m.product_id and m.service_id = 2
-                WHERE o.order_id = '.$order_id.'
-                GROUP BY store_rid';
+        $sql = ' SELECT m.store_rid from `'.$dbName.'`.`order_content` o '.
+               ' LEFT JOIN all_map m on o.product_id = m.product_id and m.service_id = 2 '.
+               ' WHERE o.order_id = '.$order_id.
+               ' GROUP BY store_rid';
 
         $stories = $db->createCommand($sql)->queryAll();
         $stories = ArrayHelper::getColumn($stories, 'store_rid');

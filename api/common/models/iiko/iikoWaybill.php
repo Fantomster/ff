@@ -302,9 +302,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
                 if ($waybillModeIiko === '1' && $model->status_id == 4 ) { // Autosend waybill
 
-                    var_dump('Sending model: '.$model->id);
-                    die();
-
                     $transaction = Yii::$app->db_api->beginTransaction();
                     $api = iikoApi::getInstance();
 
@@ -312,7 +309,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                         if ($api->auth()) {
                             $response = $api->sendWaybill($model);
                             if ($response !== true) {
-                                \yii::error('Error during sending waybill');
+                                \Yii::error('Error during sending waybill');
                                 throw new \Exception('Ошибка при отправке. ' . $response);
                             }
                             $model->status_id = 2;
@@ -337,15 +334,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $num++;
         }
 
-        die();
-
         return $res;
 
     }
 
     public static function exportWaybill($waybill_id): bool
     {
-        // TODO: Implement exportWaybill() method.
+        // TODO: Implement exportWaybill() method here
     }
 
     protected function createWaybillData()

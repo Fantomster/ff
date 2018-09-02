@@ -142,7 +142,7 @@ class AllMaps extends \yii\db\ActiveRecord
         switch ($service_id) {
             case 1 : // R-keeper
                 $stores += ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $org_id])->
-                andWhere('type = 2')->all(), 'rid', 'name');
+                andWhere('type = 2')->all(), 'id', 'name');
                 break;
 
             case 2 : // iiko
@@ -165,7 +165,7 @@ class AllMaps extends \yii\db\ActiveRecord
         switch ($this->service_id) {
 
             case 1:  // R-keeper
-                return RkStoretree::find()->andWhere('rid = :rid', [':rid' => $this->store_rid])->
+                return RkStoretree::find()->andWhere('id = :rid', [':rid' => $this->store_rid])->
                 andWhere('acc = :acc', [':acc' => $acc])->one();
             case 2:  // iiko
                 return iikoStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->

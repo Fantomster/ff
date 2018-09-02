@@ -7,8 +7,11 @@ use common\helpers\DBNameHelper;
 use common\models\Order;
 use common\models\OrderContent;
 use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
+use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
 use Yii;
 use frontend\controllers\ClientController;
+use yii\helpers\ArrayHelper;
+use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 
 /**
  * This is the model class for table "iiko_waybill".
@@ -35,6 +38,12 @@ use frontend\controllers\ClientController;
  */
 class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
+
+    const AUTOSTATUS_NEW = 1;
+    const AUTOSTATUS_DELETED = 2;
+    const AUTOSTATUS_REBORN = 3;
+
+
     /**
      * @inheritdoc
      */
@@ -58,7 +67,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
     {
         return [
             [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
-            [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code', 'payment_delay_date'], 'safe'],
+            [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code', 'payment_delay_date', 'autostatus_id'], 'safe'],
             [['org', 'agent_uuid'], 'required'],
             [['org', 'agent_uuid', 'store_id'], 'required', 'on' => 'handMade'],
             [['agent_uuid'], 'string', 'max' => 36],
@@ -256,9 +265,14 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
-        $stories = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = 2 and product_id in (
-        SELECT product_id from '.$dbName.'.order_content where order_id = :order  
-        ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column();
+        $db = Yii::$app->db_api;
+        $sql = 'SELECT m.store_rid from '.$dbName.'.order_content o 
+                LEFT JOIN all_map m on o.product_id = m.product_id and m.service_id = 2
+                WHERE o.order_id = '.$order_id.'
+                GROUP BY store_rid';
+
+        $stories = $db->createCommand($sql)->queryAll();
+        $stories = ArrayHelper::getColumn($stories, 'store_rid');
 
         $contra = iikoAgent::findOne(['vendor_id' => $order->vendor_id]);
 
@@ -281,11 +295,50 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $num++;
                 $res = false;
                 continue;
+            } else {
+
+                $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+                $model->refresh();
+
+                if ($waybillModeIiko === '1' && $model->status_id == 4 ) { // Autosend waybill
+
+                    var_dump('Sending model: '.$model->id);
+                    die();
+
+                    $transaction = Yii::$app->db_api->beginTransaction();
+                    $api = iikoApi::getInstance();
+
+                    try {
+                        if ($api->auth()) {
+                            $response = $api->sendWaybill($model);
+                            if ($response !== true) {
+                                \yii::error('Error during sending waybill');
+                                throw new \Exception('Ошибка при отправке. ' . $response);
+                            }
+                            $model->status_id = 2;
+                            $model->save();
+                        } else {
+                            \yii::error('Error during iiko auth');
+                            throw new \Exception('Не удалось авторизоваться');
+                        }
+
+                        $transaction->commit();
+                        $api->logout();
+                        return true;
+
+                    } catch (\Exception $e) {
+                        $transaction->rollBack();
+                        $api->logout();
+                        \yii::error('Cant send waybill, rolled back'.$e);
+                        return ['success' => false, 'error' => $e->getMessage()];
+                    }
+                }
             }
-
             $num++;
-
         }
+
+        die();
+
         return $res;
 
     }
@@ -304,9 +357,10 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         if ($waybillMode !== '0') {
 
             if ($this->store_id === null) {
-                $records =  OrderContent::find()
+                $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->andWhere('product_id in ( select product_id from '.$dbName.'.all_map where service_id = 2 and store_rid is null)')
+                    ->leftJoin($dbName.'.all_map','order_content.product_id = '.$dbName.'.`all_map`.`product_id` and '.$dbName.'.all_map.service_id = 2')
+                    ->andWhere($dbName.'.all_map.store_rid is null')
                     ->all();
             } else {
                 $records =  OrderContent::find()
@@ -352,6 +406,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
                     if (isset($ch->koef)) {
                         $wdmodel->koef = $ch->koef;
+                        $wdmodel->quant = $wdmodel->quant * $ch->koef;
                     }
 
                     if (isset($ch->unit_rid)) {
@@ -363,7 +418,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                     }
                 }
 
-                $wdmodel->quant = $wdmodel->quant * $ch->koef;
+
 
                 if (!$wdmodel->save()) {
                     var_dump($wdmodel->getErrors());

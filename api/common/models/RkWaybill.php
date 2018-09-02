@@ -5,6 +5,9 @@ namespace api\common\models;
 use Aws\Ec2\Iterator\DescribeInstancesIterator;
 use common\models\Order;
 use common\models\User;
+use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
+use common\helpers\DBNameHelper;
+use yii\helpers\ArrayHelper;
 
 use Yii;
 use common\models\OrderContent;
@@ -30,7 +33,8 @@ use common\models\OrderContent;
  * 
  * 
  */
-class RkWaybill extends \yii\db\ActiveRecord {
+class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
+{
 
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
@@ -49,7 +53,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['order_id', 'doc_date', 'corr_rid'], 'required'],
+            [['order_id', 'doc_date'], 'required'],
             [['corr_rid', 'store_rid', 'status_id','num_code'], 'integer'],
             [['store_rid'], 'number', 'min' => 0],
                 //     [['comment'], 'string', 'max' => 255],
@@ -93,7 +97,10 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
-        return RkStoretree::find()->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => $acc])->one();
+        return RkStoretree::find()
+            ->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => $acc])
+            // ->andWhere('type = 2')
+            ->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
@@ -160,103 +167,161 @@ class RkWaybill extends \yii\db\ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
         
          if ($insert) {
+             $this->createWaybillData();
+        }
+        
+    }
 
+
+    protected function createWaybillData() {
+
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+
+        $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+
+        if ($waybillMode !== '0') {
+
+            if ($this->store_rid === null) {
+                $records = OrderContent::find()
+                    ->where(['order_id' => $this->order_id])
+                    ->leftJoin($dbName.'.all_map','order_content.product_id = '.$dbName.'.`all_map`.`product_id` and '.$dbName.'.all_map.service_id = 1')
+                  //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and store_rid is null)')
+                    ->andWhere($dbName.'.all_map.store_rid is null')
+                    ->all();
+            } else {
+                $records = OrderContent::find()
+                    ->where(['order_id' => $this->order_id])
+                    ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and store_rid = :store)',
+                        [':store' => $this->store_rid])
+                    ->all();
+            }
+        } else {
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
-            
-        //    var_dump($records);
-        //    var_dump($this->order_id);
-
-            $transaction = Yii::$app->db_api->beginTransaction();
-
-            try {
-
-                $taxVat = (RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 18;
-
-                foreach ($records as $record) {
-
-                    $wdmodel = new RkWaybilldata();
-
-                    $wdmodel->waybill_id = $this->id;
-                    $wdmodel->product_id = $record->product_id;
-                    $wdmodel->quant = $record->quantity;                    
-                    $wdmodel->sum = round($record->price*$record->quantity,2);
-                    $wdmodel->defquant = $record->quantity;                    
-                    $wdmodel->defsum = round($record->price*$record->quantity,2);
-                    $wdmodel->vat = $taxVat*100;
-                    $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-                    $wdmodel->org = $this->org;
-                    $wdmodel->koef = 1;
-                    
-                    
-                    // Check previous
+        }
 
 
-                    $ch = RkWaybilldata::find()
-                            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
-                            ->andWhere('org = :org',['org' => $wdmodel->org]) 
-                            ->andWhere('product_rid is not null')
-                            ->orderBy(['linked_at' => SORT_DESC])
-                            ->limit(1)
-                            ->one();
-                    
-                    if ($ch) {
-                        $wdmodel->product_rid = $ch->product_rid;
-                        $wdmodel->munit_rid = $ch->munit_rid;
-                        $wdmodel->koef = $ch->koef;
-                        $wdmodel->quant = $wdmodel->quant*$ch->koef;
-                        $wdmodel->vat = $ch->vat;
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            $taxVat =  RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() ??  1800;
 
-                    }
+            foreach ($records as $record) {
+                $wdmodel = new RkWaybilldata();
+                ///$wdmodel->setScenario('autoWaybill');
+                $wdmodel->waybill_id = $this->id;
+                $wdmodel->product_id = $record->product_id;
+                $wdmodel->quant = $record->quantity;
+                $wdmodel->sum = round($record->price * $record->quantity, 2);
+                $wdmodel->defquant = $record->quantity;
+                $wdmodel->defsum = round($record->price * $record->quantity, 2);
+                $wdmodel->vat = $taxVat;
+                $wdmodel->org = $this->org;
+                $wdmodel->koef = 1;
+                // New check mapping
+                $ch = AllMaps::find()
+                    ->andWhere('product_id = :prod', ['prod' => $record->product_id])
+                    ->andWhere('org_id = :org', ['org' => $this->org])
+                    ->andWhere('service_id = 1')
+                    ->one();
 
-                    // New check with mass mapping...
-
- /*                   $ch = AllMaps::find()
-                        ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ])
-                        ->andWhere('org_id = :org',['org' => $wdmodel->org])
-                        ->limit(1)
-                        ->one();
-
-                    if ($ch) {
-
-                        if (isset($ch->serviceproduct_id))
+                if ($ch) {
+                    if (isset($ch->serviceproduct_id)) {
                         $wdmodel->product_rid = $ch->serviceproduct_id;
-
-                        if (isset($ch->koef))
-                            $wdmodel->koef = $ch->koef;
-
-                        // $wdmodel->munit_rid = $ch->munit_rid;
-
-                        if (isset($ch->vat))
-                            $wdmodel->vat = $ch->vat;
                     }
-*/
-                    if (!$wdmodel->save()) {
 
-                        //AD: made those changes locally for debug
-                        //var_dump($wdmodel->getErrors());
-                        \Yii::error(serialize($wdmodel->getErrors()));
-                        throw new \Exception();
+                    if (isset($ch->koef)) {
+                        $wdmodel->koef = $ch->koef;
+                        $wdmodel->quant = $wdmodel->quant * $ch->koef;
+                    }
+
+                    if (isset($ch->unit_rid)) {
+                        $wdmodel->munit_rid = $ch->unit_rid;
+                    }
+
+                    if (isset($ch->vat)) {
+                        $wdmodel->vat = $ch->vat;
                     }
                 }
 
-                $transaction->commit();
-            } catch (\Exception $ex) {
 
-                //AD: and also this changes
-               // var_dump($ex);
-                $transaction->rollback();
-                throw new \Exception("Send error code to developer", 31789);
+
+                if (!$wdmodel->save()) {
+                    var_dump($wdmodel->getErrors());
+                    throw new \Exception();
+                }
             }
-        } 
-        
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            var_dump($ex);
+            $transaction->rollback();
+        }
+
+
     }
     
-    
-    
-
 
     public static function getDb() {
         return \Yii::$app->db_api;
     }
 
+    public static function createWaybill($order_id): bool
+    {
+
+        $res = true;
+
+        $order = \common\models\Order::findOne(['id' => $order_id]);
+
+        if (!$order) {
+            echo "Can't find order";
+            return false;
+        }
+
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+
+       /* $stories2 = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = 1 and product_id in (
+        SELECT product_id from '.$dbName.'.order_content where order_id = :order  
+        ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column(); */
+
+        $db = Yii::$app->db_api;
+        $sql = 'SELECT m.store_rid from '.$dbName.'.order_content o 
+                LEFT JOIN all_map m on o.product_id = m.product_id and m.service_id = 1
+                WHERE o.order_id = '.$order_id.'
+                GROUP BY store_rid';
+
+        $stories = $db->createCommand($sql)->queryAll();
+        $stories = ArrayHelper::getColumn($stories, 'store_rid');
+
+        $contra = RkAgent::findOne(['vendor_id' => $order->vendor_id]);
+
+        $num = (count($stories) > 1) ? 1 : '';
+
+        foreach ($stories as $store) {
+
+            $model = new RkWaybill();
+            $model->order_id = $order_id;
+            $model->status_id = 1;
+            $model->org = $order->client_id;
+            $model->text_code = $num.'-mixcart';
+            $model->num_code = $order_id;
+            $model->store_rid = $store;
+            $model->corr_rid = isset($contra) ? $contra->id : null;
+
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+         //   $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+
+            if (!$model->save()) {
+                $num++;
+                $res = false;
+                continue;
+            }
+
+            $num++;
+
+        }
+        return $res;
+    }
+
+    public static function exportWaybill($waybill_id): bool
+    {
+        // TODO: Implement exportWaybill() method.
+    }
 }

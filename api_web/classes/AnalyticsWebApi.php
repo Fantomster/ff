@@ -250,6 +250,43 @@ class AnalyticsWebApi extends WebApi
     }
 
     /**
+     * Метод получения списка валют
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function currencies($post)
+    {
+
+        // ТЕЛО ЗАПРОСА
+        $query = new Query;
+        $query->select(
+            [
+                'order_content.currency_id',
+                'currency.symbol AS currency', // iso_code ???
+               // 'SUM(order_content.quantity * order_content.price) AS total_sum',
+            ]
+        )->from('order_content')
+            ->leftJoin('order', 'order.id = order_content.order_id')
+            ->leftJoin('currency', 'currency.id = order.currency_id')
+            ->andWhere(['order.client_id' => $this->user->organization->id])
+            ->groupBy('currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_ASC]);
+
+        $result = [];
+        foreach ($query->all() as $data) {
+            $result[] = [
+                'currency_id' => $data['currency_id'],
+                'iso_code' => $data['currency'],
+            ];
+        }
+
+        return [
+            'result' => $result,
+        ];
+
+    }
+
+    /**
      * Ресторан: Заказы по поставщикам
      * @param $post
      * @return array

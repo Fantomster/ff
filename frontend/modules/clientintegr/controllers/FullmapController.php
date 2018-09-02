@@ -85,11 +85,14 @@ class FullmapController extends DefaultController {
         // Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
-        $lic0 = Organization::getLicenseList();
+      /*  $lic0 = Organization::getLicenseList();
         //$lic = $this->checkLic();
         $lic = $lic0['rkws'];
         $licucs = $lic0['rkws_ucs'];
         $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+      */
+
+        $vi = 'index';
 
         // $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
         // $selected = $session = Yii::$app->session->get('selectedmap', []);
@@ -103,10 +106,10 @@ class FullmapController extends DefaultController {
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax ) {
             return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client',
-                'cart', 'vendors', 'selectedVendor', 'lic', 'licucs', 'selected', 'stores', 'services'));
+                'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services'));
         } else {
                 return $this->render($vi, compact('dataProvider', 'searchModel', 'client',
-                    'cart', 'vendors', 'selectedVendor', 'lic', 'licucs','selected', 'stores', 'services'));
+                    'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services'));
         }
 
     }

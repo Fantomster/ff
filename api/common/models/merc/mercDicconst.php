@@ -78,18 +78,22 @@ class mercDicconst extends \yii\db\ActiveRecord
     {
         $iskl = ['hand_load_only','vetis_password'];
         $model = self::findOne(['denom' => $denom]);
-        if ($model) {
-            if(is_a(Yii::$app,'yii\web\Application') && ($org == null)) {
-                $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+        try {
+            if ($model) {
+                if (is_a(Yii::$app, 'yii\web\Application') && ($org == null)) {
+                    $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+                } else {
+                    $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
+                }
+                if (!empty($pConst) || (in_array($denom, $iskl))) {
+                    return $pConst->value;
+                } else {
+                    throw new \Exception('Не заполнено свойство в настройках ' . $denom);
+                }
             }
-            else {
-                $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
-            }
-            if (!empty($pConst) || (in_array($denom, $iskl))) {
-                return $pConst->value;
-            } else {
-                throw new \Exception('Не заполнено свойство в настройках ' . $denom);
-            }
+        }catch (\Exception $e) {
+            var_dump($e->getMessage(), $e->getTraceAsString()); die();
+
         }
     }
 

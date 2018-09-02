@@ -41,6 +41,7 @@ class baseApi extends Component
             self::$_instance[$key]->enterpriseGuid = mercDicconst::getSetting('enterprise_guid', $org_id);
             self::$_instance[$key]->query_timeout = Yii::$app->params['merc_settings']['query_timeout'];
             self::$_instance[$key]->service_id = Yii::$app->params['merc_settings']['mercury']['service_id'];
+            self::$_instance[$key]->org_id = isset($org_id) ? $org_id : (\Yii::$app->user->identity)->organization_id;
         }
         return self::$_instance[$key];
     }

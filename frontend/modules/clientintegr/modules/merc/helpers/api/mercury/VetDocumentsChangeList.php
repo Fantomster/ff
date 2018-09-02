@@ -6,21 +6,18 @@ use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\base\Model;
+use yii\helpers\BaseStringHelper;
 
 class VetDocumentsChangeList extends Model
 {
     public $org_id;
 
     public function updateDocumentsList($list) {
-        $cache = \Yii::$app->cache;
         $list = is_array($list) ? $list : [$list];
         foreach ($list as $item)
         {
             if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
                 continue;
-
-            if(!$cache->get('vetDocRaw_'.$item->uuid))
-                $cache->add('vetDocRaw_'.$item->uuid, $item,60);
 
             $unit = dictsApi::getInstance($this->org_id)->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
             $sender= cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
@@ -76,12 +73,14 @@ class VetDocumentsChangeList extends Model
         $listOptions = new ListOptions();
         $listOptions->count = 100;
         $listOptions->offset = 0;
+        $count = 0;
+        $this->log('Load'.PHP_EOL);
 
         do {
-            if (isset($last_visit)) {
                 $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
                 $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
-            }
+            $count += $vetDocumentList->count;
+            $this->log('Load '.$count.' / '. $vetDocumentList->total.PHP_EOL);
 
             if ($vetDocumentList->count > 0)
                 $this->updateDocumentsList($vetDocumentList->vetDocument);
@@ -110,5 +109,19 @@ class VetDocumentsChangeList extends Model
         }
 
         return true;
+    }
+
+    /**
+     * @param $message array|string
+     */
+    public function log($message)
+    {
+        if (is_array($message)) {
+            $message = print_r($message, true);
+        }
+        $message = $message . PHP_EOL;
+        $message .= str_pad('', 80, '=') . PHP_EOL;
+        $className = BaseStringHelper::basename(get_class($this));
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
     }
 }

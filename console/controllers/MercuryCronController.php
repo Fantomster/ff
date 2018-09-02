@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use api\common\models\merc\mercPconst;
+use api\common\models\merc\MercVsd;
 use api\common\models\RabbitQueues;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisCountry;
@@ -18,6 +19,7 @@ use console\modules\daemons\classes\MercForeignEnterpriseList;
 use console\modules\daemons\classes\MercProductItemList;
 use console\modules\daemons\classes\MercProductList;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
+use console\modules\daemons\classes\MercStoreEntryList;
 use console\modules\daemons\classes\MercSubProductList;
 use console\modules\daemons\classes\MercSubProductListList;
 use console\modules\daemons\classes\MercUnitList;
@@ -82,7 +84,7 @@ class MercuryCronController extends Controller
     {
         $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
-        /*echo "GET Unit" . PHP_EOL;
+        echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
         echo "GET Purpose" . PHP_EOL;
         VetisPurpose::getUpdateData($org_id);
@@ -95,7 +97,7 @@ class MercuryCronController extends Controller
         echo "GET ForeignEnterprise" . PHP_EOL;
         VetisForeignEnterprise::getUpdateData($org_id);
         echo "GET BusinessEntity" . PHP_EOL;
-        VetisBusinessEntity::getUpdateData($org_id);*/
+        VetisBusinessEntity::getUpdateData($org_id);
 
         echo "GET ProductByType" . PHP_EOL;
         VetisProductByType::getUpdateData($org_id);
@@ -103,13 +105,19 @@ class MercuryCronController extends Controller
         VetisProductItem::getUpdateData($org_id);
         echo "GET SubproductByProduct" . PHP_EOL;
         VetisSubproductByProduct::getUpdateData($org_id);
+
+        echo "GET MercVSDList";
+        MercVsd::getUpdateData($org_id);
+
+        echo "GET MercVSDList";
+        MercStoreEntryList::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 
     public function actionTest2()
     {
         echo "START" . PHP_EOL;
-        $w = new MercVSDList(5144);
+        $w = new MercStoreEntryList(5144);
         $w->getData();
 
         echo "FINISH" . PHP_EOL;

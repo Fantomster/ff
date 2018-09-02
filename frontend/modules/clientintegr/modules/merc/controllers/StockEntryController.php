@@ -7,6 +7,7 @@ use api\common\models\merc\mercService;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
+use console\modules\daemons\classes\MercStoreEntryList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
@@ -218,18 +219,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     private function updateStockEntryList()
     {
-        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-        /*$transaction = Yii::$app->db_api->beginTransaction();
-        try {*/
-            $vsd = new LoadStockEntryList();
-            if (isset($visit))
-                $visit = gmdate("Y-m-d H:i:s", strtotime($visit) - 60 * 30);
-            $vsd->updateData($visit);
-            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-        /*    $transaction->commit();
-        } catch (\Exception $e) {
-            $transaction->rollback();
-        }*/
+        MercStockEntry::getUpdateData((\Yii::$app->user->identity)->organization_id);
     }
 
     public function actionProducersList($q = null, $c=null)

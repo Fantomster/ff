@@ -152,6 +152,8 @@ class mercuryApi extends baseApi
             return unserialize($doc->raw_data);
         }
 
+        return null;
+
         $result = null;
         $doc = null;
 
@@ -488,11 +490,12 @@ class mercuryApi extends baseApi
     public function getStockEntryByGuid($GUID)
     {
         $cache = Yii::$app->cache;
-        /* $doc = MercVsd::findOne(['uuid' => $UUID]);
+         $doc = MercVsd::findOne(['guid' => $GUID]);
 
           if ($doc != null)
           return unserialize($doc->raw_data);
-         */
+
+          return null;
 
         $result = null;
         $doc = null;
@@ -551,11 +554,12 @@ class mercuryApi extends baseApi
     public function getStockEntryByUuid($UUID)
     {
         $cache = Yii::$app->cache;
-        /* $doc = MercVsd::findOne(['uuid' => $UUID]);
+         $doc = MercVsd::findOne(['uuid' => $UUID]);
 
           if ($doc != null)
           return unserialize($doc->raw_data);
-         */
+
+          return null;
 
         $result = null;
         $doc = null;

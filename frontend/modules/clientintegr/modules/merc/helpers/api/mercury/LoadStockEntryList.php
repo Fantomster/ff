@@ -8,27 +8,25 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use yii\base\Model;
+use yii\helpers\BaseStringHelper;
 use yii\helpers\Json;
 
 class LoadStockEntryList extends Model
 {
+    public $org_id;
+
     public function updateDocumentsList($list) {
-        $cache = \Yii::$app->cache;
-        $owner_guid = mercDicconst::getSetting('enterprise_guid');
+        $owner_guid = mercDicconst::getSetting('enterprise_guid', $this->org_id);
         $list = is_array($list) ? $list : [$list];
         foreach ($list as $item)
         {
-            if(!$cache->get('stockEntryRaw_'.$item->guid))
-                $cache->add('stockEntry_'.$item->guid, $item,60);
-
-            $unit = dictsApi::getInstance()->getUnitByGuid($item->batch->unit->guid);
-            $producer = isset($item->batch->origin->producer->enterprise->uuid) ? cerberApi::getInstance()->getEnterpriseByUuid($item->batch->origin->producer->enterprise->uuid) : null;
-            $country = isset($item->batch->origin->country->guid) ? ikarApi::getInstance()->getCountryByGuid($item->batch->origin->country->guid) : null;
+            $unit = dictsApi::getInstance($this->org_id)->getUnitByGuid($item->batch->unit->guid);
+            $producer = isset($item->batch->origin->producer->enterprise->uuid) ? cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->batch->origin->producer->enterprise->uuid) : null;
+            $country = isset($item->batch->origin->country->guid) ? ikarApi::getInstance($this->org_id)->getCountryByGuid($item->batch->origin->country->guid) : null;
             $model = MercStockEntry::findOne(['guid' => $item->guid]);
 
             if($model == null)
                 $model = new MercStockEntry();
-            //var_dump(isset($item->batch->packageList->package->productMarks)); die();
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'guid' => $item->guid,
@@ -44,21 +42,20 @@ class LoadStockEntryList extends Model
                 'product_type' => $item->batch->productType,
                 'product_name' => $item->batch->productItem->name,
                 'amount' => $item->batch->volume,
-                'unit' => $unit->unit->name,
+                'unit' => isset($uint) ? $unit->name : null,
                 'gtin' => $item->batch->productItem->globalID,
                 'article' => $item->batch->productItem->code,
                 'production_date' => MercStockEntry::getDate($item->batch->dateOfProduction),
                 'expiry_date' => MercStockEntry::getDate($item->batch->expiryDate),
                 'batch_id' => $item->batch->batchID,
                 'perishable' =>  (int)$item->batch->perishable,
-                'producer_name' => isset($producer) ? ($producer->enterprise->name.'('. $producer->enterprise->address->addressView .')') : null,
-                'producer_country' => $country->country->name,
+                'producer_name' => isset($producer) ? ($producer->name.'('. $producer->address->addressView .')') : null,
+                'producer_country' => isset($country) ? $country->name : null,
                 'producer_guid' => isset($item->batch->origin->producer->enterprise->guid) ? $item->batch->origin->producer->enterprise->guid : null,
                 'low_grade_cargo' =>  (int)$item->batch->lowGradeCargo,
                 'vsd_uuid' => isset($item->vetDocument) ? $item->vetDocument->uuid : null,
                 'product_marks' => isset($item->batch->packageList->package->productMarks->_) ? $item->batch->packageList->package->productMarks->_ : "",
                 'raw_data' => serialize($item)
-                //Json::encode($item)
             ]);
 
             $model->save(false);
@@ -67,22 +64,17 @@ class LoadStockEntryList extends Model
 
     public function updateData($last_visit)
     {
-        $api = mercuryApi::getInstance();
+        $api = mercuryApi::getInstance($this->org_id);
         $listOptions = new ListOptions();
         $listOptions->count = 100;
         $listOptions->offset = 0;
-
+        $count = 0;
+        $this->log('Load'.PHP_EOL);
         do {
-            if (isset($last_visit)) {
                 $result = $api->getStockEntryChangesList($last_visit, $listOptions);
                 $stockEntryList = $result->application->result->any['getStockEntryChangesListResponse']->stockEntryList;
-            }
-            else
-                {
-                $result = $api->getStockEntryList($listOptions);
-                $stockEntryList = $result->application->result->any['getStockEntryListResponse']->stockEntryList;
-            }
-
+            $count += $stockEntryList->count;
+            $this->log('Load '.$count.' / '. $stockEntryList->total.PHP_EOL);
             if($stockEntryList->count > 0)
                 $this->updateDocumentsList($stockEntryList->stockEntry);
 
@@ -90,5 +82,19 @@ class LoadStockEntryList extends Model
                 $listOptions->offset += $stockEntryList->count;
 
         } while ($stockEntryList->total > ($stockEntryList->count + $stockEntryList->offset));
+    }
+
+/**
+* @param $message array|string
+*/
+    public function log($message)
+    {
+        if (is_array($message)) {
+            $message = print_r($message, true);
+        }
+        $message = $message . PHP_EOL;
+        $message .= str_pad('', 80, '=') . PHP_EOL;
+        $className = BaseStringHelper::basename(get_class($this));
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
     }
 }

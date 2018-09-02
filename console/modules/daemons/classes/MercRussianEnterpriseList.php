@@ -18,6 +18,47 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
  */
 class MercRussianEnterpriseList extends MercDictConsumer
 {
+    /**
+     * Обработка и сохранение результата
+     * @param $list
+     */
+    protected function saveList($list)
+    {
+        $list = is_array($list) ? $list : [$list];
+        $result = [];
+            foreach ($list as $item) {
+                $model = $this->modelClassName::findOne(['uuid' => $item->uuid]);
+
+                if ($model == null) {
+                    $model = new $this->modelClassName();
+                }
+                $attributes = json_decode(json_encode($item), true);
+                $model->uuid = $attributes['uuid'];
+                $model->guid = $attributes['guid'];
+                $model->last = $attributes['last'];
+                $model->active = $attributes['active'];
+                $model->type = $attributes['type'];
+                $model->next = $attributes['next'] ?? null;
+                $model->previous = $attributes['previous'] ?? null;
+                $model->name = $attributes['name'];
+                $model->inn = $attributes['officialRegistration']['businessEntity']['inn'];
+                $model->kpp = $attributes['officialRegistration']['kpp'];
+                $model->addressView = $attributes['address']['addressView'];
+                $model->data = serialize($item);
+                if (!$model->save()) {
+                    $result[]['error'] = $model->getErrors();
+                    $result[]['model-data'] = $model->attributes;
+                }
+            }
+
+        if(empty($result)) {
+            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
+        }
+        else{
+            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
+        }
+    }
+
     protected function init()
     {
         $this->instance = cerberApi::getInstance($this->org_id);

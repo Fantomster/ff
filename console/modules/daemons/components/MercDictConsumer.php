@@ -84,6 +84,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     {
         $this->init();
         $count = 0;
+        $this->log('Load'.PHP_EOL);
         do {
             $response = $this->instance->sendRequest($this->method, $this->request);
             $list = $response->{$this->listName};

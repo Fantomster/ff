@@ -64,7 +64,7 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last'], 'filter', 'filter' => function ($value) {
+            [['active','last', 'correspondsToGost'], 'filter', 'filter' => function ($value) {
                 $value = ($value === 'true') ? 1 : 0;
                 return $value;
             }],

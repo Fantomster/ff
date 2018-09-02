@@ -11,6 +11,7 @@ namespace console\modules\daemons\classes;
 use common\models\vetis\VetisRussianEnterprise;
 use console\modules\daemons\components\MercDictConsumer;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 
 /**
  * Class consumer with realization ConsumerInterface

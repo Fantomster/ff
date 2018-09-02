@@ -85,20 +85,24 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         $this->init();
         $count = 0;
         $this->log('Load'.PHP_EOL);
-        do {
-            $response = $this->instance->sendRequest($this->method, $this->request);
-            $list = $response->{$this->listName};
-            $count += $list->count;
-            $this->log('Load '.$count.' / '. $list->total.PHP_EOL);
-            if ($list->count > 0) {
-                $this->saveList($list->{$this->listItemName});
-            }
+        try {
+            do {
+                $response = $this->instance->sendRequest($this->method, $this->request);
+                $list = $response->{$this->listName};
+                $count += $list->count;
+                $this->log('Load '.$count.' / '. $list->total.PHP_EOL);
+                if ($list->count > 0) {
+                    $this->saveList($list->{$this->listItemName});
+                }
 
-            if ($list->count < $list->total) {
-                $this->request['listOptions']['offset'] += $list->count;
-            }
-
-        } while ($list->total > ($list->count + $list->offset));
+                if ($list->count < $list->total) {
+                    $this->request['listOptions']['offset'] += $list->count;
+                }
+            } while ($list->total > ($list->count + $list->offset));
+        }catch ( \Exception $e)
+        {
+            $this->log(PHP_EOL . " ERROR: " . $e->getMessage().PHP_EOL.$e->getTraceAsString());
+        }
     }
 
     /**

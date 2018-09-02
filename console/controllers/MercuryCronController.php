@@ -13,10 +13,15 @@ use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
+use console\modules\daemons\classes\MercBusinessEntityList;
+use console\modules\daemons\classes\MercForeignEnterpriseList;
+use console\modules\daemons\classes\MercProductItemList;
+use console\modules\daemons\classes\MercProductList;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
 use console\modules\daemons\classes\MercUnitList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\ListOptions;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\console\Controller;
 use api\common\models\merc\mercService;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
@@ -80,18 +85,18 @@ class MercuryCronController extends Controller
         VetisPurpose::getUpdateData($org_id);
 
         echo "GET Country" . PHP_EOL;
-        VetisCountry::getUpdateData($org_id);*/
+        VetisCountry::getUpdateData($org_id);
 
         echo "GET RussianEnterprise" . PHP_EOL;
         VetisRussianEnterprise::getUpdateData($org_id);
-       /* echo "GET ForeignEnterprise" . PHP_EOL;
+        echo "GET ForeignEnterprise" . PHP_EOL;
         VetisForeignEnterprise::getUpdateData($org_id);
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);*/
-        /*
+
         echo "GET ProductByType" . PHP_EOL;
         VetisProductByType::getUpdateData($org_id);
-        echo "GET ProductItem" . PHP_EOL;
+        /*echo "GET ProductItem" . PHP_EOL;
         VetisProductItem::getUpdateData($org_id);
         echo "GET SubproductByProduct" . PHP_EOL;
         VetisSubproductByProduct::getUpdateData($org_id);*/
@@ -106,20 +111,21 @@ class MercuryCronController extends Controller
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
-        $data['method'] = 'getRussianEnterpriseChangesList';
-        $data['struct'] = ['listName' => 'enterpriseList',
-            'listItemName' => 'enterprise'
+        //Формируем данные для запроса
+        $data['method'] = 'getProductItemChangesList';
+        $data['struct'] = ['listName' => 'productItemList',
+            'listItemName' => 'productItem'
         ];
 
         $listOptions = new ListOptions();
-        $listOptions->count = 10;
+        $listOptions->count = 100;
         $listOptions->offset = 0;
 
         $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
-        $instance = cerberApi::getInstance($org_id);
+        $instance = productApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-        $w = new MercRussianEnterpriseList($org_id);
+        $w = new MercProductItemList($org_id);
         $w->data = json_encode($data);
         $w->getData();
 

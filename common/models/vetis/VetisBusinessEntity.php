@@ -104,7 +104,7 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
             }
 
             //Формируем данные для запроса
-            $data['method'] = 'getBusinessEntityList';
+            $data['method'] = 'getBusinessEntityChangesList';
             $data['struct'] = ['listName' => 'businessEntityList',
                 'listItemName' => 'businessEntity'
             ];

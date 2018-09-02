@@ -15,8 +15,50 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
  * Class consumer with realization ConsumerInterface
  * and containing AbstractConsumer methods
  */
-class MercUnitList extends MercDictConsumer
+class MercProductItemList extends MercDictConsumer
 {
+    /**
+     * Обработка и сохранение результата
+     * @param $list
+     */
+    protected function saveList($list)
+    {
+        $list = is_array($list) ? $list : [$list];
+        $result = [];
+        foreach ($list as $item)
+        {
+            $model = $this->modelClassName::findOne(['uuid' => $item->uuid]);
+
+            if($model == null) {
+                $model = new $this->modelClassName();
+            }
+            $attributes =  json_decode(json_encode($item), true);
+            $model->setAttributes($attributes);
+            $model->product_guid = $attributes['product']['guid'];
+            $model->product_uuid = $attributes['product']['uuid'];
+            $model->subproduct_guid = $attributes['subProduct']['guid'];
+            $model->subproduct_uuid = $attributes['subProduct']['uuid'];
+            $model->producer_guid = $attributes['producer']['guid'];
+            $model->producer_uuid = $attributes['producer']['uuid'];
+            $model->tmOwner_guid = $attributes['tmOwner']['guid'];
+            $model->tmOwner_uuid = $attributes['tmOwner']['uuid'];
+            $model->data = serialize($item);
+            $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
+            $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
+            if (!$model->save()) {
+                $result[]['error'] = $model->getErrors();
+                $result[]['model-data'] = $model->attributes;
+            }
+        }
+
+        if(empty($result)) {
+            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
+        }
+        else{
+            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
+        }
+    }
+
     protected function init()
     {
         $this->instance = productApi::getInstance($this->org_id);

@@ -154,8 +154,8 @@ class mercuryApi extends baseApi
 
         return null;
 
-        $result = null;
-        /*$doc = null;
+        /*$result = null;
+        $doc = null;
 
         //Генерируем id запроса
         $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);

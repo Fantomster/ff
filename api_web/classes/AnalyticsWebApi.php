@@ -403,7 +403,7 @@ class AnalyticsWebApi extends WebApi
             if (is_array($post['search']['order_status_id'])) {
                 foreach ($post['search']['order_status_id'] as $status) {
                     if (in_array($status, AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type])) {
-                        $whereParams['order.status'] = $status;
+                        $whereParams['order.status'][] = $status;
                     }
                 }
             } else {

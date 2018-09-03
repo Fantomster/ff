@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use common\models\Currency;
 use common\models\Order;
 use api_web\components\WebApi;
 use yii\data\ArrayDataProvider;
@@ -28,6 +29,27 @@ class AnalyticsWebApi extends WebApi
         Order::STATUS_DONE,
         Order::STATUS_FORMING,
     ];
+    const ORDER_STATUSES_NEW = [
+        Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+    ];
+    const ORDER_STATUSES_PROCESS = [
+        Order::STATUS_PROCESSING,
+        // Order::STATUS_FORMING,
+    ];
+    const ORDER_STATUSES_DONE = [
+        Order::STATUS_DONE,
+    ];
+
+    const ORDER_TYPE_NEW = 'new';
+    const ORDER_TYPE_PROCESS = 'process';
+    const ORDER_TYPE_DONE = 'done';
+
+    const ORDER_MAPPING_TYPE_STATUSES = [
+        AnalyticsWebApi::ORDER_TYPE_NEW => AnalyticsWebApi::ORDER_STATUSES_NEW,
+        AnalyticsWebApi::ORDER_TYPE_PROCESS => AnalyticsWebApi::ORDER_STATUSES_PROCESS,
+        AnalyticsWebApi::ORDER_TYPE_DONE => AnalyticsWebApi::ORDER_STATUSES_DONE,
+    ];
 
     /**
      * Общий метод
@@ -46,7 +68,7 @@ class AnalyticsWebApi extends WebApi
             $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
         }
         // фильтр - статус заказа
-        $whereParams['order.status'] = self::ORDER_STATUSES_WELL;
+        $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_DONE;
         if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
             $whereParams['order.status'] = $post['search']['order_status_id'];
         }
@@ -74,6 +96,9 @@ class AnalyticsWebApi extends WebApi
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
             $query->andWhere('order.created_at >= :date_from',
                 [':date_from' => date('Y-m-d H:i:s', strtotime($post['search']['date']['from'] . ' 00:00:00'))]);
+        } else {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
         }
         if (isset($post['search']['date']['to']) && $post['search']['date']['to']) {
             $query->andWhere('order.created_at <= :date_to',
@@ -118,7 +143,7 @@ class AnalyticsWebApi extends WebApi
             $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
         }
         // фильтр - статус заказа
-        $whereParams['order.status'] = self::ORDER_STATUSES_WELL;
+        $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_WELL;
         if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
             $whereParams['order.status'] = $post['search']['order_status_id'];
         }
@@ -148,6 +173,9 @@ class AnalyticsWebApi extends WebApi
         if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
             $query->andWhere('order.created_at >= :date_from',
                 [':date_from' => date('Y-m-d H:i:s', strtotime($post['search']['date']['from'] . ' 00:00:00'))]);
+        } else {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
         }
         if (isset($post['search']['date']['to']) && $post['search']['date']['to']) {
             $query->andWhere('order.created_at <= :date_to',
@@ -199,7 +227,7 @@ class AnalyticsWebApi extends WebApi
             $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
         }
         // фильтр - статус заказа
-        $whereParams['order.status'] = self::ORDER_STATUSES_WELL;
+        $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_WELL;
         if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
             $whereParams['order.status'] = $post['search']['order_status_id'];
         }
@@ -250,37 +278,149 @@ class AnalyticsWebApi extends WebApi
     }
 
     /**
-     * Метод получения списка валют
-     * @return array
+     * Общий метод
+     * @param $post
+     * @return integer
      * @throws BadRequestHttpException
      */
-    public function currencies()
+    public function turnover($post)
     {
+        // ограничение на собственные заказы
+        $whereParams = ['order.client_id' => $this->user->organization->id];
+
+        // фильтр - поставщик
+        if (isset($post['search']['vendor_id'])) {
+            $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
+        }
+        // фильтр - статус заказа
+        $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_WELL;
+        if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
+            $whereParams['order.status'] = $post['search']['order_status_id'];
+        }
+        // фильтр - валюта
+        if (isset($post['search']['currency_id'])) {
+            $whereParams['order.currency_id'] = $post['search']['currency_id'];
+        }
 
         // ТЕЛО ЗАПРОСА
         $query = new Query;
         $query->select(
             [
-                'order.currency_id',
-                'currency.symbol AS currency', // iso_code ???
+                'SUM(order_content.quantity * order_content.price) AS total_sum',
             ]
         )->from('order_content')
             ->leftJoin('order', 'order.id = order_content.order_id')
-            ->leftJoin('currency', 'currency.id = order.currency_id')
-            ->andWhere(['order.client_id' => $this->user->organization->id])
-            ->groupBy('order.currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
+            ->andWhere($whereParams)
+            ->groupBy('order.currency_id');
 
-        $result = [];
-        foreach ($query->all() as $data) {
-            $result[] = [
-                'currency_id' => round($data['currency_id'], 0),
-                'iso_code' => $data['currency'],
-            ];
+        // фильтр - время создания заказа
+        if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime($post['search']['date']['from'] . ' 00:00:00'))]);
+        } else {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
+        }
+        if (isset($post['search']['date']['to']) && $post['search']['date']['to']) {
+            $query->andWhere('order.created_at <= :date_to',
+                [':date_to' => date('Y-m-d H:i:s', strtotime($post['search']['date']['to'] . ' 23:59:59'))]);
+        }
+        // фильтр - менеджер
+        if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
+            $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
         }
 
-        return [
-            'result' => $result,
-        ];
+        $result = $query->all();
+        return ($result) ? round($result[0]['total_sum'], 2) : 0;
+
+    }
+
+
+    /**
+     * Ресторан: Общая аналитика - новые
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function clientSummary($post)
+    {
+
+        if (!isset($post['search']['currency_id'])) {
+            throw new BadRequestHttpException('parameter_required|currency_id');
+        }
+
+        $currency = Currency::findOne($post['search']['currency_id']);
+
+        return
+            [
+                AnalyticsWebApi::ORDER_TYPE_NEW => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_NEW),
+                AnalyticsWebApi::ORDER_TYPE_PROCESS => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_PROCESS),
+                AnalyticsWebApi::ORDER_TYPE_DONE => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_DONE),
+                'total_sum' => $this->turnover($post),
+                'currency_id' => $post['search']['currency_id'],
+                'currency' => $currency->symbol,
+            ];
+    }
+
+    /**
+     * Ресторан: Общая аналитика - новые
+     * @param $post
+     * @param string $type
+     * @return integer
+     * @throws BadRequestHttpException
+     */
+    public function getClientSummaryByType($post, string $type)
+    {
+
+        if (!isset(AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) || !AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) {
+            throw new BadRequestHttpException('bad_order_type|'.$type);
+        }
+
+        // ограничение на собственные заказы
+        $whereParams = ['order.client_id' => $this->user->organization->id];
+
+        // фильтр - поставщик
+        if (isset($post['search']['vendor_id'])) {
+            $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
+        }
+        // фильтр - статус заказа
+        $whereParams['order.status'] = AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type];
+        if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
+            $whereParams['order.status'] = $post['search']['order_status_id'];
+        }
+        // фильтр - валюта
+        $whereParams['currency.id'] = $post['search']['currency_id'];
+
+        // ТЕЛО ЗАПРОСА
+        $query = new Query;
+        $query->select(
+            [
+                'COUNT(order.id) as '.$type,
+            ]
+        )->from('order')
+            ->leftJoin('currency', 'currency.id = order.currency_id')
+            ->andWhere($whereParams)
+            ->groupBy('order.currency_id');
+
+        // фильтр - время создания заказа
+        if (isset($post['search']['date']['from']) && $post['search']['date']['from']) {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime($post['search']['date']['from'] . ' 00:00:00'))]);
+        } else {
+            $query->andWhere('order.created_at >= :date_from',
+                [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
+        }
+        if (isset($post['search']['date']['to']) && $post['search']['date']['to']) {
+            $query->andWhere('order.created_at <= :date_to',
+                [':date_to' => date('Y-m-d H:i:s', strtotime($post['search']['date']['to'] . ' 23:59:59'))]);
+        }
+        // фильтр - менеджер
+        if (isset($post['search']['employee_id']) && $post['search']['employee_id']) {
+            $query->andWhere(['order.created_by_id' => $post['search']['employee_id']]);
+        }
+
+        $result = $query->all();
+        return ($result) ? $result[0][$type] : 0;
 
     }
 
@@ -316,6 +456,41 @@ class AnalyticsWebApi extends WebApi
         return [
             'result' => $result,
         ];
+    }
+
+    /**
+     * Метод получения списка валют
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function currencies()
+    {
+
+        // ТЕЛО ЗАПРОСА
+        $query = new Query;
+        $query->select(
+            [
+                'order.currency_id',
+                'currency.symbol AS currency', // iso_code ???
+            ]
+        )->from('order_content')
+            ->leftJoin('order', 'order.id = order_content.order_id')
+            ->leftJoin('currency', 'currency.id = order.currency_id')
+            ->andWhere(['order.client_id' => $this->user->organization->id])
+            ->groupBy('order.currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
+
+        $result = [];
+        foreach ($query->all() as $data) {
+            $result[] = [
+                'currency_id' => round($data['currency_id'], 0),
+                'iso_code' => $data['currency'],
+            ];
+        }
+
+        return [
+            'result' => $result,
+        ];
+
     }
 
 }

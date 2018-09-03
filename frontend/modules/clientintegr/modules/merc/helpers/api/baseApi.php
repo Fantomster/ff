@@ -74,6 +74,14 @@ class baseApi extends Component
     public function sendRequest($method, $request)
     {
         $client = $this->getSoapClient();
-        return $client->$method($request);
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_.log", "1", FILE_APPEND);
+        try {
+            $result = $client->$method($request);
+        } catch (\Throwable $e)
+        {
+            file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_.log", $e->getMessage(), FILE_APPEND);
+        }
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_.log", "2", FILE_APPEND);
+        return $result;
     }
 }

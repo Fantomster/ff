@@ -84,17 +84,17 @@ class MercuryCronController extends Controller
     {
         $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
-        echo "GET Unit" . PHP_EOL;
+       /* echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
         echo "GET Purpose" . PHP_EOL;
         VetisPurpose::getUpdateData($org_id);
 
         echo "GET Country" . PHP_EOL;
-        VetisCountry::getUpdateData($org_id);
+        VetisCountry::getUpdateData($org_id);*/
 
         echo "GET RussianEnterprise" . PHP_EOL;
         VetisRussianEnterprise::getUpdateData($org_id);
-        echo "GET ForeignEnterprise" . PHP_EOL;
+       /* echo "GET ForeignEnterprise" . PHP_EOL;
         VetisForeignEnterprise::getUpdateData($org_id);
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);
@@ -110,15 +110,38 @@ class MercuryCronController extends Controller
         MercVsd::getUpdateData($org_id);
 
         echo "GET MercVSDList";
-        MercStoreEntryList::getUpdateData($org_id);
+        MercStoreEntryList::getUpdateData($org_id);*/
         echo "FINISH" . PHP_EOL;
     }
 
     public function actionTest2()
     {
         echo "START" . PHP_EOL;
-        $w = new MercStoreEntryList(5144);
+        $load = new Cerber();
+
+        $org_id = (mercPconst::findOne('1'))->org;
+        $queue = null;
+        echo "START" . PHP_EOL;
+        //Формируем данные для запроса
+        $data['method'] = 'getRussianEnterpriseChangesList';
+        $data['struct'] = ['listName' => 'enterpriseList',
+            'listItemName' => 'enterprise'
+
+        $listOptions = new ListOptions();
+        $listOptions->count = 100;
+        $listOptions->offset = 0;
+
+        $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
+        $instance = productApi::getInstance($org_id);
+        $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
+
+        $w = new MercRussianEnterpriseList($org_id);
+        $w->data = json_encode($data);
+        $w = new MercVSDList(5144);
         $w->getData();
+
+        echo "FINISH" . PHP_EOL;
+
 
         echo "FINISH" . PHP_EOL;
     }

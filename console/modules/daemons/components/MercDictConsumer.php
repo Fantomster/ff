@@ -28,11 +28,10 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 
     public function __construct($org_id = null)
     {
-        if($org_id != null) {
+        if ($org_id != null) {
             $this->org_id = $org_id;
-        }
-        else {
-           $this->org_id = (mercPconst::findOne('1'))->org;
+        } else {
+            $this->org_id = (mercPconst::findOne('1'))->org;
         }
     }
 
@@ -44,28 +43,26 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     {
         $list = is_array($list) ? $list : [$list];
         $result = [];
-        foreach ($list as $item)
-        {
+        foreach ($list as $item) {
             $model = $this->modelClassName::findOne(['uuid' => $item->uuid]);
 
-            if($model == null) {
+            if ($model == null) {
                 $model = new $this->modelClassName();
             }
-            $attributes =  json_decode(json_encode($item), true);
+            $attributes = json_decode(json_encode($item), true);
             $model->setAttributes($attributes);
             $model->data = serialize($item);
-            $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
-            $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
+            $model->createDate = date('Y-m-d H:i:s', strtotime($model->createDate));
+            $model->updateDate = date('Y-m-d H:i:s', strtotime($model->updateDate));
             if (!$model->save()) {
                 $result[]['error'] = $model->getErrors();
                 $result[]['model-data'] = $model->attributes;
             }
         }
 
-        if(empty($result)) {
+        if (empty($result)) {
             mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        }
-        else{
+        } else {
             mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
         }
     }
@@ -84,13 +81,16 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     {
         $this->init();
         $count = 0;
-        $this->log('Load'.PHP_EOL);
+        $this->log('Load' . PHP_EOL);
         try {
             do {
+                $this->log('Load1' . PHP_EOL . serialize($this->method) . PHP_EOL . serialize($this->request) . PHP_EOL);
                 $response = $this->instance->sendRequest($this->method, $this->request);
+                $this->log('Load2' . PHP_EOL . serialize($response) . PHP_EOL);
                 $list = $response->{$this->listName};
+                $this->log('Load3' . PHP_EOL);
                 $count += $list->count;
-                $this->log('Load '.$count.' / '. $list->total.PHP_EOL);
+                $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
                 if ($list->count > 0) {
                     $this->saveList($list->{$this->listItemName});
                 }
@@ -99,9 +99,9 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     $this->request['listOptions']['offset'] += $list->count;
                 }
             } while ($list->total > ($list->count + $list->offset));
-        }catch ( \Exception $e)
+        }catch (\Throwable $e)
         {
-            $this->log(PHP_EOL . " ERROR: " . $e->getMessage().PHP_EOL.$e->getTraceAsString());
+            $this->log($e->getMessage());
         }
     }
 

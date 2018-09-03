@@ -5,10 +5,10 @@ namespace common\models\vetis;
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\Product;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_product_by_type".

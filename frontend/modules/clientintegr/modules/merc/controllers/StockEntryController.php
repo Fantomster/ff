@@ -100,10 +100,10 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function actionView($uuid)
     {
-        try {
+       try {
         $document = new getStockEntry();
         $document->loadStockEntry($uuid);
-        }catch (\Error $e) {
+       }catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
@@ -230,9 +230,9 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1') {
                 $res = [];
                 $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
-                if (isset($list->enterpriseList->enterprise)) {
+                if (isset($list)) {
                     $res = [];
-                    foreach ($list->enterpriseList->enterprise as $item) {
+                    foreach ($list as $item) {
                         if (($item->last) && ($item->active))
                             $res[] = ['id' => $item->guid,
                                 'text' => $item->name . '(' .
@@ -245,9 +245,9 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
             if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
-                if (isset($list->enterpriseList->enterprise)) {
+                if (isset($list)) {
 
-                    foreach ($list->enterpriseList->enterprise as $item) {
+                    foreach ($list as $item) {
                         if (($item->last) && ($item->active))
                             $res[] = ['id' => $item->guid,
                                 'text' => $item->name . '(' .

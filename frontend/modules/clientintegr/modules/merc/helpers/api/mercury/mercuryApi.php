@@ -263,24 +263,9 @@ class mercuryApi extends baseApi
             mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
             if ($status == 'COMPLETED') {
-                $doc = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
-                $row = MercVsd::findOne(['uuid' => $UUID]);
-                if ($row != null) {
-                    switch ($rejectedData['decision']) {
-                        case VetDocumentDone::RETURN_ALL :
-                            $doc = $doc[1];
-                            break;
-                        case VetDocumentDone::ACCEPT_ALL :
-                            break;
-                        case VetDocumentDone::PARTIALLY :
-                            $doc = $doc[0];
-                            break;
-                    }
+                $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
+                (new VetDocumentsChangeList())->updateDocumentsList($doc);
 
-                    $row->raw_data = serialize(is_array($doc) ? $doc[0] : $doc);
-                    $row->status = $doc->vetDStatus;
-                    $row->save();
-                }
             } else {
                 $result = null;
             }
@@ -680,6 +665,7 @@ class mercuryApi extends baseApi
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList;
+            (new LoadStockEntryList())->updateDocumentsList($result);
         } else {
             $result = null;
         }
@@ -727,6 +713,7 @@ class mercuryApi extends baseApi
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
+            (new LoadStockEntryList())->updateDocumentsList([1 => $result]);
         } else {
             $result = null;
         }
@@ -776,6 +763,10 @@ class mercuryApi extends baseApi
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
+            $stockList = $result->application->result->any['registerProductionOperationResponse']->stockEntryList;
+            (new LoadStockEntryList())->updateDocumentsList($stockList);
+            $vetDoc[] = $result->application->result->any['registerProductionOperationResponse']->vetDocument;
+            (new VetDocumentsChangeList())->updateDocumentsList($vetDoc);
         } else {
             $result = null;
         }

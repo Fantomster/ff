@@ -103,7 +103,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             
             $document = new getVetDocumentByUUID();
             $document->getDocumentByUUID($uuid);
-        } catch (\Error $e) {
+       } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         } catch (\Exception $e) {
@@ -142,7 +142,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
         
         Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
-        $this->updateVSDList();
         if (Yii::$app->request->isAjax) {
             return true;
         } else {

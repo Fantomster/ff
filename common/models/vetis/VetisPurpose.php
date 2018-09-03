@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use api\common\models\RabbitQueues;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_purpose".

@@ -157,11 +157,11 @@ class getVetDocumentByUUID extends Model
         }
 
         $product_raw = productApi::getInstance(Yii::$app->user->identity->organization_id)->getProductByGuid($doc->certifiedConsignment->batch->product->guid);
-        $product = $product_raw->name;
+        $product = isset($product_raw) ? $product_raw->name : null;
 
         $sub_product_raw = productApi::getInstance(Yii::$app->user->identity->organization_id)->getSubProductByGuid($doc->certifiedConsignment->batch->subProduct->guid);
 
-        $sub_product = $sub_product_raw->name;
+        $sub_product = isset($sub_product_raw) ? $sub_product_raw->name : null;
 
         $unit = dictsApi::getInstance(Yii::$app->user->identity->organization_id)->getUnitByGuid($doc->certifiedConsignment->batch->unit->guid);
 

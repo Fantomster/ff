@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\vetis\models;
 
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use yii\db\ActiveQuery;
@@ -68,14 +69,17 @@ class VetisWaybill extends VetisHelper
      * */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        $query = $this->getQueryByUuid();
+        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        $query = MercVsd::find()->where(['recipient_guid' => $enterpriseGuid]);
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
-        $arResult = $query->groupBy('product_name')->all();
+        
         if ($filterName == 'product_name') {
+            $arResult = $query->orWhere(['sender_guid' => $enterpriseGuid])->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {
+            $arResult = $query->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
         

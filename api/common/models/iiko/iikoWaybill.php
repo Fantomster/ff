@@ -294,6 +294,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if (!$model->save()) {
                 $num++;
                 $res = false;
+                \yii::error('Error during saving auto waybill'.$model->getErrors());
                 continue;
             } else {
 

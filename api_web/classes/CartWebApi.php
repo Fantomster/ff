@@ -149,7 +149,7 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         //Сообщение в очередь, Изменение количества товара в корзине
-        Notice::init('Order')->sendOrderToTurnClient($client);
+        Notice::init('Order')->sendOrderToTurnClient($this->user);
 
         return $this->items();
     }
@@ -282,7 +282,7 @@ class CartWebApi extends \api_web\components\WebApi
                 //Емайл и смс о новом заказе
                 Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
                 //Сообщение в очередь, Изменение количества товара в корзине
-                Notice::init('Order')->sendOrderToTurnClient($client);
+                Notice::init('Order')->sendOrderToTurnClient($this->user);
             } catch (\Exception $e) {
                 \Yii::error($e->getMessage());
             }
@@ -475,8 +475,8 @@ class CartWebApi extends \api_web\components\WebApi
     }
     
     public function noticeWhenProductAddToCart(){
-        Notice::init('Order')->sendOrderToTurnClient($this->user->organization);
-        Notice::init('Order')->sendLastUserCartAdd($this->user);
+        Notice::init('Order')->sendOrderToTurnClient($this->user);
+        //Notice::init('Order')->sendLastUserCartAdd($this->user);
     }
 
 }

@@ -1,0 +1,45 @@
+<?php
+
+namespace api_web\classes;
+
+use api_web\components\WebApi;
+use yii\web\BadRequestHttpException;
+
+/**
+ * Class SystemWebApi
+ * @package api_web\classes
+ * @createdBy Basil A Konakov
+ * @createdAt 2018-09-03
+ * @author Mixcart
+ * @module WEB-API
+ * @version 2.0
+ */
+class SystemWebApi extends WebApi
+{
+
+    /**
+     * Ресторан: Заказы по поставщикам
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function datetime()
+    {
+        $res = [
+            'localtime()' => localtime(),
+            'getdate()' => getdate(),
+            'microtime(1)' => microtime(1),
+            'time()' => time(),
+            'gmdate("Y-m-d H:i:s")' => gmdate("Y-m-d H:i:s"),
+            'date("Y-m-d H:i:s")' => date("Y-m-d H:i:s"),
+            'date_default_timezone_get()' => date_default_timezone_get(),
+        ];
+        foreach ($res as $v) {
+            var_dump($v);
+            echo PHP_EOL;
+            echo PHP_EOL;
+        }
+        exit;
+    }
+
+
+}

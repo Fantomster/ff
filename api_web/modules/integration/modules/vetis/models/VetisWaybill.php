@@ -3,12 +3,18 @@
 namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\MercVsd;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
-use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
-class VetisWaybill extends VetisHelper
+class VetisWaybill
 {
+    
+    public function __construct()
+    {
+        $this->helper = new VetisHelper();
+    }
+    
     /**
      * Список сертифитаков
      * @param $request
@@ -16,6 +22,17 @@ class VetisWaybill extends VetisHelper
      */
     public function getList($request)
     {
+        $reqPag = $request['pagination'];
+        $reqSearch = $request['search'];
+        $page = $this->helper->isSetDef($reqPag['page'], 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'], 12);
+    
+        $search = new VetisWaybillSearch();
+        if (isset($reqSearch)) {
+            $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
+            $request = $search->search($params);
+            
+        }
         return ['result' => $request];
     }
     
@@ -68,7 +85,7 @@ class VetisWaybill extends VetisHelper
      * */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        $query = $this->getQueryByUuid();
+        $query = $this->helper->getQueryByUuid();
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }

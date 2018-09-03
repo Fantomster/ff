@@ -4,8 +4,6 @@ namespace common\models\search;
 
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoodsBlocked;
-use common\models\Organization;
-use Yii;
 use common\models\guides\Guide;
 use yii\data\ActiveDataProvider;
 

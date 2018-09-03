@@ -7,7 +7,7 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 
 class WaybillController extends WebApiController
 {
-    
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/list",
      *     tags={"Integration/vetis/waybill"},
@@ -23,12 +23,22 @@ class WaybillController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {},
-     *                  "pagination":{
-     *                              "page": 1,
-     *                              "page_size": 12
+     *                    "search": {
+     *                          "acquirer_id": 1,
+     *                          "type": "INCOMING",
+     *                          "status": "CONFIRMED",
+     *                          "sender_guid": ["f8805c8f-1da4-4bda-aaca-a08b5d1cab1b"],
+     *                          "product_name": "мясо ягненка",
+     *                          "date":{
+     *                              "from":"22.22.1111",
+     *                              "to":"22.22.1111"
      *                          }
-     *                    }
+     *                      },
+     *                      "pagination": {
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                  }
      *              )
      *         )
      *     ),
@@ -62,7 +72,7 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getList($this->request);
     }
-    
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/filter-sender",
      *     tags={"Integration/vetis/waybill"},
@@ -108,7 +118,7 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getSenderOrProductFilter($this->request, 'sender_name');
     }
-    
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/filter-product",
      *     tags={"Integration/vetis/waybill"},
@@ -156,7 +166,7 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getSenderOrProductFilter($this->request, 'product_name');
     }
-    
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/filter-status",
      *     tags={"Integration/vetis/waybill"},
@@ -203,7 +213,7 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getFilterStatus();
     }
-    
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/filter-vsd",
      *     tags={"Integration/vetis/waybill"},
@@ -249,6 +259,7 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getFilterVsd();
     }
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/filters",
      *     tags={"Integration/vetis/waybill"},

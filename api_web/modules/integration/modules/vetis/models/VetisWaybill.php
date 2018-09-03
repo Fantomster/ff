@@ -72,7 +72,7 @@ class VetisWaybill extends VetisHelper
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
-        $arResult = $query->groupBy('sender_guid')->all();
+        $arResult = $query->groupBy('product_name')->all();
         if ($filterName == 'product_name') {
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {

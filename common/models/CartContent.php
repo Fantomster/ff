@@ -76,28 +76,20 @@ class CartContent extends \yii\db\ActiveRecord
         ];
     }
 
-    public function afterSave($insert, $changedAttributes)
-    {
-        $this->cart->updated_at = new Expression('NOW()');
-        $this->cart->save();
-
-        parent::afterSave($insert, $changedAttributes);
-    }
-
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array|Cart|null|\yii\db\ActiveRecord
      */
     public function getCart()
     {
-        return $this->hasOne(Cart::className(), ['id' => 'cart_id']);
+        return Cart::find()->cache(3600)->where(['id' => $this->cart_id])->one();
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array|Currency|null|\yii\db\ActiveQuery|\yii\db\ActiveRecord
      */
     public function getCurrency()
     {
-        return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+        return Currency::find()->cache(3600)->where(['id' => $this->currency_id])->one();
     }
 
     /**

@@ -49,6 +49,11 @@ class CartWebApi extends \api_web\components\WebApi
             $this->noticeWhenProductAddToCart();
         }
 
+        //Обновляем дату изменения корзины
+        $cart = $this->getCart();
+        $cart->updated_at = new Expression('NOW()');
+        $cart->save(false);
+
         return $this->items();
     }
 
@@ -220,7 +225,7 @@ class CartWebApi extends \api_web\components\WebApi
             $order->vendor_id = $vendor->id;
             $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
-            $order->created_at = gmdate("Y-m-d H:i:s");
+            $order->created_at = new Expression('NOW()');
 
             if (!empty($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);
@@ -262,7 +267,6 @@ class CartWebApi extends \api_web\components\WebApi
             $cart->updated_at = new Expression('NOW()');
             $cart->save();
             $transaction->commit();
-
             $orderCreated = true;
         } catch (\Exception $e) {
             $transaction->rollBack();

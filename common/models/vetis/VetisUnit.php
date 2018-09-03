@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_unit".

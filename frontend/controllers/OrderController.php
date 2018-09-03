@@ -1094,7 +1094,7 @@ class OrderController extends DefaultController
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-            $timeTag = Html::tag('p', "Generation time: " . GenerationTime::end(), [
+            $timeTag = Html::tag('p', "Generation time: " . round(GenerationTime::end(), 2), [
                 'style' => 'position:absolute;right:0px;bottom: -94px;font-size:10px;color:darkgray;'
             ]);
 

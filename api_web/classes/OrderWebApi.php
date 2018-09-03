@@ -847,7 +847,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function complete(array $post)
     {
@@ -878,7 +878,9 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->completion_date = new Expression('NOW()');
             if ($order->validate()) {
                 try{
-                    $order->save();
+                    if(!$order->save()) {
+                        throw new \Exception('Order not save!!!');
+                    }
                 } catch (\Throwable $e) {
                     throw $e;
                 }

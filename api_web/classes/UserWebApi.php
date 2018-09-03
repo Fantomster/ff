@@ -56,6 +56,14 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Часовой пояс пользователя
+     * @return array
+     */
+    public function getGmt() {
+        return ['GMT' => \Yii::$app->request->headers->get('GMT') ?? 0];
+    }
+
+    /**
      * Создание пользователя
      * @param array $post
      * @return string

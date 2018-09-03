@@ -293,9 +293,23 @@ class AnalyticsWebApi extends WebApi
             $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
         }
         // фильтр - статус заказа
-        $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_WELL;
-        if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
-            $whereParams['order.status'] = $post['search']['order_status_id'];
+        if (isset($post['search']['order_status_id'])) {
+            if (is_array($post['search']['order_status_id'])) {
+                foreach ($post['search']['order_status_id'] as $status) {
+                    if (in_array($status, AnalyticsWebApi::ORDER_STATUSES_DONE)) {
+                        $whereParams['order.status'] = $status;
+                    }
+                }
+            } else {
+                if (in_array($post['search']['order_status_id'], AnalyticsWebApi::ORDER_STATUSES_DONE)) {
+                    $whereParams['order.status'] = $post['search']['order_status_id'];
+                }
+            }
+            if (!isset($whereParams['order.status'])) {
+                return 0;
+            }
+        } else {
+            $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_DONE;
         }
         // фильтр - валюта
         if (isset($post['search']['currency_id'])) {
@@ -373,7 +387,7 @@ class AnalyticsWebApi extends WebApi
     {
 
         if (!isset(AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) || !AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) {
-            throw new BadRequestHttpException('bad_order_type|'.$type);
+            throw new BadRequestHttpException('bad_order_type|' . $type);
         }
 
         // ограничение на собственные заказы
@@ -383,11 +397,27 @@ class AnalyticsWebApi extends WebApi
         if (isset($post['search']['vendor_id'])) {
             $whereParams['order.vendor_id'] = $post['search']['vendor_id'];
         }
+
         // фильтр - статус заказа
-        $whereParams['order.status'] = AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type];
-        if (isset($post['search']['order_status_id']) && is_array($post['search']['order_status_id'])) {
-            $whereParams['order.status'] = $post['search']['order_status_id'];
+        if (isset($post['search']['order_status_id'])) {
+            if (is_array($post['search']['order_status_id'])) {
+                foreach ($post['search']['order_status_id'] as $status) {
+                    if (in_array($status, AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type])) {
+                        $whereParams['order.status'][] = $status;
+                    }
+                }
+            } else {
+                if (in_array($post['search']['order_status_id'], AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type])) {
+                    $whereParams['order.status'] = $post['search']['order_status_id'];
+                }
+            }
+            if (!isset($whereParams['order.status'])) {
+                return 0;
+            }
+        } else {
+            $whereParams['order.status'] = AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type];
         }
+
         // фильтр - валюта
         $whereParams['currency.id'] = $post['search']['currency_id'];
 
@@ -395,7 +425,7 @@ class AnalyticsWebApi extends WebApi
         $query = new Query;
         $query->select(
             [
-                'COUNT(order.id) as '.$type,
+                'COUNT(order.id) as ' . $type,
             ]
         )->from('order')
             ->leftJoin('currency', 'currency.id = order.currency_id')
@@ -420,7 +450,7 @@ class AnalyticsWebApi extends WebApi
         }
 
         $result = $query->all();
-        return ($result) ? $result[0][$type] : 0;
+        return ($result) ? round($result[0][$type], 0) : 0;
 
     }
 

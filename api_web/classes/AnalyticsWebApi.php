@@ -414,8 +414,6 @@ class AnalyticsWebApi extends WebApi
             $whereParams['order.status'] = AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type];
         }
 
-        if (isset($whereParams['order.status'])) {print_r($whereParams['order.status']);}
-
         // фильтр - валюта
         $whereParams['currency.id'] = $post['search']['currency_id'];
 

@@ -2,6 +2,9 @@
 
 namespace api\common\models\merc;
 
+use api\common\models\RabbitQueues;
+use console\modules\daemons\components\UpdateDictInterface;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use Yii;
 
 /**
@@ -37,7 +40,7 @@ use Yii;
  * @property string $product_marks
  * @property string $producer_country
  */
-class MercStockEntry extends \yii\db\ActiveRecord
+class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
     const CREATED = 100;
     const CREATED_WHEN_QUENCH_VETCERTIFICATE = 101;
@@ -191,5 +194,39 @@ class MercStockEntry extends \yii\db\ActiveRecord
         }
 
         return $first_date;
+    }
+
+    /**
+     * Запрос обновлений справочника
+     */
+    public static function getUpdateData($org_id)
+    {
+        try {
+            $load = new Mercury();
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            if($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = 'MercStockEntryList';
+                $queue->organization_id = $org_id;
+                $queue->save();
+            }
+
+            if (!empty($queue->organization_id)) {
+                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+            }
+            else {
+                $queueName = $queue->consumer_class_name;
+            }
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue('');
+
+        } catch (\Exception $e) {
+            Yii::error($e->getMessage());
+            var_dump($e->getMessage());
+        }
     }
 }

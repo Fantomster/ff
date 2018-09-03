@@ -34,7 +34,7 @@ class WebApi
     public function getUser()
     {
         if (empty($this->user)) {
-            $this->user = \common\models\User::findOne(\Yii::$app->user->getId());
+            $this->user = \common\models\User::find()->cache(3600)->where(['id' => \Yii::$app->user->getId()])->one();
         }
         return $this->user;
     }

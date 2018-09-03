@@ -84,11 +84,11 @@ class getStockEntry extends Model
         $this->entryNumber = $stockEntry->entryNumber;
         $this->productType = MercStockEntry::$product_types[$stockEntry->product_type];
 
-        $product_raw = productApi::getInstance()->getProductByGuid($data_raw->batch->product->guid);
-        $this->product = $product_raw->product->name;
+        $product_raw = productApi::getInstance((\Yii::$app->user->identity)->organization_id)->getProductByGuid($data_raw->batch->product->guid);
+        $this->product = isset($product_raw) ? $product_raw->name : null;
 
-        $sub_product_raw = productApi::getInstance()->getSubProductByGuid($data_raw->batch->subProduct->guid);
-        $this->subProduct = $sub_product_raw->subProduct->name;
+        $sub_product_raw = productApi::getInstance((\Yii::$app->user->identity)->organization_id)->getSubProductByGuid($data_raw->batch->subProduct->guid);
+        $this->subProduct = isset($sub_product_raw) ? $sub_product_raw->name : null;
         $this->globalID = $data_raw->batch->productItem->globalID;
 
         $this->productName = $stockEntry->product_name;
@@ -98,8 +98,8 @@ class getStockEntry extends Model
         $this->dateOfProduction = $stockEntry->production_date;
         $this->expiryDate = $stockEntry->expiry_date;
 
-        $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($data_raw->batch->owner->uuid);
-        $owner = $owner_raw->businessEntity;
+        $owner_raw = cerberApi::getInstance((\Yii::$app->user->identity)->organization_id)->getBusinessEntityByUuid($data_raw->batch->owner->uuid);
+        $owner = $owner_raw;
         $this->owner = (isset($owner)) ? ($owner->name . ', ИНН:' . $owner->inn) : " - ";
 
         //var_dump($data_raw['batch']['owner']['uuid']); die();

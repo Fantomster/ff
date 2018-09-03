@@ -360,7 +360,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             } else {
                 $records =  OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->andWhere('product_id in ( select product_id from '.$dbName.'.all_map where service_id = 2 and store_rid = :store)',
+                    ->andWhere('product_id in ( select product_id from `'.$dbName.'`.all_map where service_id = 2 and store_rid = :store)',
                         [':store' => $this->store_id])
                     ->all();
             }

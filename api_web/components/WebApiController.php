@@ -182,7 +182,7 @@ class WebApiController extends \yii\rest\Controller
         parent::afterAction($action, $result);
         if (!empty($this->response)) {
             if (!in_array($action->id, $this->not_log_actions)) {
-                Logger::getInstance()::response($this->response);
+                Logger::getInstance()::response(mb_substr($this->response, 0, 1000));
             }
             return \api_web\helpers\WebApiHelper::response($this->response);
         } else {

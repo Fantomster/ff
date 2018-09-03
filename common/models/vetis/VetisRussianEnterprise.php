@@ -37,6 +37,11 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         return 'vetis_russian_enterprise';
     }
 
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
     /**
      * @return \yii\db\Connection the database connection used by this AR class.
      */

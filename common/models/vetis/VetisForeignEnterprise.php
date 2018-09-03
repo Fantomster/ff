@@ -45,6 +45,11 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         return Yii::$app->get('db_api');
     }
 
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -62,6 +67,7 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'country_guid', 'addressView'], 'string', 'max' => 255],
         ];
     }
+
 
     /**
      * {@inheritdoc}

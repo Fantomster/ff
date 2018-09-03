@@ -45,6 +45,11 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         return Yii::$app->get('db_api');
     }
 
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
     /**
      * {@inheritdoc}
      */

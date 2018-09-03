@@ -126,6 +126,7 @@ class MercuryCronController extends Controller
         $data['method'] = 'getRussianEnterpriseChangesList';
         $data['struct'] = ['listName' => 'enterpriseList',
             'listItemName' => 'enterprise'
+            ];
 
         $listOptions = new ListOptions();
         $listOptions->count = 100;

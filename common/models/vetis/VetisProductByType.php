@@ -45,6 +45,11 @@ class VetisProductByType extends \yii\db\ActiveRecord implements UpdateDictInter
         return Yii::$app->get('db_api');
     }
 
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
     /**
      * {@inheritdoc}
      */

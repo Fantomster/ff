@@ -305,7 +305,9 @@ class AnalyticsWebApi extends WebApi
                     $whereParams['order.status'] = $post['search']['order_status_id'];
                 }
             }
-            if (!isset($whereParams['order.status'])) {return 0;}
+            if (!isset($whereParams['order.status'])) {
+                return 0;
+            }
         } else {
             $whereParams['order.status'] = AnalyticsWebApi::ORDER_STATUSES_DONE;
         }
@@ -409,7 +411,9 @@ class AnalyticsWebApi extends WebApi
                     $whereParams['order.status'] = $post['search']['order_status_id'];
                 }
             }
-            if (!isset($whereParams['order.status'])) {return 0;}
+            if (!isset($whereParams['order.status'])) {
+                return 0;
+            }
         } else {
             $whereParams['order.status'] = AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type];
         }

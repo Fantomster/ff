@@ -337,6 +337,76 @@ class AnalyticsController extends WebApiController
 
 
     /**
+     * @SWG\Post(path="/analytics/client-summary",
+     *     tags={"Analytics"},
+     *     summary="Ресторан: Общая аналитика",
+     *     description="Ресторан: Общая аналитика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *             @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                     "search": {
+     *                         "vendor_id": {
+     *                             124,
+     *                             143
+     *                         },
+     *                         "employee_id": 21,
+     *                         "order_status_id": {
+     *                             4,
+     *                             5
+     *                         },
+     *                         "currency_id": 1,
+     *                         "date": {
+     *                             "from": "23.08.2018",
+     *                             "to": "24.08.2018"
+     *                         }
+     *                     }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "new": 10,
+     *                          "process": 13,
+     *                          "done": 29,
+     *                          "total_sum": 1212.12,
+     *                          "currency_id": 1,
+     *                          "currency": "RUB"
+     *                      }
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     */
+    public function actionClientSummary()
+    {
+        $this->response = $this->container->get('AnalyticsWebApi')->clientSummary($this->request);
+    }
+
+
+    /**
      * @SWG\Post(path="/analytics/currencies",
      *     tags={"Analytics"},
      *     summary="Метод получения списка валют",
@@ -389,4 +459,5 @@ class AnalyticsController extends WebApiController
     {
         $this->response = $this->container->get('AnalyticsWebApi')->currencies($this->request);
     }
+
 }

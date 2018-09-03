@@ -27,37 +27,36 @@ class AutoWaybillHelper extends \yii\base\Component
     const licensesMap = [
         'rkws' => 1,
         'iiko' => 2,
-     //   'odinsobs' => 8,
+        //   'odinsobs' => 8,
     ];
 
     public static function processWaybill($order_id)
     {
-
         $licenses = (User::findOne(\Yii::$app->user->id))->organization->getLicenseList();
 
-            if(isset($licenses['rkws']) && ($licenses['rkws_ucs']) && array_key_exists('rkws', self::licensesMap)) {
-                $className = self::supportServices[self::licensesMap['rkws']];
-                $waybillModeRkws =  RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+        if (isset($licenses['rkws']) && ($licenses['rkws_ucs']) && array_key_exists('rkws', self::licensesMap)) {
+            $className = self::supportServices[self::licensesMap['rkws']];
+            $waybillModeRkws = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-                if ($waybillModeRkws !== '0') {
-                    return $className::createWaybill($order_id);
-                }
+            if ($waybillModeRkws !== '0') {
+                return $className::createWaybill($order_id);
             }
+        }
 
-            if(isset($licenses['iiko']) && array_key_exists('iiko', self::licensesMap)) {
-                $className = self::supportServices[self::licensesMap['iiko']];
-                $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+        if (isset($licenses['iiko']) && array_key_exists('iiko', self::licensesMap)) {
+            $className = self::supportServices[self::licensesMap['iiko']];
+            $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-                if ($waybillModeIiko !== '0') {
-                    return $className::createWaybill($order_id);
-                }
+            if ($waybillModeIiko !== '0') {
+                return $className::createWaybill($order_id);
             }
+        }
 
-            if(isset($licenses['odinsobsh']) &&  array_key_exists('odinsobsh', self::licensesMap)) {
+        if (isset($licenses['odinsobsh']) && array_key_exists('odinsobsh', self::licensesMap)) {
+            if (isset(self::licensesMap['odinsobsh'])) {
                 $className = self::supportServices[self::licensesMap['odinsobsh']];
             }
-
-
-
+            return false;
+        }
     }
 }

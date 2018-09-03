@@ -3,6 +3,7 @@
 namespace common\models\vetis;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_subproduct_by_product".

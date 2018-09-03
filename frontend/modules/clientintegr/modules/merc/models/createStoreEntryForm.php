@@ -131,9 +131,11 @@ class createStoreEntryForm extends Model
         $list = dictsApi::getInstance()->getUnitList();
 
         $res = [];
-        foreach ($list->unitList->unit as $item) {
-            if ($item->last && $item->active) {
-                $res[$item->uuid] = $item->name;
+        if (isset($list->unitList->unit) && is_iterable($list->unitList->unit)) {
+            foreach ($list->unitList->unit as $item) {
+                if ($item->last && $item->active) {
+                    $res[$item->uuid] = $item->name;
+                }
             }
         }
         return $res;
@@ -144,7 +146,7 @@ class createStoreEntryForm extends Model
         if (empty($this->productType)) {
             return [];
         }
-        
+
         $res = \common\models\vetis\VetisProductByType::getProductByTypeList($this->productType);
         if (!empty($res)) {
             return $res;
@@ -170,12 +172,12 @@ class createStoreEntryForm extends Model
         if (empty($this->product)) {
             return [];
         }
-        
+
         $res = \common\models\vetis\VetisSubproductByProduct::getSubProductByProductList($this->product);
         if (!empty($res)) {
             return $res;
         }
-        
+
         $list = productApi::getInstance()->getSubProductByProductList($this->product);
 
         if (!isset($list->subProductList->subProduct)) {
@@ -228,16 +230,17 @@ class createStoreEntryForm extends Model
         $res = [];
         do {
             $list = ikarApi::getInstance()->getAllCountryList($listOptions);
-            foreach ($list->countryList->country as $item) {
-                if ($item->last && $item->active) {
-                    $res[$item->uuid] = $item->name;
+            if (isset($list->countryList->country) && is_iterable($list->countryList->country)) {
+                foreach ($list->countryList->country as $item) {
+                    if ($item->last && $item->active) {
+                        $res[$item->uuid] = $item->name;
+                    }
                 }
             }
-
-            if ($list->countryList->count < $list->countryList->total) {
+            if (isset($list->countryList->country) && $list->countryList->count < $list->countryList->total) {
                 $listOptions->offset += $list->countryList->count;
             }
-        } while ($list->countryList->total > ($list->countryList->offset + $list->countryList->count));
+        } while (isset($list->countryList->total) && $list->countryList->total > ($list->countryList->offset + $list->countryList->count));
         return $res;
     }
 
@@ -276,7 +279,7 @@ class createStoreEntryForm extends Model
         $stockEntry->batch->expiryDate = $this->convertDate($this->expiryDate);
 
         $stockEntry->batch->batchID = $this->batchID;
-        $stockEntry->batch->perishable = (bool) $this->perishable;
+        $stockEntry->batch->perishable = (bool)$this->perishable;
 
         $stockEntry->batch->origin = new BatchOrigin();
         $stockEntry->batch->origin->country = new Country();

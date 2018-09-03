@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use api\common\models\merc\mercPconst;
+use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
 use api\common\models\RabbitQueues;
 use common\models\vetis\VetisBusinessEntity;
@@ -15,9 +16,11 @@ use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
 use console\modules\daemons\classes\MercBusinessEntityList;
+use console\modules\daemons\classes\MercCountryList;
 use console\modules\daemons\classes\MercForeignEnterpriseList;
 use console\modules\daemons\classes\MercProductItemList;
 use console\modules\daemons\classes\MercProductList;
+use console\modules\daemons\classes\MercPurposeList;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
 use console\modules\daemons\classes\MercStoreEntryList;
 use console\modules\daemons\classes\MercSubProductList;
@@ -26,6 +29,9 @@ use console\modules\daemons\classes\MercUnitList;
 use console\modules\daemons\classes\MercVSDList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\ListOptions;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
+use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\console\Controller;
 use api\common\models\merc\mercService;
@@ -50,13 +56,19 @@ class MercuryCronController extends Controller
 
         foreach ($organizations as $org_id) {
             try {
-                $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
+               // $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
-                if (!isset($locations->activityLocationList->location)) {
+            /*    if (!isset($locations->activityLocationList->location)) {
                     continue;
-                }
+                }*/
 
-                foreach ($locations->activityLocationList->location as $item) {
+                echo "GET MercVSDList".PHP_EOL;
+                MercVsd::getUpdateData($org_id);
+
+                echo "GET MercStockEntryList".PHP_EOL;
+                MercStockEntry::getUpdateData($org_id);
+
+                /*foreach ($locations->activityLocationList->location as $item) {
                     if (!isset($item->enterprise)) {
                         continue;
                     }
@@ -73,7 +85,7 @@ class MercuryCronController extends Controller
                     } catch (\Exception $e) {
                         Yii::error($e->getMessage());
                     }
-                }
+                }*/
             } catch (\Exception $e) {
                 \Yii::error($e->getMessage());
             }
@@ -84,17 +96,17 @@ class MercuryCronController extends Controller
     {
         $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
-       /* echo "GET Unit" . PHP_EOL;
+        echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
         echo "GET Purpose" . PHP_EOL;
         VetisPurpose::getUpdateData($org_id);
 
         echo "GET Country" . PHP_EOL;
-        VetisCountry::getUpdateData($org_id);*/
+        VetisCountry::getUpdateData($org_id);
 
         echo "GET RussianEnterprise" . PHP_EOL;
         VetisRussianEnterprise::getUpdateData($org_id);
-       /* echo "GET ForeignEnterprise" . PHP_EOL;
+        echo "GET ForeignEnterprise" . PHP_EOL;
         VetisForeignEnterprise::getUpdateData($org_id);
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);
@@ -105,27 +117,32 @@ class MercuryCronController extends Controller
         VetisProductItem::getUpdateData($org_id);
         echo "GET SubproductByProduct" . PHP_EOL;
         VetisSubproductByProduct::getUpdateData($org_id);
-
-        echo "GET MercVSDList";
-        MercVsd::getUpdateData($org_id);
-
-        echo "GET MercVSDList";
-        MercStoreEntryList::getUpdateData($org_id);*/
         echo "FINISH" . PHP_EOL;
     }
 
     public function actionTest2()
     {
+        $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
+        echo "GET MercVSDList".PHP_EOL;
+        MercVsd::getUpdateData($org_id);
+
+        echo "GET MercStockEntryList".PHP_EOL;
+        MercStockEntry::getUpdateData($org_id);
+        echo "FINISH" . PHP_EOL;
+    }
+
+    public function actionTestOne()
+    {
         $load = new Cerber();
 
         $org_id = (mercPconst::findOne('1'))->org;
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
-        $data['method'] = 'getRussianEnterpriseChangesList';
-        $data['struct'] = ['listName' => 'enterpriseList',
-            'listItemName' => 'enterprise'
+        $data['method'] = 'getBusinessEntityChangesList';
+        $data['struct'] = ['listName' => 'businessEntityList',
+            'listItemName' => 'businessEntity'
             ];
 
         $listOptions = new ListOptions();
@@ -133,16 +150,12 @@ class MercuryCronController extends Controller
         $listOptions->offset = 0;
 
         $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
-        $instance = productApi::getInstance($org_id);
+        $instance = cerberApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-        $w = new MercRussianEnterpriseList($org_id);
+        $w = new MercBusinessEntityList($org_id);
         $w->data = json_encode($data);
-        $w = new MercVSDList(5144);
         $w->getData();
-
-        echo "FINISH" . PHP_EOL;
-
 
         echo "FINISH" . PHP_EOL;
     }

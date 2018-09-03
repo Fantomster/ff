@@ -58,10 +58,10 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last'], 'filter', 'filter' => function ($value) {
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
                 $value = ($value === 'true') ? 1 : 0;
                 return $value;
-            }],
+            }],*/
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'addressView'], 'string', 'max' => 255],
@@ -114,7 +114,7 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             ];
 
             $listOptions = new ListOptions();
-            $listOptions->count = 1;
+            $listOptions->count = 1000;
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;

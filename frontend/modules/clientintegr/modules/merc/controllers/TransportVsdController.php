@@ -245,12 +245,18 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
             $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-            $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->enterprise->owner->uuid);
+            if(!isset($hc)) {
+                return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+            }
+            else {
+                $hc = unserialize($hc->data);
+                $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+            }
         }catch (\SoapFault $e)
         {
             return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->businessEntity->name.', ИНН:'.$hc->businessEntity->inn, 'uuid' => $hc->businessEntity->uuid]);
+        return (['result' => true, 'name' => $hc->name.', ИНН:'.$hc->inn, 'uuid' => $hc->uuid]);
     }
 
     private function getErrorText($e)
@@ -338,7 +344,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                         $result = mercuryApi::getInstance()->registerProductionOperation($request);
 
                         Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
-                        return $this->redirect(['index']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                         if(!isset($result))
                             throw new \Exception('Error');
                     } catch (\Error $e) {

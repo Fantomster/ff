@@ -16,11 +16,11 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntr
  * Class consumer with realization ConsumerInterface
  * and containing AbstractConsumer methods
  */
-class MercStoreEntryList extends MercDictConsumer
+class MercStockEntryList extends MercDictConsumer
 {
     public function getData()
     {
-        $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList_'.$this->org_id])->orderBy(['last_executed' => SORT_DESC])->one();
+        $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList_'.$this->org_id])->orderBy(['last_executed' => SORT_DESC])->one();
 
         $vsd = new LoadStockEntryList();
         $vsd->org_id = $this->org_id;

@@ -68,10 +68,10 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last', 'correspondsToGost'], 'filter', 'filter' => function ($value) {
+            /*[['active','last', 'correspondsToGost'], 'filter', 'filter' => function ($value) {
                 $value = ($value === 'true') ? 1 : 0;
                 return $value;
-            }],
+            }],*/
             [['last', 'active', 'status', 'productType', 'correspondsToGost'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'globalID', 'product_uuid', 'product_guid', 'subproduct_uuid', 'subproduct_guid', 'gost', 'producer_uuid', 'producer_guid', 'tmOwner_uuid', 'tmOwner_guid'], 'string', 'max' => 255],
@@ -134,7 +134,7 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
             ];
 
             $listOptions = new ListOptions();
-            $listOptions->count = 100;
+            $listOptions->count = 1000;
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;

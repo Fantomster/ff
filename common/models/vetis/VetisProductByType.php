@@ -58,10 +58,10 @@ class VetisProductByType extends \yii\db\ActiveRecord implements UpdateDictInter
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last'], 'filter', 'filter' => function ($value) {
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
                 $value = ($value === 'true') ? 1 : 0;
                 return $value;
-            }],
+            }],*/
             [['last', 'active', 'status', 'productType'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code'], 'string', 'max' => 255],
@@ -124,7 +124,7 @@ class VetisProductByType extends \yii\db\ActiveRecord implements UpdateDictInter
             ];
 
             $listOptions = new ListOptions();
-            $listOptions->count = 100;
+            $listOptions->count = 1000;
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;

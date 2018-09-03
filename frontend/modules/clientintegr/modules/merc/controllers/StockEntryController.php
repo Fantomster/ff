@@ -205,7 +205,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             $form = new createStoreEntryForm();
             $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT_ALL, $datas);
             if(!isset($result))
-                throw new \Exception('Error create Stock entry');
+              throw new \Exception('Error create Stock entry');
             Yii::$app->session->setFlash('success', 'Позиции списаны!');
             return $this->redirect(['index']);
         } catch (\Error $e) {
@@ -245,6 +245,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
             if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
+                //var_dump($list);
                 if (isset($list)) {
 
                     foreach ($list as $item) {

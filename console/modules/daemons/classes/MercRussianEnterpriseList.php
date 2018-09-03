@@ -36,8 +36,8 @@ class MercRussianEnterpriseList extends MercDictConsumer
                 $attributes = json_decode(json_encode($item), true);
                 $model->uuid = $attributes['uuid'];
                 $model->guid = $attributes['guid'];
-                $model->last = $attributes['last'];
-                $model->active = $attributes['active'];
+                $model->last = (int)$attributes['last'];
+                $model->active = (int)$attributes['active'];
                 $model->type = $attributes['type'];
                 $model->next = $attributes['next'] ?? null;
                 $model->previous = $attributes['previous'] ?? null;

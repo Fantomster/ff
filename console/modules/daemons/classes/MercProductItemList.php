@@ -9,6 +9,7 @@
 namespace console\modules\daemons\classes;
 use common\models\vetis\VetisProductItem;
 use console\modules\daemons\components\MercDictConsumer;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 
 /**

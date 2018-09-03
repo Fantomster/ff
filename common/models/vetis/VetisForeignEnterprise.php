@@ -58,10 +58,10 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last'], 'filter', 'filter' => function ($value) {
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
                 $value = ($value === 'true') ? 1 : 0;
                 return $value;
-            }],
+            }],*/
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'country_guid', 'addressView'], 'string', 'max' => 255],

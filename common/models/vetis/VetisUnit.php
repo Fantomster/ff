@@ -72,10 +72,10 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last'], 'filter', 'filter' => function ($value) {
-                $value = ($value === 'true') ? 1 : 0;
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
+                $value = (int)$value;
                 return $value;
-            }],
+            }],*/
             [['last', 'active', 'status', 'factor'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullName', 'commonUnitGuid'], 'string', 'max' => 255],

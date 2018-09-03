@@ -93,7 +93,6 @@ class getVetDocumentByUUID extends Model
 
     public function getDocumentByUUID($UUID, $raw = false)
     {
-        $cache = \Yii::$app->cache;
         $this->UUID = $UUID;
 
         $doc = mercuryApi::getInstance()->getVetDocumentByUUID($UUID);
@@ -307,9 +306,6 @@ class getVetDocumentByUUID extends Model
         ];
         $this->locationProsperity = $doc->authentication->locationProsperity;
         $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;
-
-        $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
-
     }
 
     public function getWaybillNumber ()

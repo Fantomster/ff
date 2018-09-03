@@ -664,7 +664,7 @@ class mercuryApi extends baseApi
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList;
+            $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList->stockEntry;
             (new LoadStockEntryList())->updateDocumentsList($result);
         } else {
             $result = null;
@@ -763,7 +763,7 @@ class mercuryApi extends baseApi
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
-            $stockList = $result->application->result->any['registerProductionOperationResponse']->stockEntryList;
+            $stockList = $result->application->result->any['registerProductionOperationResponse']->stockEntryList->stockEntry;
             (new LoadStockEntryList())->updateDocumentsList($stockList);
             $vetDoc[] = $result->application->result->any['registerProductionOperationResponse']->vetDocument;
             (new VetDocumentsChangeList())->updateDocumentsList($vetDoc);

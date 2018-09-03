@@ -84,11 +84,8 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         $this->log('Load' . PHP_EOL);
         try {
             do {
-                $this->log('Load1' . PHP_EOL . serialize($this->method) . PHP_EOL . serialize($this->request) . PHP_EOL);
                 $response = $this->instance->sendRequest($this->method, $this->request);
-                $this->log('Load2' . PHP_EOL . serialize($response) . PHP_EOL);
                 $list = $response->{$this->listName};
-                $this->log('Load3' . PHP_EOL);
                 $count += $list->count;
                 $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
                 if ($list->count > 0) {

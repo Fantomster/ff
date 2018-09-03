@@ -58,10 +58,10 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            [['active','last'], 'filter', 'filter' => function ($value) {
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
                 $value = ($value === 'true') ? 1 : 0;
                 return $value;
-            }],
+            }],*/
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'productGuid'], 'string', 'max' => 255],
@@ -94,10 +94,11 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         return \yii\helpers\Json::decode($this->data);
     }
     
-    public static function getSubProductByProductList($product_guid) {
+    public static function getSubProductByProductList($product_uuid) {
+        $product = VetisProductByType::findOne(['active' => true, 'last' => true, 'uuid' => $product_uuid]);
         $models = self::find()
                 ->select(['uuid', 'name', 'code'])
-                ->where(['active' => true, 'last' => true, 'productGuid' => $product_guid])
+                ->where(['active' => true, 'last' => true, 'productGuid' => $product->guid])
                 ->asArray()
                 ->all();
 
@@ -125,7 +126,7 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
             ];
 
             $listOptions = new ListOptions();
-            $listOptions->count = 100;
+            $listOptions->count = 1000;
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;

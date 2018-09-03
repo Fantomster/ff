@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\ikar;
 
+use common\models\vetis\VetisCountry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 
 class ikarApi extends baseApi
@@ -18,19 +19,14 @@ class ikarApi extends baseApi
     //Получние страны по GUID
     public function getCountryByGuid($GUID)
     {
-       /*$country = \common\models\vetis\VetisCountry::findOne(['guid' => $GUID]);
+       VetisCountry::getUpdateData($this->org_id);
+       $country = VetisCountry::findOne(['guid' => $GUID]);
         
         if (!empty($country)) {
-            return $country;
-        }*/
+            return unserialize($country->data);
+        }
 
-        $client = $this->getSoapClient('ikar');
-        $request = new getCountryByGuidRequest();
-        $request->guid = $GUID;
-
-        $result = $client->GetCountryByGuid($request);
-
-        return $result;
+        return null;
     }
 
     /**
@@ -39,13 +35,20 @@ class ikarApi extends baseApi
      */
     public function getAllCountryList()
     {
-        $units = \common\models\vetis\VetisCountry::findAll(['active' => 1, 'last' => 1]);
+        VetisCountry::getUpdateData($this->org_id);
+        $countries = VetisCountry::findAll(['active' => 1, 'last' => 1]);
 
-        if (!empty($units)) {
-            return $units;
+        if (!empty($countries)) {
+            $list = [];
+            foreach ($countries as $item)
+            {
+                $list = unserialize($item->data);
+            }
+
+            return $list;
         }
 
-        return null;
+        return [];
     }
 
     /**

@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use api\common\models\RabbitQueues;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_purpose".
@@ -68,6 +69,10 @@ class VetisPurpose extends \yii\db\ActiveRecord implements UpdateDictInterface
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
+                $value = ($value === 'true') ? 1 : 0;
+                return $value;
+            }],*/
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name'], 'string', 'max' => 255],
@@ -129,7 +134,7 @@ class VetisPurpose extends \yii\db\ActiveRecord implements UpdateDictInterface
             ];
 
             $listOptions = new ListOptions();
-            $listOptions->count = 100;
+            $listOptions->count = 1000;
             $listOptions->offset = 0;
 
             $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;

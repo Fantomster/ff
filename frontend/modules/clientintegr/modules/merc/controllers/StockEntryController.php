@@ -7,6 +7,7 @@ use api\common\models\merc\mercService;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\search\mercStockEntrySearch;
+use console\modules\daemons\classes\MercStoreEntryList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getStockEntry;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
@@ -99,10 +100,10 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function actionView($uuid)
     {
-        try {
+       try {
         $document = new getStockEntry();
         $document->loadStockEntry($uuid);
-        }catch (\Error $e) {
+       }catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
@@ -204,7 +205,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             $form = new createStoreEntryForm();
             $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT_ALL, $datas);
             if(!isset($result))
-                throw new \Exception('Error create Stock entry');
+              throw new \Exception('Error create Stock entry');
             Yii::$app->session->setFlash('success', 'Позиции списаны!');
             return $this->redirect(['index']);
         } catch (\Error $e) {
@@ -218,18 +219,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     private function updateStockEntryList()
     {
-        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-        /*$transaction = Yii::$app->db_api->beginTransaction();
-        try {*/
-            $vsd = new LoadStockEntryList();
-            if (isset($visit))
-                $visit = gmdate("Y-m-d H:i:s", strtotime($visit) - 60 * 30);
-            $vsd->updateData($visit);
-            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_STOCK_ENTRY);
-        /*    $transaction->commit();
-        } catch (\Exception $e) {
-            $transaction->rollback();
-        }*/
+        MercStockEntry::getUpdateData((\Yii::$app->user->identity)->organization_id);
     }
 
     public function actionProducersList($q = null, $c=null)
@@ -240,9 +230,9 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
             if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1') {
                 $res = [];
                 $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
-                if (isset($list->enterpriseList->enterprise)) {
+                if (isset($list)) {
                     $res = [];
-                    foreach ($list->enterpriseList->enterprise as $item) {
+                    foreach ($list as $item) {
                         if (($item->last) && ($item->active))
                             $res[] = ['id' => $item->guid,
                                 'text' => $item->name . '(' .
@@ -255,9 +245,10 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
             if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
-                if (isset($list->enterpriseList->enterprise)) {
+                //var_dump($list);
+                if (isset($list)) {
 
-                    foreach ($list->enterpriseList->enterprise as $item) {
+                    foreach ($list as $item) {
                         if (($item->last) && ($item->active))
                             $res[] = ['id' => $item->guid,
                                 'text' => $item->name . '(' .

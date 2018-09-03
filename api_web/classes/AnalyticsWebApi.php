@@ -251,31 +251,29 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Метод получения списка валют
-     * @param $post
      * @return array
      * @throws BadRequestHttpException
      */
-    public function currencies($post)
+    public function currencies()
     {
 
         // ТЕЛО ЗАПРОСА
         $query = new Query;
         $query->select(
             [
-                'order_content.currency_id',
+                'order.currency_id',
                 'currency.symbol AS currency', // iso_code ???
-               // 'SUM(order_content.quantity * order_content.price) AS total_sum',
             ]
         )->from('order_content')
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency', 'currency.id = order.currency_id')
             ->andWhere(['order.client_id' => $this->user->organization->id])
-            ->groupBy('currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_ASC]);
+            ->groupBy('order.currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
 
         $result = [];
         foreach ($query->all() as $data) {
             $result[] = [
-                'currency_id' => $data['currency_id'],
+                'currency_id' => round($data['currency_id'], 0),
                 'iso_code' => $data['currency'],
             ];
         }

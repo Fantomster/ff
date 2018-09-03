@@ -364,7 +364,7 @@ class AnalyticsController extends WebApiController
      *              default={
      *                  "result": {
      *                      {
-     *                          "currency_id": 1,
+     *                          "currency_id": 3,
      *                          "iso_code": "RUB"
      *                      },
      *                      {

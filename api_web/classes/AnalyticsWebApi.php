@@ -482,7 +482,7 @@ class AnalyticsWebApi extends WebApi
         $result = [];
         foreach ($query->all() as $data) {
             $result[] = [
-                'currency_id' => round($data['currency_id'], 0),
+                'id' => round($data['currency_id'], 0),
                 'iso_code' => $data['currency'],
             ];
         }

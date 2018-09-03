@@ -37,12 +37,17 @@ class OrderNotice
     }
 
     /**
-     * @param $client Organization
+     * @param $user User
      * @return bool
      */
-    public function sendOrderToTurnClient($client)
+    public function sendOrderToTurnClient(User $user)
     {
+        /**
+         * @var $client Organization
+         */
+        $client = $user->organization;
         $clientUsers = $client->users;
+        $count = (int) $client->getCartCount();
         foreach ($clientUsers as $user) {
             $channel = 'user' . $user->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
@@ -54,7 +59,8 @@ class OrderNotice
                 'user' => $user->id,
                 'organization' => $client->id
                     ], [
-                'cart_count' => (int) $client->getCartCount()
+                'cart_count' => $count,
+                'last_add_cart_user_name' => $user->profile->full_name
             ]);
         }
         return true;

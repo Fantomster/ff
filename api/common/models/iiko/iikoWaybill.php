@@ -68,7 +68,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return [
             [['org', 'order_id', 'readytoexport', 'status_id', 'store_id', 'is_duedate', 'active', 'vat_included'], 'integer'],
             [['doc_date', 'created_at', 'exported_at', 'updated_at', 'num_code', 'payment_delay_date', 'autostatus_id'], 'safe'],
-            [['org', 'agent_uuid'], 'required'],
+            [['org'], 'required'],
             [['org', 'agent_uuid', 'store_id'], 'required', 'on' => 'handMade'],
             [['agent_uuid'], 'string', 'max' => 36],
             [['text_code', 'num_code'], 'string', 'max' => 128],

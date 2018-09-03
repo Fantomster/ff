@@ -155,7 +155,7 @@ class mercuryApi extends baseApi
         return null;
 
         $result = null;
-        $doc = null;
+        /*$doc = null;
 
         //Генерируем id запроса
         $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
@@ -208,7 +208,7 @@ class mercuryApi extends baseApi
         } catch (\SoapFault $e) {
             Yii::error($e->detail);
         }
-        return $doc;
+        return $doc;*/
     }
 
     public function getVetDocumentDone($UUID, $rejectedData = null)
@@ -475,14 +475,15 @@ class mercuryApi extends baseApi
     public function getStockEntryByGuid($GUID)
     {
         $cache = Yii::$app->cache;
-         $doc = MercVsd::findOne(['guid' => $GUID]);
+        $doc = MercVsd::findOne(['guid' => $GUID]);
 
-          if ($doc != null)
-          return unserialize($doc->raw_data);
+        if ($doc != null) {
+            return unserialize($doc->raw_data);
+        }
 
-          return null;
+        return null;
 
-        $result = null;
+        /*$result = null;
         $doc = null;
 
         //Генерируем id запроса
@@ -533,20 +534,21 @@ class mercuryApi extends baseApi
             $result = null;
         }
 
-        return $doc;
+        return $doc;*/
     }
 
     public function getStockEntryByUuid($UUID)
     {
         $cache = Yii::$app->cache;
-         $doc = MercVsd::findOne(['uuid' => $UUID]);
+        $doc = MercVsd::findOne(['uuid' => $UUID]);
 
-          if ($doc != null)
-          return unserialize($doc->raw_data);
+        if ($doc != null) {
+            return unserialize($doc->raw_data);
+        }
 
-          return null;
+        return null;
 
-        $result = null;
+        /*$result = null;
         $doc = null;
 
         //Генерируем id запроса
@@ -596,7 +598,7 @@ class mercuryApi extends baseApi
             $result = null;
         }
 
-        return $doc;
+        return $doc;*/
     }
 
     public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)

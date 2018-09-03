@@ -70,7 +70,7 @@ class Logger
     {
         if (empty(self::get()['response_at']) || self::get()['response_at'] == '0000-00-00 00:00:00') {
             self::update([
-                'response' => \json_encode($response, JSON_UNESCAPED_UNICODE),
+                'response' => mb_substr(\json_encode($response, JSON_UNESCAPED_UNICODE), 0, 1000),
                 'response_at' => new Expression('NOW()')
             ]);
         } else {

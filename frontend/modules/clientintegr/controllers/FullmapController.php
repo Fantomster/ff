@@ -383,6 +383,8 @@ class FullmapController extends DefaultController {
         $vat = Yii::$app->request->post('vat_set');
         $service_id = Yii::$app->request->post('service_set');
 
+        $koef = 0 + str_replace(',', '.', $koef);
+
         $valModel = new AllMaps();
 
         $valModel->org_id = 1;

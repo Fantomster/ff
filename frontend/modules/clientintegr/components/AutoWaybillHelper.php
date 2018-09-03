@@ -48,7 +48,11 @@ class AutoWaybillHelper extends \yii\base\Component
             $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
             if ($waybillModeIiko !== '0') {
-                return $className::createWaybill($order_id);
+                $res = $className::createWaybill($order_id);
+                if ($waybillModeIiko === '1') {
+                    $res = $className::exportWaybill($order_id);
+                }
+                return $res;
             }
         }
 

@@ -189,14 +189,14 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><document></document>');
 
         $xml->addChild('comment', $model->note);
-        $xml->addChild('documentNumber', $model->order_id);
+        $xml->addChild('documentNumber', $model->order_id.'-'.$model->num_code);
         $datetime = new \DateTime($model->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
         $xml->addChild('invoice', $model->text_code);
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
-        $xml->addChild('incomingDocumentNumber', $model->num_code);
+        $xml->addChild('incomingDocumentNumber', $model->order_id.'-'.$model->num_code);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');
@@ -259,16 +259,16 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $order = \common\models\Order::findOne(['id' => $order_id]);
 
         if (!$order) {
-            echo "Can't find order";
-            return false;
+            \Yii::error('Cant find order during sending waybill');
+            throw new \Exception('Ошибка при отправке.' . $order_id);
         }
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
         $db = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid from `'.$dbName.'`.`order_content` o '.
-               ' LEFT JOIN all_map m on o.product_id = m.product_id and m.service_id = 2 '.
-               ' WHERE o.order_id = '.$order_id.' AND m.org_id = '.$order->client_id.
+        $sql = ' SELECT m.store_rid FROM `'.$dbName.'`.`order_content` o '.
+               ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id = '.$order->client_id.
+               ' WHERE o.order_id = '.$order_id.
                ' GROUP BY store_rid';
 
         $stories = $db->createCommand($sql)->queryAll();
@@ -284,7 +284,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $model->status_id = 1;
             $model->org = $order->client_id;
             $model->text_code = 'mixcart'.$order_id.'-'.$num;
-               // $model->num_code
+            $model->num_code = strval($num);
             $model->store_id = $store;
             $model->agent_uuid = isset($contra) ? $contra->uuid : null;
 
@@ -294,44 +294,10 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if (!$model->save()) {
                 $num++;
                 $res = false;
-                \yii::error('Error during saving auto waybill'.$model->getErrors());
+                \yii::error('Error during saving auto waybill'.print_r($model->getErrors(),true));
                 continue;
-            } else {
-
-                $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
-                $model->refresh();
-
-                if ($waybillModeIiko === '1' && $model->status_id == 4 ) { // Autosend waybill
-
-                    $transaction = Yii::$app->db_api->beginTransaction();
-                    $api = iikoApi::getInstance();
-
-                    try {
-                        if ($api->auth()) {
-                            $response = $api->sendWaybill($model);
-                            if ($response !== true) {
-                                \Yii::error('Error during sending waybill');
-                                throw new \Exception('Ошибка при отправке. ' . $response);
-                            }
-                            $model->status_id = 2;
-                            $model->save();
-                        } else {
-                            \yii::error('Error during iiko auth');
-                            throw new \Exception('Не удалось авторизоваться');
-                        }
-
-                        $transaction->commit();
-                        $api->logout();
-                        return true;
-
-                    } catch (\Exception $e) {
-                        $transaction->rollBack();
-                        $api->logout();
-                        \yii::error('Cant send waybill, rolled back'.$e);
-                        return ['success' => false, 'error' => $e->getMessage()];
-                    }
-                }
             }
+
             $num++;
         }
 
@@ -339,9 +305,50 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
     }
 
-    public static function exportWaybill($waybill_id): bool
+    public static function exportWaybill($order_id)
     {
-        // TODO: Implement exportWaybill() method here
+        $res = true;
+        $records = iikoWaybill::find()
+            ->andWhere('order_id = :ord',[':ord' => $order_id])
+            ->andWhere('status_id = :stat',[':stat' => 4])
+            ->all();
+
+        if (!isset($records)) {
+            \Yii::error('Cant find waybills for export');
+            throw new \Exception('Ошибка при экспорте накладных в авторежиме');
+        }
+
+        $api = iikoApi::getInstance();
+
+        try {
+            if ($api->auth()) {
+
+                foreach ($records as $model) {
+
+                        $transaction = Yii::$app->db_api->beginTransaction();
+
+                        $response = $api->sendWaybill($model);
+                        if ($response !== true) {
+                            \Yii::error('Error during sending waybill');
+                            throw new \Exception('Ошибка при отправке. ' . $response);
+                        } else {
+                            \Yii::error('Waybill'.$model->id.'has been exported');
+                        }
+
+                        $model->status_id = 2;
+                        $model->save();
+                        $transaction->commit();
+                }
+                $api->logout();
+                }
+
+            } catch (\Exception $e) {
+            $transaction->rollBack();
+            $api->logout();
+            \yii::error('Cant send waybill, rolled back' . $e);
+            $res = false;
+            }
+        return $res;
     }
 
     protected function createWaybillData()

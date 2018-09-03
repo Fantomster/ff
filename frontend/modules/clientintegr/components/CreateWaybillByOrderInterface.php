@@ -13,7 +13,7 @@ interface CreateWaybillByOrderInterface
 
     public static function createWaybill($order_id);
 
-    public static function exportWaybill($waybill_id);
+    public static function exportWaybill($order_id);
 
 
 }

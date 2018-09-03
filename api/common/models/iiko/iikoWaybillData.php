@@ -137,7 +137,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             ->andWhere('unload_status=1')
             ->count('*');
 
-            if (!isset($wmodel->store_id) || empty($wmodel->agent_uuid || $check > 0)) {
+            if (!isset($wmodel->store_id) || empty($wmodel->agent_uuid) || $check > 0) {
                 $wmodel->readytoexport = 0;
                 $wmodel->status_id = 1;
             } else {

@@ -283,9 +283,9 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column(); */
 
         $db = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid from `'.$dbName.'`.`order_content` o '.
-               ' LEFT JOIN all_map m on o.product_id = m.product_id and m.service_id = 1'.
-               ' WHERE o.order_id = '.$order_id.' AND m.org_id = '.$order->client_id.
+        $sql = ' SELECT m.store_rid FROM `'.$dbName.'`.`order_content` o '.
+               ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 1 AND m.org_id = '.$order->client_id.
+               ' WHERE o.order_id = '.$order_id.
                ' GROUP BY store_rid';
 
         $stories = $db->createCommand($sql)->queryAll();

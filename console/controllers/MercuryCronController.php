@@ -53,9 +53,9 @@ class MercuryCronController extends Controller
             ->where('status_id = 1 and now() between fd and td')
             ->createCommand(Yii::$app->db_api)
             ->queryColumn();
-
+        try {
         foreach ($organizations as $org_id) {
-            try {
+
                // $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
             /*    if (!isset($locations->activityLocationList->location)) {
@@ -86,9 +86,9 @@ class MercuryCronController extends Controller
                         Yii::error($e->getMessage());
                     }
                 }*/
-            } catch (\Exception $e) {
-                \Yii::error($e->getMessage());
-            }
+        }
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage());
         }
     }
 

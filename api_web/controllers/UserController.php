@@ -61,6 +61,55 @@ class UserController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/user/get-gmt",
+     *     tags={"User"},
+     *     summary="Часовой пояс пользователя",
+     *     description="Часовой пояс пользователя, из заголовка GTM",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *          name="GMT",
+     *          in="header",
+     *          required=false,
+     *          type="integer"
+     *     ),
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={
+     *                   "GMT": 3
+     *               }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     */
+    public function actionGetGmt()
+    {
+        $this->response = $this->container->get('UserWebApi')->getGmt($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/user/registration",
      *     tags={"User"},
      *     summary="Регистрация пользователя",

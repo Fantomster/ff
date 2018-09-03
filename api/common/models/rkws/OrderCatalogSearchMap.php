@@ -68,7 +68,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         $joins = [
             0 => '',
             1 => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.rid AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
+                   LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
 
             2 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",

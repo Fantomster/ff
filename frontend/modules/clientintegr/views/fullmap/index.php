@@ -496,7 +496,7 @@ $this->registerJs(
                                             . $data['name'] . "</div><div class='grid-article'>" . Yii::t('message', 'frontend.views.order.art', ['ru'=>'Артикул:']) . "  <span>"
                                             . $data['article'] . "</span></div>";
                                     },
-                                    'label' => Yii::t('message', 'frontend.views.order.product_name', ['ru'=>'Название продукта']),
+                                    'label' => Yii::t('message', 'frontend.fullmap.index.product_name_mixcart', ['ru'=>'Название продукта Mixcart']),
                                 ],
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
@@ -505,7 +505,7 @@ $this->registerJs(
                                     //       $model->pdenom = $model->product->denom;
                                     //       return $model->pdenom;
                                     //       },
-                                    'label' => 'Наименование SH',
+                                    'label' => Yii::t('message', 'frontend.fullmap.index.product_name_service', ['ru'=>'Название продукта']),
                                     //  'pageSummary' => 'Total',
                                     'vAlign' => 'middle',
                                     'width' => '210px',
@@ -516,7 +516,7 @@ $this->registerJs(
                                         'name' => 'pdenom',
 
                                         'formOptions' => ['action' => ['editpdenom', 'service_id' => $searchModel->service_id] ],
-                                        'header' => 'Продукт R-keeper',
+                                        'header' => 'Продукт в интеграции',
                                         'size' => 'md',
                                         'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
                                         //'widgetClass'=> 'kartik\datecontrol\DateControl',
@@ -561,7 +561,7 @@ $this->registerJs(
                                         return 'Не задано';
                                     },
                                     'format' => 'raw',
-                                    'label' => 'Ед.изм. SH',
+                                    'label' => Yii::t('message', 'frontend.fullmap.index.units_denom', ['ru'=>'Ед. изм.']),
                                 ],
 
                                 [
@@ -582,7 +582,7 @@ $this->registerJs(
                                     'vAlign'=>'middle',
                                     // 'width'=>'100px',
                                     'format'=>['decimal',6],
-
+                                    'label' => Yii::t('message', 'frontend.fullmap.index.koef', ['ru'=>'Коэффициент']),
                                     'pageSummary'=>true
                                 ],
                                 [
@@ -592,7 +592,7 @@ $this->registerJs(
                                     //       $model->pdenom = $model->product->denom;
                                     //       return $model->pdenom;
                                     //       },
-                                    'label' => 'Склад SH',
+                                    'label' => Yii::t('message', 'frontend.fullmap.index.store', ['ru'=>'Склад']),
                                     //  'pageSummary' => 'Total',
                                     'vAlign' => 'middle',
                                     'width' => '210px',
@@ -603,7 +603,7 @@ $this->registerJs(
                                         'name' => 'store',
                                         'data' => $stores,
                                         'formOptions' => ['action' => ['editstore', 'service_id' => $searchModel->service_id]],
-                                        'header' => 'Склад SH',
+                                        'header' => 'Склад интеграции',
                                         'size' => 'md',
                                         'inputType' => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
                                         'options' => [
@@ -643,7 +643,7 @@ $this->registerJs(
                                         return 'Не задано';
                                     },
                                     'format' => 'raw',
-                                    'label' => 'Ставка НДС',
+                                    'label' => Yii::t('message', 'frontend.fullmap.index.vat', ['ru'=>'Ставка НДС']),
                                 ],
 
                                 [

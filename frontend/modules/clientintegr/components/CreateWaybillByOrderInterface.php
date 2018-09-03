@@ -11,9 +11,9 @@ namespace frontend\modules\clientintegr\components;
 interface CreateWaybillByOrderInterface
 {
 
-    public static function createWaybill($order_id) : bool;
+    public static function createWaybill($order_id);
 
-    public static function exportWaybill($waybill_id) : bool;
+    public static function exportWaybill($waybill_id);
 
 
 }

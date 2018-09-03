@@ -250,7 +250,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                 }
             }
             $transaction->commit();
-            
+
         } catch (\Exception $ex) {
             \yii::error(print_r($ex, true));
             $transaction->rollback();
@@ -264,7 +264,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         return \Yii::$app->db_api;
     }
 
-    public static function createWaybill($order_id): bool
+    public static function createWaybill($order_id)
     {
 
         $res = true;

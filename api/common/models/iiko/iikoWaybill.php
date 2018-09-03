@@ -251,7 +251,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
     }
 
 
-    public static function createWaybill($order_id): bool
+    public static function createWaybill($order_id)
     {
 
         $res = true;

@@ -133,10 +133,12 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
             $timeOutStartExec = $startExec->getTimestamp() + $consumerClass::$timeoutExecuting;
             if (date('Y-m-d H:i:s', $timeOutStartExec) < date('Y-m-d H:i:s')) {
                 return true;
+            } else {
+                return false;
             }
         }
 
-        if ($queue['count'] > 0 || $queue['consumerCount'] > 0) {
+        if ($queue['count'] > 0) {
             return false;
         }
 

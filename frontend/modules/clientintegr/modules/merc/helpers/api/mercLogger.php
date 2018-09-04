@@ -72,7 +72,7 @@ class mercLogger extends Component
     public function addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml)
     {
         //Пишем лог
-      /*  $log = new mercLog();
+        $log = new mercLog();
         $log->applicationId = $response->application->applicationId;
         $log->status = $response->application->status;
         $log->action = $method;
@@ -87,9 +87,9 @@ class mercLogger extends Component
         $log->save();
         //var_dump($log->getErrors());
 
-        /*if ($log->status == mercLog::REJECTED) {
+        if ($log->status == mercLog::REJECTED) {
             throw new \Exception($log->id, 600);
-        }*/
+        }
     }
 
 

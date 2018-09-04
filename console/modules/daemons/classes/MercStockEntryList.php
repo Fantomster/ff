@@ -18,6 +18,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntr
  */
 class MercStockEntryList extends MercDictConsumer
 {
+    public static $timeout  = 60*5;
+    public static $timeoutExecuting = 60*60;
+
     public function getData()
     {
         $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList_'.$this->org_id])->orderBy(['last_executed' => SORT_DESC])->one();

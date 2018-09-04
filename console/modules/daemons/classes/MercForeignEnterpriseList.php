@@ -19,6 +19,8 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
  */
 class MercForeignEnterpriseList extends MercDictConsumer
 {
+    public static $timeout  = 60*60*24;
+    public static $timeoutExecuting = 60*60*12;
     /**
      * Обработка и сохранение результата
      * @param $list

@@ -330,9 +330,12 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $productionDate = new productionDate();
         $expiryDate = new expiryDate();
         $inputDate = new inputDate();
-        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post()) && $inputDate->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post())) {
             if (!Yii::$app->request->isAjax) {
-                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate() && $inputDate->validate();
+                $model->country = "1";
+                $model->producer = "1";
+                $model->vsd_issueNumber = "1";
+                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate();
                 if ($res) {
                     $model->dateOfProduction = $productionDate;
                     $model->expiryDate = $expiryDate;

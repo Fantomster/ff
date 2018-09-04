@@ -125,7 +125,7 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                     ?>
                 </div>
                 <div class="form-group">
-                    <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' => 'btn btn-success', 'disabled' => 'disabled', 'id' => 'alSubmitVSDButton']) ?>
+                    <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' => 'btn btn-success', 'id' => 'alSubmitVSDButton']) ?>
                 </div>
             </div>
         </div>

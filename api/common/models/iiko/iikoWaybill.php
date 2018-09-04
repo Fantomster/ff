@@ -398,7 +398,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 // New check mapping
                 $ch = AllMaps::find()
                     ->andWhere('product_id = :prod',['prod' => $record->product_id ])
-                    ->andWhere('org_id = :org',['org' => $this->org])
+                    ->andWhere('org_id = :org',['org' => $wdmodel->org ])
                     ->andWhere('service_id = 2')
                     ->one();
 

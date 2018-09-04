@@ -18,6 +18,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
  */
 class MercProductItemList extends MercDictConsumer
 {
+    public static $timeout  = 60*60*24;
+    public static $timeoutExecuting = 60*60*12;
+
     /**
      * Обработка и сохранение результата
      * @param $list
@@ -51,13 +54,7 @@ class MercProductItemList extends MercDictConsumer
                 $result[]['model-data'] = $model->attributes;
             }
         }
-
-        if(empty($result)) {
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        }
-        else{
-            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
-        }
+        return $result;
     }
 
     protected function init()

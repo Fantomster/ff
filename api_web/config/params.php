@@ -17,6 +17,7 @@ return [
         '/market/products',
         '/market/categories',
         '/market/organizations',
-        '/payment/currency-list'
+        '/payment/currency-list',
+        '/system/datetime'
     ]
 ];

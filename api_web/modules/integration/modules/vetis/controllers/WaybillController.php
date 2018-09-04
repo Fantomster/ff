@@ -318,4 +318,58 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getFilters();
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/waybill/short-info-vsd",
+     *     tags={"Integration/vetis/waybill"},
+     *     summary="Краткая информация о ВСД",
+     *     description="Краткая информация о ВСД",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                        "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                        "country_name": "Россия",
+     *                        "producer_name":"ООО Мираторг, 600021, Владимирская обл., г. Муром, ул. Октябрьской революции 16",
+     *                        "referenced_document":"3345 231234",
+     *                        "referenced_date":"23.04.1025",
+     *                        "cargo_expertized":"Положительный результат.",
+     *                        "location_prosperity":"Благополучна",
+     *                        "special_marks":"Особые отметки, любой текст",
+     *                        "vehicle_number":"a666sf777tiv"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionShortInfoVsd()
+    {
+        $this->response = (new VetisWaybill())->getShortInfoAboutVsd($this->request);
+    }
 }

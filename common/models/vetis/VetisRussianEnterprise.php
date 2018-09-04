@@ -25,6 +25,8 @@ use Yii;
  * @property string $addressView
  * @property string $data
  * @property object $enterprise
+ * @property string $owner_guid
+ * @property string $owner_uuid
  */
 class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -64,7 +66,7 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             }],*/
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
-            [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'addressView'], 'string', 'max' => 255],
+            [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'addressView', 'owner_guid', 'owner_uuid'], 'string', 'max' => 255],
         ];
     }
 

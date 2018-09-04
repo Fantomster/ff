@@ -95,9 +95,10 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     $this->request['listOptions']['offset'] += $list->count;
                 }
             } while ($list->total > ($list->count + $list->offset));
-        }catch (\Throwable $e)
-        {
+            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
+        }catch (\Throwable $e) {
             $this->log($e->getMessage());
+            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, $e->getMessage());
         }
     }
 

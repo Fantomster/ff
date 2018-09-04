@@ -113,8 +113,6 @@ class getVetDocumentByUUID extends Model
 
         $enterprise = $consignor_enterprise;
         $businessEntity = $consignor_business;
-
-        var_dump($consignor_enterprise, $doc->certifiedConsignment->consignor->businessEntity->guid); die();
         
         $this->consignor = [
             [ 'label' => 'Название предприятия',

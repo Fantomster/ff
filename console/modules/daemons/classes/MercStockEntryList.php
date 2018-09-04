@@ -26,9 +26,9 @@ class MercStockEntryList extends MercDictConsumer
     {
         $check = RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList', 
         'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
-            ->andWhere('start_executing is not null')->one();
+            ->andWhere('start_executing is null and last_executing is not null')->count();
 
-        if ($check == null) {
+        if($check == 9) {
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList_' . $this->org_id])->orderBy(['last_executed' => SORT_DESC])->one();
             $vsd = new LoadStockEntryList();
             $vsd->org_id = $this->org_id;

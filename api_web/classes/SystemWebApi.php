@@ -18,7 +18,7 @@ class SystemWebApi extends WebApi
 {
 
     /**
-     * Ресторан: Заказы по поставщикам
+     * Параметры работы сервера со временем
      * @return array
      * @throws BadRequestHttpException
      */

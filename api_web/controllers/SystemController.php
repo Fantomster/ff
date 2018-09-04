@@ -24,9 +24,9 @@ class SystemController extends WebApiController
     /**
      * @SWG\Post(path="/system/datetime",
      *     tags={"System"},
-     *     summary="Посмотреть параметры работы сервера со временем ",
-     *     description="Посмотреть различные способы вывода localtime с помощью популярных функций PHP",
-     *     produces={"application/html", "application/json"},
+     *     summary="Параметры работы сервера со временем",
+     *     description="Вывод localtime с помощью функций PHP",
+     *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
      *         in="body",
@@ -35,9 +35,7 @@ class SystemController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={
-     *
-     *                  }
+     *                  default={{}}
      *              )
      *         )
      *     ),
@@ -46,13 +44,13 @@ class SystemController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *             default={
-     *                 "localtime()": "var_dump() --- string",
-     *                 "getdate()": "var_dump() --- string",
-     *                 "microtime(1)": "var_dump() --- string",
-     *                 "time": "var_dump() --- string",
-     *                 "gmdate('Y-m-d H:i:s')": "var_dump() --- string",
-     *                 "date('Y-m-d H:i:s')": "var_dump() --- string",
-     *                 "date_default_timezone_get()": "var_dump() --- string"
+     *                 "date_default_timezone_get()": "var_dump()",
+     *                 "time": "var_dump()",
+     *                 "microtime(1)": "var_dump()",
+     *                 "localtime()": "var_dump()",
+     *                 "getdate()": "var_dump()",
+     *                 "gmdate('Y-m-d H:i:s')": "var_dump()",
+     *                 "date('Y-m-d H:i:s')": "var_dump()"
      *             }
      *         )
      *     ),

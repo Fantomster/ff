@@ -25,14 +25,15 @@ class SystemWebApi extends WebApi
     public function datetime()
     {
         $res = [
+            'date_default_timezone_get()' => date_default_timezone_get(),
+            'time()' => time(),
+            'microtime(1)' => microtime(1),
             'localtime()' => localtime(),
             'getdate()' => getdate(),
-            'microtime(1)' => microtime(1),
-            'time()' => time(),
             'gmdate("Y-m-d H:i:s")' => gmdate("Y-m-d H:i:s"),
             'date("Y-m-d H:i:s")' => date("Y-m-d H:i:s"),
-            'date_default_timezone_get()' => date_default_timezone_get(),
         ];
+
         foreach ($res as $v) {
             var_dump($v);
             echo PHP_EOL;

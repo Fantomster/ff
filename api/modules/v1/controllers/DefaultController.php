@@ -230,7 +230,6 @@ class DefaultController extends Controller {
      $goodsModel->cat_id = $baseCat;
      $goodsModel->article = $article;
      $goodsModel->units = $pack;
-     $goodsModel->created_at = time();
      $goodsModel->price = $price;
      $goodsModel->note = $cid;
      $goodsModel->deleted = 0;

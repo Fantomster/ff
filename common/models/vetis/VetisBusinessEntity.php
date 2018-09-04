@@ -102,7 +102,7 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
 
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercBusinessEntityList'])->one();
-            if($queue == null) {
+            if ($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercBusinessEntityList';
                 $queue->save();
@@ -120,14 +120,13 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 
-            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
+            $startDate = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
             $instance = cerberApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
             if (!empty($queue->organization_id)) {
                 $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            }
-            else {
+            } else {
                 $queueName = $queue->consumer_class_name;
             }
 
@@ -138,7 +137,7 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            echo $e->getMessage().PHP_EOL;
+            echo $e->getMessage() . PHP_EOL;
         }
     }
 }

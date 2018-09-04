@@ -9,6 +9,7 @@
 namespace console\modules\daemons\components;
 
 use api\common\models\merc\mercPconst;
+use api\common\models\RabbitQueues;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 
 /**
@@ -77,18 +78,21 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function getData()
     {
+        $queue = RabbitQueues::find()->where(['consumer_class_name' => self::class])->one();
+        $this->data = $queue->data_request ?? $this->data;
         $this->init();
-        $count = 0;
+        $count = $this->request['listOptions']['offset'];
         $this->log('Load' . PHP_EOL);
-        try {
-            do {
+        $error = 0;
+        do {
+            try {
                 $response = $this->instance->sendRequest($this->method, $this->request);
                 $list = $response->{$this->listName};
                 $count += $list->count;
                 $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
                 if ($list->count > 0) {
                     $result = $this->saveList($list->{$this->listItemName});
-                    if(!empty($result)) {
+                    if (!empty($result)) {
                         $this->log('ERROR ' . json_encode($result, true) . PHP_EOL);
                     }
                 }
@@ -96,12 +100,21 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 if ($list->count < $list->total) {
                     $this->request['listOptions']['offset'] += $list->count;
                 }
-            } while ($list->total > ($list->count + $list->offset));
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        }catch (\Throwable $e) {
-            $this->log($e->getMessage());
-            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, $e->getMessage());
-        }
+            } catch (\Throwable $e) {
+                $queue = RabbitQueues::find()->where(['consumer_class_name' => self::class])->one();
+                $queue->data_request = json_encode($this->request);
+                $queue->save();
+                $this->log($e->getMessage());
+                mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, $e->getMessage());
+                $error++;
+                if($error == 3)
+                    throw new \Exception('Error operation');
+            }
+        } while ($list->total > ($list->count + $list->offset));
+        $queue = RabbitQueues::find()->where(['consumer_class_name' => self::class])->one();
+        $queue->data_request = null;
+        $queue->save();
+        mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
     }
 
     /**

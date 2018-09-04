@@ -12,6 +12,7 @@ use Yii;
  * @property int $organization_id
  * @property string $last_executed
  * @property string $start_executing
+ * @property string $data_request
  */
 class RabbitQueues extends \yii\db\ActiveRecord
 {

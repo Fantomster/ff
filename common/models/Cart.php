@@ -30,6 +30,21 @@ class Cart extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [

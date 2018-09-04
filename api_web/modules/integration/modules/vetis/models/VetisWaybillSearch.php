@@ -10,10 +10,9 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
-use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use yii\base\Model;
-use yii\data\ArrayDataProvider;
+use yii\data\ActiveDataProvider;
 
 class VetisWaybillSearch extends MercVsd
 {
@@ -34,13 +33,13 @@ class VetisWaybillSearch extends MercVsd
      *
      * @param array $params
      *
-     * @return ArrayDataProvider
+     * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = (new VetisHelper)->getQueryByUuid();
-        
-        $dataProvider = new ArrayDataProvider([
+        $query->with('waybillContent');
+        $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
 

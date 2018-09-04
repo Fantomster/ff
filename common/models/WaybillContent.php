@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\common\models\merc\MercVsd;
 use Yii;
 
 /**
@@ -75,5 +76,12 @@ class WaybillContent extends \yii\db\ActiveRecord
     public function getWaybill()
     {
         return $this->hasOne(Waybill::className(), ['id' => 'waybill_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getMercVsd(){
+        return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid']);
     }
 }

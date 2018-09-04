@@ -5,16 +5,17 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\MercVsd;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 
 class VetisWaybill
 {
-    
+
     public function __construct()
     {
         $this->helper = new VetisHelper();
     }
-    
+
     /**
      * Список сертифитаков
      * @param $request
@@ -26,16 +27,64 @@ class VetisWaybill
         $reqSearch = $request['search'];
         $page = $this->helper->isSetDef($reqPag['page'], 1);
         $pageSize = $this->helper->isSetDef($reqPag['page_size'], 12);
-    
+
         $search = new VetisWaybillSearch();
         if (isset($reqSearch)) {
             $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
-            $request = $search->search($params);
-            
+            $dataProvider = $search->search($params);
+
+//            $pagination = new Pagination();
+//            $pagination->setPage($page - 1);
+//            $pagination->setPageSize($pageSize);
+//            $dataProvider->setPagination($pagination);
+
+            foreach ($dataProvider->getModels() as $model) {
+
+                if (!empty($model->waybillContent)) {
+                    foreach ($model->waybillContent as $content){
+                        $key = $content['order_content_id'];
+                        if (!isset($count[$key]['count'])) {
+                            $count[$key]['count'] = 1;
+                        }
+                        $result[$key]['count'] = $count[$key]['count']++;
+                        $result[$key]['items'][] = [
+                            'uuid'            => $model->uuid,
+                            'product_name'    => $model->product_name,
+                            'sender_name'     => $model->sender_name,
+                            'status'          => $model->status,
+                            'status_text'     => MercVsd::$statuses[$model->status],
+                            'status_date'     => $model->last_update_date,
+                            'amount'          => $model->amount,
+                            'unit'            => $model->unit,
+                            'production_date' => $model->production_date,
+                            'date_doc'        => $model->date_doc,
+                        ];
+                    }
+                } else {
+                    $key = 'order_not_installed';
+                }
+                if (!isset($count[$key]['count'])) {
+                    $count[$key]['count'] = 1;
+                }
+                $result[$key]['count'] = $count[$key]['count']++;
+                $result[$key]['items'][] = [
+                    'uuid'            => $model->uuid,
+                    'product_name'    => $model->product_name,
+                    'sender_name'     => $model->sender_name,
+                    'status'          => $model->status,
+                    'status_text'     => MercVsd::$statuses[$model->status],
+                    'status_date'     => $model->last_update_date,
+                    'amount'          => $model->amount,
+                    'unit'            => $model->unit,
+                    'production_date' => $model->production_date,
+                    'date_doc'        => $model->date_doc,
+                ];
+            }
+
         }
-        return ['result' => $request];
+        return ['result' => $result];
     }
-    
+
     /**
      * Формирование всех фильтров
      * @return array
@@ -51,7 +100,7 @@ class VetisWaybill
             ]
         ];
     }
-    
+
     /**
      * Формирование массива для фильтра ВСД
      * @return array
@@ -63,13 +112,13 @@ class VetisWaybill
         $types = MercVsd::$types;
         return [
             'result' => [
-                $inc  => $types[$inc],
-                $out  => $types[$out],
-                '' => 'Все ВСД',
+                $inc => $types[$inc],
+                $out => $types[$out],
+                ''   => 'Все ВСД',
             ]
         ];
     }
-    
+
     /**
      * Формирование массива для фильтра статусы
      * @return array
@@ -78,7 +127,7 @@ class VetisWaybill
     {
         return ['result' => array_merge(MercVsd::$statuses, ['' => 'Все'])];
     }
-    
+
     /**
      * Формирование массива для фильтра "По продукции" или по "Фирма отправитель" так же выполняет "живой" поиск лайком
      * @return array
@@ -95,7 +144,7 @@ class VetisWaybill
         } else {
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
-        
+
         return ['result' => $result];
     }
 }

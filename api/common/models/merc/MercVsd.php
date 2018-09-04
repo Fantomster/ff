@@ -2,6 +2,7 @@
 
 namespace api\common\models\merc;
 
+use common\models\WaybillContent;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use Yii;
 
@@ -256,5 +257,9 @@ class MercVsd extends \yii\db\ActiveRecord
         }
 
         return $result;
+    }
+
+    public function getWaybillContent(){
+        return $this->hasMany(WaybillContent::className(), ['merc_uuid' => 'uuid']);
     }
 }

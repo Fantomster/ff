@@ -31,57 +31,60 @@ class VetisWaybill
         $search = new VetisWaybillSearch();
         if (isset($reqSearch)) {
             $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
-            $dataProvider = $search->search($params);
+//            $dataProvider = $search->search($params);
 
 //            $pagination = new Pagination();
 //            $pagination->setPage($page - 1);
 //            $pagination->setPageSize($pageSize);
 //            $dataProvider->setPagination($pagination);
 
-            foreach ($dataProvider->getModels() as $model) {
-
-                if (!empty($model->waybillContent)) {
-                    foreach ($model->waybillContent as $content){
-                        $key = $content['order_content_id'];
-                        if (!isset($count[$key]['count'])) {
-                            $count[$key]['count'] = 1;
-                        }
-                        $result[$key]['count'] = $count[$key]['count']++;
-                        $result[$key]['items'][] = [
-                            'uuid'            => $model->uuid,
-                            'product_name'    => $model->product_name,
-                            'sender_name'     => $model->sender_name,
-                            'status'          => $model->status,
-                            'status_text'     => MercVsd::$statuses[$model->status],
-                            'status_date'     => $model->last_update_date,
-                            'amount'          => $model->amount,
-                            'unit'            => $model->unit,
-                            'production_date' => $model->production_date,
-                            'date_doc'        => $model->date_doc,
-                        ];
-                    }
-                } else {
-                    $key = 'order_not_installed';
-                }
-                if (!isset($count[$key]['count'])) {
-                    $count[$key]['count'] = 1;
-                }
-                $result[$key]['count'] = $count[$key]['count']++;
-                $result[$key]['items'][] = [
-                    'uuid'            => $model->uuid,
-                    'product_name'    => $model->product_name,
-                    'sender_name'     => $model->sender_name,
-                    'status'          => $model->status,
-                    'status_text'     => MercVsd::$statuses[$model->status],
-                    'status_date'     => $model->last_update_date,
-                    'amount'          => $model->amount,
-                    'unit'            => $model->unit,
-                    'production_date' => $model->production_date,
-                    'date_doc'        => $model->date_doc,
-                ];
-            }
+//            foreach ($dataProvider->getModels() as $model) {
+//
+//                if (!empty($model->waybillContent)) {
+//                    foreach ($model->waybillContent as $content){
+//                        $key = $content['order_content_id'];
+//                        if (!isset($count[$key]['count'])) {
+//                            $count[$key]['count'] = 1;
+//                        }
+//                        $result[$key]['count'] = $count[$key]['count']++;
+//                        $result[$key]['items'][] = [
+//                            'uuid'            => $model->uuid,
+//                            'product_name'    => $model->product_name,
+//                            'sender_name'     => $model->sender_name,
+//                            'status'          => $model->status,
+//                            'status_text'     => MercVsd::$statuses[$model->status],
+//                            'status_date'     => $model->last_update_date,
+//                            'amount'          => $model->amount,
+//                            'unit'            => $model->unit,
+//                            'production_date' => $model->production_date,
+//                            'date_doc'        => $model->date_doc,
+//                        ];
+//                    }
+//                } else {
+//                    $key = 'order_not_installed';
+//                }
+//                if (!isset($count[$key]['count'])) {
+//                    $count[$key]['count'] = 1;
+//                }
+//                $result[$key]['count'] = $count[$key]['count']++;
+//                $result[$key]['items'][] = [
+//                    'uuid'            => $model->uuid,
+//                    'product_name'    => $model->product_name,
+//                    'sender_name'     => $model->sender_name,
+//                    'status'          => $model->status,
+//                    'status_text'     => MercVsd::$statuses[$model->status],
+//                    'status_date'     => $model->last_update_date,
+//                    'amount'          => $model->amount,
+//                    'unit'            => $model->unit,
+//                    'production_date' => $model->production_date,
+//                    'date_doc'        => $model->date_doc,
+//                ];
+//            }
 
         }
+
+
+        return $this->helper->getOrdersVetis();
         return ['result' => $result];
     }
 

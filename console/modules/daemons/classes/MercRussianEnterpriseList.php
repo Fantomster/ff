@@ -19,6 +19,8 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
  */
 class MercRussianEnterpriseList extends MercDictConsumer
 {
+    public static $timeout  = 60*60*24;
+    public static $timeoutExecuting = 60*60*12;
     /**
      * Обработка и сохранение результата
      * @param $list
@@ -45,6 +47,8 @@ class MercRussianEnterpriseList extends MercDictConsumer
                 $model->inn = $attributes['officialRegistration']['businessEntity']['inn'];
                 $model->kpp = $attributes['officialRegistration']['kpp'];
                 $model->addressView = $attributes['address']['addressView'];
+                $model->owner_guid = $attributes['owner']['guid'];
+                $model->owner_uuid = $attributes['owner']['uuid'];
                 $model->data = serialize($item);
                 if (!$model->save()) {
                     $result[]['error'] = $model->getErrors();
@@ -52,12 +56,7 @@ class MercRussianEnterpriseList extends MercDictConsumer
                 }
             }
 
-        if(empty($result)) {
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        }
-        else{
-            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
-        }
+        return $result;
     }
 
     protected function init()

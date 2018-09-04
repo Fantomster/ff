@@ -25,11 +25,7 @@ class cerberApi extends baseApi
      */
     public function getActivityLocationList()
     {
-        $client = $this->getSoapClient('cerber');
-        $request = new getActivityLocationListRequest();
-        $request->businessEntity = new BusinessEntity();
-        $request->businessEntity->guid = $this->issuerID;
-        return $client->GetActivityLocationList($request);
+        return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID])->all();
     }
 
     /**

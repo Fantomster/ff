@@ -49,7 +49,7 @@ $gridColumns = [
                     return 'Ожидается подтверждение E-mail';
                     break;
             }
-            return $status;
+            return $data['status'];
         },
         'label' => 'Статус',
         'filter' => \backend\models\UserSearch::getListToStatus(),

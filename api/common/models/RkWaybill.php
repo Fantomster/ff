@@ -245,14 +245,14 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
 
                 if (!$wdmodel->save()) {
-                    \yii::error(print_r($wdmodel->getErrors(), true));
+                    \yii::error($ex->getTraceAsString());
                     throw new \Exception();
                 }
             }
             $transaction->commit();
 
         } catch (\Exception $ex) {
-            \yii::error(print_r($ex, true));
+            \yii::error($ex->getTraceAsString());
             $transaction->rollback();
         }
 

@@ -38,7 +38,7 @@ use yii\widgets\ActiveForm;
             $items = [null => 'Все'];
             if (!empty($organizations)) {
                 foreach ($organizations as $organization) {
-                    $items[$organization->organization_id] = \common\models\Organization::findOne($organization->organization_id)->name;
+                    $items[$organization->organization_id] = isset($organization->organization_id) ? \common\models\Organization::findOne($organization->organization_id)->name : '';
                 }
             }
 

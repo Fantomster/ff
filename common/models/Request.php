@@ -32,7 +32,8 @@ use yii\db\ActiveRecord;
  * @property string $countCallback
  * @property array $requestCallbacks
  */
-class Request extends \yii\db\ActiveRecord {
+class Request extends \yii\db\ActiveRecord
+{
 
     const ACTIVE = 1;
     const INACTIVE = 0;
@@ -40,11 +41,13 @@ class Request extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'request';
     }
 
-    public function beforeSave($insert) {
+    public function beforeSave($insert)
+    {
         if (parent::beforeSave($insert)) {
             if ($this->rush_order) {
                 $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 24 * 3600, 'php:Y-m-d H:i:s');
@@ -56,7 +59,8 @@ class Request extends \yii\db\ActiveRecord {
         return false;
     }
 
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -73,7 +77,8 @@ class Request extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['category', 'product', 'amount', 'rest_org_id'], 'required'],
             [['category', 'rush_order', 'payment_method', 'responsible_supp_org_id', 'count_views', 'rest_org_id', 'active_status', 'rest_user_id'], 'integer'],
@@ -85,18 +90,19 @@ class Request extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
-            'category' => Yii::t('app', 'common.models.goods_category', ['ru'=>'Категория товара']),
-            'product' => Yii::t('app', 'common.models.good_two', ['ru'=>'Товар']),
-            'comment' => Yii::t('app', 'common.models.comment_two', ['ru'=>'Комментарий']),
-            'regular' => Yii::t('app', 'common.models.orders_regularity', ['ru'=>'Регулярность заказа']),
-            'amount' => Yii::t('app', 'common.models.value', ['ru'=>'Объем']),
-            'rush_order' => Yii::t('app', 'common.models.urgency', ['ru'=>'Срочность']),
-            'payment_method' => Yii::t('app', 'common.models.payment_variant', ['ru'=>'Способ оплаты']),
-            'deferment_payment' => Yii::t('app', 'common.models.deferred_payment', ['ru'=>'Отложенный платеж']),
-            'responsible_supp_org_id' => Yii::t('app', 'common.models.responsible', ['ru'=>'Ответственный']),
+            'category' => Yii::t('app', 'common.models.goods_category', ['ru' => 'Категория товара']),
+            'product' => Yii::t('app', 'common.models.good_two', ['ru' => 'Товар']),
+            'comment' => Yii::t('app', 'common.models.comment_two', ['ru' => 'Комментарий']),
+            'regular' => Yii::t('app', 'common.models.orders_regularity', ['ru' => 'Регулярность заказа']),
+            'amount' => Yii::t('app', 'common.models.value', ['ru' => 'Объем']),
+            'rush_order' => Yii::t('app', 'common.models.urgency', ['ru' => 'Срочность']),
+            'payment_method' => Yii::t('app', 'common.models.payment_variant', ['ru' => 'Способ оплаты']),
+            'deferment_payment' => Yii::t('app', 'common.models.deferred_payment', ['ru' => 'Отложенный платеж']),
+            'responsible_supp_org_id' => Yii::t('app', 'common.models.responsible', ['ru' => 'Ответственный']),
             'count_views' => Yii::t('app', 'Count Views'),
             'created_at' => Yii::t('app', 'Created At'),
             'end' => Yii::t('app', 'End'),
@@ -125,45 +131,45 @@ class Request extends \yii\db\ActiveRecord {
 
             $dif = time() - $date_stamp;
 
-            $sArray = array(Yii::t('app', 'common.models.sec', ['ru'=>"секунду"]), Yii::t('app', 'common.models.secs', ['ru'=>"секунды"]), Yii::t('app', 'common.models.sec_two', ['ru'=>"секунд"]));
-            $iArray = array(Yii::t('app', 'common.models.minute', ['ru'=>"минуту"]), Yii::t('app', 'common.models.minutes', ['ru'=>"минуты"]), Yii::t('app', 'common.models.minute_two', ['ru'=>"минут"]));
-            $hArray = array(Yii::t('app', 'common.models.hour', ['ru'=>"час"]), Yii::t('app', 'common.models.hour_two', ['ru'=>"часа"]), Yii::t('app', 'common.models.hours', ['ru'=>"часов"]));
+            $sArray = array(Yii::t('app', 'common.models.sec', ['ru' => "секунду"]), Yii::t('app', 'common.models.secs', ['ru' => "секунды"]), Yii::t('app', 'common.models.sec_two', ['ru' => "секунд"]));
+            $iArray = array(Yii::t('app', 'common.models.minute', ['ru' => "минуту"]), Yii::t('app', 'common.models.minutes', ['ru' => "минуты"]), Yii::t('app', 'common.models.minute_two', ['ru' => "минут"]));
+            $hArray = array(Yii::t('app', 'common.models.hour', ['ru' => "час"]), Yii::t('app', 'common.models.hour_two', ['ru' => "часа"]), Yii::t('app', 'common.models.hours', ['ru' => "часов"]));
 
             if ($dif < 60 and $dif >= 0) {
                 $ns = floor($dif);
                 $text = self::getTimeFormatWord($ns, $sArray);
-                return "$ns $text " . Yii::t('message', 'market.controllers.site.ago', ['ru'=>'назад']);
+                return "$ns $text " . Yii::t('message', 'market.controllers.site.ago', ['ru' => 'назад']);
             } elseif ($dif / 60 > 0 and $dif / 60 < 60) {
                 $ni = floor($dif / 60);
                 $text = self::getTimeFormatWord($ni, $iArray);
-                return "$ni $text " . Yii::t('message', 'market.controllers.site.ago_two', ['ru'=>'назад']);
+                return "$ni $text " . Yii::t('message', 'market.controllers.site.ago_two', ['ru' => 'назад']);
             } elseif ($dif / 3600 > 0 and $dif / 3600 < 6) {
                 $nh = floor($dif / 3600);
                 $text = self::getTimeFormatWord($nh, $hArray);
-                return "$nh $text " . Yii::t('message', 'market.controllers.site.ago_three', ['ru'=>'назад']);
+                return "$nh $text " . Yii::t('message', 'market.controllers.site.ago_three', ['ru' => 'назад']);
             } else {
-                return Yii::t('app', 'common.models.today_in', ['ru'=>'Сегодня, в ']) . $tpd;
+                return Yii::t('app', 'common.models.today_in', ['ru' => 'Сегодня, в ']) . $tpd;
             }
         }
 
         if (($mpd == $md) & ($dpd == $dd - 1)) {
             $today = false;
             $yesterday = true;
-            return Yii::t('app', 'common.models.yesterday_in', ['ru'=>'Вчера, в ']) . $tpd;
+            return Yii::t('app', 'common.models.yesterday_in', ['ru' => 'Вчера, в ']) . $tpd;
         }
         $monthes = array(
-            1 => Yii::t('app', 'common.models.jan', ['ru'=>'Января']),
-            2 => Yii::t('app', 'common.models.feb', ['ru'=>'Февраля']),
-            3 => Yii::t('app', 'common.models.mar', ['ru'=>'Марта']),
-            4 => Yii::t('app', 'common.models.apr', ['ru'=>'Апреля']),
-            5 => Yii::t('app', 'common.models.may', ['ru'=>'Мая']),
-            6 => Yii::t('app', 'common.models.june', ['ru'=>'Июня']),
-            7 => Yii::t('app', 'common.models.july', ['ru'=>'Июля']),
-            8 => Yii::t('app', 'common.models.aug', ['ru'=>'Августа']),
-            9 => Yii::t('app', 'common.models.sep', ['ru'=>'Сентября']),
-            10 => Yii::t('app', 'common.models.okt', ['ru'=>'Октября']),
-            11 => Yii::t('app', 'common.models.nov', ['ru'=>'Ноября']),
-            12 => Yii::t('app', 'common.models.dec', ['ru'=>'Декабря'])
+            1 => Yii::t('app', 'common.models.jan', ['ru' => 'Января']),
+            2 => Yii::t('app', 'common.models.feb', ['ru' => 'Февраля']),
+            3 => Yii::t('app', 'common.models.mar', ['ru' => 'Марта']),
+            4 => Yii::t('app', 'common.models.apr', ['ru' => 'Апреля']),
+            5 => Yii::t('app', 'common.models.may', ['ru' => 'Мая']),
+            6 => Yii::t('app', 'common.models.june', ['ru' => 'Июня']),
+            7 => Yii::t('app', 'common.models.july', ['ru' => 'Июля']),
+            8 => Yii::t('app', 'common.models.aug', ['ru' => 'Августа']),
+            9 => Yii::t('app', 'common.models.sep', ['ru' => 'Сентября']),
+            10 => Yii::t('app', 'common.models.okt', ['ru' => 'Октября']),
+            11 => Yii::t('app', 'common.models.nov', ['ru' => 'Ноября']),
+            12 => Yii::t('app', 'common.models.dec', ['ru' => 'Декабря'])
         );
         if (($today == false) & ($yesterday == false) & ($ypd == $yy)) {
             return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ', в HH:mm');
@@ -172,7 +178,8 @@ class Request extends \yii\db\ActiveRecord {
         }
     }
 
-    static function getTimeFormatWord($number, $suffix) {
+    static function getTimeFormatWord($number, $suffix)
+    {
         $keys = array(2, 0, 1, 1, 1, 2);
         $mod = $number % 100;
         $suffix_key = ($mod > 7 && $mod < 20) ? 2 : $keys[min($mod % 10, 5)];
@@ -182,39 +189,43 @@ class Request extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCategoryName() {
+    public function getCategoryName()
+    {
         return $this->hasOne(MpCategory::className(), ['id' => 'category']);
     }
 
-    public function getRegularName() {
+    public function getRegularName()
+    {
         switch ($this->regular) {
             case 1:
-                return Yii::t('app', 'common.models.once', ['ru'=>'Разово']);
+                return Yii::t('app', 'common.models.once', ['ru' => 'Разово']);
                 break;
             case 2:
-                return Yii::t('app', 'common.models.daily', ['ru'=>'Ежедневно']);
+                return Yii::t('app', 'common.models.daily', ['ru' => 'Ежедневно']);
                 break;
             case 3:
-                return Yii::t('app', 'common.models.weekly', ['ru'=>'Каждую неделю']);
+                return Yii::t('app', 'common.models.weekly', ['ru' => 'Каждую неделю']);
                 break;
             case 4:
-                return Yii::t('app', 'common.models.monthly', ['ru'=>'Каждый месяц']);
+                return Yii::t('app', 'common.models.monthly', ['ru' => 'Каждый месяц']);
                 break;
         }
     }
 
-    public function getPaymentMethodName() {
+    public function getPaymentMethodName()
+    {
         switch ($this->payment_method) {
             case 1:
-                return Yii::t('app', 'common.models.cash', ['ru'=>'Наличный расчет']);
+                return Yii::t('app', 'common.models.cash', ['ru' => 'Наличный расчет']);
                 break;
             case 2:
-                return Yii::t('app', 'common.models.no_cash', ['ru'=>'Безналичный расчет']);
+                return Yii::t('app', 'common.models.no_cash', ['ru' => 'Безналичный расчет']);
                 break;
         }
     }
 
-    public function getManagers($id) {
+    public function getManagers($id)
+    {
         if (User::find()->where(['organization_id' => $id])->exists()) {
             return User::find()->where(['organization_id' => $id])->all();
         } else {
@@ -222,27 +233,33 @@ class Request extends \yii\db\ActiveRecord {
         }
     }
 
-    public function getClient() {
+    public function getClient()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
 
-    public function getVendor() {
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);
     }
 
-    public function getCounter() {
+    public function getCounter()
+    {
         return RequestCounters::find()->where(['request_id' => $this->id])->count();
     }
 
-    public function getCountCallback() {
+    public function getCountCallback()
+    {
         return RequestCallback::find()->where(['request_id' => $this->id])->count();
     }
 
-    public function getRequestCallbacks() {
+    public function getRequestCallbacks()
+    {
         return $this->hasMany(RequestCallback::className(), ['request_id' => 'id']);
     }
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
         if ($insert) {
 //            if (!is_a(Yii::$app, 'yii\console\Application')) {
@@ -253,45 +270,47 @@ class Request extends \yii\db\ActiveRecord {
         }
     }
 
-    public function getFranchiseeAssociate() {
+    public function getFranchiseeAssociate()
+    {
         return $this->hasOne(FranchiseeAssociate::className(), ['rest_org_id' => 'organization_id']);
     }
 
-    public function getRequestExportColumns() {
+    public function getRequestExportColumns()
+    {
         return [
             [
-                'label' => Yii::t('app', 'common.models.number', ['ru'=>'Номер']),
+                'label' => Yii::t('app', 'common.models.number', ['ru' => 'Номер']),
                 'value' => 'id',
             ],
             [
-                'label' => Yii::t('app', 'common.models.product', ['ru'=>'Продукт']),
+                'label' => Yii::t('app', 'common.models.product', ['ru' => 'Продукт']),
                 'value' => 'product',
             ],
             [
-                'label' => Yii::t('app', 'common.models.quantity', ['ru'=>'Количество']),
+                'label' => Yii::t('app', 'common.models.quantity', ['ru' => 'Количество']),
                 'value' => 'amount',
             ],
             [
-                'label' => Yii::t('app', 'common.models.comment_three', ['ru'=>'Комментарий']),
+                'label' => Yii::t('app', 'common.models.comment_three', ['ru' => 'Комментарий']),
                 'value' => 'comment',
             ],
             [
-                'label' => Yii::t('app', 'common.models.category_four', ['ru'=>'Категория']),
+                'label' => Yii::t('app', 'common.models.category_four', ['ru' => 'Категория']),
                 'value' => 'categoryName.name',
             ],
             [
                 'attribute' => 'client.name',
-                'label' => Yii::t('app', 'common.models.rest_name', ['ru'=>'Название ресторана']),
+                'label' => Yii::t('app', 'common.models.rest_name', ['ru' => 'Название ресторана']),
             ],
             [
                 'attribute' => 'created_at',
-                'label' => Yii::t('app', 'common.models.creation_date', ['ru'=>'Дата создания']),
+                'label' => Yii::t('app', 'common.models.creation_date', ['ru' => 'Дата создания']),
             ],
             [
                 'value' => function($data) {
-                    return ($data['active_status']) ? Yii::t('app', 'common.models.open', ['ru'=>'Открыта']) : Yii::t('app', 'common.models.close', ['ru'=>'Закрыта']);
+                    return ($data['active_status']) ? Yii::t('app', 'common.models.open', ['ru' => 'Открыта']) : Yii::t('app', 'common.models.close', ['ru' => 'Закрыта']);
                 },
-                'label' => Yii::t('app', 'common.models.status_three', ['ru'=>'Статус']),
+                'label' => Yii::t('app', 'common.models.status_three', ['ru' => 'Статус']),
             ],
         ];
     }

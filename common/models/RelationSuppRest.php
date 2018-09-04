@@ -28,7 +28,8 @@ use yii\helpers\ArrayHelper;
  * @property Organization $vendor
  * @property Order $lastOrder
  */
-class RelationSuppRest extends \yii\db\ActiveRecord {
+class RelationSuppRest extends \yii\db\ActiveRecord
+{
 
     const PAGE_CLIENTS = 3;
     const PAGE_CATALOG = 2;
@@ -45,14 +46,16 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'relation_supp_rest';
     }
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
                     'timestamp' => [
                         'class' => 'yii\behaviors\TimestampBehavior',
@@ -73,7 +76,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
             [['rest_org_id', 'supp_org_id', 'cat_id', 'status'], 'integer'],
@@ -85,15 +89,16 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
             'rest_org_id' => 'Rest Org ID',
             'supp_org_id' => 'Supp Org ID',
-            'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru'=>'Каталог']),
+            'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
         ];
     }
-    
+
 //    public function delete() {
 //        $this->deleted = true;
 //        return $this->save();
@@ -105,8 +110,9 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
 //
 //        return $command->execute();
 //    }
-    
-    public static function GetRelationCatalogs() {
+
+    public static function GetRelationCatalogs()
+    {
         $catalog = RelationSuppRest::
                 find()
                 ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
@@ -122,7 +128,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
       return $catalogName->status;
       } */
 
-    public function search($params, $currentUser, $const) {
+    public function search($params, $currentUser, $const)
+    {
         $vendor_id = Yii::$app->request->get('vendor_id');
         $org_id = !empty($vendor_id) ? $vendor_id : $currentUser->organization_id;
         if ($const == RelationSuppRest::PAGE_CLIENTS) {
@@ -157,8 +164,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         return $dataProvider;
     }
 
-
-    public static function row_count($id) {
+    public static function row_count($id)
+    {
         $count = RelationSuppRest::find()
                 ->where(['cat_id' => $id])
                 ->count();
@@ -168,32 +175,37 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCatalog() {
+    public function getCatalog()
+    {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getVendor() {
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getClient() {
+    public function getClient()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLastOrder() {
+    public function getLastOrder()
+    {
         return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(["`order`.updated_at" => SORT_DESC]);
     }
-    
-    public function afterSave($insert, $changedAttributes) {
+
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
 //        $rows = User::find()->where(['organization_id' => $this->supp_org_id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
 //        foreach ($rows as $row) {
@@ -210,4 +222,5 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
 //            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
         }
     }
+
 }

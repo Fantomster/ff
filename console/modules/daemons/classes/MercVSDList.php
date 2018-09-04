@@ -29,10 +29,11 @@ class MercVSDList extends MercDictConsumer
         ->andWhere('start_executing is not null')->one();
 
         if($check == null) {
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList_' . $this->org_id])->orderBy(['last_executed' => SORT_DESC])->one();
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList_' . $this->org_id])->one();
             $vsd = new VetDocumentsChangeList();
             $vsd->org_id = $this->org_id;
-            $startDate = ($queue->last_executed === null) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queue->last_executed;
+            $queueDate = $queue->last_executed ?? $queue->start_executing;
+            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
             $vsd->updateData($startDate);
         }
         else

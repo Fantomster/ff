@@ -403,7 +403,6 @@ class DefaultController extends Controller
             $catModel->rest_org_id = $agent_fid;
             $catModel->supp_org_id = $org;
             $catModel->cat_id = $cat_fid;
-            $catModel->created_at = time();
 
             if (!$catModel->save()) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Internal error. Model cat-agent not saved', $this->ip);
@@ -546,7 +545,6 @@ class DefaultController extends Controller
             $catModel->supp_org_id = $org;
             $catModel->name = $newname;
             $catModel->status = 1;
-            $catModel->created_at = time();
 
             if (!$catModel->save()) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Internal error. Model catalog not saved', $this->ip);
@@ -845,7 +843,6 @@ class DefaultController extends Controller
             $goodsModel->cat_id = $baseCat;
             $goodsModel->article = $article;
             $goodsModel->units = $pack;
-            $goodsModel->created_at = time();
             $goodsModel->price = $price;
             $goodsModel->note = $cid;
             $goodsModel->deleted = 0;

@@ -104,7 +104,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 $queue = RabbitQueues::find()->where(['consumer_class_name' => self::class])->one();
                 $queue->data_request = json_encode($this->request);
                 $queue->save();
-                $this->log($e->getMessage());
+                $this->log($e->getMessage()." ".$e->getTraceAsString());
                 mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, $e->getMessage());
                 $error++;
                 if($error == 3)

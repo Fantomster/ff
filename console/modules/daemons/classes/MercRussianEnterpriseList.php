@@ -45,6 +45,8 @@ class MercRussianEnterpriseList extends MercDictConsumer
                 $model->inn = $attributes['officialRegistration']['businessEntity']['inn'];
                 $model->kpp = $attributes['officialRegistration']['kpp'];
                 $model->addressView = $attributes['address']['addressView'];
+                $model->owner_guid = $attributes['owner']['guid'];
+                $model->owner_uuid = $attributes['owner']['uuid'];
                 $model->data = serialize($item);
                 if (!$model->save()) {
                     $result[]['error'] = $model->getErrors();

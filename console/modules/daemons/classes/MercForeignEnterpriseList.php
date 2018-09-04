@@ -44,6 +44,8 @@ class MercForeignEnterpriseList extends MercDictConsumer
             $model->name = $attributes['name'];
             $model->country_guid = $attributes['address']['country']['guid'];
             $model->addressView = $attributes['address']['addressView'];
+            $model->owner_guid = $attributes['owner']['guid'];
+            $model->owner_uuid = $attributes['owner']['uuid'];
             $model->data = serialize($item);
             if (!$model->save()) {
                 $result[]['error'] = $model->getErrors();

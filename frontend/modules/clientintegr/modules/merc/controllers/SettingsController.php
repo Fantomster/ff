@@ -104,18 +104,13 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $dicConst = mercDicconst::findOne(['id' => $pConst->const_id]);
 
             $org = [];
-            if($dicConst->denom == 'enterprise_guid')
-            {
+            if ($dicConst->denom == 'enterprise_guid')  {
                 $list = cerberApi::getInstance()->getActivityLocationList();
-                if(isset($list->activityLocationList->location)) {
-                    foreach ($list->activityLocationList->location as $item) {
-                        if (isset($item->enterprise)) {
-                            $org[] = [
-                                'value' => $item->enterprise->guid,
-                                'label' => $item->enterprise->name .
-                                    ' (' . $item->enterprise->address->addressView . ')'];
-                        }
-                    }
+                foreach ($list as $item) {
+                    $org[] = [
+                        'value' => $item->guid,
+                        'label' => $item->name .
+                            ' (' . $item->addressView . ')'];
                 }
                 if(count($org) == 0)
                     Yii::$app->session->setFlash('error', 'Не удалось выгрузить связанные с данным ХС предприятия, проверьте наличие связей предприятия с ХС или добавьте GUD предприятия вручную');

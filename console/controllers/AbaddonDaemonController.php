@@ -86,15 +86,21 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
         $res = \Yii::$app->db_api->createCommand('SELECT * FROM rabbit_queues')->queryAll();
 
         foreach ($res as $row) {
-            $kill = $this->checkForKill($row);
-            $this->daemons[$row['consumer_class_name'] . $row['organization_id']] = [
-                'className'     => 'ConsumerDaemonController',
-                'enabled'       => !$kill,
-                'consumerClass' => $row['consumer_class_name'],
-                'orgId'         => $row['organization_id'],
-                'demonize'      => 0,
-                'hardKill'      => $kill,
-            ];
+            try {
+                $queue = \Yii::$app->get('rabbit')->setQueue($this->getQueueName($row))->checkQueueCount();
+                $kill = $this->checkForKill($row, $queue);
+                $this->daemons[$row['consumer_class_name'] . $row['organization_id']] = [
+                    'className'     => 'ConsumerDaemonController',
+                    'enabled'       => !$kill,
+                    'consumerClass' => $row['consumer_class_name'],
+                    'orgId'         => $row['organization_id'],
+                    'demonize'      => 0,
+                    'hardKill'      => $kill,
+                ];
+            } catch(\Throwable $t){
+                $log = \Yii::getLogger();
+                $log->log($t->getMessage(), $log::LEVEL_ERROR, 'abaddon');
+            }
         }
 
 //			Testing string
@@ -115,9 +121,8 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
      * @param array $row sql array from rabbit_queues table row
      * @return boolean
      * */
-    protected function checkForKill($row)
+    protected function checkForKill($row, $queue)
     {
-        $queue = \Yii::$app->get('rabbit')->setQueue($this->getQueueName($row))->checkQueueCount();
         $consumerClass = $this->getConsumerClassName($row['consumer_class_name']);
 
         if (!is_null($row['last_executed'])) {
@@ -133,10 +138,12 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
             $timeOutStartExec = $startExec->getTimestamp() + $consumerClass::$timeoutExecuting;
             if (date('Y-m-d H:i:s', $timeOutStartExec) < date('Y-m-d H:i:s')) {
                 return true;
+            } else {
+                return false;
             }
         }
 
-        if ($queue['count'] > 0 || $queue['consumerCount'] > 0) {
+        if ($queue['count'] > 0) {
             return false;
         }
 

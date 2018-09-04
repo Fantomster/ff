@@ -421,16 +421,14 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                     }
                 }
 
-
-
                 if (!$wdmodel->save()) {
-                    var_dump($wdmodel->getErrors());
+                    \yii::error(print_r($wdmodel->getErrors()),true);
                     throw new \Exception();
                 }
             }
             $transaction->commit();
         } catch (\Exception $ex) {
-            var_dump($ex);
+            \yii::error($ex->getTraceAsString());
             $transaction->rollback();
         }
     }

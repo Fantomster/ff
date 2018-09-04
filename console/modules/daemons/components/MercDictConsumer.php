@@ -50,7 +50,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 $model = new $this->modelClassName();
             }
             $attributes = json_decode(json_encode($item), true);
-            $model->setAttributes($attributes);
+            $model->setAttributes($attributes, false);
             $model->active = (int)$attributes['active'];
             $model->last = (int)$attributes['last'];
             $model->data = serialize($item);

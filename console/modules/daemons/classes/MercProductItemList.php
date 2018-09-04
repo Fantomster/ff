@@ -37,7 +37,7 @@ class MercProductItemList extends MercDictConsumer
                 $model = new $this->modelClassName();
             }
             $attributes =  json_decode(json_encode($item), true);
-            $model->setAttributes($attributes);
+            $model->setAttributes($attributes, false);
             $model->last = (int)$attributes['last'];
             $model->active = (int)$attributes['active'];
             $model->correspondsToGost = (int)$attributes['correspondsToGost'];

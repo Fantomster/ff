@@ -5,8 +5,9 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
-use yii\db\ActiveQuery;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumentByUUID;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 
 class VetisWaybill extends VetisHelper
 {
@@ -19,7 +20,7 @@ class VetisWaybill extends VetisHelper
     {
         return ['result' => $request];
     }
-    
+
     /**
      * Формирование всех фильтров
      * @return array
@@ -35,7 +36,7 @@ class VetisWaybill extends VetisHelper
             ]
         ];
     }
-    
+
     /**
      * Формирование массива для фильтра ВСД
      * @return array
@@ -47,13 +48,13 @@ class VetisWaybill extends VetisHelper
         $types = MercVsd::$types;
         return [
             'result' => [
-                $inc  => $types[$inc],
-                $out  => $types[$out],
-                '' => 'Все ВСД',
+                $inc => $types[$inc],
+                $out => $types[$out],
+                ''   => 'Все ВСД',
             ]
         ];
     }
-    
+
     /**
      * Формирование массива для фильтра статусы
      * @return array
@@ -62,7 +63,7 @@ class VetisWaybill extends VetisHelper
     {
         return ['result' => array_merge(MercVsd::$statuses, ['' => 'Все'])];
     }
-    
+
     /**
      * Формирование массива для фильтра "По продукции" или по "Фирма отправитель" так же выполняет "живой" поиск лайком
      * @return array
@@ -74,7 +75,7 @@ class VetisWaybill extends VetisHelper
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
-        
+
         if ($filterName == 'product_name') {
             $arResult = $query->orWhere(['sender_guid' => $enterpriseGuid])->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
@@ -82,7 +83,23 @@ class VetisWaybill extends VetisHelper
             $arResult = $query->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
-        
+
         return ['result' => $result];
+    }
+
+    /**
+     * Краткая информация о ВСД
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function getShortInfoAboutVsd($request)
+    {
+        if (!isset($request['uuid'])) {
+            throw new BadRequestHttpException('Uuid is required');
+        }
+        $obInfo = (new VetisHelper())->getShortInfoVsd($request['uuid']);
+
+        return ['result' => $obInfo];
     }
 }

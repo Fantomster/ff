@@ -18,6 +18,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
  */
 class MercCountryList extends MercDictConsumer
 {
+    public static $timeout  = 60*60*24;
+    public static $timeoutExecuting = 60*60;
+
     protected function init()
     {
         $this->instance = ikarApi::getInstance($this->org_id);

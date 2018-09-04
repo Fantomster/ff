@@ -249,7 +249,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
             }
             else {
-                $hc = unserialize($hc->data);
                 $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
             }
         }catch (\SoapFault $e)

@@ -33,7 +33,9 @@ class AutoWaybillHelper extends \yii\base\Component
     public static function processWaybill($order_id)
     {
         $licenses = (User::findOne(\Yii::$app->user->id))->organization->getLicenseList();
-        $res = [];
+
+        $res['rkws'] = true;
+        $res['iiko'] = true;
 
         if (isset($licenses['rkws']) && ($licenses['rkws_ucs']) && array_key_exists('rkws', self::licensesMap)) {
             $className = self::supportServices[self::licensesMap['rkws']];

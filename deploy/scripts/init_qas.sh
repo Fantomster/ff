@@ -21,5 +21,6 @@ sudo rm -rf /var/www/html/qas.mixcart.ru/frontend/web/assets/*
 sudo rm -rf /var/www/html/qas.mixcart.ru/backend/web/assets/*
 sudo rm -rf /var/www/html/qas.mixcart.ru/market/web/assets/*
 sudo rm -rf /var/www/html/qas.mixcart.ru/franchise/web/assets/*
+sudo rm -rf /var/www/html/qas.mixcart.ru/api_web/web/assets/*
 
 echo "assets erased"

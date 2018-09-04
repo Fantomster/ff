@@ -7,5 +7,6 @@ sudo rm -rf /var/www/html/dev.mixcart.ru/frontend/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/backend/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/market/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/franchise/web/assets/*
+sudo rm -rf /var/www/html/dev.mixcart.ru/api_web/web/assets/*
 
 echo "assets erased"

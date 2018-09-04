@@ -72,13 +72,21 @@ class CartWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("empty_param|product_id");
         }
 
-        $product = (new Product())->findFromCatalogs($post['product_id']);
-        //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
-        if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
-            throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $cart = $this->getCart();
+            $product = (new Product())->findFromCatalogs($post['product_id']);
+            //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
+            if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
+                throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
+            }
+            $this->setPosition($cart, $product, $post['quantity']);
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            \Yii::error($e->getMessage());
+            throw $e;
         }
-
-        $this->setPosition($product, $post['quantity']);
     }
 
     /**
@@ -225,7 +233,6 @@ class CartWebApi extends \api_web\components\WebApi
             $order->vendor_id = $vendor->id;
             $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
-            $order->created_at = new Expression('NOW()');
 
             if (!empty($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);
@@ -389,56 +396,49 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Записываем позицию в корзину
+     * @param Cart $cart
      * @param array $product
      * @param $quantity
      * @return bool
-     * @throws \Exception
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
-    private function setPosition(array &$product, $quantity)
+    private function setPosition(Cart $cart, array &$product, $quantity)
     {
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            $cart = $this->getCart();
-            /**
-             * @var $productInCart CartContent
-             */
-            $productInCart = $cart->getCartContents()->andWhere(['product_id' => $product['id']])->one();
-            if ($productInCart) {
-                if ($quantity <= 0) {
-                    $productInCart->delete();
-                    return true;
-                } else {
-                    $productInCart->quantity = $this->recalculationQuantity($productInCart, $quantity);
-                    $productInCart->updated_at = new Expression('NOW()');
-                    $productInCart->save(false);
-                    return true;
-                }
-            }
-
-            if ($quantity > 0) {
-                $position = new CartContent();
-                $position->cart_id = $cart->id;
-                $position->product_id = $product['id'];
-                $position->quantity = $this->recalculationQuantity($product, $quantity);
-                $position->price = $product['price'];
-                $position->product_name = $product['product'];
-                $position->units = $product['units'];
-                $position->vendor_id = $product['vendor_id'];
-                $position->currency_id = $product['currency_id'];
-                if (!$position->validate()) {
-                    throw new ValidationException($position->getFirstErrors());
-                }
-                $position->save(false);
+        /**
+         * @var $productInCart CartContent
+         */
+        $productInCart = $cart->getCartContents()->andWhere(['product_id' => $product['id']])->one();
+        if ($productInCart) {
+            if ($quantity <= 0) {
+                $productInCart->delete();
+                return true;
             } else {
-                throw new BadRequestHttpException("ERROR: the quantity must be greater than zero");
+                $productInCart->quantity = $this->recalculationQuantity($productInCart, $quantity);
+                $productInCart->updated_at = new Expression('NOW()');
+                $productInCart->save(false);
+                return true;
             }
-            $transaction->commit();
-            return true;
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            \Yii::error($e->getMessage());
-            throw $e;
         }
+
+        if ($quantity > 0) {
+            $position = new CartContent();
+            $position->cart_id = $cart->id;
+            $position->product_id = $product['id'];
+            $position->quantity = $this->recalculationQuantity($product, $quantity);
+            $position->price = $product['price'];
+            $position->product_name = $product['product'];
+            $position->units = $product['units'];
+            $position->vendor_id = $product['vendor_id'];
+            $position->currency_id = $product['currency_id'];
+            if (!$position->validate()) {
+                throw new ValidationException($position->getFirstErrors());
+            }
+            $position->save();
+        } else {
+            throw new BadRequestHttpException("ERROR: the quantity must be greater than zero");
+        }
+        return true;
 
     }
 

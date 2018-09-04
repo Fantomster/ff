@@ -38,6 +38,9 @@ class MercProductItemList extends MercDictConsumer
             }
             $attributes =  json_decode(json_encode($item), true);
             $model->setAttributes($attributes);
+            $model->last = (int)$attributes['last'];
+            $model->active = (int)$attributes['active'];
+            $model->correspondsToGost = (int)$attributes['correspondsToGost'];
             $model->product_guid = $attributes['product']['guid'];
             $model->product_uuid = $attributes['product']['uuid'];
             $model->subproduct_guid = $attributes['subProduct']['guid'];

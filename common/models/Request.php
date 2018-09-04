@@ -64,7 +64,14 @@ class Request extends \yii\db\ActiveRecord {
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
                 ],
                 'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
+                    // пишет гарантированно в метке GMT-0 в независимости от того, какая зона сейчас на сервере
+                    // установлена и передается в PHP
+                    // автор: Basil A Konakov
+                    // создано: 2018-09-04
+                    // функционал: WEB-API
+                    $timeZone = new \DateTimeZone(date_default_timezone_get());
+                    $timeZoneDiff = $timeZone->getOffset( new \DateTime('now', $timeZone) );
+                    return gmdate("Y-m-d H:i:s", time() - $timeZoneDiff);
                 },
             ],
         ];

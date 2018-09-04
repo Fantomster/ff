@@ -166,7 +166,7 @@ class getVetDocumentByUUID extends Model
 
         $country_raw = ikarApi::getInstance(Yii::$app->user->identity->organization_id)->getCountryByGuid($doc->certifiedConsignment->batch->origin->country->guid);
 
-        $country = isset($country) ? $country_raw->country->name : null;
+        $country = isset($country_raw) ? $country_raw->country->name : null;
 
         $purpose = dictsApi::getInstance(Yii::$app->user->identity->organization_id)->getPurposeByGuid($doc->authentication->purpose->guid);
         $purpose = isset($purpose) ? $purpose->name : null;

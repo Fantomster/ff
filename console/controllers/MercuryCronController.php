@@ -140,10 +140,10 @@ class MercuryCronController extends Controller
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
-        $data['method'] = 'getBusinessEntityChangesList';
-        $data['struct'] = ['listName' => 'businessEntityList',
-            'listItemName' => 'businessEntity'
-            ];
+        $data['method'] = 'getRussianEnterpriseChangesList';
+        $data['struct'] = ['listName' => 'enterpriseList',
+            'listItemName' => 'enterprise'
+        ];
 
         $listOptions = new ListOptions();
         $listOptions->count = 100;
@@ -153,7 +153,7 @@ class MercuryCronController extends Controller
         $instance = cerberApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-        $w = new MercBusinessEntityList($org_id);
+        $w = new MercRussianEnterpriseList($org_id);
         $w->data = json_encode($data);
         $w->getData();
 

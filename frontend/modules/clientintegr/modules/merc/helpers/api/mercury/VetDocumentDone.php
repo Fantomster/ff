@@ -57,9 +57,13 @@ class VetDocumentDone extends Component
         $data->delivery->deliveryDate = $date;
 
         $consignor = $this->doc->certifiedConsignment->consignor;
+        $consignor->businessEntity->uuid = null;
+        $consignor->enterprise->uuid = null;
         $data->delivery->consignor = $consignor;
 
         $consignee = $this->doc->certifiedConsignment->consignee;
+        $consignee->businessEntity->uuid = null;
+        $consignee->enterprise->uuid = null;
         $data->delivery->consignee = $consignee;
 
         $consigment = new Consignment();
@@ -167,10 +171,14 @@ class VetDocumentDone extends Component
         $retuned->deliveryDate = $date;
 
         $consignor = $doc->certifiedConsignment->consignee;
+        $consignor->businessEntity->uuid = null;
+        $consignor->enterprise->uuid = null;
 
         $retuned->consignor = $consignor;
 
         $consignee = $doc->certifiedConsignment->consignor;
+        $consignee->businessEntity->uuid = null;
+        $consignee->enterprise->uuid = null;
 
         $retuned->consignee = $consignee;
 

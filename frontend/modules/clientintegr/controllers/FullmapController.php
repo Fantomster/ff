@@ -32,11 +32,11 @@ use frontend\modules\clientintegr\modules\rkws\components\FullmapHelper;
  * Controls all the actions of pre-mapping by goods catalog service
  * Author: R.Smirnov
  */
+class FullmapController extends DefaultController
+{
 
-class FullmapController extends DefaultController {
-
-
-    public function actionIndex() {
+    public function actionIndex()
+    {
 
         $session = Yii::$app->session;
         $client = $this->currentUser->organization;
@@ -50,10 +50,9 @@ class FullmapController extends DefaultController {
 
         $params['OrderCatalogSearchMap'] = $session['orderCatalogSearchMap'];
 
-        $currServiceId = isset($params['OrderCatalogSearchMap'])? $params['OrderCatalogSearchMap']['service_id'] : 0;
-        if(isset($currServiceId))
-        {
-            if($session['service_id'] != $currServiceId)
+        $currServiceId = isset($params['OrderCatalogSearchMap']) ? $params['OrderCatalogSearchMap']['service_id'] : 0;
+        if (isset($currServiceId)) {
+            if ($session['service_id'] != $currServiceId)
                 $this->actionClearFullmap();
         }
 
@@ -69,7 +68,7 @@ class FullmapController extends DefaultController {
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
 
-        $services = ArrayHelper::map(AllService::find()->andWhere('type_id = 1')->all(),'id', 'denom' ); // Add check license
+        $services = ArrayHelper::map(AllService::find()->andWhere('type_id = 1')->all(), 'id', 'denom'); // Add check license
         $services = ['0' => 'Выберите сервис'] + $services;
 
         $searchModel->client = $client;
@@ -85,12 +84,12 @@ class FullmapController extends DefaultController {
         // Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
-      /*  $lic0 = Organization::getLicenseList();
-        //$lic = $this->checkLic();
-        $lic = $lic0['rkws'];
-        $licucs = $lic0['rkws_ucs'];
-        $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
-      */
+        /*  $lic0 = Organization::getLicenseList();
+          //$lic = $this->checkLic();
+          $lic = $lic0['rkws'];
+          $licucs = $lic0['rkws_ucs'];
+          $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
+         */
 
         $vi = 'index';
 
@@ -104,95 +103,85 @@ class FullmapController extends DefaultController {
         $stores = AllMaps::getStoreListService($searchModel->service_id, $client->id);
 
 
-        if (Yii::$app->request->isAjax || Yii::$app->request->isPjax ) {
-            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client',
-                'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services'));
+        if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
+            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services'));
         } else {
-                return $this->render($vi, compact('dataProvider', 'searchModel', 'client',
-                    'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services'));
+            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services'));
         }
-
     }
 
-    public function actionEditpdenom($service_id) {
+    public function actionEditpdenom($service_id)
+    {
         $attr = Yii::$app->request->post('editableAttribute');
         $prod = Yii::$app->request->post('editableKey');
         $rk_product = Yii::$app->request->post('pdenom');
 
-      //  var_dump($attr);
-      //  var_dump($key);
-      //  var_dump($pdenom);
+        //  var_dump($attr);
+        //  var_dump($key);
+        //  var_dump($pdenom);
 
-       $hasProduct = AllMaps::find()->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
-           ->andWhere('service_id = '.$service_id.' and is_active =1')
-           ->andWhere('product_id = :prod',[':prod' => $prod])->one();
+        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
 
-       if (!empty($hasProduct)) { // Product link already mapped in table
+        if (!empty($hasProduct)) { // Product link already mapped in table
+            $hasProduct->serviceproduct_id = $rk_product;
+            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $hasProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-           $hasProduct->serviceproduct_id = $rk_product;
-           $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-           $hasProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            if (!$hasProduct->save()) {
+                throw new \RuntimeException('Cant update allmaps table.');
+            }
 
-           if (!$hasProduct->save()){
-               throw new \RuntimeException('Cant update allmaps table.');
-           }
+            $res = $hasProduct->getProductNameService();
+        } else { // New link for mapping creation
+            $newProduct = new AllMaps();
 
-           $res = $hasProduct->getProductNameService();
+            $newProduct->service_id = $service_id;
+            $newProduct->org_id = $this->currentUser->organization->id;
+            $newProduct->product_id = $prod;
+            $newProduct->serviceproduct_id = $rk_product;
+            $newProduct->is_active = 1;
+            $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $newProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-       } else { // New link for mapping creation
+            if (!$newProduct->save()) {
+                throw new \RuntimeException('Cant save new allmaps model.');
+            }
 
-           $newProduct = new AllMaps();
-
-           $newProduct->service_id = $service_id;
-           $newProduct->org_id =  $this->currentUser->organization->id;
-           $newProduct->product_id = $prod;
-           $newProduct->serviceproduct_id = $rk_product;
-           $newProduct->is_active = 1;
-           $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-           $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-           $newProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-           if (!$newProduct->save()){
-               throw new \RuntimeException('Cant save new allmaps model.');
-           }
-
-           $res = $newProduct->getProductNameService();
-
-       }
+            $res = $newProduct->getProductNameService();
+        }
 
         return Json::encode(['output' => $res, 'message' => '']);
-
     }
 
-
-    public function actionEditkoef($service_id) {
+    public function actionEditkoef($service_id)
+    {
 
         $attr = Yii::$app->request->post('editableAttribute');
         $prod = Yii::$app->request->post('editableKey');
         $koef = Yii::$app->request->post('koef');
 
-        $hasProduct = AllMaps::find()->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = '.$service_id.' and is_active =1')
-            ->andWhere('product_id = :prod',[':prod' => $prod])->one();
+        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
 
         if (!empty($hasProduct)) { // Product link already mapped in table
-
             $hasProduct->koef = $koef;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
             $hasProduct->setScenario('koef');
-            if (!$hasProduct->save()){
+            if (!$hasProduct->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
 
             $res = $hasProduct->koef;
-
         } else { // New link for mapping creation
-
             $newProduct = new AllMaps();
 
             $newProduct->service_id = $service_id;
-            $newProduct->org_id =  $this->currentUser->organization->id;
+            $newProduct->org_id = $this->currentUser->organization->id;
             $newProduct->product_id = $prod;
             $newProduct->is_active = 1;
             $newProduct->koef = $koef;
@@ -200,55 +189,51 @@ class FullmapController extends DefaultController {
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
             $newProduct->setScenario('koef');
-            if (!$newProduct->save()){
+            if (!$newProduct->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
 
             $res = $newProduct->koef;
         }
         return Json::encode(['output' => $res, 'message' => '']);
-
     }
 
-    public function actionEditstore($service_id) {
+    public function actionEditstore($service_id)
+    {
 
         $attr = Yii::$app->request->post('editableAttribute');
         $prod = Yii::$app->request->post('editableKey');
         $store = Yii::$app->request->post('store');
 
-        $hasProduct = AllMaps::find()->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = '.$service_id.' and is_active =1')
-            ->andWhere('product_id = :prod',[':prod' => $prod])->one();
+        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
 
         if (!empty($hasProduct)) { // Product link already mapped in table
-
             $hasProduct->store_rid = $store;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$hasProduct->save()){
+            if (!$hasProduct->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
 
             $res = $hasProduct->store;
-
         } else { // New link for mapping creation
-
             $newProduct = new AllMaps();
 
-            $newProduct->service_id =$service_id;
-            $newProduct->org_id =  $this->currentUser->organization->id;
+            $newProduct->service_id = $service_id;
+            $newProduct->org_id = $this->currentUser->organization->id;
             $newProduct->product_id = $prod;
             $newProduct->is_active = 1;
             $newProduct->store_rid = $store;
             $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$newProduct->save()){
+            if (!$newProduct->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
 
             $res = $newProduct->store;
-
         }
 
         switch ($service_id) {
@@ -264,58 +249,53 @@ class FullmapController extends DefaultController {
         }
 
         return Json::encode(['output' => $res, 'message' => '']);
-
     }
 
+    public function actionChvat($prod_id, $vat, $service_id)
+    {
 
-    public function actionChvat($prod_id, $vat, $service_id) {
-
-        $hasProduct = AllMaps::find()->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = '.$service_id.' and is_active =1')
-            ->andWhere('product_id = :prod',[':prod' => $prod_id])->one();
+        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
 
         if (!empty($hasProduct)) { // Product link already mapped in table
-
             $hasProduct->vat = $vat;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$hasProduct->save()){
+            if (!$hasProduct->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
 
             $res = $hasProduct->vat;
-
         } else { // New link for mapping creation
-
             $newProduct = new AllMaps();
 
             $newProduct->service_id = $service_id;
-            $newProduct->org_id =  $this->currentUser->organization->id;
+            $newProduct->org_id = $this->currentUser->organization->id;
             $newProduct->product_id = $prod_id;
             $newProduct->is_active = 1;
             $newProduct->vat = $vat;
             $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$newProduct->save()){
+            if (!$newProduct->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
 
             $res = $newProduct->vat;
         }
         return Json::encode(['output' => $res, 'message' => '']);
-
     }
 
-
-    public function getLastUrl() {
+    public function getLastUrl()
+    {
 
         $lastUrl = Url::previous();
-        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+        $lastUrl = substr($lastUrl, strpos($lastUrl, "/clientintegr"));
 
-        $lastUrl = $this->deleteGET($lastUrl,'way');
+        $lastUrl = $this->deleteGET($lastUrl, 'way');
 
-        if(!strpos($lastUrl,"?")) {
+        if (!strpos($lastUrl, "?")) {
             $lastUrl .= "?";
         } else {
             $lastUrl .= "&";
@@ -323,9 +303,8 @@ class FullmapController extends DefaultController {
         return $lastUrl;
     }
 
-
-
-    public function actionAutocomplete($service_id, $term = null) {
+    public function actionAutocomplete($service_id, $term = null)
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         $sourceTable = '';
@@ -360,10 +339,10 @@ class FullmapController extends DefaultController {
                     break;
             }
 
-            $sql = "( select id, CONCAT(`".$denomField."`, ' (' ,".$unitField.", ')') as `text` from ".$sourceTable." where ".$orgField." = ".User::findOne(Yii::$app->user->id)->organization_id." and ".$denomField." = '".$term."' ".$where." )".
-                " union ( select id, CONCAT(`".$denomField."`, ' (' ,".$unitField.", ')') as `text` from ".$sourceTable."  where ".$orgField." = ".User::findOne(Yii::$app->user->id)->organization_id." and  ".$denomField." like '".$term."%'  ".$where." limit 10 )".
-                "union ( select id, CONCAT(`".$denomField."`, ' (' ,".$unitField.", ')') as `text` from ".$sourceTable." where  ".$orgField." = ".User::findOne(Yii::$app->user->id)->organization_id." and ".$denomField." like '%".$term."%'  ".$where." limit 5 )".
-                "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
+            $sql = "( select id, CONCAT(`" . $denomField . "`, ' (' ," . $unitField . ", ')') as `text` from " . $sourceTable . " where " . $orgField . " = " . User::findOne(Yii::$app->user->id)->organization_id . " and " . $denomField . " = '" . $term . "' " . $where . " )" .
+                    " union ( select id, CONCAT(`" . $denomField . "`, ' (' ," . $unitField . ", ')') as `text` from " . $sourceTable . "  where " . $orgField . " = " . User::findOne(Yii::$app->user->id)->organization_id . " and  " . $denomField . " like '" . $term . "%'  " . $where . " limit 10 )" .
+                    "union ( select id, CONCAT(`" . $denomField . "`, ' (' ," . $unitField . ", ')') as `text` from " . $sourceTable . " where  " . $orgField . " = " . User::findOne(Yii::$app->user->id)->organization_id . " and " . $denomField . " like '%" . $term . "%'  " . $where . " limit 5 )" .
+                    "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)->queryAll();
@@ -373,10 +352,8 @@ class FullmapController extends DefaultController {
         return $out;
     }
 
-
-
-
-    public function actionApplyFullmap() {
+    public function actionApplyFullmap()
+    {
 
         $koef = Yii::$app->request->post('koef_set');
         $store = Yii::$app->request->post('store_set');
@@ -394,7 +371,7 @@ class FullmapController extends DefaultController {
         $valModel->vat = $vat;
         $valModel->koef = $koef;
 
-        if(!$valModel->validate()) {
+        if (!$valModel->validate()) {
             throw new \RuntimeException('Cant validate new allmaps model.');
         }
 
@@ -406,12 +383,12 @@ class FullmapController extends DefaultController {
         if (empty($selected))
             return true;
 
-        $hasProducts = AllMaps::find()->select('product_id')->andWhere('org_id = :org',[':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = :s_id and is_active =1',[':s_id' => $service_id])
-            ->andWhere(['IN','product_id',$selected])->column();
+        $hasProducts = AllMaps::find()->select('product_id')->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
+                        ->andWhere('service_id = :s_id and is_active =1', [':s_id' => $service_id])
+                        ->andWhere(['IN', 'product_id', $selected])->column();
 
         if (!empty($hasProducts)) {   // Case we have intersection of arrays
-            $noProducts = array_diff($selected,$hasProducts);
+            $noProducts = array_diff($selected, $hasProducts);
         } else {
             $noProducts = $selected; // Case all are new
         }
@@ -423,55 +400,48 @@ class FullmapController extends DefaultController {
             $model = new AllMaps();
 
             $model->service_id = $service_id;
-            $model->org_id =  $organization;
+            $model->org_id = $organization;
             $model->product_id = $prod;
             $model->is_active = 1;
             $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$model->save()){
+            if (!$model->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
-
         }
 
-        if($koef != -1) {
+        if ($koef != -1) {
 
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set koef = :koef, updated_at = now() where service_id = '.$service_id.' and org_id = :org and product_id in ('.$selected.')',
-                    [':koef' => $koef, ':org' => $organization])->execute();
-
+                            ->createCommand('UPDATE all_map set koef = :koef, updated_at = now() where service_id = ' . $service_id . ' and org_id = :org and product_id in (' . $selected . ')', [':koef' => $koef, ':org' => $organization])->execute();
         }
 
-        if($store != -1) {
+        if ($store != -1) {
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set store_rid = :store, updated_at = now() where service_id = '.$service_id.' and org_id = :org and product_id in ('.$selected.')',
-                    [':store' => $store, ':org' => $organization])->execute();
+                            ->createCommand('UPDATE all_map set store_rid = :store, updated_at = now() where service_id = ' . $service_id . ' and org_id = :org and product_id in (' . $selected . ')', [':store' => $store, ':org' => $organization])->execute();
         }
 
 
-        if($vat != -1) {
+        if ($vat != -1) {
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set vat = :vat, updated_at = now() where service_id = '.$service_id.' and org_id = :org and product_id in ('.$selected.')',
-                    [':vat' => $vat, ':org' => $organization])->execute();
+                            ->createCommand('UPDATE all_map set vat = :vat, updated_at = now() where service_id = ' . $service_id . ' and org_id = :org and product_id in (' . $selected . ')', [':vat' => $vat, ':org' => $organization])->execute();
         }
 
         $session->remove('selectedmap');
         return true;
-
     }
 
+    public function actionClearFullmap()
+    {
 
-
-    public function actionClearFullmap() {
-
-       $session = Yii::$app->session;
+        $session = Yii::$app->session;
 
         $session->remove('selectedmap');
         return true;
-
     }
 
-    public function actionSaveSelectedMaps() {
+    public function actionSaveSelectedMaps()
+    {
         $selected = Yii::$app->request->get('selected');
         $state = Yii::$app->request->get('state');
 
@@ -485,15 +455,13 @@ class FullmapController extends DefaultController {
 
         foreach ($current as $item) {
 
-            if ($state)
-            {
-               if (!in_array($item,$list))
-                $list[] = $item;
+            if ($state) {
+                if (!in_array($item, $list))
+                    $list[] = $item;
             } else {
-                $key = array_search ($item, $list);
+                $key = array_search($item, $list);
                 unset($list[$key]);
             }
-
         }
 
         if (count($list) > 300 && $state) {
@@ -504,7 +472,8 @@ class FullmapController extends DefaultController {
         return true;
     }
 
-    protected function findModel($id) {
+    protected function findModel($id)
+    {
         if (($model = AllMaps::findOne(['product_id' => $id])) !== null) {
             return $model;
         } else {

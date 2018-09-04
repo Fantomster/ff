@@ -192,7 +192,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
                     ->leftJoin('`'.$dbName.'`.`all_map`','order_content.product_id = `'.$dbName.'`.`all_map`.`product_id` and `'.$dbName.'`.all_map.service_id = 2')
-                    ->andWhere('`'.$dbName.'`.all_map.store_rid ='.$this->store_id)
+                    ->andWhere('`'.$dbName.'`.all_map.store_rid ='.$this->store_rid)
                     ->all();
             }
         } else {

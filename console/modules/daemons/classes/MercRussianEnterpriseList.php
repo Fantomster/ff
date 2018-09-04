@@ -56,12 +56,7 @@ class MercRussianEnterpriseList extends MercDictConsumer
                 }
             }
 
-        if(empty($result)) {
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        }
-        else{
-            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
-        }
+        return $result;
     }
 
     protected function init()

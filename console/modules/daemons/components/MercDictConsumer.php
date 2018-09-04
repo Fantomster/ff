@@ -60,11 +60,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             }
         }
 
-        if (empty($result)) {
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        } else {
-            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
-        }
+        return $result;
     }
 
     /**
@@ -89,7 +85,10 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 $count += $list->count;
                 $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
                 if ($list->count > 0) {
-                    $this->saveList($list->{$this->listItemName});
+                    $result = $this->saveList($list->{$this->listItemName});
+                    if(!empty($result)) {
+                        $this->log('ERROR ' . json_encode($result, true) . PHP_EOL);
+                    }
                 }
 
                 if ($list->count < $list->total) {

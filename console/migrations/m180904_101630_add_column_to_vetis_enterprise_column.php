@@ -18,10 +18,10 @@ class m180904_101630_add_column_to_vetis_enterprise_column extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%vetis_russian_enterprise}}', 'owner_guid', $this->string()->notNull());
-        $this->addColumn('{{%vetis_russian_enterprise}}', 'owner_uuid', $this->string()->notNull());
-        $this->addColumn('{{%vetis_foreign_enterprise}}', 'owner_guid', $this->string()->notNull());
-        $this->addColumn('{{%vetis_foreign_enterprise}}', 'owner_uuid', $this->string()->notNull());
+        $this->addColumn('{{%vetis_russian_enterprise}}', 'owner_guid', $this->string());
+        $this->addColumn('{{%vetis_russian_enterprise}}', 'owner_uuid', $this->string());
+        $this->addColumn('{{%vetis_foreign_enterprise}}', 'owner_guid', $this->string());
+        $this->addColumn('{{%vetis_foreign_enterprise}}', 'owner_uuid', $this->string());
         $this->addCommentOnColumn('{{%vetis_russian_enterprise}}', 'owner_guid','Глобальный идентификатор хозяйствующего субъекта владельца');
         $this->addCommentOnColumn('{{%vetis_russian_enterprise}}', 'owner_uuid','Идентификатор хозяйствующего субъекта владельца');
         $this->addCommentOnColumn('{{%vetis_foreign_enterprise}}', 'owner_guid','Глобальный идентификатор хозяйствующего субъекта');

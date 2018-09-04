@@ -54,13 +54,7 @@ class MercProductItemList extends MercDictConsumer
                 $result[]['model-data'] = $model->attributes;
             }
         }
-
-        if(empty($result)) {
-            mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
-        }
-        else{
-            mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, json_encode($result));
-        }
+        return $result;
     }
 
     protected function init()

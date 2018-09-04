@@ -108,12 +108,14 @@ class getVetDocumentByUUID extends Model
         $this->type = $doc->vetDType;
         $this->status = $doc->vetDStatus;
 
-        $consignor_business = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->certifiedConsignment->consignor->businessEntity->uuid);
-        $consignor_enterprise = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getEnterpriseByUuid($doc->certifiedConsignment->consignor->enterprise->uuid);
+        $consignor_business = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByGuid($doc->certifiedConsignment->consignor->businessEntity->guid);
+        $consignor_enterprise = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getEnterpriseByGuid($doc->certifiedConsignment->consignor->enterprise->guid);
 
         $enterprise = $consignor_enterprise;
         $businessEntity = $consignor_business;
 
+        var_dump($consignor_enterprise, $doc->certifiedConsignment->consignor->businessEntity->guid); die();
+        
         $this->consignor = [
             [ 'label' => 'Название предприятия',
               'value' => isset($enterprise) ? $enterprise->name.'('.
@@ -246,7 +248,7 @@ class getVetDocumentByUUID extends Model
             'value' => $purpose,
         ];
 
-        $this->transportInfo = isset ($doc->certifiedConsignment->transportInfo) ? ([
+        $this->transportInfo = (isset ($doc->certifiedConsignment->transportInfo) && isset($doc->certifiedConsignment->transportInfo->transportType)) ? ([
             'type' => MercVsd::$transport_types[$doc->certifiedConsignment->transportInfo->transportType],
             'numbers' => [
                 [

@@ -292,7 +292,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new \Exception('access denied.');
             }
 
-            if (!$this->user->validate() || !$this->user->save()) {
+            if (!$this->user->save()) {
                 throw new ValidationException($this->user->getFirstErrors());
             }
 

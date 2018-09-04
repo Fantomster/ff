@@ -20,7 +20,7 @@ abstract class AbstractConsumer
     /**@var string $data data from queue message*/
     public $data;
     /**@var integer $timeoutExecuting timeout in seconds for execution consumer*/
-    public static $timeoutExecuting = 11300;
+    public static $timeoutExecuting = 600;
 
     /**
      * @param $message array|string

@@ -134,7 +134,7 @@ class createStoreEntryForm extends Model
         if (empty($this->productType)) {
             return [];
         }
-        
+
         $res = \common\models\vetis\VetisProductByType::getProductByTypeList($this->productType);
         if (!empty($res)) {
             return $res;
@@ -147,7 +147,7 @@ class createStoreEntryForm extends Model
         if (empty($this->product)) {
             return [];
         }
-        
+
         $res = \common\models\vetis\VetisSubproductByProduct::getSubProductByProductList($this->product);
         if (!empty($res)) {
             return $res;
@@ -155,6 +155,22 @@ class createStoreEntryForm extends Model
 
         return [];
     }
+
+
+    public function getProductsNamesList()
+    {
+        if (empty($this->subProduct)) {
+            return [];
+        }
+
+        $res = \common\models\vetis\VetisProductItem::getProductItemList($this->subProduct);
+        if (!empty($res)) {
+            return $res;
+        }
+
+        return [];
+    }
+
 
     public function getProductName()
     {
@@ -224,7 +240,7 @@ class createStoreEntryForm extends Model
         $stockEntry->batch->expiryDate = $this->convertDate($this->expiryDate);
 
         $stockEntry->batch->batchID = $this->batchID;
-        $stockEntry->batch->perishable = (bool) $this->perishable;
+        $stockEntry->batch->perishable = (bool)$this->perishable;
 
         $stockEntry->batch->origin = new BatchOrigin();
         $stockEntry->batch->origin->country = new Country();

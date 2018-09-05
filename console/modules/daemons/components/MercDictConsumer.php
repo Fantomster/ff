@@ -84,7 +84,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function getData()
     {
-        $className = BaseStringHelper::basename(get_class(self::class));
+        $className = BaseStringHelper::basename(self::class);
         $queue = RabbitQueues::find()->where(['consumer_class_name' => $className])->one();
         $this->data = $queue->data_request ?? $this->data;
         $this->init();

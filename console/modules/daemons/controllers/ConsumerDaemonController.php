@@ -17,7 +17,7 @@ class ConsumerDaemonController extends AbstractDaemonController
         }
         return $this->consumerClass;
     }
-    
+
     /**
      * Обработка полученных сообщений
      * @param $job
@@ -26,6 +26,7 @@ class ConsumerDaemonController extends AbstractDaemonController
     public function doJob($job)
     {
         $this->renewConnections();
+        $this->ask($job);
         
         try {
             if (!is_null($this->lastExec) && $this->lastTimeout > date('Y-m-d H:i:s')) {
@@ -38,24 +39,12 @@ class ConsumerDaemonController extends AbstractDaemonController
                 $this->loggingExecutedTime();
                 $this->noticeToFCM();
             }
-//            if (!is_array($row)) {
-//                throw new \Exception('Message is not array! ' . PHP_EOL . print_r($row, true));
-//            }
 
-//            try{
-//                \Yii::$app->get('db_api')->createCommand()->insert(iikoLogger::$tableName, $row)->execute();
-//            } catch (\Exception $e) {
-//                $this->log(PHP_EOL . " DIE: HALT " . $e->getMessage());
-//                @unlink(\Yii::$app->basePath . "/runtime/daemons/pids/" . self::shortClassName());
-//                die('die mysql connection');
-//            }
-            if ($success) {
-                $this->ask($job);
-            } else {
+            if (!$success) {
                 throw new \Exception('$success false');
             }
         } catch (\Throwable $e) {
-            $this->log(PHP_EOL . " ERROR: " . $e->getMessage().PHP_EOL.$e->getTraceAsString());
+            $this->log(PHP_EOL . " ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $this->nask($job);
         }
         return true;

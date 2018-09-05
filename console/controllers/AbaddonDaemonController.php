@@ -2,6 +2,10 @@
 
 namespace console\controllers;
 
+use api\common\models\RabbitQueues;
+use yii\db\Expression;
+use yii\db\Query;
+
 /**
  * Class for upping consumers from rabbit_queues table
  */
@@ -97,7 +101,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
                     'demonize'      => 0,
                     'hardKill'      => $kill,
                 ];
-            } catch(\Throwable $t){
+            } catch (\Throwable $t) {
                 $log = \Yii::getLogger();
                 $log->log($t->getMessage(), $log::LEVEL_ERROR, 'abaddon');
             }
@@ -137,6 +141,9 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
             $startExec = new \DateTime($row['start_executing']);
             $timeOutStartExec = $startExec->getTimestamp() + $consumerClass::$timeoutExecuting;
             if (date('Y-m-d H:i:s', $timeOutStartExec) < date('Y-m-d H:i:s')) {
+                (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+                    'start_executing' => new Expression('NULL'),
+                ], ['id' => $row['id']])->execute();
                 return true;
             } else {
                 return false;

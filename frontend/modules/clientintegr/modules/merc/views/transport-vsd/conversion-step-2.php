@@ -40,7 +40,7 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
 
             <div class="panel-body">
                 <ul class="fk-prev-next pull-right">
-                    <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru'=>'Назад']), ['conversion-step-1']) . '</li>' ?>
+                    <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru' => 'Назад']), ['conversion-step-1']) . '</li>' ?>
                 </ul>
             </div>
 
@@ -64,16 +64,9 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                     ->dropDownList($model->getSubProductList(), ['prompt' => 'не указано'])
                 ?>
 
-                <?php $model->getProductName() ?>
-                <?= $form->field($model, 'product_name')->widget(
-                    AutoComplete::className(), [
-                    'clientOptions' => [
-                        'source' => $model->getProductName(),
-                    ],
-                    'options' => [
-                        'class' => 'form-control'
-                    ]
-                ])
+                <?=
+                $form->field($model, 'product_name')
+                    ->dropDownList($model->getProductsNamesList(), ['prompt' => 'не указано'])
                 ?>
 
                 <?= $form->field($model, 'volume')->textInput(['maxlength' => true]); ?>

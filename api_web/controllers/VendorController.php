@@ -143,8 +143,9 @@ class VendorController extends WebApiController
      *                             "name": "ООО Рога и Копыта",
      *                             "phone": "+79182225588",
      *                             "email":"test@test.ru",
-     *                             "inn": "0001112223",
+     *                             "inn": "1111111111",
      *                             "contact_name": "Контактное имя",
+     *                             "gmt": 3,
      *                             "address": {
      *                                  "country":"Россия",
      *                                  "region": "Московская область",

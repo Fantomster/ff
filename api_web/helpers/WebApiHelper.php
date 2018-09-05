@@ -84,6 +84,7 @@ class WebApiHelper
         $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
         $item['about'] = $model->about ?? "";
         $item['is_allowed_for_franchisee'] = $model->is_allowed_for_franchisee ?? 0;
+        $item['gmt'] = $model->gmt ?? 0;
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['inn'] = $model->inn ?? null;

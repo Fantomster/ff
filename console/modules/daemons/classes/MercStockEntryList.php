@@ -34,14 +34,7 @@ class MercStockEntryList extends MercDictConsumer
 
         if ($check == 9) {
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $this->org_id])->one();
-            if (isset($this->queue->data_request)) {
-                $this->data = json_decode($this->queue->data_request);
-            } else {
-                $queueDate = $this->queue->last_executed ?? $this->queue->start_executing;
-                $this->data['startDate'] = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
-                $this->data['listOptions']['count'] = 100;
-                $this->data['listOptions']['offset'] = 0;
-            }
+            $this->data = json_decode(($this->queue->data_request ?? $this->data), true);
         } else {
             die('Dictionaries are currently being updated'.PHP_EOL);
         }
@@ -58,6 +51,7 @@ class MercStockEntryList extends MercDictConsumer
         $vsd = new LoadStockEntryList();
         $vsd->org_id = $this->org_id;
         $api = mercuryApi::getInstance($this->org_id);
+        $api->setEnterpriseGuid($this->data['enterpriseGuid']);
         do {
             try {
                 //Записываем в базу данные о текущем шаге

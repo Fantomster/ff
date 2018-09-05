@@ -44,10 +44,9 @@ class MercuryCronController extends Controller
 {
 
     /**
-     * Автоматическая загрузка списка ВСД для всех пользователей (за прошедшие сутки)
-     * @param $interval - период за который нужно выгрузить ВСД в часах
+     * Автоматическая загрузка списка ВСД и журнала склада для всех пользователей (за прошедшие сутки)
      */
-    public function actionVetDocumentsChangeList($interval = 24)
+    public function actionVetDocumentsChangeList()
     {
         $organizations = (new \yii\db\Query)
             ->select('org')
@@ -58,36 +57,23 @@ class MercuryCronController extends Controller
         try {
         foreach ($organizations as $org_id) {
 
-               // $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
+                $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
-            /*    if (!isset($locations->activityLocationList->location)) {
+                if (!isset($locations->activityLocationList->location)) {
                     continue;
-                }*/
+                }
 
-                echo "GET MercVSDList".PHP_EOL;
-                MercVsd::getUpdateData($org_id);
-
-                echo "GET MercStockEntryList".PHP_EOL;
-                MercStockEntry::getUpdateData($org_id);
-
-                /*foreach ($locations->activityLocationList->location as $item) {
+                foreach ($locations->activityLocationList->location as $item) {
                     if (!isset($item->enterprise)) {
                         continue;
                     }
-                    $request = [
-                        'enterpriseGuid' => $item->enterprise->guid,
-                        'orgId' => $org_id,
-                        'intervalHours' => $interval,
-                    ];
 
-                    try {
-                        \Yii::$app->get('rabbit')
-                            ->setQueue('merc_load_vsd')
-                            ->addRabbitQueue(\json_encode($request));
-                    } catch (\Exception $e) {
-                        Yii::error($e->getMessage());
-                    }
-                }*/
+                    echo "GET MercVSDList ".$item->enterprise->guid.PHP_EOL;
+                    MercVsd::getUpdateData($org_id, $item->enterprise->guid);
+
+                    echo "GET MercStockEntryList".$item->enterprise->guid.PHP_EOL;
+                    MercStockEntry::getUpdateData($org_id, $item->enterprise->guid);
+                }
         }
         } catch (\Exception $e) {
             \Yii::error($e->getMessage());

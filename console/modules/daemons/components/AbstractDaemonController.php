@@ -114,21 +114,12 @@ abstract class AbstractDaemonController extends DaemonController
 
         //Получаем канал, если нет, создаем
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
+        //Получение сообщений из очереди по одному
+        $channel->basic_qos(null, 1, null);
         //Цепляем канал к очереди
         $channel->queue_bind($this->getQueueName(), $this->getExchangeName(), $this->getQueueName());
         //Цепляем консьюмера
         $channel->basic_consume($this->getQueueName(), $consumerTag, false, false, false, false, [$this, 'doJob']);
-
-        /**
-         * Инофрмация о подключении
-         */
-        $this->log([
-            "HOST"     => $this->rabbit->host,
-            "V_HOST"   => $this->rabbit->vhost,
-            "Exchange" => $this->getExchangeName(),
-            "Queue"    => $this->getQueueName(),
-            "Consumer" => $consumerTag
-        ]);
 
         while (count($channel->callbacks)) {
             try {

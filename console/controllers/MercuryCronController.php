@@ -22,6 +22,7 @@ use console\modules\daemons\classes\MercProductItemList;
 use console\modules\daemons\classes\MercProductList;
 use console\modules\daemons\classes\MercPurposeList;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
+use console\modules\daemons\classes\MercStockEntryList;
 use console\modules\daemons\classes\MercStoreEntryList;
 use console\modules\daemons\classes\MercSubProductList;
 use console\modules\daemons\classes\MercSubProductListList;
@@ -97,7 +98,7 @@ class MercuryCronController extends Controller
     {
         $org_id = (mercPconst::findOne('1'))->org;
         echo "START" . PHP_EOL;
-       /* echo "GET Unit" . PHP_EOL;
+        echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
         echo "GET Purpose" . PHP_EOL;
         VetisPurpose::getUpdateData($org_id);
@@ -113,11 +114,11 @@ class MercuryCronController extends Controller
         VetisBusinessEntity::getUpdateData($org_id);
 
         echo "GET ProductByType" . PHP_EOL;
-        VetisProductByType::getUpdateData($org_id);*/
+        VetisProductByType::getUpdateData($org_id);
         echo "GET ProductItem" . PHP_EOL;
         VetisProductItem::getUpdateData($org_id);
-        /*echo "GET SubproductByProduct" . PHP_EOL;
-        VetisSubproductByProduct::getUpdateData($org_id);*/
+        echo "GET SubproductByProduct" . PHP_EOL;
+        VetisSubproductByProduct::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 
@@ -158,6 +159,22 @@ class MercuryCronController extends Controller
         $w->data = json_encode($data);
         $w->getData();
 
+        echo "FINISH" . PHP_EOL;
+    }
+
+    public function actionTestVsd()
+    {
+        echo "START" . PHP_EOL;
+        $w = new MercVSDList(5144);
+        $w->getData();
+        echo "FINISH" . PHP_EOL;
+    }
+
+    public function actionTestStock()
+    {
+        echo "START" . PHP_EOL;
+        $w = new MercStockEntryList(5144);
+        $w->getData();
         echo "FINISH" . PHP_EOL;
     }
 }

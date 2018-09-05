@@ -8,7 +8,6 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api;
 
-
 use api\common\models\merc\mercLog;
 use common\models\AllServiceOperation;
 use common\models\Journal;
@@ -45,14 +44,19 @@ class mercLogger extends Component
         return self::$_instance;
     }
 
-    public function addMercLog($response, $method, $localTransactionId, $request_xml, $response_xml)
+    public function addMercLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id = null)
     {
         $operation = $this->getServiceOperation($method);
         $journal = new Journal();
         $journal->service_id = self::service_id;
         $journal->operation_code = $operation->code."";
-        //$journal->user_id = \Yii::$app->user->id;
-        //$journal->organization_id = (\Yii::$app->user->identity)->organization_id;
+        if (\Yii::$app instanceof \Yii\web\Application) {
+            $journal->user_id = \Yii::$app->user->id;
+            $journal->organization_id = (\Yii::$app->user->identity)->organization_id;
+        }
+        else {
+            $journal->organization_id = $org_id;
+        }
         $journal->log_guide = $localTransactionId;
         $journal->type = ($response->application->status == 'COMPLETED') ? 'success' : 'error';
         $journal->response = ($journal->type == 'success') ? 'COMPLETE' :  serialize($response);
@@ -61,14 +65,14 @@ class mercLogger extends Component
 
         $journal->getErrors();
 
-        $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml);
+        $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id = null);
 
         if ($journal->type == mercLog::REJECTED) {
             throw new \Exception($journal->id, 600);
         }
     }
 
-    public function addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml)
+    public function addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id = null)
     {
         //Пишем лог
         $log = new mercLog();
@@ -78,6 +82,7 @@ class mercLogger extends Component
         $log->localTransactionId = $localTransactionId;
         $log->request = $request_xml;
         $log->response = $response_xml;
+        $log->organization_id = $org_id;
 
         if ($log->status == mercLog::REJECTED) {
             $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
@@ -111,10 +116,10 @@ class mercLogger extends Component
 
     public function addMercLogDict ($result, $localTransactionId, $response)
     {
-        //$operation = $this->getServiceOperation($method);
+        $operation = $this->getServiceOperation($localTransactionId);
         $journal = new Journal();
         $journal->service_id = self::service_id;
-        $journal->operation_code = '1';//$operation->code."";
+        $journal->operation_code = $operation->code."";
         $journal->log_guide = $localTransactionId;
         $journal->type = $result;
         $journal->response = ($journal->type == 'COMPLETE') ? 'COMPLETE' :  $response;

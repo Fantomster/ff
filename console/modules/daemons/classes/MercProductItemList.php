@@ -62,6 +62,7 @@ class MercProductItemList extends MercDictConsumer
 
     protected function init()
     {
+        parent::init();
         $this->instance = productApi::getInstance($this->org_id);
         $this->data = json_decode($this->data, true);
         $this->method = $this->data['method'];

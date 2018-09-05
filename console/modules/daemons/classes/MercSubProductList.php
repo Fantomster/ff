@@ -22,6 +22,7 @@ class MercSubProductList extends MercDictConsumer
 
     protected function init()
     {
+        parent::init();
         $this->instance = productApi::getInstance($this->org_id);
         $data = json_decode($this->data, true);
         $this->method = $data['method'];

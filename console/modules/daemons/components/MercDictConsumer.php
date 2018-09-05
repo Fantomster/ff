@@ -33,6 +33,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     protected $request;
     protected $org_id;
     protected $modelClassName;
+    protected $queue;
 
     public function __construct($org_id = null)
     {
@@ -78,6 +79,8 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     protected function init()
     {
+        $this->queue = RabbitQueues::find()->where(['consumer_class_name' => BaseStringHelper::basename(static::class)])->one();
+        $this->data = $this->queue->data_request ?? $this->data;
     }
 
     /**
@@ -85,9 +88,6 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function getData()
     {
-        $className = BaseStringHelper::basename(static::class);
-        $queue = RabbitQueues::find()->where(['consumer_class_name' => $className])->one();
-        $this->data = $queue->data_request ?? $this->data;
         $this->init();
         $count = $this->request['listOptions']['offset'];
         $this->log('Load' . PHP_EOL);
@@ -97,13 +97,15 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             try {
                 //Записываем в базу данные о текущем шаге
                 $this->data['request'] = json_encode($this->request);
-                $queue->data_request = json_encode($this->data);
-                $queue->save();
+                $this->queue->data_request = json_encode($this->data);
+                $this->queue->save();
+
                 //Выполняем запрос и обработку полученных данных
                 $response = $this->instance->sendRequest($this->method, $this->request);
                 $list = $response->{$this->listName};
                 $count += $list->count;
                 $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
+
                 if ($list->count > 0) {
                     $result = $this->saveList($list->{$this->listItemName});
                     if (!empty($result)) {
@@ -115,8 +117,8 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     $this->request['listOptions']['offset'] += $list->count;
                 }
             } catch (\Throwable $e) {
-                $this->log($e->getMessage() . " " . $e->getTraceAsString().PHP_EOL);
-                mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, $e->getMessage());
+                $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+                mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                 $error++;
                 if ($error == 3) {
                     die('Error operation');
@@ -124,15 +126,12 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             }
         } while ($list->total > ($list->count + $list->offset));
 
-        $this->log("FIND: consumer_class_name = {$className}");
+        $this->log("FIND: consumer_class_name = ".BaseStringHelper::basename(static::class));
 
-        $queue = RabbitQueues::findOne(['consumer_class_name' => $className]);
-        if ($queue) {
-            $queue->data_request = new Expression('NULL');
-            $queue->save();
-        }
+        $this->queue->data_request = new Expression('NULL');
+        $this->queue->save();
 
-        mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
+        mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
     }
 
     /**

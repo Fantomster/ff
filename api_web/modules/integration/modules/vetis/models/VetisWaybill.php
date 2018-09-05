@@ -146,7 +146,8 @@ class VetisWaybill
      * */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        $query = $this->helper->getQueryByUuid();
+        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        $query = MercVsd::find()->where(['recipient_guid' => $enterpriseGuid]);
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }

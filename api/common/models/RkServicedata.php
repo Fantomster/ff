@@ -151,7 +151,7 @@ class RkServicedata extends \yii\db\ActiveRecord {
     {
         return self::find()
             //->where(['status_id' => 2])
-            ->andWhere('org = :org', ['org' => Yii::$app->user->identity->organization_id])
+            ->andWhere('org = :org and status_id = 1', ['org' => Yii::$app->user->identity->organization_id])
             //->andOnCondition('td >= NOW()')
             //->andOnCondition('fd <= NOW()')
             ->one();

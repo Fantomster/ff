@@ -12,6 +12,7 @@ use api\common\models\merc\mercPconst;
 use api\common\models\RabbitQueues;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
+use yii\db\Expression;
 use yii\helpers\BaseStringHelper;
 
 /**
@@ -119,7 +120,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 }
             }
         } while ($list->total > ($list->count + $list->offset));
-        $queue->data_request = null;
+        $queue->data_request = new Expression('NULL');
         $queue->save();
         mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
     }

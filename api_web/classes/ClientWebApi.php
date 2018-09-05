@@ -83,6 +83,10 @@ class ClientWebApi extends WebApi
                 $model->name = $post['name'];
             }
 
+            if (isset($post['gmt']) && $post['gmt'] !== null) {
+                $model->gmt = $post['gmt'];
+            }
+
             if (isset($post['is_allowed_for_franchisee']) && in_array($post['is_allowed_for_franchisee'], [0, 1, true, false])) {
                 $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
             }

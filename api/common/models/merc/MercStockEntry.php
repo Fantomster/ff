@@ -202,7 +202,6 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
     public static function getUpdateData($org_id, $enterpriseGuid = null)
     {
         try {
-            $load = new Mercury();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList'])->orderBy(['last_executed' => SORT_DESC])->one();
             if($queue == null) {

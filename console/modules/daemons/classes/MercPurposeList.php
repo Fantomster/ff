@@ -18,6 +18,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
  */
 class MercPurposeList extends MercDictConsumer
 {
+    public static $timeout  = 60*60*24;
+    public static $timeoutExecuting = 60*5;
+
     protected function init()
     {
         $this->instance = dictsApi::getInstance($this->org_id);

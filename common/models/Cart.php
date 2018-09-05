@@ -30,6 +30,21 @@ class Cart extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
@@ -127,7 +142,7 @@ class Cart extends \yii\db\ActiveRecord
     }
 
     public function forMinCartPrice($vendor_id, $rawPrice = null) {
-        $vendor = Organization::findOne($vendor_id);
+        $vendor = Organization::find()->cache(3600)->where(['id' => $vendor_id])->one();
         if (isset($vendor->delivery)) {
             $diff = $vendor->delivery->min_order_price - (!isset($rawPrice) ? $this->getRawPrice($vendor_id) : $rawPrice);
         } else {

@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_unit".
@@ -71,6 +72,10 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
+                $value = (int)$value;
+                return $value;
+            }],*/
             [['last', 'active', 'status', 'factor'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullName', 'commonUnitGuid'], 'string', 'max' => 255],

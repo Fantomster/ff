@@ -61,8 +61,9 @@ class Product extends WebApi
     private function prepareProduct(CatalogBaseGoods $baseModel, CatalogGoods $individualModel = null)
     {
         $product = $baseModel->getAttributes();
-        $product['currency_id'] = $baseModel->catalog->currency_id;
-        $product['currency'] = $baseModel->catalog->currency->symbol;
+        $currency = $baseModel->catalog->currency;
+        $product['currency_id'] = $currency->id;
+        $product['currency'] = $currency->symbol;
 
         if (!empty($individualModel)) {
             $product['price'] = $individualModel->price;
@@ -78,7 +79,8 @@ class Product extends WebApi
             $product['image'] = \Yii::$app->params['web'] . 'site/image-base?id=' . $product['id'] . '&type=product';
         }
 
-        $product['vendor_id'] = Catalog::findOne($product['cat_id'])->supp_org_id;
+        $c = Catalog::find()->cache(3600)->where(['id' => $product['cat_id']])->one();
+        $product['vendor_id'] = $c->supp_org_id;
         $product['model'] = $baseModel;
 
         return $product;

@@ -99,17 +99,17 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     
     public function actionView($uuid)
     {
-        //try {
+        try {
             
             $document = new getVetDocumentByUUID();
             $document->getDocumentByUUID($uuid);
-        /*} catch (\Error $e) {
+       } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }*/
+        }
         $params = ['document' => $document];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
@@ -142,7 +142,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         }
         
         Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
-        $this->updateVSDList();
         if (Yii::$app->request->isAjax) {
             return true;
         } else {
@@ -335,21 +334,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         if ($hand_only == 1) {
             return true;
         }
-        
-        $visit = MercVisits::getLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
-        //$transaction = Yii::$app->db_api->beginTransaction();
-        try {
-            $vsd = new VetDocumentsChangeList();
-            if (isset($visit)) {
-                $visit = gmdate("Y-m-d H:i:s", strtotime($visit) - 60 * 30);
-            }
-            $vsd->updateData($visit);
-            MercVisits::updateLastVisit(Yii::$app->user->identity->organization_id, MercVisits::LOAD_VSD);
-            //  $transaction->commit();
-        } catch (\Exception $e) {
-            //   $transaction->rollback();
-            Yii::error($e->getMessage());
-        }
+
+        MercVsd::getUpdateData(Yii::$app->user->identity->organization_id);
         return true; // in case of error return true anyway, like hand_only is set
     }
     

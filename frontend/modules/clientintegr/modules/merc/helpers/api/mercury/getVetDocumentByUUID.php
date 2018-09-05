@@ -14,6 +14,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\base\Model;
+use Yii;
 
 class getVetDocumentByUUID extends Model
 {
@@ -92,7 +93,6 @@ class getVetDocumentByUUID extends Model
 
     public function getDocumentByUUID($UUID, $raw = false)
     {
-        $cache = \Yii::$app->cache;
         $this->UUID = $UUID;
 
         $doc = mercuryApi::getInstance()->getVetDocumentByUUID($UUID);
@@ -108,70 +108,70 @@ class getVetDocumentByUUID extends Model
         $this->type = $doc->vetDType;
         $this->status = $doc->vetDStatus;
 
-        $consignor_business = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignor->businessEntity->uuid);
-        $consignor_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignor->enterprise->uuid);
+        $consignor_business = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByGuid($doc->certifiedConsignment->consignor->businessEntity->guid);
+        $consignor_enterprise = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getEnterpriseByGuid($doc->certifiedConsignment->consignor->enterprise->guid);
 
-        $enterprise = $consignor_enterprise->enterprise;
-        $businessEntity = $consignor_business->businessEntity;
-
+        $enterprise = $consignor_enterprise;
+        $businessEntity = $consignor_business;
+        
         $this->consignor = [
             [ 'label' => 'Название предприятия',
-              'value' => $enterprise->name.'('.
+              'value' => isset($enterprise) ? $enterprise->name.'('.
                   $enterprise->address->addressView
-                  .')',
+                  .')': null,
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->name.', ИНН:'.$businessEntity->inn,
+                'value' => isset($businessEntity) ? $businessEntity->name.', ИНН:'.$businessEntity->inn : null,
             ]
         ];
 
-        $consignee_business = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->consignee->businessEntity->uuid);
-        $consignee_enterprise = cerberApi::getInstance()->getEnterpriseByUuid($doc->certifiedConsignment->consignee->enterprise->uuid);
+        $consignee_business = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->certifiedConsignment->consignee->businessEntity->uuid);
+        $consignee_enterprise = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getEnterpriseByUuid($doc->certifiedConsignment->consignee->enterprise->uuid);
 
-        $enterprise = $consignee_enterprise->enterprise;
-        $businessEntity = $consignee_business->businessEntity;
+        $enterprise = $consignee_enterprise;
+        $businessEntity = $consignee_business;
 
         $this->consignee = [
             [ 'label' => 'Название предприятия',
-                'value' => $enterprise->name.'('.
+                'value' => isset($enterprise) ? $enterprise->name.'('.
                     $enterprise->address->addressView
-                    .')',
+                    .')' : null,
             ],
             [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => $businessEntity->name.', ИНН:'.$businessEntity->inn,
+                'value' => isset($businessEntity) ? $businessEntity->name.', ИНН:'.$businessEntity->inn : null,
             ]
         ];
 
         if(isset($doc->certifiedConsignment->broker)) {
-            $broker_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->broker->uuid);
-            $broker = $broker_raw->businessEntity;
+            $broker_raw = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->certifiedConsignment->broker->uuid);
+            $broker = $broker_raw;
             $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
                 'value' => $broker->name . ', ИНН:' . $broker->inn,
             ];
         }
 
         if(isset($doc->certifiedConsignment->batch->origin->owner)) {
-            $owner_raw = cerberApi::getInstance()->getBusinessEntityByUuid($doc->certifiedConsignment->batch->origin->uuid);
+            $owner_raw = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->certifiedConsignment->batch->origin->uuid);
             $owner = $owner_raw->businessEntity;
         }
 
-        $product_raw = productApi::getInstance()->getProductByGuid($doc->certifiedConsignment->batch->product->guid);
-        $product = $product_raw->product->name;
+        $product_raw = productApi::getInstance(Yii::$app->user->identity->organization_id)->getProductByGuid($doc->certifiedConsignment->batch->product->guid);
+        $product = isset($product_raw) ? $product_raw->name : null;
 
-        $sub_product_raw = productApi::getInstance()->getSubProductByGuid($doc->certifiedConsignment->batch->subProduct->guid);
+        $sub_product_raw = productApi::getInstance(Yii::$app->user->identity->organization_id)->getSubProductByGuid($doc->certifiedConsignment->batch->subProduct->guid);
 
-        $sub_product = $sub_product_raw->subProduct->name;
+        $sub_product = isset($sub_product_raw) ? $sub_product_raw->name : null;
 
-        $unit = dictsApi::getInstance()->getUnitByGuid($doc->certifiedConsignment->batch->unit->guid);
+        $unit = dictsApi::getInstance(Yii::$app->user->identity->organization_id)->getUnitByGuid($doc->certifiedConsignment->batch->unit->guid);
 
-        $country_raw = ikarApi::getInstance()->getCountryByGuid($doc->certifiedConsignment->batch->origin->country->guid);
+        $country_raw = ikarApi::getInstance(Yii::$app->user->identity->organization_id)->getCountryByGuid($doc->certifiedConsignment->batch->origin->country->guid);
 
-        $country = $country_raw->country->name;
+        $country = isset($country_raw) ? $country_raw->name : null;
 
-        $purpose = dictsApi::getInstance()->getPurposeByGuid($doc->authentication->purpose->guid);
-        $purpose = $purpose->purpose->name;
+        $purpose = dictsApi::getInstance(Yii::$app->user->identity->organization_id)->getPurposeByGuid($doc->authentication->purpose->guid);
+        $purpose = isset($purpose) ? $purpose->name : null;
 
-        $producer = isset($doc->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($doc->certifiedConsignment->batch->origin->producer) : null;
+        $producer = isset($doc->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($doc->certifiedConsignment->batch->origin->producer, Yii::$app->user->identity->organization_id) : null;
 
         if(isset($producer)) {
             $producer = implode(", ",$producer['name']);
@@ -197,7 +197,7 @@ class getVetDocumentByUUID extends Model
             ],
             [
                 'label' => 'Объем',
-                'value' => $doc->certifiedConsignment->batch->volume." ".$unit->unit->name,
+                'value' => $doc->certifiedConsignment->batch->volume." ".isset($unit) ? $unit->name : '',
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',
@@ -246,7 +246,7 @@ class getVetDocumentByUUID extends Model
             'value' => $purpose,
         ];
 
-        $this->transportInfo = isset ($doc->certifiedConsignment->transportInfo) ? ([
+        $this->transportInfo = (isset ($doc->certifiedConsignment->transportInfo) && isset($doc->certifiedConsignment->transportInfo->transportType)) ? ([
             'type' => MercVsd::$transport_types[$doc->certifiedConsignment->transportInfo->transportType],
             'numbers' => [
                 [
@@ -306,9 +306,6 @@ class getVetDocumentByUUID extends Model
         ];
         $this->locationProsperity = $doc->authentication->locationProsperity;
         $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;
-
-        $cache->add('vetDoc_'.$UUID, $this->attributes, 60*5);
-
     }
 
     public function getWaybillNumber ()

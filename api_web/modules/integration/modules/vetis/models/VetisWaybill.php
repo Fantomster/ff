@@ -2,11 +2,13 @@
 
 namespace api_web\modules\integration\modules\vetis\models;
 
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumentByUUID;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -148,13 +150,31 @@ class VetisWaybill
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
-        $arResult = $query->groupBy('sender_guid')->all();
+
         if ($filterName == 'product_name') {
+            $arResult = $query->orWhere(['sender_guid' => $enterpriseGuid])->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {
+            $arResult = $query->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
 
         return ['result' => $result];
+    }
+
+    /**
+     * Краткая информация о ВСД
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function getShortInfoAboutVsd($request)
+    {
+        if (!isset($request['uuid'])) {
+            throw new BadRequestHttpException('Uuid is required');
+        }
+        $obInfo = (new VetisHelper())->getShortInfoVsd($request['uuid']);
+
+        return ['result' => $obInfo];
     }
 }

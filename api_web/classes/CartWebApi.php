@@ -24,19 +24,21 @@ use api_web\exceptions\ValidationException;
 class CartWebApi extends \api_web\components\WebApi
 {
 
+    public static $cart;
+    public $catalogs;
+
     /**
      * Добавляем/Удаляем товар в заказе
      * @param array $post
+     * @param bool $ajax_published
      * @return array
-     * @throws BadRequestHttpException
-     * @throws \Exception
      */
     public function add(array $post, $ajax_published = false)
     {
         //Если прилетел массив товаров
-        if (isset($post[0])) {
+        if (!isset($post['product_id'])) {
             foreach ($post as $item) {
-                $this->add($item);
+                $this->addItem($item);
             }
         } else {
             $this->addItem($post);
@@ -46,6 +48,11 @@ class CartWebApi extends \api_web\components\WebApi
             //Сообщение в очередь, Изменение количества товара в корзине
             $this->noticeWhenProductAddToCart();
         }
+
+        //Обновляем дату изменения корзины
+        $cart = $this->getCart();
+        $cart->updated_at = new Expression('NOW()');
+        $cart->save(false);
 
         return $this->items();
     }
@@ -69,9 +76,8 @@ class CartWebApi extends \api_web\components\WebApi
         try {
             $cart = $this->getCart();
             $product = (new Product())->findFromCatalogs($post['product_id']);
-            $catalogs = explode(',',  $this->user->organization->getCatalogs());
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
-            if (!in_array($product['cat_id'], $catalogs) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
+            if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
                 throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
             }
             $this->setPosition($cart, $product, $post['quantity']);
@@ -149,7 +155,7 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         //Сообщение в очередь, Изменение количества товара в корзине
-        Notice::init('Order')->sendOrderToTurnClient($client);
+        Notice::init('Order')->sendOrderToTurnClient($this->user);
 
         return $this->items();
     }
@@ -227,7 +233,6 @@ class CartWebApi extends \api_web\components\WebApi
             $order->vendor_id = $vendor->id;
             $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
-            $order->created_at = gmdate("Y-m-d H:i:s");
 
             if (!empty($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);
@@ -269,7 +274,6 @@ class CartWebApi extends \api_web\components\WebApi
             $cart->updated_at = new Expression('NOW()');
             $cart->save();
             $transaction->commit();
-
             $orderCreated = true;
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -282,7 +286,7 @@ class CartWebApi extends \api_web\components\WebApi
                 //Емайл и смс о новом заказе
                 Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
                 //Сообщение в очередь, Изменение количества товара в корзине
-                Notice::init('Order')->sendOrderToTurnClient($client);
+                Notice::init('Order')->sendOrderToTurnClient($this->user);
             } catch (\Exception $e) {
                 \Yii::error($e->getMessage());
             }
@@ -357,22 +361,37 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function getCart()
     {
-        $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
-        if (isset($individual_cart_enable)) {
-            $cart = Cart::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
-        }
-
-        if (empty($cart)) {
-            $cart = new Cart([
-                'organization_id' => $this->user->organization->id,
-                'user_id' => $this->user->id,
-            ]);
-
-            if (!$cart->save()) {
-                throw new ValidationException($cart->getFirstErrors());
+        if (empty(static::$cart)) {
+            $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
+            if (isset($individual_cart_enable)) {
+                $cart = Cart::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
             }
+
+            if (empty($cart)) {
+                $cart = new Cart([
+                    'organization_id' => $this->user->organization->id,
+                    'user_id' => $this->user->id,
+                ]);
+
+                if (!$cart->save()) {
+                    throw new ValidationException($cart->getFirstErrors());
+                }
+            }
+            static::$cart = $cart;
         }
-        return $cart;
+        return static::$cart;
+    }
+
+    /**
+     * Список доступных каталогов
+     * @return array
+     */
+    private function getCatalogs()
+    {
+        if (empty($this->catalogs)) {
+            $this->catalogs = explode(',', $this->user->organization->getCatalogs());
+        }
+        return $this->catalogs;
     }
 
     /**
@@ -384,19 +403,21 @@ class CartWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    private function setPosition(Cart &$cart, array &$product, $quantity)
+    private function setPosition(Cart $cart, array &$product, $quantity)
     {
-        foreach ($cart->cartContents as $position) {
-            if ($position->product_id == $product['id']) {
-                if ($quantity <= 0) {//yet another test
-                    $position->delete();
-                    return true;
-                } else {
-                    $position->quantity = $this->recalculationQuantity($product, $quantity);
-                    $position->updated_at = new Expression('NOW()');
-                    $position->save();
-                    return true;
-                }
+        /**
+         * @var $productInCart CartContent
+         */
+        $productInCart = $cart->getCartContents()->andWhere(['product_id' => $product['id']])->one();
+        if ($productInCart) {
+            if ($quantity <= 0) {
+                $productInCart->delete();
+                return true;
+            } else {
+                $productInCart->quantity = $this->recalculationQuantity($productInCart, $quantity);
+                $productInCart->updated_at = new Expression('NOW()');
+                $productInCart->save(false);
+                return true;
             }
         }
 
@@ -418,6 +439,7 @@ class CartWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("ERROR: the quantity must be greater than zero");
         }
         return true;
+
     }
 
     /**
@@ -473,10 +495,11 @@ class CartWebApi extends \api_web\components\WebApi
         $item['comment'] = $row->comment;
         return $item;
     }
-    
-    public function noticeWhenProductAddToCart(){
-        Notice::init('Order')->sendOrderToTurnClient($this->user->organization);
-        Notice::init('Order')->sendLastUserCartAdd($this->user);
+
+    public function noticeWhenProductAddToCart()
+    {
+        Notice::init('Order')->sendOrderToTurnClient($this->user);
+        //Notice::init('Order')->sendLastUserCartAdd($this->user);
     }
 
 }

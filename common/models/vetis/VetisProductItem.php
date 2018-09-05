@@ -2,7 +2,13 @@
 
 namespace common\models\vetis;
 
+use api\common\models\RabbitQueues;
+use console\modules\daemons\components\UpdateDictInterface;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_product_item".
@@ -32,7 +38,7 @@ use Yii;
  * @property string $updateDate
  * @property object $productItem
  */
-class VetisProductItem extends \yii\db\ActiveRecord
+class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
     /**
      * {@inheritdoc}
@@ -50,6 +56,11 @@ class VetisProductItem extends \yii\db\ActiveRecord
         return Yii::$app->get('db_api');
     }
 
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -58,6 +69,10 @@ class VetisProductItem extends \yii\db\ActiveRecord
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
+            /*[['active','last', 'correspondsToGost'], 'filter', 'filter' => function ($value) {
+                $value = ($value === 'true') ? 1 : 0;
+                return $value;
+            }],*/
             [['last', 'active', 'status', 'productType', 'correspondsToGost'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'globalID', 'product_uuid', 'product_guid', 'subproduct_uuid', 'subproduct_guid', 'gost', 'producer_uuid', 'producer_guid', 'tmOwner_uuid', 'tmOwner_guid'], 'string', 'max' => 255],
@@ -95,9 +110,65 @@ class VetisProductItem extends \yii\db\ActiveRecord
             'updateDate' => 'Update Date',
         ];
     }
-    
+
     public function getProductItem()
     {
         return \yii\helpers\Json::decode($this->data);
+    }
+
+    public static function getUpdateData($org_id)
+    {
+        try {
+            $load = new Products();
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercProductItemList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            if ($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = 'MercProductItemList';
+                $queue->save();
+            }
+
+            //Формируем данные для запроса
+            $data['method'] = 'getProductItemChangesList';
+            $data['struct'] = ['listName' => 'productItemList',
+                'listItemName' => 'productItem'
+            ];
+
+            $listOptions = new ListOptions();
+            $listOptions->count = 1000;
+            $listOptions->offset = 0;
+
+            $startDate = ($queue === null) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queue->last_executed;
+            $instance = productApi::getInstance($org_id);
+            $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
+
+            if (!empty($queue->organization_id)) {
+                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+            } else {
+                $queueName = $queue->consumer_class_name;
+            }
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue(json_encode($data));
+
+        } catch (\Exception $e) {
+            Yii::error($e->getMessage());
+        }
+    }
+
+
+    public static function getProductItemList($subproduct_uuid)
+    {
+        $models = self::find()
+            ->select(['uuid', 'name'])
+            ->where(['active' => true, 'last' => true, 'subproduct_uuid' => $subproduct_uuid])
+            ->asArray()
+            ->all();
+
+        return ArrayHelper::map($models, 'uuid', function ($model) {
+            return $model['name'];
+        });
     }
 }

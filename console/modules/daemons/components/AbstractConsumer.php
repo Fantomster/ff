@@ -15,10 +15,12 @@ use yii\helpers\BaseStringHelper;
  */
 abstract class AbstractConsumer
 {
-    /**@var integer $timeout */
+    /**@var integer $timeout in seconds*/
     public static $timeout = 300;
     /**@var string $data data from queue message*/
     public $data;
+    /**@var integer $timeoutExecuting timeout in seconds for execution consumer*/
+    public static $timeoutExecuting = 600;
 
     /**
      * @param $message array|string

@@ -195,8 +195,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
-            'agentName' => $agentModel->denom,
-            'storeName' => $storeModel->denom,
+            'agentName' => isset($agentModel->denom) ? $agentModel->denom : 'Не указан',
+            'storeName' => isset($storeModel->denom) ? $storeModel->denom : 'Не указан',
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData,
@@ -386,6 +386,7 @@ SQL;
         }
 
         $model = new iikoWaybill();
+        $model->setScenario('handMade');
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;

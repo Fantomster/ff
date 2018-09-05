@@ -152,7 +152,9 @@ class mercuryApi extends baseApi
             return unserialize($doc->raw_data);
         }
 
-        $result = null;
+        return null;
+
+        /*$result = null;
         $doc = null;
 
         //Генерируем id запроса
@@ -206,7 +208,7 @@ class mercuryApi extends baseApi
         } catch (\SoapFault $e) {
             Yii::error($e->detail);
         }
-        return $doc;
+        return $doc;*/
     }
 
     public function getVetDocumentDone($UUID, $rejectedData = null)
@@ -261,24 +263,9 @@ class mercuryApi extends baseApi
             mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
 
             if ($status == 'COMPLETED') {
-                $doc = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
-                $row = MercVsd::findOne(['uuid' => $UUID]);
-                if ($row != null) {
-                    switch ($rejectedData['decision']) {
-                        case VetDocumentDone::RETURN_ALL :
-                            $doc = $doc[1];
-                            break;
-                        case VetDocumentDone::ACCEPT_ALL :
-                            break;
-                        case VetDocumentDone::PARTIALLY :
-                            $doc = $doc[0];
-                            break;
-                    }
+                $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
+                (new VetDocumentsChangeList())->updateDocumentsList($doc);
 
-                    $row->raw_data = serialize(is_array($doc) ? $doc[0] : $doc);
-                    $row->status = $doc->vetDStatus;
-                    $row->save();
-                }
             } else {
                 $result = null;
             }
@@ -488,13 +475,15 @@ class mercuryApi extends baseApi
     public function getStockEntryByGuid($GUID)
     {
         $cache = Yii::$app->cache;
-        /* $doc = MercVsd::findOne(['uuid' => $UUID]);
+        $doc = MercVsd::findOne(['guid' => $GUID]);
 
-          if ($doc != null)
-          return unserialize($doc->raw_data);
-         */
+        if ($doc != null) {
+            return unserialize($doc->raw_data);
+        }
 
-        $result = null;
+        return null;
+
+        /*$result = null;
         $doc = null;
 
         //Генерируем id запроса
@@ -545,19 +534,21 @@ class mercuryApi extends baseApi
             $result = null;
         }
 
-        return $doc;
+        return $doc;*/
     }
 
     public function getStockEntryByUuid($UUID)
     {
         $cache = Yii::$app->cache;
-        /* $doc = MercVsd::findOne(['uuid' => $UUID]);
+        $doc = MercVsd::findOne(['uuid' => $UUID]);
 
-          if ($doc != null)
-          return unserialize($doc->raw_data);
-         */
+        if ($doc != null) {
+            return unserialize($doc->raw_data);
+        }
 
-        $result = null;
+        return null;
+
+        /*$result = null;
         $doc = null;
 
         //Генерируем id запроса
@@ -607,7 +598,7 @@ class mercuryApi extends baseApi
             $result = null;
         }
 
-        return $doc;
+        return $doc;*/
     }
 
     public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
@@ -675,7 +666,8 @@ class mercuryApi extends baseApi
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList;
+            $result = $result->application->result->any['resolveDiscrepancyResponse']->stockEntryList->stockEntry;
+            (new LoadStockEntryList())->updateDocumentsList($result);
         } else {
             $result = null;
         }
@@ -723,6 +715,7 @@ class mercuryApi extends baseApi
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
+            (new LoadStockEntryList())->updateDocumentsList([1 => $result]);
         } else {
             $result = null;
         }
@@ -766,12 +759,16 @@ class mercuryApi extends baseApi
 
             $status = $result->application->status;
         } while ($status == 'IN_PROCESS');
-        //dd($result);
+
         //Пишем лог
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
             $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
+            $stockList = $result->application->result->any['registerProductionOperationResponse']->stockEntryList->stockEntry;
+            (new LoadStockEntryList())->updateDocumentsList($stockList);
+            $vetDoc[] = $result->application->result->any['registerProductionOperationResponse']->vetDocument;
+            (new VetDocumentsChangeList())->updateDocumentsList($vetDoc);
         } else {
             $result = null;
         }

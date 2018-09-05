@@ -111,13 +111,11 @@ class createStoreEntryForm extends Model
         $bis_guid = mercDicconst::getSetting('issuer_id');
         $business = cerberApi::getInstance()->getBusinessEntityByGuid($bis_guid);
         $enterprise = cerberApi::getInstance()->getEnterpriseByGuid($ent_guid);
-        $enterprise = $enterprise->enterprise;
-        $business = $business->businessEntity;
 
-        return [$enterprise->name . '(' .
+        return [isset($enterprise) ? $enterprise->name . '(' .
             $enterprise->address->addressView
-            . ')',
-            $business->name . ', ИНН:' . $business->inn,
+            . ')' : null,
+            isset($business) ? $business->name . ', ИНН:' . $business->inn : null,
         ];
     }
 
@@ -128,15 +126,7 @@ class createStoreEntryForm extends Model
             return $res;
         }
 
-        $list = dictsApi::getInstance()->getUnitList();
-
-        $res = [];
-        foreach ($list->unitList->unit as $item) {
-            if ($item->last && $item->active) {
-                $res[$item->uuid] = $item->name;
-            }
-        }
-        return $res;
+        return [];
     }
 
     public function getProductList()
@@ -144,25 +134,12 @@ class createStoreEntryForm extends Model
         if (empty($this->productType)) {
             return [];
         }
-        
+
         $res = \common\models\vetis\VetisProductByType::getProductByTypeList($this->productType);
         if (!empty($res)) {
             return $res;
         }
-
-        $list = productApi::getInstance()->getProductByTypeList($this->productType);
-
-        if (!isset($list->productList->product)) {
-            return [];
-        }
-
-        $res = [];
-        foreach ($list->productList->product as $item) {
-            if ($item->last && $item->active) {
-                $res[$item->guid] = $item->name;
-            }
-        }
-        return $res;
+        return [];
     }
 
     public function getSubProductList()
@@ -170,26 +147,30 @@ class createStoreEntryForm extends Model
         if (empty($this->product)) {
             return [];
         }
-        
+
         $res = \common\models\vetis\VetisSubproductByProduct::getSubProductByProductList($this->product);
         if (!empty($res)) {
             return $res;
         }
-        
-        $list = productApi::getInstance()->getSubProductByProductList($this->product);
 
-        if (!isset($list->subProductList->subProduct)) {
+        return [];
+    }
+
+
+    public function getProductsNamesList()
+    {
+        if (empty($this->subProduct)) {
             return [];
         }
 
-        $res = [];
-        foreach ($list->subProductList->subProduct as $item) {
-            if ($item->last && $item->active) {
-                $res[$item->guid] = $item->name . " (" . $item->code . ")";
-            }
+        $res = \common\models\vetis\VetisProductItem::getProductItemList($this->subProduct);
+        if (!empty($res)) {
+            return $res;
         }
-        return $res;
+
+        return [];
     }
+
 
     public function getProductName()
     {
@@ -221,24 +202,7 @@ class createStoreEntryForm extends Model
             return $res;
         }
 
-        $listOptions = new ListOptions();
-        $listOptions->count = 100;
-        $listOptions->offset = 0;
-
-        $res = [];
-        do {
-            $list = ikarApi::getInstance()->getAllCountryList($listOptions);
-            foreach ($list->countryList->country as $item) {
-                if ($item->last && $item->active) {
-                    $res[$item->uuid] = $item->name;
-                }
-            }
-
-            if ($list->countryList->count < $list->countryList->total) {
-                $listOptions->offset += $list->countryList->count;
-            }
-        } while ($list->countryList->total > ($list->countryList->offset + $list->countryList->count));
-        return $res;
+        return [];
     }
 
     public function getStockDiscrepancy($ID)
@@ -276,7 +240,7 @@ class createStoreEntryForm extends Model
         $stockEntry->batch->expiryDate = $this->convertDate($this->expiryDate);
 
         $stockEntry->batch->batchID = $this->batchID;
-        $stockEntry->batch->perishable = (bool) $this->perishable;
+        $stockEntry->batch->perishable = (bool)$this->perishable;
 
         $stockEntry->batch->origin = new BatchOrigin();
         $stockEntry->batch->origin->country = new Country();

@@ -84,49 +84,43 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     public function actionStep1()
     {
         $session = Yii::$app->session;
-        if(Yii::$app->request->isGet) {
+        if (Yii::$app->request->isGet) {
             $get = Yii::$app->request->get();
             if (isset($get['selected'])) {
                 $selected = Yii::$app->request->get('selected');
                 $session->remove('TrVsd_step1');
-            }
-            else
-            {
+            } else {
                 $selected = $session->get('TrVsd_step1');
                 $attributes = $selected;
                 $session->remove('TrVsd_step1');
                 $selected = implode(",", array_keys($selected));
                 $list = step1Form::find()->where("id in ($selected)")->all();
-                foreach ($list as $key => $item)
-                {
+                foreach ($list as $key => $item) {
                     $list[$key]->attributes = $attributes[$item->id];
                 }
             }
-        }
-        else {
+        } else {
             $post = Yii::$app->request->post('step1Form');
             $res = [];
-            foreach ($post as $item)
-            {
+            foreach ($post as $item) {
                 $res[] = $item['id'];
             }
             $selected = implode(",", $res);
         }
 
-        if(!isset($list))
+        if (!isset($list))
             $list = step1Form::find()->where("id in ($selected)")->all();
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
-            foreach ($list as $item)
-            {
-                $attributes[$item->id] = $item->getAttributes(['product_name','select_amount']);
+            foreach ($list as $item) {
+                $attributes[$item->id] = $item->getAttributes(['product_name', 'select_amount']);
             }
-                $session->set('TrVsd_step1', $attributes);
-                if (Yii::$app->request->isAjax) {
-                    Yii::$app->response->format = Response::FORMAT_JSON;
-                    return (['success' => true]);
-                }
-                return $this->redirect(['step-2']);
+            $session->set('TrVsd_step1', $attributes);
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return (['success' => true]);
+            }
+            return $this->redirect(['step-2']);
 
         }
 
@@ -203,12 +197,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                     $session->remove('TrVsd_step2');
                     $session->remove('TrVsd_step3');
                     $session->remove('TrVsd_step4');
-                }
-                catch (\SoapFault $e) {
+                } catch (\SoapFault $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                }
-                catch (\Exception $e)
-                {
+                } catch (\Exception $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
                 }
                 return $this->redirect(['/clientintegr/merc/stock-entry']);
@@ -217,21 +208,27 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         return $this->render('step-4', ['model' => $model]);
     }
 
-    public function actionAutocomplete($type = 1) {
+    public function actionAutocomplete($type = 1)
+    {
         if (Yii::$app->request->get('term')) {
             $term = Yii::$app->request->get('term');
 
-            switch ($type){
-                case 2 : $column = 'trailer_number'; break;
-                case 3 : $column = 'container_number'; break;
-                default : $column = 'vehicle_number';
+            switch ($type) {
+                case 2 :
+                    $column = 'trailer_number';
+                    break;
+                case 3 :
+                    $column = 'container_number';
+                    break;
+                default :
+                    $column = 'vehicle_number';
             }
 
-                $data = MercVsd::find()
-                    ->select([$column.' as label', $column.' as id'])
-                    ->where(['like', $column, $term])
-                    ->asArray()
-                    ->all();
+            $data = MercVsd::find()
+                ->select([$column . ' as label', $column . ' as id'])
+                ->where(['like', $column, $term])
+                ->asArray()
+                ->all();
             //Yii::$app->response->format = Response::FORMAT_JSON;
             //echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
             return json_encode($data);
@@ -245,12 +242,16 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
             $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-            $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->enterprise->owner->uuid);
-        }catch (\SoapFault $e)
-        {
-            return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+            if(!isset($hc)) {
+                return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+            }
+            else {
+                $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+            }
+        } catch (\SoapFault $e) {
+            return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->businessEntity->name.', ИНН:'.$hc->businessEntity->inn, 'uuid' => $hc->businessEntity->uuid]);
+        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->uuid]);
     }
 
     private function getErrorText($e)
@@ -265,42 +266,36 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     public function actionConversionStep1()
     {
         $session = Yii::$app->session;
-        if(Yii::$app->request->isGet) {
+        if (Yii::$app->request->isGet) {
             $get = Yii::$app->request->get();
             if (isset($get['selected'])) {
                 $selected = Yii::$app->request->get('selected');
                 $session->remove('TrVsd_step1');
-            }
-            else
-            {
+            } else {
                 $selected = $session->get('TrVsd_step1');
                 $attributes = $selected;
                 $session->remove('TrVsd_step1');
                 $selected = implode(",", array_keys($selected));
                 $list = step1Form::find()->where("id in ($selected)")->all();
-                foreach ($list as $key => $item)
-                {
+                foreach ($list as $key => $item) {
                     $list[$key]->attributes = $attributes[$item->id];
                 }
             }
-        }
-        else {
+        } else {
             $post = Yii::$app->request->post('step1Form');
             $res = [];
-            foreach ($post as $item)
-            {
+            foreach ($post as $item) {
                 $res[] = $item['id'];
             }
             $selected = implode(",", $res);
         }
 
-        if(!isset($list))
+        if (!isset($list))
             $list = step1Form::find()->where("id in ($selected)")->all();
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
-            foreach ($list as $item)
-            {
-                $attributes[$item->id] = $item->getAttributes(['product_name','select_amount']);
+            foreach ($list as $item) {
+                $attributes[$item->id] = $item->getAttributes(['product_name', 'select_amount']);
             }
             $session->set('TrVsd_step1', $attributes);
             if (Yii::$app->request->isAjax) {
@@ -324,9 +319,12 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $productionDate = new productionDate();
         $expiryDate = new expiryDate();
         $inputDate = new inputDate();
-        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post()) && $inputDate->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post())) {
             if (!Yii::$app->request->isAjax) {
-                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate() && $inputDate->validate();
+                $model->country = "1";
+                $model->producer = "1";
+                $model->vsd_issueNumber = "1";
+                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate();
                 if ($res) {
                     $model->dateOfProduction = $productionDate;
                     $model->expiryDate = $expiryDate;
@@ -336,11 +334,11 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                     $request->step1 = $session->get('TrVsd_step1');
                     try {
                         $result = mercuryApi::getInstance()->registerProductionOperation($request);
-
-                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
-                        return $this->redirect(['index']);
-                        if(!isset($result))
+                        if (!isset($result)) {
                             throw new \Exception('Error');
+                        }
+                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Error $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
                         return $this->redirect(['conversion-step-2']);

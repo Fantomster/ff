@@ -24,6 +24,11 @@ class mercuryApi extends baseApi
         $this->enterpriseGuid = $enterpriseGuid;
     }
 
+    public function getEnterpriseGuid ()
+    {
+        return $this->enterpriseGuid;
+    }
+
     private function getSubmitApplicationRequest()
     {
         $request = new submitApplicationRequest();

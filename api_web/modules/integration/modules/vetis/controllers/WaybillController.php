@@ -9,10 +9,10 @@ class WaybillController extends WebApiController
 {
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/list",
+     * @SWG\Post(path="/integration/vetis/waybill/groups-list",
      *     tags={"Integration/vetis/waybill"},
-     *     summary="Список сертификатов",
-     *     description="Список сертификатов",
+     *     summary="Список групп сертификатов",
+     *     description="Список групп сертификатов",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -56,6 +56,80 @@ class WaybillController extends WebApiController
      *                            "page_size": 12
      *                      }
      *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGroupsList()
+    {
+        $this->response = (new VetisWaybill())->getGroupsList($this->request);
+    }
+    /**
+     * @SWG\Post(path="/integration/vetis/waybill/list",
+     *     tags={"Integration/vetis/waybill"},
+     *     summary="Список сертификатов",
+     *     description="Список сертификатов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                    "uuids": {
+     *                      "d50becf5-ad90-45dd-aebd-8bc36fe984e0",
+     *                      "80679a18-d03d-45e0-8d0f-adf8f09ec77e",
+     *                      "e3ec3a8d-ecc0-4267-8e65-559bde8d663f",
+     *                      "db3ba021-5165-4d6b-98ce-af8c621731a6"
+     *                    }
+     *                 }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                      "result": {
+     *                            {
+     *                                "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                                "product_name": "Говядина бескостная рубленая БИО, Замороженная",
+     *                                "sender_name": "Поставщик №1 (600021, Владимерская обл., г. Муром, ул. Октяборьской революции 16",
+     *                                "status": "CONFIRMED",
+     *                                "status_text": "Оформлен",
+     *                                "status_date": "29.08.2018",
+     *                                "amount": 40,
+     *                                "unit": "кг",
+     *                                "production_date": "29.08.2018",
+     *                                "date_doc": "29.08.2018"
+     *                                },
+     *                                {
+     *                                "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                                "product_name": "Говядина бескостная рубленая БИО, Замороженная",
+     *                                "sender_name": "Поставщик №1 (600021, Владимерская обл., г. Муром, ул. Октяборьской революции 16",
+     *                                "status": "CONFIRMED",
+     *                                "status_text": "Оформлен",
+     *                                "status_date": "29.08.2018",
+     *                                "amount": 40,
+     *                                "unit": "кг",
+     *                                "production_date": "29.08.2018",
+     *                                "date_doc": "29.08.2018"
+     *                                }
+     *                           }
+     *                      }
+     *              )
      *          )
      *     ),
      *     @SWG\Response(

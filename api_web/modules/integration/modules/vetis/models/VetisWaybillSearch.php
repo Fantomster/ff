@@ -27,7 +27,7 @@ class VetisWaybillSearch extends MercVsd
     {
         return Model::scenarios();
     }
-    
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -37,32 +37,33 @@ class VetisWaybillSearch extends MercVsd
      */
     public function search($params)
     {
-        $query = (new VetisHelper)->getQueryByUuid();
-        $query->with('waybillContent');
+        $query = (new VetisHelper())->getOrdersQueryVetis();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
 
-        if(empty($params)){
+        if (empty($params)) {
             return $dataProvider;
         }
 
         foreach ($params as $key => $param) {
             if ($key == 'from') {
                 $start_date = date('Y-m-d 00:00:00', strtotime($this->from));
-            } elseif ($key == 'to'){
-                $end_date = date('Y-m-d 23:59:59',strtotime($this->to));
-            } elseif ($key == 'product_name'){
-                $query->andFilterWhere(['like', 'product_name', $this->product_name]);
+            } elseif ($key == 'to') {
+                $end_date = date('Y-m-d 23:59:59', strtotime($this->to));
+            } elseif ($key == 'product_name') {
+                $query->andFilterWhere(['like', 'm.product_name', $this->product_name]);
+            } elseif ($key == 'acquirer_id') {
+                $query->andWhere(['w.' . $key => $this->{$key}]);
             } else {
-                $query->andWhere([$key => $this->{$param}]);
+                $query->andWhere(['m.' . $key => $this->{$key}]);
             }
         }
 
         if (isset($start_date) && isset($end_date)) {
-            $query->andFilterWhere(['between', 'date_doc', $start_date, $end_date]);
+            $query->andFilterWhere(['between', 'm.date_doc', $start_date, $end_date]);
         }
-        
+
         return $dataProvider;
     }
 

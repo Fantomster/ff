@@ -5,8 +5,10 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\MercVsd;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
+use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 
 class VetisWaybill
 {
@@ -17,11 +19,11 @@ class VetisWaybill
     }
 
     /**
-     * Список сертифитаков
+     * Список сертифитаков сгруппированный по номеру заказа
      * @param $request
      * @return array
      */
-    public function getList($request)
+    public function getGroupsList($request)
     {
         $reqPag = $request['pagination'];
         $reqSearch = $request['search'];
@@ -31,60 +33,65 @@ class VetisWaybill
         $search = new VetisWaybillSearch();
         if (isset($reqSearch)) {
             $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
-//            $dataProvider = $search->search($params);
-
-//            $pagination = new Pagination();
-//            $pagination->setPage($page - 1);
-//            $pagination->setPageSize($pageSize);
-//            $dataProvider->setPagination($pagination);
-
-//            foreach ($dataProvider->getModels() as $model) {
-//
-//                if (!empty($model->waybillContent)) {
-//                    foreach ($model->waybillContent as $content){
-//                        $key = $content['order_content_id'];
-//                        if (!isset($count[$key]['count'])) {
-//                            $count[$key]['count'] = 1;
-//                        }
-//                        $result[$key]['count'] = $count[$key]['count']++;
-//                        $result[$key]['items'][] = [
-//                            'uuid'            => $model->uuid,
-//                            'product_name'    => $model->product_name,
-//                            'sender_name'     => $model->sender_name,
-//                            'status'          => $model->status,
-//                            'status_text'     => MercVsd::$statuses[$model->status],
-//                            'status_date'     => $model->last_update_date,
-//                            'amount'          => $model->amount,
-//                            'unit'            => $model->unit,
-//                            'production_date' => $model->production_date,
-//                            'date_doc'        => $model->date_doc,
-//                        ];
-//                    }
-//                } else {
-//                    $key = 'order_not_installed';
-//                }
-//                if (!isset($count[$key]['count'])) {
-//                    $count[$key]['count'] = 1;
-//                }
-//                $result[$key]['count'] = $count[$key]['count']++;
-//                $result[$key]['items'][] = [
-//                    'uuid'            => $model->uuid,
-//                    'product_name'    => $model->product_name,
-//                    'sender_name'     => $model->sender_name,
-//                    'status'          => $model->status,
-//                    'status_text'     => MercVsd::$statuses[$model->status],
-//                    'status_date'     => $model->last_update_date,
-//                    'amount'          => $model->amount,
-//                    'unit'            => $model->unit,
-//                    'production_date' => $model->production_date,
-//                    'date_doc'        => $model->date_doc,
-//                ];
-//            }
-
+            $dataProvider = $search->search($params);
+        } else {
+            $dataProvider = new ActiveDataProvider([
+                'query' => $this->helper->getOrdersQueryVetis(),
+            ]);
         }
 
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+        foreach ($dataProvider->models as $model) {
+            $result[$model['group_name']]['count'] = $model['count'];
+            if ($model['group_name'] != 'order_not_installed') {
+                $result[$model['group_name']]['date'] = $model['created_at'];
+                $result[$model['group_name']]['total_price'] = $model['total_price'];
+            }
+            $result[$model['group_name']]['uuids'] = explode(',', $model['uuids']);
+        }
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+        return $return;
+    }
 
-        return $this->helper->getOrdersVetis();
+    /**
+     * Получение ВСД по uuids
+     * @throws BadRequestHttpException
+     * @param array $uuids
+     * */
+    public function getList($request)
+    {
+        if (!isset($request['uuids']) || empty($request['uuids'])) {
+            throw new BadRequestHttpException('uuids не заполнен или пуст');
+        }
+
+        $models = MercVsd::findAll(['uuid' => $request['uuids']]);
+        $result = [];
+        foreach ($models as $model) {
+            $result[] = [
+                'uuid'            => $model->uuid,
+                'product_name'    => $model->product_name,
+                'sender_name'     => $model->sender_name,
+                'status'          => $model->status,
+                'status_text'     => MercVsd::$statuses[$model->status],
+                'status_date'     => $model->last_update_date,
+                'amount'          => $model->amount,
+                'unit'            => $model->unit,
+                'production_date' => $model->production_date,
+                'date_doc'        => $model->date_doc,
+            ];
+        }
+
         return ['result' => $result];
     }
 

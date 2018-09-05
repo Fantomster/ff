@@ -51,27 +51,32 @@ class VetisHelper
         return $arGoodParams;
     }
 
-    public function getOrdersVetis()
+    /**
+     * @return Query
+     * */
+    public function getOrdersQueryVetis()
     {
-        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db->dsn);
-        $sq = 'SELECT
-                  COALESCE(o.id, "order_not_installed") as group_name,
-                  COUNT(m.id),
-                  o.created_at,
-                  o.total_price
-                FROM merc_vsd m
-                LEFT JOIN waybill_content wc ON wc.merc_uuid = m.uuid COLLATE utf8_unicode_ci
-                LEFT JOIN waybill w ON w.id = wc.waybill_id
-                LEFT JOIN ' . $tableName .'.`order_content` oc ON oc.id = wc.order_content_id
-                LEFT JOIN ' . $tableName .'.`order` o ON o.id = oc.order_id
-                WHERE
-                  w.service_id = 4
-                GROUP BY group_name
-                ORDER BY group_name DESC';
+        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $query = (new Query())
+            ->select(
+                [
+                    'COALESCE(o.id, \'order_not_installed\' ) as group_name',
+                    'COUNT(m.id) as count',
+                    'o.created_at',
+                    'o.total_price',
+                    'GROUP_CONCAT(`wc`.`merc_uuid` SEPARATOR \',\') AS `uuids`'
+                ]
+            )
+            ->from('`' . $tableName . '`.merc_vsd m')
+            ->leftJoin('`' . $tableName . '`.waybill_content wc', 'wc.merc_uuid = m.uuid COLLATE utf8_unicode_ci')
+            ->leftJoin('`' . $tableName . '`.waybill w', 'w.id = wc.waybill_id')
+            ->leftJoin('order_content oc', 'oc.id = wc.order_content_id')
+            ->leftJoin('order o', 'o.id = oc.order_id')
+            ->where('w.service_id = 4')
+            ->groupBy('group_name')
+            ->orderBy(['group_name' => SORT_DESC]);
 
-        
-        $posts = \Yii::$app->db_api->createCommand($sq)->queryAll();
-        return $posts;
+        return $query;
     }
 
     private function getDsnAttribute($name, $dsn)

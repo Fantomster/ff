@@ -188,15 +188,24 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $model = $this;
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><document></document>');
 
+        $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+
+        if ($waybillMode !== '0') {
+            $xml->addChild('documentNumber', $model->order_id.'-'.$model->num_code);
+            $xml->addChild('invoice', $model->text_code);
+            $xml->addChild('incomingDocumentNumber', $model->order_id.'-'.$model->num_code);
+        } else {
+            $xml->addChild('documentNumber', $model->order_id);
+            $xml->addChild('invoice', $model->text_code);
+            $xml->addChild('incomingDocumentNumber', $model->num_code);
+        }
+
         $xml->addChild('comment', $model->note);
-        $xml->addChild('documentNumber', $model->order_id.'-'.$model->num_code);
         $datetime = new \DateTime($model->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
-        $xml->addChild('invoice', $model->text_code);
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
-        $xml->addChild('incomingDocumentNumber', $model->order_id.'-'.$model->num_code);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');
@@ -283,13 +292,17 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $model->order_id = $order_id;
             $model->status_id = 1;
             $model->org = $order->client_id;
-            $model->text_code = 'mixcart'.$order_id.'-'.$num;
-            $model->num_code = strval($num);
             $model->store_id = $store;
             $model->agent_uuid = isset($contra) ? $contra->uuid : null;
-
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
             $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+
+            $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+
+            if ($waybillMode !== '2') {
+                $model->text_code = 'mixcart' . $order_id . '-' . $num;
+                $model->num_code = strval($num);
+            }
 
             if (!$model->save()) {
                 $num++;

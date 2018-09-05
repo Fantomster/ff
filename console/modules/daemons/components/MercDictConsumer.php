@@ -120,8 +120,15 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 }
             }
         } while ($list->total > ($list->count + $list->offset));
-        $queue->data_request = new Expression('NULL');
-        $queue->save();
+
+        $this->log("FIND: consumer_class_name = {$className}");
+
+        $queue = RabbitQueues::findOne(['consumer_class_name' => $className]);
+        if ($queue) {
+            $queue->data_request = new Expression('NULL');
+            $queue->save();
+        }
+
         mercLogger::getInstance()->addMercLogDict('COMPLETE', $this->modelClassName, null);
     }
 

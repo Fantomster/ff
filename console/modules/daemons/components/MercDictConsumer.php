@@ -85,7 +85,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
      */
     public function getData()
     {
-        $className = BaseStringHelper::basename(self::class);
+        $className = BaseStringHelper::basename(static::class);
         $queue = RabbitQueues::find()->where(['consumer_class_name' => $className])->one();
         $this->data = $queue->data_request ?? $this->data;
         $this->init();
@@ -95,6 +95,11 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         $list = null;
         do {
             try {
+                //Записываем в базу данные о текущем шаге
+                $this->data['request'] = json_encode($this->request);
+                $queue->data_request = json_encode($this->data);
+                $queue->save();
+                //Выполняем запрос и обработку полученных данных
                 $response = $this->instance->sendRequest($this->method, $this->request);
                 $list = $response->{$this->listName};
                 $count += $list->count;
@@ -110,9 +115,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     $this->request['listOptions']['offset'] += $list->count;
                 }
             } catch (\Throwable $e) {
-                $queue->data_request = json_encode($this->request);
-                $queue->save();
-                $this->log($e->getMessage() . " " . $e->getTraceAsString());
+                $this->log($e->getMessage() . " " . $e->getTraceAsString().PHP_EOL);
                 mercLogger::getInstance()->addMercLogDict('ERROR', $this->modelClassName, $e->getMessage());
                 $error++;
                 if ($error == 3) {

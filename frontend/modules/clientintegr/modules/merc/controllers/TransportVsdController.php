@@ -242,10 +242,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
             $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-            if (!isset($hc)) {
-                return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
-            } else {
-                $hc = unserialize($hc->data);
+            if(!isset($hc)) {
+                return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+            }
+            else {
                 $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
             }
         } catch (\SoapFault $e) {

@@ -17,6 +17,9 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
  */
 class MercSubProductList extends MercDictConsumer
 {
+    public static $timeout  = 60*60*24;
+    public static $timeoutExecuting = 60*60*12;
+
     protected function init()
     {
         $this->instance = productApi::getInstance($this->org_id);

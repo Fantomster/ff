@@ -66,7 +66,8 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             }],*/
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
-            [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'country_guid', 'addressView', 'owner_guid', 'owner_uuid'], 'string', 'max' => 255],
+            [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'country_guid', 'owner_guid', 'owner_uuid'], 'string', 'max' => 255],
+            [['addressView'], 'string']
         ];
     }
 

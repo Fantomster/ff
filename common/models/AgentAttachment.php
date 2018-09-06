@@ -17,8 +17,9 @@ use yii\helpers\ArrayHelper;
  */
 class AgentAttachment extends \yii\db\ActiveRecord
 {
+
     public $resourceCategory = 'agent_requests';
-    
+
     /**
      * @inheritdoc
      */
@@ -30,7 +31,8 @@ class AgentAttachment extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
                     [
                         'class' => UploadBehavior::className(),
@@ -72,4 +74,5 @@ class AgentAttachment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(AgentRequest::className(), ['id' => 'agent_request_id']);
     }
+
 }

@@ -226,4 +226,35 @@ class VetisWaybill
 
         return ['result' => $result];
     }
+    /**
+     * Погашение ВСД
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function partialAcceptance($request)
+    {
+        $uuid = $request['uuid'];
+        if (!isset($uuid) || !is_array($uuid || !isset($request['reason']))) {
+            throw new BadRequestHttpException('Uuid and reason is required and must be array');
+        }
+        $result = [];
+        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        $records = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
+        ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        try{
+            $api = mercuryApi::getInstance();
+            if(array_key_exists($uuid, $records)){
+                $result[$uuid] = $api->getVetDocumentDone($uuid);
+            } else {
+                $result[$uuid] = 'ВСД не принадлежит данной организации';
+            }
+        } catch (\Throwable $t){
+            $result['error'] = $t->getMessage();
+            $result['trace'] = $t->getTraceAsString();
+            $result['code'] = $t->getCode();
+        }
+
+        return ['result' => $result];
+    }
 }

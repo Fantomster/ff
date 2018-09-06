@@ -178,4 +178,20 @@ class VetisWaybill
 
         return ['result' => $obInfo];
     }
+
+    /**
+     * Полная информация о ВСД
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function getFullInfoAboutVsd($request)
+    {
+        if (!isset($request['uuid'])) {
+            throw new BadRequestHttpException('Uuid is required');
+        }
+        $obInfo = (new VetisHelper())->getFullInfoVsd($request['uuid']);
+
+        return ['result' => $obInfo];
+    }
 }

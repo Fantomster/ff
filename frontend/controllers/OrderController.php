@@ -44,6 +44,7 @@ use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\helpers\Url;
+use Exception;
 
 
 class OrderController extends DefaultController
@@ -574,12 +575,50 @@ class OrderController extends DefaultController
         return $this->renderPartial('_vds_list', compact('mercVSDs'));
     }
 
+
+
+    /**
+     * Редактирование шаблона
+     * @param $initGuideItems array
+     * @return array
+     */
+    public function getOrderGuideItems(array $initGuideItems = []): array
+    {
+
+        #---------------------------------------------------------------------------------------------------------------
+        # загружаем временные параметры шаблона из куки и корректируем сохраненные товары шаблона на только что загруженные
+        # в итоге получаем товары шаблона для отображения
+        $itemsInCookie = COOK::get(COOK::ORDER_GUIDE_SELECTED_PRODUCTS);
+        if (str_replace(COOK::DELIMITER_VALUE, NULL, $itemsInCookie)) {
+            foreach (explode(COOK::DELIMITER_VALUE, $itemsInCookie) as $gp) {
+                if ($gp) {
+                    $gp = str_replace('+', '', $gp);
+                    if ((int)$gp > 0) {
+                        if (!in_array($gp, $initGuideItems)) {
+                            $initGuideItems[] = $gp;
+                        }
+                    } elseif ((int)$gp < 0) {
+                        $gp = -$gp;
+                        if (in_array($gp, $initGuideItems)) {
+                            unset($initGuideItems[array_search($gp, $initGuideItems)]);
+                        }
+                    }
+                }
+            }
+        }
+        #---------------------------------------------------------------------------------------------------------------
+        return $initGuideItems;
+        #---------------------------------------------------------------------------------------------------------------
+
+    }
+
+
     /**
      * Редактирование шаблона
      * @param int $id
      * @return string
      */
-    public function actionEditGuide(int $id)
+    public function actionEditGuide(int $id): string
     {
 
         $client = $this->currentUser->organization;
@@ -588,12 +627,9 @@ class OrderController extends DefaultController
         if (empty($guide)) {
             return $this->redirect(['order/guides']);
         }
-
         # обнуляем временные товары шаблона (если хранимые в куки настройки шаблона относятся к другому шаблону)
-        if ($id != COOK::get(COOK::ORDER_GUIDE_CURRENT)) {
-            COOK::remove(COOK::ORDER_GUIDE_ITEMS);
-        }
-        # уточняем id последнего просматриваемого шаблона
+        COOK::removeOrderGuideParamsIfOrderGuideIsNotCurrent($id);
+        # обновляем id последнего просматриваемого шаблона
         COOK::set(COOK::ORDER_GUIDE_CURRENT, $id);
 
         #---------------------------------------------------------------------------------------------------------------
@@ -616,30 +652,7 @@ class OrderController extends DefaultController
         ];
         #---------------------------------------------------------------------------------------------------------------
 
-        #---------------------------------------------------------------------------------------------------------------
-        # загружаем временные параметры шаблона из куки и корректируем сохраненные товары шаблона на только что загруженные
-        # в итоге получаем товары шаблона для отображения
-
-        $guideItems = $guide->guideProductsIds;
-        $itemsInCookie = COOK::get(COOK::ORDER_GUIDE_ITEMS);
-        if (str_replace(COOK::DELIMITER_VALUE, NULL, $itemsInCookie)) {
-            foreach (explode(COOK::DELIMITER_VALUE, $itemsInCookie) as $gp) {
-                if ($gp) {
-                    $gp = str_replace('+', '', $gp);
-                    if ((int)$gp > 0) {
-                        if (!in_array($gp, $guideItems)) {
-                            $guideItems[] = $gp;
-                        }
-                    } elseif ((int)$gp < 0) {
-                        $gp = -$gp;
-                        if (in_array($gp, $guideItems)) {
-                            unset($guideItems[array_search($gp, $guideItems)]);
-                        }
-                    }
-                }
-            }
-        }
-        #---------------------------------------------------------------------------------------------------------------
+        $guideItems = $this->getOrderGuideItems($guide->guideProductsIds);
 
         #---------------------------------------------------------------------------------------------------------------
         # корректируем параметры работы виджетов - работа фильтра поиск по поставщику, сортировка товаров,
@@ -653,9 +666,9 @@ class OrderController extends DefaultController
         #---------------------------------------------------------------------------------------------------------------
         if (Yii::$app->request->get("sort")) {
             $params['sort'] = Yii::$app->request->get("sort");
-            COOK::set(COOK::ORDER_GUIDE_SORT, $params['sort']);
-        } elseif (COOK::get(COOK::ORDER_GUIDE_SORT)) {
-            $params['sort'] = COOK::get(COOK::ORDER_GUIDE_SORT);
+            COOK::set(COOK::ORDER_GUIDE_SORT_PRODUCTS, $params['sort']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SORT_PRODUCTS)) {
+            $params['sort'] = COOK::get(COOK::ORDER_GUIDE_SORT_PRODUCTS);
         }
         #---------------------------------------------------------------------------------------------------------------
         if (isset(Yii::$app->request->post("OrderCatalogSearch")['searchString'])) {
@@ -667,9 +680,9 @@ class OrderController extends DefaultController
         #---------------------------------------------------------------------------------------------------------------
         if (isset(Yii::$app->request->post("BaseProductSearch")['searchString'])) {
             $params['BaseProductSearch']['searchString'] = Yii::$app->request->post("BaseProductSearch")['searchString'];
-            COOK::set(COOK::ORDER_GUIDE_SEARCH_GUIDE, $params['BaseProductSearch']['searchString']);
-        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_GUIDE)) {
-            $params['BaseProductSearch']['searchString'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_GUIDE);
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_PROODUCTS, $params['BaseProductSearch']['searchString']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_PROODUCTS)) {
+            $params['BaseProductSearch']['searchString'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_PROODUCTS);
         }
         #---------------------------------------------------------------------------------------------------------------
 
@@ -706,41 +719,30 @@ class OrderController extends DefaultController
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
             return $this->renderPartial('guides/_vendor-list', ['selectedVendor' => $params['selectedVendor']]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
-            return $this->renderPartial('guides/_product-list', [
-                'productDataProvider' => $productDataProvider,
-            ]);
+            return $this->renderPartial('guides/_product-list', ['productDataProvider' => $productDataProvider]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
             return $this->renderPartial('guides/_guide-product-list',
-               [
-                   'show_sorting' => $params['show_sorting'],
-                   'sort' => $params['sort'],
-                   'guideDataProvider' => $guideDataProvider,
-                   'guideSearchModel' => $guideSearchModel,
-               ]
+                [
+                    'show_sorting' => $params['show_sorting'],
+                    'sort' => $params['sort'],
+                    'guideDataProvider' => $guideDataProvider,
+                    'guideSearchModel' => $guideSearchModel,
+                ]
             );
         } else {
-            return $this->render('guides/edit-guide',
-                [
-                    'selectedVendor' => $params['selectedVendor'],
-                    'guide' => $guide,
-                    'client' => $client,
-                    'vendorSearchModel' => $vendorSearchModel,
-                    'vendorDataProvider' => $vendorDataProvider,
-                    'productSearchModel' => $productSearchModel,
-                    'productDataProvider' => $productDataProvider,
-                    'guideProductList' => $guideItems,
-                    'guideSearchModel' => $guideSearchModel,
-                    'guideDataProvider' => $guideDataProvider,
-                    'params' => $params,
-                ]
-
-//                compact('guide', 'selectedVendor', 'guideProductList',
-//                    'guideProductList', 'vendorSearchModel', 'vendorDataProvider',
-//                    'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider',
-//                    'session', 'params', 'client')
-//
-
-        );
+            return $this->render('guides/edit-guide', [
+                'selectedVendor' => $params['selectedVendor'],
+                'guide' => $guide,
+                'client' => $client,
+                'vendorSearchModel' => $vendorSearchModel,
+                'vendorDataProvider' => $vendorDataProvider,
+                'productSearchModel' => $productSearchModel,
+                'productDataProvider' => $productDataProvider,
+                'guideProductList' => $guideItems,
+                'guideSearchModel' => $guideSearchModel,
+                'guideDataProvider' => $guideDataProvider,
+                'params' => $params,
+            ]);
         }
         #---------------------------------------------------------------------------------------------------------------
 
@@ -754,48 +756,43 @@ class OrderController extends DefaultController
      */
     public function actionSaveGuide($id)
     {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            $client = $this->currentUser->organization;
-            $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
-            $current_id = Yii::$app->session->get('currentGuide', null);
-            if ($id != $current_id) {
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            if ($id != COOK::get(COOK::ORDER_GUIDE_CURRENT)) {
                 return $this->redirect(['order/guides']);
             }
-
-            $guideProductList = Yii::$app->session->get('guideProductList');
-
+            $client = $this->currentUser->organization;
+            $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+            $guideItems = $this->getOrderGuideItems($guide->guideProductsIds);
             foreach ($guide->guideProducts as $guideProduct) {
-                if (!in_array($guideProduct->cbg_id, $guideProductList)) {
+
+                if (!in_array($guideProduct->cbg_id, $guideItems)) {
                     $guideProduct->delete();
                 } else {
-                    $position = array_search($guideProduct->cbg_id, $guideProductList);
-                    if ($position !== false) {
-                        unset($guideProductList[$position]);
-                    }
+                    $position = array_search($guideProduct->cbg_id, $guideItems);
+                    unset($guideItems[$position]);
                 }
             }
-
             $rows = [];
-            foreach ($guideProductList as $newProductId) {
+            foreach ($guideItems as $newProductId) {
                 $rows[] = [
                     'guide_id' => $id,
                     'cbg_id' => $newProductId,
                 ];
             }
 
-            if (!empty($rows)) {
+            if ($rows) {
                 Yii::$app->db->createCommand()
                     ->batchInsert(GuideProduct::tableName(), ['guide_id', 'cbg_id'], $rows)
                     ->execute();
             }
+            COOK::removeOrderGuideParamsIfOrderGuideIsNotCurrent();
 
-            Yii::$app->session->remove('guideProductList');
-            Yii::$app->session->remove('selectedVendor');
-            Yii::$app->session->remove('currentGuide');
             $transaction->commit();
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             $transaction->rollBack();
             throw $e;
         }
@@ -809,10 +806,7 @@ class OrderController extends DefaultController
      */
     public function actionResetGuide()
     {
-        $session = Yii::$app->session;
-        unset($session['guideProductList']);
-        unset($session['selectedVendor']);
-        unset($session['currentGuide']);
+        COOK::removeOrderGuideParamsIfOrderGuideIsNotCurrent();
         return $this->redirect(['order/guides']);
     }
 
@@ -835,7 +829,7 @@ class OrderController extends DefaultController
         $guideDataProvider->pagination = false; //['pageSize' => 8];
         if (!Yii::$app->request->isPjax) {
             foreach ($_SESSION as $key => &$item) {
-                if (strpos($key, 'uideProductCount')) {
+                if (strpos($key, 'GuideProductCount')) {
                     unset($_SESSION[$key]);
                 }
             }
@@ -872,7 +866,7 @@ class OrderController extends DefaultController
             return FALSE;
         }
 
-        $cookieKey = COOK::ORDER_GUIDE_ITEMS;
+        $cookieKey = COOK::ORDER_GUIDE_SELECTED_PRODUCTS;
         $orderGuide = COOK::get($cookieKey);
 
         if (!$orderGuide) {
@@ -915,7 +909,7 @@ class OrderController extends DefaultController
             return FALSE;
         }
 
-        $cookieKey = COOK::ORDER_GUIDE_ITEMS;
+        $cookieKey = COOK::ORDER_GUIDE_SELECTED_PRODUCTS;
         $orderGuide = COOK::get($cookieKey);
 
         if (!$orderGuide) {
@@ -2683,8 +2677,8 @@ class OrderController extends DefaultController
 
     public function actionAjaxClearSession()
     {
-        foreach ($_SESSION as $key => &$item) {
-            if (strpos($key, 'uideProductCount')) {
+        foreach ($_SESSION as $key => $item) {
+            if (strpos($key, 'GuideProductCount')) {
                 unset($_SESSION[$key]);
             }
         }

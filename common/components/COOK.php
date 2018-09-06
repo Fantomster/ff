@@ -19,11 +19,11 @@ class COOK
     const YEAR_IN_SECONDS = 31536000;
 
     const ORDER_GUIDE_CURRENT = 'order_guide_current';
-    const ORDER_GUIDE_ITEMS = 'order_guide_items';
+    const ORDER_GUIDE_SELECTED_PRODUCTS = 'order_guide_selected_products';
     const ORDER_GUIDE_SEARCH_VENDOR = 'order_guide_search_vendor';
     const ORDER_GUIDE_SEARCH_CATALOG = 'order_guide_search_catalog';
-    const ORDER_GUIDE_SEARCH_GUIDE = 'order_guide_search_guide';
-    const ORDER_GUIDE_SORT = 'order_guide_sort';
+    const ORDER_GUIDE_SEARCH_PROODUCTS = 'order_guide_search_products';
+    const ORDER_GUIDE_SORT_PRODUCTS = 'order_guide_sort_products';
     const ORDER_GUIDE_SELECTED_VENDOR = 'order_guide_selected_vendor';
 
     const DELIMITER_VALUE = ';';
@@ -47,6 +47,26 @@ class COOK
         ]));
         return TRUE;
 
+    }
+
+    /**
+     * Remove web-domain cookie recognized as ORDER GUIDE COOKIE params if we edit|view another order guide
+     * @param $id int
+     * @return bool
+     */
+    public static function removeOrderGuideParamsIfOrderGuideIsNotCurrent(int $id = NULL): bool
+    {
+        if (!$id || $id != COOK::get(COOK::ORDER_GUIDE_CURRENT)) {
+            COOK::remove(COOK::ORDER_GUIDE_CURRENT);
+            COOK::remove(COOK::ORDER_GUIDE_SELECTED_PRODUCTS);
+            COOK::remove(COOK::ORDER_GUIDE_SEARCH_VENDOR);
+            COOK::remove(COOK::ORDER_GUIDE_SEARCH_CATALOG);
+            COOK::remove(COOK::ORDER_GUIDE_SEARCH_PROODUCTS);
+            COOK::remove(COOK::ORDER_GUIDE_SORT_PRODUCTS);
+            COOK::remove(COOK::ORDER_GUIDE_SELECTED_VENDOR);
+            return TRUE;
+        }
+        return FALSE;
     }
 
     /**

@@ -45,7 +45,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function getList(array $post)
     {
-        $sort = (isset($post['sort']) ? $post['sort'] : 'created_at');
+        $sort = (!empty($post['sort']) ? $post['sort'] : 'created_at');
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
         $product_list = (isset($post['product_list']) ? $post['product_list'] : false);

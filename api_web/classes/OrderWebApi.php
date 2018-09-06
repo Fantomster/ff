@@ -339,6 +339,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         $result = $order->attributes;
+        $currency = $order->currency->symbol ?? "RUB";
         unset($result['updated_at']);
         unset($result['status']);
         unset($result['accepted_by_id']);
@@ -347,7 +348,7 @@ class OrderWebApi extends \api_web\components\WebApi
         unset($result['client_id']);
         unset($result['currency_id']);
         unset($result['discount_type']);
-        $result['currency'] = $order->currency->symbol;
+        $result['currency'] = $currency;
         $result['currency_id'] = $order->currency->id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
@@ -385,7 +386,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 /**
                  * @var OrderContent $model
                  */
-                $result['items'][] = $this->prepareProduct($model);
+                $result['items'][] = $this->prepareProduct($model, $currency);
             }
         }
 
@@ -877,8 +878,8 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
             if ($order->validate()) {
-                try{
-                    if(!$order->save()) {
+                try {
+                    if (!$order->save()) {
                         throw new \Exception('Order not save!!!');
                     }
                 } catch (\Throwable $e) {
@@ -955,7 +956,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    private function prepareProduct(OrderContent $model)
+    private function prepareProduct(OrderContent $model, $currency = null)
     {
         $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
 
@@ -973,7 +974,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
         $item['units'] = $model->product->units;
-        $item['currency'] = $model->product->catalog->currency->symbol;
+        $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;

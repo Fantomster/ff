@@ -9,10 +9,12 @@ use api_web\classes\CartWebApi;
 use api_web\classes\RkeeperWebApi;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
+use common\components\COOK;
 use common\models\Cart;
 use common\models\CatalogGoodsBlocked;
 use common\models\search\OrderProductsSearch;
 use frontend\helpers\GenerationTime;
+use function PHPSTORM_META\type;
 use Yii;
 use common\components\SearchOrdersComponent;
 use yii\db\Expression;
@@ -579,87 +581,169 @@ class OrderController extends DefaultController
      */
     public function actionEditGuide(int $id)
     {
+
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        $params['show_sorting'] = true;
-
+        $vendors = $client->getSuppliers(null, false);
         if (empty($guide)) {
             return $this->redirect(['order/guides']);
         }
 
-        $session = Yii::$app->session;
-
-        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
-            unset($session['guideProductList']);
-            unset($session['selectedVendor']);
+        # обнуляем временные товары шаблона (если хранимые в куки настройки шаблона относятся к другому шаблону)
+        if ($id != COOK::get(COOK::ORDER_GUIDE_CURRENT)) {
+            COOK::remove(COOK::ORDER_GUIDE_ITEMS);
         }
+        # уточняем id последнего просматриваемого шаблона
+        COOK::set(COOK::ORDER_GUIDE_CURRENT, $id);
 
-        $session['currentGuide'] = $id;
+        #---------------------------------------------------------------------------------------------------------------
+        # уточненяем базовые параметры работы страницы
+        $params = [
+            # храним только числовые идентификаторы (show_sorting = FALSE)
+            'show_sorting' => FALSE,
+            # назначаем идентификатор шаблона
+            'guide_id' => $id,
+            # обнуляем фильтр поиска по поставщику
+            'VendorSearch' => NULL,
+            # обнуляем сортировку по умолчанию (начальную)
+            'sort' => NULL,
+            # обнуляем поиск товаров по каталогу
+            'OrderCatalogSearch' => NULL,
+            # настройки выбранного поставщика
+            'selectedVendor' => NULL,
+            # обнуляем поиск товаров в шаблоне
+            'BaseProductSearch' => NULL,
+        ];
+        #---------------------------------------------------------------------------------------------------------------
 
-        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
-        $session['guideProductList'] = $guideProductList;
+        #---------------------------------------------------------------------------------------------------------------
+        # загружаем временные параметры шаблона из куки и корректируем сохраненные товары шаблона на только что загруженные
+        # в итоге получаем товары шаблона для отображения
 
-        if (!count($session['guideProductList'])) {
-            $params['show_sorting'] = false;
-        }
-
-        if (is_iterable($session['guideProductList'])) {
-            foreach ($session['guideProductList'] as $one) {
-                if (gettype($one) == "integer") {
-                    $params['show_sorting'] = false;
-                    break;
+        $guideItems = $guide->guideProductsIds;
+        $itemsInCookie = COOK::get(COOK::ORDER_GUIDE_ITEMS);
+        if (str_replace(COOK::DELIMITER_VALUE, NULL, $itemsInCookie)) {
+            foreach (explode(COOK::DELIMITER_VALUE, $itemsInCookie) as $gp) {
+                if ($gp) {
+                    $gp = str_replace('+', '', $gp);
+                    if ((int)$gp > 0) {
+                        if (!in_array($gp, $guideItems)) {
+                            $guideItems[] = $gp;
+                        }
+                    } elseif ((int)$gp < 0) {
+                        $gp = -$gp;
+                        if (in_array($gp, $guideItems)) {
+                            unset($guideItems[array_search($gp, $guideItems)]);
+                        }
+                    }
                 }
             }
         }
+        #---------------------------------------------------------------------------------------------------------------
 
-        $vendorSearchModel = new VendorSearch();
-        if (Yii::$app->request->post("VendorSearch")) {
-            $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
+        #---------------------------------------------------------------------------------------------------------------
+        # корректируем параметры работы виджетов - работа фильтра поиск по поставщику, сортировка товаров,
+        # фильтр поиска по каталогу товаров, поиск по товарам шаблона
+        if (isset(Yii::$app->request->post("VendorSearch")['search_string'])) {
+            $params['VendorSearch']['search_string'] = Yii::$app->request->post("VendorSearch")['search_string'];
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_VENDOR, $params['VendorSearch']['search_string']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_VENDOR)) {
+            $params['VendorSearch']['search_string'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_VENDOR);
         }
-        $params['VendorSearch'] = $session['vendorSearchString'];
-        $params['guide_id'] = $id;
+        #---------------------------------------------------------------------------------------------------------------
+        if (Yii::$app->request->get("sort")) {
+            $params['sort'] = Yii::$app->request->get("sort");
+            COOK::set(COOK::ORDER_GUIDE_SORT, $params['sort']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SORT)) {
+            $params['sort'] = COOK::get(COOK::ORDER_GUIDE_SORT);
+        }
+        #---------------------------------------------------------------------------------------------------------------
+        if (isset(Yii::$app->request->post("OrderCatalogSearch")['searchString'])) {
+            $params['OrderCatalogSearch']['searchString'] = Yii::$app->request->post("OrderCatalogSearch")['searchString'];
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_CATALOG, $params['OrderCatalogSearch']['searchString']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_CATALOG)) {
+            $params['OrderCatalogSearch']['searchString'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_CATALOG);
+        }
+        #---------------------------------------------------------------------------------------------------------------
+        if (isset(Yii::$app->request->post("BaseProductSearch")['searchString'])) {
+            $params['BaseProductSearch']['searchString'] = Yii::$app->request->post("BaseProductSearch")['searchString'];
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_GUIDE, $params['BaseProductSearch']['searchString']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_GUIDE)) {
+            $params['BaseProductSearch']['searchString'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_GUIDE);
+        }
+        #---------------------------------------------------------------------------------------------------------------
 
-        $session['sort'] = $params['sort'] = Yii::$app->request->get("sort") ?? $session['sort'] ?? '';
-
+        #---------------------------------------------------------------------------------------------------------------
+        # формируем модель поиска и провайдер данных для первого блока (ПОСТАВЩИКИ)
+        $vendorSearchModel = new VendorSearch();
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
-
+        #---------------------------------------------------------------------------------------------------------------
+        # формируем модель поиска и провайдер данных для второго блока (КАТАЛОГ ТОВАРОВ)
         $productSearchModel = new OrderCatalogSearch();
-        $vendors = $client->getSuppliers(null, false);
-        $selectedVendor = $session['selectedVendor'];
-        if (empty($selectedVendor)) {
-            $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
-        }
-
-        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
-        $productSearchModel->catalogs = $catalogs;
-        $productSearchModel->product_block = true;
-        if (Yii::$app->request->post("OrderCatalogSearch")) {
-            $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
+        if (COOK::get(COOK::ORDER_GUIDE_SELECTED_VENDOR)) {
+            $params['selectedVendor'] = COOK::get(COOK::ORDER_GUIDE_SELECTED_VENDOR);
+        } else {
+            $params['selectedVendor'] = array_keys($vendors)[0];
+            COOK::set(COOK::ORDER_GUIDE_SELECTED_VENDOR, $params['selectedVendor']);
         }
-        $params['OrderCatalogSearch'] = $session['orderCatalogSearchString'];
+        $productSearchModel->catalogs = $client->getCatalogs($params['selectedVendor']) ?? "(0)";
+        $productSearchModel->product_block = true;
         $productDataProvider = $productSearchModel->search($params);
         $productDataProvider->pagination = ['pageSize' => 8];
-
+        #---------------------------------------------------------------------------------------------------------------
+        # формируем модель поиска и провайдер данных для третьего блока (ТОВАРЫ ШАБЛОНА)
         $guideSearchModel = new BaseProductSearch();
-        if (Yii::$app->request->post("BaseProductSearch")) {
-            $session['baseProductSearchString'] = Yii::$app->request->post("BaseProductSearch");
-        }
-        $params['BaseProductSearch'] = $session['baseProductSearchString'];
-        $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
+        $guideDataProvider = $guideSearchModel->search($params, $guideItems);
         $guideDataProvider->pagination = ['pageSize' => 7];
+        #---------------------------------------------------------------------------------------------------------------
 
+        #---------------------------------------------------------------------------------------------------------------
+        # рендеринг
         $pjax = Yii::$app->request->get("_pjax");
+        #---------------------------------------------------------------------------------------------------------------
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
-            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor', 'session', 'params'));
+            return $this->renderPartial('guides/_vendor-list', ['selectedVendor' => $params['selectedVendor']]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
-            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList', 'session', 'params'));
+            return $this->renderPartial('guides/_product-list', [
+                'productDataProvider' => $productDataProvider,
+            ]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
-            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
+            return $this->renderPartial('guides/_guide-product-list',
+               [
+                   'show_sorting' => $params['show_sorting'],
+                   'sort' => $params['sort'],
+                   'guideDataProvider' => $guideDataProvider,
+                   'guideSearchModel' => $guideSearchModel,
+               ]
+            );
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params', 'client'));
+            return $this->render('guides/edit-guide',
+                [
+                    'selectedVendor' => $params['selectedVendor'],
+                    'guide' => $guide,
+                    'client' => $client,
+                    'vendorSearchModel' => $vendorSearchModel,
+                    'vendorDataProvider' => $vendorDataProvider,
+                    'productSearchModel' => $productSearchModel,
+                    'productDataProvider' => $productDataProvider,
+                    'guideProductList' => $guideItems,
+                    'guideSearchModel' => $guideSearchModel,
+                    'guideDataProvider' => $guideDataProvider,
+                    'params' => $params,
+                ]
+
+//                compact('guide', 'selectedVendor', 'guideProductList',
+//                    'guideProductList', 'vendorSearchModel', 'vendorDataProvider',
+//                    'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider',
+//                    'session', 'params', 'client')
+//
+
+        );
         }
+        #---------------------------------------------------------------------------------------------------------------
+
     }
 
     /**
@@ -771,44 +855,94 @@ class OrderController extends DefaultController
      */
     public function actionAjaxSelectVendor($id)
     {
-        Yii::$app->session->set('selectedVendor', $id);
+        COOK::set(COOK::ORDER_GUIDE_SELECTED_VENDOR, $id);
         return true;
     }
 
     /**
      * Добавляем товар в шаблон
-     * @param $id
+     * @param $guideId integer
+     * @param $productId integer
      * @return bool
      */
-    public function actionAjaxAddToGuide($id)
+    public function actionAjaxAddToGuide(int $guideId, int $productId): bool
     {
-        $client = $this->currentUser->organization;
-        $session = Yii::$app->session;
-        $product = $client->getProductIfAvailable($id);
-        if ($product) {
-            $guideProductList = $session->get('guideProductList', []);
-            if (!in_array($product->id, $guideProductList)) {
-                $guideProductList[] = $product->id;
-                $session->set('guideProductList', $guideProductList);
+
+        if (!COOK::set(COOK::ORDER_GUIDE_CURRENT, $guideId)) {
+            return FALSE;
+        }
+
+        $cookieKey = COOK::ORDER_GUIDE_ITEMS;
+        $orderGuide = COOK::get($cookieKey);
+
+        if (!$orderGuide) {
+            // 1. если кука пустая то заворачиваем инструкцию на добавление позиции в шаблон в ";"
+            // инструкция на добавление реализована через префикс
+            // заворачиваем чтобы искать можно было по маске по полному вхождению
+            return COOK::set($cookieKey, COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE);
+        } else {
+            // 2. если инструкции на добавление в куки нет, то тогда отрабатываем сценарий для уже непустой куки
+            // если инструкция на добавление уже есть, то ничего не делаем
+            if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE) < 1) {
+
+                if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE) > 0) {
+                    // 2.1. если инструкции на удаление в куки есть, то просто удаляем инструкцию на удаление
+                    // удаляем инструкцию по маске
+                    $orderGuide = str_replace(COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE,
+                        COOK::DELIMITER_VALUE, $orderGuide);
+                } else {
+                    // 2.2. если инструкции на удаление в куки нет, то добавляем инструкцию на добавление
+                    $orderGuide .= '+'.$productId.COOK::DELIMITER_VALUE;
+                }
+                return COOK::set($cookieKey, $orderGuide);
             }
         }
-        return isset($product);
+
+        return TRUE;
+
     }
 
     /**
      * Удаление товара из шаблона
-     * @param $id
+     * @param $guideId integer
+     * @param $productId integer
      * @return bool
      */
-    public function actionAjaxRemoveFromGuide($id)
+    public function actionAjaxRemoveFromGuide(int $guideId, int $productId): bool
     {
-        $session = Yii::$app->session;
-        $guideProductList = $session->get('guideProductList', []);
-        if (in_array($id, $guideProductList)) {
-            $session->set('guideProductList', array_diff($guideProductList, [$id]));
-            return true;
+
+        if (!COOK::set(COOK::ORDER_GUIDE_CURRENT, $guideId)) {
+            return FALSE;
         }
-        return false;
+
+        $cookieKey = COOK::ORDER_GUIDE_ITEMS;
+        $orderGuide = COOK::get($cookieKey);
+
+        if (!$orderGuide) {
+            // 1. если кука пустая то заворачиваем инструкцию на добавление позиции в шаблон в ";"
+            // инструкция на добавление реализована через префикс
+            // заворачиваем чтобы искать можно было по маске по полному вхождению
+            return COOK::set($cookieKey, COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE);
+        } else {
+            // 2. если инструкции на добавление в куки нет, то тогда отрабатываем сценарий для уже непустой куки
+            // если инструкция на добавление уже есть, то ничего не делаем
+            if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE) < 1) {
+
+                if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE) > 0) {
+                    // 2.1. если инструкции на удаление в куки есть, то просто удаляем инструкцию на удаление
+                    // удаляем инструкцию по маске
+                    $orderGuide = str_replace(COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE,
+                        COOK::DELIMITER_VALUE, $orderGuide);
+                } else {
+                    // 2.2. если инструкции на удаление в куки нет, то добавляем инструкцию на добавление
+                    $orderGuide .= '-'.$productId.COOK::DELIMITER_VALUE;
+                }
+                return COOK::set($cookieKey, $orderGuide);
+            }
+        }
+
+        return TRUE;
+
     }
 
     /**
@@ -888,8 +1022,8 @@ class OrderController extends DefaultController
 
         return $post['id'];
     }
-    
-    
+
+
     public function actionAjaxAddToCartNotice()
     {
         try {

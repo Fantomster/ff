@@ -35,6 +35,8 @@ if (!Yii::$app->user->isGuest) {
         Yii::t('message', 'frontend.views.layouts.header.var8', ['ru' => 'Непрочитанных сообщений:']),
     ];
 
+
+
     $js = <<<JS
     
 
@@ -267,7 +269,7 @@ $(document).on("click", ".new-network", function(e) {
     return false;
 });      
 JS;
-    $this->registerJs($js, \yii\web\View::POS_READY)
+//    $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
     <?php $this->registerCss("
 ::-webkit-scrollbar {

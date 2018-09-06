@@ -53,6 +53,7 @@ $form = ActiveForm::begin([
                     'format' => 'dd.mm.yyyy', //'d M yyyy',//
                     'autoclose' => true,
                     'endDate' => "0d",
+                    'orientation' => "bottom auto"
                 ]
             ])
             ?>
@@ -66,6 +67,9 @@ $form = ActiveForm::begin([
 <div>Ресторанов с 4 заказами: <?= $clientsStats["c4"] ?></div>
 <div>Ресторанов с 5 заказами: <?= $clientsStats["c5"] ?></div>
 <div>Ресторанов с большим количеством заказов: <?= $clientsStats["cn"] ?></div>
+<br>
+<div>Среднее количество заказов ресторанами в день за период: <?= $dayOrderCount ?></div>
+<div>Среднее количество заказов ресторанами в месяц за период: <?= $monthOrderCount ?></div>
 <br>
 <div>Поставщиков с каталогами: <?= $vendorsWithGoodsCount ?></div>
 <div>Всего размещено товаров: <?= $productsCount ?></div>

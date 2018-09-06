@@ -11,6 +11,7 @@ use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
 use Yii;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use api\common\models\RkWaybill;
 use api\common\models\RkAgentSearch;
@@ -165,7 +166,7 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
             $hasProduct->koef = $koef;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$hasProduct->save(false)){
+            if (!$hasProduct->save()){
                 throw new \RuntimeException('Cant update allmaps table.');
             }
 
@@ -183,15 +184,12 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
             $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-            if (!$newProduct->save(false)){
+            if (!$newProduct->save()){
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
 
             $res = $newProduct->koef;
-
         }
-
-
         return Json::encode(['output' => $res, 'message' => '']);
 
     }

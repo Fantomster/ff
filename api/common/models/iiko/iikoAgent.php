@@ -18,6 +18,7 @@ use yii\helpers\ArrayHelper;
  * @property string $comment
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $payment_delay
  */
 class iikoAgent extends \yii\db\ActiveRecord
 {
@@ -44,7 +45,7 @@ class iikoAgent extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'org_id'], 'required'],
-            [['org_id', 'is_active', 'store_id', 'vendor_id'], 'integer'],
+            [['org_id', 'is_active', 'store_id', 'vendor_id', 'payment_delay'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['uuid'], 'string', 'max' => 36],
             [['denom', 'comment'], 'string', 'max' => 250]
@@ -65,6 +66,7 @@ class iikoAgent extends \yii\db\ActiveRecord
             'comment' => Yii::t('app', 'Comment'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'payment_delay' => Yii::t('app', 'Payment delay in days'),
         ];
     }
 
@@ -102,7 +104,7 @@ class iikoAgent extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getAgents($org_id, $all = true, $notMap = true, $is_active = true)
+    public static function getAgents($org_id, $all = true, $notMap = true, $is_active = true)
     {
         $query = iikoAgent::find()->select(['uuid', 'denom'])->where(['org_id' => $org_id]);
 

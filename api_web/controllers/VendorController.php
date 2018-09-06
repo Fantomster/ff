@@ -225,6 +225,50 @@ class VendorController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/vendor/get-goods-in-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Список товаров в каталоге",
+     *     description="Список товаров в каталоге",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 3010,
+     *                      "pagination":{
+     *                          "page":1,
+     *                          "page_size":12
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(ref="#/definitions/VendorCatalogGoods"),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetGoodsInCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->getGoodsInCatalog($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/vendor/upload-main-catalog",
      *     tags={"Vendor/Catalog"},
      *     summary="Загрузка основного каталога",
@@ -353,17 +397,9 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 4,
-     *                      "uploaded_name": "dfg5fhbdhb",
-     *                      "index_field": "ssid",
-     *                      "mapping": {
-     *                          "ssid": 1,
-     *                          "article": 3,
-     *                          "product_name": 2,
-     *                          "unit": 4,
-     *                          "price": 6,
-     *                          "multiplicity": 7
-     *                      }
+     *                      "cat_id": 3010,
+     *                      "index_field": "article",
+     *                      "mapping": {"article", "product", "units", "price", "ed", "other"}
      *                  }
      *              )
      *         )
@@ -391,6 +427,51 @@ class VendorController extends WebApiController
     public function actionImportMainCatalog()
     {
         $this->response = $this->container->get('VendorWebApi')->importMainCatalog($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/vendor/update-main-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Обновление главного каталога",
+     *     description="Обновление главного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "cat_id": 3010
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdateMainCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->updateMainCatalog($this->request);
     }
 
     /**

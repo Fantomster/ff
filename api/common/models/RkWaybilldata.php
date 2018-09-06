@@ -56,9 +56,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             //  [['koef'], 'number'],
             //  
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
+           // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
             //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
-            ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
+           // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
@@ -201,7 +201,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        $this->saveAllMap();
+        // $this->saveAllMap();
 
         $wmodel = $this->waybill;
         $check = $this::find()
@@ -255,7 +255,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         $allMapModel = AllMaps::findOne([
             'service_id' => rkeeperService::getServiceId(),
             'org_id' => $client_id,
-            'supp_id' => $vendor_id,
+        //    'supp_id' => $vendor_id,
             'product_id' => $this->product_id
         ]);
 
@@ -271,9 +271,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
 
         $allMapModel->serviceproduct_id = $this->product_rid;
         $allMapModel->unit_rid = $this->munit_rid;
-        $allMapModel->store_rid = $this->getWaybill()->store_rid;
+       // $allMapModel->store_rid = $this->getWaybill()->store_rid;
         $allMapModel->koef = $this->koef;
-        $allMapModel->vat = $this->vat;
+        $allMapModel->vat = $this->vat*100;
         $allMapModel->is_active = 1;
 
         return !empty($allMapModel->dirtyAttributes) ? $allMapModel->save() : false;

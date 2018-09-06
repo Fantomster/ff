@@ -2,7 +2,13 @@
 
 namespace common\models\vetis;
 
+use console\modules\daemons\components\UpdateDictInterface;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\Ikar;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ListOptions;
+use api\common\models\RabbitQueues;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_country".
@@ -23,7 +29,7 @@ use Yii;
  * @property string $updateDate
  * @property object $country
  */
-class VetisCountry extends \yii\db\ActiveRecord
+class VetisCountry extends \yii\db\ActiveRecord implements  UpdateDictInterface
 {
     /**
      * {@inheritdoc}
@@ -42,12 +48,35 @@ class VetisCountry extends \yii\db\ActiveRecord
     }
 
     /**
+     * Returns the primary key name(s) for this AR class.
+     * The default implementation will return the primary key(s) as declared
+     * in the DB table that is associated with this AR class.
+     *
+     * If the DB table does not declare any primary key, you should override
+     * this method to return the attributes that you want to use as primary keys
+     * for this AR class.
+     *
+     * Note that an array should be returned even for a table with single primary key.
+     *
+     * @return string[] the primary keys of the associated database table.
+     */
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
+            /*[['active','last'], 'filter', 'filter' => function ($value) {
+                $value = ($value === 'true') ? 1 : 0;
+                return $value;
+            }],*/
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullName', 'englishName'], 'string', 'max' => 255],
@@ -91,5 +120,53 @@ class VetisCountry extends \yii\db\ActiveRecord
                 ->all();
 
         return ArrayHelper::map($models, 'uuid', 'name');
+    }
+
+    /**
+     * Запрос обновлений справочника
+     */
+    public static function getUpdateData($org_id)
+    {
+        try {
+            $load = new Ikar();
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercCountryList'])->one();
+            if($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = 'MercCountryList';
+                $queue->save();
+            }
+
+            //Формируем данные для запроса
+            $data['method'] = 'getCountryChangesList';
+            $data['struct'] = ['listName' => 'countryList',
+                'listItemName' => 'country'
+            ];
+
+            $listOptions = new ListOptions();
+            $listOptions->count = 1000;
+            $listOptions->offset = 0;
+
+            $queueDate = $queue->last_executed ?? $queue->start_executing;
+
+            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
+            $instance = ikarApi::getInstance($org_id);
+            $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
+
+            if (!empty($queue->organization_id)) {
+                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+            }
+            else {
+                $queueName = $queue->consumer_class_name;
+            }
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue(json_encode($data));
+
+        } catch (\Exception $e) {
+            Yii::error($e->getMessage());
+        }
     }
 }

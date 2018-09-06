@@ -6,26 +6,25 @@ use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\base\Model;
+use yii\helpers\BaseStringHelper;
 
 class VetDocumentsChangeList extends Model
 {
+    public $org_id;
+
     public function updateDocumentsList($list) {
-        $cache = \Yii::$app->cache;
         $list = is_array($list) ? $list : [$list];
         foreach ($list as $item)
         {
             if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
                 continue;
 
-            if(!$cache->get('vetDocRaw_'.$item->uuid))
-                $cache->add('vetDocRaw_'.$item->uuid, $item,60);
-
-            $unit = dictsApi::getInstance()->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
-            $sender= cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
-            $recipient = cerberApi::getInstance()->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
+            $unit = dictsApi::getInstance($this->org_id)->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
+            $sender= cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
+            $recipient = cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
 
 
-            $producer = isset($item->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($item->certifiedConsignment->batch->origin->producer) : null;
+            $producer = isset($item->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($item->certifiedConsignment->batch->origin->producer, $this->org_id) : null;
             $model = MercVsd::findOne(['uuid' => $item->uuid]);
 
             if($model == null)
@@ -38,10 +37,10 @@ class VetDocumentsChangeList extends Model
                 'type' => $item->vetDType,
                 'form' => $item->vetDForm,
                 'status' => $item->vetDStatus,
-                'recipient_name' => $recipient->enterprise->name.'('. $recipient->enterprise->address->addressView .')',
-                'recipient_guid' => $recipient->enterprise->guid,
-                'sender_guid' => $sender->enterprise->guid,
-                'sender_name' =>  $sender->enterprise->name.'('. $sender->enterprise->address->addressView .')',
+                'recipient_name' => !isset($recipient) ? null : $recipient->name.'('. $recipient->addressView .')',
+                'recipient_guid' => $item->certifiedConsignment->consignee->enterprise->guid,
+                'sender_guid' => $item->certifiedConsignment->consignor->enterprise->guid,
+                'sender_name' =>  !isset($sender) ? null : $sender->name.'('. $sender->addressView .')',
                 'finalized' => $item->finalized,
                 'last_update_date' => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s',strtotime($item->lastUpdateDate)) : null,
                 'vehicle_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber : null,
@@ -51,7 +50,7 @@ class VetDocumentsChangeList extends Model
                 'product_type' => $item->certifiedConsignment->batch->productType,
                 'product_name' => $item->certifiedConsignment->batch->productItem->name,
                 'amount' => $item->certifiedConsignment->batch->volume,
-                'unit' => $unit->unit->name,
+                'unit' => !isset($unit) ? null : $unit->name,
                 'gtin' => $item->certifiedConsignment->batch->productItem->globalID,
                 'article' => $item->certifiedConsignment->batch->productItem->code,
                 'production_date' => MercVsd::getDate($item->certifiedConsignment->batch->dateOfProduction),
@@ -70,21 +69,18 @@ class VetDocumentsChangeList extends Model
 
     public function updateData($last_visit)
     {
-        $api = mercuryApi::getInstance();
+        $api = mercuryApi::getInstance($this->org_id);
         $listOptions = new ListOptions();
         $listOptions->count = 100;
         $listOptions->offset = 0;
+        $count = 0;
+        $this->log('Load'.PHP_EOL);
 
         do {
-            if (isset($last_visit)) {
                 $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
                 $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
-            }
-            else
-                {
-                $result = $api->getVetDocumentList(null, $listOptions);
-                $vetDocumentList = $result->application->result->any['getVetDocumentListResponse']->vetDocumentList;
-            }
+            $count += $vetDocumentList->count;
+            $this->log('Load '.$count.' / '. $vetDocumentList->total.PHP_EOL);
 
             if ($vetDocumentList->count > 0)
                 $this->updateDocumentsList($vetDocumentList->vetDocument);
@@ -103,7 +99,7 @@ class VetDocumentsChangeList extends Model
         if(count($list) == 0)
             return false;
 
-        $api = mercuryApi::getInstance();
+        $api = mercuryApi::getInstance($this->org_id);
 
         foreach ($list as $item)
         {
@@ -113,5 +109,19 @@ class VetDocumentsChangeList extends Model
         }
 
         return true;
+    }
+
+    /**
+     * @param $message array|string
+     */
+    public function log($message)
+    {
+        if (is_array($message)) {
+            $message = print_r($message, true);
+        }
+        $message = $message . PHP_EOL;
+        $message .= str_pad('', 80, '=') . PHP_EOL;
+        $className = BaseStringHelper::basename(get_class($this));
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
     }
 }

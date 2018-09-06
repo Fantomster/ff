@@ -9,7 +9,10 @@ use kartik\grid\GridView;
 use kartik\checkbox\CheckboxX;
 use yii\web\JsExpression;
 
+/** @var $way mixed */
+
 $this->title = 'Интеграция с 1С Общепит';
+$way = Yii::$app->request->get('way');
 
 $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
 $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
@@ -105,6 +108,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     [
                                         'attribute' => 'product_id',
                                         'vAlign' => 'bottom',
+                                        'contentOptions' => function ($data) {
+                                            return ["id" => "way" . $data->id];
+                                        },
                                     ],
                                     [
                                         'attribute' => 'fproductnameProduct',
@@ -181,7 +187,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             'asPopover' => $isAndroid ? false : true,
                                             'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                             'inputType' => \kartik\editable\Editable::INPUT_TEXT,
-                                            'afterInput' => function($form, $w) {
+                                            'afterInput' => function ($form, $w) {
                                                 /**
                                                  * @var $form ActiveForm
                                                  * @var $w \kartik\editable\Editable
@@ -278,7 +284,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 }
 
                                                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => 0]);
+                                                $way = $model->id;
+                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => 0, 'page' => $page, 'way' => $way]);
                                                 return \yii\helpers\Html::a('&nbsp;0', $customurl,
                                                     ['title' => Yii::t('backend', '0%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
@@ -293,7 +301,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 }
 
                                                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1000']);
+                                                $way = $model->id;
+                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1000', 'page' => $page, 'way' => $way]);
                                                 return \yii\helpers\Html::a('10', $customurl,
                                                     ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
@@ -308,7 +318,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 }
 
                                                 //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1800']);
+                                                $way = $model->id;
+                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/chvat', 'id' => $model->id, 'vat' => '1800', 'page' => $page, 'way' => $way]);
                                                 return \yii\helpers\Html::a('18', $customurl,
                                                     ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
@@ -351,7 +363,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 $text = 'Удалить';
                                                 $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
                                                 $action = 'delete';
-                                                if(!$model->unload_status){
+                                                if (!$model->unload_status) {
                                                     $action = 'restore';
                                                     $text = 'Восстановить';
                                                 }
@@ -388,7 +400,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'fontAwesome' => true,
                                 ],
                                 'rowOptions' => function ($model) {
-                                    if(!$model->unload_status) {
+                                    if (!$model->unload_status) {
                                         return ['style' => 'opacity: 0.3;'];
                                     }
                                 },
@@ -473,6 +485,12 @@ $(function () {
     };
     
     FF.deleteBtn.init();
+    
+    if ($way > 0) {
+        $('html, body').animate({
+            scrollTop: $("#way$way").offset().top
+        }, 1000);
+    }
 });
 JS;
 

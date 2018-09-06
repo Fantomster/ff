@@ -43,6 +43,7 @@ use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\helpers\Url;
 
+
 class OrderController extends DefaultController
 {
 
@@ -115,6 +116,7 @@ class OrderController extends DefaultController
                             'repeat',
                             'refresh-cart',
                             'ajax-add-to-cart',
+                            'ajax-add-to-cart-notice',
                             'ajax-add-guide-to-cart',
                             'ajax-delete-order',
                             'ajax-make-order',
@@ -451,11 +453,9 @@ class OrderController extends DefaultController
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
-
-        if (Yii::$app->request->isPost) {
-            if(Yii::$app->request->post("OrderCatalogSearch")) {
-                $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
-            }
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
         else {
             if(Yii::$app->request->get("OrderCatalogSearch")) {
@@ -471,6 +471,7 @@ class OrderController extends DefaultController
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
         }
+
         $vendors = $client->getSuppliers($selectedCategory);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
@@ -880,12 +881,24 @@ class OrderController extends DefaultController
         $product = ['product_id' => $post['id'], 'quantity' => $quantity];
 
         try {
-            (new CartWebApi())->add($product);
+            (new CartWebApi())->add($product, true);
         } catch (\Exception $e) {
             return false;
         }
 
         return $post['id'];
+    }
+    
+    
+    public function actionAjaxAddToCartNotice()
+    {
+        try {
+            (new CartWebApi())->noticeWhenProductAddToCart();
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     public function actionAjaxShowDetails()
@@ -1081,7 +1094,7 @@ class OrderController extends DefaultController
 
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-            $timeTag = Html::tag('p', "Generation time: " . GenerationTime::end(), [
+            $timeTag = Html::tag('p', "Generation time: " . round(GenerationTime::end(), 2), [
                 'style' => 'position:absolute;right:0px;bottom: -94px;font-size:10px;color:darkgray;'
             ]);
 
@@ -1356,10 +1369,10 @@ class OrderController extends DefaultController
                     $this->sendOrderDone($order->acceptedBy, $order);
                 }
             }
+            $order->calculateTotalPrice();
+            $order->save();
         }
 
-        $order->calculateTotalPrice();
-        $order->save();
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1683,6 +1696,7 @@ class OrderController extends DefaultController
             }
             if ($order->save()) {
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
+
                 return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
             }
         }
@@ -1704,6 +1718,7 @@ class OrderController extends DefaultController
         $order->status = Order::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
         $this->sendOrderDone($order->createdBy, $order);
+
         if ($order->save()) {
             $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);
             $this->redirect(['order/view', 'id' => $id]);
@@ -2601,6 +2616,7 @@ class OrderController extends DefaultController
     {
         $selected = Yii::$app->request->post('selected');
         $state = Yii::$app->request->post('state');
+
         $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
         $current = !empty($selected) ? explode(",", $selected) : [];
 

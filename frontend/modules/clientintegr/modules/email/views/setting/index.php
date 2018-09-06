@@ -40,7 +40,7 @@ $exclude_attributes = [
         <div class="box box-info">
             <div class="box-header with-border">
                 <?= \Yii::$app->controller->module->renderMenu() ?>
-                <a href="<?=\yii\helpers\Url::to(['/clientintegr/email/setting/create'])?>"
+                <a href="<?= \yii\helpers\Url::to(['/clientintegr/email/setting/create']) ?>"
                    class="btn btn-success">
                     <i class="fa fa-plus"></i> Подключение
                 </a>
@@ -91,6 +91,28 @@ $exclude_attributes = [
                                 <tr>
                                     <td><b><?= $model->getAttributeLabel('is_active') ?>:</b></td>
                                     <td><?= ($model->is_active ? 'Да' : 'Нет') ?></td>
+                                </tr>
+                                <tr>
+                                    <td><b><?= $model->getAttributeLabel('language') ?>:</b></td>
+                                    <td><?php
+                                        switch ($model->language) {
+                                            case 'ru':
+                                                echo 'ru (Русский)';
+                                                break;
+                                            case 'en':
+                                                echo 'en (Английский)';
+                                                break;
+                                            case 'es':
+                                                echo 'es (Испанский)';
+                                                break;
+                                            case 'md':
+                                                echo 'md (Молдавский)';
+                                                break;
+                                            case 'ua':
+                                                echo 'ua (Украинский)';
+                                                break;
+                                        }
+                                        ?></td>
                                 </tr>
                                 <tr>
                                     <td><b><?= $model->getAttributeLabel('created_at') ?>:</b></td>

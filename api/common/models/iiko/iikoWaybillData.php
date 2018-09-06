@@ -125,27 +125,33 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
+                $this->setReadyToExportStatus();
+    }
+
+    protected function setReadyToExportStatus () {
 
         $wmodel = $this->waybill;
-
         $check = $this::find()
             ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
-            ->andwhere('product_rid is null or munit is null')
+            ->andwhere('product_rid is null')
             ->andWhere('unload_status=1')
             ->count('*');
 
-        if ($check > 0) {
-            $wmodel->readytoexport = 0;
-            $wmodel->status_id = 1;
-        } else {
-            $wmodel->readytoexport = 1;
-            $wmodel->status_id = 4;
-        }
+            if (!isset($wmodel->store_id) || empty($wmodel->agent_uuid) || $check > 0) {
+                $wmodel->readytoexport = 0;
+                $wmodel->status_id = 1;
+            } else {
+                $wmodel->readytoexport = 1;
+                $wmodel->status_id = 4;
+            }
 
         if (!$wmodel->save(false)) {
             echo "Can't save model in after save";
-            exit;
+            return false;
+        } else {
+            return true;
         }
+
     }
 
     public function getWaybill()

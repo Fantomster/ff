@@ -10,9 +10,11 @@ use kartik\checkbox\CheckboxX;
 use yii\web\JsExpression;
 use api\common\models\RkDicconst;
 
+/** @var $way mixed */
 
 ?>
 <?php
+$way = Yii::$app->request->get('way');
 $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
 $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
 $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
@@ -147,6 +149,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'attribute' => 'product_id',
                                 'label' => 'ID в Mixcart',
                                 'vAlign' => 'bottom',
+                                'contentOptions' => function ($data) {
+                                    return ["id" => "way" . $data->id];
+                                },
                             ],
                             [
                                 'attribute' => 'fproductnameProduct',
@@ -325,10 +330,12 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             $tStyle = "";
                                         }
 
+                                        $way = $model->id;
+                                        $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
                                         $customurl = Yii::$app->getUrlManager()->createUrl([
                                             'clientintegr/rkws/waybill/chvat',
                                             'id' => $model->id,
-                                            'vat' => 0
+                                            'vat' => 0, 'page' => $page, 'way' => $way
                                         ]);
 
                                         return \yii\helpers\Html::a('&nbsp;0', $customurl, [
@@ -349,7 +356,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
 
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1000']);
+                                        $way = $model->id;
+                                        $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1000', 'page' => $page, 'way' => $way]);
                                         return \yii\helpers\Html::a('10', $customurl,
                                             ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
@@ -364,7 +373,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
 
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1800']);
+                                        $way = $model->id;
+                                        $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1800', 'page' => $page, 'way' => $way]);
                                         return \yii\helpers\Html::a('18', $customurl,
                                             ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
@@ -562,7 +573,7 @@ $js = <<< JS
         			    action = that.data('action'),
         			    status = that.data('status'),
         			    title = that.prop('title');
-        			
+        			    
         			    status = status === 1 ? 0 : 1;
         			    
         			swal({
@@ -609,6 +620,12 @@ $js = <<< JS
         };
         
         FF.deleteBtn.init();
+        
+        if ($way > 0) {
+	        $('html, body').animate({
+	            scrollTop: $("#way$way").offset().top
+	        }, 1000);
+        }
     });
 JS;
 

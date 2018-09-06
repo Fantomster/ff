@@ -342,14 +342,16 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     /**
      * @param $id
      * @param $vat
+     * @param $page
+     * @param $way
      * @return \yii\web\Response
      */
-    public function actionChvat($id, $vat)
+    public function actionChvat($id, $vat, $page, $way)
     {
         $model = $this->findDataModel($id);
         $model->vat = $vat;
         $model->save();
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
     }
 
     /**

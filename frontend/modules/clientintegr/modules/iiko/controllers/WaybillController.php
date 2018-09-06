@@ -139,7 +139,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
 
-
         $renderParams = [
             'searchModel' => $searchModel,
             'affiliated' => $search->affiliated,
@@ -171,7 +170,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (!$model) {
             die("Cant find wmodel in map controller");
         }
-        
+
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
@@ -196,8 +195,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $params = [
             'dataProvider' => $dataProvider,
             'wmodel' => $model,
-            'agentName' => $agentModel->denom,
-            'storeName' => $storeModel->denom,
+            'agentName' => isset($agentModel->denom) ? $agentModel->denom : 'Не указан',
+            'storeName' => isset($storeModel->denom) ? $storeModel->denom : 'Не указан',
             'isAndroid' => $isAndroid,
             'searchModel' => $searchModel,
             'vatData' => $vatData,
@@ -299,9 +298,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             SELECT id, denom as text FROM (
                   (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 10)
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 5)
+                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -363,6 +362,7 @@ SQL;
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
@@ -386,12 +386,14 @@ SQL;
         }
 
         $model = new iikoWaybill();
+        $model->setScenario('handMade');
         $model->order_id = $order_id;
         $model->status_id = 1;
         $model->org = $ord->client_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
@@ -553,7 +555,7 @@ SQL;
     }
 
 
-    public function actionChvat($id, $vat)
+    public function actionChvat($id, $vat, $page, $way)
     {
 
         $model = $this->findDataModel($id);
@@ -561,7 +563,7 @@ SQL;
         $rress = Yii::$app->db_api
             ->createCommand('UPDATE iiko_waybill_data SET vat = :vat, linked_at = now() WHERE id = :id', [':vat' => $vat, ':id' => $id])->execute();
 
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
 
     }
 
@@ -623,7 +625,7 @@ SQL;
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
-    
+
     /**
      * Make unload_status -> 0 or unload_status -> 1
      */
@@ -634,18 +636,18 @@ SQL;
         $id = Yii::$app->request->post('id');
         $status = Yii::$app->request->post('status');
         $action = Yii::$app->request->post('action');
-        
+
         $model = iikoWaybillData::findOne($id);
         try {
             $model->unload_status = $status;
             $model->save();
             $transaction->commit();
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $transaction->rollback();
             Yii::debug($t->getMessage());
             return false;
         }
-        
+
         return ['success' => true, 'action' => $action];
     }
 }

@@ -2,7 +2,12 @@
 
 namespace api\common\models\merc;
 
+use api\common\models\RabbitQueues;
+use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ListOptions;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use Yii;
 
 /**
@@ -40,7 +45,7 @@ use Yii;
  * @property int $low_grade_cargo
  * @property string $raw_data
  */
-class MercVsd extends \yii\db\ActiveRecord
+class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
     const DOC_TYPE_INCOMMING = 'INCOMING';
     const DOC_TYPE_OUTGOING = 'OUTGOING';
@@ -238,7 +243,7 @@ class MercVsd extends \yii\db\ActiveRecord
         return $first_date;
     }
 
-    public static function getProduccerData($producer)
+    public static function getProduccerData($producer, $org_id)
     {
         if(!is_array($producer))
             $data[] = $producer;
@@ -248,7 +253,7 @@ class MercVsd extends \yii\db\ActiveRecord
         $result = null;
         foreach ($data as $item)
         {
-            $res = isset($item->enterprise->uuid) ? cerberApi::getInstance()->getEnterpriseByUuid($item->enterprise->uuid) : null;
+            $res = isset($item->enterprise->uuid) ? cerberApi::getInstance($org_id)->getEnterpriseByUuid($item->enterprise->uuid) : null;
 
             $result['name'][] = isset($res) ? ($res->enterprise->name.'('. $res->enterprise->address->addressView .')') : null;
             $result['guid'][] = $item->enterprise->guid;
@@ -256,5 +261,49 @@ class MercVsd extends \yii\db\ActiveRecord
         }
 
         return $result;
+    }
+
+    /**
+     * Запрос обновлений справочника
+     */
+    public static function getUpdateData($org_id, $enterpriseGuid = null)
+    {
+        try {
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            if($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = 'MercVSDList';
+                $queue->organization_id = $org_id;
+                $queue->save();
+            }
+
+            if (!empty($queue->organization_id)) {
+                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+            }
+            else {
+                $queueName = $queue->consumer_class_name;
+            }
+
+            if(isset($enterpriseGuid)) {
+                $data['startDate'] = date("Y-m-d H:i:s", mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')));
+            }
+            else {
+                $queueDate = $queue->last_executed ?? $queue->start_executing;
+                $data['startDate'] = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+            }
+            $data['listOptions']['count'] = 100;
+            $data['listOptions']['offset'] = 0;
+            $data['enterpriseGuid'] = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue(json_encode($data));
+
+        } catch (\Exception $e) {
+            Yii::error($e->getMessage());
+            var_dump($e->getMessage());
+        }
     }
 }

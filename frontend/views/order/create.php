@@ -77,6 +77,9 @@ $this->registerJs(
                 var form = $("#searchForm");
                 form.submit();
             });
+            
+            var ajax_id = null;
+            
             $(document).on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
                 quantity = $(this).parent().parent().find(".quantity").val();
@@ -117,11 +120,23 @@ $this->registerJs(
                         $(this).detach()
                     });
                 }
+                
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
                    $(\'a[data-id="\'+result+\'"]\').parent().parent().addClass("success");
+                   
+                   if(ajax_id !== null) {
+                        ajax_id.abort();
+                   }
+                   
+                   ajax_id = $.ajax({
+                      type: "POST",
+                      url: "' . Url::to(['/order/ajax-add-to-cart-notice']) . '",
+                      data: {},
+                      async: true
+                   });
                 });
             });
             

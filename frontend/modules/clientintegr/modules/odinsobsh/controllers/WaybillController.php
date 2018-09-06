@@ -185,10 +185,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $searchModel = new OneSWaybillDataSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-    
+
         $agentModel = OneSContragent::findOne(['id' => $model->agent_uuid]);
         $storeModel = OneSStore::findOne(['id' => $model->store_id]);
-        
+
         $lic = OneSService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
         $params = [
@@ -281,22 +281,22 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if (!is_null($term)) {
-       /*     $query = new \yii\db\Query;
-            $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unit,")")'])
-                ->from('iiko_product')
-                ->where('org_id = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
-                ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
-                ->limit(20);
+            /*     $query = new \yii\db\Query;
+                 $query->select(['id' => 'id', 'text' => 'CONCAT(`denom`," (",unit,")")'])
+                     ->from('iiko_product')
+                     ->where('org_id = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
+                     ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
+                     ->limit(20);
 
-            $command = $query->createCommand();
-            $command->db = Yii::$app->db_api;
-            $data = $command->queryAll();
-            $out['results'] = array_values($data);
-       */
-            $sql = "( select id, name as `text` from one_s_good where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and name = '".$term."' )".
-                " union ( select id, name as `text` from one_s_good  where org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and name like '".$term."%' limit 10 )".
-                "union ( select id, name as `text` from one_s_good where  org_id = ".User::findOne(Yii::$app->user->id)->organization_id." and name like '%".$term."%' limit 5 )".
-                "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
+                 $command = $query->createCommand();
+                 $command->db = Yii::$app->db_api;
+                 $data = $command->queryAll();
+                 $out['results'] = array_values($data);
+            */
+            $sql = "( select id, name as `text` from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
+                " union ( select id, name as `text` from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
+                "union ( select id, name as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+                "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)->queryAll();
@@ -345,7 +345,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 exit;
             }
             $model->save();
-            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -381,7 +381,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }
-            return $this->redirect([$this->getLastUrl().'way='.$model->order_id]);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             $model->num_code = $order_id;
             return $this->render('create', [
@@ -399,12 +399,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $transaction = Yii::$app->db_api->beginTransaction();
 
         /**
-            header ("Content-Type:text/xml");
-            $id = Yii::$app->request->get('id');
-            $model = $this->findModel($id);
-            echo $model->getXmlDocument();
-            exit;
-        */
+         * header ("Content-Type:text/xml");
+         * $id = Yii::$app->request->get('id');
+         * $model = $this->findModel($id);
+         * echo $model->getXmlDocument();
+         * exit;
+         */
 
         $api = OneSApi::getInstance();
         try {
@@ -420,7 +420,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
 
             if ($api->auth()) {
-                if(!$api->sendWaybill($model)) {
+                if (!$api->sendWaybill($model)) {
                     throw new \Exception('Ошибка при отправке.');
                 }
                 $model->status_id = 2;
@@ -438,36 +438,39 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
-    public function actionMakevat($waybill_id, $vat) {
+    public function actionMakevat($waybill_id, $vat)
+    {
 
         $model = $this->findModel($waybill_id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE one_s_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' =>$waybill_id])->execute();
+            ->createCommand('UPDATE one_s_waybill_data set vat = :vat where waybill_id = :id', [':vat' => $vat, ':id' => $waybill_id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->id]);
     }
 
 
-    public function actionChvat($id, $vat) {
+    public function actionChvat($id, $vat, $page, $way)
+    {
 
         $model = $this->findDataModel($id);
 
         $rress = Yii::$app->db_api
-            ->createCommand('UPDATE one_s_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' =>$id])->execute();
+            ->createCommand('UPDATE one_s_waybill_data set vat = :vat where id = :id', [':vat' => $vat, ':id' => $id])->execute();
 
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
 
     }
 
-    public function getLastUrl() {
+    public function getLastUrl()
+    {
 
         $lastUrl = Url::previous();
-        $lastUrl = substr($lastUrl, strpos($lastUrl,"/clientintegr"));
+        $lastUrl = substr($lastUrl, strpos($lastUrl, "/clientintegr"));
 
-        $lastUrl = $this->deleteGET($lastUrl,'way');
+        $lastUrl = $this->deleteGET($lastUrl, 'way');
 
-        if(!strpos($lastUrl,"?")) {
+        if (!strpos($lastUrl, "?")) {
             $lastUrl .= "?";
         } else {
             $lastUrl .= "&";
@@ -475,16 +478,16 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $lastUrl;
     }
 
-    public function deleteGET($url, $name, $amp = true) {
+    public function deleteGET($url, $name, $amp = true)
+    {
         $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
         list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
         parse_str($qs_part, $qs_vars); // Разбиваем строку с запросом на массив с параметрами и их значениями
         unset($qs_vars[$name]); // Удаляем необходимый параметр
         if (count($qs_vars) > 0) { // Если есть параметры
-            $url = $url_part."?".http_build_query($qs_vars); // Собираем URL обратно
+            $url = $url_part . "?" . http_build_query($qs_vars); // Собираем URL обратно
             if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
-        }
-        else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
+        } else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
         return $url; // Возвращаем итоговый URL
     }
 
@@ -517,7 +520,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
-    
+
     /**
      * Make unload_status -> 0 or unload_status -> 1
      */
@@ -528,18 +531,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $id = Yii::$app->request->post('id');
         $status = Yii::$app->request->post('status');
         $action = Yii::$app->request->post('action');
-        
+
         $model = OneSWaybillData::findOne($id);
         try {
             $model->unload_status = $status;
             $model->save();
             $transaction->commit();
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $transaction->rollback();
             Yii::debug($t->getMessage());
             return false;
         }
-        
+
         return ['success' => true, 'action' => $action];
     }
 }

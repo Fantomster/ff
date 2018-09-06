@@ -19,19 +19,22 @@ use yii\helpers\ArrayHelper;
  * @property User $agent
  * @property AgentAttachment[] $attachments
  */
-class AgentRequest extends \yii\db\ActiveRecord {
+class AgentRequest extends \yii\db\ActiveRecord
+{
 
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'agent_request';
     }
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
                     'timestamp' => [
                         'class' => 'yii\behaviors\TimestampBehavior',
@@ -45,7 +48,8 @@ class AgentRequest extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['agent_id', 'target_email'], 'required'],
             [['target_email'], 'email'],
@@ -59,7 +63,8 @@ class AgentRequest extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
             'agent_id' => 'Agent ID',
@@ -74,26 +79,26 @@ class AgentRequest extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAgent() {
+    public function getAgent()
+    {
         return $this->hasOne(User::className(), ['id' => 'agent_id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProfile() {
+    public function getProfile()
+    {
         return $this->hasOne(Profile::className(), ['user_id' => 'agent_id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAttachments() {
+    public function getAttachments()
+    {
         return $this->hasMany(AgentAttachment::className(), ['agent_request_id' => 'id']);
     }
-
 
     /**
      * @return \yii\db\ActiveQuery
@@ -101,14 +106,15 @@ class AgentRequest extends \yii\db\ActiveRecord {
     public function getFranchisee()
     {
         return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
-            ->viaTable('franchisee_user', ['user_id' => 'agent_id']);
+                        ->viaTable('franchisee_user', ['user_id' => 'agent_id']);
     }
 
-
-    public function delete() {
+    public function delete()
+    {
         foreach ($this->attachments as $attachment) {
             $attachment->delete();
         }
         parent::delete();
     }
+
 }

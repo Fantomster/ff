@@ -69,7 +69,7 @@ class EmailIntegrationController extends Controller
         //$temp_file[26] = '/app/console/runtime/ЕКТД 22032.xls';
         //$temp_file[27] = '/app/console/runtime/ЕКТД 22033.xls';
         //$temp_file[28] = '/app/console/runtime/ЕКТД 22034.xls';
-        //$temp_file[29] = '/app/console/runtime/testnac29.xls'; // накладная, где сумма итоговая не совпадает с суммой по строкам
+        $temp_file[29] = '/app/console/runtime/testnac29.xls'; // накладная, где сумма итоговая не совпадает с суммой по строкам
         //$temp_file[30] = '/app/console/runtime/test0307n12.xlsx';
         //$temp_file[31] = '/app/console/runtime/test0307xlsx.xls';
         //$temp_file[32] = '/app/console/runtime/id7905.xlsx';
@@ -93,10 +93,10 @@ class EmailIntegrationController extends Controller
         //$temp_file[50] = '/app/console/runtime/testnac47.xls';
         //$temp_file[51] = '/app/console/runtime/testnac48.xls';
         //$temp_file[52] = '/app/console/runtime/testnac49.xls';
-        $temp_file[53] = '/app/console/runtime/testnac50.xls';
-        $temp_file[54] = '/app/console/runtime/testnac51.xls';
+        //$temp_file[53] = '/app/console/runtime/testnac50.xls';
+        //$temp_file[54] = '/app/console/runtime/testnac51.xls';
         $temp_file[55] = '/app/console/runtime/testnac52.xls';
-        $temp_file[56] = '/app/console/runtime/testnac53.xls';
+        //$temp_file[56] = '/app/console/runtime/testnac53.xls';
 
 
         $i = 1;
@@ -270,6 +270,7 @@ class EmailIntegrationController extends Controller
         ];
 
         foreach ($email['attachment'] as $name_file => $file) {
+            //print $setting->language.PHP_EOL;
             //Узнаём тип вложения
             $mime_type = array_keys($file)[0];
             //Собираем только разрешённые вложения
@@ -278,12 +279,12 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
-            $this->log([
+            /*$this->log([
                 str_pad('', 100, '_'),
                 'EMAIL ID: ' . $email['id'],
                 'FROM: ' . $email['from']['email'],
                 'SUBJECT: ' . $email['subject'] . PHP_EOL
-            ]);
+            ]);*/
 
             //Получаем тело файла
             $content = array_values($file)[0];
@@ -304,7 +305,7 @@ class EmailIntegrationController extends Controller
                 'file_hash_summ' => md5($file_content),
             ]);
             if (!empty($model)) {
-                $this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
+                //$this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
                 continue;
             }
             //Сохраняем темп файл
@@ -314,6 +315,7 @@ class EmailIntegrationController extends Controller
             try {
                 // запускаем обработку накладной
                 $parser->parse();
+                if ($parser->sumNotEqual === true) $parser->sendMailNotEqualSum($email['from']['email'], $name_file, $setting->language);
             } catch (ParseTorg12Exception $e) {
                 $this->log([
                     PHP_EOL,

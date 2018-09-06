@@ -660,7 +660,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'category_id' => (int)$model['category_id'],
                 'price' => round($model['price'], 2),
                 'ed' => $model['ed'],
-                'units' => (int)$model['units'] ?? 1,
+                'units' => round(($model['units'] ?? 0), 3),
                 'currency' => $model['symbol'],
                 'currency_id' => (int)$model['currency_id'],
                 'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
@@ -847,7 +847,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function complete(array $post)
     {
@@ -876,14 +876,21 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->status = Order::STATUS_DONE;
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
-            if ($order->validate() && $order->save()) {
+            if ($order->validate()) {
+                try{
+                    if(!$order->save()) {
+                        throw new \Exception('Order not save!!!');
+                    }
+                } catch (\Throwable $e) {
+                    throw $e;
+                }
                 Notice::init('Order')->doneOrder($order, $this->user);
             } else {
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
             return $this->getInfo(['order_id' => $order->id]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $t->rollBack();
             throw $e;
         }

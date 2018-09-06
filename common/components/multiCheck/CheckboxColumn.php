@@ -5,7 +5,8 @@ namespace common\components\multiCheck;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 
-class CheckboxColumn extends \yii\grid\CheckboxColumn
+class CheckboxColumn extends \kartik\grid\CheckboxColumn
+
 {
     /**
      * @var array
@@ -25,18 +26,20 @@ class CheckboxColumn extends \yii\grid\CheckboxColumn
     {
         if (!empty($this->onChangeEvents)) {
             $js = [];
+            $header = '$(document)';
             foreach ($this->onChangeEvents as $event => $handler) {
                 if(!empty($handler)) {
                     if(!$this->multiple && $event == 'changeAll')
                         continue;
-                    $id = ($event == 'changeAll') ? "$('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]')"
-                        : "$('input[type=\"checkbox\"][name=\"selection[]\"]')";
+                    $id = ($event == 'changeAll') ? "'input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]'"
+                        : "'input[type=\"checkbox\"][name=\"selection[]\"]'";
                     $function = new JsExpression($handler);
-                    $js[] = "{$id}.on('change', {$function});";
+                    $js[] = "{$header}.on('change', {$id}, {$function});";
                 }
             }
             $js = implode("\n", $js);
             $view->registerJs($js);
+
         }
     }
 
@@ -57,12 +60,20 @@ class CheckboxColumn extends \yii\grid\CheckboxColumn
         jQuery('#$id').yiiGridView('setSelectionColumn', $options);
         ");
         } else {
-            $this->grid->getView()->registerJs("
+            $js = " //function initSelectedAll(){
             jQuery('#$id').yiiGridView('setSelectionColumn', $options);
             countSelected = $('#$id').yiiGridView('getSelectedRows');
-            checked = (countSelected == $pageCount);
+            checked = (countSelected.length == $pageCount);
+            console.log(countSelected.length);
+            console.log($pageCount);
+            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').attr(\"disabled\", true);
             $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').prop(\"checked\", checked);
-            ");
+            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').removeAttr(\"disabled\");
+           // }
+           // initSelectedAll();
+            ";
+            $this->grid->getView()->registerJs($js);
+            $this->_clientScript .= "\n".$js;
         }
 
         $this->registerOnChangeEvents($this->grid->getView());

@@ -3,14 +3,21 @@
 namespace api_web\components;
 
 use Yii;
-use \Firebase\FirebaseLib;
 use yii\web\HttpException;
 
 class FireBase
 {
-    function __wakeup(){}
-    function __clone(){}
-    function __construct(){}
+    function __wakeup()
+    {
+    }
+
+    function __clone()
+    {
+    }
+
+    function __construct()
+    {
+    }
 
     /**
      * @var FireBase
@@ -18,7 +25,7 @@ class FireBase
     private static $instance;
 
     /**
-     * @var FirebaseLib
+     * @var \api_web\components\FireBaseLib
      */
     private static $fireBase;
 
@@ -46,7 +53,7 @@ class FireBase
         self::$path = Yii::$app->params['fireBase']['DEFAULT_PATH'] ?? '/';
         $url = Yii::$app->params['fireBase']['DEFAULT_URL'];
         $token = Yii::$app->params['fireBase']['DEFAULT_TOKEN'];
-        self::$fireBase = new FirebaseLib($url, $token);
+        self::$fireBase = new \api_web\components\FireBaseLib($url, $token);
         return new self();
     }
 
@@ -99,8 +106,7 @@ class FireBase
      */
     public function update($path, $data)
     {
-        $path = $this->getPath($path);
-        return self::$fireBase->update($path, $data);
+        return self::$fireBase->update($this->getPath($path), $data);
     }
 
     /**

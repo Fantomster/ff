@@ -26,6 +26,9 @@ class Module extends \yii\base\Module
             'one_s' => [
                 'class' => 'api_web\modules\integration\modules\one_s\Module',
             ],
+            'vetis' => [
+                'class' => 'api_web\modules\integration\modules\vetis\Module',
+            ],
         ];
     }
 }

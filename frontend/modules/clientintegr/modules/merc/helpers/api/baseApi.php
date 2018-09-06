@@ -2,17 +2,15 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api;
 
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\Ikar;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
 use api\common\models\merc\mercDicconst;
 use yii\base\Component;
 
 class baseApi extends Component
 {
+   const GET_USERDATA = 1;
+   const GET_UPDATES_DICTS = 2;
+
     protected $login;
     protected $pass;
     protected $apiKey;
@@ -23,6 +21,9 @@ class baseApi extends Component
     protected $enterpriseGuid;
     protected $wsdls;
     protected $query_timeout;
+    protected $system;
+    protected $wsdlClassName;
+    protected $org_id;
 
     protected static $_instance = [];
 
@@ -40,49 +41,24 @@ class baseApi extends Component
             self::$_instance[$key]->enterpriseGuid = mercDicconst::getSetting('enterprise_guid', $org_id);
             self::$_instance[$key]->query_timeout = Yii::$app->params['merc_settings']['query_timeout'];
             self::$_instance[$key]->service_id = Yii::$app->params['merc_settings']['mercury']['service_id'];
+            self::$_instance[$key]->org_id = isset($org_id) ? $org_id : (\Yii::$app->user->identity)->organization_id;
         }
         return self::$_instance[$key];
     }
 
-    protected function getSoapClient($system)
+    protected function getSoapClient()
     {
-        if ($this->_client === null)
-            switch ($system) {
-            case 'mercury': $this->_client = (new Mercury(
-                    ['url' => $this->wsdls[$system]['wsdl'],
+        $className = $this->wsdlClassName;
+        if ($this->_client === null) {
+            $this->_client = (new $className(
+                    ['url' => $this->wsdls[$this->system]['wsdl'],
                     'login' => $this->login,
                     'password' => $this->pass,
                     'exceptions' => 1,
+                    'connection_timeout' => 500,
+                    'cache_wsdl' => WSDL_CACHE_NONE,
+                    'keep_alive' => false,
                     'trace' => 1]))->soapClient;
-                break;
-            case 'cerber': $this->_client = (new Cerber(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
-            case 'dicts': $this->_client = (new Dicts(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
-            case 'ikar': $this->_client = (new Ikar(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
-            case 'product': $this->_client = (new Products(
-                    ['url' => $this->wsdls[$system]['wsdl'],
-                        'login' => $this->login,
-                        'password' => $this->pass,
-                        'exceptions' => 1,
-                        'trace' => 1]))->soapClient;
-                break;
         }
 
         return $this->_client;
@@ -91,5 +67,17 @@ class baseApi extends Component
     protected function getLocalTransactionId($method)
     {
         return base64_encode($method.time());
+    }
+
+    /**
+     * @param string $method
+     * @param array $request
+     * @return mixed
+     */
+    public function sendRequest($method, $request)
+    {
+        ini_set('default_socket_timeout', 500);
+        $client = $this->getSoapClient();
+        return $client->$method($request);
     }
 }

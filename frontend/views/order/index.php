@@ -1,5 +1,3 @@
-...
-
 <?php
 
 use yii\widgets\ActiveForm;
@@ -313,6 +311,9 @@ $i = 'Внимание, данные о фактическом приёме то
 $titleCompleteEDI = EchoRu::echo ('frontend.views.order.complete_edi', $i, 'app');
 $btnYes = EchoRu::echo ('frontend.views.order.yep', 'Да');
 $btnNo = EchoRu::echo ('frontend.views.order.cancel', 'Нет');
+
+$url = Url::to('order');
+
 $js = <<< JS
 $("document").ready(function () {
 
@@ -322,7 +323,7 @@ $("document").ready(function () {
         if (w === "https:") {
             target = "https:";
         }
-        target = target + '//' + window.location.hostname + '/order?OrderSearch2[id]=' + $("#orderFilter").val();
+        target = target + '//' + window.location.hostname + '/$url?OrderSearch2[id]=' + $("#orderFilter").val();
         window.location.href = target;
     });
 

@@ -53,6 +53,20 @@ class Journal extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors() {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
+                ],
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+    
     /**
      * {@inheritdoc}
      */

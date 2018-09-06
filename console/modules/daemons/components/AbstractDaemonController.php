@@ -2,13 +2,22 @@
 
 namespace console\modules\daemons\components;
 
+use api\common\models\RabbitQueues;
+use api_web\components\FireBase;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use vyants\daemon\DaemonController;
 use PhpAmqpLib\Channel\AMQPChannel;
+use yii\db\Expression;
+use yii\db\Query;
 
 abstract class AbstractDaemonController extends DaemonController
 {
+
+    /**
+     * @var \console\modules\daemons\components\ConsumerInterface
+     */
+    public $consumer;
+
     /**
      * Description
      * @var RabbitService
@@ -31,6 +40,71 @@ abstract class AbstractDaemonController extends DaemonController
     public $maxChildProcesses = 5;
 
     /**
+     * rabbit queues table name
+     * @var \DateTime
+     * */
+    public $lastExec = null;
+
+    /**
+     * Check consumer implements interfaces methods
+     * @param \console\modules\daemons\components\ConsumerInterface $consumer
+     */
+    private function getConsumer(ConsumerInterface $consumer)
+    {
+        $this->consumer = $consumer;
+    }
+
+    /**
+     * Generate class string
+     * @return string
+     */
+    public function getConsumerClassName()
+    {
+        return "console\modules\daemons\classes\\" . $this->consumerClass;
+    }
+
+    /**
+     * Create consumer with different parameters
+     * maybe refactoring to argument unpacking new class(...$arrayOfConstructorParameters)
+     */
+    public function createConsumer()
+    {
+        $arWhere = [
+            'consumer_class_name' => $this->consumerClass
+        ];
+
+        if (!empty($this->orgId)) {
+            $this->getConsumer(new $this->consumerClassName($this->orgId));
+            $arWhere['organization_id'] = $this->orgId;
+        } else {
+            $this->getConsumer(new $this->consumerClassName);
+        }
+
+        $dateTime = new \DateTime();
+        (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+            'start_executing' => $dateTime->format('Y-m-d H:i:s')
+        ], $arWhere)->execute();
+    }
+
+    public function loggingExecutedTime()
+    {
+        $arWhere = [
+            'consumer_class_name' => $this->consumerClass
+        ];
+
+        if (!empty($this->orgId)) {
+            $arWhere['organization_id'] = $this->orgId;
+        }
+
+        $dateTime = new \DateTime();
+        $this->lastExec = $dateTime->format('Y-m-d H:i:s');
+        (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+            'start_executing' => new Expression('NULL'),
+            'last_executed'   => $this->lastExec
+        ], $arWhere)->execute();
+    }
+
+    /**
      * @return array|bool
      */
     protected function defineJobs()
@@ -40,21 +114,12 @@ abstract class AbstractDaemonController extends DaemonController
 
         //Получаем канал, если нет, создаем
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
+        //Получение сообщений из очереди по одному
+        $channel->basic_qos(null, 1, null);
         //Цепляем канал к очереди
         $channel->queue_bind($this->getQueueName(), $this->getExchangeName(), $this->getQueueName());
         //Цепляем консьюмера
         $channel->basic_consume($this->getQueueName(), $consumerTag, false, false, false, false, [$this, 'doJob']);
-
-        /**
-         * Инофрмация о подключении
-         */
-        $this->log([
-            "HOST" => $this->rabbit->host,
-            "V_HOST" => $this->rabbit->vhost,
-            "Exchange" => $this->getExchangeName(),
-            "Queue" => $this->getQueueName(),
-            "Consumer" => $consumerTag
-        ]);
 
         while (count($channel->callbacks)) {
             try {
@@ -86,18 +151,53 @@ abstract class AbstractDaemonController extends DaemonController
     public function renewConnections()
     {
         //if (\Yii::$app->db->isActive) {
-            \Yii::$app->db->close();
-            \Yii::$app->db->open();
+        \Yii::$app->db->close();
+        \Yii::$app->db->open();
         //}
 
         //if (\Yii::$app->db_api->isActive) {
-            \Yii::$app->db_api->close();
-            \Yii::$app->db_api->open();
+        \Yii::$app->db_api->close();
+        \Yii::$app->db_api->open();
         //}
     }
 
     /**
-     * @param $queue
+     * send to FCM when consumer complete work
+     * */
+    public function noticeToFCM(): void
+    {
+        $arFB = [
+            'dictionaries',
+            'queue' => $this->queueName,
+        ];
+        if (!is_null($this->orgId)) {
+            $arFB['organization'] = $this->orgId;
+        }
+        $count = \Yii::$app->get('rabbit')->setQueue($this->queueName)->checkQueueCount();
+
+        FireBase::getInstance()->update($arFB, [
+            'last_executed'  => $this->lastExec,
+            'plain_executed' => $this->lastTimeout,
+            'count'          => $count,
+        ]);
+    }
+
+    /**
+     * Get last timeout from last exec time
+     * @return string|null
+     */
+    public function getLastTimeout()
+    {
+        if (!is_null($this->lastExec)) {
+            $lastExec = new \DateTime($this->lastExec);
+            $timeOut = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
+            return date('Y-m-d H:i:s', $timeOut);
+        }
+        return null;
+    }
+
+    /**
+     * @param        $queue
      * @param string $exchange
      * @return AMQPChannel
      */

@@ -4,18 +4,23 @@
  use yii\data\ActiveDataProvider;
  use common\models\User;
  use yii\helpers\Html;
+ use api\common\models\RkDicconst;
 
  ?>
 Приходная Накладная:<br><br>
 
 <?php 
-    
-    // var_dump($model);   
+
+    $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
     if(empty($model)) {
-        echo "<div style=\"text-align:right;\">";
-         echo Html::a('Создать накладную', ['create','order_id'=>$order_id], ['class'=>'btn btn-md fk-button']);
-         echo "</div>";
+        echo "<div  style=\"text-align:right;\">";
+        if ($waybillMode === "0") {
+            echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
+        } else {
+            echo "Включен автоматический режим создания накладных.";
+        }
+        echo "</div>";
     } else {
         $columns = array (
             'id',
@@ -91,7 +96,7 @@
                     },
                     'map' =>  function ($url, $model) {
                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/map', 'waybill_id'=>$model->id]);
+                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/map', 'waybill_id'=>$model->id, 'way' => 0]);
                         return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                             ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax'=>"0"]);
                     },

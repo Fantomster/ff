@@ -64,10 +64,9 @@ $arr = [
     Yii::t('message', 'frontend.views.order.var15', ['ru' => 'Попробуйте ещё раз']),
 ];
 
-
 $organization = $user->organization;
 $lisences = $organization->getLicenseList();
-$list_integration = '';
+$listIntegration = '';
 $links = [
     'rkws' => [
         'alter' => 'R_keeper',
@@ -83,15 +82,26 @@ $links = [
         'url' => '/clientintegr/odinsobsh/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
     ]
 ];
+$numLicences = 0;
 foreach ($links as $key => $val) {
     if (isset($lisences[$key]) && $lisences[$key]) {
-        $list_integration .= '<br>' . Html::a($val['title'], Yii::$app->urlManager->createUrl($val['url']), [
+        $listIntegration .= '<br>' . Html::a($val['title'], Yii::$app->urlManager->createUrl($val['url']), [
                 'class' => 'btn btn-primary', 'style' => 'margin-top: 8px'
             ]);
+        $numLicences++;
     }
+}
+$titleIntegration = 'Накладная успешно привязана!';
+if ($numLicences) {
+    $textIntegration = 'Перейти в интеграцию: '.$listIntegration;
+} else {
+    $titleIntegration = 'Заказ завершен';
+    $textIntegration = 'Просьба активировать лицензию';
 }
 
 $js = <<<JS
+
+   
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
@@ -116,14 +126,16 @@ $js = <<<JS
                 ).done(function(result) {
                         $('#actionButtons').html(result);
                         clickedButton.button("reset");
+                        swal(
+                            '$titleIntegration',
+                            '$textIntegration',
+                            'success'
+                        );
                 });
-                 swal(
-                'Накладная успешно привязана!',
-                'Перейти в интеграцию: $list_integration',
-                'success'
-                );
+                 
             }
         });
+
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
         });

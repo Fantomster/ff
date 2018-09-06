@@ -2,6 +2,11 @@
 
 namespace common\models\vetis;
 
+use api\common\models\RabbitQueues;
+use console\modules\daemons\components\UpdateDictInterface;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\ListOptions;
 use Yii;
 
 /**
@@ -22,7 +27,7 @@ use Yii;
  * @property string $addressView
  * @property object $businessEntity
  */
-class VetisBusinessEntity extends \yii\db\ActiveRecord
+class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
 
     /**
@@ -41,6 +46,11 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord
         return Yii::$app->get('db_api');
     }
 
+    public static function primaryKey()
+    {
+        return ['uuid'];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -48,8 +58,10 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'guid'], 'required'],
+            [['uuid'], 'unique'],
             [['last', 'active', 'type'], 'integer'],
-            [['uuid', 'guid', 'next', 'previous', 'name', 'fullname', 'fio', 'inn', 'kpp', 'addressView'], 'string', 'max' => 255],
+            [['uuid', 'guid', 'next', 'previous', 'name', 'fullname', 'fio', 'inn', 'kpp'], 'string', 'max' => 255],
+            [['addressView'], 'string']
         ];
     }
 
@@ -80,4 +92,49 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord
         return \yii\helpers\Json::decode($this->data);
     }
 
+    public static function getUpdateData($org_id)
+    {
+        try {
+            $load = new Cerber();
+
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercBusinessEntityList'])->one();
+            if ($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = 'MercBusinessEntityList';
+                $queue->save();
+            }
+
+            //Формируем данные для запроса
+            $data['method'] = 'getBusinessEntityChangesList';
+            $data['struct'] = ['listName' => 'businessEntityList',
+                'listItemName' => 'businessEntity'
+            ];
+
+            $listOptions = new ListOptions();
+            $listOptions->count = 1000;
+            $listOptions->offset = 0;
+
+            $queueDate = $queue->last_executed ?? $queue->start_executing;
+
+            $startDate = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+            $instance = cerberApi::getInstance($org_id);
+            $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
+
+            if (!empty($queue->organization_id)) {
+                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+            } else {
+                $queueName = $queue->consumer_class_name;
+            }
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue(json_encode($data));
+
+        } catch (\Exception $e) {
+            Yii::error($e->getMessage());
+            echo $e->getMessage() . PHP_EOL;
+        }
+    }
 }

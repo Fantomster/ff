@@ -49,26 +49,9 @@ class step2Form extends Model
         }
 
         $api = dictsApi::getInstance();
-        $listOptions = new ListOptions();
-        $listOptions->count = 100;
-        $listOptions->offset = 0;
-        $res = [];
 
-        do {
-            $list = $api->getPurposeList($listOptions);
-            $list = $list->purposeList;
-
-            if (isset($list->purpose)) {
-                foreach ($list->purpose as $item) {
-                    if ($item->last && $item->active)
-                        $res[$item->guid] = $item->name;
-                }
-            }
-            if ($list->count < $list->total)
-                $listOptions->offset += $list->count;
-        } while ($list->total > ($list->count + $list->offset));
-
-        return $res;
+        $list = $api->getPurposeList();
+        return $list ?? [];
     }
 
     public function getExpertizeList()

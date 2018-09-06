@@ -116,7 +116,7 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                         ]
                     ])->label(false);
                     echo $form->field($expiryDate, 'second_date')->widget(DateTimePicker::classname(), [
-                        'options' => ['placeholder' => 'Конечная дата в интервале'],
+                        'options' => ['placeholder' => 'Конечная дата в интервале', 'id' => 'inputdate-first_date'],
                         'pluginOptions' => [
                             'autoclose' => true,
                             'format' => 'dd.mm.yyyy hh:ii'
@@ -124,56 +124,8 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                     ])->label(false);
                     ?>
                 </div>
-                <h4>Сведения о происхождении продукции: </h4>
-                <?php
-                $model->country = isset($model->country) ? $model->country : '72a84b51-5c5e-11e1-b9b7-001966f192f1';
-                echo $form->field($model, 'country')
-                    ->dropDownList(createStoreEntryForm::getCountryList(), ['prompt' => 'не указано',
-                        /* 'options'=>[
-                         '7' => ['label' => 'JULY', 'selected'=>true],
-                     ]*/]);
-                ?>
-                <?php
-                $url = \yii\helpers\Url::to(['stock-entry/producers-list']);
-                $desc = '';//empty($model->city) ? '' : City::findOne($model->city)->description;
-
-                echo $form->field($model, 'producer')->widget(Select2::classname(), [
-                    'initValueText' => $desc, // set the initial display text
-                    'options' => ['placeholder' => 'Укажите название предприятия для поиска  ...'],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'minimumInputLength' => 3,
-                        'language' => [
-                            'errorLoading' => new JsExpression("function () { return 'Загрузка результатов...'; }"),
-                        ],
-                        'ajax' => [
-                            'url' => $url,
-                            'dataType' => 'json',
-                            'data' => new JsExpression('function(params) { return {q:params.term,c:$( "#createstoreentryform-country option:selected" ).val()}; }')
-                        ],
-                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                        /*'templateResult' => new JsExpression('function(city) { return producer.text; }'),
-                        'templateSelection' => new JsExpression('function (city) { return producer.text; }'),*/
-                    ],
-                ]);
-                ?>
-
-                <h4>Сведения о бумажном ВСД: </h4>
-                <?= $form->field($model, 'vsd_issueSeries')->textInput(['maxlength' => true]); ?>
-                <?= $form->field($model, 'vsd_issueNumber')->textInput(['maxlength' => true]); ?>
-                <div class="form-group required">
-                    <?php echo '<label class="control-label"><b>Дата бумажного ВСД</b></label>';
-                    echo $form->field($inputDate, 'first_date')->widget(\kartik\widgets\DatePicker::classname(), [
-                        'options' => ['placeholder' => 'Дата бумажного ВСД'],
-                        'pluginOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd.mm.yyyy'
-                        ]
-                    ])->label(false);
-                    ?>
-                </div>
                 <div class="form-group">
-                    <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' => 'btn btn-success', 'disabled' => 'disabled', 'id' => 'alSubmitVSDButton']) ?>
+                    <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.create', ['ru' => 'Создать']), ['class' => 'btn btn-success', 'id' => 'alSubmitVSDButton']) ?>
                 </div>
             </div>
         </div>

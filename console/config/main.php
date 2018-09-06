@@ -32,7 +32,12 @@ return [
             'daemons' => [
                 ['className' => 'iikoLogDaemonController', 'enabled' => true]
             ]
-        ]
+        ],
+        'abaddon-daemon' => [
+            'class' => "\console\controllers\AbaddonDaemonController",
+            'maxChildProcesses' => 100,
+            'isMultiInstance' => false,
+        ],
     ],
     'aliases' => [
           '@baseUrl'=>'https://mixcart.ru'

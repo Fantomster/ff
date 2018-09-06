@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use api\common\models\iiko\iikoAgent;
+use common\components\SimpleChecker;
 use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
@@ -26,16 +28,23 @@ use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
 use yii\db\Query;
+use Exception;
 
 /**
  *  Controller for restaurant
  */
 class ClientController extends DefaultController
 {
+
+    const AJAX_STATUS_SUCCESS = 'Y';
+    const AJAX_STATUS_FAIL = 'N';
+
+    const MAX_DELAY_PAYMENT = 365;
 
     public $layout = "main-client";
 
@@ -44,6 +53,7 @@ class ClientController extends DefaultController
      */
     public function behaviors()
     {
+
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -53,6 +63,16 @@ class ClientController extends DefaultController
                 ],
 //                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial', 'employees'],
                 'rules' => [
+                    [
+                        'actions' => [
+                            'ajax-set-agent-attr-payment-delay',
+                        ],
+                        'allow' => true,
+                        // Only restaurant owners which are in system "managers"
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                        ],
+                    ],
                     [
                         'actions' => [
                             'settings',
@@ -235,9 +255,93 @@ class ClientController extends DefaultController
         }
     }
 
-    /*
-     *  User create
+
+    /**
+     * Throw new Exception of not Ajax
+     * @throws Exception
      */
+    public function checkAjax()
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new Exception('Use ajax-method only!');
+        }
+    }
+
+    /**
+     * Format result as JSON
+     */
+    public function formatJson()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+    }
+
+    /**
+     * Display ajax fail result
+     * @var $message string
+     * @throws Exception
+     * @return array
+     */
+    public function fail($message = NULL): array
+    {
+        $this->formatJson();
+        $result = ['status' => self::AJAX_STATUS_FAIL];
+        $result['error'] = $message;
+        return $result;
+    }
+
+    /**
+     * Display ajax success result
+     * @var $message string
+     * @throws Exception
+     * @return array
+     */
+    public function success($message = NULL): array
+    {
+        $this->formatJson();
+        $result = ['status' => self::AJAX_STATUS_SUCCESS];
+        $result['error'] = $message;
+        return $result;
+    }
+
+    /**
+     * Display ajax request result
+     * @var $message string
+     * @throws Exception
+     * @return array
+     */
+    public function actionAjaxSetAgentAttrPaymentDelay(): array
+    {
+
+
+        $this->checkAjax();
+        $post = Yii::$app->request->post();
+        if (isset($post['delay_days'])) {
+            $post['delay_days'] = trim($post['delay_days']);
+        }
+
+        if (!isset($post['agent_id']) || !$post['agent_id']) {
+            return $this->fail('Agent ID is required!');
+        } elseif (!isset($post['delay_days'])) {
+            return $this->fail('Payment delay value is required!');
+        } elseif (!SimpleChecker::validateWholeNumerExactly($post['delay_days'])) {
+            return $this->fail('Payment delay value must be whole number!');
+        } elseif ($post['delay_days'] > self::MAX_DELAY_PAYMENT) {
+            return $this->fail('Payment delay value must be not more than ' . self::MAX_DELAY_PAYMENT . '!');
+        }
+
+        $agent = iikoAgent::findOne([
+            'id' => $post['agent_id'],
+            'org_id' => $this->currentUser->organization->id,
+        ]);
+        if (!$agent || !$agent instanceof iikoAgent) {
+            return $this->fail('Agent ID record not found!');
+        }
+
+        $result['status'] = self::AJAX_STATUS_SUCCESS;
+        $agent->payment_delay = (int)$post['delay_days'];
+        $agent->save();
+        return $this->success();
+    }
 
     public function actionAjaxCreateUser()
     {
@@ -1048,20 +1152,25 @@ class ClientController extends DefaultController
             if (!empty($user)) {
                 $post = Yii::$app->request->post();
                 if ($user->status == 0 && $post) {
+                    $organization->zip_code = '090';
                     $organization->load($post);
                     if ($organization->validate()) {
                         $organization->save();
                         if ($user->email != $organization->email) {
                             $user->email = $organization->email;
                             $user->save();
-                            $currentUser->sendInviteToVendor($user);
-                        }/* else {
-                          if (Yii::$app->request->post('resend_email') == 1) {
-                          $currentUser->sendInviteToVendor($user);
-                          }
-                          } */
+                            if ($organization->action == 'new') $currentUser->sendInviteToVendor($user);
+                            $message = Yii::t('app', 'Сохранено');
+                            return $this->renderAjax('suppliers/_success', ['message' => $message]);
+                        } else {
+                            if ($organization->action == 'new') {
+                                if (Yii::$app->request->post('resend_email') == 1) {
+                                    $currentUser->sendInviteToVendor($user);
+                                }
+                            }
+                        }
                     } else {
-                        $message = 'Не верно заполнена форма!';
+                        $message = 'Неверно заполнена форма!';
                         return $this->renderAjax('suppliers/_success', ['message' => $message]);
                     }
                 }
@@ -1933,7 +2042,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
     }
 
     /**
-     * Сформировать, и скачать отчет
+     * Сформировать и скачать отчёт
      * @throws \Exception
      */
     public function actionPriceStat()

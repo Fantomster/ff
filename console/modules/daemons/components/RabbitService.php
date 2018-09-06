@@ -56,6 +56,32 @@ class RabbitService extends Component
     }
 
     /**
+     * Check number of jobs and consumers in queue
+     * @throws ErrorException
+     * @return array
+     * */
+    public function checkQueueCount()
+    {
+        //Должна быть указана очередь
+        if ($this->queue == null) {
+            throw new ErrorException('Необходимо установить имя очереди (new RabbitService())->setQueue($name_queue);');
+        }
+
+        $connection = $this->connect();
+        $channel = $connection->channel();
+        list($queue, $messageCount, $consumerCount) = $channel->queue_declare($this->queue, true);
+
+        //Разрыв соединения
+        $channel->close();
+        $connection->close();
+
+        return [
+            'count' => $messageCount,
+            'consumerCount' => $consumerCount,
+        ];
+    }
+
+    /**
      * Название очереди
      * @param $queue
      * @return $this

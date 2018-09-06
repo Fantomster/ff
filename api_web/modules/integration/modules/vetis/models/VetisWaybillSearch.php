@@ -66,13 +66,4 @@ class VetisWaybillSearch extends MercVsd
 
         return $dataProvider;
     }
-
-    /*public function getRecipientList()
-    {
-        $guid = mercDicconst::getSetting('enterprise_guid');
-        if($this->type == 1)
-            return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("recipient_guid = '$guid'")->groupBy('sender_guid')->all(), 'sender_guid', 'sender_name'));
-        else
-            return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("sender_guid = '$guid'")->groupBy('recipient_guid')->all(), 'recipient_guid', 'recipient_name'));
-    }*/
 }

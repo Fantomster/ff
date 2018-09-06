@@ -526,4 +526,56 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getFullInfoAboutVsd($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/waybill/repay-vsd",
+     *     tags={"Integration/vetis/waybill"},
+     *     summary="Полная информация о ВСД",
+     *     description="Полная информация о ВСД",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuids": {
+     *                                 "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                                  "eb9eed88-919d-422d-9593-8092fdb91ab7",
+     *                                  "470b17ea-9e16-434d-b3d6-b3064324ca82"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
+     *                      "eb9eed88-919d-422d-9593-8092fdb91ab7":false,
+     *                      "470b17ea-9e16-434d-b3d6-b3064324ca82":true
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRepayVsd()
+    {
+        $this->response = (new VetisWaybill())->repayVsd($this->request);
+    }
 }

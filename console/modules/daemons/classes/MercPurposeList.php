@@ -23,12 +23,8 @@ class MercPurposeList extends MercDictConsumer
 
     protected function init()
     {
+        parent::init();
         $this->instance = dictsApi::getInstance($this->org_id);
-        $data = json_decode($this->data, true);
-        $this->method = $data['method'];
-        $this->request = json_decode($data['request'], true);
-        $this->listName = $data['struct']['listName'];
-        $this->listItemName = $data['struct']['listItemName'];
         $this->modelClassName = VetisPurpose::class;
     }
 }

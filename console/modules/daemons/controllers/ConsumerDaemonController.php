@@ -2,7 +2,10 @@
 
 namespace console\modules\daemons\controllers;
 
+use api\common\models\RabbitQueues;
 use console\modules\daemons\components\AbstractDaemonController;
+use yii\db\Expression;
+use yii\db\Query;
 
 class ConsumerDaemonController extends AbstractDaemonController
 {
@@ -17,7 +20,7 @@ class ConsumerDaemonController extends AbstractDaemonController
         }
         return $this->consumerClass;
     }
-    
+
     /**
      * Обработка полученных сообщений
      * @param $job
@@ -26,7 +29,7 @@ class ConsumerDaemonController extends AbstractDaemonController
     public function doJob($job)
     {
         $this->renewConnections();
-        
+
         try {
             if (!is_null($this->lastExec) && $this->lastTimeout > date('Y-m-d H:i:s')) {
                 $success = true;
@@ -38,24 +41,21 @@ class ConsumerDaemonController extends AbstractDaemonController
                 $this->loggingExecutedTime();
                 $this->noticeToFCM();
             }
-//            if (!is_array($row)) {
-//                throw new \Exception('Message is not array! ' . PHP_EOL . print_r($row, true));
-//            }
 
-//            try{
-//                \Yii::$app->get('db_api')->createCommand()->insert(iikoLogger::$tableName, $row)->execute();
-//            } catch (\Exception $e) {
-//                $this->log(PHP_EOL . " DIE: HALT " . $e->getMessage());
-//                @unlink(\Yii::$app->basePath . "/runtime/daemons/pids/" . self::shortClassName());
-//                die('die mysql connection');
-//            }
             if ($success) {
                 $this->ask($job);
             } else {
                 throw new \Exception('$success false');
             }
         } catch (\Throwable $e) {
-            $this->log(PHP_EOL . " ERROR: " . $e->getMessage().PHP_EOL.$e->getTraceAsString());
+            $arWhere = ['consumer_class_name' => $this->consumerClass];
+            if (!empty($this->orgId)) {
+                $arWhere['organization_id'] = $this->orgId;
+            }
+            (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+                'start_executing' => new Expression('NULL')
+            ], $arWhere)->execute();
+            $this->log(PHP_EOL . " ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $this->nask($job);
         }
         return true;

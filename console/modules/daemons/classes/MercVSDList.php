@@ -10,7 +10,11 @@ namespace console\modules\daemons\classes;
 
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\MercDictConsumer;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsChangeList;
+use yii\db\Expression;
+use yii\helpers\BaseStringHelper;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 
 /**
  * Class consumer with realization ConsumerInterface
@@ -18,27 +22,73 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsC
  */
 class MercVSDList extends MercDictConsumer
 {
-    public static $timeout  = 60*5;
-    public static $timeoutExecuting = 60*60;
+    public static $timeout = 60 * 5;
+    public static $timeoutExecuting = 60 * 60;
     private $result = true;
 
-    public function getData()
+    public function init()
     {
         $check = RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList', 
         'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
-        ->andWhere('start_executing is not null')->one();
+            ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count();
 
-        if($check == null) {
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList_' . $this->org_id])->orderBy(['last_executed' => SORT_DESC])->one();
-            $vsd = new VetDocumentsChangeList();
-            $vsd->org_id = $this->org_id;
-            $startDate = ($queue->last_executed === null) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queue->last_executed;
-            $vsd->updateData($startDate);
+        if ($check == 9) {
+            $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id])->one();
+            $this->data = json_decode(($this->queue->data_request ?? $this->data), true);
+        } else {
+            $this->log('Dictionaries are currently being updated'.PHP_EOL);
+            die('Dictionaries are currently being updated'.PHP_EOL);
         }
-        else
-        {
-            $this->result = false;
-        }
+    }
+
+    public function getData()
+    {
+        $className = BaseStringHelper::basename(static::class);
+        $this->init();
+        $count = $this->request['listOptions']['offset'];
+        $this->log('Load' . PHP_EOL);
+        $error = 0;
+        $list = null;
+        $vsd = new VetDocumentsChangeList();
+        $vsd->org_id = $this->org_id;
+        $api = mercuryApi::getInstance($this->org_id);
+        $api->setEnterpriseGuid($this->data['enterpriseGuid']);
+        do {
+            try {
+                //Записываем в базу данные о текущем шаге
+                $this->data['listOptions'] = $this->data['listOptions'];
+                $this->queue->data_request = json_encode($this->data);
+                $this->queue->save();
+                //Выполняем запрос и обработку полученных данных
+                $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
+                $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
+
+                $count += $vetDocumentList->count;
+                $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+
+                if ($vetDocumentList->count > 0) {
+                    $vsd->updateDocumentsList($vetDocumentList->vetDocument);
+                }
+
+                if ($vetDocumentList->count < $vetDocumentList->total) {
+                    $this->data['listOptions']['offset'] += $vetDocumentList->count;
+                }
+            } catch (\Throwable $e) {
+                $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+                mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                $error++;
+                if ($error == 3) {
+                    die('Error operation');
+                }
+            }
+        } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
+
+        $this->log("FIND: consumer_class_name = {$className}");
+
+        $this->queue->data_request = new Expression('NULL');
+        $this->queue->save();
+
+        mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
     }
 
     public function saveData()

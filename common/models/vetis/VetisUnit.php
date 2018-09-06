@@ -127,7 +127,7 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
         try {
             $load = new Dicts();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercUnitList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercUnitList'])->one();
             if($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercUnitList';
@@ -144,7 +144,9 @@ class VetisUnit extends \yii\db\ActiveRecord implements UpdateDictInterface
             $listOptions->count = 100;
             $listOptions->offset = 0;
 
-            $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
+            $queueDate = $queue->last_executed ?? $queue->start_executing;
+
+            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
             $instance = dictsApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 

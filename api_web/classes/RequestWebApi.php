@@ -385,7 +385,6 @@ class RequestWebApi extends WebApi
             $model->supp_user_id = $this->user->id;
             $model->price = $post['price'];
             $model->comment = $post['comment'] ?? '';
-            $model->created_at = new Expression('NOW()');
 
             if ($model->validate() && $model->save()) {
                 //Отправляем уведомления

@@ -13,12 +13,14 @@ use api_web\components\Notice;
 use common\models\User;
 
 //`php yii cron/count`
-class CronController extends Controller {
+class CronController extends Controller
+{
 
     /**
      * Отправка Емайлов пользователем, кто у нас ровно неделю
      */
-    public function actionSendEmailWeekend() {
+    public function actionSendEmailWeekend()
+    {
         $users = User::find()->where(['status' => 1, 'send_week_message' => 0, 'language' => 'ru'])
                 ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)')
                 ->all();
@@ -38,7 +40,8 @@ class CronController extends Controller {
     /**
      * Отправка Емайлов пользователем, через час после логина
      */
-    public function actionSendMessageManager() {
+    public function actionSendMessageManager()
+    {
         $users = User::find()->where(['status' => 1, 'send_manager_message' => 0, 'language' => 'ru'])
                 ->andWhere('first_logged_in_at is not null')
                 ->andWhere('first_logged_in_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)')
@@ -60,7 +63,8 @@ class CronController extends Controller {
     /**
      * Отправка Емайлов пользователем, через 2 дня после создания
      */
-    public function actionSendDemonstration() {
+    public function actionSendDemonstration()
+    {
         $users = User::find()->where(['status' => 1, 'send_demo_message' => 0, 'language' => 'ru'])
                 ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 2 DAY)')
                 ->all();
@@ -77,14 +81,16 @@ class CronController extends Controller {
         }
     }
 
-    public function actionCount() {
+    public function actionCount()
+    {
         $restourants = rand(15, 25);
         $suppliers = rand(5, 10);
         $sql = "update main_counter set supp_count = supp_count + $suppliers, rest_count = rest_count + $restourants ";
         \Yii::$app->db->createCommand($sql)->execute();
     }
 
-    public function actionPlusOne() {
+    public function actionPlusOne()
+    {
         $query = "SELECT updated_at FROM main_counter LIMIT 1";
         $latest = Yii::$app->db->createCommand($query)->queryScalar();
         $now = new \DateTime();
@@ -95,7 +101,8 @@ class CronController extends Controller {
     }
 
     //обновление одного продукта (крон запускается каждые 2 минуты)
-    public function actionUpdateCollection() {
+    public function actionUpdateCollection()
+    {
         $base = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
                 ->andWhere(['in', 'es_status', [1, 2]])
@@ -198,7 +205,8 @@ class CronController extends Controller {
         }
     }
 
-    public function actionUpdateCategory() {
+    public function actionUpdateCategory()
+    {
         $model = \common\models\MpCategory::find()->where('parent is not null')->all();
         foreach ($model as $name) {
             $category = new \common\models\ES\Category();
@@ -227,7 +235,8 @@ class CronController extends Controller {
         }
     }
 
-    public function actionUpdateSuppliers() {
+    public function actionUpdateSuppliers()
+    {
         $suppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
@@ -308,15 +317,18 @@ class CronController extends Controller {
         }
     }
 
-    public function actionUpdateOrganizationRating() {
+    public function actionUpdateOrganizationRating()
+    {
         
     }
 
-    public function actionUpdateProductRating() {
+    public function actionUpdateProductRating()
+    {
         
     }
 
-    public function actionMappingOrganizationFromGoogleApiMaps() {
+    public function actionMappingOrganizationFromGoogleApiMaps()
+    {
         $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(500)->all();
         foreach ($model as $s) {
             $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key=' . Yii::$app->params['google-api']['key-id'] . '&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
@@ -352,33 +364,39 @@ class CronController extends Controller {
         }
     }
 
-    public function actionSendMailNewRequests() {
+    public function actionSendMailNewRequests()
+    {
         //
     }
 
-    public function actionUpdateBlacklist() {
+    public function actionUpdateBlacklist()
+    {
         Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '%test%' OR name LIKE '%тест%')");
     }
 
     //handle EDI integration files
-    public function actionHandleFiles() {
+    public function actionHandleFiles()
+    {
         $eComIntegration = new EComIntegration();
         $eComIntegration->handleFilesList();
     }
 
     //handle EDI integration files queue
-    public function actionHandleFilesQueue() {
+    public function actionHandleFilesQueue()
+    {
         $eComIntegration = new EComIntegration();
         $eComIntegration->handleFilesListQueue();
     }
 
     //archieve EDI integration files
-    public function actionArchiveFiles() {
+    public function actionArchiveFiles()
+    {
         $eComIntegration = new EComIntegration();
         $eComIntegration->archiveFiles();
     }
 
-    public function actionProcessMercVsd() {
+    public function actionProcessMercVsd()
+    {
         $organizations = \yii\helpers\ArrayHelper::map(Yii::$app->db_api->CreateCommand("
             SELECT count(mvsd.id) AS vsd_count, mpconst.org AS organization_id
             FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10

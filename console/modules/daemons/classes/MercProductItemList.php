@@ -37,7 +37,10 @@ class MercProductItemList extends MercDictConsumer
                 $model = new $this->modelClassName();
             }
             $attributes =  json_decode(json_encode($item), true);
-            $model->setAttributes($attributes);
+            $model->setAttributes($attributes, false);
+            $model->last = (int)$attributes['last'];
+            $model->active = (int)$attributes['active'];
+            $model->correspondsToGost = (int)$attributes['correspondsToGost'];
             $model->product_guid = $attributes['product']['guid'];
             $model->product_uuid = $attributes['product']['uuid'];
             $model->subproduct_guid = $attributes['subProduct']['guid'];
@@ -59,12 +62,8 @@ class MercProductItemList extends MercDictConsumer
 
     protected function init()
     {
+        parent::init();
         $this->instance = productApi::getInstance($this->org_id);
-        $data = json_decode($this->data, true);
-        $this->method = $data['method'];
-        $this->request = json_decode($data['request'], true);
-        $this->listName = $data['struct']['listName'];
-        $this->listItemName = $data['struct']['listItemName'];
         $this->modelClassName = VetisProductItem::class;
     }
 }

@@ -266,10 +266,9 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData($org_id)
+    public static function getUpdateData($org_id, $enterpriseGuid = null)
     {
         try {
-            $load = new Mercury();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList'])->orderBy(['last_executed' => SORT_DESC])->one();
             if($queue == null) {
@@ -286,10 +285,21 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
+            if(isset($enterpriseGuid)) {
+                $data['startDate'] = date("Y-m-d H:i:s", mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')));
+            }
+            else {
+                $queueDate = $queue->last_executed ?? $queue->start_executing;
+                $data['startDate'] = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+            }
+            $data['listOptions']['count'] = 100;
+            $data['listOptions']['offset'] = 0;
+            $data['enterpriseGuid'] = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
+
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')
                 ->setQueue($queueName)
-                ->addRabbitQueue('');
+                ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());

@@ -201,9 +201,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-
-
-        $this->saveAllMap();
+        // $this->saveAllMap();
 
         $wmodel = $this->waybill;
         $check = $this::find()

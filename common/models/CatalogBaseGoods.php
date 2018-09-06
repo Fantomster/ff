@@ -47,7 +47,8 @@ use yii\helpers\ArrayHelper;
  * @property RatingPercent $ratingPercent
  * @property Catalog $catalog
  */
-class CatalogBaseGoods extends \yii\db\ActiveRecord {
+class CatalogBaseGoods extends \yii\db\ActiveRecord
+{
 
     const STATUS_ON = 1;
     const STATUS_OFF = 0;
@@ -75,7 +76,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
                     [
                         'class' => ImageUploadBehavior::className(),
@@ -100,16 +102,17 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'catalog_base_goods';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
-            
             [['cat_id', 'price', 'product', 'ed'], 'required'],
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
@@ -122,29 +125,30 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
-            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => Yii::t('app', 'common.models.catalog_base.file', ['ru'=>'Размер файла не должен превышать 2 Мб'])], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
+            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => Yii::t('app', 'common.models.catalog_base.file', ['ru' => 'Размер файла не должен превышать 2 Мб'])], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.00],
             [['barcode'], 'integer', 'min' => 1000000000000, 'max' => 9999999999999],
             [['sub1', 'sub2'], 'required',
                 'when' => function($model) {
-            return $model->market_place == self::MARKETPLACE_ON;
-        },
+                    return $model->market_place == self::MARKETPLACE_ON;
+                },
                 'whenClient' => 'function(attribute, value) {
                     return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON . ');
                 }',
-                'message' => Yii::t('app', 'common.models.catalog_base.category', ['ru'=>'Укажите категорию товара']),
+                'message' => Yii::t('app', 'common.models.catalog_base.category', ['ru' => 'Укажите категорию товара']),
                 'on' => 'marketPlace',
             ],
             [['category_id'], 'required',
                 'when' => function($model) {
-            return $model->market_place == self::MARKETPLACE_ON;
-        },
+                    return $model->market_place == self::MARKETPLACE_ON;
+                },
                 'except' => 'marketPlace',
             ],
         ];
     }
+
 //    public function uniqueArticle($attribute, $params, $validator)
 //    {
 //        empty($this->id)?$where= "true":$where = "id <> $this->id";
@@ -158,29 +162,30 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
-            'cat_id' => Yii::t('app', 'common.models.catalog', ['ru'=>'Каталог']),
-            'category_id' => Yii::t('app', 'common.models.category', ['ru'=>'Категория']),
-            'article' => Yii::t('app', 'common.models.art', ['ru'=>'Артикул']),
-            'product' => Yii::t('app', 'common.models.name', ['ru'=>'Название']),
-            'supp_org_id' => Yii::t('app', 'common.models.vendors_id', ['ru'=>'id поставщика']),
-            'supplier' => Yii::t('app', 'common.models.vendor_two', ['ru'=>'Поставщик']),
-            'units' => Yii::t('app', 'common.models.multiplicity', ['ru'=>'Кратность']),
-            'price' => Yii::t('app', 'common.models.price', ['ru'=>'Цена']),
-            'discount_price' => Yii::t('app', 'common.models.discount_price', ['ru'=>'Цена со скидкой']),
-            'status' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
-            'market_place' => Yii::t('app', 'common.models.settled_on_f_market', ['ru'=>'Размещен на F-MARKET']),
+            'cat_id' => Yii::t('app', 'common.models.catalog', ['ru' => 'Каталог']),
+            'category_id' => Yii::t('app', 'common.models.category', ['ru' => 'Категория']),
+            'article' => Yii::t('app', 'common.models.art', ['ru' => 'Артикул']),
+            'product' => Yii::t('app', 'common.models.name', ['ru' => 'Название']),
+            'supp_org_id' => Yii::t('app', 'common.models.vendors_id', ['ru' => 'id поставщика']),
+            'supplier' => Yii::t('app', 'common.models.vendor_two', ['ru' => 'Поставщик']),
+            'units' => Yii::t('app', 'common.models.multiplicity', ['ru' => 'Кратность']),
+            'price' => Yii::t('app', 'common.models.price', ['ru' => 'Цена']),
+            'discount_price' => Yii::t('app', 'common.models.discount_price', ['ru' => 'Цена со скидкой']),
+            'status' => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'market_place' => Yii::t('app', 'common.models.settled_on_f_market', ['ru' => 'Размещен на F-MARKET']),
             'deleted' => Yii::t('app', 'Deleted'),
-            'note' => Yii::t('app', 'common.models.comment', ['ru'=>'Комментарий']),
-            'ed' => Yii::t('app', 'common.models.measure', ['ru'=>'Единица измерения']),
-            'image' => Yii::t('app', 'common.models.products_image', ['ru'=>'Картинка продукта']),
-            'brand' => Yii::t('app', 'common.models.vendor', ['ru'=>'Производитель']),
-            'region' => Yii::t('app', 'common.models.country_vendor', ['ru'=>'Страна производитель']),
-            'weight' => Yii::t('app', 'common.models.weight', ['ru'=>'Вес']),
-            'mp_show_price' => Yii::t('app', 'common.models.show_price_in_f_market', ['ru'=>'Показывать цену в F-MARKET']),
-            'rating' => Yii::t('app', 'common.models.rating', ['ru'=>'Рейтинг'])
+            'note' => Yii::t('app', 'common.models.comment', ['ru' => 'Комментарий']),
+            'ed' => Yii::t('app', 'common.models.measure', ['ru' => 'Единица измерения']),
+            'image' => Yii::t('app', 'common.models.products_image', ['ru' => 'Картинка продукта']),
+            'brand' => Yii::t('app', 'common.models.vendor', ['ru' => 'Производитель']),
+            'region' => Yii::t('app', 'common.models.country_vendor', ['ru' => 'Страна производитель']),
+            'weight' => Yii::t('app', 'common.models.weight', ['ru' => 'Вес']),
+            'mp_show_price' => Yii::t('app', 'common.models.show_price_in_f_market', ['ru' => 'Показывать цену в F-MARKET']),
+            'rating' => Yii::t('app', 'common.models.rating', ['ru' => 'Рейтинг'])
                 //'importCatalog'=>'Files'
         ];
     }
@@ -194,7 +199,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 //        return false;
 //    }
 
-    public function search($params, $id) {
+    public function search($params, $id)
+    {
         $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price', 'note', 'ed', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -225,7 +231,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return $dataProvider;
     }
 
-    public static function get_value($id) {
+    public static function get_value($id)
+    {
         $model = CatalogBaseGoods::find()->where(["id" => $id])->one();
         if (!empty($model)) {
             return $model;
@@ -233,7 +240,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return null;
     }
 
-    public static function get_no_active_product($id) {
+    public static function get_no_active_product($id)
+    {
         $model = CatalogBaseGoods::find()->select('id')->where(["id" => $id, 'status' => CatalogBaseGoods::STATUS_OFF])->all();
         return $model;
     }
@@ -241,15 +249,18 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getVendor() {
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
-    public function getCategory() {
+    public function getCategory()
+    {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
     }
 
-    public function getGuideProduct() {
+    public function getGuideProduct()
+    {
         return $this->hasOne(GuideProduct::className(), ['cbg_id' => 'id']);
     }
 
@@ -260,83 +271,94 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
       {
       return $this->image ? $this->getThumbUploadUrl('image', 'image') : self::DEFAULT_IMAGE;
       } */
-    public function getImageUrl() {
+    public function getImageUrl()
+    {
         if ($this->image) {
             return $this->getThumbUploadUrl('image', 'image');
         } else {
             if ($this->category_id) {
-                    return ImagesHelper::getUrl($this->mainCategory->id);
+                return ImagesHelper::getUrl($this->mainCategory->id);
             } else {
                 return self::DEFAULT_IMAGE;
             }
         }
     }
 
-    public function getMpRegion() {
+    public function getMpRegion()
+    {
         return $this->hasOne(MpCountry::className(), ['id' => 'region']);
     }
 
-    public function getMiniImageUrl() {
+    public function getMiniImageUrl()
+    {
         return $this->image ? $this->getThumbUploadUrl('image', 'mini') : self::DEFAULT_IMAGE;
     }
 
-    public function getSubCategory() {
+    public function getSubCategory()
+    {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
     }
 
-    public function getMainCategory() {
+    public function getMainCategory()
+    {
         return MpCategory::find()->where(['id' => $this->category->parent])->one();
     }
 
-    public static function getCurCategory($id) {
+    public static function getCurCategory($id)
+    {
         $parent = MpCategory::find()->where(['id' => $id])->one()->parent;
         return MpCategory::find()->where(['id' => $parent])->one();
     }
 
-    public function getRatingStars() {
+    public function getRatingStars()
+    {
         return number_format(($this->rating) / (self::MAX_RATING / 5), 1);
     }
 
-    public function getRatingPercent() {
+    public function getRatingPercent()
+    {
         return number_format(((($this->rating) / (self::MAX_RATING / 5)) / 5 * 100), 1);
     }
-    
-    public function getClientNote($clientId) {
+
+    public function getClientNote($clientId)
+    {
         $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->id, 'rest_org_id' => $clientId]);
         return isset($note) ? $note->note : '';
     }
-    
-    public function formatPrice() {
+
+    public function formatPrice()
+    {
         return $this->price . " " . $this->catalog->currency->symbol;
     }
 
-    public function getCatalog() {
+    public function getCatalog()
+    {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getBaseProduct() {
+    public function getBaseProduct()
+    {
         return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'id']);
     }
-
 
     public function getDataForExcelExport(Catalog $catalog, string $sort, bool $isBase = false): ActiveDataProvider
     {
         $q = self::find()
-            ->select([
-                '*',
-                "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
-                "`article` REGEXP '^-?[0-9]+$' as i",
-                "(`article` + 0) AS c_article_1",
-                "`article` AS c_article",
-                "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
-            ])
-            ->where(['deleted' => 0]);
-        if($isBase){
+                ->select([
+                    '*',
+                    "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
+                    "`article` REGEXP '^-?[0-9]+$' as i",
+                    "(`article` + 0) AS c_article_1",
+                    "`article` AS c_article",
+                    "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+                ])
+                ->where(['deleted' => 0]);
+        if ($isBase) {
             $q->andWhere(['cat_id' => $catalog->id]);
-        }else{
+        } else {
             $q->leftJoin('catalog_goods', 'catalog_goods.base_goods_id = catalog_base_goods.id');
 
             $q->andWhere(['catalog_goods.cat_id' => $catalog->id]);
@@ -392,4 +414,5 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
         return $dataProvider;
     }
+
 }

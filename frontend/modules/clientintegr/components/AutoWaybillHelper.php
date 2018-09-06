@@ -34,12 +34,15 @@ class AutoWaybillHelper extends \yii\base\Component
     {
         $licenses = (User::findOne(\Yii::$app->user->id))->organization->getLicenseList();
 
+        $res['rkws'] = true;
+        $res['iiko'] = true;
+
         if (isset($licenses['rkws']) && ($licenses['rkws_ucs']) && array_key_exists('rkws', self::licensesMap)) {
             $className = self::supportServices[self::licensesMap['rkws']];
             $waybillModeRkws = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
             if ($waybillModeRkws !== '0') {
-                return $className::createWaybill($order_id);
+                $res['rkws'] = $className::createWaybill($order_id);
             }
         }
 
@@ -48,19 +51,21 @@ class AutoWaybillHelper extends \yii\base\Component
             $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
             if ($waybillModeIiko !== '0') {
-                $res = $className::createWaybill($order_id);
+                $res['iiko'] = $className::createWaybill($order_id);
                 if ($waybillModeIiko === '1') {
-                    $res = $className::exportWaybill($order_id);
+                    $res['iiko'] = $className::exportWaybill($order_id);
                 }
-                return $res;
             }
         }
 
+        /*
         if (isset($licenses['odinsobsh']) && array_key_exists('odinsobsh', self::licensesMap)) {
             if (isset(self::licensesMap['odinsobsh'])) {
                 $className = self::supportServices[self::licensesMap['odinsobsh']];
             }
-            return false;
         }
+        */
+
+        return ($res['rkws'] && $res['iiko']);
     }
 }

@@ -58,10 +58,6 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            /*[['active','last'], 'filter', 'filter' => function ($value) {
-                $value = ($value === 'true') ? 1 : 0;
-                return $value;
-            }],*/
             [['last', 'active', 'status'], 'integer'],
             [['createDate', 'updateDate'], 'safe'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'code', 'productGuid'], 'string', 'max' => 255],
@@ -112,7 +108,7 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         try {
             $load = new Products();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercSubProductList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercSubProductList'])->one();
             if($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercSubProductList';
@@ -129,7 +125,9 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
             $listOptions->count = 1000;
             $listOptions->offset = 0;
 
-            $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
+            $queueDate = $queue->last_executed ?? $queue->start_executing;
+
+            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
             $instance = productApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 

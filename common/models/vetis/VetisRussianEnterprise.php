@@ -60,13 +60,10 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            /*[['active','last'], 'filter', 'filter' => function ($value) {
-                $value = ($value === 'true') ? 1 : 0;
-                return $value;
-            }],*/
             [['last', 'active', 'type'], 'integer'],
             [['data'], 'string'],
-            [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'addressView', 'owner_guid', 'owner_uuid'], 'string', 'max' => 255],
+            [['uuid', 'guid', 'next', 'previous', 'name', 'inn', 'kpp', 'owner_guid', 'owner_uuid'], 'string', 'max' => 255],
+            [['addressView'], 'string']
         ];
     }
 
@@ -102,7 +99,7 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             $load = new Cerber();
 
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercRussianEnterpriseList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercRussianEnterpriseList'])->one();
             if($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercRussianEnterpriseList';
@@ -119,7 +116,9 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             $listOptions->count = 1000;
             $listOptions->offset = 0;
 
-            $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
+            $queueDate = $queue->last_executed ?? $queue->start_executing;
+
+            $startDate = !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
             $instance = cerberApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 

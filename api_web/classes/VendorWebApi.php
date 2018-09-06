@@ -373,6 +373,10 @@ class VendorWebApi extends \api_web\components\WebApi
                 $model->inn = $post['inn'];
             }
 
+            if (!empty($post['gmt'])) {
+                $model->gmt = $post['gmt'];
+            }
+
             if (!empty($post['contact_name'])) {
                 $model->contact_name = $post['contact_name'];
             }

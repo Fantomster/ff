@@ -100,6 +100,7 @@ class ClientController extends WebApiController
      *                             "email":"test@test.ru",
      *                             "about": "Вот контора так контора",
      *                             "is_allowed_for_franchisee": 1,
+     *                             "gmt": 3,
      *                             "address": {
      *                                  "country":"Россия",
      *                                  "region": "Московская область",

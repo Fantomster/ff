@@ -56,6 +56,7 @@ use common\models\guides\Guide;
  * @property string $inn
  * @property string $kpp
  * @property integer $parent_id
+ * @property integer $gmt
  * @property string $action
  *
  * @property OrganizationType $type
@@ -133,9 +134,9 @@ class Organization extends \yii\db\ActiveRecord
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
-            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted'], 'integer'],
+            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted', 'gmt'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp'], 'safe'],
-            [['name', 'inn', 'kpp', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -226,6 +227,7 @@ class Organization extends \yii\db\ActiveRecord
             'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
             'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе']),
             'gln_code' => Yii::t('app', 'GLN-код'),
+            'gmt' => Yii::t('app', 'GMT'),
         ];
     }
 

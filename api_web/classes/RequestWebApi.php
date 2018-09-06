@@ -588,8 +588,8 @@ class RequestWebApi extends WebApi
             'id' => (int)$model->id,
             "name" => $model->product,
             "status" => (int)$model->active_status,
-            "created_at" => date('d.m.Y H:i', strtotime($model->created_at)),
-            "end_at" => !empty($model->end) ? date('d.m.Y H:i', strtotime($model->end)) : null,
+            "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:ii:ss'),
+            "end_at" => !empty($model->end) ? \Yii::$app->formatter->asDate($model->end, 'dd.MM.yyyy HH:ii:ss') : null,
             "category" => $model->categoryName->name,
             "category_id" => (int)$model->category,
             "amount" => $model->amount,
@@ -620,8 +620,8 @@ class RequestWebApi extends WebApi
             "vendor" => WebApiHelper::prepareOrganization($model->organization),
             "price" => round($model->price, 2),
             "comment" => $model->comment,
-            "created_at" => $model->created_at,
-            "updated_at" => $model->updated_at,
+            "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:ii:ss'),
+            "updated_at" => \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:ii:ss'),
         ];
     }
 }

@@ -125,7 +125,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                 $error++;
                 if ($error == 3) {
-                    die('Error operation');
+                    throw new \Exception('Error operation');
                 }
             }
         } while ($list->total > ($list->count + $list->offset));

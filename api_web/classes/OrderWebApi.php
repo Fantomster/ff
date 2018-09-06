@@ -340,6 +340,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $result = $order->attributes;
         $currency = $order->currency->symbol ?? "RUB";
+        $currency_id = $order->currency->id;
         unset($result['updated_at']);
         unset($result['status']);
         unset($result['accepted_by_id']);
@@ -349,7 +350,7 @@ class OrderWebApi extends \api_web\components\WebApi
         unset($result['currency_id']);
         unset($result['discount_type']);
         $result['currency'] = $currency;
-        $result['currency_id'] = $order->currency->id;
+        $result['currency_id'] = $currency_id;
         $result['total_price'] = round($order->total_price, 2);
         $result['discount'] = round($order->discount, 2);
         $result['discount_type'] = null;
@@ -386,7 +387,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 /**
                  * @var OrderContent $model
                  */
-                $result['items'][] = $this->prepareProduct($model, $currency);
+                $result['items'][] = $this->prepareProduct($model, $currency, $currency_id);
             }
         }
 
@@ -956,7 +957,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    private function prepareProduct(OrderContent $model, $currency = null)
+    private function prepareProduct(OrderContent $model, $currency = null, $currency_id = null)
     {
         $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
 
@@ -975,7 +976,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['ed'] = $model->product->ed;
         $item['units'] = $model->product->units;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
-        $item['currency_id'] = (int)$model->product->catalog->currency->id;
+        $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
         return $item;
     }

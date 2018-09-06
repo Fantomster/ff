@@ -40,7 +40,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         if ($org_id != null) {
             $this->org_id = $org_id;
         } else {
-            $this->org_id = (mercPconst::findOne('1'))->org;
+            $this->org_id = 0;
         }
     }
 
@@ -109,6 +109,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 $list = $response->{$this->listName};
                 $count += $list->count;
                 $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
+                echo 'Load ' . $count . ' / ' . $list->total . PHP_EOL;
 
                 if ($list->count > 0) {
                     $result = $this->saveList($list->{$this->listItemName});

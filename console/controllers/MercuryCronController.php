@@ -82,7 +82,7 @@ class MercuryCronController extends Controller
 
     public function actionTest()
     {
-        $org_id = (mercPconst::findOne('1'))->org;
+        $org_id = 0;
         echo "START" . PHP_EOL;
         echo "GET Unit" . PHP_EOL;
         VetisUnit::getUpdateData($org_id);
@@ -124,7 +124,7 @@ class MercuryCronController extends Controller
     {
         $load = new Products();
 
-        $org_id = (mercPconst::findOne('1'))->org;
+        $org_id = 0;
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса

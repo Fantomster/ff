@@ -589,7 +589,7 @@ class OrderController extends DefaultController
         # загружаем временные параметры шаблона из куки и корректируем сохраненные товары шаблона на только что загруженные
         # в итоге получаем товары шаблона для отображения
         $itemsInCookie = COOK::get(COOK::ORDER_GUIDE_SELECTED_PRODUCTS);
-        if (str_replace(COOK::DELIMITER_VALUE, NULL, $itemsInCookie)) {
+        if (str_replace(COOK::DELIMITER_VALUE, null, $itemsInCookie)) {
             foreach (explode(COOK::DELIMITER_VALUE, $itemsInCookie) as $gp) {
                 if ($gp) {
                     $gp = str_replace('+', '', $gp);
@@ -634,20 +634,20 @@ class OrderController extends DefaultController
         #---------------------------------------------------------------------------------------------------------------
         # уточненяем базовые параметры работы страницы
         $params = [
-            # храним только числовые идентификаторы (show_sorting = FALSE)
-            'show_sorting' => FALSE,
+            # храним только числовые идентификаторы (show_sorting = false)
+            'show_sorting' => false,
             # назначаем идентификатор шаблона
             'guide_id' => $id,
             # обнуляем фильтр поиска по поставщику
-            'VendorSearch' => NULL,
+            'VendorSearch' => null,
             # обнуляем сортировку по умолчанию (начальную)
-            'sort' => NULL,
+            'sort' => null,
             # обнуляем поиск товаров по каталогу
-            'OrderCatalogSearch' => NULL,
+            'OrderCatalogSearch' => null,
             # настройки выбранного поставщика
-            'selectedVendor' => NULL,
+            'selectedVendor' => null,
             # обнуляем поиск товаров в шаблоне
-            'BaseProductSearch' => NULL,
+            'BaseProductSearch' => null,
         ];
         #---------------------------------------------------------------------------------------------------------------
 
@@ -860,7 +860,7 @@ class OrderController extends DefaultController
     {
 
         if (!COOK::set(COOK::ORDER_GUIDE_CURRENT, $guideId)) {
-            return FALSE;
+            return false;
         }
 
         $cookieKey = COOK::ORDER_GUIDE_SELECTED_PRODUCTS;
@@ -889,7 +889,7 @@ class OrderController extends DefaultController
             }
         }
 
-        return TRUE;
+        return true;
 
     }
 
@@ -903,7 +903,7 @@ class OrderController extends DefaultController
     {
 
         if (!COOK::set(COOK::ORDER_GUIDE_CURRENT, $guideId)) {
-            return FALSE;
+            return false;
         }
 
         $cookieKey = COOK::ORDER_GUIDE_SELECTED_PRODUCTS;
@@ -932,7 +932,7 @@ class OrderController extends DefaultController
             }
         }
 
-        return TRUE;
+        return true;
 
     }
 
@@ -2555,7 +2555,7 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->setCellValue($col . $i, '=SUM(C' . $i . ':' . $last_col . $i . ')');
         }
 
-        $objPHPExcel->getActiveSheet()->fromArray($report, NULL, 'A' . $row_data);
+        $objPHPExcel->getActiveSheet()->fromArray($report, null, 'A' . $row_data);
 
         $objPHPExcel->getActiveSheet()->getStyle('A1:' . $col . '1')->getAlignment()->setWrapText(true);
         $objPHPExcel->getActiveSheet()->getStyle('A1:' . $col . (count($report) + 2))->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);

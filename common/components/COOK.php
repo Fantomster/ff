@@ -38,14 +38,14 @@ class COOK
     {
 
         if (!$key) {
-            return FALSE;
+            return false;
         }
         Yii::$app->response->cookies->add(new Cookie([
             'name' => $key,
             'value' => $value,
             'expire' => (time() + self::YEAR_IN_SECONDS),
         ]));
-        return TRUE;
+        return true;
 
     }
 
@@ -54,7 +54,7 @@ class COOK
      * @param $id int
      * @return bool
      */
-    public static function removeOrderGuideParamsIfOrderGuideIsNotCurrent(int $id = NULL): bool
+    public static function removeOrderGuideParamsIfOrderGuideIsNotCurrent(int $id = null): bool
     {
         if (!$id || $id != COOK::get(COOK::ORDER_GUIDE_CURRENT)) {
             COOK::remove(COOK::ORDER_GUIDE_CURRENT);
@@ -64,9 +64,9 @@ class COOK
             COOK::remove(COOK::ORDER_GUIDE_SEARCH_PROODUCTS);
             COOK::remove(COOK::ORDER_GUIDE_SORT_PRODUCTS);
             COOK::remove(COOK::ORDER_GUIDE_SELECTED_VENDOR);
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
     /**
@@ -74,14 +74,14 @@ class COOK
      * @param $key string
      * @return bool
      * */
-    public static function remove(string $key = NULL): bool
+    public static function remove(string $key = null): bool
     {
 
         if (!$key) {
-            return FALSE;
+            return false;
         }
         Yii::$app->response->cookies->remove($key);
-        return TRUE;
+        return true;
 
     }
 
@@ -90,10 +90,10 @@ class COOK
      * @param $key string
      * @return string?
      * */
-    public static function get(string $key = NULL): ?string
+    public static function get(string $key = null): ?string
     {
         if (!$key) {
-            return NULL;
+            return null;
         }
         return Yii::$app->request->cookies->get($key);
     }
@@ -103,10 +103,10 @@ class COOK
      * @param $prefix string?
      * @return bool
      * */
-    public static function removeByPrefix(string $prefix = NULL): bool
+    public static function removeByPrefix(string $prefix = null): bool
     {
         if (!$prefix) {
-            return FALSE;
+            return false;
         }
         $cookie = Yii::$app->request->cookies->toArray();
         foreach ($cookie as $k => $v) {
@@ -114,7 +114,7 @@ class COOK
                 self::remove($k);
             }
         }
-        return TRUE;
+        return true;
     }
 
 }

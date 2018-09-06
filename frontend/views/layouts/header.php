@@ -269,7 +269,7 @@ $(document).on("click", ".new-network", function(e) {
     return false;
 });      
 JS;
-//    $this->registerJs($js, \yii\web\View::POS_READY)
+    $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
     <?php $this->registerCss("
 ::-webkit-scrollbar {

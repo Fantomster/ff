@@ -55,6 +55,9 @@ class baseApi extends Component
                     'login' => $this->login,
                     'password' => $this->pass,
                     'exceptions' => 1,
+                    'connection_timeout' => 5000,
+                    'cache_wsdl' => WSDL_CACHE_NONE,
+                    'keep_alive' => false,
                     'trace' => 1]))->soapClient;
         }
 
@@ -73,6 +76,7 @@ class baseApi extends Component
      */
     public function sendRequest($method, $request)
     {
+        ini_set('default_socket_timeout', 5000);
         $client = $this->getSoapClient();
         return $client->$method($request);
     }

@@ -399,15 +399,30 @@ class WaybillController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                  "result": {
-     *                        "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
-     *                        "country_name": "Россия",
-     *                        "producer_name":"ООО Мираторг, 600021, Владимирская обл., г. Муром, ул. Октябрьской революции 16",
-     *                        "referenced_document":"3345 231234",
-     *                        "referenced_date":"23.04.1025",
-     *                        "cargo_expertized":"Положительный результат.",
-     *                        "location_prosperity":"Благополучна",
-     *                        "special_marks":"Особые отметки, любой текст",
-     *                        "vehicle_number":"a666sf777tiv"
+     *                      "org_id": 3768,
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                      "producer_name": "Рыбкин Дом ИП Понасков А.А.(ст. Пшехская ул. Красная б/н)",
+     *                      "country_name": "Российская Федерация",
+     *                      "cargo_expertized": "Продукция подвергнута ВСЭ в полном объеме",
+     *                      "location_prosperity": "Местность благополучна по заразным болезням животных",
+     *                      "specialMarks": "",
+     *                      "vehicle_number": "54258",
+     *                      "consignor_business": null,
+     *                      "product_type": "Рыба и морепродукты",
+     *                      "product": "живая рыба лососевых пород",
+     *                      "sub_product": "коралловая форель",
+     *                      "product_in_numenclature": "коралловая форель",
+     *                      "volume": "50.0 кг",
+     *                      "date_of_production": "2018-5-17 0:00:00",
+     *                      "expiry_date_of_production": "Смерти рыбы",
+     *                      "perishable_products": "Да",
+     *                      "producers": "",
+     *                      "expertiseInfo": "ЭмпаерЛАБ эксп №1224 от 2018-05-17 ( Наличие паразитов - Паразиты отстутствуют )",
+     *                      "transport_type": "Автомобильный",
+     *                      "transport_number": "54258",
+     *                      "transport_storage_type": "Охлаждаемый",
+     *                      "specified_person": "Понитков Максим Алексеевич",
+     *                      "specified_person_post": "Project Manager"
      *                  }
      *              }
      *          )

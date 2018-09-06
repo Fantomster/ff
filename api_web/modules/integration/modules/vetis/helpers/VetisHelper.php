@@ -122,6 +122,8 @@ class VetisHelper
         } else {
             $docs = $refDoc;
         }
+        $this->referenced_document = null;
+        $this->referenced_date = null;
         foreach ($docs as $item) {
             if (($item->type >= 1) && ($item->type <= 5)) {
                 $str = '';

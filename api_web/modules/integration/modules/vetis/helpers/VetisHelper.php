@@ -83,7 +83,8 @@ class VetisHelper
 
         $businessEntity = cerberApi::getInstance($this->org_id)->getBusinessEntityByGuid($this->doc->certifiedConsignment->consignor->businessEntity->guid);
         $this->consignor_business = isset($businessEntity) ? $businessEntity->name . ', ИНН:' . $businessEntity->inn : null;
-        $this->product_type = MercVsd::$product_types[$this->doc->certifiedConsignment->batch->productType];
+        $this->product_type = isset($this->doc->certifiedConsignment->batch->productType) ?
+            MercVsd::$product_types[$this->doc->certifiedConsignment->batch->productType] : null;
         $product_raw = productApi::getInstance($this->org_id)->getProductByGuid($this->doc->certifiedConsignment->batch->product->guid);
         $this->product = isset($product_raw) ? $product_raw->name : null;
         $sub_product_raw = productApi::getInstance($this->org_id)->getSubProductByGuid($this->doc->certifiedConsignment->batch->subProduct->guid);
@@ -102,7 +103,8 @@ class VetisHelper
         $this->expertiseInfo = $labResearch->operator->name . ' эксп №' . $labResearch->expertiseID . ' от ' .
             $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
             $labResearch->conclusion . ' )';
-        $this->transport_type = MercVsd::$transport_types[$this->doc->certifiedConsignment->transportInfo->transportType];
+        $this->transport_type = isset($this->doc->certifiedConsignment->transportInfo->transportType) ?
+            MercVsd::$transport_types[$this->doc->certifiedConsignment->transportInfo->transportType] : null;
         $this->transport_number = $this->doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber ?? null;
         $this->transport_storage_type = isset($this->doc->certifiedConsignment->transportStorageType) ? MercVsd::$storage_types[$this->doc->certifiedConsignment->transportStorageType] : null;
         $this->specified_person = current($this->doc->statusChange)->specifiedPerson->fio ?? "-";

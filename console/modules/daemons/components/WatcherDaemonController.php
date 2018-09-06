@@ -24,9 +24,9 @@ abstract class WatcherDaemonController extends DaemonController
      * @var $daemonsList array
      */
     public $daemonsList = [];
-    
+
     public $daemonFolder = '';
-    
+
     public function init()
     {
         $pidFile = \Yii::getAlias($this->pidDir) . DIRECTORY_SEPARATOR . $this->shortClassName();
@@ -39,7 +39,7 @@ abstract class WatcherDaemonController extends DaemonController
         }
         parent::init();
     }
-    
+
     /**
      * Job processing body
      *
@@ -50,14 +50,14 @@ abstract class WatcherDaemonController extends DaemonController
     protected function doJob($job)
     {
         $pidfile = \Yii::getAlias($this->pidDir) . DIRECTORY_SEPARATOR . $job['className'] . $job['consumerClass'] . $job['orgId'];
-        
+
         \Yii::trace('Check daemon ' . $job['className']);
         if (file_exists($pidfile)) {
             $pid = file_get_contents($pidfile);
             if ($this->isProcessRunning($pid)) {
                 if ($job['enabled']) {
                     \Yii::trace('Daemon ' . $job['className'] . ' running and working fine');
-                    
+
                     return true;
                 } else {
                     \Yii::warning('Daemon ' . $job['className'] . ' running, but disabled in config. Send SIGTERM signal.');
@@ -66,7 +66,7 @@ abstract class WatcherDaemonController extends DaemonController
                     } else {
                         posix_kill($pid, SIGTERM);
                     }
-                    
+
                     return true;
                 }
             }
@@ -90,19 +90,20 @@ abstract class WatcherDaemonController extends DaemonController
                         'demonize'      => $job['demonize'] ?? 1,
                         'orgId'         => $job['orgId'] ?? null,
                         'consumerClass' => $job['consumerClass'] ?? null,
+                        'storeId'       => $job['storeId'] ?? null,
                     ])
                         ? self::EXIT_CODE_NORMAL
                         : self::EXIT_CODE_ERROR
                     )
                 );
             }
-            
+
         }
         \Yii::trace('Daemon ' . $job['className'] . ' is checked.');
-        
+
         return true;
     }
-    
+
     /**
      * Return array of daemons
      *
@@ -111,10 +112,10 @@ abstract class WatcherDaemonController extends DaemonController
     protected function defineJobs()
     {
         sleep($this->sleep);
-        
+
         return $this->daemonsList;
     }
-    
+
     protected function getCommandNameBy($className)
     {
         $command = strtolower(
@@ -125,14 +126,14 @@ abstract class WatcherDaemonController extends DaemonController
                 str_replace('Controller', '', $className)
             )
         );
-        
+
         if (!empty($this->daemonFolder)) {
             $command = $this->daemonFolder . DIRECTORY_SEPARATOR . $command;
         }
-        
+
         return $command . DIRECTORY_SEPARATOR . 'index';
     }
-    
+
     /**
      * @param $pid
      *

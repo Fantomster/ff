@@ -36,7 +36,7 @@ class RequestController extends WebApiController
      *                       "id": 74,
      *                       "name": "цукен",
      *                       "status": 1,
-     *                       "created_at": "30.06.2017 14:17",
+     *                       "created_at": "30.06.2017 14:17:34",
      *                       "category": "Мебель",
      *                       "category_id": 231,
      *                       "client": {
@@ -120,7 +120,7 @@ class RequestController extends WebApiController
      *                       "id": 74,
      *                       "name": "цукен",
      *                       "status": 1,
-     *                       "created_at": "30.06.2017 14:17",
+     *                       "created_at": "30.06.2017 14:17:34",
      *                       "category": "Мебель",
      *                       "category_id": 231,
      *                       "client": {
@@ -214,7 +214,7 @@ class RequestController extends WebApiController
      *                       "id": 74,
      *                       "name": "цукен",
      *                       "status": 1,
-     *                       "created_at": "30.06.2017 14:17",
+     *                       "created_at": "30.06.2017 14:17:34",
      *                       "category": "Мебель",
      *                       "category_id": 231,
      *                       "client": {
@@ -351,7 +351,7 @@ class RequestController extends WebApiController
      *                        "id": 282,
      *                        "name": "Огурцы",
      *                        "status": 1,
-     *                        "created_at": "21.03.2018 07:17",
+     *                        "created_at": "30.06.2017 14:17:34",
      *                        "category": "Овощи и зелень",
      *                        "category_id": 83,
      *                        "amount": "10 кг",
@@ -433,7 +433,7 @@ class RequestController extends WebApiController
      *                        "id": 282,
      *                        "name": "Огурцы",
      *                        "status": 0,
-     *                        "created_at": "21.03.2018 07:17",
+     *                        "created_at": "30.06.2017 14:17:34",
      *                        "category": "Овощи и зелень",
      *                        "category_id": 83,
      *                        "amount": "10 кг",
@@ -596,7 +596,7 @@ class RequestController extends WebApiController
      *                       "id": 74,
      *                       "name": "цукен",
      *                       "status": 1,
-     *                       "created_at": "30.06.2017 14:17",
+     *                        "created_at": "30.06.2017 14:17:34",
      *                       "category": "Мебель",
      *                       "category_id": 231,
      *                       "client": {
@@ -672,7 +672,7 @@ class RequestController extends WebApiController
      *                       "id": 74,
      *                       "name": "цукен",
      *                       "status": 1,
-     *                       "created_at": "30.06.2017 14:17",
+     *                        "created_at": "30.06.2017 14:17:34",
      *                       "category": "Мебель",
      *                       "category_id": 231,
      *                       "client": {

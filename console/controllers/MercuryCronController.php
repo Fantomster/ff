@@ -128,9 +128,9 @@ class MercuryCronController extends Controller
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
-        $data['method'] = 'getProductItemChangesList';
-        $data['struct'] = ['listName' => 'productItemList',
-            'listItemName' => 'productItem'
+        $data['method'] = 'getRussianEnterpriseChangesList';
+        $data['struct'] = ['listName' => 'enterpriseList',
+            'listItemName' => 'enterprise'
         ];
 
         $listOptions = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions();
@@ -138,10 +138,10 @@ class MercuryCronController extends Controller
         $listOptions->offset = 0;
 
         $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
-        $instance = productApi::getInstance($org_id);
+        $instance = cerberApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-        $w = new MercProductItemList($org_id);
+        $w = new MercRussianEnterpriseList($org_id);
         $w->data = json_encode($data);
         $w->getData();
 

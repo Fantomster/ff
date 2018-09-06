@@ -80,7 +80,11 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     protected function init()
     {
         $this->queue = RabbitQueues::find()->where(['consumer_class_name' => BaseStringHelper::basename(static::class)])->one();
-        $this->data = $this->queue->data_request ?? $this->data;
+        $this->data = json_decode($this->queue->data_request ?? $this->data, true);
+        $this->method = $this->data['method'];
+        $this->request = json_decode($this->data['request'], true);
+        $this->listName = $this->data['struct']['listName'];
+        $this->listItemName = $this->data['struct']['listItemName'];
     }
 
     /**

@@ -64,11 +64,6 @@ class MercProductItemList extends MercDictConsumer
     {
         parent::init();
         $this->instance = productApi::getInstance($this->org_id);
-        $this->data = json_decode($this->data, true);
-        $this->method = $this->data['method'];
-        $this->request = json_decode($this->data['request'], true);
-        $this->listName = $this->data['struct']['listName'];
-        $this->listItemName = $this->data['struct']['listItemName'];
         $this->modelClassName = VetisProductItem::class;
     }
 }

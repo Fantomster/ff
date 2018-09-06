@@ -612,7 +612,6 @@ class OrderController extends DefaultController
 
     }
 
-
     /**
      * Редактирование шаблона
      * @param int $id
@@ -721,14 +720,12 @@ class OrderController extends DefaultController
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
             return $this->renderPartial('guides/_product-list', ['productDataProvider' => $productDataProvider]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
-            return $this->renderPartial('guides/_guide-product-list',
-                [
-                    'show_sorting' => $params['show_sorting'],
-                    'sort' => $params['sort'],
-                    'guideDataProvider' => $guideDataProvider,
-                    'guideSearchModel' => $guideSearchModel,
-                ]
-            );
+            return $this->renderPartial('guides/_guide-product-list', [
+                'show_sorting' => $params['show_sorting'],
+                'sort' => $params['sort'],
+                'guideDataProvider' => $guideDataProvider,
+                'guideSearchModel' => $guideSearchModel,
+            ]);
         } else {
             return $this->render('guides/edit-guide', [
                 'selectedVendor' => $params['selectedVendor'],

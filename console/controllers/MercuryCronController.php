@@ -69,10 +69,10 @@ class MercuryCronController extends Controller
                     }
 
                     echo "GET MercVSDList ".$item->enterprise->guid.PHP_EOL;
-                    MercVsd::getUpdateData($org_id, $item->enterprise->guid);
+                    MercVsd::getUpdateData($org_id, $item->enterprise->guid, true);
 
                     echo "GET MercStockEntryList".$item->enterprise->guid.PHP_EOL;
-                    MercStockEntry::getUpdateData($org_id, $item->enterprise->guid);
+                    MercStockEntry::getUpdateData($org_id, $item->enterprise->guid, true);
                 }
         }
         } catch (\Exception $e) {

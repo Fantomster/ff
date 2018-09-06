@@ -34,7 +34,7 @@ class MercVSDList extends MercDictConsumer
 
         if ($check == 9) {
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id])->one();
-            $this->data = json_decode(($this->queue->data_request ?? $this->data), true);
+            $this->data = json_decode($this->queue->data_request, true);
         } else {
             $this->log('Dictionaries are currently being updated'.PHP_EOL);
             die('Dictionaries are currently being updated'.PHP_EOL);

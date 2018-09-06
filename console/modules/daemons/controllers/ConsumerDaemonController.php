@@ -2,7 +2,10 @@
 
 namespace console\modules\daemons\controllers;
 
+use api\common\models\RabbitQueues;
 use console\modules\daemons\components\AbstractDaemonController;
+use yii\db\Expression;
+use yii\db\Query;
 
 class ConsumerDaemonController extends AbstractDaemonController
 {
@@ -26,8 +29,7 @@ class ConsumerDaemonController extends AbstractDaemonController
     public function doJob($job)
     {
         $this->renewConnections();
-        $this->ask($job);
-        
+
         try {
             if (!is_null($this->lastExec) && $this->lastTimeout > date('Y-m-d H:i:s')) {
                 $success = true;
@@ -40,10 +42,19 @@ class ConsumerDaemonController extends AbstractDaemonController
                 $this->noticeToFCM();
             }
 
-            if (!$success) {
+            if ($success) {
+                $this->ask($job);
+            } else {
                 throw new \Exception('$success false');
             }
         } catch (\Throwable $e) {
+            $arWhere = ['consumer_class_name' => $this->consumerClass];
+            if (!empty($this->orgId)) {
+                $arWhere['organization_id'] = $this->orgId;
+            }
+            (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
+                'start_executing' => new Expression('NULL')
+            ], $arWhere)->execute();
             $this->log(PHP_EOL . " ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $this->nask($job);
         }

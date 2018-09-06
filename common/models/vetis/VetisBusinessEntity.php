@@ -59,10 +59,6 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
         return [
             [['uuid', 'guid'], 'required'],
             [['uuid'], 'unique'],
-            /*[['active','last'], 'filter', 'filter' => function ($value) {
-                $value = ($value === 'true') ? 1 : 0;
-                return $value;
-            }],*/
             [['last', 'active', 'type'], 'integer'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullname', 'fio', 'inn', 'kpp'], 'string', 'max' => 255],
             [['addressView'], 'string']

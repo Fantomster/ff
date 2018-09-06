@@ -322,12 +322,12 @@ class Catalog extends \yii\db\ActiveRecord
             $this->currency_id = $this->currency_id;
             if ($this->save()) {
                 $sql = "INSERT INTO catalog_base_goods "
-                        . "(cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
-                        . "(SELECT :cat_id"
+                        . "(supp_org_id, cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
+                        . "(SELECT :supp_org_id, :cat_id"
                         . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
                         . "FROM catalog_snapshot_content WHERE snapshot_id = :snapshot_id)";
                 \Yii::$app->db->createCommand($sql)
-                        ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id])
+                        ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id, ":supp_org_id" => $this->supp_org_id])
                         ->execute();
                 $transaction->commit();
                 return true;

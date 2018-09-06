@@ -4,11 +4,10 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
-use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumentByUUID;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -193,5 +192,38 @@ class VetisWaybill
         $obInfo = (new VetisHelper())->getFullInfoVsd($request['uuid']);
 
         return ['result' => $obInfo];
+    }
+
+    /**
+     * Погашение ВСД
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function repayVsd($request)
+    {
+        if (!isset($request['uuids']) || !is_array($request['uuids'])) {
+            throw new BadRequestHttpException('Uuids is required and must be array');
+        }
+        $result = [];
+        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        $records = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
+        ->andWhere(['uuid' => $request['uuids']])->indexBy('uuid')->all();
+        try{
+            $api = mercuryApi::getInstance();
+            foreach ($request['uuids'] as $uuid) {
+                if(array_key_exists($uuid, $records)){
+                    $result[$uuid] = $api->getVetDocumentDone($uuid);
+                } else {
+                    $result[$uuid] = 'ВСД не принадлежит данной организации';
+                }
+            }
+        } catch (\Throwable $t){
+            $result['error'] = $t->getMessage();
+            $result['trace'] = $t->getTraceAsString();
+            $result['code'] = $t->getCode();
+        }
+
+        return ['result' => $result];
     }
 }

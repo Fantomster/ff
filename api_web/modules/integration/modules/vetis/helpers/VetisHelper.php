@@ -11,7 +11,6 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\MercVsd;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
-use yii\db\ActiveQuery;
 use yii\db\Query;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
@@ -110,12 +109,6 @@ class VetisHelper
         $this->specified_person_post = current($this->doc->statusChange)->specifiedPerson->post ?? "";
 
         return $this;
-    }
-
-    public function getQueryByUuid()
-    {
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        return MercVsd::find()->where(['recipient_guid' => $enterpriseGuid]);
     }
   
     /**

@@ -98,7 +98,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
                     'enabled'       => !$kill,
                     'consumerClass' => $row['consumer_class_name'],
                     'orgId'         => $row['organization_id'],
-                    'demonize'      => 0,
+                    'demonize'      => 1,
                     'hardKill'      => $kill,
                 ];
             } catch (\Throwable $t) {
@@ -129,14 +129,6 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
     {
         $consumerClass = $this->getConsumerClassName($row['consumer_class_name']);
 
-        if (!is_null($row['last_executed'])) {
-            $lastExec = new \DateTime($row['last_executed']);
-            $timeOut = $lastExec->getTimestamp() + $consumerClass::$timeout;
-            if (date('Y-m-d H:i:s', $timeOut) > date('Y-m-d H:i:s')) {
-                return false;
-            }
-        }
-
         if (!is_null($row['start_executing'])) {
             $startExec = new \DateTime($row['start_executing']);
             $timeOutStartExec = $startExec->getTimestamp() + $consumerClass::$timeoutExecuting;
@@ -147,6 +139,14 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
                 return true;
             } else {
                 return false;
+            }
+        }
+
+        if (!is_null($row['last_executed'])) {
+            $lastExec = new \DateTime($row['last_executed']);
+            $timeOut = $lastExec->getTimestamp() + $consumerClass::$timeout;
+            if (date('Y-m-d H:i:s', $timeOut) > date('Y-m-d H:i:s')) {
+                return true;
             }
         }
 

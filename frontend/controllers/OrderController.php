@@ -14,7 +14,6 @@ use common\models\Cart;
 use common\models\CatalogGoodsBlocked;
 use common\models\search\OrderProductsSearch;
 use frontend\helpers\GenerationTime;
-use function PHPSTORM_META\type;
 use Yii;
 use common\components\SearchOrdersComponent;
 use yii\db\Expression;

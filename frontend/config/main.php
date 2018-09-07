@@ -8,7 +8,7 @@ return [
     'id' => 'mixcart',
     'name' => 'mixcart',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log',], // 'assetsAutoCompress'
+    'bootstrap' => ['log', ], // 'assetsAutoCompress'
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
@@ -38,7 +38,7 @@ return [
 //                    'mailer' => 'mailer',
 //                ],
             ],
-        ], 
+        ],
 //        'assetsAutoCompress' =>
 //        [
 //            'class'         => '\skeeks\yii2\assetsAuto\AssetsAutoCompressComponent',
@@ -62,6 +62,10 @@ return [
     'modules' => [
         'billing' => [
             'class' => 'frontend\modules\billing\Module',
+        ],
+        'debug' => [
+            'class' => 'yii\debug\Module',
+            'allowedIPs' => ['*']
         ],
     ],
 ];

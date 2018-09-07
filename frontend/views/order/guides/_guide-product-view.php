@@ -2,14 +2,18 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+use common\models\CatalogBaseGoods;
+
+/** @var $model CatalogBaseGoods */
+
 ?>
 <td>
     <div class="guid_block_create_title">
         <p><?= $model->product ?? '' ?></p>
-    </div>	
+    </div>
     <div class="guid_block_create_counts">
         <p><?= $model->vendor->name ?? '' ?></p>
-    </div>     
+    </div>
 </td>
 <td>
     <?=

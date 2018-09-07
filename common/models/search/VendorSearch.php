@@ -58,6 +58,7 @@ class VendorSearch extends RelationSuppRest {
      */
     public function search($params, $client_id, $tmp = false)
     {
+
         $rspTable = RelationSuppRest::tableName();
         $rspPTable = RelationSuppRestPotential::tableName();
         $orgTable = Organization::tableName();
@@ -109,7 +110,6 @@ class VendorSearch extends RelationSuppRest {
                 'pageSize' => 10,
             ],
         ]);
-
 
         $this->load($params);
 

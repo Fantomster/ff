@@ -47,7 +47,7 @@ class OrderNotice
          */
         $client = $user->organization;
         $clientUsers = $client->users;
-        $count = (int) $client->getCartCount();
+        $count = (int)$client->getCartCount();
         foreach ($clientUsers as $user) {
             $channel = 'user' . $user->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
@@ -58,7 +58,7 @@ class OrderNotice
             FireBase::getInstance()->update([
                 'user' => $user->id,
                 'organization' => $client->id
-                    ], [
+            ], [
                 'cart_count' => $count,
                 'last_add_cart_user_name' => $user->profile->full_name
             ]);
@@ -78,7 +78,7 @@ class OrderNotice
             FireBase::getInstance()->update([
                 'user' => $user->id,
                 'organization' => $client->id
-                    ], [
+            ], [
                 'last_add_cart_user_name' => $userSend->profile->full_name
             ]);
         }
@@ -108,9 +108,9 @@ class OrderNotice
                 if ($notification && $notification->order_created) {
                     try {
                         $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     } catch (\Exception $e) {
                         \Yii::error($e->getMessage());
                     }
@@ -165,9 +165,9 @@ class OrderNotice
                 if ($notification) {
                     if ($notification->order_canceled) {
                         $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 }
                 //Отправляем СМС
@@ -216,9 +216,9 @@ class OrderNotice
                 if ($notification) {
                     if ($notification->order_done) {
                         $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 }
 
@@ -295,7 +295,10 @@ class OrderNotice
                 'user' => $clientUser->id,
                 'organization' => $newMessage->recipient_id,
                 'notifications' => uniqid(),
-                    ], ['body' => $newMessage->message]);
+            ], [
+                'body' => $newMessage->message,
+                'date' => \Yii::$app->formatter->asDate(\gmmktime(), 'dd.MM.yyyy HH:mm:ss')
+            ]);
         }
         foreach ($vendorUsers as $vendorUser) {
             $channel = 'user' . $vendorUser->id;
@@ -313,7 +316,7 @@ class OrderNotice
                 'user' => $vendorUser->id,
                 'organization' => $newMessage->recipient_id,
                 'notifications' => uniqid(),
-                    ], ['body' => $newMessage->message]);
+            ], ['body' => $newMessage->message]);
         }
 
         return true;
@@ -325,7 +328,7 @@ class OrderNotice
      */
     private function getNotificationCount(Organization $organizaion)
     {
-        return (int) OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
+        return (int)OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
     }
 
 }

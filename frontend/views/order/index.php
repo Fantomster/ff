@@ -32,13 +32,13 @@ use kartik\select2\Select2;
 /** @var $businessType string */
 /** @var $selected array */
 
-$forVendor = FALSE;
-$forRestaurant = FALSE;
+$forVendor = false;
+$forRestaurant = false;
 if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) {
-    $forVendor = TRUE;
+    $forVendor = true;
 }
 if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
-    $forRestaurant = TRUE;
+    $forRestaurant = true;
 }
 
 $headers = [
@@ -78,7 +78,7 @@ $dataColumns = [
         'format' => 'raw',
         'contentOptions' => ['class' => 'small_cell_supp'],
         'value' => function ($data) {
-            $text = NULL;
+            $text = null;
             if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code > 0) {
                 $alt = EchoRu::echo ('frontend.views.client.suppliers.edi_alt_text',
                     'Поставщик работает через систему электронного документооборота', 'app');
@@ -190,7 +190,7 @@ $dataColumns = [
         'visible' => $forRestaurant,
         'format' => 'raw',
         'value' => function ($data) {
-            $class = $message = $message_orig = $url = NULL;
+            $class = $message = $message_orig = $url = null;
             if (in_array($data->status, [Order::STATUS_DONE, Order::STATUS_REJECTED, Order::STATUS_CANCELLED])) {
                 $message_orig = EchoRu::echo ('frontend.views.order.repeat_order', 'Повторить заказ');
                 $message = EchoRu::echo ('frontend.views.order.repeat', 'Повторить');
@@ -212,7 +212,7 @@ $dataColumns = [
                         'url' => Url::to([$url, 'id' => $data->id])],
                 ]);
             }
-            return NULL;
+            return null;
         },
         'contentOptions' => ['class' => 'text-center'],
         'headerOptions' => ['style' => 'width: 20px;']
@@ -413,7 +413,7 @@ $("document").ready(function () {
 
 });   
 JS;
-$js2 = NULL;
+$js2 = null;
 if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_RESTAURANT) {
     $js2 = <<< JS
 $("document").ready(function () {
@@ -553,7 +553,7 @@ $this->registerCss($css);
                     # 2. SELECT SUPPLIER Filter field
                     echo $form->field($searchModel, $filterSwitcher['orderAff'])->widget($filterWidgetNames['orderAff'], [
                         'data' => $filterOptions['orderAff'],
-                        'pluginOptions' => ['allowClear' => TRUE],
+                        'pluginOptions' => ['allowClear' => true],
                         'id' => 'orgFilter',
                     ])->label($filterLabels['orderAff'], ['class' => 'label', 'style' => 'color:#555']);
                     ?>
@@ -581,7 +581,7 @@ $this->registerCss($css);
                     # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
                     echo $form->field($searchModel, 'doc_status')->widget($filterWidgetNames['orderStatus'], [
                         'data' => $filterOptions['orderStatus'], 'options' => ['placeholder' => $filterValues['orderStatus']],
-                        'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
+                        'pluginOptions' => ['allowClear' => true], 'hideSearch' => true,
                         'id' => 'docStatus',
                     ])->label($filterLabels['orderStatus'], ['class' => 'label', 'style' => 'color:#555']);
                     ?>

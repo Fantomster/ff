@@ -20,10 +20,10 @@ class SimpleChecker
      * @var $value mixed Validated data
      * @return boolean
      */
-    public static function validateWholeNumerExactly($value = NULL): bool
+    public static function validateWholeNumerExactly($value = null): bool
     {
         $value = (string)$value;
-        $res = FALSE;
+        $res = false;
         if (!strlen($value)) {
             return $res;
         }
@@ -35,7 +35,7 @@ class SimpleChecker
             }
         }
 
-        return TRUE;
+        return true;
     }
 
 }

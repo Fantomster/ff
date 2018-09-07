@@ -47,7 +47,7 @@ class OrderSearch2 extends Order
      * @var $dateFrom string
      * @var $dateTo string
      * */
-    public function prepareDates(string $dateFrom = NULL, string $dateTo = NULL)
+    public function prepareDates(string $dateFrom = null, string $dateTo = null)
     {
 
         if (!$dateFrom) {

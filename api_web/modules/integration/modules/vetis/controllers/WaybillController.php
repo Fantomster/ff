@@ -72,6 +72,7 @@ class WaybillController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getGroupsList($this->request);
     }
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/list",
      *     tags={"Integration/vetis/waybill"},
@@ -132,11 +133,11 @@ class WaybillController extends WebApiController
      *              )
      *          )
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 401,
      *         description = "error"
      *     )
@@ -530,8 +531,8 @@ class WaybillController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/waybill/repay-vsd",
      *     tags={"Integration/vetis/waybill"},
-     *     summary="Полная информация о ВСД",
-     *     description="Полная информация о ВСД",
+     *     summary="Погашение ВСД",
+     *     description="Погашение ВСД",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -577,5 +578,54 @@ class WaybillController extends WebApiController
     public function actionRepayVsd()
     {
         $this->response = (new VetisWaybill())->repayVsd($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/waybill/partial-acceptance",
+     *     tags={"Integration/vetis/waybill"},
+     *     summary="Частичное погашение ВСД",
+     *     description="Частичное погашение ВСД amount: 37, Не может быть больше merc_vsd.amount reason:Частичная приемка, Обязательное поле",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
+     *                      "amount": 37,
+     *                      "reason":"Частичная приемка",
+     *                      "description":"long string description"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionPartialAcceptance()
+    {
+        $this->response = (new VetisWaybill())->partialAcceptance($this->request);
     }
 }

@@ -47,6 +47,11 @@ abstract class DaemonController extends Controller
      * @var null
      */
     public $orgId = null;
+
+    /**
+     * @var null
+     */
+    public $storeId = null;
     
     /**
      * @var $parentPID int main procces pid
@@ -222,6 +227,7 @@ abstract class DaemonController extends Controller
             'maxChildProcesses',
             'orgId',
             'consumerClass',
+            'storeId',
         ];
     }
     
@@ -458,7 +464,7 @@ abstract class DaemonController extends Controller
         if (!file_exists($dir)) {
             mkdir($dir, 0744, true);
         }
-        return $dir . DIRECTORY_SEPARATOR . $this->shortName . $this->consumerClass . $this->orgId;
+        return $dir . DIRECTORY_SEPARATOR . $this->shortName . $this->consumerClass . $this->orgId . $this->storeId;
     }
     
 }

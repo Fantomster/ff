@@ -13,6 +13,7 @@ use Yii;
  * @property string $last_executed
  * @property string $start_executing
  * @property string $data_request
+ * @property string $store_id
  */
 class RabbitQueues extends \yii\db\ActiveRecord
 {
@@ -41,7 +42,7 @@ class RabbitQueues extends \yii\db\ActiveRecord
             [['consumer_class_name'], 'required'],
             [['organization_id'], 'integer'],
             [['last_executed', 'start_executing'], 'safe'],
-            [['consumer_class_name'], 'string', 'max' => 255],
+            [['consumer_class_name', 'store_id'], 'string', 'max' => 255],
         ];
     }
 

@@ -33,7 +33,7 @@ class MercStockEntryList extends MercDictConsumer
             ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count();
 
         if ($check == 9) {
-            $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $this->org_id])->one();
+            $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $this->org_id, 'store_id' => $this->data])->one();
             $this->data = json_decode(($this->queue->data_request ?? $this->data), true);
         } else {
             $this->log('Dictionaries are currently being updated'.PHP_EOL);

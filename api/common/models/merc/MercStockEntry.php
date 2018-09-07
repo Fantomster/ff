@@ -199,16 +199,16 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData($org_id, $enterpriseGuid = null)
+    public static function getUpdateData($org_id, $enterpriseGuid = null, $day_update = false)
     {
         try {
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList'])->orderBy(['last_executed' => SORT_DESC])->one();
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $org_id, 'sore_id' => $enterpriseGuid])->one();
             if($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercStockEntryList';
                 $queue->organization_id = $org_id;
-                $queue->save();
+                $queue->store_id = $enterpriseGuid;
             }
 
             if (!empty($queue->organization_id)) {
@@ -218,21 +218,25 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
-            if(isset($enterpriseGuid)) {
-                $data['startDate'] = date("Y-m-d H:i:s", mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')));
+            if(!isset($queue->data_request) || $day_update) {
+                if ($day_update) {
+                    $data['startDate'] = date("Y-m-d H:i:s", mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')));
+                } else {
+                    $queueDate = $queue->last_executed ?? $queue->start_executing;
+                    $data['startDate'] = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+                }
+                $data['listOptions']['count'] = 100;
+                $data['listOptions']['offset'] = 0;
+                $data['enterpriseGuid'] = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
+                $queue->data_request = json_encode($data);
             }
-            else {
-                $queueDate = $queue->last_executed ?? $queue->start_executing;
-                $data['startDate'] = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
-            }
-            $data['listOptions']['count'] = 100;
-            $data['listOptions']['offset'] = 0;
-            $data['enterpriseGuid'] = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
+
+            $queue->save();
 
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')
                 ->setQueue($queueName)
-                ->addRabbitQueue(json_encode($data));
+                ->addRabbitQueue($data['enterpriseGuid']);
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());

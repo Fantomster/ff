@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -208,17 +209,17 @@ class VetisWaybill
         $result = [];
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
         $records = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-        ->andWhere(['uuid' => $request['uuids']])->indexBy('uuid')->all();
-        try{
+            ->andWhere(['uuid' => $request['uuids']])->indexBy('uuid')->all();
+        try {
             $api = mercuryApi::getInstance();
             foreach ($request['uuids'] as $uuid) {
-                if(array_key_exists($uuid, $records)){
+                if (array_key_exists($uuid, $records)) {
                     $result[$uuid] = $api->getVetDocumentDone($uuid);
                 } else {
                     $result[$uuid] = 'ВСД не принадлежит данной организации';
                 }
             }
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $result['error'] = $t->getMessage();
             $result['trace'] = $t->getTraceAsString();
             $result['code'] = $t->getCode();
@@ -226,8 +227,9 @@ class VetisWaybill
 
         return ['result' => $result];
     }
+
     /**
-     * Погашение ВСД
+     * Частичное погашение ВСД
      * @param $request
      * @throws BadRequestHttpException
      * @return array
@@ -235,21 +237,26 @@ class VetisWaybill
     public function partialAcceptance($request)
     {
         $uuid = $request['uuid'];
-        if (!isset($uuid) || !is_array($uuid || !isset($request['reason']))) {
+        if (!isset($uuid) || !isset($request['reason'])) {
             throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
-        $result = [];
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $records = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-        ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
-        try{
+        $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
+            ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        if ($record) {
+            throw new BadRequestHttpException('Uuid not for this organization');
+        }
+        $params = [
+            'decision'    => VetDocumentDone::PARTIALLY,
+            'volume'      => $request['amount'],
+            'reason'      => $request['reason'],
+            'description' => $request['description'],
+        ];
+
+        try {
             $api = mercuryApi::getInstance();
-            if(array_key_exists($uuid, $records)){
-                $result[$uuid] = $api->getVetDocumentDone($uuid);
-            } else {
-                $result[$uuid] = 'ВСД не принадлежит данной организации';
-            }
-        } catch (\Throwable $t){
+            $result[$uuid] = $api->getVetDocumentDone($uuid, $params);
+        } catch (\Throwable $t) {
             $result['error'] = $t->getMessage();
             $result['trace'] = $t->getTraceAsString();
             $result['code'] = $t->getCode();

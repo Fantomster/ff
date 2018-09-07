@@ -40,7 +40,7 @@ Modal::widget([
 $this->render('/default/_license_no_active.php', ['lic' => $lic]);
 ?>
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
+    <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
 </section>
 <section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.settings', ['ru'=>'Настройки']) ?>:</h4>

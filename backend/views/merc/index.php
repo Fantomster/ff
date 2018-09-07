@@ -35,6 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                     ],
                     [
+                        'attribute' => 'code',
+                        'value' => function ($model) {
+                            if ($model) return \api\common\models\merc\mercService::$licenses_list[$model->code];
+                        },
+                    ],
+                    [
                         'attribute' => 'status_id',
                         'value' => function ($model) {
                             if ($model) return ($model->status_id == 1) ? 'Активно' : 'Не активно';

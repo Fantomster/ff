@@ -98,7 +98,7 @@ class VetisHelper
             (($this->doc->certifiedConsignment->batch->perishable == 'true') ? 'Да' : 'Нет') : null;
         $producer = isset($this->doc->certifiedConsignment->batch->origin->producer) ?
             MercVsd::getProduccerData($this->doc->certifiedConsignment->batch->origin->producer, $this->org_id) : null;
-        $this->producers = isset($producer) ? implode(", ",$producer['name']) : null;
+        $this->producers = isset($producer) ? implode(", ", $producer['name']) : null;
         $labResearch = $this->doc->authentication->laboratoryResearch;
         $this->expertiseInfo = $labResearch->operator->name . ' эксп №' . $labResearch->expertiseID . ' от ' .
             $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
@@ -107,12 +107,17 @@ class VetisHelper
             MercVsd::$transport_types[$this->doc->certifiedConsignment->transportInfo->transportType] : null;
         $this->transport_number = $this->doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber ?? null;
         $this->transport_storage_type = isset($this->doc->certifiedConsignment->transportStorageType) ? MercVsd::$storage_types[$this->doc->certifiedConsignment->transportStorageType] : null;
-        $this->specified_person = current($this->doc->statusChange)->specifiedPerson->fio ?? "-";
-        $this->specified_person_post = current($this->doc->statusChange)->specifiedPerson->post ?? "";
+        if (is_array($this->doc->statusChange)) {
+            $specPerson = current($this->doc->statusChange);
+        } else {
+            $specPerson = $this->doc->statusChange;
+        }
+        $this->specified_person = $specPerson->specifiedPerson->fio ?? "-";
+        $this->specified_person_post = $specPerson->specifiedPerson->post ?? "";
 
         return $this;
     }
-  
+
     /**
      * Парсит $doc->referencedDocument и записывает в экземпляр класса
      * @param object $refDoc

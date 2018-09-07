@@ -48,6 +48,7 @@ class ConsumerDaemonController extends AbstractDaemonController
                 throw new \Exception('$success false');
             }
         } catch (\Throwable $e) {
+            $this->cancel($job);
             $arWhere = ['consumer_class_name' => $this->consumerClass];
             if (!empty($this->orgId)) {
                 $arWhere['organization_id'] = $this->orgId;
@@ -56,7 +57,6 @@ class ConsumerDaemonController extends AbstractDaemonController
                 'start_executing' => new Expression('NULL')
             ], $arWhere)->execute();
             $this->log(PHP_EOL . " ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            $this->nask($job);
         }
         return true;
     }

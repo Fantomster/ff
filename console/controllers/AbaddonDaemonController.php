@@ -93,11 +93,12 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
             try {
                 $queue = \Yii::$app->get('rabbit')->setQueue($this->getQueueName($row))->checkQueueCount();
                 $kill = $this->checkForKill($row, $queue);
-                $this->daemons[$row['consumer_class_name'] . $row['organization_id']] = [
+                $this->daemons[$row['consumer_class_name'] . $row['organization_id'] . $row['store_id']] = [
                     'className'     => 'ConsumerDaemonController',
                     'enabled'       => !$kill,
                     'consumerClass' => $row['consumer_class_name'],
                     'orgId'         => $row['organization_id'],
+                    'storeId'       => $row['store_id'],
                     'demonize'      => 1,
                     'hardKill'      => $kill,
                 ];

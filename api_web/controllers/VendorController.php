@@ -273,7 +273,11 @@ class VendorController extends WebApiController
      * @SWG\Post(path="/vendor/upload-main-catalog",
      *     tags={"Vendor/Catalog"},
      *     summary="Загрузка основного каталога",
-     *     description="Загрузка основного каталога",
+     *     description="Загрузка основного каталога на файловый сервер.
+     * Ответ возвращает 20 строк файла, для предпросмотра, и выбора колонок
+     * На этом этапе, в базе не хранится ничего, кроме названия файла
+     * cat_id = ID каталога в который происходит загрузка
+     * data = документ Excel в base64",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -284,7 +288,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 4,
+     *                      "cat_id": 3010,
      *                      "data": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
      *                  }
      *              )
@@ -345,7 +349,8 @@ class VendorController extends WebApiController
      * @SWG\Post(path="/vendor/get-list-main-index",
      *     tags={"Vendor/Catalog"},
      *     summary="Список ключей для загрузки каталога",
-     *     description="Список ключей для загрузки каталога",
+     *     description="Список ключей, доступных для выбора пользователю. Далее по этому ключу будет осуществляться поиск дублей.
+     * Передавать в метод /vendor/import-main-catalog параметр index_field",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -355,7 +360,8 @@ class VendorController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={}
+     *                  default={
+     *                  }
      *              )
      *         )
      *     ),
@@ -364,6 +370,9 @@ class VendorController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
+     *                 "product": "Продукт",
+     *                 "article": "Артикул",
+     *                 "other": "Другое"
      *             }
      *          ),
      *     ),
@@ -386,7 +395,47 @@ class VendorController extends WebApiController
      * @SWG\Post(path="/vendor/import-main-catalog",
      *     tags={"Vendor/Catalog"},
      *     summary="Маппинг, валидация и импорт основного каталога",
-     *     description="Маппинг, валидация и импорт основного каталога",
+     *     description="Метод Импортирует файл с сервера во временную таблицу БД, по правилам которые переданы в параметре mapping
+     * cat_id = ID каталога
+     * index_field = ключ поиска дублей
+     * mapping = очередность колонок, при загрузке файла
+     *
+     *     Пример:
+     *     POST /vendor/upload-main-catalog вернул результат
+     *     {
+     *          result: true,
+     *          temp_id: 2,
+     *          rows: [
+     *              [
+     *                  Артикул,
+     *                  Наименование,
+     *                  Кратность,
+     *                  Цена,
+     *                  Единица измерения,
+     *                  Комментарий
+     *              ],
+     *              [
+     *                  10,
+     *                  Товар 10,
+     *                  '',
+     *                  100,
+     *                  бутылка,
+     *                  ''
+     *              ],
+     *              [
+     *                  111004,
+     *                  Балтика 7,
+     *                  1.25,
+     *                  45.5,
+     *                  бутылка,
+     *                  ''
+     *              ]
+     *         ]
+     *     }
+     *
+     *     Тогда в mapping мы передаем очередность полей как на фронте ее отмечает пользователь
+     *     mapping = {1:article, 3:units, 5:ed, 4:price, 2:product, 6:other}
+     * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -400,7 +449,7 @@ class VendorController extends WebApiController
      *                  default={
      *                      "cat_id": 3010,
      *                      "index_field": "article",
-     *                      "mapping": {"article", "product", "units", "price", "ed", "other"}
+     *                      "mapping": {1:"article", 2:"product", 3:"units", 4:"price", 5:"ed", 6:"other"}
      *                  }
      *              )
      *         )
@@ -410,8 +459,7 @@ class VendorController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-     *                  "cat_id": 4,
-     *                  "uploaded_name": "dfg5fhbdhb"
+     *                  "result": true
      *             }
      *          ),
      *     ),

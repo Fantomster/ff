@@ -36,7 +36,7 @@ use yii\widgets\Breadcrumbs;
     ?>
 </section>
 <section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
+    <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
 </section>
 <section class="content-header">
     <h4><?=$this->title?>:</h4>

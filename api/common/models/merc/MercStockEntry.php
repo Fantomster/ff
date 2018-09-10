@@ -202,8 +202,9 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
     public static function getUpdateData($org_id, $enterpriseGuid = null, $day_update = false)
     {
         try {
+            $enterpriseGuid = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $org_id, 'sore_id' => $enterpriseGuid])->one();
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $org_id, 'store_id' => $enterpriseGuid])->one();
             if($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercStockEntryList';
@@ -229,9 +230,11 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $data['listOptions']['offset'] = 0;
                 $data['enterpriseGuid'] = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
                 $queue->data_request = json_encode($data);
+                $queue->save();
             }
-
-            $queue->save();
+            else {
+                $data = json_decode($queue->data_request, true);
+            }
 
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')

@@ -49,7 +49,7 @@ abstract class WatcherDaemonController extends DaemonController
      */
     protected function doJob($job)
     {
-        $pidfile = \Yii::getAlias($this->pidDir) . DIRECTORY_SEPARATOR . $job['className'] . $job['consumerClass'] . $job['orgId'];
+        $pidfile = \Yii::getAlias($this->pidDir) . DIRECTORY_SEPARATOR . $job['className'] . $job['consumerClass'] . $job['orgId'] . $job['storeId'];
 
         \Yii::trace('Check daemon ' . $job['className']);
         if (file_exists($pidfile)) {

@@ -21,9 +21,22 @@ use Yii;
  * @property string $outer_contractor_uuid
  * @property int $vat_included
  *
+ * @property string $edi_number
+ * @property string $edi_recadv
+ * @property string $edi_invoice
+ * @property string $doc_date
+ * @property int $is_duedate
+ * @property int $is_deleted
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $exported_at
+ * @property int $paymant_dalay
+ * @property string $paymant_dalay_date
+ *
+ *
  * @property WaybillContent[] $waybillContents
  */
-class Waybill extends \yii\db\ActiveRecord
+class Waybill extends yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -48,8 +61,8 @@ class Waybill extends \yii\db\ActiveRecord
     {
         return [
             [['acquirer_id', 'service_id'], 'required'],
-            [['acquirer_id', 'bill_status_id', 'readytoexport', 'service_id', 'vat_included'], 'integer'],
-            [['outer_duedate'], 'safe'],
+            [['acquirer_id', 'bill_status_id', 'readytoexport', 'service_id', 'vat_included', 'is_duedate', 'is_deleted', 'paymant_dalay'], 'integer'],
+            [['outer_duedate', 'edi_number', 'edi_recadv', 'edi_invoice', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'paymant_dalay_date'], 'safe'],
             [['outer_number_code', 'outer_number_additional', 'outer_note', 'outer_order_date'], 'string', 'max' => 45],
             [['outer_store_uuid', 'outer_contractor_uuid'], 'string', 'max' => 36],
         ];
@@ -82,6 +95,6 @@ class Waybill extends \yii\db\ActiveRecord
      */
     public function getWaybillContents()
     {
-        return $this->hasMany(WaybillContent::className(), ['waybill_id' => 'id']);
+        return $this->hasMany(WaybillContent::class, ['waybill_id' => 'id']);
     }
 }

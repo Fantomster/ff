@@ -18,6 +18,9 @@ use Yii;
  * @property string $article
  * @property integer $units
  * @property string $comment
+ * @property string $edi_ordersp
+ * @property string $merc_uuid
+ * @property integer $vat_product
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
@@ -42,8 +45,9 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
-            [['order_id', 'product_id', 'updated_user_id'], 'integer'],
+            [['order_id', 'product_id', 'updated_user_id', 'vat_product'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['edi_ordersp', 'merc_uuid'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],

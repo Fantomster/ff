@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\merc\controllers;
 
+use api\common\models\merc\mercService;
 use common\models\User;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 use yii\web\Controller;
@@ -52,6 +53,7 @@ class JournalController extends Controller
         $searchModel->organizations = array_keys(\yii\helpers\ArrayHelper::map($user->getAllOrganization(null), 'id', 'name'));
         $searchModel->organization_id = (\Yii::$app->user->identity)->organization_id;
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
+        $lic = mercService::getLicense();
 
         $sort = new Sort();
         $sort->defaultOrder = ['id' => SORT_DESC];
@@ -61,6 +63,7 @@ class JournalController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'user' => $user,
+            'lic' => $lic,
         ]);
     }
 

@@ -46,7 +46,7 @@ class CatalogSnapshot extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
+                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
                 ],
                 'value' => function ($event) {
                     return gmdate("Y-m-d H:i:s");

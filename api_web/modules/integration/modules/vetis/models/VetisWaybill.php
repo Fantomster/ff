@@ -264,4 +264,39 @@ class VetisWaybill
 
         return ['result' => $result];
     }
+    /**
+     * Возврат ВСД
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function returnVsd($request)
+    {
+        $uuid = $request['uuid'];
+        if (!isset($uuid) || !isset($request['reason'])) {
+            throw new BadRequestHttpException('Uuid and reason is required and must be array');
+        }
+        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
+            ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        if ($record) {
+            throw new BadRequestHttpException('Uuid not for this organization');
+        }
+        $params = [
+            'decision'    => VetDocumentDone::RETURN_ALL,
+            'reason'      => $request['reason'],
+            'description' => $request['description'],
+        ];
+
+        try {
+            $api = mercuryApi::getInstance();
+            $result[$uuid] = $api->getVetDocumentDone($uuid, $params);
+        } catch (\Throwable $t) {
+            $result['error'] = $t->getMessage();
+            $result['trace'] = $t->getTraceAsString();
+            $result['code'] = $t->getCode();
+        }
+
+        return ['result' => $result];
+    }
 }

@@ -66,7 +66,7 @@ class MercVSDList extends MercDictConsumer
 
                 $count += $vetDocumentList->count;
                 $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
-var_dump('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+
                 if ($vetDocumentList->count > 0) {
                     $vsd->updateDocumentsList($vetDocumentList->vetDocument);
                 }

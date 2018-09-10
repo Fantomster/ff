@@ -37,10 +37,10 @@ class VetDocumentsChangeList extends Model
                 'type' => $item->vetDType,
                 'form' => $item->vetDForm,
                 'status' => $item->vetDStatus,
-                'recipient_name' => !isset($recipient) ? null : $recipient->name.'('. $recipient->addressView .')',
+                'recipient_name' => !isset($recipient) ? null : $recipient->name.'('. $recipient->address->addressView .')',
                 'recipient_guid' => $item->certifiedConsignment->consignee->enterprise->guid,
                 'sender_guid' => $item->certifiedConsignment->consignor->enterprise->guid,
-                'sender_name' =>  !isset($sender) ? null : $sender->name.'('. $sender->addressView .')',
+                'sender_name' =>  !isset($sender) ? null : $sender->name.'('. $sender->address->addressView .')',
                 'finalized' => $item->finalized,
                 'last_update_date' => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s',strtotime($item->lastUpdateDate)) : null,
                 'vehicle_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber : null,
@@ -62,7 +62,6 @@ class VetDocumentsChangeList extends Model
                 'low_grade_cargo' =>  (int)$item->certifiedConsignment->batch->lowGradeCargo,
                 'raw_data' => serialize($item)
             ]);
-
             $model->save(false);
         }
     }

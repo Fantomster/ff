@@ -25,7 +25,7 @@ class cerberApi extends baseApi
      */
     public function getActivityLocationList()
     {
-        return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID])->all();
+       return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID])->all();
     }
 
     /**
@@ -52,7 +52,14 @@ class cerberApi extends baseApi
             return unserialize($enterprise->data);
         }
 
-        return null;
+            $client = $this->getSoapClient('cerber');
+
+            $request = new getEnterpriseByUuidRequest();
+            $request->uuid = $UUID;
+
+            $enterprise = ($client->GetEnterpriseByUuid($request))->enterprise;
+
+        return $enterprise;
     }
 
     /**
@@ -70,7 +77,13 @@ class cerberApi extends baseApi
             return unserialize($business->data);
         }
 
-        return null;
+            $client = $this->getSoapClient('cerber');
+            $request = new getBusinessEntityByUuidRequest();
+            $request->uuid = $UUID;
+
+            $business = ($client->GetBusinessEntityByUuid($request))->businessEntity;
+
+            return $business;
     }
 
     /**
@@ -97,7 +110,15 @@ class cerberApi extends baseApi
             return unserialize($enterprise->data);
         }
 
-        return null;
+
+            $client = $this->getSoapClient('cerber');
+
+            $request = new getEnterpriseByUuidRequest();
+            $request->guid = $GUID;
+
+            $enterprise = ($client->GetEnterpriseByUuid($request))->enterprise;
+
+            return $enterprise;
     }
 
     /**
@@ -115,7 +136,13 @@ class cerberApi extends baseApi
             return unserialize($business->data);
         }
 
-        return null;
+            $client = $this->getSoapClient('cerber');
+            $request = new getBusinessEntityByUuidRequest();
+            $request->guid = $GUID;
+
+            $business = ($client->GetBusinessEntityByUuid($request))->businessEntity;
+
+            return $business;
     }
 
     /**

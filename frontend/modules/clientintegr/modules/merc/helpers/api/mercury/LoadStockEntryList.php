@@ -19,6 +19,7 @@ class LoadStockEntryList extends Model
     public function updateDocumentsList($list) {
         $owner_guid = mercDicconst::getSetting('enterprise_guid', $this->org_id);
         $list = is_array($list) ? $list : [$list];
+
         foreach ($list as $item)
         {
             $unit = dictsApi::getInstance($this->org_id)->getUnitByGuid($item->batch->unit->guid);

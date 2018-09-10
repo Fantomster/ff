@@ -64,6 +64,7 @@ class MercStockEntryList extends MercDictConsumer
                 $stockEntryList = $result->application->result->any['getStockEntryChangesListResponse']->stockEntryList;
                 $count += $stockEntryList->count;
                 $this->log('Load '.$count.' / '. $stockEntryList->total.PHP_EOL);
+
                 if($stockEntryList->count > 0) {
                     $vsd->updateDocumentsList($stockEntryList->stockEntry);
                 }

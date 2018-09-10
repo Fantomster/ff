@@ -54,6 +54,7 @@ class VetisWaybill
                 $result[$model['group_name']]['total_price'] = $model['total_price'];
             }
             $result[$model['group_name']]['uuids'] = explode(',', $model['uuids']);
+            $result[$model['group_name']]['status'] = $this->helper->getStatusForGroup($model['statuses']);
         }
         $return = [
             'result'     => $result,

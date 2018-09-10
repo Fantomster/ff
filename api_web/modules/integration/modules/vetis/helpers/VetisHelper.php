@@ -36,6 +36,12 @@ class VetisHelper
         'VSERAW'      => 'ВСЭ подвергнуто сырьё, из которого произведена продукция',
         'VSEFULL'     => 'Продукция подвергнута ВСЭ в полном объеме'
     ];
+    /**@var array $ordersStatuses статусы для заказов */
+    public static $ordersStatuses = [
+        'WITHDRAWN' => 'Сертификаты аннулированы',
+        'CONFIRMED' => 'Сертификаты ожидают погашения',
+        'UTILIZED'  => 'Сертификаты погашены',
+    ];
 
 
     public function __construct()
@@ -182,7 +188,8 @@ class VetisHelper
                     'COUNT(m.id) as count',
                     'o.created_at',
                     'o.total_price',
-                    'GROUP_CONCAT(`wc`.`merc_uuid` SEPARATOR \',\') AS `uuids`'
+                    'GROUP_CONCAT(`wc`.`merc_uuid` SEPARATOR \',\') AS `uuids`',
+                    'GROUP_CONCAT(DISTINCT `m`.`status` SEPARATOR \',\') AS `statuses`',
                 ]
             )
             ->from('`' . $tableName . '`.merc_vsd m')
@@ -197,12 +204,33 @@ class VetisHelper
         return $query;
     }
 
+    /**
+     * Get database name from config
+     * @param string $name
+     * @param string $dsn dsn string from config
+     * @return string database name
+     * */
     private function getDsnAttribute($name, $dsn)
     {
         if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
             return $match[1];
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Get group status from array statuses
+     * @param string $strStatuses
+     * @return string status
+     * */
+    public function getStatusForGroup($strStatuses)
+    {
+        $statuses = explode(',', $strStatuses);
+        if (count($statuses) > 1) {
+            return self::$ordersStatuses['CONFIRMED'];
+        } else {
+            return self::$ordersStatuses[current($statuses)];
         }
     }
 }

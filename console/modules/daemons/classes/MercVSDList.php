@@ -8,6 +8,7 @@
 
 namespace console\modules\daemons\classes;
 
+use api\common\models\merc\mercLog;
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\MercDictConsumer;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\ListOptions;
@@ -62,6 +63,10 @@ class MercVSDList extends MercDictConsumer
                 $this->queue->save();
                 //Выполняем запрос и обработку полученных данных
                 $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
+                if($result->application->status == mercLog::REJECTED) {
+                    sleep(5);
+                    continue;
+                }
                 $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
                 $count += $vetDocumentList->count;

@@ -61,6 +61,10 @@ class MercStockEntryList extends MercDictConsumer
                 $this->queue->save();
                 //Выполняем запрос и обработку полученных данных
                 $result = $api->getStockEntryChangesList($this->data['startDate'], $this->data['listOptions']);
+                if($result->application->status == mercLog::REJECTED) {
+                    sleep(5);
+                    continue;
+                }
                 $stockEntryList = $result->application->result->any['getStockEntryChangesListResponse']->stockEntryList;
                 $count += $stockEntryList->count;
                 $this->log('Load '.$count.' / '. $stockEntryList->total.PHP_EOL);

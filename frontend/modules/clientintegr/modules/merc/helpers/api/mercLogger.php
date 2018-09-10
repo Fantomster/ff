@@ -63,12 +63,13 @@ class mercLogger extends Component
 
         $journal->save();
 
-        $journal->getErrors();
 
         $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id = null);
 
-        if ($journal->type == mercLog::REJECTED) {
-            throw new \Exception($journal->id, 600);
+        if (\Yii::$app instanceof \Yii\web\Application) {
+            if ($journal->type == mercLog::REJECTED) {
+                throw new \Exception($journal->id, 600);
+            }
         }
     }
 

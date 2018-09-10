@@ -110,7 +110,7 @@ class MercuryCronController extends Controller
 
     public function actionTest2()
     {
-        $org_id = (mercPconst::findOne('1'))->org;
+        $org_id = 5144;
         echo "START" . PHP_EOL;
         echo "GET MercVSDList".PHP_EOL;
         MercVsd::getUpdateData($org_id);
@@ -152,6 +152,7 @@ class MercuryCronController extends Controller
     {
         echo "START" . PHP_EOL;
         $w = new MercVSDList(5144);
+        $w->data = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
         $w->getData();
         echo "FINISH" . PHP_EOL;
     }
@@ -160,6 +161,7 @@ class MercuryCronController extends Controller
     {
         echo "START" . PHP_EOL;
         $w = new MercStockEntryList(5144);
+        $w->data = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
         $w->getData();
         echo "FINISH" . PHP_EOL;
     }

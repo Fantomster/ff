@@ -44,7 +44,7 @@ class MercRussianEnterpriseList extends MercDictConsumer
                 $model->next = $attributes['next'] ?? null;
                 $model->previous = $attributes['previous'] ?? null;
                 $model->name = $attributes['name'];
-                $model->inn = $attributes['officialRegistration']['businessEntity']['inn'];
+                $model->inn = key_exists('businessEntity', $attributes['officialRegistration'])?$attributes['officialRegistration']['businessEntity']['inn'] : null;
                 $model->kpp = $attributes['officialRegistration']['kpp'];
                 $model->addressView = $attributes['address']['addressView'];
                 $model->owner_guid = $attributes['owner']['guid'];

@@ -96,6 +96,8 @@ use yii\web\JsExpression;
     ]);
     ?>
 
+    <?= $form->field($model, 'code')->dropDownList(\api\common\models\merc\mercService::$licenses_list)->label('Тип лицензии') ?>
+
     <?php echo $form->field($model, 'status_id')->dropDownList([1 => 'Активно', 0 => 'Не активно']); ?>
     <div class="form-group">
         <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

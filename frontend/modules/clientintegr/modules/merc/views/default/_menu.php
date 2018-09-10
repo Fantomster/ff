@@ -22,7 +22,7 @@ use yii\helpers\Url;
                             <?= ($currentUrl != Url::to(['/clientintegr/merc/default'])) ? Html::a('Список ВСД', ['/clientintegr/merc/default'], ['class'=>'btn btn-md fk-button']) : ''; ?>
                             <?php
                             $user = Yii::$app->user->identity;
-                            if (($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) && ($currentUrl != Url::to(['/clientintegr/merc/stock-entry']))) {
+                            if (($lic->code == \api\common\models\merc\mercService::EXTENDED_LICENSE_CODE) && ($currentUrl != Url::to(['/clientintegr/merc/stock-entry']))) {
                                 echo Html::a(Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']), ['/clientintegr/merc/stock-entry'], ['class'=>'btn btn-md fk-button']);
                             }
                             ?>

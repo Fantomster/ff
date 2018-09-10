@@ -28,9 +28,9 @@ class MercStockEntryList extends MercDictConsumer
 
     public function init()
     {
-        $check = RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList', 
+        $check = 9;/*RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList',
         'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
-            ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count();
+            ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count();*/
 
         if ($check == 9) {
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $this->org_id, 'store_id' => $this->data])->one();
@@ -64,6 +64,7 @@ class MercStockEntryList extends MercDictConsumer
                 $stockEntryList = $result->application->result->any['getStockEntryChangesListResponse']->stockEntryList;
                 $count += $stockEntryList->count;
                 $this->log('Load '.$count.' / '. $stockEntryList->total.PHP_EOL);
+
                 if($stockEntryList->count > 0) {
                     $vsd->updateDocumentsList($stockEntryList->stockEntry);
                 }

@@ -217,6 +217,7 @@ class SearchOrdersComponent extends Component
             }
             // 3.3. Update Totalprice - otherwise
             $this->totalPrice = Order::find()
+                ->leftJoin("$tblMA", "$tblMA.organization_id = `$tblOrder`.vendor_id")
                 ->where(['status' => $statuses['fulfilled'], "$tblMA.manager_id" => $userId, 'vendor_id' => $orgId])
                 ->sum("total_price");
             // 3.4. Detect Restaurants

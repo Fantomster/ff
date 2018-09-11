@@ -55,19 +55,36 @@ use api\common\models\iiko\iikoDicconst;
 class Order extends \yii\db\ActiveRecord
 {
 
+    // "НОВЫЙ" ЗАКАЗ
+    // - EDI: Заказ создан, сохранен, но еще не отправлен
+    // - доступны операции: [Отменить, Редактировать, Завершить]
+    //
+    const STATUS_NEW = 0;
+
+    // ЗАКАЗ "ОЖИДАЕТ ПОДТВЕРЖДЕНИЕ ОТ ПОСТАВЩИКА"
+    // - EDI: Заказ отправлен поставщику, документ ORDERSP еще не получен
+    // - операции: [<пусто>]
     const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
+
+    // ЗАКАЗ "ОЖИДАЕТ ПОДТВЕРЖДЕНИЕ ОТ ПОСТАВЩИКА" (EDI: Заказ отправлен поставщику, документ ORDERSP еще не получен)
+    // - операции: [<пусто>]
     const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
     const STATUS_PROCESSING = 3;
     const STATUS_DONE = 4;
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
 
+
+    const LIST_STATUSES_EDI = [
+
+    ];
     /**
      * @inheritdoc
      */

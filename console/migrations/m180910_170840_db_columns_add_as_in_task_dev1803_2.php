@@ -29,8 +29,8 @@ class m180910_170840_db_columns_add_as_in_task_dev1803_2 extends Migration
         $this->addColumn('{{%waybill}}', 'created_at', $this->timestamp());
         $this->addColumn('{{%waybill}}', 'updated_at', $this->timestamp());
         $this->addColumn('{{%waybill}}', 'exported_at', $this->timestamp());
-        $this->addColumn('{{%waybill}}', 'paymant_dalay', $this->integer(11));
-        $this->addColumn('{{%waybill}}', 'paymant_dalay_date', $this->timestamp());
+        $this->addColumn('{{%waybill}}', 'payment_delay', $this->integer(11));
+        $this->addColumn('{{%waybill}}', 'payment_delay_date', $this->timestamp());
         #table `waybill_content`
         $this->execute('ALTER TABLE `waybill_content` ADD COLUMN `edi_desadv` VARCHAR(45) NULL;');
         $this->execute('ALTER TABLE `waybill_content` ADD COLUMN `edi_alcdes` VARCHAR(45) NULL;');
@@ -50,8 +50,8 @@ class m180910_170840_db_columns_add_as_in_task_dev1803_2 extends Migration
         $this->dropColumn('{{%waybill_content}}', 'edi_alcdes');
         $this->dropColumn('{{%waybill_content}}', 'edi_desadv');
         #table `waybill`
-        $this->dropColumn('{{%waybill}}', 'paymant_dalay_date');
-        $this->dropColumn('{{%waybill}}', 'paymant_dalay');
+        $this->dropColumn('{{%waybill}}', 'payment_delay_date');
+        $this->dropColumn('{{%waybill}}', 'payment_delay');
         $this->dropColumn('{{%waybill}}', 'exported_at');
         $this->dropColumn('{{%waybill}}', 'updated_at');
         $this->dropColumn('{{%waybill}}', 'created_at');

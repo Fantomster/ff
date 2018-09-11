@@ -30,8 +30,8 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * @property string $exported_at
- * @property int $paymant_dalay
- * @property string $paymant_dalay_date
+ * @property int $payment_delay
+ * @property string $payment_delay_date
  *
  *
  * @property WaybillContent[] $waybillContents
@@ -61,8 +61,8 @@ class Waybill extends yii\db\ActiveRecord
     {
         return [
             [['acquirer_id', 'service_id'], 'required'],
-            [['acquirer_id', 'bill_status_id', 'readytoexport', 'service_id', 'vat_included', 'is_duedate', 'is_deleted', 'paymant_dalay'], 'integer'],
-            [['outer_duedate', 'edi_number', 'edi_recadv', 'edi_invoice', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'paymant_dalay_date'], 'safe'],
+            [['acquirer_id', 'bill_status_id', 'readytoexport', 'service_id', 'vat_included', 'is_duedate', 'is_deleted', 'payment_delay'], 'integer'],
+            [['outer_duedate', 'edi_number', 'edi_recadv', 'edi_invoice', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date'], 'safe'],
             [['outer_number_code', 'outer_number_additional', 'outer_note', 'outer_order_date'], 'string', 'max' => 45],
             [['outer_store_uuid', 'outer_contractor_uuid'], 'string', 'max' => 36],
         ];

@@ -54,19 +54,18 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
             if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
-
+                //Задать стоимость доставки у вендора
+                if (!empty($post['delivery_price'])) {
+                    $delivery = Delivery::findOne(['vendor_id' => $organizationID]);
+                    if (!$delivery) {
+                        $delivery = new Delivery();
+                        $delivery->vendor_id = $organizationID;
+                    }
+                    $delivery->delivery_charge = (float)$post['delivery_price'];
+                    $delivery->save();
+                }
             }else{
                 throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
-            }
-            //Задать стоимость доставки у вендора
-            if (!empty($post['delivery_price'])) {
-                $delivery = Delivery::findOne(['vendor_id' => $organizationID]);
-                if (!$delivery) {
-                    $delivery = new Delivery();
-                    $delivery->vendor_id = $organizationID;
-                }
-                $delivery->delivery_charge = (float)$post['delivery_price'];
-                $delivery->save();
             }
         }
         if (!$this->accessAllow($order)) {

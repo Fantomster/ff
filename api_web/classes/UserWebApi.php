@@ -756,4 +756,23 @@ class UserWebApi extends \api_web\components\WebApi
         }
         return $pass . rand(111, 999);
     }
+
+    /**
+     * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
+     * @return string $gmt
+     * */
+    public function checkGMTFromDb(){
+        $model = Organization::findOne(\Yii::$app->user->identity->organization_id);
+        if(!$model->gmt){
+            $model->gmt = $this->getGmt()['GMT'];
+            if($model->validate()){
+                $model->save();
+            }
+        }
+        if(strpos($model->gmt, '-') !== 0){
+            $gmt = '+' . $model->gmt;
+        }
+
+        return $gmt;
+    }
 }

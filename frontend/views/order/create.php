@@ -309,7 +309,7 @@ $this->registerJs(
                                                         'initval' => 0.100,
                                                         'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0,
                                                         'max' => PHP_INT_MAX,
-                                                        'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
+                                                        'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.1,
                                                         'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
                                                         'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
                                                         'buttonup_class' => 'btn btn-default',

@@ -53,8 +53,9 @@ class OrderWebApi extends \api_web\components\WebApi
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
-            $organization = Organization::findOne(['id' => $organizationID]);
-            if (($this->user->status != User::STATUS_UNCONFIRMED_EMAIL && $organization->type_id != Organization::TYPE_SUPPLIER) || ($organizationID != $order->vendor_id || $organization->is_work != 0)) {
+            if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
+
+            }else{
                 throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
             }
             //Задать стоимость доставки у вендора
@@ -633,8 +634,7 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             $order = Order::findOne(['id' => $post['search']['order_id']]);
             $organizationID = $this->user->organization_id;
-            $organization = Organization::findOne(['id' => $organizationID]);
-            if (($this->user->status == User::STATUS_UNCONFIRMED_EMAIL && $organization->type_id == Organization::TYPE_SUPPLIER) || ($organizationID == $order->vendor_id || $organization->is_work == 0)) {
+            if ($this->checkUnconfirmedVendorAccess($post['search']['order_id'], $organizationID, $this->user->status)) {
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
                 $vendors = [$organizationID];
@@ -739,8 +739,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('empty_param|order_id');
             }
             $order = Order::findOne(['id' => $post['order_id']]);
-            $organization = Organization::findOne(['id' => $organizationID]);
-            if (($this->user->status == User::STATUS_UNCONFIRMED_EMAIL && $organization->type_id == Organization::TYPE_SUPPLIER) || ($organizationID == $order->vendor_id || $organization->is_work == 0)) {
+            if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                 $suppliers = [$this->user->organization_id];
                 $organizationID = $order->client_id;
             } else {
@@ -843,8 +842,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
             if ($isUnconfirmedVendor) {
                 $organizationID = $this->user->organization_id;
-                $organization = Organization::findOne(['id' => $organizationID]);
-                if (($this->user->status == User::STATUS_UNCONFIRMED_EMAIL && $organization->type_id == Organization::TYPE_SUPPLIER) || ($organizationID == $order->vendor_id || $organization->is_work == 0)) {
+                if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                     $order->status = Order::STATUS_REJECTED;
                 } else {
                     throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
@@ -1083,6 +1081,24 @@ class OrderWebApi extends \api_web\components\WebApi
             return true;
         }
 
+        return false;
+    }
+
+
+    /**
+     * Доступ к изменению заказа
+     * @param int $orderID
+     * @param int $organizationID
+     * @param $status
+     * @return bool
+     */
+    private function checkUnconfirmedVendorAccess(int $orderID, int $organizationID, $status): bool
+    {
+        $order = Order::findOne(['id' => $orderID]);
+        $organization = Organization::findOne(['id' => $organizationID]);
+        if ($organization->type_id == Organization::TYPE_SUPPLIER && $organizationID == $order->vendor_id && ($status == User::STATUS_UNCONFIRMED_EMAIL || $organization->is_work == 0)) {
+            return true;
+        }
         return false;
     }
 }

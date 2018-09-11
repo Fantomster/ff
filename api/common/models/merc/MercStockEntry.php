@@ -199,7 +199,7 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData($org_id, $enterpriseGuid = null, $day_update = false)
+    public static function getUpdateData($org_id, $enterpriseGuid = null)
     {
         try {
             $enterpriseGuid = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
@@ -219,16 +219,11 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
-            if(!isset($queue->data_request) || $day_update) {
-                if ($day_update) {
-                    $data['startDate'] = date("Y-m-d H:i:s", mktime(0, 0, 0, date('m'), date('d') - 1, date('Y')));
-                } else {
-                    $queueDate = $queue->last_executed ?? $queue->start_executing;
-                    $data['startDate'] = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
-                }
+            if(!isset($queue->data_request)) {
+                $data['startDate'] = MercVisits::getLastVisit($org_id, 'MercStockEntryList', $enterpriseGuid);
                 $data['listOptions']['count'] = 100;
                 $data['listOptions']['offset'] = 0;
-                $data['enterpriseGuid'] = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
+                $data['enterpriseGuid'] = $enterpriseGuid;
                 $queue->data_request = json_encode($data);
                 $queue->save();
             }

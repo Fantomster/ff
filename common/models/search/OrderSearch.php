@@ -78,6 +78,7 @@ class OrderSearch extends Order
     public function search($params)
     {
 
+        
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
                 ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);

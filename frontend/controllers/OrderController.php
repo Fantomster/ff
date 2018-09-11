@@ -1007,6 +1007,7 @@ class OrderController extends DefaultController
         try {
             (new CartWebApi())->add($product, true);
         } catch (\Exception $e) {
+            \Yii::error(PHP_EOL . $e->getTraceAsString() . PHP_EOL . $e->getMessage(), 'ajaxaddtocart');
             return false;
         }
 

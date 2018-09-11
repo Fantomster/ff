@@ -8,6 +8,7 @@
 
 namespace console\modules\daemons\classes;
 
+use api\common\models\merc\MercVisits;
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\MercDictConsumer;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\LoadStockEntryList;
@@ -87,6 +88,8 @@ class MercStockEntryList extends MercDictConsumer
         } while ($stockEntryList->total > ($stockEntryList->count + $stockEntryList->offset));
 
         $this->log("FIND: consumer_class_name = {$className}");
+
+        MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_STOCK_ENTRY_LIST, $this->data['enterpriseGuid']);
 
         $this->queue->data_request = new Expression('NULL');
         $this->queue->save();

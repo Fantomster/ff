@@ -82,6 +82,6 @@ class MercVisits extends \yii\db\ActiveRecord
         $guid = $guid ?? mercDicconst::getSetting('enterprise_guid');
         $visit = MercVisits::findOne(['org' => $org_id, 'guid' => $guid, 'action' => $action]);
 
-        return isset($visit->last_visit) ? $visit->last_visit : date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000));
+        return isset($visit->last_visit) ? gmdate("Y-m-d H:i:s", strtotime($visit->last_visit ) - 60 * 60) : date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000));
     }
 }

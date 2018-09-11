@@ -38,11 +38,10 @@ class VetisHelper
     ];
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
-        'WITHDRAWN' => 'Сертификаты аннулированы',
-        'CONFIRMED' => 'Сертификаты ожидают погашения',
-        'UTILIZED'  => 'Сертификаты погашены',
+        'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
+        'CONFIRMED' => 'vsd_status_confirmed', //'Сертификаты ожидают погашения',
+        'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
     ];
-
 
     public function __construct()
     {
@@ -228,9 +227,9 @@ class VetisHelper
     {
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
-            return self::$ordersStatuses['CONFIRMED'];
+            return \Yii::t('api_web', self::$ordersStatuses['CONFIRMED']);
         } else {
-            return self::$ordersStatuses[current($statuses)];
+            return \Yii::t('api_web', self::$ordersStatuses[current($statuses)]);
         }
     }
 }

@@ -5,6 +5,8 @@ namespace common\models;
 use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
+use yii\behaviors\AttributesBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use api\common\models\iiko\iikoDicconst;
@@ -28,6 +30,9 @@ use api\common\models\iiko\iikoDicconst;
  * @property string $discount
  * @property integer $discount_type
  * @property integer $currency_id
+ * @property integer $service_id
+ * @property string $status_updated_at
+ * @property string $edi_order
  *
  * @property User $acceptedBy
  * @property User $createdBy
@@ -50,19 +55,36 @@ use api\common\models\iiko\iikoDicconst;
 class Order extends \yii\db\ActiveRecord
 {
 
+    // "НОВЫЙ" ЗАКАЗ
+    // - EDI: Заказ создан, сохранен, но еще не отправлен
+    // - доступны операции: [Отменить, Редактировать, Завершить]
+    //
+    const STATUS_NEW = 0;
+
+    // ЗАКАЗ "ОЖИДАЕТ ПОДТВЕРЖДЕНИЕ ОТ ПОСТАВЩИКА"
+    // - EDI: Заказ отправлен поставщику, документ ORDERSP еще не получен
+    // - операции: [<пусто>]
     const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
+
+    // ЗАКАЗ "ОЖИДАЕТ ПОДТВЕРЖДЕНИЕ ОТ ПОСТАВЩИКА" (EDI: Заказ отправлен поставщику, документ ORDERSP еще не получен)
+    // - операции: [<пусто>]
     const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
     const STATUS_PROCESSING = 3;
     const STATUS_DONE = 4;
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
 
+
+    const LIST_STATUSES_EDI = [
+
+    ];
     /**
      * @inheritdoc
      */
@@ -84,6 +106,18 @@ class Order extends \yii\db\ActiveRecord
                     return gmdate("Y-m-d H:i:s");
                 },
             ],
+            'attributes' => [
+                'class' => AttributesBehavior::class,
+                'attributes' => [
+                    'status_updated_at' => [
+                        ActiveRecord::EVENT_BEFORE_UPDATE => function ($event, $attribute) {
+                            if ($this->status != $this->oldAttributes['status']) {
+                                $this->$attribute = gmdate("Y-m-d H:i:s");
+                            }
+                        },
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -94,9 +128,9 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number'], 'safe'],
+            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],

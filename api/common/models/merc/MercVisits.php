@@ -16,7 +16,10 @@ use Yii;
 class MercVisits extends \yii\db\ActiveRecord
 {
     const LOAD_VSD = 'loadVsd';
-    CONST LOAD_STOCK_ENTRY = 'loadStockEntry';
+    const LOAD_STOCK_ENTRY = 'loadStockEntry';
+    const LOAD_VSD_LIST = 'MercVSDList';
+    const LOAD_STOCK_ENTRY_LIST = 'MercStockEntryList';
+
     /**
      * {@inheritdoc}
      */
@@ -56,9 +59,9 @@ class MercVisits extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function updateLastVisit($org_id, $action)
+    public static function updateLastVisit($org_id, $action, $guid = null)
     {
-        $guid = mercDicconst::getSetting('enterprise_guid');
+        $guid = $guid ?? mercDicconst::getSetting('enterprise_guid');
         $visit = MercVisits::findOne(['org' => $org_id, 'guid' => $guid, 'action' => $action]);
 
         if($visit == null)
@@ -74,11 +77,11 @@ class MercVisits extends \yii\db\ActiveRecord
         return $visit;
     }
 
-    public static function getLastVisit($org_id, $action)
+    public static function getLastVisit($org_id, $action, $guid = null)
     {
-        $guid = mercDicconst::getSetting('enterprise_guid');
+        $guid = $guid ?? mercDicconst::getSetting('enterprise_guid');
         $visit = MercVisits::findOne(['org' => $org_id, 'guid' => $guid, 'action' => $action]);
 
-        return isset($visit->last_visit) ? $visit->last_visit : null;
+        return isset($visit->last_visit) ? $visit->last_visit : date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000));
     }
 }

@@ -229,6 +229,7 @@ class OrderSearch extends Order
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;
+
     }
 
 

@@ -404,6 +404,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistory(array $post)
     {
+
         $sort_field = (!empty($post['sort']) ? $post['sort'] : null);
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
@@ -413,6 +414,11 @@ class OrderWebApi extends \api_web\components\WebApi
         WebApiHelper::clearRequest($post);
 
         if (isset($post['search'])) {
+
+            if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
+                $search->service_id = $post['search']['service_id'];
+            }
+
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
                 $search->vendor_array = $post['search']['vendor'];
             }

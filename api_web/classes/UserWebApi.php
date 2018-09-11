@@ -763,14 +763,16 @@ class UserWebApi extends \api_web\components\WebApi
      * */
     public function checkGMTFromDb(){
         $model = Organization::findOne(\Yii::$app->user->identity->organization_id);
-        if(!$model->gmt){
+        if(is_null($model->gmt)){
             $model->gmt = $this->getGmt()['GMT'];
             if($model->validate()){
                 $model->save();
             }
         }
-        if(strpos($model->gmt, '-') !== 0){
-            $gmt = '+' . $model->gmt;
+        if(strpos($model->gmt, '-') === 0){
+            $gmt = str_replace('-', '+', $model->gmt);
+        } else {
+            $gmt = '-' . $model->gmt;
         }
 
         return $gmt;

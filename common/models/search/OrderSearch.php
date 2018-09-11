@@ -31,6 +31,7 @@ class OrderSearch extends Order
     public $date_to;
     public $docStatus;
     public $completion_date_to;
+    public $service_id;
 
     /**
      * @inheritdoc
@@ -38,7 +39,7 @@ class OrderSearch extends Order
     public function rules(): array
     {
         return [
-            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id'], 'integer'],
+            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id', 'service_id'], 'integer'],
             [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus'], 'safe'],
         ];
     }
@@ -77,11 +78,6 @@ class OrderSearch extends Order
     public function search($params)
     {
 
-
-        /**
-         * @editedBy Basil A Konakov
-         * @editedByKonakovAt 2018-08-13
-         */
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
                 ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);
@@ -218,12 +214,22 @@ class OrderSearch extends Order
             $query->rightJoin('integration_invoice', 'integration_invoice.number=order.waybill_number');
         }
 
+        /**
+         * @editedBy Basil A Konakov
+         * @editedByKonakovAt 2018-08-13
+         * Служба или источник получения заказа (EDI и т.д.) - см., например, таблицу all_service
+         */
+        if (!empty($this->service_id)) {
+            $query->andFilterWhere(['service_id' => $this->service_id]);
+        }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;
+
     }
 
 

@@ -28,13 +28,13 @@ class VetisHelper
     private $vsdModel;
     /**@var array $expertizeList расшифровки статусов экспертиз */
     public static $expertizeList = [
-        'UNKNOWN'     => 'Результат неизвестен',
-        'UNDEFINED'   => 'Результат невозможно определить (не нормируется)',
-        'POSITIVE'    => 'Положительный результат',
-        'NEGATIVE'    => 'Отрицательный результат',
-        'UNFULFILLED' => 'Не проводилось',
-        'VSERAW'      => 'ВСЭ подвергнуто сырьё, из которого произведена продукция',
-        'VSEFULL'     => 'Продукция подвергнута ВСЭ в полном объеме'
+        'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
+        'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
+        'POSITIVE'    => 'positive_result', //Положительный результат
+        'NEGATIVE'    => 'negative_result', //Отрицательный результат
+        'UNFULFILLED' => 'not_conducted', //Не проводилось
+        'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
+        'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
@@ -69,7 +69,7 @@ class VetisHelper
             $this->setTransportWaybill($this->doc->referencedDocument);
         }
         $this->cargo_expertized = isset($this->doc->authentication->cargoExpertized) ?
-            self::$expertizeList[$this->doc->authentication->cargoExpertized] : null;
+            \Yii::t('api_web', self::$expertizeList[$this->doc->authentication->cargoExpertized]) : null;
         $this->location_prosperity = $this->doc->authentication->locationProsperity;
         $this->specialMarks = $this->doc->authentication->specialMarks ?? null;
         $this->vehicle_number = $this->vsdModel->vehicle_number;

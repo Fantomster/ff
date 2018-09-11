@@ -5,7 +5,9 @@ namespace api_web\classes;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
+use api_web\models\User;
 use common\models\CatalogBaseGoods;
+use common\models\Delivery;
 use common\models\MpCategory;
 use common\models\OrderContent;
 use common\models\RelationSuppRest;
@@ -34,18 +36,38 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Редактирование заказа
      * @param $post
+     * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function update($post)
+    public function update($post, bool $isUnconfirmedVendor = false)
     {
         WebApiHelper::clearRequest($post);
+
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
+        //If user is unconfirmed
+        if ($isUnconfirmedVendor) {
+            $organizationID = $this->user->organization_id;
+            if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
+                //Задать стоимость доставки у вендора
+                if (!empty($post['delivery_price'])) {
+                    $delivery = Delivery::findOne(['vendor_id' => $organizationID]);
+                    if (!$delivery) {
+                        $delivery = new Delivery();
+                        $delivery->vendor_id = $organizationID;
+                    }
+                    $delivery->delivery_charge = (float)$post['delivery_price'];
+                    $delivery->save();
+                }
+            }else{
+                throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+            }
+        }
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
@@ -54,8 +76,12 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
         }
         //Если сменили комментарий
-        if (!empty($post['comment'])) {
+        if (!empty($post['comment']) && !$isUnconfirmedVendor) {
             $order->comment = trim($post['comment']);
+        }
+        //Если сменили дату доставки
+        if (!empty($post['actual_delivery'])) {
+            $order->actual_delivery = $post['actual_delivery'];
         }
         //Если поменяли скидку
         if (!empty($post['discount'])) {
@@ -598,25 +624,42 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Список доступных для заказа продуктов
      * @param $post
+     * @param bool $isUnconfirmedVendor
      * @return array
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    public function products($post)
+    public function products($post, bool $isUnconfirmedVendor = false)
     {
         $sort = (isset($post['sort']) ? $post['sort'] : null);
         $searchString = (isset($post['search']['product']) ? $post['search']['product'] : null);
-        $searchSupplier = (isset($post['search']['supplier_id']) ? $post['search']['supplier_id'] : null);
+        if ($isUnconfirmedVendor) {
+            if (empty($post['search']['order_id'])) {
+                throw new BadRequestHttpException('empty_param|order_id');
+            }
+            $order = Order::findOne(['id' => $post['search']['order_id']]);
+            $organizationID = $this->user->organization_id;
+            if ($this->checkUnconfirmedVendorAccess($post['search']['order_id'], $organizationID, $this->user->status)) {
+                $searchSupplier = $organizationID;
+                $client = Organization::findOne(['id' => $order->client_id]);
+                $vendors = [$organizationID];
+                $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
+            } else {
+                throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+            }
+        } else {
+            $searchSupplier = (isset($post['search']['supplier_id']) ? $post['search']['supplier_id'] : null);
+            $client = $this->user->organization;
+            $vendors = $client->getSuppliers('', false);
+            $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
+        }
+
         $searchCategory = $post['search']['category_id'] ?? null;
         $searchPrice = (isset($post['search']['price']) ? $post['search']['price'] : null);
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $client = $this->user->organization;
         $searchModel = new OrderCatalogSearch();
-
-        $vendors = $client->getSuppliers('', false);
-        $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
@@ -689,15 +732,30 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Список доступных категорий
+     * @param $post
+     * @param bool $isUnconfirmedVendor
      * @return array
      */
-    public function categories()
+    public function categories($post = null, bool $isUnconfirmedVendor = false)
     {
-
-        $suppliers = RelationSuppRest::find()
-            ->select('supp_org_id')
-            ->where(['rest_org_id' => $this->user->organization_id, 'status' => 1])
-            ->column();
+        $organizationID = $this->user->organization_id;
+        if ($isUnconfirmedVendor) {
+            if (empty($post['order_id'])) {
+                throw new BadRequestHttpException('empty_param|order_id');
+            }
+            $order = Order::findOne(['id' => $post['order_id']]);
+            if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
+                $suppliers = [$this->user->organization_id];
+                $organizationID = $order->client_id;
+            } else {
+                throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+            }
+        } else {
+            $suppliers = RelationSuppRest::find()
+                ->select('supp_org_id')
+                ->where(['rest_org_id' => $this->user->organization_id, 'status' => 1])
+                ->column();
+        }
 
         $query = (new Query())
             ->distinct()
@@ -708,7 +766,6 @@ class OrderWebApi extends \api_web\components\WebApi
             ->leftJoin('mp_category', 'mp_category.id = category_id')
             ->where(['in', 'supp_org_id', $suppliers])
             ->column();
-
         $return = [];
         foreach ($query as $id) {
 
@@ -716,7 +773,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $return[9999] = [
                     'id' => (int)$id,
                     'name' => 'Без категории',
-                    'count_product' => MpCategory::getProductCountWithOutCategory(null, $this->user->organization_id)
+                    'count_product' => MpCategory::getProductCountWithOutCategory(null, $organizationID)
                 ];
                 continue;
             }
@@ -758,11 +815,12 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Отмена заказа
      * @param array $post
+     * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function cancel(array $post)
+    public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
@@ -787,7 +845,16 @@ class OrderWebApi extends \api_web\components\WebApi
         $t = \Yii::$app->db->beginTransaction();
         try {
 
-            $order->status = Order::STATUS_CANCELLED;
+            if ($isUnconfirmedVendor) {
+                $organizationID = $this->user->organization_id;
+                if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
+                    $order->status = Order::STATUS_REJECTED;
+                } else {
+                    throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+                }
+            } else {
+                $order->status = Order::STATUS_CANCELLED;
+            }
 
             if (!$order->validate() || !$order->save()) {
                 throw new ValidationException($order->getFirstErrors());
@@ -1019,6 +1086,24 @@ class OrderWebApi extends \api_web\components\WebApi
             return true;
         }
 
+        return false;
+    }
+
+
+    /**
+     * Доступ к изменению заказа
+     * @param int $orderID
+     * @param int $organizationID
+     * @param $status
+     * @return bool
+     */
+    private function checkUnconfirmedVendorAccess(int $orderID, int $organizationID, $status): bool
+    {
+        $order = Order::findOne(['id' => $orderID]);
+        $organization = Organization::findOne(['id' => $organizationID]);
+        if ($organization->type_id == Organization::TYPE_SUPPLIER && $organizationID == $order->vendor_id && ($status == User::STATUS_UNCONFIRMED_EMAIL || $organization->is_work == 0)) {
+            return true;
+        }
         return false;
     }
 }

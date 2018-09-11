@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
+use common\models\AllService;
 use common\models\CatalogBaseGoods;
 use common\models\MpCategory;
 use common\models\OrderContent;
@@ -417,6 +418,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
+            } else {
+                $search->service_id_excluded = [(AllService::findOne(['denom' => 'EDI']))->id];
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
@@ -554,6 +557,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistoryCount()
     {
+
         $result = (new Query())->from(Order::tableName())
             ->select(['status', 'COUNT(status) as count'])
             ->where([
@@ -561,6 +565,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 ['client_id' => $this->user->organization->id],
                 ['vendor_id' => $this->user->organization->id],
             ])
+            ->andWhere(['not in', 'service_id', [(AllService::findOne(['denom' => 'EDI']))->id]])
             ->groupBy('status')
             ->all();
 

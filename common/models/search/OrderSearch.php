@@ -6,6 +6,7 @@ use api\common\models\iiko\iikoWaybill;
 use api\common\models\one_s\OneSWaybill;
 use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
+use common\models\AllService;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -32,6 +33,7 @@ class OrderSearch extends Order
     public $docStatus;
     public $completion_date_to;
     public $service_id;
+    public $service_id_excluded = [];
 
     /**
      * @inheritdoc
@@ -221,6 +223,9 @@ class OrderSearch extends Order
          */
         if (!empty($this->service_id)) {
             $query->andFilterWhere(['service_id' => $this->service_id]);
+        }
+        if (!empty($this->service_id_excluded) && is_array($this->service_id_excluded)) {
+            $query->andWhere(['not in', 'service_id', $this->service_id_excluded]);
         }
 
         $dataProvider = new ActiveDataProvider([

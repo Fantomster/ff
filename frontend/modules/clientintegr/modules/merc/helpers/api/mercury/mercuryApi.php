@@ -274,7 +274,7 @@ class mercuryApi extends baseApi
 
             if ($status == 'COMPLETED') {
                 $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
-                (new VetDocumentsChangeList())->updateDocumentsList($doc);
+                (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
 
             } else {
                 $result = null;

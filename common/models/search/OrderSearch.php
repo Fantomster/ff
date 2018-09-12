@@ -225,7 +225,11 @@ class OrderSearch extends Order
             $query->andFilterWhere(['service_id' => $this->service_id]);
         }
         if (!empty($this->service_id_excluded) && is_array($this->service_id_excluded)) {
-            $query->andWhere(['not in', 'service_id', $this->service_id_excluded]);
+            $query->andWhere(
+                ['OR',
+                    ['not in', 'service_id', $this->service_id_excluded],
+                    ['service_id' => NULL]
+                ]);
         }
 
         $dataProvider = new ActiveDataProvider([

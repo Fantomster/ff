@@ -90,14 +90,14 @@ class MercVSDList extends MercDictConsumer
                     mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                     $error++;
                     if ($error == 3) {
-                        die('Error operation');
+                        throw new \Exception('Error operation');
                     }
                 }
             } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
-            die('Error operation');
+            throw new \Exception('Error operation');
         }
         $this->log("FIND: consumer_class_name = {$className}");
 

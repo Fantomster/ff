@@ -134,7 +134,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
-            die('Error operation');
+            throw new \Exception('Error operation');
         }
 
         $this->log("FIND: consumer_class_name = " . BaseStringHelper::basename(static::class));

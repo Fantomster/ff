@@ -240,7 +240,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010,
+     *                      "vendor_id": 3010,
      *                      "pagination":{
      *                          "page":1,
      *                          "page_size":12
@@ -276,7 +276,7 @@ class VendorController extends WebApiController
      *     description="Загрузка основного каталога на файловый сервер.
      * Ответ возвращает 20 строк файла, для предпросмотра, и выбора колонок
      * На этом этапе, в базе не хранится ничего, кроме названия файла
-     * cat_id = ID каталога в который происходит загрузка
+     * vendor_id = ID вендора каталога в который происходит загрузка
      * data = документ Excel в base64",
      *     produces={"application/json"},
      *     @SWG\Parameter(
@@ -288,7 +288,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010,
+     *                      "vendor_id": 3010,
      *                      "data": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
      *                  }
      *              )
@@ -396,7 +396,7 @@ class VendorController extends WebApiController
      *     tags={"Vendor/Catalog"},
      *     summary="Маппинг, валидация и импорт основного каталога",
      *     description="Метод Импортирует файл с сервера во временную таблицу БД, по правилам которые переданы в параметре mapping
-     * cat_id = ID каталога
+     * vendor_id = ID вендора
      * index_field = ключ поиска дублей
      * mapping = очередность колонок, при загрузке файла
      *
@@ -447,7 +447,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010,
+     *                      "vendor_id": 3010,
      *                      "index_field": "article",
      *                      "mapping": {1:"article", 2:"product", 3:"units", 4:"price", 5:"ed", 6:"other"}
      *                  }

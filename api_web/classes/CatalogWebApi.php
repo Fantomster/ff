@@ -300,11 +300,11 @@ class CatalogWebApi extends WebApi
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
 
-        $catalog = Catalog::findOne($request['cat_id']);
+        $catalog = Catalog::findOne(['supp_org_id' => $request['vendor_id']]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
         }

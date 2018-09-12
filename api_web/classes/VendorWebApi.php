@@ -487,22 +487,24 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadMainCatalog(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
+        $vendorID = $request['vendor_id'];
 
         if (empty($request['data'])) {
             throw new BadRequestHttpException('empty_param|data');
         }
 
-        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        $catalog = Catalog::findOne(['supp_org_id' => $vendorID, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
+        $catalogID = $catalog->id;
 
         //проверка нет ли уже загруженного временного каталога
         //если есть - удаляем
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalogID, 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
             CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
@@ -516,7 +518,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
                 Yii::$app->get('resourceManager')->save($file, Excel::excelTempFolder . DIRECTORY_SEPARATOR . $file->name);
                 $newTempCatalog = new CatalogTemp();
-                $newTempCatalog->cat_id = $request['cat_id'];
+                $newTempCatalog->cat_id = $catalogID;
                 $newTempCatalog->user_id = $this->user->id;
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
@@ -542,8 +544,8 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function importMainCatalog(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
 
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);

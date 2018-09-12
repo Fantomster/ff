@@ -42,10 +42,10 @@ class cerberApi extends baseApi
             return null;
         }
 
-        $enterprise = VetisRussianEnterprise::findOne(['uuid' => $UUID, 'active' => true, 'last' => 'true']);
+        $enterprise = VetisRussianEnterprise::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
 
         if (empty($enterprise)) {
-            $enterprise = VetisForeignEnterprise::findOne(['uuid' => $UUID, 'active' => true, 'last' => 'true']);
+            $enterprise = VetisForeignEnterprise::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
         }
 
         if (!empty($enterprise)) {
@@ -71,7 +71,7 @@ class cerberApi extends baseApi
     {
         VetisBusinessEntity::getUpdateData($this->org_id);
 
-        $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => 'true']);
+        $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
             return unserialize($business->data);
@@ -100,10 +100,10 @@ class cerberApi extends baseApi
             return null;
         }
 
-        $enterprise = VetisRussianEnterprise::findOne(['guid' => $GUID, 'active' => true, 'last' => 'true']);
+        $enterprise = VetisRussianEnterprise::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
 
         if (empty($enterprise)) {
-            $enterprise = VetisForeignEnterprise::findOne(['guid' => $GUID, 'active' => true, 'last' => 'true']);
+            $enterprise = VetisForeignEnterprise::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
         }
 
         if (!empty($enterprise)) {
@@ -130,7 +130,7 @@ class cerberApi extends baseApi
     {
         VetisBusinessEntity::getUpdateData($this->org_id);
 
-        $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => 'true']);
+        $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
             return unserialize($business->data);

@@ -13,11 +13,18 @@ class m180910_170840_db_columns_add_as_in_task_dev1803_1 extends Migration
         #table `order`
         $this->addColumn('{{%order}}', 'service_id', $this->integer(11));
         $this->addColumn('{{%order}}', 'status_updated_at', $this->timestamp());
-        $this->execute('ALTER TABLE `order` ADD COLUMN `edi_order` VARCHAR(45) NULL;');
+        $this->addColumn('{{%order}}', 'edi_order', $this->string(45)->defaultValue(null));
+        $this->addCommentOnColumn('{{%order}}', 'service_id', 'ID сервиса');
+        $this->addCommentOnColumn('{{%order}}', 'status_updated_at', 'Дата обновления статуса');
+        $this->addCommentOnColumn('{{%order}}', 'edi_order', 'Номер заказа в EDI');
         #table `order_content`
-        $this->execute('ALTER TABLE `order_content` ADD COLUMN `edi_ordersp` VARCHAR(45) NULL;');
-        $this->execute('ALTER TABLE `order_content` ADD COLUMN `merc_uuid` VARCHAR(36) NULL;');
+        $this->addColumn('{{%order_content}}', 'edi_ordersp', $this->string(45)->defaultValue(null));
+        $this->addColumn('{{%order_content}}', 'merc_uuid', $this->string(36)->defaultValue(null));
         $this->addColumn('{{%order_content}}', 'vat_product', $this->integer(11));
+        $this->addCommentOnColumn('{{%order_content}}', 'edi_ordersp', 'Имя файла ORDERSP который прилетает от поставщик');
+        $this->addCommentOnColumn('{{%order_content}}', 'merc_uuid', 'UUID ВСД сертификата');
+        $this->addCommentOnColumn('{{%order_content}}', 'vat_product', 'Ставка НДС');
+
     }
 
     public function safeDown()

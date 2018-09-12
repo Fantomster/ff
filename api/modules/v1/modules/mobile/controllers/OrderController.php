@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\OrderStatus;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
@@ -183,7 +184,7 @@ class OrderController extends ActiveController {
             }
             $newOrder = new \common\models\Order();
             $newOrder->load($post, 'Order');
-            $newOrder->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $newOrder->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $newOrder->currency_id = 1;
             if (!$newOrder->save()) {
                 echo json_encode(['Order' => $newOrder->getErrors()]);
@@ -232,7 +233,7 @@ class OrderController extends ActiveController {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }
 
-        if(($status <> $model->status) && ($model->status == Order::STATUS_DONE)) {
+        if(($status <> $model->status) && ($model->status == OrderStatus::STATUS_DONE)) {
             $currentUser = Yii::$app->user->getIdentity();
             $systemMessage = $model->client->name . ' получил заказ!';
             $model->actual_delivery = gmdate("Y-m-d H:i:s");
@@ -264,7 +265,7 @@ class OrderController extends ActiveController {
                 if (Yii::$app->request->post("comment")) {
                     $order->comment = Yii::$app->request->post("comment");
                 }
-                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? OrderStatus::STATUS_CANCELLED : OrderStatus::STATUS_REJECTED;
                 $systemMessage = $initiator->name . ' отменил заказ!';
                 $danger = true;
                 $order->save();
@@ -311,7 +312,7 @@ class OrderController extends ActiveController {
 
             if ($organizationType == Organization::TYPE_RESTAURANT && $order->status < 4) {
                 $systemMessage = $order->client->name . ' получил заказ!';
-                $order->status = Order::STATUS_DONE;
+                $order->status = OrderStatus::STATUS_DONE;
                 $order->actual_delivery = gmdate("Y-m-d H:i:s");
                 $this->sendOrderDone($order->createdBy, $order);
             }

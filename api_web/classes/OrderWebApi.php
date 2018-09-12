@@ -11,6 +11,7 @@ use common\models\CatalogBaseGoods;
 use common\models\Delivery;
 use common\models\MpCategory;
 use common\models\OrderContent;
+use common\models\OrderStatus;
 use common\models\RelationSuppRest;
 use common\models\Role;
 use common\models\search\OrderCatalogSearch;
@@ -73,7 +74,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
         //Проверим статус заказа
-        if (in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
+        if (in_array($order->status, [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED])) {
             throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
         }
         //Если сменили комментарий
@@ -131,10 +132,10 @@ class OrderWebApi extends \api_web\components\WebApi
                     if ($order->positionCount == 0) {
                         switch ($this->user->organization->type_id) {
                             case Organization::TYPE_SUPPLIER:
-                                $order->status = Order::STATUS_REJECTED;
+                                $order->status = OrderStatus::STATUS_REJECTED;
                                 break;
                             case Organization::TYPE_RESTAURANT:
-                                $order->status = Order::STATUS_CANCELLED;
+                                $order->status = OrderStatus::STATUS_CANCELLED;
                                 break;
                         }
 
@@ -531,7 +532,7 @@ class OrderWebApi extends \api_web\components\WebApi
              */
             foreach ($models as $model) {
 
-                if ($model->status == Order::STATUS_DONE) {
+                if ($model->status == OrderStatus::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
                     $date = $model->updated_at;
@@ -610,18 +611,18 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!empty($result)) {
             foreach ($result as $row) {
                 switch ($row['status']) {
-                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
                         $return['waiting'] += $row['count'];
                         break;
-                    case Order::STATUS_PROCESSING:
+                    case OrderStatus::STATUS_PROCESSING:
                         $return['processing'] += $row['count'];
                         break;
-                    case Order::STATUS_DONE:
+                    case OrderStatus::STATUS_DONE:
                         $return['success'] += $row['count'];
                         break;
-                    case Order::STATUS_CANCELLED:
-                    case Order::STATUS_REJECTED:
+                    case OrderStatus::STATUS_CANCELLED:
+                    case OrderStatus::STATUS_REJECTED:
                         $return['canceled'] += $row['count'];
                         break;
                 }
@@ -848,7 +849,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if ($order->status == Order::STATUS_CANCELLED) {
+        if ($order->status == OrderStatus::STATUS_CANCELLED) {
             throw new BadRequestHttpException("This order has been cancelled.");
         }
 
@@ -858,12 +859,12 @@ class OrderWebApi extends \api_web\components\WebApi
             if ($isUnconfirmedVendor) {
                 $organizationID = $this->user->organization_id;
                 if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
-                    $order->status = Order::STATUS_REJECTED;
+                    $order->status = OrderStatus::STATUS_REJECTED;
                 } else {
                     throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
                 }
             } else {
-                $order->status = Order::STATUS_CANCELLED;
+                $order->status = OrderStatus::STATUS_CANCELLED;
             }
 
             if (!$order->validate() || !$order->save()) {
@@ -952,13 +953,13 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if ($order->status == Order::STATUS_DONE) {
+        if ($order->status == OrderStatus::STATUS_DONE) {
             throw new BadRequestHttpException("This order has been completed.");
         }
 
         $t = \Yii::$app->db->beginTransaction();
         try {
-            $order->status = Order::STATUS_DONE;
+            $order->status = OrderStatus::STATUS_DONE;
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
             if ($order->validate()) {

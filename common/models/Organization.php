@@ -566,7 +566,7 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        return Order::find()->where(['client_id' => $this->id, 'status' => Order::STATUS_FORMING])->all();
+        return Order::find()->where(['client_id' => $this->id, 'status' => OrderStatus::STATUS_FORMING])->all();
     }
 
     /**
@@ -594,7 +594,7 @@ class Organization extends \yii\db\ActiveRecord
             case self::TYPE_RESTAURANT:
                 $result = Order::find()->where([
                         'client_id' => $this->id,
-                        'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                        'status' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
                 )->count();
                 break;
             case self::TYPE_SUPPLIER:
@@ -606,12 +606,12 @@ class Organization extends \yii\db\ActiveRecord
                         ->where([
                             'vendor_id' => $this->id,
                             "$maTable.manager_id" => $manager_id,
-                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                            'status' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
                         ->count();
                 } else {
                     $result = Order::find()->where([
                             'vendor_id' => $this->id,
-                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                            'status' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
                     )->count();
                 }
                 break;
@@ -932,7 +932,7 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id === self::TYPE_RESTAURANT) {
             return 0;
         }
-        return Order::find()->where(['vendor_id' => $this->id, 'status' => Order::STATUS_DONE])->count();
+        return Order::find()->where(['vendor_id' => $this->id, 'status' => OrderStatus::STATUS_DONE])->count();
     }
 
     public function getMarketGoodsCount()

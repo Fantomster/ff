@@ -591,7 +591,12 @@ class OrderWebApi extends \api_web\components\WebApi
                 ['client_id' => $this->user->organization->id],
                 ['vendor_id' => $this->user->organization->id],
             ])
-            ->andWhere(['not in', 'service_id', [(AllService::findOne(['denom' => 'EDI']))->id]])
+            ->andWhere(
+                ['OR',
+                    ['not in', 'service_id', [(AllService::findOne(['denom' => 'EDI']))->id]],
+                    ['service_id' => NULL]
+                ]
+            )
             ->groupBy('status')
             ->all();
 

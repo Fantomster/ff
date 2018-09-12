@@ -36,6 +36,11 @@ class MercStockEntryList extends MercDictConsumer
         if ($check == 9) {
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $this->org_id, 'store_id' => $this->data])->one();
             $this->data = json_decode(($this->queue->data_request ?? $this->data), true);
+            if(!isset($this->data))
+            {
+                $this->log('Not data for request'.PHP_EOL);
+                die('Not data for request'.PHP_EOL);
+            }
         } else {
             $this->log('Dictionaries are currently being updated'.PHP_EOL);
             die('Dictionaries are currently being updated'.PHP_EOL);
@@ -46,7 +51,7 @@ class MercStockEntryList extends MercDictConsumer
     {
         $className = BaseStringHelper::basename(static::class);
         $this->init();
-        $count = $this->request['listOptions']['offset'];
+        $count = $this->data['listOptions']['offset'];
         $this->log('Load' . PHP_EOL);
         $error = 0;
         $list = null;

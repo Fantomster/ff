@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\OrderStatus;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
@@ -157,9 +158,9 @@ class OrderContentController extends ActiveController {
 
         $initialQuantity = $product->initial_quantity;
         $allowedStatuses = [
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_PROCESSING
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            OrderStatus::STATUS_PROCESSING
         ];
         $quantityChanged = isset($position['quantity']) ? ($position['quantity']!= $product->quantity) : false;
         $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
@@ -190,7 +191,7 @@ class OrderContentController extends ActiveController {
                     }
                 }
             }
-            if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
+            if ($quantityChanged && ($order->status == OrderStatus::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                 $product->initial_quantity = $initialQuantity;
             }
             if ($product->quantity == 0) {
@@ -201,11 +202,11 @@ class OrderContentController extends ActiveController {
         }
         
         if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = Order::STATUS_REJECTED;
+                $order->status = OrderStatus::STATUS_REJECTED;
                 $orderChanged = -1;
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = Order::STATUS_CANCELLED;
+                $order->status = OrderStatus::STATUS_CANCELLED;
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
@@ -218,7 +219,7 @@ class OrderContentController extends ActiveController {
                 }
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
+                $order->status = ($order->status === OrderStatus::STATUS_PROCESSING) ? OrderStatus::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->recipientsList as $recipient) {
@@ -233,7 +234,7 @@ class OrderContentController extends ActiveController {
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = ($order->status == Order::STATUS_PROCESSING)? Order::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
+                $order->status = ($order->status == OrderStatus::STATUS_PROCESSING)? OrderStatus::STATUS_PROCESSING : (($order->status >=4 && $order->status <=6) ? $order->status : OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR);
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();

@@ -16,6 +16,7 @@
 <br>
 <?php
 use \common\models\Order;
+use common\models\OrderStatus;
 use yii\web\View;
 use yii\helpers\Url;
 
@@ -94,18 +95,18 @@ $columns = [
         'attribute' => 'status',
         'value' => function($data) {
             switch ($data->status) {
-                case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                     $statusClass = 'new';
                     break;
-                case Order::STATUS_PROCESSING:
+                case OrderStatus::STATUS_PROCESSING:
                     $statusClass = 'processing';
                     break;
-                case Order::STATUS_DONE:
+                case OrderStatus::STATUS_DONE:
                     $statusClass = 'done';
                     break;
-                case Order::STATUS_REJECTED:
-                case Order::STATUS_CANCELLED:
+                case OrderStatus::STATUS_REJECTED:
+                case OrderStatus::STATUS_CANCELLED:
                     $statusClass = 'cancelled';
                     break;
             }

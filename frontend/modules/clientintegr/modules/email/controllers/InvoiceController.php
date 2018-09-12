@@ -7,6 +7,7 @@ use common\models\IntegrationInvoice;
 use common\models\IntegrationInvoiceContent;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OrderStatus;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use common\models\User;
@@ -77,7 +78,7 @@ class InvoiceController extends Controller
         $params['OrderSearch']['client_id'] = $user->organization_id;
         $params['OrderSearch']['client_search_id'] = $user->organization_id;
         $searchModel = new OrderSearch();
-        $searchModel->status_array = [Order::STATUS_DONE, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
+        $searchModel->status_array = [OrderStatus::STATUS_DONE, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->pageSize = 5;
 
@@ -119,7 +120,7 @@ class InvoiceController extends Controller
             if (isset($params['order_id'])) {
                 $order_model = Order::findOne($params['order_id']);
                 if ($order_model) {
-                    $order_model->status = Order::STATUS_CANCELLED;
+                    $order_model->status = OrderStatus::STATUS_CANCELLED;
                     $order_model->invoice_relation = $invoice->id;
                     $order_model->save();
                 }
@@ -148,7 +149,7 @@ class InvoiceController extends Controller
             $order->client_id = $user->organization_id;
             $order->vendor_id = $vendor->id;
             $order->created_by_id = $user->id;
-            $order->status = Order::STATUS_DONE;
+            $order->status = OrderStatus::STATUS_DONE;
             $order->total_price = 0;
             $order->currency_id = $vendor->baseCatalog->currency_id;
             if (!$order->save()) {

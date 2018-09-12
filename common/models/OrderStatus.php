@@ -24,7 +24,6 @@ class OrderStatus extends ActiveRecord
     const STATUS_FORMING = 7;
     const STATUS_EDO_SENT_BY_VENDOR = 8;
     const STATUS_EDO_ACCEPTANCE_FINISHED = 9;
-    const STATUS_NEW = 10;
 
     public static function tableName()
     {

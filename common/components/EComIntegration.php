@@ -11,6 +11,7 @@ use common\models\EdiOrderContent;
 use common\models\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OrderStatus;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
@@ -265,7 +266,7 @@ class EComIntegration
             OrderController::sendOrderCanceled($order->client, $order);
             $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
             OrderController::sendSystemMessage($user, $order->id, $message);
-            $order->status = Order::STATUS_REJECTED;
+            $order->status = OrderStatus::STATUS_REJECTED;
             $order->save();
             return true;
         }
@@ -367,7 +368,7 @@ class EComIntegration
                 }
             }
         }
-        Yii::$app->db->createCommand()->update('order', ['status' => Order::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
+        Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
         $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
         if ($ediOrder) {
             $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';

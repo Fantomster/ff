@@ -185,7 +185,7 @@ class Franchisee extends \yii\db\ActiveRecord {
                 ->leftJoin($faTable, "$ordTable.vendor_id = $faTable.organization_id")
                 ->leftJoin($rsrTable, "$ordTable.vendor_id = $rsrTable.supp_org_id")
                 ->leftJoin($biTable, "$ordTable.vendor_id = $biTable.organization_id")
-                ->where(["$faTable.franchisee_id" => $this->id, "$ordTable.status" => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_PROCESSING, Order::STATUS_DONE]]);
+                ->where(["$faTable.franchisee_id" => $this->id, "$ordTable.status" => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_PROCESSING, OrderStatus::STATUS_DONE]]);
 
         if($currencyId){
             $orders = $orders->andWhere(["currency_id"=>$currencyId]);

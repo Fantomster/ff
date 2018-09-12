@@ -8,6 +8,7 @@
 
 namespace console\modules\daemons\classes;
 
+use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVisits;
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\MercDictConsumer;

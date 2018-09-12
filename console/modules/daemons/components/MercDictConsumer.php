@@ -129,7 +129,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     throw new \Exception('Error operation');
                 }
             }
-        } while ($list->total > ($list->count + $list->offset));
+        } while (isset($list->total, $list->count, $list->offset) && ($list->total > ($list->count + $list->offset)));
 
         $this->log("FIND: consumer_class_name = ".BaseStringHelper::basename(static::class));
 

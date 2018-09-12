@@ -38,14 +38,13 @@ class MercVSDList extends MercDictConsumer
         if ($check == 9) {
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data])->one();
             $this->data = json_decode($this->queue->data_request, true);
-            if(!isset($this->data))
-            {
-                $this->log('Not data for request'.PHP_EOL);
-                die('Not data for request'.PHP_EOL);
+            if (!isset($this->data)) {
+                $this->log('Not data for request' . PHP_EOL);
+                die('Not data for request' . PHP_EOL);
             }
         } else {
-            $this->log('Dictionaries are currently being updated'.PHP_EOL);
-            die('Dictionaries are currently being updated'.PHP_EOL);
+            $this->log('Dictionaries are currently being updated' . PHP_EOL);
+            die('Dictionaries are currently being updated' . PHP_EOL);
         }
     }
 
@@ -61,40 +60,45 @@ class MercVSDList extends MercDictConsumer
         $vsd->org_id = $this->org_id;
         $api = mercuryApi::getInstance($this->org_id);
         $api->setEnterpriseGuid($this->data['enterpriseGuid']);
-        do {
-            try {
-                //Записываем в базу данные о текущем шаге
-                $this->data['listOptions'] = $this->data['listOptions'];
-                $this->queue->data_request = json_encode($this->data);
-                $this->queue->save();
-                //Выполняем запрос и обработку полученных данных
-                $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
-                if($result->application->status == mercLog::REJECTED) {
-                    sleep(5);
-                    continue;
-                }
-                $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
+        try {
+            do {
+                try {
+                    //Записываем в базу данные о текущем шаге
+                    $this->data['listOptions'] = $this->data['listOptions'];
+                    $this->queue->data_request = json_encode($this->data);
+                    $this->queue->save();
+                    //Выполняем запрос и обработку полученных данных
+                    $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
+                    if ($result->application->status == mercLog::REJECTED) {
+                        sleep(5);
+                        continue;
+                    }
+                    $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
-                $count += $vetDocumentList->count;
-                $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+                    $count += $vetDocumentList->count;
+                    $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
 
-                if ($vetDocumentList->count > 0) {
-                    $vsd->updateDocumentsList($vetDocumentList->vetDocument);
-                }
+                    if ($vetDocumentList->count > 0) {
+                        $vsd->updateDocumentsList($vetDocumentList->vetDocument);
+                    }
 
-                if ($vetDocumentList->count < $vetDocumentList->total) {
-                    $this->data['listOptions']['offset'] += $vetDocumentList->count;
+                    if ($vetDocumentList->count < $vetDocumentList->total) {
+                        $this->data['listOptions']['offset'] += $vetDocumentList->count;
+                    }
+                } catch (\Throwable $e) {
+                    $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+                    mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                    $error++;
+                    if ($error == 3) {
+                        die('Error operation');
+                    }
                 }
-            } catch (\Throwable $e) {
-                $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-                mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
-                $error++;
-                if ($error == 3) {
-                    die('Error operation');
-                }
-            }
-        } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
-
+            } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
+        } catch (\Throwable $e) {
+            $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+            mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+            die('Error operation');
+        }
         $this->log("FIND: consumer_class_name = {$className}");
 
         MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_VSD_LIST, $this->data['enterpriseGuid']);

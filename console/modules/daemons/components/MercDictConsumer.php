@@ -97,41 +97,47 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         $this->log('Load' . PHP_EOL);
         $error = 0;
         $list = null;
-        do {
-            try {
-                //Записываем в базу данные о текущем шаге
-                $this->data['request'] = json_encode($this->request);
-                $this->queue->data_request = json_encode($this->data);
-                $this->queue->save();
+        try {
+            do {
+                try {
+                    //Записываем в базу данные о текущем шаге
+                    $this->data['request'] = json_encode($this->request);
+                    $this->queue->data_request = json_encode($this->data);
+                    $this->queue->save();
 
-                //Выполняем запрос и обработку полученных данных
-                $response = $this->instance->sendRequest($this->method, $this->request);
-                $list = $response->{$this->listName};
-                $count += $list->count;
-                $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
-                echo 'Load ' . $count . ' / ' . $list->total . PHP_EOL;
+                    //Выполняем запрос и обработку полученных данных
+                    $response = $this->instance->sendRequest($this->method, $this->request);
+                    $list = $response->{$this->listName};
+                    $count += $list->count;
+                    $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
+                    echo 'Load ' . $count . ' / ' . $list->total . PHP_EOL;
 
-                if ($list->count > 0) {
-                    $result = $this->saveList($list->{$this->listItemName});
-                    if (!empty($result)) {
-                        $this->log('ERROR ' . json_encode($result, true) . PHP_EOL);
+                    if ($list->count > 0) {
+                        $result = $this->saveList($list->{$this->listItemName});
+                        if (!empty($result)) {
+                            $this->log('ERROR ' . json_encode($result, true) . PHP_EOL);
+                        }
+                    }
+
+                    if ($list->count < $list->total) {
+                        $this->request['listOptions']['offset'] += $list->count;
+                    }
+                } catch (\Throwable $e) {
+                    $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+                    mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                    $error++;
+                    if ($error == 3) {
+                        throw new \Exception('Error operation');
                     }
                 }
+            } while ($list->total > ($list->count + $list->offset));
+        } catch (\Throwable $e) {
+            $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+            mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+            throw new \Exception('Error operation');
+        }
 
-                if ($list->count < $list->total) {
-                    $this->request['listOptions']['offset'] += $list->count;
-                }
-            } catch (\Throwable $e) {
-                $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-                mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
-                $error++;
-                if ($error == 3) {
-                    throw new \Exception('Error operation');
-                }
-            }
-        } while (isset($list->total, $list->count, $list->offset) && ($list->total > ($list->count + $list->offset)));
-
-        $this->log("FIND: consumer_class_name = ".BaseStringHelper::basename(static::class));
+        $this->log("FIND: consumer_class_name = " . BaseStringHelper::basename(static::class));
 
         $this->queue->data_request = new Expression('NULL');
         $this->queue->save();

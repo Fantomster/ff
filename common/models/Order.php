@@ -11,7 +11,6 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use api\common\models\iiko\iikoDicconst;
 
-
 /**
  * This is the model class for table "order".
  *

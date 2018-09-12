@@ -113,10 +113,10 @@ class cerberApi extends baseApi
 
             $client = $this->getSoapClient('cerber');
 
-            $request = new getEnterpriseByUuidRequest();
+            $request = new getEnterpriseByGuidRequest();
             $request->guid = $GUID;
 
-            $enterprise = ($client->GetEnterpriseByUuid($request))->enterprise;
+            $enterprise = ($client->GetEnterpriseByGuid($request))->enterprise;
 
             return $enterprise;
     }
@@ -137,10 +137,10 @@ class cerberApi extends baseApi
         }
 
             $client = $this->getSoapClient('cerber');
-            $request = new getBusinessEntityByUuidRequest();
+            $request = new getBusinessEntityByGuidRequest();
             $request->guid = $GUID;
 
-            $business = ($client->GetBusinessEntityByUuid($request))->businessEntity;
+            $business = ($client->GetBusinessEntityByGuid($request))->businessEntity;
 
             return $business;
     }

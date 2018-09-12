@@ -249,10 +249,16 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
             }
             else {
-                $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+                if(isset($hc->owner)) {
+                    $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+                }
+                else {
+                    return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+                }
             }
         }catch (\SoapFault $e)
         {
+            var_dump($e->getMessage()); die();
             return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
         }
         return (['result' => true, 'name' => $hc->name.', ИНН:'.$hc->inn, 'uuid' => $hc->uuid]);

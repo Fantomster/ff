@@ -165,7 +165,9 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         /** @var $currentUser User */
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUserRole = User::findOne(Yii::$app->user->id);
-        if ($currentUserRole->role_id === Role::ROLE_RESTAURANT_MANAGER) {
+        /**@var $roles array Available roles ids*/
+        $roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_FRANCHISEE_LEADER];
+        if (in_array($currentUserRole->role_id, $roles)) {
             $arOrgsObj = $currentUser->getAllOrganization();
             $provider = new ArrayDataProvider([
                 'allModels'  => $arOrgsObj,

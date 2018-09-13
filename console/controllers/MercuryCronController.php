@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercPconst;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
@@ -15,6 +16,7 @@ use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
+use console\modules\daemons\classes\IikoProductsSync;
 use console\modules\daemons\classes\MercBusinessEntityList;
 use console\modules\daemons\classes\MercCountryList;
 use console\modules\daemons\classes\MercForeignEnterpriseList;
@@ -118,6 +120,11 @@ class MercuryCronController extends Controller
         echo "GET MercStockEntryList".PHP_EOL;
         MercStockEntry::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
+    }
+
+    public function actionTest3()
+    {
+        IikoProductsSync::getUpdateData(5144);
     }
 
     public function actionTestOne()

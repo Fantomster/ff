@@ -10,6 +10,7 @@ namespace console\modules\daemons\components;
 
 use api\common\models\iiko\iikoDic;
 use api\common\models\iiko\iikoDictype;
+use api\common\models\RabbitQueues;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 
@@ -73,4 +74,37 @@ class IikoSyncConsumer extends AbstractConsumer
         }
     }
 
+
+    /**
+     * Запрос обновлений справочника
+     */
+    public static function getUpdateData($org_id)
+    {
+        $arClassName = explode("\\",__CLASS__);
+        $className = array_pop($arClassName);
+        try {
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => $className, 'organization_id' => $org_id])->one();
+            if($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = $className;
+                $queue->organization_id = $org_id;
+            }
+
+            if (!empty($queue->organization_id)) {
+                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+            }
+            else {
+                $queueName = $queue->consumer_class_name;
+            }
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue('');
+
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage());
+        }
+    }
 }

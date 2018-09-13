@@ -9,6 +9,7 @@
 namespace console\modules\daemons\classes;
 
 use api\common\models\iiko\iikoDictype;
+use api\common\models\RabbitQueues;
 use api_web\exceptions\ValidationException;
 use common\models\OuterProduct;
 use common\models\OuterUnit;
@@ -19,7 +20,7 @@ use yii\db\Expression;
 
 class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
 {
-    /**@var $items array*/
+    /**@var $items array */
     private $items;
 
     public $updates_uuid = [];
@@ -40,79 +41,12 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
     }
 
     /**
-     * Обновление продукта
-     * @param $uuid
-     * @param $item
-     * @return bool
-     * @throws \Exception
-     */
-    private function updateProduct($uuid, $item)
-    {
-        $transaction = \Yii::$app->get('db_api')->beginTransaction();
-        try {
-            $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId]);
-            //Если нет товара у нас, создаем
-            if (empty($model)) {
-                $model = new OuterProduct(['outer_uid' => $uuid]);
-                $model->org_id = $this->orgId;
-            }
-            //Родительская категория если есть
-            if (isset($item['parentId']) && !empty($item['parentId'])) {
-                $model->parent_uid = $item['parentId'];
-            }
-            if (!empty($item['name'])) {
-                $model->name = $item['name'];
-            }
-//            if (!empty($item['productType'])) {
-//                $model->product_type = $item['productType'];
-//            }
-
-            if (!empty($item['mainUnit'])) {
-                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => $this->serviceId]);
-                if(!$obUnitModel){
-                    $obUnitModel = new OuterUnit();
-                    $obUnitModel->name = $item['mainUnit'];
-                    $obUnitModel->service_id = $this->serviceId;
-                    if($obUnitModel->validate()){
-                        $obUnitModel->save();
-                    }
-                }
-                $model->outer_unit_id = $obUnitModel->id;
-            }
-//            if (!empty($item['num'])) {
-//                $model->num = $item['num'];
-//            }
-//            if (!empty($item['cookingPlaceType'])) {
-//                $model->cooking_place_type = $item['cookingPlaceType'];
-//            }
-//            if (isset($item['containers']) && !empty($item['containers'])) {
-//                $model->containers = \json_encode($item['containers']);
-//            }
-
-            //Валидируем сохраняем
-            if ($model->attributes !== $model->oldAttributes) {
-                $model->is_deleted = 0;
-                $model->save(false);
-            } else {
-                $this->updates_uuid[] = $uuid;
-            }
-
-            $transaction->commit();
-            return true;
-        } catch (\Exception $e) {
-            $transaction->roolBack();
-            throw $e;
-        }
-    }
-
-    /**
      * Синхронизация продуктов
      * @return int
      * @throws ValidationException
      */
     protected function goods()
     {
-
         $this->items = iikoApi::getInstance($this->orgId)->getProducts();
         $this->log($this->items);
 //        exit();
@@ -142,5 +76,60 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
         }
         //Обновляем колличество полученных объектов
         return OuterProduct::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId])->count();
+    }
+
+
+    /**
+     * Обновление продукта
+     * @param $uuid
+     * @param $item
+     * @return bool
+     * @throws \Exception
+     */
+    private function updateProduct($uuid, $item)
+    {
+        $transaction = \Yii::$app->get('db_api')->beginTransaction();
+        try {
+            $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId]);
+            //Если нет товара у нас, создаем
+            if (empty($model)) {
+                $model = new OuterProduct(['outer_uid' => $uuid]);
+                $model->org_id = $this->orgId;
+            }
+            //Родительская категория если есть
+            if (isset($item['parentId']) && !empty($item['parentId'])) {
+                $model->parent_uid = $item['parentId'];
+            }
+            if (!empty($item['name'])) {
+                $model->name = $item['name'];
+            }
+
+            if (!empty($item['mainUnit'])) {
+                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => $this->serviceId]);
+                if (!$obUnitModel) {
+                    $obUnitModel = new OuterUnit();
+                    $obUnitModel->name = $item['mainUnit'];
+                    $obUnitModel->service_id = $this->serviceId;
+                    if ($obUnitModel->validate()) {
+                        $obUnitModel->save();
+                    }
+                }
+                $model->outer_unit_id = $obUnitModel->id;
+            }
+
+            //Валидируем сохраняем
+            if ($model->attributes !== $model->oldAttributes) {
+                $model->is_deleted = 0;
+                $model->save(false);
+            } else {
+                $this->updates_uuid[] = $uuid;
+            }
+
+            $transaction->commit();
+            return true;
+        } catch (\Exception $e) {
+            $transaction->roolBack();
+            throw $e;
+        }
     }
 }

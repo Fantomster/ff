@@ -29,6 +29,10 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
 
     public $serviceId = 2;
 
+    public static $timeout = 600;
+
+    public static $timeoutExecuting = 300;
+
     public function getData()
     {
         $model = iikoDictype::findOne(['method' => 'goods']);
@@ -53,7 +57,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
-            OuterProduct::updateAll(['is_deleted' => 1], ['org_id' => $this->orgId]);
+            OuterProduct::updateAll(['is_deleted' => 1], ['org_id' => $this->orgId, 'service_id' => $this->serviceId]);
 
             $generator = function ($items) {
                 foreach ($items as &$item) {
@@ -70,12 +74,14 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
                     ->update(OuterProduct::tableName(), [
                         'is_deleted' => 0,
                         'updated_at' => new Expression('NOW()')
-                    ], ['outer_uid' => $this->updates_uuid])
+                    ], ['outer_uid' => $this->updates_uuid,
+                        'service_id' => $this->serviceId,
+                        ])
                     ->execute();
             }
         }
         //Обновляем колличество полученных объектов
-        return OuterProduct::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId])->count();
+        return OuterProduct::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => $this->serviceId])->count();
     }
 
 
@@ -90,11 +96,12 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
     {
         $transaction = \Yii::$app->get('db_api')->beginTransaction();
         try {
-            $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId]);
+            $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId, 'service_id' => $this->serviceId,]);
             //Если нет товара у нас, создаем
             if (empty($model)) {
                 $model = new OuterProduct(['outer_uid' => $uuid]);
                 $model->org_id = $this->orgId;
+                $model->service_id = $this->serviceId;
             }
             //Родительская категория если есть
             if (isset($item['parentId']) && !empty($item['parentId'])) {

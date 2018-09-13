@@ -16,7 +16,7 @@ use yii\web\BadRequestHttpException;
 
 class IikoSyncConsumer extends AbstractConsumer
 {
-    /**@var $orgId int*/
+    /**@var $orgId int */
     public $orgId;
 
     public function __construct($orgId = null)
@@ -33,9 +33,6 @@ class IikoSyncConsumer extends AbstractConsumer
      */
     public function run($type)
     {
-        /**
-         * @var $transaction Transaction
-         */
         $model = iikoDictype::findOne($type);
 
         if (empty($model)) {
@@ -77,25 +74,25 @@ class IikoSyncConsumer extends AbstractConsumer
 
     /**
      * Запрос обновлений справочника
+     * @param integer $org_id
      */
-    public static function getUpdateData($org_id)
+    public static function getUpdateData($org_id) : void
     {
-        $arClassName = explode("\\",__CLASS__);
+        $arClassName = explode("\\", static::class);
         $className = array_pop($arClassName);
         try {
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => $className, 'organization_id' => $org_id])->one();
-            if($queue == null) {
+            if ($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = $className;
                 $queue->organization_id = $org_id;
             }
 
+            $queueName = $queue->consumer_class_name;
+
             if (!empty($queue->organization_id)) {
-                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            }
-            else {
-                $queueName = $queue->consumer_class_name;
+                $queueName .= '_' . $queue->organization_id;
             }
 
             //ставим задачу в очередь

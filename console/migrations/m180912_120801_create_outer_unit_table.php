@@ -21,7 +21,7 @@ class m180912_120801_create_outer_unit_table extends Migration
             '{{%outer_unit}}',
             [
                 'id'=> $this->primaryKey(11),
-                'outer_uid'=> $this->string(45)->null()->comment('???'),
+                'outer_uid'=> $this->string(45)->null()->comment('Внешний уникальный ID'),
                 'service_id'=> $this->tinyInteger()->null()->comment('ID Сервиса'),
                 'name' => $this->string()->null()->comment('Название продукта'),
                 'iso_code' => $this->string(12)->null()->comment('ISO код'),

@@ -11,16 +11,16 @@ namespace api_web\controllers;
 use api_web\components\WebApiController;
 
 /**
- * Class CartController
+ * Class RabbitController
  * @package api_web\controllers
  */
 class RabbitController extends WebApiController
 {
     /**
-     * @SWG\Post(path="/cart/add",
-     *     tags={"Cart"},
-     *     summary="Добавить/Удалить товар в корзине",
-     *     description="Добавляем или удаляем товар в корзине с помощью параметра quantity",
+     * @SWG\Post(path="/rabbit/add-to-queue",
+     *     tags={"Rabbit"},
+     *     summary="Добавить сообщение в очередь",
+     *     description="Добавить сообщение в очередь",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -30,14 +30,16 @@ class RabbitController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={{"product_id":1, "quantity":10}}
+     *                  default={{"queue":"IikoProductsSync", "org_id":5144}}
      *              )
      *         )
      *     ),
      *     @SWG\Response(
      *         response = 200,
      *         description = "success",
-     *         @SWG\Schema(ref="#/definitions/CartItems"),
+     *         @SWG\Schema(
+     *            default={"result":true}
+     *         )
      *     ),
      *     @SWG\Response(
      *         response = 400,
@@ -51,6 +53,6 @@ class RabbitController extends WebApiController
      */
     public function actionAddToQueue()
     {
-        $this->response = $this->container->get('RabbitWebApi')->dispatch($this->request);
+        $this->response = $this->container->get('RabbitWebApi')->addToQueue($this->request);
     }
 }

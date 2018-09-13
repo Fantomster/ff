@@ -413,7 +413,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->vat = $taxVat;
                 $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
                 $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $this->org]);
-                $wdmodel->org = !is_null($obConstModel) ? $obConstModel->value : $this->org;
+                $wdmodel->org = isset($obConstModel->value) ? $obConstModel->value : $this->org;
                 $wdmodel->koef = 1;
                 // New check mapping
                 $ch = AllMaps::find()

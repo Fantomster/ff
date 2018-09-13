@@ -217,28 +217,8 @@ class AllMaps extends \yii\db\ActiveRecord
         }
     }
 
-    /*    public function beforeValidate() {
-
-            if (parent::beforeValidate()) {
-                $this->koef = 0 + str_replace(',', '.', $this->koef);
-
-                return true;
-            }
-            return false;
-        }
-    */
-
-    /*
-        public function afterSave($insert, $changedAttributes) {
-            parent::afterSave($insert, $changedAttributes);
-
-
-        }
-    */
-
     public static function getDb()
     {
         return \Yii::$app->db_api;
     }
-
 }

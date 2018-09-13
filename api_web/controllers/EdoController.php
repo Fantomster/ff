@@ -293,8 +293,6 @@ class EdoController extends WebApiController
         $this->response = $this->container->get('EdoWebApi')->getOrderInfo($this->request);
     }
 
-
-
     /**
      * @SWG\Post(path="/edo/accept-products",
      *     tags={"Edo"},
@@ -337,6 +335,50 @@ class EdoController extends WebApiController
     public function actionAcceptProducts()
     {
         $this->response = $this->container->get('EdoWebApi')->acceptProducts($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edo/finish-order",
+     *     tags={"Edo"},
+     *     summary="Завершение заказа",
+     *     description="Завершение заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionFinishOrder()
+    {
+        $this->response = $this->container->get('EdoWebApi')->finishOrder($this->request);
     }
 
 }

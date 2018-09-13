@@ -101,4 +101,62 @@ class EdoWebApi extends WebApi
         ];
     }
 
+    /**
+     * Количество заказов в разных статусах
+     * @return array
+     */
+    public function getHistoryCount()
+    {
+
+        $result = (new Query())->from(Order::tableName())
+            ->select(['status', 'COUNT(status) as count'])
+            ->where([
+                'or',
+                ['client_id' => $this->user->organization->id],
+                ['vendor_id' => $this->user->organization->id],
+            ])
+            ->andWhere(['service_id' => (AllService::findOne(['denom' => 'EDI']))->id])
+            ->groupBy('status')
+            ->all();
+
+        $return = [
+            'waiting' => 0,
+            'processing' => 0,
+            'sent_by_vendor' => 0,
+            'acceptance_finished' => 0,
+            'success' => 0,
+            'canceled' => 0
+        ];
+
+        if (!empty($result)) {
+            foreach ($result as $row) {
+                switch ($row['status']) {
+                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        $return['waiting'] += $row['count'];
+                        break;
+                    case OrderStatus::STATUS_PROCESSING:
+                        $return['processing'] += $row['count'];
+                        break;
+                    case OrderStatus::STATUS_EDO_SENT_BY_VENDOR:
+                        $return['sent_by_vendor'] += $row['count'];
+                        break;
+                    case OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED:
+                        $return['acceptance_finished'] += $row['count'];
+                        break;
+                    case OrderStatus::STATUS_DONE:
+                        $return['success'] += $row['count'];
+                        break;
+                    case OrderStatus::STATUS_CANCELLED:
+                    case OrderStatus::STATUS_REJECTED:
+                        $return['canceled'] += $row['count'];
+                        break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+
 }

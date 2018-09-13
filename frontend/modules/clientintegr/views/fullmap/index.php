@@ -335,7 +335,7 @@ $this->registerJs(
                         <?php echo Html::label('Склад:','store_set');?>
                         <?php echo Html::dropDownList('store_set', null, $stores,['class' => 'form-control', 'style'=>'width:30%', 'id' => 'store_set']); ?>
                         <?php echo Html::label('Коэф:','koef_set');?>
-                        <?php echo  Html::textInput("koef_set",'',['class' => 'form-control','style'=>'width:15%;', 'id' => 'koef_set'])?>
+                        <?php echo  Html::textInput("koef_set",'',['class' => 'form-control','style'=>'width:15%;', 'id' => 'koef_set', 'readonly'=>($searchModel->service_id == 2 && $mainOrg != $client->id)])?>
                         <?php echo Html::label('НДС:','vat_set');?>
                         <?php echo Html::dropDownList('vat_set', null,[-1 => 'Нет', 0 => '0%', 1000 =>'10%', 1800 => '18%'],
                             ['class' => 'form-control', 'style'=>'width:15%', 'id' => 'vat_set']); ?>
@@ -501,15 +501,15 @@ $this->registerJs(
                                 [
                                     'class' => 'kartik\grid\EditableColumn',
                                     'attribute' => 'pdenom',
-                                    //       'value' => function ($model) {
-                                    //       $model->pdenom = $model->product->denom;
-                                    //       return $model->pdenom;
-                                    //       },
+                                    'value' => function ($model) {
+                                    return $model['pdenom'] ?? 'Не задано';
+                                           },
                                     'label' => Yii::t('message', 'frontend.fullmap.index.product_name_service', ['ru'=>'Название продукта']),
                                     //  'pageSummary' => 'Total',
                                     'vAlign' => 'middle',
                                     'width' => '210px',
                                     'refreshGrid' => true,
+                                    'readonly' => ($searchModel->service_id == 2 && $mainOrg != $client->id),
 
                                     'editableOptions' => [
                                         'asPopover' => true,
@@ -568,6 +568,10 @@ $this->registerJs(
                                     'class'=>'kartik\grid\EditableColumn',
                                     'attribute'=>'koef',
                                     'refreshGrid' => true,
+                                    /*'value' => function ($model) {
+                                        return $model['koef'] ?? 'Не задано';
+                                    },*/
+                                    'readonly' => ($searchModel->service_id == 2 && $mainOrg != $client->id),
                                     'editableOptions'=>[
                                         'name' => 'koef',
                                         'asPopover' => true,

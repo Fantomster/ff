@@ -69,7 +69,7 @@ class iikoDicconst extends \yii\db\ActiveRecord
     public function getPconstValue()
     {
         $pConst = iikoPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
-        $res = (!empty($pConst)) ? $pConst->value : $this->def_value;
+        $res = (isset($pConst->value)) ? $pConst->value : $this->def_value;
         if ($pConst == 'taxVat') {
             $res = $res / 100;
         }
@@ -81,7 +81,7 @@ class iikoDicconst extends \yii\db\ActiveRecord
         $model = self::findOne(['denom' => $denom]);
         if ($model) {
             $pConst = iikoPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
-            if (!empty($pConst)) {
+            if (!isset($pConst->value)) {
                 return $pConst->value;
             } else {
                 throw new \Exception('Не заполнено свойство в настройках ' . $denom);

@@ -76,12 +76,12 @@ class iikoDicconst extends \yii\db\ActiveRecord
         return $res;
     }
 
-    public static function getSetting($denom)
+    public static function getSetting($denom, $orgId = null)
     {
         $model = self::findOne(['denom' => $denom]);
         if ($model) {
-            $pConst = iikoPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
-            if (!isset($pConst->value)) {
+            $pConst = iikoPconst::findOne(['const_id' => $model->id, 'org' => $orgId ?? Yii::$app->user->identity->organization_id]);
+            if (!empty($pConst)) {
                 return $pConst->value;
             } else {
                 throw new \Exception('Не заполнено свойство в настройках ' . $denom);

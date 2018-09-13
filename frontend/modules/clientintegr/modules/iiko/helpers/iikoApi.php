@@ -18,14 +18,15 @@ class iikoApi
 
     protected static $_instance;
 
-    public static function getInstance()
+    public static function getInstance($orgId = null)
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
-            self::$_instance->host = iikoDicconst::getSetting('URL');
-            self::$_instance->login = iikoDicconst::getSetting('auth_login');
-            self::$_instance->pass = iikoDicconst::getSetting('auth_password');
+            self::$_instance->host = iikoDicconst::getSetting('URL', $orgId);
+            self::$_instance->login = iikoDicconst::getSetting('auth_login', $orgId);
+            self::$_instance->pass = iikoDicconst::getSetting('auth_password', $orgId);
         }
+
         return self::$_instance;
     }
 
@@ -55,7 +56,7 @@ class iikoApi
 
         $params = [
             'login' => $login,
-            'pass' => hash('sha1', $password)
+            'pass'  => hash('sha1', $password)
         ];
 
         if ($this->token = $this->sendAuth('/auth', $params)) {
@@ -104,8 +105,8 @@ class iikoApi
 
         return [
             'categories' => $categories,
-            'products' => $products,
-            'units' => array_unique($units)
+            'products'   => $products,
+            'units'      => array_unique($units)
         ];
     }
 
@@ -141,10 +142,10 @@ class iikoApi
     /**
      * Обычный SEND без чанков. Копия обычной SEND() для авторизации,
      * так как авторизация не поддерживает запрос только с HEADERS для определения чанков
-     * @param $url
-     * @param array $params
+     * @param        $url
+     * @param array  $params
      * @param string $method
-     * @param array $headers
+     * @param array  $headers
      * @return mixed
      * @throws \Exception
      */
@@ -161,7 +162,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 300);
@@ -182,10 +183,10 @@ class iikoApi
     }
 
     /**
-     * @param $url
-     * @param array $params
+     * @param        $url
+     * @param array  $params
      * @param string $method
-     * @param array $headers
+     * @param array  $headers
      * @return mixed|string
      * @throws \Exception
      */
@@ -206,7 +207,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_NOBODY, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 100);
@@ -238,7 +239,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_URL, $this->host . $url . '?' . http_build_query($params));
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 300);
@@ -282,8 +283,8 @@ class iikoApi
     }
 
     /**
-     * @param $url
-     * @param $body
+     * @param       $url
+     * @param       $body
      * @param array $headers
      * @return mixed
      */
@@ -306,7 +307,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 300);

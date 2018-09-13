@@ -479,13 +479,13 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Загрузка основного каталога
+     * Загрузка индивид. каталога
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
      * @throws \yii\base\Exception
      */
-    public function uploadMainCatalog(array $request)
+    public function uploadPersonalCatalog(array $request)
     {
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
@@ -496,7 +496,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|data');
         }
 
-        $catalog = Catalog::findOne(['supp_org_id' => $vendorID, 'type' => Catalog::BASE_CATALOG]);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
@@ -536,19 +536,22 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Валидация и импорт уже загруженного основного каталога
+     * Валидация и импорт уже загруженного инд. каталога
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function importMainCatalog(array $request)
+    public function importPersonalCatalog(array $request)
     {
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        if (!$catalog) {
+            throw new BadRequestHttpException("Catalog not found");
+        }
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
             throw new BadRequestHttpException("Temp catalog not found");
         }

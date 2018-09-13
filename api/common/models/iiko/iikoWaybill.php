@@ -411,7 +411,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->defquant = $record->quantity;
                 $wdmodel->defsum = round($record->price * $record->quantity, 2);
                 $wdmodel->vat = $taxVat;
-                $wdmodel->org = iikoService::getMainOrg($this->org);
+                $wdmodel->org = $this->org; //iikoService::getMainOrg($this->org);
                 $wdmodel->koef = 1;
                 // New check mapping
                 $client_id = $this->org;

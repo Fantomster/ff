@@ -309,6 +309,24 @@ class Order extends \yii\db\ActiveRecord
         return $statusList[$this->status];
     }
 
+    public static function getStatusListEdo()
+    {
+        return [
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app',
+                'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
+            OrderStatus::STATUS_PROCESSING => Yii::t('app',
+                'common.models.order_status.status_processing', ['ru' => 'Выполняются']),
+            OrderStatus::STATUS_EDO_SENT_BY_VENDOR => Yii::t('app',
+                'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
+            OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED => Yii::t('app',
+                'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
+            OrderStatus::STATUS_DONE => Yii::t('app',
+                'common.models.order_status.status_done', ['ru' => 'Завершен']),
+            OrderStatus::STATUS_CANCELLED => Yii::t('app',
+                'common.models.order_status.status_cancelled', ['ru' => 'Отменен']),
+        ];
+    }
+
     public static function getStatusList($short = false)
     {
         $result = [

@@ -23,7 +23,7 @@ class Mailer extends \yii\mail\BaseMailer
     private $to;
     private $subject;
     public $defaultFrom = "";
-    public $queueName = "email_queue";
+    public $queueName = "process_email";
     
     public function compose($view = null, array $params = [])
     {

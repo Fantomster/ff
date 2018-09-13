@@ -20,9 +20,9 @@ class iikoLogger
         self::$guide = md5(uniqid(microtime(), 1));
         self::insert([
             'guide' => self::$guide,
-            'ip' => Yii::$app->request->getUserIP()
+//            'ip' => \Yii::$app->request->getUserIP()
         ]);
-        $this->setUser(\Yii::$app->user->id);
+//        $this->setUser(\Yii::$app->user->id);
     }
 
     /**

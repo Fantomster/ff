@@ -67,7 +67,7 @@ $this->params['breadcrumbs'] = [
                                         $message = $email->statusText . " " . Yii::$app->formatter->asTime($email->updated_at, "php:j M Y, H:i:s");
                                         $class = 'list-group-item-success';
 
-                                        if ($model->status == EmailQueue::STATUS_FAILED) {
+                                        if ($email->status == EmailQueue::STATUS_FAILED) {
                                             $message = 'ошибка при отправке почты';
                                             $class = 'list-group-item-warning';
                                         }

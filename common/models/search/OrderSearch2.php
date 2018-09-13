@@ -5,6 +5,7 @@ namespace common\models\search;
 use api\common\models\iiko\iikoWaybill;
 use api\common\models\one_s\OneSWaybill;
 use common\models\Order;
+use common\models\OrderStatus;
 use common\models\User;
 use frontend\modules\clientintegr\modules\rkws\controllers\WaybillController;
 use yii\base\Model;
@@ -90,7 +91,7 @@ class OrderSearch2 extends Order
         if (isset($params['OrderSearch2']['id']) && (int)$params['OrderSearch2']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch2']['id']])
                 ->andWhere([$selfTypeColumnId => $orgId])
-                ->andFilterWhere(['status' => Order::STATUS_DONE]);
+                ->andFilterWhere(['status' => OrderStatus::STATUS_DONE]);
         } elseif (isset($params['OrderSearch2']['id']) && $params['OrderSearch2']['id']) {
             $query = Order::find()->where(['id' => 0]);
         } else {
@@ -129,7 +130,7 @@ class OrderSearch2 extends Order
                 }
             }
 
-            $query->andFilterWhere(['status' => Order::STATUS_DONE]);
+            $query->andFilterWhere(['status' => OrderStatus::STATUS_DONE]);
 
             if ($this->wb_status && isset($wbStatuses[$this->wb_status]) && $wbStatuses[$this->wb_status]) {
                 /** @var string Все заказы, по которым есть накладные со статусом 5 и readytoexport > 0 */

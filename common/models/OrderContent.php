@@ -229,7 +229,7 @@ class OrderContent extends \yii\db\ActiveRecord
         }
         
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if($this->order->status == Order::STATUS_FORMING)
+            if($this->order->status == OrderStatus::STATUS_FORMING)
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContent($this->id);
         }
 
@@ -244,7 +244,7 @@ class OrderContent extends \yii\db\ActiveRecord
         $result = parent::beforeDelete();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if($this->order->status == Order::STATUS_FORMING)
+            if($this->order->status == OrderStatus::STATUS_FORMING)
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContentDelete($this);
         }
         

@@ -225,9 +225,9 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     public function actionProducersList($q = null, $c=null)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $out = ['results' => ['id' => '', 'text' => '']];
+        $out =  ['results' => ['id' => '', 'text' => '']];
         if (!is_null($q)) {
-            if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1') {
+            if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1' && $c != null) {
                 $res = [];
                 $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
                 if (isset($list)) {

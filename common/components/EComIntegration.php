@@ -18,6 +18,7 @@ use common\models\User;
 use frontend\controllers\OrderController;
 use mongosoft\soapclient\Client;
 use Yii;
+use yii\base\Component;
 use yii\db\Exception;
 use yii\db\Expression;
 
@@ -27,7 +28,7 @@ use yii\db\Expression;
  * @author alexey.sergeev
  *
  */
-class EComIntegration
+class EComIntegration extends Component
 {
 
     const STATUS_NEW = 1;

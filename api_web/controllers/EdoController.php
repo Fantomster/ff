@@ -321,7 +321,6 @@ class EdoController extends WebApiController
      *         @SWG\Schema(
      *              default={
      *                      true
-     *                  }
      *              }
      *         )
      *     ),

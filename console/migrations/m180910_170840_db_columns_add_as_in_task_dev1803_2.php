@@ -23,14 +23,14 @@ class m180910_170840_db_columns_add_as_in_task_dev1803_2 extends Migration
         $this->addColumn('{{%waybill}}', 'edi_number', $this->string(45)->defaultValue(null));
         $this->addColumn('{{%waybill}}', 'edi_recadv', $this->string(45)->defaultValue(null));
         $this->addColumn('{{%waybill}}', 'edi_invoice', $this->string(45)->defaultValue(null));
-        $this->addColumn('{{%waybill}}', 'doc_date', $this->timestamp());
+        $this->addColumn('{{%waybill}}', 'doc_date', $this->timestamp()->null());
         $this->addColumn('{{%waybill}}', 'is_duedate', $this->tinyInteger());
         $this->addColumn('{{%waybill}}', 'is_deleted', $this->tinyInteger());
-        $this->addColumn('{{%waybill}}', 'created_at', $this->timestamp());
-        $this->addColumn('{{%waybill}}', 'updated_at', $this->timestamp());
-        $this->addColumn('{{%waybill}}', 'exported_at', $this->timestamp());
+        $this->addColumn('{{%waybill}}', 'created_at', $this->timestamp()->null());
+        $this->addColumn('{{%waybill}}', 'updated_at', $this->timestamp()->null());
+        $this->addColumn('{{%waybill}}', 'exported_at', $this->timestamp()->null());
         $this->addColumn('{{%waybill}}', 'payment_delay', $this->integer(11));
-        $this->addColumn('{{%waybill}}', 'payment_delay_date', $this->timestamp());
+        $this->addColumn('{{%waybill}}', 'payment_delay_date', $this->timestamp()->null());
 
         // $this->addCommentOnColumn('{{%waybill}}', 'edi_number', '');
         // $this->addCommentOnColumn('{{%waybill}}', 'edi_recadv', '');

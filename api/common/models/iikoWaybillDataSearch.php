@@ -51,14 +51,13 @@ class iikoWaybillDataSearch extends iikoWaybillData
             ->select('iiko_waybill_data.*, iiko_product.denom as pdenom')
             ->leftJoin('iiko_product', 'iiko_product.id = product_rid')
             ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
-        if(isset($params['iikoWaybillDataSearch']['vat']) && $params['iikoWaybillDataSearch']['vat'] != 1){
+        if (isset($params['iikoWaybillDataSearch']['vat']) && $params['iikoWaybillDataSearch']['vat'] != 1) {
             $vat = $params['iikoWaybillDataSearch']['vat'];
             $query = $query->andWhere(['vat' => $vat]);
         }
         $query = $query->all();
 
-        foreach ($query as $key=>$value)
-        {
+        foreach ($query as $key => $value) {
             $data = $value->attributes;
             $data['fproductnameProduct'] = $value->fproductnameProduct;
             $arr[$key] = $data;
@@ -72,11 +71,11 @@ class iikoWaybillDataSearch extends iikoWaybillData
 
         ]);
 
-       $dataProvider->setSort([
+        $dataProvider->setSort([
             'attributes' => [
-                'product_id'=>[
-                    'asc' => ['catalog_base_goods.id' => SORT_ASC],
-                    'desc' => ['catalog_base_goods.id' => SORT_DESC],
+                'product_id' => [
+                    'asc' => ['product_id' => SORT_ASC],
+                    'desc' => ['product_id' => SORT_DESC],
                 ],
                 'fproductnameProduct'
             ],

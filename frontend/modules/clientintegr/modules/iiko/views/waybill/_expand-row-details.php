@@ -7,20 +7,20 @@ use api\common\models\iiko\iikoDicconst;
 
 ?>
 
-Приходная Накладная:<br><br>
+    Приходная Накладная:<br><br>
 
 <?php
 
- $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+$waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-if (empty($model) ) {
-        echo "<div  style=\"text-align:right;\">";
-            if ($waybillMode === "0") {
-                echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
-            } else {
-                echo "Включен автоматический режим создания накладных.";
-            }
-        echo "</div>";
+if (empty($model)) {
+    echo "<div  style=\"text-align:right;\">";
+    if ($waybillMode === "0") {
+        echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
+    } else {
+        echo "Включен автоматический режим создания накладных.";
+    }
+    echo "</div>";
 } else {
     $columns = array(
         'id',
@@ -85,13 +85,13 @@ if (empty($model) ) {
                         ['title' => Yii::t('backend', 'Изменить шапку'), 'data-pjax' => "0"]);
                 },
                 'map' => function ($url, $model) {
-                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/map', 'waybill_id' => $model->id, 'way' => 0]);
+                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/map', 'waybill_id' => $model->id, 'way' => 0, 'iikoWaybillDataSearch[vat]' => 1]);
                     return \yii\helpers\Html::a('<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax' => "0"]);
                 },
                 'export' => function ($url, $model) use ($order_id) {
                     return \yii\helpers\Html::a(
-                        Html::tag('i','',[
+                        Html::tag('i', '', [
                             'class' => 'fa fa-upload ',
                             'aria-hidden' => true
                         ]),
@@ -107,8 +107,10 @@ if (empty($model) ) {
             ]
         ]
     );
-    $timestamp_now=time();
-    if (!(($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))))) {unset($columns[10]['buttons']['export']);}
+    $timestamp_now = time();
+    if (!(($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))))) {
+        unset($columns[10]['buttons']['export']);
+    }
 
     echo GridView::widget([
         'dataProvider' => new ActiveDataProvider([
@@ -134,4 +136,3 @@ if (empty($model) ) {
     ]);
     ?>
 <?php } ?>
-

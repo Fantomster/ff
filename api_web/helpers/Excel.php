@@ -21,7 +21,8 @@ class Excel
      */
     public static function get20Rows($excelFile)
     {
-        $spreadsheet = IOFactory::load($excelFile);
+        $spreadsheet = \PHPExcel_IOFactory::load($excelFile);
+
         $worksheet = $spreadsheet->getActiveSheet();
 
         $rows = [];
@@ -30,8 +31,13 @@ class Excel
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
             $cells = [];
+            $i = 0;
             foreach ($cellIterator as $cell) {
+                if ($i > 5) {
+                    break;
+                }
                 $cells[] = htmlspecialchars($cell->getValue(), ENT_QUOTES);
+                $i++;
             }
             $rows[] = $cells;
             $rowsCount++;
@@ -69,16 +75,18 @@ class Excel
     {
         $spreadsheet = IOFactory::load($excelFile);
         $worksheet = $spreadsheet->getActiveSheet();
-
         $rows = [];
         foreach ($worksheet->getRowIterator() as $row) {
-            $cellsCount = 0;
+            $cellsCount = 1;
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
             $attributes = [];
             $attributes['temp_id'] = $tmpCatId;
             $write = true;
             foreach ($cellIterator as $cell) {
+                if ($cellsCount > 6) {
+                    break;
+                }
                 $value = $cell->getValue();
                 if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
                     $write = false;

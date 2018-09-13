@@ -2,9 +2,11 @@
 
 namespace api_web\classes;
 
+use api\modules\v1\modules\mobile\resources\RelationSuppRest;
 use common\models\CatalogGoods;
 use common\models\CatalogTemp;
 use common\models\CatalogTempContent;
+use common\models\Organization;
 use Yii;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
@@ -66,19 +68,23 @@ class CatalogWebApi extends WebApi
 
 
     /**
-     * Обновление главного каталога
+     * Обновление инд. каталога
      * @param $request
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function updateMainCatalog($request)
+    public function updatePersonalCatalog($request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException("empty_param|cat_id");
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException("empty_param|vendor_id");
         }
-
-        $catalogTemp = CatalogTemp::findOne(['cat_id' => (int)$request['cat_id'], 'user_id' => $this->user->id]);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        if (empty($catalog)) {
+            throw new BadRequestHttpException("base_catalog_not_found");
+        }
+        $catalogID = $catalog->id;
+        $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalogID, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException("catalog_temp_not_found");
         }
@@ -88,12 +94,7 @@ class CatalogWebApi extends WebApi
             throw new BadRequestHttpException("catalog_temp_content_not_found");
         }
 
-        $catalog = Catalog::findOne(['id' => $catalogTemp->cat_id, 'type' => Catalog::BASE_CATALOG]);
-        if (empty($catalog)) {
-            throw new BadRequestHttpException("base_catalog_not_found");
-        }
-
-        if (!empty($this->getTempDuplicatePosition(['cat_id' => $catalog->id]))) {
+        if (!empty($this->getTempDuplicatePosition(['vendor_id' => $request['vendor_id']]))) {
             throw new BadRequestHttpException("catalog_temp_exists_duplicate");
         }
 
@@ -103,7 +104,7 @@ class CatalogWebApi extends WebApi
                 'status' => CatalogBaseGoods::STATUS_OFF
             ], [
                 'supp_org_id' => $catalog->supp_org_id,
-                'cat_id' => $catalog->id
+                'cat_id' => $catalogID
             ]);
             /**
              * @var $tempRow CatalogTempContent
@@ -111,14 +112,14 @@ class CatalogWebApi extends WebApi
             foreach ($catalogTempContent as $tempRow) {
                 //Поиск товара в главном каталоге
                 $model = CatalogBaseGoods::findOne([
-                    'cat_id' => $catalog->id,
+                    'cat_id' => $catalogID,
                     'article' => $tempRow->article,
                     'product' => $tempRow->product
                 ]);
                 //Если не нашли, создаем его
                 if (empty($model)) {
                     $model = new CatalogBaseGoods([
-                        'cat_id' => $catalog->id,
+                        'cat_id' => $catalogID,
                         'article' => $tempRow->article,
                         'product' => $tempRow->product,
                         'supp_org_id' => $catalog->supp_org_id
@@ -132,6 +133,14 @@ class CatalogWebApi extends WebApi
                 $model->status = CatalogBaseGoods::STATUS_ON;
                 //Если атрибуты изменились или новая запись, сохраняем модель
                 $model->save();
+                $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalogID]);
+                if (empty($catalogGood)) {
+                    $catalogGood = new CatalogGoods();
+                    $catalogGood->cat_id = $catalogID;
+                    $catalogGood->base_goods_id = $model->id;
+                }
+                $catalogGood->price = $model->price;
+                $catalogGood->save();
             }
             //Убиваем временный каталог
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
@@ -193,11 +202,11 @@ class CatalogWebApi extends WebApi
      */
     public function getTempDuplicatePosition(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
-
-        $catalogTemp = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException('catalog_temp_not_found');
         }
@@ -300,11 +309,12 @@ class CatalogWebApi extends WebApi
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
 
-        $catalog = Catalog::findOne($request['cat_id']);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
         }
@@ -364,6 +374,33 @@ class CatalogWebApi extends WebApi
         ];
     }
 
+
+    /**
+     * Список товаров в каталоге
+     */
+    public function setCurrencyForPersonalCatalog($request)
+    {
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
+        }
+
+        if (empty($request['currency_id'])) {
+            throw new BadRequestHttpException('empty_param|currency_id');
+        }
+
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+
+        if (empty($catalog)) {
+            throw new BadRequestHttpException('catalog_not_found');
+        }
+        $catalog->currency_id = (int)$request['currency_id'];
+        $catalog->save();
+
+        return [
+            'result' => true
+        ];
+    }
+
     /**
      * @param array $row
      * @return array
@@ -381,5 +418,44 @@ class CatalogWebApi extends WebApi
             "ed" => $row['ed'],
             "CountOf" => (int)$row['CountOf'] ?? 1
         ];
+    }
+
+
+    public function getPersonalCatalog(int $vendorID, Organization $restOrganization)
+    {
+        $rel = RelationSuppRest::find()->where(['supp_org_id' => $vendorID, 'rest_org_id' => $restOrganization->id])->andWhere([">", "cat_id", 0])->one();
+        if (!isset($rel->cat_id) || $rel->cat_id == 0) {
+            $catalog = new Catalog();
+            $vendorOrganization = Organization::findOne(['id' => $vendorID]);
+            $catalog->type = Catalog::CATALOG;
+            $catalog->supp_org_id = $vendorID;
+            $catalog->name = $vendorOrganization->name;
+            $catalog->status = Catalog::STATUS_ON;
+            $catalog->currency_id = 1;
+            $mainCatalog = Catalog::findOne(['supp_org_id' => $vendorID]);
+            if ($mainCatalog) {
+                $catalog->currency_id = $mainCatalog->currency_id;
+                $catalog->main_index = $mainCatalog->main_index;
+                $catalog->mapping = $mainCatalog->mapping;
+                $catalog->index_column = $mainCatalog->index_column;
+            }
+            $catalog->save();
+            if ($rel) {
+                $rel->cat_id = $catalog->id;
+                $rel->save();
+            }
+        } else {
+            $catalog = Catalog::findOne(['id' => $rel->cat_id]);
+        }
+        if (!$rel) {
+            $rel = new RelationSuppRest();
+            $rel->rest_org_id = $restOrganization->id;
+            $rel->supp_org_id = $vendorID;
+            $rel->cat_id = $catalog->id;
+            $rel->invite = 1;
+            $rel->status = 1;
+            $rel->save();
+        }
+        return $catalog;
     }
 }

@@ -46,6 +46,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property Currency $currency
  * @property OrderAttachment[] $attachments
  * @property OrderAssignment $assignment
+ * @property EmailQueue[] $relatedEmails
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -633,5 +634,13 @@ class Order extends \yii\db\ActiveRecord
     public function getAssignment()
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRelatedEmails()
+    {
+        return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
 }

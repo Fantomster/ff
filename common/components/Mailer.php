@@ -25,21 +25,6 @@ class Mailer extends \yii\mail\BaseMailer
     public $defaultFrom = "";
     public $queueName = "email_queue";
     
-    public function beforeSend($message)
-    {
-        $result = parent::beforeSend($message);
-
-        if (substr($message->getTo(), -4) === "_bak") {
-            return false;
-        }
-        //check blacklist
-        if (EmailBlacklist::find()->where(['email' => $message->getTo()])->exists()) {
-            return false;
-        }
-
-        return $result;
-    }
-
     public function compose($view = null, array $params = [])
     {
         if (array_key_exists('order', $params)) {
@@ -78,8 +63,17 @@ class Mailer extends \yii\mail\BaseMailer
         $newEmail->body = $this->html;
         $newEmail->order_id = $this->order_id;
         $newEmail->status = EmailQueue::STATUS_NEW;
+
+        if (substr($this->to, -4) === "_bak") {
+            $newEmail->status = EmailQueue::STATUS_FAILED;
+        }
+        //check blacklist
+        if (EmailBlacklist::find()->where(['email' => $this->to])->exists()) {
+            $newEmail->status = EmailQueue::STATUS_FAILED;
+        }
+
         
-        if ($newEmail->save()) {
+        if ($newEmail->save() && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
             try {
             \Yii::$app->get('rabbit')
                 ->setQueue($this->queueName)

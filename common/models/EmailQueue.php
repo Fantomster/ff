@@ -22,11 +22,12 @@ use common\models\notifications\EmailFails;
  *
  * @property EmailFails $emailFail
  * @property Order $order
+ * @property string $statusText
  */
 class EmailQueue extends \yii\db\ActiveRecord
 {
     const STATUS_NEW = 0;
-    const STATUS_SENT = 1;
+    const STATUS_SENDING = 1;
     const STATUS_CONFIRMED = 2;
     const STATUS_FAILED = 3; 
     
@@ -89,5 +90,22 @@ class EmailQueue extends \yii\db\ActiveRecord
     public function getOrder()
     {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
+    }
+    
+    /**
+     * @return string
+     */
+    public function getStatusText() 
+    {
+        switch ($this->status) {
+            case self::STATUS_NEW:
+                return Yii::t('app', 'common.models.email_queue.status_new');
+            case self::STATUS_SENDING:
+                return Yii::t('app', 'common.models.email_queue.status_sending');
+            case self::STATUS_CONFIRMED:
+                return Yii::t('app', 'common.models.email_queue.status_confirmed');
+            case self::STATUS_FAILED:
+                return Yii::t('app', 'common.models.email_queue.status_failed');
+        }
     }
 }

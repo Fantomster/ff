@@ -123,7 +123,7 @@ class iikoSync extends WebApi
                     $model->denom = $store['name'];
                 }
                 if (!empty($store['code'])) {
-                    $model->store_code = $store['code'];
+                    $model->store_code = (string) $store['code'];
                 }
                 if (!empty($store['type'])) {
                     $model->store_type = $store['type'];

@@ -12,7 +12,7 @@ class m180910_170840_db_columns_add_as_in_task_dev1803_1 extends Migration
     {
         #table `order`
         $this->addColumn('{{%order}}', 'service_id', $this->integer(11));
-        $this->addColumn('{{%order}}', 'status_updated_at', $this->timestamp());
+        $this->addColumn('{{%order}}', 'status_updated_at', $this->timestamp()->null());
         $this->addColumn('{{%order}}', 'edi_order', $this->string(45)->defaultValue(null));
         $this->addCommentOnColumn('{{%order}}', 'service_id', 'ID сервиса');
         $this->addCommentOnColumn('{{%order}}', 'status_updated_at', 'Дата обновления статуса');

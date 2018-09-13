@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Order;
+use common\models\OrderStatus;
 use common\models\Organization;
 use yii\helpers\Html;
 
@@ -124,7 +125,7 @@ if ($order->isObsolete) {
     $actionButtons .= $btnCloseOrder;
 } else {
     switch ($order->status) {
-        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+        case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
             $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_RESTAURANT) {
                 $statusInfo .= '<a href="#" class="btn btn-warning disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.waiting', ['ru' => 'Ожидаем подтверждения']) . ' </a>';
@@ -133,7 +134,7 @@ if ($order->isObsolete) {
             }
             $canEdit = true;
             break;
-        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+        case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
             $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-warning disabled status"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.waiting_two', ['ru' => 'Ожидаем подтверждения']) . ' </a>';
@@ -142,7 +143,7 @@ if ($order->isObsolete) {
             }
             $canEdit = true;
             break;
-        case Order::STATUS_PROCESSING:
+        case OrderStatus::STATUS_PROCESSING:
             if (!isset($data->vendor->ediOrganization->gln_code)) {
                 $actionButtons .= $btnCancel;
             }
@@ -153,14 +154,14 @@ if ($order->isObsolete) {
             }
             $canEdit = true;
             break;
-        case Order::STATUS_DONE;
+        case OrderStatus::STATUS_DONE;
             $statusInfo .= '<a href="#" class="btn btn-success disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.ready', ['ru' => 'Выполнен']) . ' </a>';
             $canEdit = true;
             break;
-        case Order::STATUS_REJECTED;
+        case OrderStatus::STATUS_REJECTED;
             $statusInfo .= '<a href="#" class="btn btn-danger disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.rejected', ['ru' => 'Отклонен']) . ' </a>';
             break;
-        case Order::STATUS_CANCELLED;
+        case OrderStatus::STATUS_CANCELLED;
             $statusInfo .= '<a href="#" class="btn btn-danger disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; ' . Yii::t('message', 'frontend.views.order.canceled_two', ['ru' => 'Отменен']) . ' </a>';
             break;
     }

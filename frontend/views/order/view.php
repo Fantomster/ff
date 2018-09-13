@@ -1,5 +1,6 @@
 <?php
 
+use common\models\OrderStatus;
 use yii\widgets\Pjax;
 use common\models\Order;
 use common\models\Organization;
@@ -29,17 +30,17 @@ if (!empty($order->invoiceRelation)) {
 
 $title = $title ?? $this->title;
 
-if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
+if (($order->status == OrderStatus::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
 } else {
     $quantityEditable = (in_array($order->status, [
-        Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-        Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-        Order::STATUS_PROCESSING]));
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+        OrderStatus::STATUS_PROCESSING]));
     $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array($order->status, [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
@@ -273,9 +274,9 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
 $canRepeatOrder = false;
 if ($organizationType == Organization::TYPE_RESTAURANT) {
     switch ($order->status) {
-        case Order::STATUS_DONE:
-        case Order::STATUS_REJECTED:
-        case Order::STATUS_CANCELLED:
+        case OrderStatus::STATUS_DONE:
+        case OrderStatus::STATUS_REJECTED:
+        case OrderStatus::STATUS_CANCELLED:
             $canRepeatOrder = true;
             break;
     }

@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\OrderStatus;
 use common\models\RelationUserOrganization;
 use Yii;
 use yii\rest\ActiveController;
@@ -177,7 +178,7 @@ class CartController extends ActiveController {
             $newOrder = new Order();
             $newOrder->client_id = $client->id;
             $newOrder->vendor_id = $vendor->id;
-            $newOrder->status = Order::STATUS_FORMING;
+            $newOrder->status = OrderStatus::STATUS_FORMING;
             $newOrder->currency_id = $product->catalog->currency_id;
             $newOrder->save();
             $alteringOrder = $newOrder;
@@ -235,7 +236,7 @@ class CartController extends ActiveController {
             $client = Yii::$app->user->getIdentity()->organization;
             $order_id = Yii::$app->request->post('order_id');
             $delivery_date = Yii::$app->request->post('delivery_date');
-            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING]);
             $oldDateSet = isset($order->requested_delivery);
             if ($order && !empty($delivery_date)) {
 
@@ -278,7 +279,7 @@ class CartController extends ActiveController {
             if ($orderContent) {
                 $order = $orderContent->order;
 
-                if ($order && $order->client_id == $client->id && $order->status == Order::STATUS_FORMING) {
+                if ($order && $order->client_id == $client->id && $order->status == OrderStatus::STATUS_FORMING) {
                     $orderContent->comment = Yii::$app->request->post('comment');
                     $orderContent->save();
                     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -297,7 +298,7 @@ class CartController extends ActiveController {
 
         if (Yii::$app->request->post()) {
 //            $order_id = Yii::$app->request->post('order_id');
-            $order = Order::find()->where(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            $order = Order::find()->where(['id' => $order_id, 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING])->one();
             if ($order) {
                 $order->comment = Yii::$app->request->post('comment');
                 $order->save();
@@ -314,7 +315,7 @@ class CartController extends ActiveController {
         $client = Yii::$app->user->getIdentity()->organization;
 
         $orderDeleted = false;
-        $order = Order::find()->where(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+        $order = Order::find()->where(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING])->one();
         foreach ($order->orderContent as $position) {
             if ($position->product_id == $product_id) {
                 $position->delete();
@@ -343,12 +344,12 @@ class CartController extends ActiveController {
         if (Yii::$app->request->post()) {
             if (!Yii::$app->request->post('all')) {
                 $order_id = Yii::$app->request->post('id');
-                $orders[] = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                $orders[] = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING]);
             } else {
-                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                $orders = Order::findAll(['client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING]);
             }
             foreach ($orders as $order) {
-                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $order->created_by_id = Yii::$app->user->getIdentity()->id;
                 $order->created_at = gmdate("Y-m-d H:i:s");
                 $order->calculateTotalPrice(); //also saves order
@@ -367,13 +368,13 @@ class CartController extends ActiveController {
         $client = Yii::$app->user->getIdentity()->organization;
 
         if (!$all) {
-            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING]);
             if ($order) {
                 OrderContent::deleteAll(['order_id' => $order->id]);
                 $order->delete();
             }
         } else {
-            $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            $orders = Order::findAll(['client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING]);
             foreach ($orders as $order) {
                 OrderContent::deleteAll(['order_id' => $order->id]);
                 $order->delete();

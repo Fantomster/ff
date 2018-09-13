@@ -1,5 +1,6 @@
 <?php
 
+use common\models\OrderStatus;
 use yii\widgets\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
@@ -166,18 +167,18 @@ $dataColumns = [
         'value' => function ($data) {
             $statusClass = '';
             switch ($data->status) {
-                case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                     $statusClass = 'new';
                     break;
-                case Order::STATUS_PROCESSING:
+                case OrderStatus::STATUS_PROCESSING:
                     $statusClass = 'processing';
                     break;
-                case Order::STATUS_DONE:
+                case OrderStatus::STATUS_DONE:
                     $statusClass = 'done';
                     break;
-                case Order::STATUS_REJECTED:
-                case Order::STATUS_CANCELLED:
+                case OrderStatus::STATUS_REJECTED:
+                case OrderStatus::STATUS_CANCELLED:
                     $statusClass = 'cancelled';
                     break;
             }
@@ -191,7 +192,7 @@ $dataColumns = [
         'format' => 'raw',
         'value' => function ($data) {
             $class = $message = $message_orig = $url = null;
-            if (in_array($data->status, [Order::STATUS_DONE, Order::STATUS_REJECTED, Order::STATUS_CANCELLED])) {
+            if (in_array($data->status, [OrderStatus::STATUS_DONE, OrderStatus::STATUS_REJECTED, OrderStatus::STATUS_CANCELLED])) {
                 $message_orig = EchoRu::echo ('frontend.views.order.repeat_order', 'Повторить заказ');
                 $message = EchoRu::echo ('frontend.views.order.repeat', 'Повторить');
                 $class = 'reorder btn btn-outline-processing';

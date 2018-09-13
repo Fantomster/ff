@@ -111,7 +111,7 @@ class Currency extends \yii\db\ActiveRecord {
             'COUNT(order.id) as count'
         ])->joinWith('currency as c')
             ->join('LEFT JOIN', 'franchisee_associate as fa', 'fa.organization_id = order.'.$orgField)
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->where('status <> :status',[':status' => OrderStatus::STATUS_FORMING])
             ->andWhere('fa.franchisee_id = :fid', [':fid' => $franchId])
             ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($date_from)), date('Y-m-d', strtotime($date_to))])
             ->orderBy('count DESC')
@@ -156,7 +156,7 @@ class Currency extends \yii\db\ActiveRecord {
         ])->joinWith('currency as c')
             ->join('LEFT JOIN', 'franchisee_associate as fa1', 'fa1.organization_id = order.client_id')
             ->join('LEFT JOIN', 'franchisee_associate as fa2', 'fa2.organization_id = order.vendor_id')
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->where('status <> :status',[':status' => OrderStatus::STATUS_FORMING])
             ->andWhere('fa1.franchisee_id = :fid1', [':fid1' => $franchId])
             ->andWhere('fa2.franchisee_id = :fid2', [':fid2' => $franchId])
             ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
@@ -181,7 +181,7 @@ class Currency extends \yii\db\ActiveRecord {
             'c.iso_code',
             'COUNT(order.id) as count'
         ])->joinWith('currency as c')
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->where('status <> :status',[':status' => OrderStatus::STATUS_FORMING])
             ->andWhere("$field = :cid", [':cid' => $organizationId])
             ->andWhere(['between', 'DATE(created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])
             ->orderBy('count DESC')
@@ -213,7 +213,7 @@ class Currency extends \yii\db\ActiveRecord {
         ])->joinWith('currency as c')
             ->join('LEFT JOIN', 'franchisee_associate as fa1', 'fa1.organization_id = order.client_id')
             ->join('LEFT JOIN', 'franchisee_associate as fa2', 'fa2.organization_id = order.vendor_id')
-            ->where('status <> :status',[':status' => Order::STATUS_FORMING])
+            ->where('status <> :status',[':status' => OrderStatus::STATUS_FORMING])
             ->andWhere('fa1.franchisee_id = :fid1', [':fid1' => $franchId])
             ->andWhere('fa2.franchisee_id = :fid2', [':fid2' => $franchId])
             ->andWhere(['between', 'DATE(order.created_at)', date('Y-m-d', strtotime($filter_from_date)), date('Y-m-d', strtotime($filter_to_date))])

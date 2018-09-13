@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Order;
+use common\models\OrderStatus;
 use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -10,17 +11,17 @@ use dosamigos\fileupload\FileUploadUI;
 
 $this->title = Yii::t('message', 'frontend.views.order.order_edit', ['ru' => 'Редактирование заказа №']) . $order->id;
 
-if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
+if (($order->status == OrderStatus::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
 } else {
     $quantityEditable = (in_array($order->status, [
-                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                Order::STATUS_PROCESSING]));
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+        OrderStatus::STATUS_PROCESSING]));
     $priceEditable = (in_array($order->status, [
-                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
 if ($organizationType == Organization::TYPE_RESTAURANT || $organizationType == Organization::TYPE_FRANCHISEE) {
     $quantityEditable = true;
@@ -272,9 +273,9 @@ lo\widgets\magnific\MagnificPopupAsset::register($this);
 $canRepeatOrder = false;
 if ($organizationType == Organization::TYPE_RESTAURANT) {
     switch ($order->status) {
-        case Order::STATUS_DONE:
-        case Order::STATUS_REJECTED:
-        case Order::STATUS_CANCELLED:
+        case OrderStatus::STATUS_DONE:
+        case OrderStatus::STATUS_REJECTED:
+        case OrderStatus::STATUS_CANCELLED:
             $canRepeatOrder = true;
             break;
     }
@@ -308,7 +309,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                 <div class="box-header">
                     <h4 class="font-bold"><?= Yii::t('message', 'frontend.views.order.order_six', ['ru' => 'Заказ']) ?> №<?= $order->id ?></h4><hr>
                     <?=
-                    (($order->status != Order::STATUS_CANCELLED && $order->status != Order::STATUS_REJECTED && !isset($order->vendor->ediOrganization->gln_code)) || ($order->status == Order::STATUS_DONE && isset($order->vendor->ediOrganization->gln_code))) ?
+                    (($order->status != OrderStatus::STATUS_CANCELLED && $order->status != OrderStatus::STATUS_REJECTED && !isset($order->vendor->ediOrganization->gln_code)) || ($order->status == OrderStatus::STATUS_DONE && isset($order->vendor->ediOrganization->gln_code))) ?
                             Html::a('<span><i class="icon fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru' => 'Добавить в заказ']) . ' </span>', Url::to(['order/ajax-show-products', 'order_id' => $order->id]), [
                                 'class' => 'btn btn-success pull-right btnAdd',
                                 'data' => [

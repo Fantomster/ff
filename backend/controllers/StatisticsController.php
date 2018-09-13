@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use backend\models\DynamicUsageSearch;
 use backend\models\MercuryReportSearch;
+use common\models\OrderStatus;
 use Yii;
 use common\models\User;
 use common\models\Role;
@@ -193,7 +194,7 @@ class StatisticsController extends Controller {
         $labelsTotal = [];
         $colorsTotal = [];
         $statusesList = Order::getStatusList();
-        unset($statusesList[Order::STATUS_FORMING]);
+        unset($statusesList[OrderStatus::STATUS_FORMING]);
         $statuses = array_keys($statusesList);
         $colorsList = Order::getStatusColors();
         
@@ -206,7 +207,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id where $orgTable.blacklisted = 0 and $orderTable.status <> " . Order::STATUS_FORMING;
+        $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id where $orgTable.blacklisted = 0 and $orderTable.status <> " . OrderStatus::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -217,7 +218,7 @@ class StatisticsController extends Controller {
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
         $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id "
-                . "where $orgTable.blacklisted = 0 and `$orderTable`.created_at > '$thisMonthStart'"." and status <> " . Order::STATUS_FORMING;
+                . "where $orgTable.blacklisted = 0 and `$orderTable`.created_at > '$thisMonthStart'"." and status <> " . OrderStatus::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
@@ -225,7 +226,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisMonth["count"]);
 
         $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id "
-                . "where $orgTable.blacklisted = 0 and `$orderTable`.created_at > '$thisDayStart'"." and status <> " . Order::STATUS_FORMING;
+                . "where $orgTable.blacklisted = 0 and `$orderTable`.created_at > '$thisDayStart'"." and status <> " . OrderStatus::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 
@@ -302,7 +303,7 @@ class StatisticsController extends Controller {
         
         $query = "SELECT truncate(sum($orderTable.total_price),1) as spent,truncate(sum($orderTable.total_price)/count($orderTable.id),1) as cheque, year($orderTable.created_at) as year, month($orderTable.created_at) as month, day($orderTable.created_at) as day "
                 . "FROM `order` LEFT JOIN $orgTable ON $orderTable.client_id = $orgTable.id "
-                . "where $orderTable.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and $orgTable.blacklisted = 0 and $orderTable.created_at between :dateFrom and :dateTo "
+                . "where $orderTable.status in (". OrderStatus::STATUS_PROCESSING .",". OrderStatus::STATUS_DONE .",". OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT .",". OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR .") and $orgTable.blacklisted = 0 and $orderTable.created_at between :dateFrom and :dateTo "
                 . "group by year($orderTable.created_at), month($orderTable.created_at), day($orderTable.created_at)";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $ordersByDay = $command->queryAll();
@@ -319,7 +320,7 @@ class StatisticsController extends Controller {
         
         $query = "SELECT truncate(sum($orderTable.total_price),1) as total_month, truncate(sum($orderTable.total_price)/count(distinct $orderTable.client_id),1) as spent,truncate(sum($orderTable.total_price)/count($orderTable.id),1) as cheque, year($orderTable.created_at) as year, month($orderTable.created_at) as month "
                 . "FROM `order` LEFT JOIN $orgTable ON $orderTable.client_id = $orgTable.id "
-                . "where $orderTable.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and $orgTable.blacklisted = 0 "
+                . "where $orderTable.status in (". OrderStatus::STATUS_PROCESSING .",". OrderStatus::STATUS_DONE .",". OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT .",". OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR .") and $orgTable.blacklisted = 0 "
                 . "group by year($orderTable.created_at), month($orderTable.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $money = $command->queryAll();
@@ -388,7 +389,7 @@ class StatisticsController extends Controller {
         $query = "select $orgTable.id as id, count(`$orderTable`.id) as ordersCount from $orgTable "
                 . "left join $userTable on $orgTable.id=$userTable.organization_id "
                 . "left join `$orderTable` on `$orderTable`.client_id = $orgTable.id "
-                . "where type_id=1 and $userTable.status=1 and `$orderTable`.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
+                . "where type_id=1 and $userTable.status=1 and `$orderTable`.status in (". OrderStatus::STATUS_PROCESSING .",". OrderStatus::STATUS_DONE .",". OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT .",". OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR .") "
                     . "and $orgTable.blacklisted = 0 and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $clientsWithOrders = $command->queryAll();

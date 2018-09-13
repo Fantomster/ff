@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use common\models\OrderStatus;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -78,7 +79,7 @@ class OrderSearch extends Order {
 
         // add conditions that should always apply here
         $query->where("vendor.blacklisted = 0");
-        $query->andWhere("`$orderTable`.status <> " . Order::STATUS_FORMING);
+        $query->andWhere("`$orderTable`.status <> " . OrderStatus::STATUS_FORMING);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

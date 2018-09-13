@@ -26,9 +26,6 @@ class OrderStatus extends ActiveRecord
     const STATUS_EDO_SENT_BY_VENDOR = 8;
     const STATUS_EDO_ACCEPTANCE_FINISHED = 9;
 
-    const YES = 'Y';
-    const NO = 'N';
-
     static $clientPermissionsDef = [
         'edit' => true,
         'cancel' => true,
@@ -43,16 +40,33 @@ class OrderStatus extends ActiveRecord
     public static function getClientPermissions(int $status = null): ?array
     {
         $res = self::$clientPermissionsDef;
-        if (!$status || !in_array($status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])) {
+        if (!$status || !in_array($status, [
+                self::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                self::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                self::STATUS_PROCESSING,
+                self::STATUS_DONE,
+                self::STATUS_REJECTED,
+                self::STATUS_CANCELLED,
+                self::STATUS_FORMING,
+                self::STATUS_EDO_SENT_BY_VENDOR,
+                self::STATUS_EDO_ACCEPTANCE_FINISHED,
+            ])) {
             return null;
         }
-        if (in_array($status, [1, 3, 8, 9, 4, 6])) {
+        if (in_array($status, [
+            self::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            self::STATUS_PROCESSING,
+            self::STATUS_EDO_SENT_BY_VENDOR,
+            self::STATUS_EDO_ACCEPTANCE_FINISHED,
+            self::STATUS_DONE,
+            self::STATUS_CANCELLED,
+        ])) {
             $res = [
                 'edit' => false,
                 'cancel' => false,
                 'complete' => false,
             ];
-            if ($status == 8) {
+            if ($status == self::STATUS_EDO_SENT_BY_VENDOR) {
                 $res['edit'] = $res['complete'] = true;
             }
         }
@@ -63,9 +77,9 @@ class OrderStatus extends ActiveRecord
      * Get a custom permission for a client that is "the owner of the order" by the status of an order
      * @param int $status Status of an order (Order->status_id)
      * @param string $type Type of client permission
-     * @return string?
+     * @return bool?
      */
-    public static function getClientPermissionByType(int $status = null, string $type = NULL): ?string
+    public static function getClientPermissionByType(int $status = null, string $type = NULL): ?bool
     {
         if (!$status || ($type && !array_key_exists($type, self::$clientPermissionsDef))) {
             return null;
@@ -75,9 +89,9 @@ class OrderStatus extends ActiveRecord
             return null;
         }
         if ($statuses[$type]) {
-            return self::YES;
+            return true;
         }
-        return self::NO;
+        return false;
     }
 
     /**
@@ -91,7 +105,9 @@ class OrderStatus extends ActiveRecord
     {
         if ($order && $order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
             if (!$edoExcludesStatuses || !in_array($order->status, $edoExcludesStatuses)) {
-                if (OrderStatus::getClientPermissionByType($order->status, $type) != self::YES) {
+                if (OrderStatus::getClientPermissionByType($order->status, $type) == null) {
+                    throw new BadRequestHttpException('Bad permission type! Check the awaialble list of types.');
+                } elseif (!OrderStatus::getClientPermissionByType($order->status, $type)) {
                     throw new BadRequestHttpException('Current user has no permissions for this transaction. Operation is blocked!');
                 }
             }

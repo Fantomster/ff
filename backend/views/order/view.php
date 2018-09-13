@@ -64,7 +64,7 @@ $this->params['breadcrumbs'] = [
                                     <?php
                                     foreach ($model->relatedEmails as $email) {
 
-                                        $message = $email->statusText . " " . Yii::$app->formatter->asTime($model->updated_at, "php:j M Y, H:i:s");
+                                        $message = $email->statusText . " " . Yii::$app->formatter->asTime($email->updated_at, "php:j M Y, H:i:s");
                                         $class = 'list-group-item-success';
 
                                         if ($model->status == EmailQueue::STATUS_FAILED) {

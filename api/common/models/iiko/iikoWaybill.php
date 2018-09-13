@@ -411,14 +411,17 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->defquant = $record->quantity;
                 $wdmodel->defsum = round($record->price * $record->quantity, 2);
                 $wdmodel->vat = $taxVat;
-                $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
-                $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $this->org]);
-                $wdmodel->org = isset($obConstModel->value) ? $obConstModel->value : $this->org;
+                $wdmodel->org = iikoService::getMainOrg($this->org);
                 $wdmodel->koef = 1;
                 // New check mapping
+                $client_id = $this->org;
+                if ($wdmodel->org  != $this->org) {
+                        $client_id = "IF(product_id in (select product_id from all_map where service_id = 2 and org_id = $client_id), $client_id, $wdmodel->org)";
+                    }
+                    
                 $ch = AllMaps::find()
                     ->andWhere('product_id = :prod',['prod' => $record->product_id ])
-                    ->andWhere('org_id = :org',['org' => $wdmodel->org ])
+                    ->andWhere("org_id in ($client_id)")
                     ->andWhere('service_id = 2')
                     ->one();
 

@@ -64,7 +64,7 @@ $this->params['breadcrumbs'] = [
                                     <?php
                                     foreach ($model->relatedEmails as $email) {
 
-                                        $message = $email->statusText;
+                                        $message = $email->statusText . " " . Yii::$app->formatter->asTime($model->updated_at, "php:j M Y, H:i:s");
                                         $class = 'list-group-item-success';
 
                                         if ($model->status == EmailQueue::STATUS_FAILED) {
@@ -77,7 +77,7 @@ $this->params['breadcrumbs'] = [
                                             $class = 'list-group-item-danger';
                                         }
 
-                                        echo Html::tag('li', '<b>' . $email->to . '</b> ' . $message . '.<br>', ['class' => 'list-group-item ' . $class]);
+                                        echo Html::tag('li', '<b>' . $email->to . '</b> ' . $message . '.<br>'.$email->subject, ['class' => 'list-group-item ' . $class]);
                                     }
                                     ?>
                                 </ul>

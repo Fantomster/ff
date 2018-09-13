@@ -57,6 +57,7 @@ use common\models\guides\Guide;
  * @property string $kpp
  * @property integer $parent_id
  * @property string $action
+ * @property integer $blacklisted
  *
  * @property OrganizationType $type
  * @property Delivery $delivery

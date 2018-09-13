@@ -51,7 +51,7 @@ abstract class WatcherDaemonController extends DaemonController
     {
         $pidfile = \Yii::getAlias($this->pidDir) . DIRECTORY_SEPARATOR . $job['className'] . $job['consumerClass'] . $job['orgId'] . $job['storeId'];
 
-        \Yii::trace('Check daemon ' . $job['className']);
+        \Yii::trace('Check daemon ' . $job['consumerClass']);
         if (file_exists($pidfile)) {
             $pid = file_get_contents($pidfile);
             if ($this->isProcessRunning($pid)) {
@@ -73,7 +73,7 @@ abstract class WatcherDaemonController extends DaemonController
         }
         \Yii::trace('Daemon pid not found.');
         if ($job['enabled']) {
-            \Yii::trace('Try to run daemon ' . $job['className'] . '.');
+            \Yii::trace('Try to run daemon ' . $job['consumerClass'] . '.');
             $command_name = $this->getCommandNameBy($job['className']);
             //flush log before fork
             \Yii::$app->getLog()->getLogger()->flush(true);
@@ -83,7 +83,7 @@ abstract class WatcherDaemonController extends DaemonController
                 $this->halt(self::EXIT_CODE_ERROR, 'pcntl_fork() returned error');
             } elseif (!$pid) {
                 $this->initLogger();
-                \Yii::trace('Daemon ' . $job['className'] . ' is running.');
+                \Yii::trace('Daemon ' . $job['consumerClass'] . ' is running.');
             } else {
                 $this->halt(
                     (0 === \Yii::$app->runAction("$command_name", [
@@ -99,7 +99,8 @@ abstract class WatcherDaemonController extends DaemonController
             }
 
         }
-        \Yii::trace('Daemon ' . $job['className'] . ' is checked.');
+        \Yii::trace('Daemon ' . $job['consumerClass'] . ' is checked.');
+        file_put_contents($this->getPidPath(), getmypid());
 
         return true;
     }

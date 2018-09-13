@@ -106,7 +106,7 @@ class OrderStatus extends ActiveRecord
         if ($order && $order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
             if (!$edoExcludesStatuses || !in_array($order->status, $edoExcludesStatuses)) {
                 if (OrderStatus::getClientPermissionByType($order->status, $type) == null) {
-                    throw new BadRequestHttpException('Bad permission type! Check the awaialble list of types.');
+                    throw new BadRequestHttpException('Bad permission type! Check the awailable list of types.');
                 } elseif (!OrderStatus::getClientPermissionByType($order->status, $type)) {
                     throw new BadRequestHttpException('Current user has no permissions for this transaction. Operation is blocked!');
                 }

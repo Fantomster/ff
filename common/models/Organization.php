@@ -58,6 +58,7 @@ use common\models\guides\Guide;
  * @property integer $parent_id
  * @property integer $gmt
  * @property string $action
+ * @property integer $blacklisted
  *
  * @property OrganizationType $type
  * @property Delivery $delivery

@@ -51,6 +51,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property Currency $currency
  * @property OrderAttachment[] $attachments
  * @property OrderAssignment $assignment
+ * @property EmailQueue[] $relatedEmails
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -590,7 +591,7 @@ class Order extends \yii\db\ActiveRecord
             }
 
             //Если получает заказчик, и он не работает в системе, добавляем токен
-            if ($user->organization_id == $this->vendor_id && $this->vendor->is_work == 0) {
+            if (($user->organization_id == $this->vendor_id) && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id" => $this->id,
@@ -644,5 +645,13 @@ class Order extends \yii\db\ActiveRecord
     public function getAssignment()
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRelatedEmails()
+    {
+        return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
 }

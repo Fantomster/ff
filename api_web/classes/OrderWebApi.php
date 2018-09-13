@@ -11,6 +11,7 @@ use common\models\CatalogBaseGoods;
 use common\models\Delivery;
 use common\models\MpCategory;
 use common\models\OrderContent;
+use common\models\OrderStatus;
 use common\models\RelationSuppRest;
 use common\models\Role;
 use common\models\search\OrderCatalogSearch;
@@ -51,6 +52,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
+
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
@@ -72,6 +74,8 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
+        OrderStatus::checkEdiOrderPermissions($order, 'edit');
+
         //Проверим статус заказа
         if (in_array($order->status, [Order::STATUS_CANCELLED, Order::STATUS_REJECTED])) {
             throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
@@ -283,6 +287,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение комментария к заказу");
         }
+        OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
 
         $order->comment = $post['comment'];
 
@@ -321,6 +326,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение комментария к заказу");
         }
+        OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
 
         $orderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => (int)$post['product_id']]);
 
@@ -851,6 +857,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($order->status == Order::STATUS_CANCELLED) {
             throw new BadRequestHttpException("This order has been cancelled.");
         }
+        OrderStatus::checkEdiOrderPermissions($order, 'cancel');
 
         $t = \Yii::$app->db->beginTransaction();
         try {
@@ -955,6 +962,8 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($order->status == Order::STATUS_DONE) {
             throw new BadRequestHttpException("This order has been completed.");
         }
+
+        OrderStatus::checkEdiOrderPermissions($order, 'complete');
 
         $t = \Yii::$app->db->beginTransaction();
         try {

@@ -197,7 +197,7 @@ class getVetDocumentByUUID extends Model
             ],
             [
                 'label' => 'Объем',
-                'value' => $doc->certifiedConsignment->batch->volume." ".isset($unit) ? $unit->name : '',
+                'value' => $doc->certifiedConsignment->batch->volume." ".(isset($unit) ? $unit->name : ''),
             ],
             [
                 'label' => 'Список видов упаковки, которые используются для производственной партии',

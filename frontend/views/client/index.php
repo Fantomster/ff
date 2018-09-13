@@ -1,5 +1,6 @@
 <?php
 
+use common\models\OrderStatus;
 use kartik\grid\GridView;
 use common\models\Order;
 use common\models\Organization;
@@ -335,18 +336,18 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                             'attribute' => 'status',
                             'value' => function($data) {
                                 switch ($data->status) {
-                                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                                         $statusClass = 'new';
                                         break;
-                                    case Order::STATUS_PROCESSING:
+                                    case OrderStatus::STATUS_PROCESSING:
                                         $statusClass = 'processing';
                                         break;
-                                    case Order::STATUS_DONE:
+                                    case OrderStatus::STATUS_DONE:
                                         $statusClass = 'done';
                                         break;
-                                    case Order::STATUS_REJECTED:
-                                    case Order::STATUS_CANCELLED:
+                                    case OrderStatus::STATUS_REJECTED:
+                                    case OrderStatus::STATUS_CANCELLED:
                                         $statusClass = 'cancelled';
                                         break;
                                 }
@@ -359,9 +360,9 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                             'format' => 'raw',
                             'value' => function($data) {
                                 switch ($data['status']) {
-                                    case Order::STATUS_DONE:
-                                    case Order::STATUS_REJECTED:
-                                    case Order::STATUS_CANCELLED:
+                                    case OrderStatus::STATUS_DONE:
+                                    case OrderStatus::STATUS_REJECTED:
+                                    case OrderStatus::STATUS_CANCELLED:
                                         return Html::a(Yii::t('app', 'frontend.views.client.index.repeat', ['ru' => 'Повторить']), '#', [
                                                     'class' => 'reorder btn btn-outline-processing',
                                                     'data' => [
@@ -371,9 +372,9 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                                     ],
                                         ]);
                                         break;
-                                    case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                    case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                    case Order::STATUS_PROCESSING:
+                                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                    case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                    case OrderStatus::STATUS_PROCESSING:
                                         if ($data->isObsolete) {
                                             return Html::a(Yii::t('message', 'frontend.views.client.index.end', ['ru' => 'Завершить']), '#', [
                                                         'class' => 'complete btn btn-outline-success',

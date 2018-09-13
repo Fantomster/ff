@@ -69,7 +69,7 @@ class iikoDicconst extends \yii\db\ActiveRecord
     public function getPconstValue()
     {
         $pConst = iikoPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
-        $res = (!empty($pConst)) ? $pConst->value : $this->def_value;
+        $res = (isset($pConst->value)) ? $pConst->value : $this->def_value;
         if ($pConst == 'taxVat') {
             $res = $res / 100;
         }

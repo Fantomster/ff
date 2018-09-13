@@ -30,6 +30,7 @@
         "branchonline/yii2-lightbox": "*",
         "cboden/ratchet": "^0.4.1",
         "codemix/yii2-localeurls": "*",
+        "creocoder/yii2-nested-sets": "^0.9.0",
         "darkdrim/yii2-simplehtmldom": "*",
         "delocker/yii2-animate.css": "dev-master",
         "dmstr/yii2-adminlte-asset": "2.*@dev",

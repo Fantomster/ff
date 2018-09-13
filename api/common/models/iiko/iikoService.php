@@ -105,8 +105,8 @@ class iikoService extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
 
-        if($insert) {
-            if(!iikoDic::find()->andWhere('org_id = :org', [':org' => $this->org])->exists()) {
+        if ($insert) {
+            if (!iikoDic::find()->andWhere('org_id = :org', [':org' => $this->org])->exists()) {
                 $dics = iikoDictype::find()->all();
                 foreach ($dics as $dic) {
                     $model = new iikoDic();
@@ -140,5 +140,18 @@ class iikoService extends \yii\db\ActiveRecord
             //->andOnCondition('td >= NOW()')
             //->andOnCondition('fd <= NOW()')
             ->one();
+    }
+
+    public static function getMainOrg($org_id)
+    {
+        $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $org_id]);
+        return isset($obConstModel->value) ? $obConstModel->value : $org_id;
+    }
+
+    public static function getChildOrgsId($org_id)
+    {
+        $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        return iikoPconst::find()->select('org')->where(['const_id' => $obDicConstModel->id, 'value' => $org_id])->column();
     }
 }

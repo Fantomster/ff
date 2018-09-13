@@ -5,6 +5,7 @@ namespace api_web\classes;
 use common\models\Currency;
 use common\models\Order;
 use api_web\components\WebApi;
+use common\models\OrderStatus;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
@@ -23,22 +24,22 @@ class AnalyticsWebApi extends WebApi
 {
 
     const ORDER_STATUSES_WELL = [
-        Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-        Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-        Order::STATUS_PROCESSING,
-        Order::STATUS_DONE,
-        Order::STATUS_FORMING,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+        OrderStatus::STATUS_PROCESSING,
+        OrderStatus::STATUS_DONE,
+        OrderStatus::STATUS_FORMING,
     ];
     const ORDER_STATUSES_NEW = [
-        Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-        Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+        OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
     ];
     const ORDER_STATUSES_PROCESS = [
-        Order::STATUS_PROCESSING,
+        OrderStatus::STATUS_PROCESSING,
         // Order::STATUS_FORMING,
     ];
     const ORDER_STATUSES_DONE = [
-        Order::STATUS_DONE,
+        OrderStatus::STATUS_DONE,
     ];
 
     const ORDER_TYPE_NEW = 'new';

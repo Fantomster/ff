@@ -10,6 +10,7 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
 use common\models\Order;
+use common\models\OrderStatus;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
@@ -129,7 +130,7 @@ class rkeeperService extends WebApi implements ServiceInterface
     public function getOptions()
     {
         $result = 0;
-        $orders = Order::find()->where(['status' => Order::STATUS_DONE, 'client_id' => $this->user->organization->id])->all();
+        $orders = Order::find()->where(['status' => OrderStatus::STATUS_DONE, 'client_id' => $this->user->organization->id])->all();
         if (!empty($orders)) {
             foreach ($orders as $order) {
                 if (!RkWaybill::find()->where(['order_id' => $order->id])->exists()) {

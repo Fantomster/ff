@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\models\OrderStatus;
 use common\models\search\OrderContentSearch;
 use Yii;
 use common\models\Order;
@@ -142,10 +143,10 @@ class OrderController extends Controller {
 
     public function actionEdit($id, $attachment_id = null) {
         $editableOrders = [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            Order::STATUS_PROCESSING,
-            Order::STATUS_DONE,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            OrderStatus::STATUS_PROCESSING,
+            OrderStatus::STATUS_DONE,
         ];
 
         $order = Order::findOne(['id' => $id, 'status' => $editableOrders]);
@@ -180,11 +181,11 @@ class OrderController extends Controller {
                 }
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = Order::STATUS_REJECTED;
+                $order->status = OrderStatus::STATUS_REJECTED;
                 $orderChanged = -1;
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = Order::STATUS_CANCELLED;
+                $order->status = OrderStatus::STATUS_CANCELLED;
                 $orderChanged = -1;
             }
             $order->calculateTotalPrice();

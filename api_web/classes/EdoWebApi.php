@@ -51,7 +51,7 @@ class EdoWebApi extends WebApi
         }
 
         $eComAccess = EdiOrganization::findOne(['organization_id' => $order->client_id]);
-        if (!$eComAccess || !$eComAccess instanceof EdiOrganization) {
+        if (!$eComAccess) {
             throw new BadRequestHttpException("Отсутствуют параметры доступа к EDI");
         }
 

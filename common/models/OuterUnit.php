@@ -4,13 +4,12 @@ namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "outer_unit".
  *
  * @property int $id
- * @property string $outer_uid ???
+ * @property string $outer_uid Внешний ID
  * @property int $service_id ID Сервиса
  * @property string $name Название продукта
  * @property string $iso_code ISO код
@@ -74,7 +73,7 @@ class OuterUnit extends \yii\db\ActiveRecord
                 'class' => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => new Expression('NOW()'),
+                'value' => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }

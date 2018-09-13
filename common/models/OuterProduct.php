@@ -4,7 +4,6 @@ namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "outer_product".
@@ -12,13 +11,13 @@ use yii\db\Expression;
  * @property int $id
  * @property int $service_id ID Сервиса
  * @property int $org_id ID организации
- * @property string $outer_uid ???
+ * @property string $outer_uid Внешний ID
  * @property string $name Название продукта
- * @property string $parent_uid ???
+ * @property string $parent_uid Id родителя
  * @property int $level Уровень
  * @property int $is_deleted Статус удаления
- * @property int $is_category ???
- * @property int $outer_unit_id ???
+ * @property int $is_category Статус категории
+ * @property int $outer_unit_id Внешний ID привязки к таблице outer_unit
  * @property string $comment Комментарий
  * @property string $created_at Дата создания
  * @property string $updated_at Дата обновления
@@ -83,7 +82,7 @@ class OuterProduct extends \yii\db\ActiveRecord
                 'class' => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => new Expression('NOW()'),
+                'value' => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }

@@ -9,14 +9,12 @@
 namespace console\modules\daemons\classes;
 
 use api\common\models\iiko\iikoDictype;
-use api\common\models\RabbitQueues;
 use api_web\exceptions\ValidationException;
 use common\models\OuterProduct;
 use common\models\OuterUnit;
 use console\modules\daemons\components\ConsumerInterface;
 use console\modules\daemons\components\IikoSyncConsumer;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
-use yii\db\Expression;
 
 class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
 {
@@ -52,8 +50,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
     protected function goods()
     {
         $this->items = iikoApi::getInstance($this->orgId)->getProducts();
-        $this->log($this->items);
-//        exit();
+
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
@@ -73,7 +70,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
                 \Yii::$app->db_api->createCommand()
                     ->update(OuterProduct::tableName(), [
                         'is_deleted' => 0,
-                        'updated_at' => new Expression('NOW()')
+                        'updated_at' => \gmdate('Y-m-d H:i:s')
                     ], ['outer_uid' => $this->updates_uuid,
                         'service_id' => $this->serviceId,
                         ])

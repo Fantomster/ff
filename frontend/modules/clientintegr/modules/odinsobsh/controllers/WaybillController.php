@@ -657,7 +657,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         } else {
             $vat_add = ' AND vat = ' . $vatf;
         }
-        //var_dump($page);die();
         if ($page != 'undefined') {
             $page_not_parsing = $page;
             $temp1 = explode('-', $page_not_parsing);

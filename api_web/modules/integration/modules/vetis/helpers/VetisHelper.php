@@ -105,9 +105,13 @@ class VetisHelper
             MercVsd::getProduccerData($this->doc->certifiedConsignment->batch->origin->producer, $this->org_id) : null;
         $this->producers = isset($producer) ? implode(", ", $producer['name']) : null;
         $labResearch = $this->doc->authentication->laboratoryResearch;
-        $this->expertiseInfo = $labResearch->operator->name . ' эксп №' . $labResearch->expertiseID . ' от ' .
-            $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
-            $labResearch->conclusion . ' )';
+        if(isset($labResearch)) {
+            $this->expertiseInfo = $labResearch->operator->name . ' эксп №' . $labResearch->expertiseID . ' от ' .
+                $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
+                $labResearch->conclusion . ' )';
+        } else {
+            $this->expertiseInfo = 'Экспертиза не проводилась';
+        }
         $this->transport_type = isset($this->doc->certifiedConsignment->transportInfo->transportType) ?
             MercVsd::$transport_types[$this->doc->certifiedConsignment->transportInfo->transportType] : null;
         $this->transport_number = $this->doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber ?? null;

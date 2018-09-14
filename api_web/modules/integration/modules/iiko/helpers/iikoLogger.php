@@ -18,11 +18,12 @@ class iikoLogger
     function __construct()
     {
         self::$guide = md5(uniqid(microtime(), 1));
-        self::insert([
-            'guide' => self::$guide,
-//            'ip' => \Yii::$app->request->getUserIP()
-        ]);
-//        $this->setUser(\Yii::$app->user->id);
+        $arInsert = ['guide' => self::$guide];
+        if(!(\Yii::$app instanceof yii\console\Application)){
+            $this->setUser(\Yii::$app->user->id);
+            $arInsert['ip'] = \Yii::$app->request->getUserIP();
+        }
+        self::insert($arInsert);
     }
 
     /**

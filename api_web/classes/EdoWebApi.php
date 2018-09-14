@@ -25,7 +25,7 @@ class EdoWebApi extends WebApi
 {
 
     /**
-     * История заказов
+     * Завершение приемки товаров по заказу
      * @param array $post
      * @throws BadRequestHttpException
      * @return bool
@@ -63,6 +63,38 @@ class EdoWebApi extends WebApi
         }
 
         throw new BadRequestHttpException("В процессе отправки данных возникла ошибка");
+
+    }
+
+    /**
+     * Завершение заказа
+     * @param array $post
+     * @throws BadRequestHttpException
+     * @return bool
+     */
+    public function finishOrder(array $post): bool
+    {
+
+        if (!isset($post['order_id'])) {
+            throw new BadRequestHttpException("empty_param|order_id");
+        }
+
+        $order = Order::findOne([
+            'id' => $post['order_id'],
+            'client_id' => $this->user->organization->id,
+        ]);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
+            throw new BadRequestHttpException("Доступно только для документов ЭДО");
+        } elseif ($order->status != OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED) {
+            throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
+        }
+
+        $order->status = OrderStatus::STATUS_DONE;
+        $order->save();
+        return true;
 
     }
 

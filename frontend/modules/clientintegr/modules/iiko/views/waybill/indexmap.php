@@ -117,7 +117,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'contentOptions' => function ($data) {
                                             return ["id" => "way" . $data->id];
                                         },
-                                        'label' => 'ID в Mixcart',
                                     ],
                                     [
                                         'attribute' => 'fproductnameProduct',

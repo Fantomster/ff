@@ -117,6 +117,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'contentOptions' => function ($data) {
                                             return ["id" => "way" . $data->id];
                                         },
+                                        'label' => 'ID в Mixcart',
                                     ],
                                     [
                                         'attribute' => 'fproductnameProduct',
@@ -641,6 +642,8 @@ $js = <<< JS
                                             var sel100 = 'Показаны первые 100 позиций';
                                             if (data.length>=100) {
                                                 $('#bukv-tovar3').html(sel100);
+                                            } else {
+                                                $('#bukv-tovar3').html('');
                                             }
                                             var sel = '<div id="spisok">';
                                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
@@ -661,6 +664,12 @@ $js = <<< JS
                                 $.post('auto-complete-new', {stroka: a}).done(
                                     function(data){
                                         if (data.length>0) {
+                                            var sel100 = 'Показаны первые 100 позиций';
+                                            if (data.length>=100) {
+                                                $('#bukv-tovar3').html(sel100);
+                                            } else {
+                                                $('#bukv-tovar3').html('');
+                                            }
                                             var sel = '<div id="spisok">';
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
@@ -791,9 +800,7 @@ $js = <<< JS
         $(document).on("change", "#vatFilter", function() {
             //$("#search-form").submit();
             var hr = $('[data-col-seq='+0+'] a').attr('href');
-            console.log(hr);
             var vatf = $('#vatFilter').val();
-            console.log(vatf);
             var qasc=$('.asc').attr('data-sort');
             var qdesc=$('.desc').attr('data-sort');
             if (typeof qdesc === 'undefined') {
@@ -807,7 +814,6 @@ $js = <<< JS
             } else {
                 sortirov='-'+sortirov;
             }
-            console.log(sortirov);
             $.post('vat-filter', {hr:hr, vatf:vatf, sort:sortirov}, function (data) {
                        alert(data);
             })

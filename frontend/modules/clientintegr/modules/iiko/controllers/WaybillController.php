@@ -163,13 +163,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_unitr' => null, ':w_id' => $id_all_map])->execute();
             }
         }
-        /*print $id.PHP_EOL;
-        print $number.PHP_EOL;
-        print $button.PHP_EOL;
-        print $vatf.PHP_EOL;
-        print $sort.PHP_EOL;
-        print $page.PHP_EOL;*/
-        //return Json::encode(['success' => true, 'munit' => $munit]);
         return $munit;
     }
 
@@ -796,65 +789,71 @@ SQL;
             $vat_add = ' AND vat = ' . $vatf;
         }
 
-        $page_not_parsing = $page;
-        $temp1 = explode('-', $page_not_parsing);
-        $temp2 = explode('<', $temp1[1]);
-        $last_row = $temp2[0];
-        $ostatok = $last_row % $page_size;
-        if ($ostatok == 0) {
-            $page = $last_row / $page_size;
+        if ($page != 'undefined') {
+            $page_not_parsing = $page;
+            $temp1 = explode('-', $page_not_parsing);
+            $temp2 = explode('<', $temp1[1]);
+            $last_row = $temp2[0];
+            $ostatok = $last_row % $page_size;
+            if ($ostatok == 0) {
+                $page = $last_row / $page_size;
+            } else {
+                $page = intdiv($last_row, $page_size) + 1;
+            }
         } else {
-            $page = intdiv($last_row, $page_size) + 1;
+            $page = 1;
         }
 
         $sql = "SELECT id FROM iiko_waybill_data WHERE waybill_id = :w_wid" . $vat_add;
         $result0 = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
 
-        foreach ($result0 as $resu) {
-            $id = $resu["id"];
-            $sql = "SELECT product_id,org,product_rid,koef FROM iiko_waybill_data WHERE id = :w_id";
-            $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $id])->queryAll();
-            $product_id = $result[0]["product_id"];
-            $product_rid = $result[0]["product_rid"];
-            $org_id = $result[0]["org"];
-            $koef = $result[0]["koef"];
-            $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
-            if ($existence == 0) {
-                $sql = "SELECT store_id,agent_uuid FROM iiko_waybill WHERE id = :w_wi";
-                $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
-                $store = $res[0]["store_id"];
-                $cagent = $res[0]["agent_uuid"];
-                $sql = "SELECT COUNT(*) FROM iiko_agent WHERE uuid = :w_uuid AND org_id = :w_org";
-                $result = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
-                if ($result == 0) {
-                    $agent = null;
-                } else {
-                    $sql = "SELECT id FROM iiko_agent WHERE uuid = :w_uuid AND org_id = :w_org";
-                    $agent = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
-                }
-                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
+        if (count($result0 > 0)) {
+            foreach ($result0 as $resu) {
+                $id = $resu["id"];
+                $sql = "SELECT product_id,org,product_rid,koef FROM iiko_waybill_data WHERE id = :w_id";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $id])->queryAll();
+                $product_id = $result[0]["product_id"];
+                $product_rid = $result[0]["product_rid"];
+                $org_id = $result[0]["org"];
+                $koef = $result[0]["koef"];
+                $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+                $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                if ($existence == 0) {
+                    $sql = "SELECT store_id,agent_uuid FROM iiko_waybill WHERE id = :w_wi";
+                    $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
+                    $store = $res[0]["store_id"];
+                    $cagent = $res[0]["agent_uuid"];
+                    $sql = "SELECT COUNT(*) FROM iiko_agent WHERE uuid = :w_uuid AND org_id = :w_org";
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
+                    if ($result == 0) {
+                        $agent = null;
+                    } else {
+                        $sql = "SELECT id FROM iiko_agent WHERE uuid = :w_uuid AND org_id = :w_org";
+                        $agent = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
+                    }
+                    $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                                 VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
-                $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s' => 2,
-                    ':w_org' => $org_id,
-                    ':w_product' => $product_id,
-                    ':w_supp' => $agent,
-                    ':w_spid' => $product_rid,
-                    ':w_unitr' => null,
-                    ':w_store' => $store,
-                    ':w_koef' => $koef,
-                    ':w_vat' => $vat,
-                ])->execute();
-                if (!(is_null($product_rid))) {
-                    $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
-                    $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 2])->execute();
+                    $result = Yii::$app->db_api->createCommand($sql, [
+                        ':w_s' => 2,
+                        ':w_org' => $org_id,
+                        ':w_product' => $product_id,
+                        ':w_supp' => $agent,
+                        ':w_spid' => $product_rid,
+                        ':w_unitr' => null,
+                        ':w_store' => $store,
+                        ':w_koef' => $koef,
+                        ':w_vat' => $vat,
+                    ])->execute();
+                    if (!(is_null($product_rid))) {
+                        $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
+                        $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 2])->execute();
+                    }
+                } else {
+                    $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+                    $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                    $sql = "UPDATE all_map SET vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
                 }
-            } else {
-                $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
-                $sql = "UPDATE all_map SET vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
-                $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
             }
         }
 

@@ -59,7 +59,8 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
                 if (empty($model)) {
                     $model = new OuterStore([
                         'outer_uid' => $store['id'],
-                        'org_id' => $this->orgId
+                        'org_id' => $this->orgId,
+                        'service_id' => self::SERVICE_ID,
                     ]);
                 }
                 $model->is_deleted = 0;
@@ -78,6 +79,7 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
 
                 //Валидируем сохраняем
                 if (!$model->validate() || !$model->save()) {
+                    $this->log($model->getErrors());
                     throw new ValidationException($model->getFirstErrors());
                 }
             }

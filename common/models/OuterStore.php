@@ -3,7 +3,6 @@
 namespace common\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
 use \yii\db\ActiveRecord;
 use creocoder\nestedsets\NestedSetsBehavior;
 use common\components\NestedSetsQuery;
@@ -20,7 +19,7 @@ use yii\db\Expression;
  * @property int $is_deleted
  * @property string $created_at
  * @property string $updated_at
- * @property int $store_type
+ * @property string $store_type
  * @property int $tree
  * @property int $left
  * @property int $right
@@ -49,7 +48,7 @@ class OuterStore extends ActiveRecord
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
                     ActiveRecord::EVENT_AFTER_UPDATE => ['updated_at'],
-                    ActiveRecord::EVENT_AFTER_INSERT => ['created_at']
+                    ActiveRecord::EVENT_AFTER_INSERT => ['created_at'],
                 ],
                 'value' => new Expression('UTC_TIMESTAMP()')
             ],
@@ -88,9 +87,9 @@ class OuterStore extends ActiveRecord
     {
         return [
             [['outer_uid', 'service_id', 'org_id', 'name'], 'required'],
-            [['service_id', 'org_id', 'is_deleted', 'store_type', 'selected', 'collapsed', 'left', 'right', 'tree', 'level'], 'integer'],
+            [['service_id', 'org_id', 'is_deleted', 'selected', 'collapsed', 'left', 'right', 'tree', 'level'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['outer_uid', 'name'], 'string', 'max' => 45],
+            [['outer_uid', 'name', 'store_type'], 'string', 'max' => 45],
         ];
     }
 

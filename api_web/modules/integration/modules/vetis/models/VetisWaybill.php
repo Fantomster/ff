@@ -148,16 +148,16 @@ class VetisWaybill
     public function getSenderOrProductFilter($request, $filterName)
     {
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $query = MercVsd::find()->where(['recipient_guid' => $enterpriseGuid]);
+        $query = MercVsd::find();
         if (isset($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
 
         if ($filterName == 'product_name') {
-            $arResult = $query->orWhere(['sender_guid' => $enterpriseGuid])->groupBy('product_name')->all();
+            $arResult = $query->andWhere(['or', ['sender_guid' => $enterpriseGuid], ['recipient_guid' => $enterpriseGuid]])->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {
-            $arResult = $query->groupBy('sender_name')->all();
+            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuid])->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
 

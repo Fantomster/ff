@@ -20,6 +20,8 @@ class Module extends \yii\base\Module
     public function init()
     {
         parent::init();
+
+        $cookieValidationKey = Yii::$app->request->cookieValidationKey;
         
         Yii::$app->set('user', [
         'class' => 'api\modules\v1\modules\mobile\components\User',
@@ -49,7 +51,8 @@ class Module extends \yii\base\Module
                         'class' => 'yii\web\Request',
                         'parsers' => [
                             'application/json' => 'yii\web\JsonParser',
-                        ]
+                        ],
+                'cookieValidationKey' => $cookieValidationKey,
                     ]
                 );
         

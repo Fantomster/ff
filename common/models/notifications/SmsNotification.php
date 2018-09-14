@@ -21,6 +21,8 @@ use common\models\User;
  * @property integer $order_done
  * @property integer $request_accept
  * @property integer $rel_user_org_id
+ * @property string $created_at
+ * @property string $updated_at
  *
  * @property User $user
  */
@@ -33,6 +35,21 @@ class SmsNotification extends \yii\db\ActiveRecord {
         return 'sms_notification';
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+    
     /**
      * @inheritdoc
      */

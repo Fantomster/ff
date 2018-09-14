@@ -22,6 +22,8 @@ use common\models\User;
  * @property integer $order_done
  * @property integer request_accept
  * @property integer $merc_vsd
+ * @property string $created_at
+ * @property string $updated_at
  *
  * @property User $user
  */
@@ -33,6 +35,21 @@ class EmailNotification extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'email_notification';
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
     }
 
     /**

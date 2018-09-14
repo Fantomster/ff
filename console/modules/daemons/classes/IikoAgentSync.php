@@ -18,9 +18,6 @@ use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 
 class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
 {
-    /**@var $items array */
-    private $items;
-
     public $updates_uuid = [];
 
     public $success;

@@ -25,8 +25,6 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
 
     public $success;
 
-    public $serviceId = 2;
-
     public static $timeout = 600;
 
     public static $timeoutExecuting = 300;
@@ -54,7 +52,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
-            OuterProduct::updateAll(['is_deleted' => 1], ['org_id' => $this->orgId, 'service_id' => $this->serviceId]);
+            OuterProduct::updateAll(['is_deleted' => 1], ['org_id' => $this->orgId, 'service_id' => self::SERVICE_ID]);
 
             $generator = function ($items) {
                 foreach ($items as &$item) {
@@ -72,13 +70,13 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
                         'is_deleted' => 0,
                         'updated_at' => \gmdate('Y-m-d H:i:s')
                     ], ['outer_uid' => $this->updates_uuid,
-                        'service_id' => $this->serviceId,
+                        'service_id' => self::SERVICE_ID,
                         ])
                     ->execute();
             }
         }
         //Обновляем колличество полученных объектов
-        return OuterProduct::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => $this->serviceId])->count();
+        return OuterProduct::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])->count();
     }
 
 
@@ -93,12 +91,12 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
     {
         $transaction = \Yii::$app->get('db_api')->beginTransaction();
         try {
-            $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId, 'service_id' => $this->serviceId,]);
+            $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID,]);
             //Если нет товара у нас, создаем
             if (empty($model)) {
                 $model = new OuterProduct(['outer_uid' => $uuid]);
                 $model->org_id = $this->orgId;
-                $model->service_id = $this->serviceId;
+                $model->service_id = self::SERVICE_ID;
             }
             //Родительская категория если есть
             if (isset($item['parentId']) && !empty($item['parentId'])) {
@@ -109,11 +107,11 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
             }
 
             if (!empty($item['mainUnit'])) {
-                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => $this->serviceId]);
+                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => self::SERVICE_ID]);
                 if (!$obUnitModel) {
                     $obUnitModel = new OuterUnit();
                     $obUnitModel->name = $item['mainUnit'];
-                    $obUnitModel->service_id = $this->serviceId;
+                    $obUnitModel->service_id = self::SERVICE_ID;
                     if ($obUnitModel->validate()) {
                         $obUnitModel->save();
                     }

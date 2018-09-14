@@ -51,6 +51,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property Currency $currency
  * @property OrderAttachment[] $attachments
  * @property OrderAssignment $assignment
+ * @property EmailQueue[] $relatedEmails
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -306,6 +307,24 @@ class Order extends \yii\db\ActiveRecord
     {
         $statusList = self::getStatusList();
         return $statusList[$this->status];
+    }
+
+    public static function getStatusListEdo()
+    {
+        return [
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app',
+                'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
+            OrderStatus::STATUS_PROCESSING => Yii::t('app',
+                'common.models.order_status.status_processing', ['ru' => 'Выполняются']),
+            OrderStatus::STATUS_EDO_SENT_BY_VENDOR => Yii::t('app',
+                'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
+            OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED => Yii::t('app',
+                'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
+            OrderStatus::STATUS_DONE => Yii::t('app',
+                'common.models.order_status.status_done', ['ru' => 'Завершен']),
+            OrderStatus::STATUS_CANCELLED => Yii::t('app',
+                'common.models.order_status.status_cancelled', ['ru' => 'Отменен']),
+        ];
     }
 
     public static function getStatusList($short = false)
@@ -590,7 +609,7 @@ class Order extends \yii\db\ActiveRecord
             }
 
             //Если получает заказчик, и он не работает в системе, добавляем токен
-            if ($user->organization_id == $this->vendor_id && $this->vendor->is_work == 0) {
+            if (($user->organization_id == $this->vendor_id) && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id" => $this->id,
@@ -644,5 +663,13 @@ class Order extends \yii\db\ActiveRecord
     public function getAssignment()
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRelatedEmails()
+    {
+        return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
 }

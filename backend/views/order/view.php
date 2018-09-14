@@ -4,6 +4,9 @@
 /* @var $model common\models\Order */
 
 use yii\helpers\Html;
+use common\models\EmailQueue;
+
+
 $this->title = Yii::t('app', 'Заказ') . ' №' . $model->id;
 $this->params['breadcrumbs'] = [
     ['label' => Yii::t('app', 'Заказы'), 'url' => ['index']],
@@ -55,26 +58,26 @@ $this->params['breadcrumbs'] = [
                     </div>
                     <div class="col-sm-6">
                         <div class="panel panel-danger">
-                            <div class="panel-heading">Ошибки отправки Email</div>
+                            <div class="panel-heading">История Email</div>
                             <div class="panel-body">
                                 <ul class="list-group">
                                     <?php
-                                    foreach ($model->getRecipientsList() as $recipient) {
+                                    foreach ($model->relatedEmails as $email) {
 
-                                        $message = 'нет ошибок';
+                                        $message = $email->statusText . " " . Yii::$app->formatter->asTime($email->updated_at, "php:j M Y, H:i:s");
                                         $class = 'list-group-item-success';
 
-                                        if (\common\models\notifications\EmailFails::findOne(['email' => $recipient->email])) {
-                                            $message = 'ошибка при отправке почты';
+                                        if ($email->status == EmailQueue::STATUS_FAILED) {
+                                            $message = 'ошибка при отправке почты ' . Yii::$app->formatter->asTime($email->updated_at, "php:j M Y, H:i:s");
                                             $class = 'list-group-item-warning';
                                         }
 
-                                        if (\common\models\notifications\EmailBlacklist::findOne(['email' => $recipient->email])) {
+                                        if (\common\models\notifications\EmailBlacklist::findOne(['email' => $email->to])) {
                                             $message = 'в черном списке';
                                             $class = 'list-group-item-danger';
                                         }
 
-                                        echo Html::tag('li', '<b>' . $recipient->email . '</b> ' . $message . '.<br>', ['class' => 'list-group-item ' . $class]);
+                                        echo Html::tag('li', '<b>' . $email->to . '</b> ' . $message . '.<br>'.$email->subject, ['class' => 'list-group-item ' . $class]);
                                     }
                                     ?>
                                 </ul>

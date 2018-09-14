@@ -381,4 +381,52 @@ class EdoController extends WebApiController
         $this->response = $this->container->get('EdoWebApi')->finishOrder($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/edo/history-count",
+     *     tags={"Edo"},
+     *     summary="История заказов EDI в цифрах",
+     *     description="История заказов EDI в цифрах",
+
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *          response = 200,
+     *          description = "success",
+     *          @SWG\Schema(
+     *              default={
+     *                   "waiting": 61,
+     *                   "processing": 3,
+     *                   "sent_by_vendor": 3,
+     *                   "acceptance_finished": 21,
+     *                   "success": 2,
+     *                   "canceled": 3
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionHistoryCount()
+    {
+        $this->response = $this->container->get('EdoWebApi')->getHistoryCount($this->request);
+    }
+
 }

@@ -2,6 +2,7 @@
 
 namespace api\common\models\rkws;
 
+use api\common\models\iiko\iikoService;
 use yii\data\SqlDataProvider;
 
 /**
@@ -145,9 +146,16 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             }
         }
 
-
         if(!$this->service_id) {
             $where_all .= ' AND service_id = 0';
+        }
+
+        $client_id = $this->client->id;
+        if( $this->service_id == 2) {
+            $mainOrg_id = iikoService::getMainOrg($this->client->id);
+            if ($mainOrg_id != $this->client->id) {
+                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg_id)";
+            }
         }
 
         $sql = "
@@ -158,7 +166,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
+             LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$client_id." AND fmap.service_id = ".$this->service_id."
              ".$joins[$this->service_id]."
              LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id       
            WHERE          
@@ -173,7 +181,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
            LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
            LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$this->client->id." AND fmap.service_id = ".$this->service_id."
+           LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = ".$client_id." AND fmap.service_id = ".$this->service_id."
            ".$joins[$this->service_id]."
            LEFT JOIN `$dbName`.`all_service` allservice ON fmap.service_id = allservice.id 
           WHERE         

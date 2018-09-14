@@ -19,9 +19,6 @@ use yii\web\BadRequestHttpException;
 
 class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
 {
-    /**@var $items array */
-    private $items;
-
     public $updates_uuid = [];
 
     public $success;
@@ -51,6 +48,8 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
     {
         //Получаем список складов
         $stores = iikoApi::getInstance($this->orgId)->getStores();
+        /**/
+        array_unshift($stores['corporateItemDto'], ['id' => md5($this->orgId), 'name' => 'Все склады', 'type' => 'rootnode']);
         if (!empty($stores['corporateItemDto'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
             OuterStore::updateAll(['is_deleted' => 1], ['org_id' => $this->orgId, 'service_id' => self::SERVICE_ID]);
@@ -59,19 +58,22 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
                 //Если нет категории у нас, создаем
                 if (empty($model)) {
                     $model = new OuterStore([
-                        'uuid' => $store['id'],
+                        'outer_uid' => $store['id'],
                         'org_id' => $this->orgId
                     ]);
                 }
-                $model->is_active = 1;
+                $model->is_deleted = 0;
                 if (!empty($store['name'])) {
-                    $model->denom = $store['name'];
-                }
-                if (!empty($store['code'])) {
-                    $model->store_code = is_array($store['code']) ? implode('_', $store['code']) : (string)$store['code'];
+                    $model->name = $store['name'];
                 }
                 if (!empty($store['type'])) {
-                    $model->store_type = $store['type'];
+                    if($store['type'] == 'rootnode'){
+                        $model->makeRoot();
+                        $rootNode = $model;
+                    } else {
+                        $model->prependTo($rootNode);
+                        $model->store_type = $store['type'];
+                    }
                 }
 
                 //Валидируем сохраняем
@@ -81,7 +83,7 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
             }
         }
         //Обновляем колличество полученных объектов
-        return (int)OuterStore::find()->where(['is_active' => 1, 'org_id' => $this->orgId])->count();
+        return (int)OuterStore::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])->count();
     }
 
 }

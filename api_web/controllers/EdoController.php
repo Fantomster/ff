@@ -111,7 +111,7 @@ class EdoController extends WebApiController
      */
     public function actionOrderHistory()
     {
-        $this->response = $this->container->get('EdoWebApi')->orderHistory($this->request);
+        $this->response = $this->container->get('EdoWebApi')->getOrderHistory($this->request);
     }
 
     /**
@@ -129,9 +129,7 @@ class EdoController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "search": {
-     *                         "order_id": 1
-     *                      }
+     *                      "order_id": 1
      *                  }
      *              )
      *         )
@@ -292,7 +290,95 @@ class EdoController extends WebApiController
      */
     public function actionOrderInfo()
     {
-        $this->response = $this->container->get('EdoWebApi')->orderInfo($this->request);
+        $this->response = $this->container->get('EdoWebApi')->getOrderInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edo/accept-products",
+     *     tags={"Edo"},
+     *     summary="Завершение приемки товаров по заказу",
+     *     description="Завершение приемки товаров по заказу",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAcceptProducts()
+    {
+        $this->response = $this->container->get('EdoWebApi')->acceptProducts($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edo/finish-order",
+     *     tags={"Edo"},
+     *     summary="Завершение заказа",
+     *     description="Завершение заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionFinishOrder()
+    {
+        $this->response = $this->container->get('EdoWebApi')->finishOrder($this->request);
     }
 
     /**
@@ -300,6 +386,7 @@ class EdoController extends WebApiController
      *     tags={"Edo"},
      *     summary="История заказов EDI в цифрах",
      *     description="История заказов EDI в цифрах",
+
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

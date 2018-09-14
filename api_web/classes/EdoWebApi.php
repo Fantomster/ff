@@ -2,7 +2,10 @@
 
 namespace api_web\classes;
 
+use common\models\EdiOrganization;
+use common\models\Organization;
 use api_web\components\WebApi;
+use common\components\EComIntegration;
 use common\models\AllService;
 use common\models\Order;
 use common\models\OrderStatus;
@@ -22,11 +25,85 @@ class EdoWebApi extends WebApi
 {
 
     /**
+     * Завершение приемки товаров по заказу
+     * @param array $post
+     * @throws BadRequestHttpException
+     * @return bool
+     */
+    public function acceptProducts(array $post): bool
+    {
+
+        if (!isset($post['order_id'])) {
+            throw new BadRequestHttpException("empty_param|order_id");
+        }
+
+        $order = Order::findOne([
+            'id' => $post['order_id'],
+            'client_id' => $this->user->organization->id,
+        ]);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
+            throw new BadRequestHttpException("Доступно только для документов ЭДО");
+        } elseif ($order->status != OrderStatus::STATUS_EDO_SENT_BY_VENDOR) {
+            throw new BadRequestHttpException("Должен быть статус \"Отправлено поставщиком\"");
+        }
+
+        $eComAccess = EdiOrganization::findOne(['organization_id' => $order->client_id]);
+        if (!$eComAccess) {
+            throw new BadRequestHttpException("Отсутствуют параметры доступа к EDI");
+        }
+
+        if ((new EComIntegration())->sendOrderInfo($order, Organization::findOne($order->vendor_id),
+            Organization::findOne($order->client_id), $eComAccess->login, $eComAccess->pass, true)) {
+            $order->status = OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED;
+            $order->save();
+            return true;
+        }
+
+        throw new BadRequestHttpException("В процессе отправки данных возникла ошибка");
+
+    }
+
+    /**
+     * Завершение заказа
+     * @param array $post
+     * @throws BadRequestHttpException
+     * @return bool
+     */
+    public function finishOrder(array $post): bool
+    {
+
+        if (!isset($post['order_id'])) {
+            throw new BadRequestHttpException("empty_param|order_id");
+        }
+
+        $order = Order::findOne([
+            'id' => $post['order_id'],
+            'client_id' => $this->user->organization->id,
+        ]);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
+            throw new BadRequestHttpException("Доступно только для документов ЭДО");
+        } elseif ($order->status != OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED) {
+            throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
+        }
+
+        $order->status = OrderStatus::STATUS_DONE;
+        $order->save();
+        return true;
+
+    }
+
+    /**
      * История заказов
      * @param array $post
      * @return array
      */
-    public function orderHistory(array $post)
+    public function getOrderHistory(array $post)
     {
         $post['search']['service_id'] = (AllService::findOne(['denom' => 'EDI']))->id;
         return $this->container->get('OrderWebApi')->getHistory($post);
@@ -38,15 +115,15 @@ class EdoWebApi extends WebApi
      * @throws BadRequestHttpException
      * @return array
      */
-    public function orderInfo(array $post)
+    public function getOrderInfo(array $post)
     {
 
-        if (!isset($post['search']['order_id'])) {
+        if (!isset($post['order_id'])) {
             throw new BadRequestHttpException("empty_param|order_id");
         }
 
         $order = Order::findOne([
-            'id' => $post['search']['order_id'],
+            'id' => $post['order_id'],
             'client_id' => $this->user->organization->id,
         ]);
 
@@ -56,7 +133,7 @@ class EdoWebApi extends WebApi
             throw new BadRequestHttpException("Доступно только для документов ЭДО");
         }
 
-        $res = $this->container->get('OrderWebApi')->getInfo($post['search']);
+        $res = $this->container->get('OrderWebApi')->getInfo($post);
 
         if (isset($res['items']) && $res['items']) {
             foreach ($res['items'] as $k => $v) {

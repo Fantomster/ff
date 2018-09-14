@@ -181,18 +181,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                     [
                                         'attribute' => 'munit',
-                                        'value' => function ($model) {
-                                            if (!empty($model->product)) {
-                                                return $model->product->measure;
-                                            }
-                                            return 'Не задано';
-                                        },
-                                        'format' => 'raw',
-                                        'label' => 'Ед.изм. 1С Общепит',
-                                        'vAlign' => 'bottom',
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "edizm_us" . $data->id];
-                                        },
+                                        'label' => 'Ед.изм. 1С Общепит'
                                     ],
                                     [
                                         'attribute' => 'defquant',

@@ -163,13 +163,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_unitr' => null, ':w_id' => $id_all_map])->execute();
             }
         }
-        /*print $id.PHP_EOL;
-        print $number.PHP_EOL;
-        print $button.PHP_EOL;
-        print $vatf.PHP_EOL;
-        print $sort.PHP_EOL;
-        print $page.PHP_EOL;*/
-        //return Json::encode(['success' => true, 'munit' => $munit]);
         return $munit;
     }
 

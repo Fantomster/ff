@@ -2,10 +2,8 @@
 
 namespace console\controllers;
 
-use api\common\models\merc\mercPconst;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
-use api\common\models\RabbitQueues;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisCountry;
 use common\models\vetis\VetisForeignEnterprise;
@@ -15,25 +13,11 @@ use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
-use console\modules\daemons\classes\MercBusinessEntityList;
-use console\modules\daemons\classes\MercCountryList;
-use console\modules\daemons\classes\MercForeignEnterpriseList;
-use console\modules\daemons\classes\MercProductItemList;
-use console\modules\daemons\classes\MercProductList;
-use console\modules\daemons\classes\MercPurposeList;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
 use console\modules\daemons\classes\MercStockEntryList;
 use console\modules\daemons\classes\MercStoreEntryList;
-use console\modules\daemons\classes\MercSubProductList;
 use console\modules\daemons\classes\MercSubProductListList;
-use console\modules\daemons\classes\MercUnitList;
 use console\modules\daemons\classes\MercVSDList;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Cerber;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\ListOptions;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use yii\console\Controller;
 use api\common\models\merc\mercService;
@@ -49,15 +33,15 @@ class MercuryCronController extends Controller
     public function actionVetDocumentsChangeList()
     {
         $organizations = (new \yii\db\Query)
-            ->select('org')
             ->from(mercService::tableName())
             ->where('status_id = 1 and now() between fd and td')
             ->createCommand(Yii::$app->db_api)
             ->queryColumn();
         try {
-        foreach ($organizations as $org_id) {
+        foreach ($organizations as $org) {
+            $org_id = $org->org;
 
-                $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
+            $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
                 if (!isset($locations->activityLocationList->location)) {
                     continue;
@@ -71,8 +55,10 @@ class MercuryCronController extends Controller
                     echo "GET MercVSDList ".$item->enterprise->guid.PHP_EOL;
                     MercVsd::getUpdateData($org_id, $item->enterprise->guid);
 
-                    echo "GET MercStockEntryList".$item->enterprise->guid.PHP_EOL;
-                    MercStockEntry::getUpdateData($org_id, $item->enterprise->guid);
+                    if($org->code == mercService::EXTENDED_LICENSE_CODE) {
+                        echo "GET MercStockEntryList" . $item->enterprise->guid . PHP_EOL;
+                        MercStockEntry::getUpdateData($org_id, $item->enterprise->guid);
+                    }
                 }
         }
         } catch (\Exception $e) {

@@ -62,7 +62,7 @@ class VetisHelper
         }
         $this->vsdModel = MercVsd::findOne(['uuid' => $uuid]);
         $arProducerName = unserialize($this->vsdModel->producer_name);
-        $this->producer_name = reset($arProducerName);
+        $this->producer_name = is_array($arProducerName) ? reset($arProducerName) : $arProducerName;
         $country_raw = ikarApi::getInstance($this->org_id)->getCountryByGuid($this->doc->certifiedConsignment->batch->origin->country->guid);
         $this->country_name = isset($country_raw) ? $country_raw->name : null;
         if (isset($this->doc->referencedDocument)) {

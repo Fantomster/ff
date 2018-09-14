@@ -163,15 +163,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         ]],
                                     [
                                         'attribute' => 'munit',
-                                        'value' => function ($model) {
-                                            if (!empty($model->product)) {
-                                                return $model->product->measure;
-                                            }
-                                            return 'Не задано';
-                                        },
-                                        'format' => 'raw',
-                                        'label' => 'Ед.изм. 1С Общепит',
-                                        'vAlign' => 'bottom',
+                                        'label' => 'Ед.изм. 1С Общепит'
                                     ],
                                     [
                                         'attribute' => 'defquant',

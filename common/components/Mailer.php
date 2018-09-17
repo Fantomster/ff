@@ -78,7 +78,7 @@ class Mailer extends \yii\mail\BaseMailer
         }
 
 
-        if ($newEmail->validate() && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
+        if ($newEmail->save() && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
             try {
 //            \Yii::$app->get('rabbit')
 //                ->setQueue($this->queueName)

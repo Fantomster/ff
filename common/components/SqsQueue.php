@@ -9,7 +9,8 @@
 namespace common\components;
 
 use yii\base\Component;
-use Aws\Sqs;
+use Aws\Sqs\SqsClient;
+use yii\helpers\Json;
 
 /**
  * Description of SqsQueue
@@ -18,5 +19,39 @@ use Aws\Sqs;
  */
 class SqsQueue extends Component
 {
-    //put your code here
+    private $_client;
+    
+    public $config = [];
+    
+    public function init()
+    {
+        $this->_client = SqsClient::factory($this->config);
+    }
+    
+    public function getClient()
+    {
+        if (empty($this->_client)) {
+            $this->init();
+        }
+        return $this->_client;
+    }
+    
+    /**
+     * @param string $queueUrl
+     * @param object $message
+     * 
+     * @return boolean result
+     */
+    public function sendMessage($queueUrl, $message)
+    {
+        $result = $this->_client->sendMessage([
+            'QueueUrl' => $queueUrl,
+            'MessageBody' => Json::encode($message),
+        ]);
+//        $result = $this->_client->getCommand('SendMessage',[
+//            'QueueUrl' => $queueUrl,
+//            'MessageBody' => Json::encode($message),
+//        ]);
+        return ($result !== null);
+    }
 }

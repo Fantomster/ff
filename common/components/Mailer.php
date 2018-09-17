@@ -10,6 +10,7 @@ namespace common\components;
 
 use common\models\notifications\EmailBlacklist;
 use common\models\EmailQueue;
+use yii\helpers\Json;
 
 /**
  * Description of Mailer
@@ -24,6 +25,7 @@ class Mailer extends \yii\mail\BaseMailer
     private $subject;
     public $defaultFrom = "";
     public $queueName = "process_email";
+    public $sqsQueueUrl;
     
     public function compose($view = null, array $params = [])
     {
@@ -74,13 +76,19 @@ class Mailer extends \yii\mail\BaseMailer
 
         
         if ($newEmail->save() && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
-            try {
-            \Yii::$app->get('rabbit')
-                ->setQueue($this->queueName)
-                ->addRabbitQueue(json_encode([$newEmail->id]));
-            } catch (\Exception $e) {
-                Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
-            }
+            //try {
+//            \Yii::$app->get('rabbit')
+//                ->setQueue($this->queueName)
+//                ->addRabbitQueue(json_encode([$newEmail->id]));
+                $result = \Yii::$app->get('sqsQueue')
+                        ->getClient()
+                        ->sendMessage([
+            'QueueUrl' => $this->sqsQueueUrl,
+            'MessageBody' => Json::encode([$newEmail->id]),
+        ]);
+//            } catch (\Exception $e) {
+//                Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+//            }
         }
 
         return $newEmail->save();

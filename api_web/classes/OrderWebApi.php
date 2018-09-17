@@ -20,6 +20,7 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
+use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
@@ -93,7 +94,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
                 throw new BadRequestHttpException("Discount type FIXED or PERCENT");
             }
-            if (empty($post['discount']['amount'])) {
+            if (!isset($post['discount']['amount'])) {
                 throw new BadRequestHttpException("Discount amount empty");
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
@@ -110,6 +111,7 @@ class OrderWebApi extends \api_web\components\WebApi
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
+
                     foreach ($post['products'] as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
@@ -123,11 +125,14 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $this->addProduct($order, $product);
                                 break;
                             case 'edit':
-                                $this->editProduct($order, $product);
+                                if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+                                    $this->editProductEdo($order, $product);
+                                } else {
+                                    $this->editProduct($order, $product);
+                                }
                                 break;
                         }
                     }
-
                     if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
                         throw new BadRequestHttpException("Discount amount > Total Price");
                     }
@@ -199,6 +204,46 @@ class OrderWebApi extends \api_web\components\WebApi
             return true;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
+        }
+    }
+
+    /**
+     * Редактирвание продукта в заказе типа EDI (меняем данные в накладной)
+     * @param Order $order
+     * @param array $product
+     * @return bool
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @editedBy Basil A Konakov
+     */
+    private function editProductEdo(Order $order, array $product)
+    {
+        if (empty($product['id'])) {
+            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+        }
+
+        /**
+         * @var $orderContent OrderContent
+         */
+        $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+        if (empty($orderContent)) {
+            throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
+        }
+
+        /** @var OrderContent $orderContent */
+        $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
+
+        if (!empty($product['quantity'])) {
+            $wbContent->quantity_waybill = $product['quantity'];
+        }
+        if (!empty($product['price'])) {
+            $wbContent->price_waybill = $product['price'];
+        }
+
+        if ($wbContent->validate() && $wbContent->save()) {
+            return true;
+        } else {
+            throw new ValidationException($wbContent->getFirstErrors());
         }
     }
 
@@ -415,6 +460,26 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
+        # корректируем данные заказа на данные из накладной если это документ EDI
+        # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
+        if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+            $deltaTotalSumm = 0;
+            $deltaQuantity = 0;
+            $productsEdo = [];
+            foreach ($products as $k => $model) {
+                $wbContent = WaybillContent::findOne(['order_content_id' => $model->id]);
+                if ($wbContent) {
+                    $deltaTotalSumm += (($wbContent->quantity_waybill * $wbContent->price_waybill)
+                        - ($model->quantity * $model->price));
+                    $deltaQuantity += $wbContent->quantity_waybill - $model->quantity;
+                    $model->quantity = $wbContent->quantity_waybill;
+                    $model->price = $wbContent->price_waybill;
+                }
+                $productsEdo[$model->edi_number][$k] = $model;
+            }
+            $products = $productsEdo;
+        }
+
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
@@ -451,7 +516,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
-                $search->service_id_excluded = [(AllService::findOne(['denom' => 'EDI']))->id];
+                $search->service_id_excluded = [];
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {

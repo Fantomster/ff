@@ -50,15 +50,24 @@ use yii\widgets\ActiveForm;
                     'allowClear' => false,
                 ],
             ]);
-
             ?>
         </div>
         <div class="col-sm-3">
+            <?php  echo $form->field($model, 'operation_code')->widget(\kartik\select2\Select2::classname(), [
+                'data' => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->all(), 'code', 'denom'),
+                'attribute' => 'operation_code',
+                'pluginOptions' => [
+                    'selected' => \Yii::$app->request->get('code') ?? '',
+                    'allowClear' => false,
+                ],
+            ]);?>
+        </div>
+        <div class="col-sm-2">
             <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>
         </div>
 
 
-        <div class="col-sm-3">
+        <div class="col-sm-1">
             <?= Html::label('&nbsp;'); ?><br>
             <?= Html::submitButton('Поиск', ['class' => 'btn btn-primary']) ?>
         </div>

@@ -297,7 +297,7 @@ class OrderNotice
                 'notifications' => uniqid(),
             ], [
                 'body' => $newMessage->message,
-                'date' => \Yii::$app->formatter->asDatetime(\gmmktime(), \DateTime::ISO8601 . 'z')
+                'date' => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM)
             ]);
         }
         foreach ($vendorUsers as $vendorUser) {

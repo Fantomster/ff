@@ -234,6 +234,7 @@ class CartWebApi extends \api_web\components\WebApi
             $order->vendor_id = $vendor->id;
             $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
+            $order->service_id = 9;
 
             if (!empty($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);

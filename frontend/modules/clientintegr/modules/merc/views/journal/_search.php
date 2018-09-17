@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
             'data-pjax' => 1
         ]
     ]); ?>
-    <div class="col-sm-5">
+    <div class="col-sm-3">
         <?php
         $model->organization_id = isset($model->organization_id ) ? $model->organization_id : (\Yii::$app->user->identity)->organization_id;
         echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
@@ -29,7 +29,12 @@ use yii\widgets\ActiveForm;
         ]);
         ?>
     </div>
-    <div class="col-sm-5">
+    <div class="col-sm-3">
+        <?php echo $form->field($model, 'operation_code')
+            ->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::findAll(['service_id' => 4]), 'code', 'comment'),
+                ['prompt'=>'Select...']) ?>
+    </div>
+    <div class="col-sm-3">
         <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>
     </div>
     <div class="col-sm-2">

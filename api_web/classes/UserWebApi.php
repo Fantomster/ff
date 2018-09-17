@@ -59,7 +59,8 @@ class UserWebApi extends \api_web\components\WebApi
      * Часовой пояс пользователя
      * @return array
      */
-    public function getGmt() {
+    public function getGmt()
+    {
         return ['GMT' => \Yii::$app->request->headers->get('GMT') ?? 0];
     }
 
@@ -761,20 +762,27 @@ class UserWebApi extends \api_web\components\WebApi
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
      * @return string $gmt
      * */
-    public function checkGMTFromDb(){
-        $model = Organization::findOne(\Yii::$app->user->identity->organization_id);
-        if(is_null($model->gmt)){
-            $model->gmt = $this->getGmt()['GMT'];
-            if($model->validate()){
-                $model->save();
+    public function checkGMTFromDb()
+    {
+        $gmt = $this->getGmt()['GMT'];
+
+        if (!empty($this->user)) {
+            $model = $this->user->organization;
+            if (is_null($model->gmt)) {
+                $model->gmt = $gmt;
+                if ($model->validate()) {
+                    $model->save();
+                }
             }
-        }
-        if(strpos($model->gmt, '-') === 0){
-            $gmt = str_replace('-', '+', $model->gmt);
-        } else {
-            $gmt = '-' . $model->gmt;
+            $gmt = $model->gmt;
         }
 
-        return $gmt;
+        if (strpos($gmt, '-') === 0) {
+            $return = str_replace('-', '+', $gmt);
+        } else {
+            $return = '-' . $gmt;
+        }
+
+        return $return;
     }
 }

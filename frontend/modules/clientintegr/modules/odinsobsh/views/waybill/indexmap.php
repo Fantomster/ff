@@ -181,7 +181,18 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     ],
                                     [
                                         'attribute' => 'munit',
-                                        'label' => 'Ед.изм. 1С Общепит'
+                                        'label' => 'Ед.изм. 1С Общепит',
+                                        'value' => function ($model) {
+                                            if (!empty($model->munit)) {
+                                                return $model->munit;
+                                            }
+                                            return 'Не задано';
+                                        },
+                                        'format' => 'raw',
+                                        'vAlign' => 'bottom',
+                                        'contentOptions' => function ($data) {
+                                            return ["id" => "edizm_us" . $data->id];
+                                        },
                                     ],
                                     [
                                         'attribute' => 'defquant',
@@ -560,7 +571,9 @@ $(function () {
                 var cont_old = $(this).html();
                 if (cont_old=='(не задано)') {cont_old='<i>'+cont_old+'</i>';}
                 var cont_new = '<button class="button-name" id="'+idbutton+'" style="background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
-                $(this).html(cont_new);
+                if (idbutton!='butdefined') {
+                    $(this).html(cont_new);
+                }
             });
             $('.button-name').on('click', function () {
                 $('a .button-name').click(function(){ return false;});

@@ -33,6 +33,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property integer $service_id
  * @property string $status_updated_at
  * @property string $edi_order
+ * @property string $edi_ordersp
  *
  * @property User $acceptedBy
  * @property User $createdBy
@@ -108,7 +109,7 @@ class Order extends \yii\db\ActiveRecord
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number'], 'safe'],
+            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],

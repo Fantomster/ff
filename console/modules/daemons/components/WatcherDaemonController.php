@@ -100,7 +100,6 @@ abstract class WatcherDaemonController extends DaemonController
 
         }
         \Yii::trace('Daemon ' . $job['consumerClass'] . ' is checked.');
-        file_put_contents($this->getPidPath(), getmypid());
 
         return true;
     }

@@ -59,6 +59,11 @@ class Mailer extends \yii\mail\BaseMailer
         return $this;
     }
 
+    public function setFrom($from)
+    {
+        $this->defaultFrom = $from;
+    }
+    
     public function send($message = null)
     {
         $newEmail = new EmailQueue();

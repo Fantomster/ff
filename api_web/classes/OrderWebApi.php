@@ -20,6 +20,7 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
+use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
@@ -110,6 +111,7 @@ class OrderWebApi extends \api_web\components\WebApi
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
+
                     foreach ($post['products'] as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
@@ -123,11 +125,14 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $this->addProduct($order, $product);
                                 break;
                             case 'edit':
-                                $this->editProduct($order, $product);
+                                if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+                                    $this->editProductEdo($order, $product);
+                                } else {
+                                    $this->editProduct($order, $product);
+                                }
                                 break;
                         }
                     }
-
                     if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
                         throw new BadRequestHttpException("Discount amount > Total Price");
                     }
@@ -199,6 +204,46 @@ class OrderWebApi extends \api_web\components\WebApi
             return true;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
+        }
+    }
+
+    /**
+     * Редактирвание продукта в заказе типа EDI (меняем данные в накладной)
+     * @param Order $order
+     * @param array $product
+     * @return bool
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @editedBy Basil A Konakov
+     */
+    private function editProductEdo(Order $order, array $product)
+    {
+        if (empty($product['id'])) {
+            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+        }
+
+        /**
+         * @var $orderContent OrderContent
+         */
+        $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+        if (empty($orderContent)) {
+            throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
+        }
+
+        /** @var OrderContent $orderContent */
+        $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
+
+        if (!empty($product['quantity'])) {
+            $wbContent->quantity_waybill = $product['quantity'];
+        }
+        if (!empty($product['price'])) {
+            $wbContent->price_waybill = $product['price'];
+        }
+
+        if ($wbContent->validate() && $wbContent->save()) {
+            return true;
+        } else {
+            throw new ValidationException($wbContent->getFirstErrors());
         }
     }
 

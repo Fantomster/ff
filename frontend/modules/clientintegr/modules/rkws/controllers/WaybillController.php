@@ -104,6 +104,182 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         ]);
     }
 
+    public function actionEditNew()
+    {
+        $page_size = 20;
+
+        $product_rid = Yii::$app->request->post('id');
+        $number = Yii::$app->request->post('number');
+        $button = Yii::$app->request->post('button');
+        $vatf = Yii::$app->request->post('vatf');
+        $sort = Yii::$app->request->post('sort');
+        $page0 = Yii::$app->request->post('page');
+        $temp1 = explode('-', $page0);
+        $temp2 = explode('<', $temp1[1]);
+        $last_row = $temp2[0];
+        $ostatok = $last_row % $page_size;
+        if ($ostatok == 0) {
+            $page = $last_row / $page_size;
+        } else {
+            $page = intdiv($last_row, $page_size) + 1;
+        }
+
+        $sql = "SELECT waybill_id,product_id,org,vat,koef FROM rk_waybill_data WHERE id = :w_id";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $number])->queryAll();
+        $waybill_id = $result[0]["waybill_id"];
+        $product_id = $result[0]["product_id"];
+        $org_id = $result[0]["org"];
+        $vat = $result[0]["vat"];
+        $koef = $result[0]["koef"];
+
+        $sql = "SELECT unit_rid,unitname FROM rk_product WHERE id = :w_id";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $product_rid])->queryAll();
+        $munit = $result[0]["unitname"];
+        $munit_id = $result[0]["unit_rid"];
+
+        $sql = "UPDATE rk_waybill_data SET product_rid = :w_prid, munit_rid = :w_munit, updated_at = NOW(), linked_at = NOW() WHERE id = :w_id";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_prid' => $product_rid, ':w_munit' => $munit_id, ':w_id' => $number])->execute();
+
+        if ($button == 'forever') {
+            $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            if ($existence == 0) {
+                $sql = "SELECT store_rid,corr_rid FROM rk_waybill WHERE id = :w_wi";
+                $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
+                $store = $res[0]["store_rid"];
+                $cagent = $res[0]["corr_rid"];
+                $sql = "SELECT COUNT(*) FROM rk_agent WHERE rid = :w_uuid AND acc = :w_org";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
+                if ($result == 0) {
+                    $agent = null;
+                } else {
+                    $agent = $cagent;
+                }
+                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
+                        VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), NOW(), NOW())";
+                $result = Yii::$app->db_api->createCommand($sql, [
+                    ':w_s' => 1,
+                    ':w_org' => $org_id,
+                    ':w_product' => $product_id,
+                    ':w_supp' => $agent,
+                    ':w_spid' => $product_rid,
+                    ':w_unitr' => $munit_id,
+                    ':w_store' => $store,
+                    ':w_koef' => $koef,
+                    ':w_vat' => $vat,
+                ])->execute();
+            } else {
+                $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                $sql = "UPDATE all_map SET serviceproduct_id = :w_spid, unit_rid = :w_unitr, linked_at = NOW(), updated_at = NOW() WHERE id = :w_id";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_unitr' => $munit_id, ':w_id' => $id_all_map])->execute();
+            }
+        }
+        return $munit;
+    }
+
+    public function actionChangeCoefficientNew()
+    {
+        $page_size = 20;
+        $est = 0;
+        $i = 0;
+        $massiv_post = Yii::$app->request->post('RkWaybilldata');
+        while ($est == 0) {
+            if (isset($massiv_post[$i]["koef"])) {
+                $koef = $massiv_post[$i]["koef"];
+                $est = 1;
+            }
+            $i++;
+        }
+        $koef = round($koef, 6);
+        $buttons = $massiv_post["koef_buttons"];
+        $koef_id = Yii::$app->request->post('editableKey');
+        $querys = $massiv_post["querys"];
+
+        $sql = "SELECT quant,koef,waybill_id,product_id,org,vat,product_rid FROM rk_waybill_data WHERE id = :w_id";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $koef_id])->queryAll();
+        $quant_old = $result[0]["quant"];
+        $koef_old = $result[0]["koef"];
+        $waybill_id = $result[0]["waybill_id"];
+        $product_id = $result[0]["product_id"];
+        $product_rid = $result[0]["product_rid"];
+        $org_id = $result[0]["org"];
+        $vat = $result[0]["vat"];
+        $quant_new = $quant_old * ($koef / $koef_old);
+        $quant_new = round($quant_new, 4);
+
+        if (is_null($product_rid)) {
+            $product_rid = 0;
+        }
+
+        if ($product_rid != 0) {
+            $sql = "SELECT unit_rid,unitname FROM rk_product WHERE id = :w_id";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $product_rid])->queryAll();
+            $munit = $result[0]["unitname"];
+            $munit_id = $result[0]["unit_rid"];
+        } else {
+            $munit = null;
+            $munit_id = null;
+        }
+
+        $sql = "UPDATE rk_waybill_data SET quant = :w_quant, koef = :w_koef WHERE id = :w_id";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_quant' => $quant_new, ':w_koef' => $koef, ':w_id' => $koef_id])->execute();
+        if ($buttons == 'forever') {
+            $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            if ($existence == 0) {
+                $sql = "SELECT store_rid,corr_rid FROM rk_waybill WHERE id = :w_wi";
+                $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
+                $store = $res[0]["store_rid"];
+                $cagent = $res[0]["corr_rid"];
+                $sql = "SELECT COUNT(*) FROM rk_agent WHERE rid = :w_uuid AND acc = :w_org";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
+                if ($result == 0) {
+                    $agent = null;
+                } else {
+                    $agent = $cagent;
+                }
+                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
+                        VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
+                $result = Yii::$app->db_api->createCommand($sql, [
+                    ':w_s' => 1,
+                    ':w_org' => $org_id,
+                    ':w_product' => $product_id,
+                    ':w_supp' => $agent,
+                    ':w_spid' => $product_rid,
+                    ':w_unitr' => $munit_id,
+                    ':w_store' => $store,
+                    ':w_koef' => $koef,
+                    ':w_vat' => $vat,
+                ])->execute();
+                if (!(is_null($product_rid))) {
+                    $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 1])->execute();
+                }
+            } else {
+                $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                $sql = "UPDATE all_map SET koef = :w_koef, vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_koef' => $koef, ':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
+            }
+            $temp0 = explode('+', $querys);
+            $sort = $temp0[1];
+            $temp1 = explode('-', $temp0[0]);
+            $temp2 = explode('<', $temp1[1]);
+            $last_row = $temp2[0];
+            $ostatok = $last_row % $page_size;
+            $vat_filter = $temp0[2];
+            if ($ostatok == 0) {
+                $page = $last_row / $page_size;
+            } else {
+                $page = intdiv($last_row, $page_size) + 1;
+            }
+            //$ssilka = '/clientintegr/iiko/waybill/map?waybill_id='.$waybill_id.'&way='.$koef_id.'&sort='.$sort.'&iikoWaybillDataSearch[vat]='.$vat_filter.'&page='.$page;
+            //return $this->redirect($ssilka);
+            return $this->redirect(['map', 'waybill_id' => $waybill_id, 'way' => $koef_id, 'sort' => $sort, 'RkWaybilldataSearch[vat]' => $vat_filter, 'page' => $page]);
+        }
+        return $koef;
+    }
 
     public function actionIndex()
     {
@@ -197,6 +373,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $lic = $this->checkLic();
         $vi = $lic ? 'indexmap' : '/default/_nolic';
+        $vatFilter = array();
+        $vatFilter["vat"] = 1;
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
@@ -206,7 +384,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 'agentName' => $agentModel['denom'],
                 'storeName' => $storeModel['denom'],
                 'isAndroid' => $isAndroid,
-                'vatData' => $vatData
+                'vatData' => $vatData,
+                'RkWaybilldataSearch' => $vatFilter,
             ]);
         } else {
             return $this->render($vi, [
@@ -216,7 +395,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 'agentName' => $agentModel['denom'],
                 'storeName' => $storeModel['denom'],
                 'isAndroid' => $isAndroid,
-                'vatData' => $vatData
+                'vatData' => $vatData,
+                'RkWaybilldataSearch' => $vatFilter,
             ]);
         }
     }
@@ -323,35 +503,172 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id]);
     }
 
-    /**
-     * @param $waybill_id
-     * @param $vat
-     * @return \yii\web\Response
-     */
-    public function actionMakevat($waybill_id, $vat)
+    public function actionMakevat($waybill_id, $vat, $vatf, $sort, $page)
     {
+        $page_size = 20;
         $model = $this->findModel($waybill_id);
 
-        Yii::$app->db_api
-            ->createCommand('UPDATE rk_waybill_data SET vat = :vat, linked_at = now() WHERE waybill_id = :id', [':vat' => $vat, ':id' => $waybill_id])
-            ->execute();
+        if ($vatf == 1) {
+            $vat_add = '';
+        } else {
+            $vat_add = ' AND vat = ' . $vatf;
+        }
 
-        return $this->redirect(['map', 'waybill_id' => $model->id]);
+        if ($page != 'undefined') {
+            $page_not_parsing = $page;
+            $temp1 = explode('-', $page_not_parsing);
+            $temp2 = explode('<', $temp1[1]);
+            $last_row = $temp2[0];
+            $ostatok = $last_row % $page_size;
+            if ($ostatok == 0) {
+                $page = $last_row / $page_size;
+            } else {
+                $page = intdiv($last_row, $page_size) + 1;
+            }
+        } else {
+            $page = 1;
+        }
+
+        $sql = "SELECT id FROM rk_waybill_data WHERE waybill_id = :w_wid" . $vat_add;
+        $result0 = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
+
+        if (count($result0 > 0)) {
+            foreach ($result0 as $resu) {
+                $id = $resu["id"];
+                $sql = "SELECT product_id,org,product_rid,koef FROM rk_waybill_data WHERE id = :w_id";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $id])->queryAll();
+                $product_id = $result[0]["product_id"];
+                $product_rid = $result[0]["product_rid"];
+                $org_id = $result[0]["org"];
+                $koef = $result[0]["koef"];
+
+                if (is_null($product_rid)) {
+                    $product_rid = 0;
+                }
+
+                if ($product_rid != 0) {
+                    $sql = "SELECT unit_rid,unitname FROM rk_product WHERE id = :w_id";
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $product_rid])->queryAll();
+                    $munit = $result[0]["unitname"];
+                    $munit_id = $result[0]["unit_rid"];
+                } else {
+                    $munit = null;
+                    $munit_id = null;
+                }
+
+                $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+                $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                if ($existence == 0) {
+                    $sql = "SELECT store_rid,corr_rid FROM rk_waybill WHERE id = :w_wi";
+                    $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
+                    $store = $res[0]["store_rid"];
+                    $cagent = $res[0]["corr_rid"];
+                    $sql = "SELECT COUNT(*) FROM rk_agent WHERE rid = :w_uuid AND acc = :w_org";
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
+                    if ($result == 0) {
+                        $agent = null;
+                    } else {
+                        $agent = $cagent;
+                    }
+                    $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
+                                VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
+                    $result = Yii::$app->db_api->createCommand($sql, [
+                        ':w_s' => 1,
+                        ':w_org' => $org_id,
+                        ':w_product' => $product_id,
+                        ':w_supp' => $agent,
+                        ':w_spid' => $product_rid,
+                        ':w_unitr' => $munit_id,
+                        ':w_store' => $store,
+                        ':w_koef' => $koef,
+                        ':w_vat' => $vat,
+                    ])->execute();
+                    if (!(is_null($product_rid))) {
+                        $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
+                        $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 1])->execute();
+                    }
+                } else {
+                    $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+                    $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                    $sql = "UPDATE all_map SET vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
+                }
+            }
+        }
+
+        $sql = 'UPDATE rk_waybill_data SET vat = :vat, updated_at = now() WHERE waybill_id = :id' . $vat_add;
+        $rress = Yii::$app->db_api
+            ->createCommand($sql, [':vat' => $vat, ':id' => $waybill_id])->execute();
+
+        return $this->redirect(['map', 'waybill_id' => $model->id, 'way' => 0, 'RkWaybilldataSearch[vat]' => $vatf, 'sort' => $sort, 'page' => $page]);
     }
 
-    /**
-     * @param $id
-     * @param $vat
-     * @param $page
-     * @param $way
-     * @return \yii\web\Response
-     */
-    public function actionChvat($id, $vat, $page, $way)
+    public function actionChvat($id, $koef, $vatf, $sort = 'fproductnameProduct', $vat, $page, $way)
     {
         $model = $this->findDataModel($id);
-        $model->vat = $vat;
-        $model->save();
-        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way]);
+
+        $rress = Yii::$app->db_api
+            ->createCommand('UPDATE rk_waybill_data SET vat = :vat, updated_at = now() WHERE id = :id', [':vat' => $vat, ':id' => $id])->execute();
+
+        $sql = "SELECT waybill_id,product_id,org,product_rid FROM rk_waybill_data WHERE id = :w_id";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $id])->queryAll();
+        $waybill_id = $result[0]["waybill_id"];
+        $product_id = $result[0]["product_id"];
+        $product_rid = $result[0]["product_rid"];
+        $org_id = $result[0]["org"];
+
+        if (is_null($product_rid)) {
+            $product_rid = 0;
+        }
+
+        if ($product_rid != 0) {
+            $sql = "SELECT unit_rid,unitname FROM rk_product WHERE id = :w_id";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_id' => $product_rid])->queryAll();
+            $munit = $result[0]["unitname"];
+            $munit_id = $result[0]["unit_rid"];
+        } else {
+            $munit = null;
+            $munit_id = null;
+        }
+
+        $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+        $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+        if ($existence == 0) {
+            $sql = "SELECT store_rid,corr_rid FROM rk_waybill WHERE id = :w_wi";
+            $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
+            $store = $res[0]["store_rid"];
+            $cagent = $res[0]["corr_rid"];
+            $sql = "SELECT COUNT(*) FROM rk_agent WHERE rid = :w_uuid AND acc = :w_org";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_uuid' => $cagent, ':w_org' => $org_id])->queryScalar();
+            if ($result == 0) {
+                $agent = null;
+            } else {
+                $agent = $cagent;
+            }
+            $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
+                        VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
+            $result = Yii::$app->db_api->createCommand($sql, [
+                ':w_s' => 1,
+                ':w_org' => $org_id,
+                ':w_product' => $product_id,
+                ':w_supp' => $agent,
+                ':w_spid' => $product_rid,
+                ':w_unitr' => $munit_id,
+                ':w_store' => $store,
+                ':w_koef' => $koef,
+                ':w_vat' => $vat,
+            ])->execute();
+            if (!(is_null($product_rid))) {
+                $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 1])->execute();
+            }
+        } else {
+            $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
+            $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            $sql = "UPDATE all_map SET vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
+        }
+        return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way, 'RkWaybilldataSearch[vat]' => $vatf, 'sort' => $sort]);
     }
 
     /**
@@ -375,6 +692,74 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $out['results'] = array_values($data);
         }
 
+        return $out;
+    }
+
+    /**
+     * @param null $term
+     * @return mixed
+     */
+    public function actionAutoCompleteNew($term = null)
+    {
+        $term = Yii::$app->request->post('stroka');
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        if ($term == '') {
+            $term = null;
+        }
+        $out = [];
+        if (!is_null($term)) {
+            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+            //$constId = RkDicconst::findOne(['denom' => 'main_org']);
+            //$parentId = RkPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+            //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+            //$andWhere = '';
+            //$arr = ArrayHelper::map(RkSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+            //if (count($arr)) {
+            //    $andWhere = 'AND id in (' . implode(',', $arr) . ')';
+            //}
+
+            $sql = <<<SQL
+            SELECT id, denom FROM (
+                  (SELECT id, denom FROM rk_product WHERE acc = :org_id AND denom = :term)
+                    UNION
+                  (SELECT id, denom FROM rk_product WHERE acc = :org_id AND denom LIKE :term_ LIMIT 15)
+                    UNION
+                  (SELECT id, denom FROM rk_product WHERE acc = :org_id AND denom LIKE :_term_ LIMIT 10)
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                     THEN 1
+                     ELSE 2
+                  END
+            ) as t
+SQL;
+
+            /**
+             * @var $db Connection
+             */
+            $db = Yii::$app->db_api;
+            $data = $db->createCommand($sql)
+                ->bindValues([
+                    'term' => $term,
+                    'term_' => $term . '%',
+                    '_term_' => '%' . $term . '%',
+                    'org_id' => $orgId
+                ])
+                ->queryAll();
+            $out = array_values($data);
+        } else {
+            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+            //$constId = RkDicconst::findOne(['denom' => 'main_org']);
+            //$parentId = RkPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+            //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+            $sql = 'SELECT id, denom FROM rk_product WHERE acc = ' . $orgId . ' ORDER BY denom LIMIT 100';
+
+            /**
+             * @var $db Connection
+             */
+            $db = Yii::$app->db_api;
+            $data = $db->createCommand($sql)->queryAll();
+            $out = array_values($data);
+        }
         return $out;
     }
 
@@ -621,7 +1006,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
         return isset($eDate) ? $eDate->updated_at : null;
     }
-    
+
     /**
      * Make unload_status -> 0 or unload_status -> 1
      */
@@ -632,18 +1017,36 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $id = Yii::$app->request->post('id');
         $status = Yii::$app->request->post('status');
         $action = Yii::$app->request->post('action');
-        
+
         $model = RkWaybilldata::findOne($id);
         try {
             $model->unload_status = $status;
             $model->save();
             $transaction->commit();
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $transaction->rollback();
             Yii::debug($t->getMessage());
             return false;
         }
-        
+
         return ['success' => true, 'action' => $action];
+    }
+
+    public function actionVatFilter()
+    {
+        $hr = Yii::$app->request->post('hr');
+        $vatf = Yii::$app->request->post('vatf');
+        $sort = Yii::$app->request->post('sort');
+
+        $temp0 = explode('?', $hr);
+        $temp1 = explode('&', $temp0[1]);
+        $arr = array();
+        foreach ($temp1 as $para) {
+            $temp2 = explode('=', $para);
+            $arr[$temp2[0]] = $temp2[1];
+        }
+        $waybill_id = $arr["waybill_id"];
+
+        return $this->redirect(['map', 'waybill_id' => $waybill_id, 'way' => 0, 'sort' => $sort, 'RkWaybilldataSearch[vat]' => $vatf, 'page' => 1]);
     }
 }

@@ -20,6 +20,7 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
+use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
@@ -415,6 +416,26 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
+        # корректируем данные заказа на данные из накладной если это документ EDI
+        # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
+        if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+            $deltaTotalSumm = 0;
+            $deltaQuantity = 0;
+            $productsEdo = [];
+            foreach ($products as $k => $model) {
+                $wbContent = WaybillContent::findOne(['order_content_id' => $model->id]);
+                if ($wbContent) {
+                    $deltaTotalSumm += (($wbContent->quantity_waybill * $wbContent->price_waybill)
+                        - ($model->quantity * $model->price));
+                    $deltaQuantity += $wbContent->quantity_waybill - $model->quantity;
+                    $model->quantity = $wbContent->quantity_waybill;
+                    $model->price = $wbContent->price_waybill;
+                }
+                $productsEdo[$model->edi_number][$k] = $model;
+            }
+            $products = $productsEdo;
+        }
+
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
@@ -451,7 +472,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
-                $search->service_id_excluded = [(AllService::findOne(['denom' => 'EDI']))->id];
+                $search->service_id_excluded = [];
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {

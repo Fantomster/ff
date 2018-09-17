@@ -21,9 +21,6 @@ use Yii;
  * @property string $outer_contractor_uuid
  * @property int $vat_included
  *
- * @property string $edi_number
- * @property string $edi_recadv
- * @property string $edi_invoice
  * @property string $doc_date
  * @property int $is_duedate
  * @property int $is_deleted
@@ -62,7 +59,7 @@ class Waybill extends yii\db\ActiveRecord
         return [
             [['acquirer_id', 'service_id'], 'required'],
             [['acquirer_id', 'bill_status_id', 'readytoexport', 'service_id', 'vat_included', 'is_duedate', 'is_deleted', 'payment_delay'], 'integer'],
-            [['outer_duedate', 'edi_number', 'edi_recadv', 'edi_invoice', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date'], 'safe'],
+            [['outer_duedate', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date'], 'safe'],
             [['outer_number_code', 'outer_number_additional', 'outer_note', 'outer_order_date'], 'string', 'max' => 45],
             [['outer_store_uuid', 'outer_contractor_uuid'], 'string', 'max' => 36],
         ];

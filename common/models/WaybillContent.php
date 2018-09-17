@@ -17,8 +17,6 @@ use Yii;
  * @property double $vat_waybill
  * @property string $merc_uuid
  * @property int $unload_status
- * @property string $edi_desadv
- * @property string $edi_alcdes
  * @property int $sum_with_vat
  * @property int $sum_without_vat
  * @property int $price_with_vat
@@ -51,7 +49,6 @@ class WaybillContent extends yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['edi_desadv', 'edi_alcdes'], 'safe'],
             [['waybill_id'], 'required'],
             [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status', 'sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat'], 'integer'],
             [['quantity_waybill', 'price_waybill', 'vat_waybill'], 'number'],

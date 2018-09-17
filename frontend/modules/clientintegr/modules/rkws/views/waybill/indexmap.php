@@ -157,25 +157,40 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'attribute' => 'fproductnameProduct',
                                 'label' => 'Наименование продукции',
                                 'vAlign' => 'bottom',
+                                'contentOptions' => function ($data) {
+                                    return ["id" => "denom" . $data->id];
+                                },
                             ],
                             [
-                                'attribute' => 'product_id',
+                                'attribute' => 'waybill_id',
                                 'value' => function ($model) {
                                     return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
                                 },
                                 'format' => 'raw',
                                 'label' => 'Ед. изм. Mixcart',
                                 'vAlign' => 'bottom',
+                                'contentOptions' => function ($data) {
+                                    return ["id" => "edizm" . $data->id];
+                                },
                             ],
                             [
-                                'class' => 'kartik\grid\EditableColumn',
+                                //'class' => 'kartik\grid\EditableColumn',
                                 'attribute' => 'pdenom',
                                 'label' => 'Наименование в Store House',
                                 'vAlign' => 'bottom',
                                 'width' => '210px',
-                                'refreshGrid' => true,
+                                //'refreshGrid' => true,
+                                'contentOptions' => function ($data) {
+                                    return ["id" => "td" . $data->id, 'style' => 'color:#6ea262'/*width: 120px; text-align: center; padding-right: 30px'*/];
+                                },
+                                'value' => function ($model) {
+                                    if (!empty($model->product)) {
+                                        return $model->product->denom;
+                                    }
+                                    return '(не задано)';
+                                },
 
-                                'editableOptions' => [
+                                /*'editableOptions' => [
                                     'asPopover' => $isAndroid ? false : true,
                                     'formOptions' => ['action' => ['edit']],
                                     'header' => 'Продукт R-keeper',
@@ -202,7 +217,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         ]
 
                                     ]
-                                ]],
+                                ]*/
+                            ],
                             [
                                 'attribute' => 'munit_rid',
                                 'value' => function ($model) {
@@ -215,6 +231,9 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'format' => 'raw',
                                 'label' => 'Ед.изм. StoreHouse',
                                 'vAlign' => 'bottom',
+                                'contentOptions' => function ($data) {
+                                    return ["id" => "edizm_us" . $data->id];
+                                },
                             ],
                             [
                                 'attribute' => 'defquant',
@@ -230,28 +249,60 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                     'asPopover' => $isAndroid ? false : true,
                                     'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
                                     'inputType' => \kartik\editable\Editable::INPUT_TEXT,
+                                    'beforeInput' => function ($form, $w) {
+                                        /**
+                                         * @var $form ActiveForm
+                                         * @var $w \kartik\editable\Editable
+                                         */
+                                        echo $form->field($w->model, 'querys')->hiddenInput(['value' => '', 'display' => 'none', 'class' => 'querys']);
+                                    },
                                     'afterInput' => function ($form, $w) {
                                         /**
                                          * @var $form ActiveForm
                                          * @var $w \kartik\editable\Editable
                                          */
-                                        echo $form->field($w->model, 'enable_all_map')->checkbox();
+                                        //echo $form->field($w->model, 'enable_all_map')->checkbox();
+                                        echo $form->field($w->model, 'koef_buttons')->hiddenInput(['value' => 'onlyone', 'class' => 'izm', 'display' => 'none']);
+                                        echo $form->field($w->model, 'koef_forever')->input('button', ['id' => 'koef_forever',
+                                            'class' => 'btn btn-sm btn-primary', 'value' => 'Применить и запомнить', 'title' => 'Применить и использовать в будущем по умолчанию',
+                                            'onClick' => '$(\'.izm\').val(\'forever\'); //устаналиваем значение скрытого поля, указывая, что применить и запомнить
+                                                    var pos = $(\'.summary\').html(); //запоминаем строку с указанием позиций и страницы
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\'); //узнаём порядок сортировки с классом asc
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\'); //узнаём порядок сортировки с классом desc                                                    
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    } //из двух возможных сортировок существует всегда только одна
+                                                    var sortirov0=sortirov.substring(0,1); //узнаём первый символ сортировки
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    } //и меняем на противоположный порядок сортировки
+                                                    var querystr = pos+"+"+sortirov; //компонуем строку из двух параметров
+                                                    var vat_filter = $("#vatFilter").val(); //узнаём значение фильтра НДС
+                                                    querystr = querystr+"+"+vat_filter; //добавляем в строку третий параметр
+                                                    $(\'.querys\').val(querystr); //устанавливаем значение скрытого поля, передавая в него строку с параметрами
+                                                    form.submit();' //отправляем значения из формы
+                                        ]);
                                     },
-                                    'buttonsTemplate' => '{reset}{submit}',
+                                    'buttonsTemplate' => '{submit}{reset}',
                                     'resetButton' => [
                                         'class' => 'btn btn-sm btn-outline-danger',
-                                        'icon' => '<i class="glyphicon glyphicon-ban-circle"></i> ',
-                                        'name' => 'otkaz',
+                                        'icon' => 'Отменить',
+                                        'name' => 'koef_otkaz',
                                         'label' => 'Отменить'
                                     ],
                                     'submitButton' => [
-                                        'class' => 'btn btn-sm btn-success',
-                                        'icon' => '<i class="glyphicon glyphicon-save"></i> ',
-                                        'name' => 'forever',
-                                        'label' => 'Применить сейчас'
+                                        'class' => 'btn btn-sm btn-success sub',
+                                        'icon' => 'Применить',
+                                        'id' => 'koef_submit',
+                                        'name' => 'koef_onlyone',
+                                        'label' => 'Применить только для данной накладной'
                                     ],
                                     'formOptions' => [
-                                        'action' => Url::toRoute('changekoef'),
+                                        'action' => Url::toRoute('change-coefficient-new'),
                                         'enableClientValidation' => false,
                                     ],
                                 ],
@@ -309,9 +360,66 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'contentOptions' => ['style' => 'width: 6%; text-align:center'],
                                 'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
                                 'header' => '<span align="center">НДС</br>' .
-                                    ' <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
-                                    '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
-                                    '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+                                    ' <button id="btnZero" type="button" 
+                                            onClick="var path = \'' . $sLinkzero . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;"
+                                            class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                    '<button id="btnTen" type="button" 
+                                            onClick="var path = \'' . $sLinkten . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;" 
+                                            class="btn btn-xs btn-link" style="color:green;">10</button>' .
+                                    '<button id="btnEight" type="button" 
+                                            onClick="var path = \'' . $sLinkeight . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;" 
+                                            class="btn btn-xs btn-link" style="color:green;">18</button></span>',
 
                                 'visibleButtons' => [
                                     'zero' => function ($model, $key, $index) {
@@ -331,10 +439,19 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
 
                                         $way = $model->id;
+                                        $sort = Yii::$app->request->get('sort');
                                         $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                        $vatf = 1;
+                                        if (null !== (Yii::$app->request->get('RkWaybilldataSearch'))) {
+                                            $massiv = Yii::$app->request->get('RkWaybilldataSearch');
+                                            $vatf = $massiv["vat"];
+                                        }
                                         $customurl = Yii::$app->getUrlManager()->createUrl([
                                             'clientintegr/rkws/waybill/chvat',
                                             'id' => $model->id,
+                                            'koef' => $model->koef,
+                                            'vatf' => $vatf,
+                                            'sort' => $sort,
                                             'vat' => 0, 'page' => $page, 'way' => $way
                                         ]);
 
@@ -357,8 +474,14 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                         $way = $model->id;
+                                        $sort = Yii::$app->request->get('sort');
                                         $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1000', 'page' => $page, 'way' => $way]);
+                                        $vatf = 1;
+                                        if (null !== (Yii::$app->request->get('RkWaybilldataSearch'))) {
+                                            $massiv = Yii::$app->request->get('RkWaybilldataSearch');
+                                            $vatf = $massiv["vat"];
+                                        }
+                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1000', 'page' => $page, 'sort' => $sort, 'way' => $way]);
                                         return \yii\helpers\Html::a('10', $customurl,
                                             ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
@@ -374,8 +497,14 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                         $way = $model->id;
+                                        $sort = Yii::$app->request->get('sort');
                                         $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'vat' => '1800', 'page' => $page, 'way' => $way]);
+                                        $vatf = 1;
+                                        if (null !== (Yii::$app->request->get('RkWaybilldataSearch'))) {
+                                            $massiv = Yii::$app->request->get('RkWaybilldataSearch');
+                                            $vatf = $massiv["vat"];
+                                        }
+                                        $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1800', 'page' => $page, 'sort' => $sort, 'way' => $way]);
                                         return \yii\helpers\Html::a('18', $customurl,
                                             ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                     },
@@ -417,7 +546,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         $text = 'Удалить';
                                         $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
                                         $action = 'delete';
-                                        if(!$model->unload_status){
+                                        if (!$model->unload_status) {
                                             $action = 'restore';
                                             $text = 'Восстановить';
                                         }
@@ -461,7 +590,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 'fontAwesome' => true,
                             ],
                             'rowOptions' => function ($model) {
-                                if(!$model->unload_status) {
+                                if (!$model->unload_status) {
                                     return ['style' => 'opacity: 0.3;'];
                                 }
                             },
@@ -504,9 +633,174 @@ $url = Url::toRoute('waybill/sendws-by-button');
 $query_string = Yii::$app->session->get('query_string');
 $js = <<< JS
     $(function () {
+        function links_column3 () {
+            $('[data-col-seq='+3+']').each(function() {
+                var idtd = $(this).attr('id');
+                var idtds = String(idtd);
+                var idnumber = idtds.substring(2);
+                var idbutton = 'but' + idnumber;
+                var cont_old = $(this).html();
+                if (cont_old=='(не задано)') {cont_old='<i>'+cont_old+'</i>';}
+                var cont_new = '<button class="button-name" id="'+idbutton+'" style="background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
+                $(this).html(cont_new);
+            });
+            $('.button-name').on('click', function () {
+                $('a .button-name').click(function(){ return false;});
+                var vat_filter = $("#vatFilter").val(); //фильтр НДС
+                var idbutton = $(this).attr('id'); 
+                var idbuttons = String(idbutton);
+                var number = idbuttons.substring(3);   // идентификатор строки
+                var denom = $("#denom"+number).html(); // наименование товара
+                var edizm = $("#edizm"+number).html(); // единица измерения товара
+                var id = $("#way"+number).html();      // якорь строки
+                var tovar = denom+'   /'+edizm+'/';    // наименование товара вместе с единицей измерения
+                var cont_old = $(this).html();         // содержание ячейки до форматирования 
+                var nesopost = '<i>(не задано)</i>';   // содержание несопоставленной ячейки
+                swal({
+                    html: '<i class="glyphicon glyphicon-edit"></i>  <span style="font-size:14px">Редактировать продукт R-Keeper</span></br></br><span id="tovar">товар</span></br></br>' +
+                     '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
+                     '<div id="bukv-tovar2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-tovar3" style="margin-top:0px;padding-top:0px;"></div>'
+                     + '</br><input type="submit" name="denom_forever" id="denom_forever" class="btn btn-sm btn-primary butsubmit" value="Сопоставить и запомнить"> '
+                     +'<input type="submit" name="denom_onlyone" id="denom_onlyone" class="btn btn-sm btn-success butsubmit" value="Сопоставить"> '+
+                     '<input type="button" id="denom_close" class="btn btn-sm btn-outline-danger" value="Отменить">',
+                     showConfirmButton:false,
+                     inputOptions: new Promise(function (resolve) {
+                        $(document).ready ( function(){
+                            $("#bukv-tovar").focus();
+                            var a = $("#bukv-tovar").val();
+                            $("#tovar").html(tovar);
+                            if (cont_old!=nesopost) 
+                            {
+                                $("#bukv-tovar").attr( 'placeholder', cont_old);
+                            }
+                            $.post('auto-complete-new', {stroka: a}).done(
+                                function(data){
+                                    if (data.length>0) {
+                                            var sel100 = 'Показаны первые 100 позиций';
+                                            if (data.length>=100) {
+                                                $('#bukv-tovar3').html(sel100);
+                                            } else {
+                                                $('#bukv-tovar3').html('');
+                                            }
+                                            var sel = '<div id="spisok">';
+                                            sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
+                                            var index;
+                                            for (index = 0; index < data.length; ++index) {
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['denom']+'</option>';
+                                            }
+                                            sel = sel+'</select></div>';
+                                    } else {
+                                        sel = 'Нет данных.';
+                                    }
+                                    $('#bukv-tovar').css("margin-bottom", "0px");
+                                    $('#bukv-tovar2').html(sel);
+                                    $('#selpos').css("margin-top", "0px");
+                                });
+                            $("#bukv-tovar").keyup(function() {
+                                var a = $("#bukv-tovar").val();
+                                $.post('auto-complete-new', {stroka: a}).done(
+                                    function(data){
+                                        if (data.length>0) {
+                                            var sel100 = 'Показаны первые 100 позиций';
+                                            if (data.length>=100) {
+                                                $('#bukv-tovar3').html(sel100);
+                                            } else {
+                                                $('#bukv-tovar3').html('');
+                                            }
+                                            var sel = '<div id="spisok">';
+                                            sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
+                                            var index;
+                                            for (index = 0; index < data.length; ++index) {
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['denom']+'</option>';
+                                            }
+                                            sel = sel+'</select></div>';
+                                        } else {
+                                            sel = 'Нет данных.';
+                                        }
+                                        $('#bukv-tovar').css("margin-bottom", "0px");
+                                        $('#bukv-tovar2').html(sel);
+                                        $('#selpos').css("margin-top", "0px");
+                                    });
+                            })
+                        });    
+                     })
+                })    
+                $('#denom_close').on('click', function() {
+                   swal.close(); 
+                })
+                $('#denom_onlyone').on('click', function () {    
+                   var selectvalue = $('#selpos').val();
+                   var selected_name = $("#selpos option:selected").text();
+                   var vatf = $('#vatFilter').val();
+                   var qasc=$('.asc').attr('data-sort');
+                   var qdesc=$('.desc').attr('data-sort');
+                   if (typeof qdesc === 'undefined') {
+                       var sortirov=qasc;
+                   } else {
+                       var sortirov=qdesc;
+                   }
+                   var sortirov0=sortirov.substring(0,1);
+                   if (sortirov0=='-') {
+                       sortirov=sortirov.substring(1);
+                   } else {
+                       sortirov='-'+sortirov;
+                   }
+                   var pos = $('.summary').html();
+                   
+                   $.post('edit-new', {id:selectvalue, number:number, button:'onlyone', vatf:vatf, sort:sortirov, page:pos}, function (data) {
+                       $('#edizm_us'+number).html(data);
+                       $('#but'+number).html(selected_name);
+                       swal.close();
+                   })
+                });
+                $('#denom_forever').on('click', function () {    
+                   var selectvalue = $('#selpos').val();
+                   var selected_name = $("#selpos option:selected").text();
+                   var vatf = $('#vatFilter').val();
+                   var qasc=$('.asc').attr('data-sort');
+                   var qdesc=$('.desc').attr('data-sort');
+                   if (typeof qdesc === 'undefined') {
+                       var sortirov=qasc;
+                   } else {
+                       var sortirov=qdesc;
+                   }
+                   var sortirov0=sortirov.substring(0,1);
+                   if (sortirov0=='-') {
+                       sortirov=sortirov.substring(1);
+                   } else {
+                       sortirov='-'+sortirov;
+                   }
+                   var pos = $('.summary').html();
+                   
+                   $.post('edit-new', {id:selectvalue, number:number, button:'forever', vatf:vatf, sort:sortirov, page:pos}, function (data) {
+                       $('#edizm_us'+number).html(data);
+                       $('#but'+number).html(selected_name);
+                       swal.close();
+                   })
+                });
+            });
+        }
         
         $(document).on("change", "#vatFilter", function() {
-            $("#search-form").submit();
+            //$("#search-form").submit();
+            var hr = $('[data-col-seq='+0+'] a').attr('href');
+            var vatf = $('#vatFilter').val();
+            var qasc=$('.asc').attr('data-sort');
+            var qdesc=$('.desc').attr('data-sort');
+            if (typeof qdesc === 'undefined') {
+                var sortirov=qasc;
+            } else {
+                var sortirov=qdesc;
+            }
+            var sortirov0=sortirov.substring(0,1);
+            if (sortirov0=='-') {
+                sortirov=sortirov.substring(1);
+            } else {
+                sortirov='-'+sortirov;
+            }
+            $.post('vat-filter', {hr:hr, vatf:vatf, sort:sortirov}, function (data) {
+                       alert(data);
+            })
         });
         
         $(' .sendonbutton').on('click', '.export-waybill-btn', function () {
@@ -560,6 +854,14 @@ $js = <<< JS
                     })
                 }
             })
+        });
+        
+        $(document).on('pjax:end', function() {
+               links_column3();
+            });
+        
+        $(document).ready(function() {
+            links_column3();
         });
         
         FF = {};

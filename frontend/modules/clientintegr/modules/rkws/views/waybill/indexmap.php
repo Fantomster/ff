@@ -642,7 +642,9 @@ $js = <<< JS
                 var cont_old = $(this).html();
                 if (cont_old=='(не задано)') {cont_old='<i>'+cont_old+'</i>';}
                 var cont_new = '<button class="button-name" id="'+idbutton+'" style="background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
-                $(this).html(cont_new);
+                if (idbutton!='butdefined') {
+                    $(this).html(cont_new);
+                }
             });
             $('.button-name').on('click', function () {
                 $('a .button-name').click(function(){ return false;});

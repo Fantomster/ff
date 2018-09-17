@@ -56,7 +56,13 @@ use api\common\models\iiko\iikoDicconst;
  */
 class Order extends \yii\db\ActiveRecord
 {
-
+    const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
+    const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
+    const STATUS_PROCESSING = 3;
+    const STATUS_DONE = 4;
+    const STATUS_REJECTED = 5;
+    const STATUS_CANCELLED = 6;
+    const STATUS_FORMING = 7;
 
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;

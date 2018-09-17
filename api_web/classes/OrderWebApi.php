@@ -93,7 +93,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
                 throw new BadRequestHttpException("Discount type FIXED or PERCENT");
             }
-            if (empty($post['discount']['amount'])) {
+            if (!isset($post['discount']['amount'])) {
                 throw new BadRequestHttpException("Discount amount empty");
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;

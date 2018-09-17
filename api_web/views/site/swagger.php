@@ -32,7 +32,7 @@ SwaggerUIAsset::register($this);
             window.swaggerUi = new SwaggerUi({
                 url: url,
                 dom_id: "swagger-ui-container",
-                supportedSubmitMethods: ['get', 'post'],
+                supportedSubmitMethods: ['post'],
                 onComplete: function (swaggerApi, swaggerUi) {
                     if (typeof initOAuth == "function") {
                         initOAuth(<?= json_encode($oauthConfig) ?>);
@@ -49,7 +49,7 @@ SwaggerUIAsset::register($this);
                 jsonEditor: false,
                 defaultModelRendering: 'schema',
                 showRequestHeaders: true,
-                showOperationIds: true
+                showOperationIds: false
             });
 
             window.swaggerUi.load();
@@ -59,6 +59,24 @@ SwaggerUIAsset::register($this);
                     console.log.apply(console, arguments);
                 }
             }
+
+            $('#clear_cache').click(function () {
+                $('#message-bar').html('Сбрасываем...');
+                $('#swagger-ui-container').html('');
+                $.get('/site/api', {'clear-cache':1}, function() {
+                    $('#message-bar').html('Проверяем валидность API...');
+                    $.get('/site/api', function(data) {
+                        if(data.error) {
+                            $('#message-bar').html('Ошибка в описании документации:');
+                            $('#swagger-ui-container').html('<b style="color:red">' + data.error + '</b>');
+                        } else {
+                            window.swaggerUi.load();
+                            $('#message-bar').html('Строим доку... Ждем...');
+                        }
+                    });
+                });
+            });
+
         });
     </script>
 </head>
@@ -68,6 +86,9 @@ SwaggerUIAsset::register($this);
 <div id='header'>
     <div class="swagger-ui-wrap">
         <a id="logo" href="https://mixcart.ru"><span class="logo__title">MixCart API WEB</span></a>
+    </div>
+    <div style="position:fixed;left:10px;top:10px">
+        <button id="clear_cache">Reload cache</button>
     </div>
 </div>
 

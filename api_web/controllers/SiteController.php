@@ -3,6 +3,7 @@
 namespace api_web\controllers;
 
 use api_web\components\WebApi;
+use api_web\components\WebApiSwaggerAction;
 use Yii;
 use yii\web\Controller;
 use frontend\modules\billing\models\BillingPayment;
@@ -62,7 +63,7 @@ class SiteController extends Controller
                 'restUrl' => \yii\helpers\Url::to(['/site/api'], true),
             ],
             'api' => [
-                'class' => 'light\swagger\SwaggerApiAction',
+                'class' => WebApiSwaggerAction::class,
                 'scanDir' => $scanDir,
                 'cache' => 'cache',
                 'cacheKey' => 'api-web-swagger-cache'

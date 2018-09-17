@@ -129,7 +129,7 @@ class UserWebApi extends \api_web\components\WebApi
         if (!$user->validate()) {
             throw new ValidationException($user->getFirstErrors());
         }
-        $user->setRegisterAttributes($role_id);
+        $user->setRegisterAttributes($role_id, User::STATUS_ACTIVE);
         $user->save();
         return $user;
     }

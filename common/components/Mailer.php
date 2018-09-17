@@ -19,6 +19,7 @@ use yii\helpers\Json;
  */
 class Mailer extends \yii\mail\BaseMailer
 {
+
     private $order_id;
     private $html;
     private $to;
@@ -26,13 +27,13 @@ class Mailer extends \yii\mail\BaseMailer
     public $defaultFrom = "";
     public $queueName = "process_email";
     public $sqsQueueUrl;
-    
+
     public function compose($view = null, array $params = [])
     {
         if (array_key_exists('order', $params)) {
             $this->order_id = isset($params['order']->id) ? $params['order']->id : null;
         }
-        
+
         if (is_array($view)) {
             if (isset($view['html'])) {
                 $html = $this->render($view['html'], $params, $this->htmlLayout);
@@ -46,16 +47,18 @@ class Mailer extends \yii\mail\BaseMailer
         return $this;
     }
 
-    public function setTo($to) {
+    public function setTo($to)
+    {
         $this->to = $to;
         return $this;
     }
-    
-    public function setSubject($subject) {
+
+    public function setSubject($subject)
+    {
         $this->subject = $subject;
         return $this;
     }
-    
+
     public function send($message = null)
     {
         $newEmail = new EmailQueue();
@@ -74,26 +77,25 @@ class Mailer extends \yii\mail\BaseMailer
             $newEmail->status = EmailQueue::STATUS_FAILED;
         }
 
-        
+
         if ($newEmail->save() && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
-            //try {
+            try {
 //            \Yii::$app->get('rabbit')
 //                ->setQueue($this->queueName)
 //                ->addRabbitQueue(json_encode([$newEmail->id]));
                 $result = \Yii::$app->get('sqsQueue')
                         ->getClient()
                         ->sendMessage([
-            'QueueUrl' => $this->sqsQueueUrl,
-            'MessageBody' => Json::encode([$newEmail->id]),
-        ]);
-//            } catch (\Exception $e) {
-//                Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
-//            }
+                    'QueueUrl' => $this->sqsQueueUrl,
+                    'MessageBody' => Json::encode([$newEmail->id]),
+                ]);
+            } catch (\Exception $e) {
+                Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+            }
         }
 
         return $newEmail->save();
     }
-
 
     /**
      * @inheritdoc

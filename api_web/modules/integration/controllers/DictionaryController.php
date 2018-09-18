@@ -45,7 +45,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                       "products": [
+     *                       "products": {
      *                          {
      *                            "id": 2763,
      *                            "name": "____сосиска2",
@@ -58,7 +58,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *                            "unit": "кг",
      *                            "is_active": 1
      *                          },
-     *                       ],
+     *                       },
      *                       "pagination": {
      *                            "page": 1,
      *                            "total_page": 17,

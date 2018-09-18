@@ -37,6 +37,7 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/SystemController.php'),
             Yii::getAlias('@api_web/controllers/RabbitController.php'),
             Yii::getAlias('@api_web/modules/integration/controllers/DefaultController.php'),
+            Yii::getAlias('@api_web/modules/integration/controllers/DictionaryController.php'),
         ];
 
         /**

@@ -62,19 +62,21 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
                         'org_id' => $this->orgId,
                         'service_id' => self::SERVICE_ID,
                     ]);
+
+                    if (!empty($store['type'])) {
+                        if($store['type'] == 'rootnode'){
+                            $model->makeRoot();
+                            $rootNode = $model;
+                        } else {
+                            $model->prependTo($rootNode);
+                            $model->store_type = $store['type'];
+                        }
+                    }
                 }
                 $model->is_deleted = 0;
+
                 if (!empty($store['name'])) {
                     $model->name = $store['name'];
-                }
-                if (!empty($store['type'])) {
-                    if($store['type'] == 'rootnode'){
-                        $model->makeRoot();
-                        $rootNode = $model;
-                    } else {
-                        $model->prependTo($rootNode);
-                        $model->store_type = $store['type'];
-                    }
                 }
 
                 //Валидируем сохраняем

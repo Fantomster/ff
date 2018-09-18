@@ -11,7 +11,7 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 use api_web\modules\integration\interfaces\DictionaryInterface;
 
-class IikoProduct extends abstractDictionary implements DictionaryInterface
+class IikoProduct extends AbstractDictionary implements DictionaryInterface
 {
 
 }

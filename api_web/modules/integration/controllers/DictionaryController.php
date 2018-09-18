@@ -15,7 +15,7 @@ class DictionaryController extends \api_web\components\WebApiController
 {
     /**
      * @SWG\Post(path="/integration/dictionary/product-list",
-     *     tags={"Integration/iiko/product"},
+     *     tags={"Integration/dictionary/product"},
      *     summary="Список продуктов",
      *     description="Список продуктов",
      *     produces={"application/json"},
@@ -45,21 +45,25 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                       "products": {{
-     *                          "id": 1,
-     *                          "name": "Бананы",
-     *                          "num": "0004",
-     *                          "code": "8",
-     *                          "product_type": "GOODS",
-     *                          "cooking_place_type": "Кухня",
-     *                          "unit": "кг",
-     *                          "is_active":1}
-     *                      },
-     *                      "pagination": {
-     *                                      "page": 1,
-     *                                      "total_page": 17,
-     *                                      "page_size": 12
-     *                                  }
+     *                       "products": [
+     *                          {
+     *                            "id": 2763,
+     *                            "name": "____сосиска2",
+     *                            "unit": "кг",
+     *                            "is_active": 1
+     *                          },
+     *                          {
+     *                            "id": 2764,
+     *                            "name": "А_Посольская об 0",
+     *                            "unit": "кг",
+     *                            "is_active": 1
+     *                          },
+     *                       ],
+     *                       "pagination": {
+     *                            "page": 1,
+     *                            "total_page": 17,
+     *                            "page_size": 12
+     *                       }
      *              }
      *          )
      *     ),

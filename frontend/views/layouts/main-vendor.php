@@ -19,6 +19,7 @@ use yii\helpers\Url;
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <link rel="shortcut icon" href="/images/favicon/favicon.ico" type="image/x-icon">
+        <?= \common\assets\FireBaseAsset::widget() ?>
         <?php $this->head() ?>
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">

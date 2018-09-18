@@ -18,6 +18,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsC
 use yii\db\Expression;
 use yii\helpers\BaseStringHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
+use api_web\components\FireBase;
 
 /**
  * Class consumer with realization ConsumerInterface
@@ -107,6 +108,14 @@ class MercVSDList extends MercDictConsumer
         $this->queue->save();
 
         mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
+
+        FireBase::getInstance()->update([
+            'mercury',
+            'operation' => 'MercVSDList',
+            'enterpriseGuid' => $this->data['enterpriseGuid'],
+        ], [
+            'update_date' => strtotime(gmdate("M d Y H:i:s")),
+        ]);
     }
 
     public function saveData()

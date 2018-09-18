@@ -1,8 +1,6 @@
 <?php
+use yii\web\View;
 
-use yii\helpers\Html;
-
-//echo '<strong>Активна</strong> ID: ' . $lic->code . ' (с ' . date("d-m-Y H:i:s", strtotime($lic->fd)) . ' по ' . date("d-m-Y H:i:s", strtotime($lic->td)) . ') ';
 $timestamp_now=time();
 $sub0 = explode(' ',$lic->td);
 $sub1 = explode('-',$sub0[0]);
@@ -30,10 +28,44 @@ if ($lic_merc!=3) {
                         }
                         ?>
                     </p>
+                    <p id="mercNotificationVsd"></p>
+                    <?php if ($lic->code == \api\common\models\merc\mercService::EXTENDED_LICENSE_CODE) : ?>
+                        <p id="mercNotificationStockEntry"></p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
     <?php
 }
+
+$enterpriseGuid = \api\common\models\merc\mercDicconst::getSetting('enterprise_guid');
+$messageVSD = 'Время последнего обновления списка ВСД: ';
+$messageStock = 'Время последнего обновления журнала входной продукции: ';
+
+$customJs = <<< JS
+        var refVSD = firebase.database().ref('/mercury/operation/MercVSDList/enterpriseGuid/$enterpriseGuid');
+        refVSD.on("value", (snapshot) => {
+            if(snapshot.val() != null) {
+                var now = new Date();
+                var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+                now = new Date(timestamp);
+                var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
+                $('#mercNotificationVsd').text('$messageVSD' + formatted);    
+                //console.log(snapshot.val().update_date); //Вывод значения в консоль
+        }
+    });
+        var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList/enterpriseGuid/$enterpriseGuid');
+        refStock.on("value", (snapshot) => {
+        if(snapshot.val() != null) {   
+            var now = new Date();
+            var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+            now = new Date(timestamp);
+            var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
+            $('#mercNotificationStockEntr').text('$messageStock' + formatted);    
+            //console.log(snapshot.val().update_date); //Вывод значения в консоль
+        }
+    });
+JS;
+$this->registerJs($customJs, View::POS_END);
 ?>

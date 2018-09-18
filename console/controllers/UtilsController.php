@@ -271,29 +271,42 @@ class UtilsController extends Controller
         $i=0;
 
         do {
-            $rows = \Yii::$app->db_api->createCommand("SELECT * FROM vetis_product_item 
-JOIN (SELECT uuid FROM vetis_product_item ORDER BY uuid LIMIT $count, $offset) as b ON b.uuid = vetis_product_item.uuid")->queryAll();
-            foreach ($rows as $row) {
-                $i++;
-                $dataPackaging = (unserialize($row['data']))->packaging;
-                if (isset($dataPackaging)) {
-                    $params = ['packagingType_guid' => isset($dataPackaging->packagingType->guid) ? $dataPackaging->packagingType->guid : null,
+            \Yii::$app->db_api->close();
+            \Yii::$app->db_api->open();
+
+            $sql = ($offset == 0) ? "SELECT uuid, `data` FROM vetis_product_item LIMIT $count" : "SELECT uuid, `data` FROM vetis_product_item LIMIT $count, $offset";
+
+            echo "start SQL".PHP_EOL;
+            $rows = \Yii::$app->db_api->createCommand($sql)->queryAll();
+            echo "end SQL".PHP_EOL.$sql.PHP_EOL;
+            $this->vetisWork($rows, $i, $all_count);
+            $offset += $count;
+        } while ($i < $all_count);
+    }
+
+    private function vetisWork($rows, &$i, $all_count)
+    {
+        $generator = function ($items) {
+            foreach ($items as &$item) {
+                yield $item;
+            }
+        };
+
+        foreach ($generator($rows) as $row) {
+            $i++;
+            $dataPackaging = (unserialize($row['data']))->packaging;
+            if (isset($dataPackaging)) {
+                $params = ['packagingType_guid' => isset($dataPackaging->packagingType->guid) ? $dataPackaging->packagingType->guid : null,
                     'packagingType_uuid' => isset($dataPackaging->packagingType->uuid) ? $dataPackaging->packagingType->uuid : null,
                     'unit_uuid' => isset($dataPackaging->unit->uuid) ? $dataPackaging->unit->uuid : null,
                     'unit_guid' => isset($dataPackaging->unit->guid) ? $dataPackaging->unit->guid : null,
                     'packagingQuantity' => isset($dataPackaging->quantity) ? $dataPackaging->quantity : null,
                     'packagingVolume' => isset($dataPackaging->volumne) ? $dataPackaging->volumne : null
-                    ];
-                    $arWhere['uuid'] = $row['uuid'];
-                    (new \yii\db\Query())->createCommand(\Yii::$app->db_api)->update(VetisProductItem::tableName(),$params, $arWhere)->execute();
-                    unset($row);
-                    unset($params);
-                    unset($dataPackaging);
-                }
-                echo $i . "/" . $all_count . PHP_EOL;
+                ];
+                $arWhere['uuid'] = $row['uuid'];
+                (new \yii\db\Query())->createCommand(\Yii::$app->db_api)->update(VetisProductItem::tableName(),$params, $arWhere)->execute();
             }
-            unset($rows);
-            $offset += $count;
-        } while ($i < $all_count);
+            echo $i . "/" . $all_count . PHP_EOL;
+        }
     }
 }

@@ -286,6 +286,9 @@ JOIN (SELECT uuid FROM vetis_product_item ORDER BY uuid LIMIT $count, $offset) a
                     ];
                     $arWhere['uuid'] = $row['uuid'];
                     (new \yii\db\Query())->createCommand(\Yii::$app->db_api)->update(VetisProductItem::tableName(),$params, $arWhere)->execute();
+                    unset($row);
+                    unset($params);
+                    unset($dataPackaging);
                 }
                 echo $i . "/" . $all_count . PHP_EOL;
             }

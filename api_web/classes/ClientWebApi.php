@@ -615,7 +615,7 @@ class ClientWebApi extends WebApi
             //Все хорошо, применяем изменения в базе
             $transaction->commit();
             //Тут нужно отправить письмо для смены пароля пользователю
-            $user->sendEmployeeConfirmation($user);
+            $user->sendEmployeeConfirmation($user, true);
             return $this->prepareEmployee($user);
         } catch (\Exception $e) {
             $transaction->rollBack();

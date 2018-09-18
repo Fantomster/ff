@@ -22,6 +22,7 @@ $directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed201
         <title><?= Html::encode($this->title) ?></title>
         <link rel="shortcut icon" href="/images/favicon/favicon.ico" type="image/x-icon">
         <?php $this->head() ?>
+        <?= \common\assets\FireBaseAsset::widget() ?>
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?= Yii::$app->session->get('sidebar-collapse') ? 'sidebar-collapse' : '' ?>">
         <?php $this->beginBody() ?>

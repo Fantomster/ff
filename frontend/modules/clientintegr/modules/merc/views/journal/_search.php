@@ -32,7 +32,7 @@ use yii\widgets\ActiveForm;
     <div class="col-sm-3">
         <?php echo $form->field($model, 'operation_code')
             ->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::findAll(['service_id' => 4]), 'code', 'comment'),
-                ['prompt'=>'Select...']) ?>
+                ['prompt'=>'Все']) ?>
     </div>
     <div class="col-sm-3">
         <?php echo $form->field($model, 'type')->dropDownList([null => 'Все', 'success' => 'Успех', 'error' => 'Ошибка']) ?>

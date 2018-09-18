@@ -505,7 +505,7 @@ class User extends \amnah\yii2\user\models\User
      *  @param User $user
      *  @return int
      */
-    public function sendEmployeeConfirmation($user)
+    public function sendEmployeeConfirmation($user, $isNewConfirm = false)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -520,7 +520,8 @@ class User extends \amnah\yii2\user\models\User
         $email = $user->email;
         $newPassword = $user->newPassword;
         $subject = Yii::t('app', 'common.models.confirm', ['ru' => "Подтвердите аккаунт на MixCart"]);
-        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken", "newPassword"))
+        $view = $isNewConfirm ? 'confirmEmailTwo' : 'confirmEmail';
+        $result = $mailer->compose($view, compact("subject", "user", "profile", "userToken", "newPassword"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

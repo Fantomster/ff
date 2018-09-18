@@ -289,6 +289,7 @@ JOIN (SELECT uuid FROM vetis_product_item ORDER BY uuid LIMIT $count, $offset) a
                 }
                 echo $i . "/" . $all_count . PHP_EOL;
             }
+            unset($rows);
             $offset += $count;
         } while ($i < $all_count);
     }

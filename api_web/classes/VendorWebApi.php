@@ -187,7 +187,6 @@ class VendorWebApi extends \api_web\components\WebApi
                  * Отправка почты
                  *
                  * */
-                $currentUser->sendInviteToVendor($user);
                 $relation->invite = RelationSuppRest::INVITE_ON;
                 $relation->save();
 
@@ -195,13 +194,14 @@ class VendorWebApi extends \api_web\components\WebApi
                 $currentOrganization->step = Organization::STEP_OK;
                 $currentOrganization->save();
 
+                $transaction->commit();
                 if (!empty($profile->phone)) {
                     $text = Yii::$app->sms->prepareText('sms.client_invite', [
                         'name' => $currentUser->organization->name
                     ]);
                     Yii::$app->sms->send($text, $profile->phone);
                 }
-                $transaction->commit();
+                $currentUser->sendInviteToVendor($user);
 
                 $result = [
                     'success' => true,

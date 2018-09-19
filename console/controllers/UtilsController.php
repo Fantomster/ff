@@ -271,23 +271,19 @@ class UtilsController extends Controller
         $i=0;
 
         do {
-            /*\Yii::$app->db_api->close();
-            \Yii::$app->db_api->open();*/
-
-            $sql = ($offset == 0) ? "select
-  uuid,
-  (SELECT data FROM vetis_product_item t2 WHERE t1.uuid = t2.uuid) as data
-from vetis_product_item t1
-LIMIT $count"
-                : "select
-  uuid,
-  (SELECT data FROM vetis_product_item t2 WHERE t1.uuid = t2.uuid) as data
-from vetis_product_item t1
-LIMIT $count, $offset";
+            $query = (new \yii\db\Query())
+                ->select([
+                    'uuid',
+                    'data' //=> '(SELECT t2.data FROM ' . VetisProductItem::tableName() . ' t2 WHERE t2.uuid = t1.uuid)'
+                ])
+                ->from(VetisProductItem::tableName() . ' t1')
+                ->limit($count)
+                ->offset($offset)
+                ->indexBy('uuid');
 
             echo "start SQL".PHP_EOL;
-            $rows = \Yii::$app->db_api->createCommand($sql)->queryAll();
-            echo "end SQL".PHP_EOL.$sql.PHP_EOL;
+            $rows = $query->all(\Yii::$app->get('db_api'));
+            echo "end SQL".PHP_EOL;
             $this->vetisWork($rows, $i, $all_count);
             $offset += $count;
         } while ($i < $all_count);

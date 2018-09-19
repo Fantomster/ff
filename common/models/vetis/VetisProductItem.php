@@ -103,24 +103,24 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
             'previous' => 'Previous',
             'name' => 'Name',
             'code' => 'Code',
-            'globalID' => 'Global ID',
-            'productType' => 'Product Type',
-            'product_uuid' => 'Product Uuid',
-            'product_guid' => 'Product Guid',
-            'subproduct_uuid' => 'Subproduct Uuid',
-            'subproduct_guid' => 'Subproduct Guid',
-            'correspondsToGost' => 'Corresponds To Gost',
-            'gost' => 'Gost',
+            'globalID' => 'GTIN',
+            'productType' => 'Тип продукции',
+            'product_uuid' => 'Продукция',
+            'product_guid' => 'Продукция',
+            'subproduct_uuid' => 'Вид продукции',
+            'subproduct_guid' => 'Вид продукции',
+            'correspondsToGost' => 'Соответствие ГОСТ',
+            'gost' => 'ГОСТ',
             'producer_uuid' => 'Producer Uuid',
             'producer_guid' => 'Producer Guid',
             'tmOwner_uuid' => 'Tm Owner Uuid',
             'tmOwner_guid' => 'Tm Owner Guid',
             'createDate' => 'Create Date',
             'updateDate' => 'Update Date',
-            'packagingType_guid' => 'packagingType_guid',
-            'packagingType_uuid' => 'packagingType_uuid',
-            'unit_uuid' => 'unit_uuid',
-            'unit_guid' => 'unit_guid',
+            'packagingType_guid' => 'Упаковка',
+            'packagingType_uuid' => 'Упаковка',
+            'unit_uuid' => 'Единица Измерения',
+            'unit_guid' => 'Единица Измерения',
             'packagingQuantity' => 'packagingQuantity',
             'packagingVolume' => 'packagingVolume',
         ];
@@ -145,6 +145,22 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
             return $this->hasOne(VetisUnit::className(), ['uuid' => 'packagingType_uuid']);
 
         return $this->hasOne(VetisUnit::className(), ['guid' => 'packagingType_guid']);
+    }
+
+    public function getProduct()
+    {
+        if(!is_null($this->product_uuid))
+            return $this->hasOne(VetisProductByType::className(), ['uuid' => 'product_uuid']);
+
+        return $this->hasOne(VetisProductByType::className(), ['guid' => 'product_guid']);
+    }
+
+    public function getSubProduct()
+    {
+        if(!is_null($this->subproduct_uuid))
+            return $this->hasOne(VetisSubproductByProduct::className(), ['uuid' => 'subproduct_uuid']);
+
+        return $this->hasOne(VetisSubproductByProduct::className(), ['guid' => 'subproduct_guid']);
     }
 
     public static function getUpdateData($org_id)

@@ -114,8 +114,8 @@ Modal::widget([
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
-            'template' => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{inventory}',
-            /*'buttons' => [
+            'template' => '{view}&nbsp;&nbsp;&nbsp;{update}&nbsp;&nbsp;&nbsp;{delete}',
+            'buttons' => [
                 'view' => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
                         'title' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
@@ -134,29 +134,7 @@ Modal::widget([
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
-                'create' =>  function ($url, $model) {
-                    $customurl = Url::to(['transport-vsd/step-1','selected'=>$model->id]);
-                    return \yii\helpers\Html::a( '<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
-                        ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax'=>"0"]);
-                },
-                'inventory' => function ($url, $model, $key) use ($searchModel) {
-                    $options = [
-                        'title' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
-                        'aria-label' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
-                        'data' => [
-                            //'pjax'=>0,
-                            'target' => '#ajax-load',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-                    ];
-                    $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
-                        'style' => 'width: 24px'
-                    ]);
-                    return Html::a($icon, ['inventory', 'id' => $model->id], $options);
-                },
-            ]*/
+            ]
         ]
     );
     ?>

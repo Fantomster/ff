@@ -12,113 +12,58 @@ $timestamp_now=time();
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= Yii::t('message', 'frontend.client.integration.view_vsd', ['ru' => 'Просмотр ВСД']) ?></h4>
+    <h4 class="modal-title">Просмотр сведений о продукте</h4>
 </div>
 <div class="modal-body">
         <div class="box-header with-border">
                 <div class="box-body table-responsive no-padding grid-category">
-                    <?php if (Yii::$app->session->hasFlash('success')): ?>
-                        <div class="alert alert-success alert-dismissable">
-                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                            <h4>
-                                <i class="icon fa fa-check"></i><?= Yii::t('message', 'frontend.client.integration.mercury.successful', ['ru' => 'Выполнено']) ?>
-                            </h4>
-                            <?= Yii::$app->session->getFlash('success') ?>
-                        </div>
-                    <?php endif; ?>
-                    <?php if (Yii::$app->session->hasFlash('error')): ?>
-                        <div class="alert alert-danger alert-dismissable">
-                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-                            <h4>
-                                <i class="icon fa fa-exclamation-circle"></i><?= Yii::t('message', 'frontend.views.vendor.error', ['ru' => 'Ошибка']) ?>
-                            </h4>
-                            <?= Yii::$app->session->getFlash('error') ?>
-                        </div>
-                    <?php endif; ?>
-                    <h4>Общие сведения: </h4>
                     <?php echo DetailView::widget([
-                        'model' => $document,
+                        'model' => $model,
                         'attributes' => [
-                            [
-                                'attribute' => 'status',
-                                'format' => 'raw',
-                                'value' => $document->status,
-                            ],
-                            [
-                                'attribute' => 'owner',
-                                'format' => 'raw',
-                                'value' => $document->owner,
-                            ],
-                            [
-                                'attribute' => 'owner_firm',
-                                'format' => 'raw',
-                                'value' => $document->owner_firm,
-                            ],
-                        ],
-                    ]) ?>
-                    <h4>Информация о продукции: </h4>
-                    <?php echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => [
-                            [
-                                'attribute' => 'entryNumber',
-                                'value' => $document->entryNumber
-                            ],
-                            [
-                                'attribute' => 'createDate',
-                                'value' => $document->createDate
-                            ],
                             [
                                 'attribute' => 'productType',
-                                'value' => $document->productType
+                                'format' => 'raw',
+                                'value' => MercVsd::$product_types[$model->productType],
                             ],
                             [
-                                'attribute' => 'product',
-                                'value' => $document->product
+                                'attribute' => 'product_uuid',
+                                'format' => 'raw',
+                                'value' => $model->product->name,
                             ],
                             [
-                                'attribute' => 'subProduct',
-                                'value' => $document->subProduct
+                                'attribute' => 'subproduct_uuid',
+                                'format' => 'raw',
+                                'value' => $model->subProduct->name,
                             ],
                             [
-                                'attribute' => 'productName',
-                                'value' => $document->productName
+                                'attribute' => 'name',
+                                'format' => 'raw',
+                                'value' => $model->name,
                             ],
                             [
-                                'attribute' => 'volume',
-                                'value' => $document->volume." ".$document->unit
+                                'attribute' => 'code',
+                                'format' => 'raw',
+                                'value' => $model->code,
                             ],
                             [
-                                'attribute' => 'dateOfProduction',
-                                'value' => $document->dateOfProduction
+                                'attribute' => 'globalID',
+                                'format' => 'raw',
+                                'value' => $model->globalID,
                             ],
                             [
-                                'attribute' => 'expiryDate',
-                                'value' => $document->expiryDate
-                            ],
-                        ],
-                    ]) ?>
-                    <h4>Сведения о происхождении продукции: </h4>
-                    <?php echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => [
-                            [
-                                'attribute' => 'producer_country',
-                                'value' => $document->producer_country
+                                'attribute' => 'correspondsToGost',
+                                'format' => 'raw',
+                                'value' => $model->correspondsToGost ? ($model->gost ?? null) : 'Нет',
                             ],
                             [
-                                'attribute' => 'producer',
-                                'value' => $document->producer
+                                'attribute' => 'packagingType_uuid',
+                                'format' => 'raw',
+                                'value' => $model->packingType->name ?? null,
                             ],
-                        ],
-                    ]) ?>
-                    <h4>Дополнительная информация о входной продукции: </h4>
-                    <?php echo DetailView::widget([
-                        'model' => $document,
-                        'attributes' => [
                             [
-                                'attribute' => 'uuid_vsd',
-                                'value' => $document->uuid_vsd
+                                'attribute' => 'unit_uuid',
+                                'format' => 'raw',
+                                'value' => $model->unit->name ?? null,
                             ],
                         ],
                     ]) ?>

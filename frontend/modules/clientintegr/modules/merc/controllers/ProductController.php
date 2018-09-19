@@ -101,18 +101,8 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionView($uuid)
     {
-       try {
-        $document = new getStockEntry();
-        $document->loadStockEntry($uuid);
-       }catch (\Error $e) {
-            Yii::$app->session->setFlash('error', $this->getErrorText($e));
-            return $this->redirect(['index']);
-        }
-        catch (\Exception $e){
-            Yii::$app->session->setFlash('error', $this->getErrorText($e));
-            return $this->redirect(['index']);
-        }
-        $params = ['document' => $document];
+        $model = VetisProductItem::findOne(['uuid' => $uuid]);
+        $params = ['model' => $model];
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('_ajaxView', $params);
         } else {
@@ -120,7 +110,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
-    public function actionCreate()
+    /*public function actionCreate()
     {
         $model = new createStoreEntryForm();
         $productionDate = new productionDate();
@@ -211,5 +201,5 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
         else
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
-    }
+    }*/
 }
